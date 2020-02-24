@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -84,7 +84,7 @@ class RelationshipPredicateTest {
             .loadAnyLabel()
             .loadAnyRelationshipType()
                 .build()
-                .graph(HugeGraphFactory.class);
+                .graph(HugeGraphStoreFactory.class);
 
         // A -> B
         assertTrue(graph.exists(
@@ -130,7 +130,7 @@ class RelationshipPredicateTest {
         final Graph graph = loader()
                 .globalOrientation(Orientation.REVERSE)
                 .build()
-                .load(HugeGraphFactory.class);
+                .load(HugeGraphStoreFactory.class);
 
         // B <- A
         assertTrue(graph.exists(
@@ -177,7 +177,7 @@ class RelationshipPredicateTest {
         final Graph graph = loader()
                 .globalOrientation(Orientation.UNDIRECTED)
                 .build()
-                .graph(HugeGraphFactory.class);
+                .graph(HugeGraphStoreFactory.class);
 
         // A -> B
         assertTrue(graph.exists(

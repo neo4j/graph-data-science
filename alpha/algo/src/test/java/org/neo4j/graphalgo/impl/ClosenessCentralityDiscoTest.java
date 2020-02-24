@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
@@ -81,7 +81,7 @@ class ClosenessCentralityDiscoTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
-            .load(HugeGraphFactory.class);
+            .load(HugeGraphStoreFactory.class);
 
         final MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,

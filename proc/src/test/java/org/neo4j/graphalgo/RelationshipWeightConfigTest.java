@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStore;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -143,7 +143,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig)
-                .build(HugeGraphFactory.class)
+                .build(HugeGraphStoreFactory.class)
                 .build()
                 .graphStore();
 
@@ -305,7 +305,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             .build();
 
         GraphStore graphStore = graphLoader(db, graphCreateConfig)
-            .build(HugeGraphFactory.class)
+            .build(HugeGraphStoreFactory.class)
             .build()
             .graphStore();
 

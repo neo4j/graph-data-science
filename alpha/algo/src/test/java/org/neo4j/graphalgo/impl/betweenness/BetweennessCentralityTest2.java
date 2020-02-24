@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 
@@ -141,7 +141,7 @@ class BetweennessCentralityTest2 extends AlgoTestBase {
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .build()
-            .load(HugeGraphFactory.class);
+            .load(HugeGraphStoreFactory.class);
     }
 
     private String name(long id) {

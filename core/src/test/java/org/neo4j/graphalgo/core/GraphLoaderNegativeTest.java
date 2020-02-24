@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -36,7 +36,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
                 .api(RandomGraphTestCase.db)
                 .addNodeLabel("foo")
                 .build()
-                .load(HugeGraphFactory.class),
+                .load(HugeGraphStoreFactory.class),
             "Node label not found: 'foo'"
         );
     }
@@ -49,7 +49,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
                 .api(RandomGraphTestCase.db)
                 .addRelationshipType("foo")
                 .build()
-                .load(HugeGraphFactory.class),
+                .load(HugeGraphStoreFactory.class),
             ("Relationship type(s) not found: 'foo'")
         );
     }
@@ -60,7 +60,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
             IllegalArgumentException.class,
             () -> new StoreLoaderBuilder().api(RandomGraphTestCase.db)
                 .addNodeProperty(PropertyMapping.of("foo", 0.0))
-                .build().load(HugeGraphFactory.class),
+                .build().load(HugeGraphStoreFactory.class),
             "Node properties not found: 'foo'"
         );
     }

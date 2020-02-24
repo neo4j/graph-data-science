@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
 import org.neo4j.graphalgo.results.CentralityResult;
 import org.neo4j.graphdb.Label;
 
@@ -102,7 +102,7 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void test(Class<? extends GraphFactory> factoryType) {
+    void test(Class<? extends GraphStoreFactory> factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -120,7 +120,7 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherGraphStoreFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")

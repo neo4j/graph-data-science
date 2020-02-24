@@ -49,7 +49,7 @@ import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestGraphLoader.addSuffix;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-class CypherGraphFactoryTest {
+class CypherGraphStoreFactoryTest {
 
     private static final int COUNT = 10_000;
     private static final String DB_CYPHER = "UNWIND range(1, $count) AS id " +
@@ -98,7 +98,7 @@ class CypherGraphFactoryTest {
                 .addRelationshipProperty(PropertyMapping.of("weight", 0))
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
-                .load(CypherGraphFactory.class)
+                .load(CypherGraphStoreFactory.class)
         );
 
         long node1 = graph.toMappedNodeId(id1);
@@ -146,7 +146,7 @@ class CypherGraphFactoryTest {
                     .nodeQuery(nodes)
                     .relationshipQuery(relationships)
                     .build()
-                    .load(CypherGraphFactory.class);
+                    .load(CypherGraphStoreFactory.class);
             })
         );
 
@@ -259,7 +259,7 @@ class CypherGraphFactoryTest {
         Graph graph = TestGraphLoader
             .from(db)
             .withNodeProperties(PropertyMappings.of(prop1, prop2, prop3), false)
-            .graph(CypherGraphFactory.class);
+            .graph(CypherGraphStoreFactory.class);
 
         String gdl = "(a {prop1: 1, prop2: 0, prop3: 0})" +
                      "(b {prop1: 0, prop2: 2, prop3: 0})" +
@@ -293,7 +293,7 @@ class CypherGraphFactoryTest {
             .from(db)
             .withRelationshipProperties(PropertyMappings.of(prop1, prop2, prop3), false)
             .withDefaultAggregation(Aggregation.DEFAULT)
-            .graphStore(CypherGraphFactory.class);
+            .graphStore(CypherGraphStoreFactory.class);
 
         String expectedGraph =
             "(a)-[{w: %f}]->(b)" +
@@ -332,7 +332,7 @@ class CypherGraphFactoryTest {
             builder.executorService(Pools.createDefaultSingleThreadPool());
         }
 
-        Graph graph = runInTransaction(db, () -> builder.build().load(CypherGraphFactory.class));
+        Graph graph = runInTransaction(db, () -> builder.build().load(CypherGraphStoreFactory.class));
 
         assertEquals(COUNT, graph.nodeCount());
         AtomicInteger relCount = new AtomicInteger();

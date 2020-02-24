@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphdb.Node;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -103,7 +103,7 @@ public final class ShortestPathsTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(HugeGraphStoreFactory.class);
     }
 
     @AfterEach

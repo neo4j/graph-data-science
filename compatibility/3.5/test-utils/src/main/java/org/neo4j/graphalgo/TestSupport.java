@@ -25,10 +25,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
@@ -66,8 +66,8 @@ public final class TestSupport {
     @MethodSource("org.neo4j.graphalgo.TestSupport#allTypes")
     public @interface AllGraphTypesTest {}
 
-    public static Stream<Class<? extends GraphFactory>> allTypes() {
-        return Stream.of(HugeGraphFactory.class, CypherGraphFactory.class);
+    public static Stream<Class<? extends GraphStoreFactory>> allTypes() {
+        return Stream.of(HugeGraphStoreFactory.class, CypherGraphStoreFactory.class);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -75,8 +75,8 @@ public final class TestSupport {
     @MethodSource("org.neo4j.graphalgo.TestSupport#allTypesWithoutCypher")
     public @interface AllGraphTypesWithoutCypherTest {}
 
-    public static Stream<Class<? extends GraphFactory>> allTypesWithoutCypher() {
-        return Stream.of(HugeGraphFactory.class);
+    public static Stream<Class<? extends GraphStoreFactory>> allTypesWithoutCypher() {
+        return Stream.of(HugeGraphStoreFactory.class);
     }
 
     @Retention(RetentionPolicy.RUNTIME)

@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphdb.Node;
 
 import java.util.List;
@@ -80,7 +80,7 @@ public class YensDebugTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("REL_IN", RelationshipProjection.of("REL", Orientation.REVERSE, Aggregation.NONE))
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(HugeGraphStoreFactory.class);
     }
 
     @Test

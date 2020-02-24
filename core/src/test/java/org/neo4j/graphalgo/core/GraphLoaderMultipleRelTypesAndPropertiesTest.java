@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -84,10 +84,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void parallelRelationshipsWithoutProperties(Class<? extends GraphFactory> graphFactory) {
+    void parallelRelationshipsWithoutProperties(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withDefaultAggregation(Aggregation.NONE)
-            .graph(graphFactory);
+            .graph(graphStoreFactory);
 
         Graph expected = fromGdl(
             "(n1)" +
@@ -103,11 +103,11 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void parallelRelationships(Class<? extends GraphFactory> graphFactory) {
+    void parallelRelationships(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .withDefaultAggregation(NONE)
-            .graph(graphFactory);
+            .graph(graphStoreFactory);
 
         Graph expected = fromGdl(
             "(n1)" +
@@ -133,14 +133,14 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @ParameterizedTest
     @MethodSource("deduplicateWithWeightsParams")
     void parallelRelationshipsWithAggregation(
-        Class<? extends GraphFactory> graphFactory,
+        Class<? extends GraphStoreFactory> graphStoreFactory,
         Aggregation aggregation,
         double expectedWeight
     ) {
         Graph graph = TestGraphLoader.from(db)
             .withDefaultAggregation(aggregation)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-            .graph(graphFactory);
+            .graph(graphStoreFactory);
 
         Graph expected = fromGdl(String.format(
             "(n1)" +
@@ -155,11 +155,11 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void parallelRelationshipsWithAggregation_SINGLE(Class<? extends GraphFactory> graphFactory) {
+    void parallelRelationshipsWithAggregation_SINGLE(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withDefaultAggregation(SINGLE)
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-            .graph(graphFactory);
+            .graph(graphStoreFactory);
 
         String expectedGraph =
             "(n1)" +
@@ -175,10 +175,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void multipleTypes(Class<? extends GraphFactory> graphFactory) {
+    void multipleTypes(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphStore graphStore = TestGraphLoader.from(db)
             .withRelationshipTypes("REL1", "REL2")
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         assertEquals(2, graphStore.availableRelationshipTypes().size());
         assertEquals(graphStore.availableRelationshipTypes(), new HashSet<>(asList("REL1", "REL2")));
@@ -193,11 +193,11 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void multipleTypesWithProperties(Class<? extends GraphFactory> graphFactory) {
+    void multipleTypesWithProperties(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphStore graphStore = TestGraphLoader.from(db)
             .withRelationshipTypes("REL1", "REL2")
             .withRelationshipProperties(PropertyMapping.of("prop1", 1337D))
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         assertEquals(2, graphStore.availableRelationshipTypes().size());
         assertEquals(graphStore.availableRelationshipTypes(), new HashSet<>(asList("REL1", "REL2")));
@@ -212,7 +212,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void multipleProperties(Class<? extends GraphFactory> graphFactory) {
+    void multipleProperties(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -233,7 +233,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("agg2", "p2", 2.0, Aggregation.NONE),
                 PropertyMapping.of("agg3", "p3", 2.0, Aggregation.NONE)
             )
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         Graph p1Graph = graphs.getGraph("*", Optional.of("agg1"));
         Graph expectedP1Graph = fromGdl(
@@ -267,7 +267,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void multiplePropertiesWithDefaultValues(Class<? extends GraphFactory> graphFactory) {
+    void multiplePropertiesWithDefaultValues(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -285,7 +285,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("agg2", "p1", 50.0, MAX),
                 PropertyMapping.of("agg3", "p1", 3.0, SUM)
             )
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         Graph p1Graph = graphs.getGraph("*", Optional.of("agg1"));
         Graph expectedP1Graph = fromGdl(
@@ -310,7 +310,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void multiplePropertiesWithIncompatibleAggregations(Class<? extends GraphFactory> graphFactory) {
+    void multiplePropertiesWithIncompatibleAggregations(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -331,7 +331,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                     PropertyMapping.of("p1", "p1", 1.0, Aggregation.NONE),
                     PropertyMapping.of("p2", "p2", 2.0, SUM)
                 )
-                .graphStore(graphFactory)
+                .graphStore(graphStoreFactory)
         );
 
         assertThat(
@@ -342,7 +342,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void singlePropertyWithAggregations(Class<? extends GraphFactory> graphFactory) {
+    void singlePropertyWithAggregations(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -360,7 +360,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("agg1", "p1", 1.0, MAX),
                 PropertyMapping.of("agg2", "p1", 2.0, MIN)
             )
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         Graph p1Graph = graphs.getGraph("*", Optional.of("agg1"));
         Graph expectedP1Graph = fromGdl(
@@ -403,7 +403,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @ParameterizedTest
     @MethodSource("graphImplWithGlobalAndLocalAggregationArguments")
     void multiplePropertiesWithGlobalAndLocalAggregations(
-        Class<? extends GraphFactory> graphFactory,
+        Class<? extends GraphStoreFactory> graphStoreFactory,
         Aggregation globalAggregation,
         Aggregation localAggregation1,
         Aggregation localAggregation2,
@@ -428,7 +428,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("p1", "p1", 1.0, localAggregation1),
                 PropertyMapping.of("p2", "p2", 2.0, localAggregation2)
             )
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         Graph p1Graph = graphs.getGraph("*", Optional.of("p1"));
         Graph expectedP1Graph = fromGdl(String.format(
@@ -452,7 +452,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void multipleTypesWithSameProperty(Class<? extends GraphFactory> graphFactory) {
+    void multipleTypesWithSameProperty(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         runQuery(localDb,
             "CREATE" +
@@ -468,7 +468,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withRelationshipProperties(
                 PropertyMapping.of("agg", "p1", 1.0, MAX)
             )
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         Graph graph = graphs.getGraph("*", Optional.of("agg"));
         assertEquals(3L, graph.relationshipCount());
@@ -490,7 +490,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @ParameterizedTest
     @MethodSource("graphImplWithLocalAggregationArguments")
     void multiplePropertiesWithAggregation(
-        Class<? extends GraphFactory> graphFactory,
+        Class<? extends GraphStoreFactory> graphStoreFactory,
         Aggregation aggregation,
         double expectedNodeAP1,
         double expectedNodeBP1,
@@ -512,7 +512,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("p1", "p1", 1.0, aggregation),
                 PropertyMapping.of("p2", "p2", 2.0, aggregation)
             )
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         Graph p1Graph = graphs.getGraph("*", Optional.of("p1"));
         Graph expectedP1Graph = fromGdl(String.format(
@@ -534,7 +534,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void multiplePropertiesWithAggregation_SINGLE(Class<? extends GraphFactory> graphFactory) {
+    void multiplePropertiesWithAggregation_SINGLE(Class<? extends GraphStoreFactory> graphStoreFactory) {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(db,
             "CREATE" +
@@ -548,7 +548,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 PropertyMapping.of("p1", "p1", 1.0, SINGLE),
                 PropertyMapping.of("p2", "p2", 2.0, SINGLE)
             )
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         String expectedGraphTemplate =
             "(a)-[{w: %fd}]->(a)" +
@@ -566,10 +566,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void graphCanBeReleased(Class<? extends GraphFactory> graphFactory) {
+    void graphCanBeReleased(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphStore graphStore = TestGraphLoader.from(db)
             .withRelationshipTypes("REL1", "REL2")
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         Graph rel1Graph = graphStore.getGraph("REL1");
         Graph unionGraph = graphStore.getUnion();
@@ -590,10 +590,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     }
 
     @AllGraphTypesTest
-    void graphsStoreGivesCorrectElementCounts(Class<? extends GraphFactory> graphFactory) {
+    void graphsStoreGivesCorrectElementCounts(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphStore graphStore = TestGraphLoader.from(db)
             .withRelationshipTypes("REL1", "REL2", "REL3")
-            .graphStore(graphFactory);
+            .graphStore(graphStoreFactory);
 
         Graph rel1Graph = graphStore.getGraph("REL1");
         Graph unionGraph = graphStore.getUnion();

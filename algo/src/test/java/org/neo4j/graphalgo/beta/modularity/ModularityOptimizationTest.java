@@ -35,7 +35,7 @@ import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -91,7 +91,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(HugeGraphStoreFactory.class);
 
         ModularityOptimization pmo = new ModularityOptimization(
             graph,
@@ -121,7 +121,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(HugeGraphStoreFactory.class);
 
         ModularityOptimization pmo = new ModularityOptimization(
             graph,
@@ -151,7 +151,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .addNodeProperty(PropertyMapping.of("seed2", -1))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(HugeGraphStoreFactory.class);
 
         ModularityOptimization pmo = new ModularityOptimization(
             graph,
@@ -183,7 +183,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .addNodeProperty(PropertyMapping.of("seed1", -1))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(HugeGraphStoreFactory.class);
 
         ModularityOptimization pmo = new ModularityOptimization(
             graph,
@@ -222,7 +222,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(HugeGraphStoreFactory.class);
 
         TestLog log = new TestLog();
 
@@ -253,7 +253,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(HugeGraphStoreFactory.class);
 
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,

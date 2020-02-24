@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.api.GraphFactory.ANY_REL_TYPE;
+import static org.neo4j.graphalgo.api.GraphStoreFactory.ANY_REL_TYPE;
 
 public final class GraphStore {
 

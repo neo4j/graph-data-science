@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
@@ -92,7 +92,7 @@ class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
 
         GraphStoreCatalog.set(
             createGraphConfig,
-            graphLoader(createGraphConfig).build(HugeGraphFactory.class).build().graphStore()
+            graphLoader(createGraphConfig).build(HugeGraphStoreFactory.class).build().graphStore()
         );
 
         String query = GdsCypher.call()

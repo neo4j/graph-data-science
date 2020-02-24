@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The Abstract Factory defines the construction of the graph
  */
-public abstract class GraphFactory implements Assessable {
+public abstract class GraphStoreFactory implements Assessable {
 
     public static final String TASK_LOADING = "LOADING";
     public static final String ANY_REL_TYPE = "";
@@ -51,11 +51,11 @@ public abstract class GraphFactory implements Assessable {
     protected final Log log;
     protected final ProgressLogger progressLogger;
 
-    public GraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
+    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup) {
         this(api, setup, true);
     }
 
-    public GraphFactory(GraphDatabaseAPI api, GraphSetup setup, boolean readTokens) {
+    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup, boolean readTokens) {
         this.threadPool = setup.executor();
         this.api = api;
         this.setup = setup;

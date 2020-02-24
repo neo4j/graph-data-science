@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
@@ -110,7 +110,7 @@ class KSpanningTreeTest extends AlgoTestBase {
             .globalOrientation(Orientation.UNDIRECTED)
             .addRelationshipProperty(PropertyMapping.of("w", 1.0))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(HugeGraphStoreFactory.class);
 
         runInTransaction(db, () -> {
             a = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "a").getId()));

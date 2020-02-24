@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
@@ -92,7 +92,7 @@ class WeightedAllShortestPathsTest {
                 .addRelationshipType(RELATIONSHIP)
                 .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
                 .build()
-                .load(HugeGraphFactory.class);
+                .load(HugeGraphStoreFactory.class);
         }
     }
 
@@ -131,7 +131,7 @@ class WeightedAllShortestPathsTest {
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .build()
-            .load(HugeGraphFactory.class);
+            .load(HugeGraphStoreFactory.class);
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
             new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4);

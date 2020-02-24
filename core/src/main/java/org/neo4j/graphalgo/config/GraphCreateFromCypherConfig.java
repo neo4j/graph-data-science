@@ -30,10 +30,10 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
 
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
@@ -50,8 +50,8 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     @Override
     @Configuration.Ignore
-    default Class<? extends GraphFactory> getGraphImpl() {
-        return CypherGraphFactory.class;
+    default Class<? extends GraphStoreFactory> getGraphImpl() {
+        return CypherGraphStoreFactory.class;
     }
 
     @Override

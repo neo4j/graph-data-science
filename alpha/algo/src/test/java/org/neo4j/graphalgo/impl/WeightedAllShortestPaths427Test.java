@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
@@ -412,7 +412,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
             .addRelationshipType("LINK")
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
-            .load(HugeGraphFactory.class);
+            .load(HugeGraphStoreFactory.class);
         List<Result> expected = calculateExpected(graph, true);
         WeightedAllShortestPaths shortestPaths = new WeightedAllShortestPaths(
             graph,
@@ -429,7 +429,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
             .addNodeLabel("Node")
             .addRelationshipType("LINK")
             .build()
-            .load(HugeGraphFactory.class);
+            .load(HugeGraphStoreFactory.class);
         List<Result> expectedNonWeighted = calculateExpected(graph, false);
         MSBFSAllShortestPaths shortestPaths = new MSBFSAllShortestPaths(
             graph,

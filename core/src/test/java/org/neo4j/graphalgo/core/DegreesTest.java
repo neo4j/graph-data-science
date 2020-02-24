@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStore;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphdb.Label;
 
 import java.util.Arrays;
@@ -155,7 +155,7 @@ class DegreesTest extends AlgoTestBase {
                 RelationshipProjection.of("TYPE", Orientation.UNDIRECTED)
             )
             .build()
-            .graphStore(HugeGraphFactory.class);
+            .graphStore(HugeGraphStoreFactory.class);
 
         if (orientation == Orientation.NATURAL) {
             graph = graphStore.getGraph("TYPE_OUT");

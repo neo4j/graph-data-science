@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -49,9 +49,9 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 
-public final class HugeGraphFactory extends GraphFactory {
+public final class HugeGraphStoreFactory extends GraphStoreFactory {
 
-    public HugeGraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
+    public HugeGraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup) {
         super(api, setup);
     }
 

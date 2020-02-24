@@ -22,10 +22,10 @@ package org.neo4j.graphalgo;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -102,20 +102,20 @@ public final class TestGraphLoader {
         return this;
     }
 
-    public <T extends GraphFactory> Graph graph(Class<T> graphFactory) {
+    public <T extends GraphStoreFactory> Graph graph(Class<T> graphStoreFactory) {
         try (Transaction ignored = db.beginTx()) {
-            return loader(graphFactory).build(graphFactory).build().graphStore().getUnion();
+            return loader(graphStoreFactory).build(graphStoreFactory).build().graphStore().getUnion();
         }
     }
 
-    public <T extends GraphFactory> GraphStore graphStore(Class<T> graphFactory) {
+    public <T extends GraphStoreFactory> GraphStore graphStore(Class<T> graphStoreFactory) {
         try (Transaction ignored = db.beginTx()) {
-            return loader(graphFactory).build(graphFactory).build().graphStore();
+            return loader(graphStoreFactory).build(graphStoreFactory).build().graphStore();
         }
     }
 
-    private <T extends GraphFactory> GraphLoader loader(Class<T> graphFactory) {
-        return graphFactory.isAssignableFrom(CypherGraphFactory.class) ? cypherLoader() : storeLoader();
+    private <T extends GraphStoreFactory> GraphLoader loader(Class<T> graphStoreFactory) {
+        return graphStoreFactory.isAssignableFrom(CypherGraphStoreFactory.class) ? cypherLoader() : storeLoader();
     }
 
     private GraphLoader cypherLoader() {

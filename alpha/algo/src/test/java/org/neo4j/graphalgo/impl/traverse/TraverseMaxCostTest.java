@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphStoreFactory;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.logging.Log;
@@ -88,7 +88,7 @@ class TraverseMaxCostTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .addRelationshipProperty(PropertyMapping.of("distance", Double.MAX_VALUE))
             .build()
-            .load(HugeGraphFactory.class);
+            .load(HugeGraphStoreFactory.class);
 
         exitPredicate = (s, t, w) -> {
             Traverse.ExitPredicate.Result result = w >= maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;

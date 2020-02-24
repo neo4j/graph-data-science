@@ -30,14 +30,14 @@ import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.CypherGraphStoreFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -70,7 +70,7 @@ class K1ColoringTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void testK1Coloring(Class<? extends GraphFactory> graphImpl) {
+    void testK1Coloring(Class<? extends GraphStoreFactory> graphImpl) {
         final String DB_CYPHER =
             "CREATE" +
             " (a)" +
@@ -85,7 +85,7 @@ class K1ColoringTest extends AlgoTestBase {
         Graph graph;
 
         GraphLoader graphLoader;
-        if (graphImpl == CypherGraphFactory.class) {
+        if (graphImpl == CypherGraphStoreFactory.class) {
             graphLoader = new CypherLoaderBuilder()
                 .api(db)
                 .graphName("cypher")

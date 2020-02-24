@@ -25,7 +25,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -110,8 +110,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
-            GraphFactory graphFactory = loader.build(config.getGraphImpl());
-            estimateDimensions = graphFactory.dimensions();
+            GraphStoreFactory graphStoreFactory = loader.build(config.getGraphImpl());
+            estimateDimensions = graphStoreFactory.dimensions();
 
             if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {
                 estimateDimensions = ImmutableGraphDimensions.builder()
@@ -122,7 +122,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                     .build();
             }
 
-            estimationBuilder.add("graph", graphFactory.memoryEstimation(estimateDimensions));
+            estimationBuilder.add("graph", graphStoreFactory.memoryEstimation(estimateDimensions));
         } else {
             String graphName = config.graphName().get();
 
@@ -136,8 +136,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 .get();
 
             GraphLoader loader = newLoader(graphCreateConfig, AllocationTracker.EMPTY);
-            GraphFactory graphFactory = loader.build(config.getGraphImpl());
-            estimateDimensions = graphFactory.dimensions();
+            GraphStoreFactory graphStoreFactory = loader.build(config.getGraphImpl());
+            estimateDimensions = graphStoreFactory.dimensions();
         }
 
         estimationBuilder.add("algorithm", algorithmFactory(config).memoryEstimation(config));
