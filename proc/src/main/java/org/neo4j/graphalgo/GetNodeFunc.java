@@ -19,9 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -32,6 +30,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
+
 public class GetNodeFunc {
     @Context
     public GraphDatabaseAPI api;
@@ -39,23 +39,16 @@ public class GetNodeFunc {
     @UserFunction("gds.util.asNode")
     @Description("CALL gds.util.asNode(nodeId) - Return the node objects for the given node id or null if none exists.")
     public Node asNode(@Name(value = "nodeId") Number nodeId) {
-        try {
-            return GraphDatabaseApiProxy.getNodeById(api, nodeId.longValue());
-        } catch (NotFoundException e) {
-            return null;
-        }
+        return getNodeById(api, nodeId.longValue());
     }
 
     @UserFunction("gds.util.asNodes")
     @Description("CALL gds.util.asNodes(nodeIds) - Return the node objects for the given node ids or an empty list if none exists.")
     public List<Node> asNodes(@Name(value = "nodeIds") List<Number> nodeIds) {
-        return nodeIds.stream().map(nodeId -> {
-            try {
-                return GraphDatabaseApiProxy.getNodeById(api, nodeId.longValue());
-            } catch (NotFoundException e) {
-                return null;
-            }
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        return nodeIds.stream()
+            .map(nodeId -> getNodeById(api, nodeId.longValue()))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 
 }

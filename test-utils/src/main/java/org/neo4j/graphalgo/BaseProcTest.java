@@ -49,6 +49,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
 
@@ -233,7 +234,7 @@ public class BaseProcTest {
     protected void assertResult(final String scoreProperty, Map<Long, Double> expected) {
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             for (Map.Entry<Long, Double> entry : expected.entrySet()) {
-                double score = ((Number) GraphDatabaseApiProxy.getNodeById(db, entry.getKey())
+                double score = ((Number) getNodeById(db, entry.getKey())
                     .getProperty(scoreProperty))
                     .doubleValue();
                 assertEquals(

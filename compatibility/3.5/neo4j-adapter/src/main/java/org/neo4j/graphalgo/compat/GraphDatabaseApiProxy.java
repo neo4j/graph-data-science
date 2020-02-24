@@ -23,9 +23,11 @@ import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.api.KernelTransactions;
@@ -70,7 +72,13 @@ public final class GraphDatabaseApiProxy {
     }
 
     public static Node getNodeById(GraphDatabaseService db, long id) {
-        return applyInTransaction(db, tx ->db.getNodeById(id));
+        return applyInTransaction(db, tx -> {
+            try {
+                return db.getNodeById(id);
+            } catch (NotFoundException e) {
+                return null;
+            }
+        });
     }
 
     public static Node createNode(GraphDatabaseService db) {
@@ -101,6 +109,10 @@ public final class GraphDatabaseApiProxy {
                 LoginContext.AUTH_DISABLED,
                 timeoutUnit.toMillis(timeout)
             );
+    }
+
+    public static ProcedureCallContext procedureCallContext(String... outputFieldNames) {
+        return new ProcedureCallContext(outputFieldNames, false);
     }
 
     public static void runInTransaction(GraphDatabaseService db, Consumer<Transaction> block) {
