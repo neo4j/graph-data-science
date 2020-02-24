@@ -25,6 +25,7 @@ public final class Editions {
         throw new UnsupportedOperationException();
     }
 
+    @SuppressWarnings("deprecation")
     public static boolean isEnterprise() {
         // TODO: #jdk11
         //  return Editions.class.getClassLoader().getDefinedPackage("org.neo4j.kernel.impl.enterprise") != null;

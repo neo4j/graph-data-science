@@ -262,7 +262,7 @@ public class PrimitiveIntCollections {
      * @throws IllegalStateException for the first encountered duplicate.
      */
     public static Set<Integer> toSet(PrimitiveIntIterator iterator) {
-        return mapToSet(iterator, Integer::new);
+        return mapToSet(iterator, Integer::valueOf);
     }
 
     public static <T> Set<T> mapToSet(PrimitiveIntIterator iterator, IntFunction<T> map) {

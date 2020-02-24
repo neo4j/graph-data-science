@@ -21,14 +21,15 @@ package org.neo4j.graphalgo.core;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -44,6 +45,7 @@ import java.util.stream.StreamSupport;
  *
  * The Cypher statement should be valid, but might not reproduce the input graph 100%.
  */
+@IdenticalCompat
 public final class CypherExporter {
 
     /**
@@ -187,19 +189,13 @@ public final class CypherExporter {
 
         @Override
         public void runInTx(GraphDatabaseService graph, Runnable action) {
-            try (Transaction tx = graph.beginTx()) {
-                action.run();
-                tx.commit();
-            }
+            GraphDatabaseApiProxy.runInTransaction(graph, tx -> action.run());
         }
 
 
         @Override
         public void forEachNode(GraphDatabaseService graph, Consumer<Node> action) {
-            try (Transaction tx = graph.beginTx()) {
-                tx.getAllNodes().forEach(action);
-                tx.commit();
-            }
+            GraphDatabaseApiProxy.getAllNodes(graph).forEach(action);
         }
 
         @Override

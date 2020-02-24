@@ -24,6 +24,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -85,12 +87,28 @@ public final class GraphDatabaseApiProxy {
         return applyInTransaction(db, tx -> db.createNode());
     }
 
+    public static Node createNode(GraphDatabaseService db, Label... labels) {
+        return applyInTransaction(db, tx -> db.createNode(labels));
+    }
+
     public static Node findNode(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue) {
         return applyInTransaction(db, tx -> db.findNode(label, propertyKey, propertyValue));
     }
 
     public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue) {
         return applyInTransaction(db, tx -> db.findNodes(label, propertyKey, propertyValue));
+    }
+
+    public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Label label) {
+        return applyInTransaction(db, tx -> db.findNodes(label));
+    }
+
+    public static ResourceIterable<Node> getAllNodes(GraphDatabaseService db) {
+        return applyInTransaction(db, tx -> db.getAllNodes());
+    }
+
+    public static ResourceIterable<Relationship> getAllRelationships(GraphDatabaseService db) {
+        return applyInTransaction(db, tx -> db.getAllRelationships());
     }
 
     public static NeoStores neoStores(GraphDatabaseService db) {

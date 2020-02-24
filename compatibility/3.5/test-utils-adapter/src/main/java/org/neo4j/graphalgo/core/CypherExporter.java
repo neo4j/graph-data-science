@@ -21,14 +21,15 @@ package org.neo4j.graphalgo.core;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -44,6 +45,7 @@ import java.util.stream.StreamSupport;
  *
  * The Cypher statement should be valid, but might not reproduce the input graph 100%.
  */
+@IdenticalCompat
 public final class CypherExporter {
 
     /**
@@ -182,21 +184,18 @@ public final class CypherExporter {
         Object property(String key, T t, Context context);
     }
 
-    enum NeoData implements GraphLike<GraphDatabaseService, PropertyContainer, Node, PropertyContainer, Relationship>, NodeLike<Node>, RelationshipLike<Relationship>, PropertiesLike<PropertyContainer, GraphDatabaseService> {
+    enum NeoData implements GraphLike<GraphDatabaseService, Entity, Node, Entity, Relationship>, NodeLike<Node>, RelationshipLike<Relationship>, PropertiesLike<Entity, GraphDatabaseService> {
         INSTANCE;
 
         @Override
         public void runInTx(GraphDatabaseService graph, Runnable action) {
-            try (Transaction tx = graph.beginTx()) {
-                action.run();
-                tx.success();
-            }
+            GraphDatabaseApiProxy.runInTransaction(graph, tx -> action.run());
         }
 
 
         @Override
         public void forEachNode(GraphDatabaseService graph, Consumer<Node> action) {
-            graph.getAllNodes().forEach(action);
+            GraphDatabaseApiProxy.getAllNodes(graph).forEach(action);
         }
 
         @Override
@@ -237,12 +236,12 @@ public final class CypherExporter {
 
 
         @Override
-        public Iterable<String> availableKeys(PropertyContainer propertyContainer, GraphDatabaseService context) {
+        public Iterable<String> availableKeys(Entity propertyContainer, GraphDatabaseService context) {
             return propertyContainer.getPropertyKeys();
         }
 
         @Override
-        public Object property(String key, PropertyContainer propertyContainer, GraphDatabaseService context) {
+        public Object property(String key, Entity propertyContainer, GraphDatabaseService context) {
             return propertyContainer.getProperty(key);
         }
 
@@ -257,12 +256,12 @@ public final class CypherExporter {
         }
 
         @Override
-        public PropertiesLike<PropertyContainer, GraphDatabaseService> nodePropsLike() {
+        public PropertiesLike<Entity, GraphDatabaseService> nodePropsLike() {
             return this;
         }
 
         @Override
-        public PropertiesLike<PropertyContainer, GraphDatabaseService> relPropsLike() {
+        public PropertiesLike<Entity, GraphDatabaseService> relPropsLike() {
             return this;
         }
     }

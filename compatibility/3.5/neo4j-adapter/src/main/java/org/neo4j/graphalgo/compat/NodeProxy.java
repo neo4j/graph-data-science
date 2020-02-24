@@ -19,26 +19,18 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.cypher.internal.evaluator.EvaluationException;
-import org.neo4j.cypher.internal.evaluator.Evaluator;
-import org.neo4j.cypher.internal.evaluator.ExpressionEvaluator;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 
-import java.util.Map;
+public final class NodeProxy {
 
-public final class MapConverter {
-
-    private static final ExpressionEvaluator EVALUATOR = Evaluator.expressionEvaluator();
-
-    @SuppressWarnings("unchecked")
-    public static Map<String, Object> convert(String value) {
-        try {
-            return EVALUATOR.evaluate(value, Map.class);
-        } catch (EvaluationException e) {
-            throw new IllegalArgumentException(String.format("%s is not a valid map expression", value), e);
-        }
+    public static Iterable<Relationship> getRelationships(Node node, RelationshipType type, Direction direction) {
+        return node.getRelationships(direction, type);
     }
 
-    private MapConverter() {
+    private NodeProxy() {
         throw new UnsupportedOperationException("No instances");
     }
 }

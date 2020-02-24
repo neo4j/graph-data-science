@@ -355,6 +355,7 @@ public class BaseProcTest {
         assertEquals(expected, configMap.get(key));
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, Object> extractUserInput(Result.ResultRow row) {
         return ((Map<String, Object>) row.get("configuration"));
     }

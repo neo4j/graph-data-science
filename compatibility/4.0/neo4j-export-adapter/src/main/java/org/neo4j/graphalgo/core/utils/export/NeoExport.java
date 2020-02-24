@@ -40,6 +40,7 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.internal.LogService;
+import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.logging.internal.StoreLogService;
 import org.neo4j.scheduler.JobScheduler;
 
@@ -80,7 +81,6 @@ public class NeoExport {
 
         Config dbConfig = Config.defaults(GraphDatabaseSettings.neo4j_home, storeDir.toPath());
         DatabaseLayout databaseLayout = DatabaseLayout.of(dbConfig);
-        File internalLogFile = dbConfig.get(SettingsProxy.storeInternalLogPath()).toFile();
         // TODO: @s1ck ?????
         Configuration importConfig = new Configuration() {
             @Override
@@ -102,7 +102,9 @@ public class NeoExport {
         LifeSupport life = new LifeSupport();
 
         try (FileSystemAbstraction fs = new DefaultFileSystemAbstraction()) {
-            LogService logService = life.add(StoreLogService.withInternalLog(internalLogFile).build(fs));
+            LogService logService = config.enableDebugLog()
+                ? life.add(StoreLogService.withInternalLog(dbConfig.get(SettingsProxy.storeInternalLogPath()).toFile()).build(fs))
+                : NullLogService.getInstance();
             JobScheduler jobScheduler = life.add(createScheduler());
 
             life.start();

@@ -23,6 +23,7 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
@@ -73,7 +74,13 @@ public final class GraphDatabaseApiProxy {
     }
 
     public static Node getNodeById(GraphDatabaseService db, long id) {
-        return applyInTransaction(db, tx -> tx.getNodeById(id));
+        return applyInTransaction(db, tx -> {
+            try {
+                return tx.getNodeById(id);
+            } catch (NotFoundException e) {
+                return null;
+            }
+        });
     }
 
     public static Node createNode(GraphDatabaseService db) {

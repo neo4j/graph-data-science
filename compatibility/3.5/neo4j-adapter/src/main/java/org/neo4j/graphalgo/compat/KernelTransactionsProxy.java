@@ -19,26 +19,28 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.cypher.internal.evaluator.EvaluationException;
-import org.neo4j.cypher.internal.evaluator.Evaluator;
-import org.neo4j.cypher.internal.evaluator.ExpressionEvaluator;
+import org.neo4j.kernel.api.KernelTransactionHandle;
+import org.neo4j.kernel.api.query.ExecutingQuery;
 
-import java.util.Map;
+import java.util.stream.Collectors;
 
-public final class MapConverter {
+public final class KernelTransactionsProxy {
 
-    private static final ExpressionEvaluator EVALUATOR = Evaluator.expressionEvaluator();
-
-    @SuppressWarnings("unchecked")
-    public static Map<String, Object> convert(String value) {
-        try {
-            return EVALUATOR.evaluate(value, Map.class);
-        } catch (EvaluationException e) {
-            throw new IllegalArgumentException(String.format("%s is not a valid map expression", value), e);
-        }
+    public static long lastTransactionIdWhenStarted(KernelTransactionHandle ktx) {
+        return ktx.lastTransactionTimestampWhenStarted();
     }
 
-    private MapConverter() {
+    public static void markForTermination(KernelTransactionHandle ktx) {
+        ktx.markForTermination(Transactions.markedAsFailed());
+    }
+
+    public static String executingQueryTexts(KernelTransactionHandle ktx, String delimiter) {
+        return ktx.executingQueries()
+            .map(ExecutingQuery::queryText)
+            .collect(Collectors.joining(delimiter));
+    }
+
+    private KernelTransactionsProxy() {
         throw new UnsupportedOperationException("No instances");
     }
 }

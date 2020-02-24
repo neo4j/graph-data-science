@@ -29,7 +29,6 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 import java.util.Map;
@@ -39,9 +38,6 @@ import java.util.function.Supplier;
 
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
-/**
- * QueryRunner does not live in compat package (for now) to reduce the amount of tests that need to change
- */
 public final class QueryRunner {
 
     private QueryRunner() {}
@@ -84,7 +80,7 @@ public final class QueryRunner {
         db.execute(query, params).close();
     }
 
-    public static void runQuery(GraphDatabaseAPI db, String username, String query, Map<String, Object> params) {
+    public static void runQuery(GraphDatabaseService db, String username, String query, Map<String, Object> params) {
         try (KernelTransaction.Revertable ignored = withUsername(db.beginTx(), username)) {
             db.execute(query, params).close();
         }
@@ -122,7 +118,7 @@ public final class QueryRunner {
         }
     }
 
-    public static <R> R runWithKernelTransaction(GraphDatabaseAPI db, Function<KernelTransaction, R> function) {
+    public static <R> R runWithKernelTransaction(GraphDatabaseService db, Function<KernelTransaction, R> function) {
         try (Transaction tx = db.beginTx()) {
             KernelTransaction kernelTransaction = GraphDatabaseApiProxy
                 .resolveDependency(db, ThreadToStatementContextBridge.class)

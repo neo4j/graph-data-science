@@ -37,6 +37,11 @@ public interface NeoExportConfig extends BaseConfig {
 
     String dbName();
 
+    @Value
+    default boolean enableDebugLog() {
+        return false;
+    }
+
     @Value.Default
     default int writeConcurrency() {
         return AlgoBaseConfig.DEFAULT_CONCURRENCY;

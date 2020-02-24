@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.utils;
 
-import org.neo4j.graphalgo.compat.TransactionWrapper;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.withKernelTransaction;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
 public abstract class StatementApi {
@@ -35,17 +35,14 @@ public abstract class StatementApi {
         T apply(KernelTransaction transaction) throws Exception;
     }
 
-
     protected final GraphDatabaseAPI api;
-    private final TransactionWrapper tx;
 
     protected StatementApi(GraphDatabaseAPI api) {
         this.api = api;
-        this.tx = new TransactionWrapper(api);
     }
 
     protected final <T> T applyInTransaction(TxFunction<T> fun) {
-        return tx.apply(ktx -> {
+        return withKernelTransaction(api, ktx -> {
             try {
                 return fun.apply(ktx);
             } catch (Exception e) {
@@ -56,13 +53,14 @@ public abstract class StatementApi {
     }
 
     protected final void acceptInTransaction(TxConsumer fun) {
-        tx.accept(ktx -> {
+        withKernelTransaction(api, ktx -> {
             try {
                 fun.accept(ktx);
             } catch (Exception e) {
                 throwIfUnchecked(e);
                 throw new RuntimeException(e);
             }
+            return null;
         });
     }
 
