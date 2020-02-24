@@ -29,6 +29,7 @@ import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.impl.util.Validators;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.internal.LogService;
+import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.logging.internal.StoreLogService;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.tooling.ImportTool;
@@ -77,7 +78,6 @@ public class NeoExport {
 
         DatabaseLayout databaseLayout = DatabaseLayout.of(storeDir);
         Config dbConfig = Config.defaults();
-        File internalLogFile = dbConfig.get(store_internal_log_path);
         Configuration importConfig = ImportTool.importConfiguration(
             config.writeConcurrency(),
             defaultSettingsSuitableForTests,
@@ -89,7 +89,10 @@ public class NeoExport {
         LifeSupport life = new LifeSupport();
 
         try (FileSystemAbstraction fs = new DefaultFileSystemAbstraction()) {
-            LogService logService = life.add(StoreLogService.withInternalLog(internalLogFile).build(fs));
+            LogService logService = config.enableDebugLog()
+                ? life.add(StoreLogService.withInternalLog(dbConfig.get(store_internal_log_path)).build(fs))
+                : NullLogService.getInstance();
+
             JobScheduler jobScheduler = life.add(createScheduler());
 
             life.start();
