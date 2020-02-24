@@ -194,16 +194,16 @@ final class HugeGraphLoadingTest {
             .build()
             .graphStore(HugeGraphFactory.class);
 
-        Graph natural = graphStore.getGraphProjection("TYPE_NATURAL");
+        Graph natural = graphStore.getGraph("TYPE_NATURAL");
         assertGraphEquals(fromGdl("({id: 0})-->({id: 1})"), natural);
 
-        Graph reverse = graphStore.getGraphProjection("TYPE_REVERSE");
+        Graph reverse = graphStore.getGraph("TYPE_REVERSE");
         assertGraphEquals(fromGdl("({id: 1})-->({id: 0})"), reverse);
 
-        Graph undirected = graphStore.getGraphProjection("TYPE_UNDIRECTED");
+        Graph undirected = graphStore.getGraph("TYPE_UNDIRECTED");
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), undirected);
 
-        Graph both = graphStore.getGraphProjection(Arrays.asList("TYPE_NATURAL", "TYPE_REVERSE"), Optional.empty());
+        Graph both = graphStore.getGraph(Arrays.asList("TYPE_NATURAL", "TYPE_REVERSE"), Optional.empty());
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), both);
 
         Graph union = graphStore.getUnion();

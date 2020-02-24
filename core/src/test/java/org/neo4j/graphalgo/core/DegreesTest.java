@@ -158,13 +158,13 @@ class DegreesTest extends AlgoTestBase {
             .graphStore(HugeGraphFactory.class);
 
         if (orientation == Orientation.NATURAL) {
-            graph = graphStore.getGraphProjection("TYPE_OUT");
+            graph = graphStore.getGraph("TYPE_OUT");
         } else if (orientation == Orientation.REVERSE) {
-            graph = graphStore.getGraphProjection("TYPE_IN");
+            graph = graphStore.getGraph("TYPE_IN");
         } else if (orientation == Orientation.UNDIRECTED) {
-            graph = graphStore.getGraphProjection("TYPE_UNDIRECTED");
+            graph = graphStore.getGraph("TYPE_UNDIRECTED");
         } else if (orientation == null) { // BOTH case
-            graph = graphStore.getGraphProjection(Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty());
+            graph = graphStore.getGraph(Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty());
         }
     }
 

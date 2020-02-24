@@ -63,15 +63,15 @@ public final class GraphStore {
         this.graphs = graphs;
     }
 
-    public Graph getGraphProjection(String... relationshipTypes) {
-        return getGraphProjection(Arrays.asList(relationshipTypes), Optional.empty());
+    public Graph getGraph(String... relationshipTypes) {
+        return getGraph(Arrays.asList(relationshipTypes), Optional.empty());
     }
 
-    public Graph getGraphProjection(String relationshipType, Optional<String> relationshipProperty) {
-        return getGraphProjection(Collections.singletonList(relationshipType), relationshipProperty);
+    public Graph getGraph(String relationshipType, Optional<String> relationshipProperty) {
+        return getGraph(Collections.singletonList(relationshipType), relationshipProperty);
     }
 
-    public Graph getGraphProjection(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         if (relationshipTypes.isEmpty()) {
             throw new IllegalArgumentException(String.format(
                 "The parameter %s should not be empty. Use `*` to load all relationship types.",

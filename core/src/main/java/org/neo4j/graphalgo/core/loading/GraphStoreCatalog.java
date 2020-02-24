@@ -145,7 +145,7 @@ public final class GraphStoreCatalog {
             if (!exists(graphName)) {
                 throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", graphName));
             }
-            return graphsByName.get(graphName).graphStore().getGraphProjection(relationshipType, maybeRelationshipProperty);
+            return graphsByName.get(graphName).graphStore().getGraph(relationshipType, maybeRelationshipProperty);
         }
 
         /**

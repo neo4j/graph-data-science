@@ -203,7 +203,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
 
         validateConfig(graphCandidate.config(), config);
-        return graphCandidate.graphStore().getGraphProjection(relationshipTypes, weightProperty);
+        return graphCandidate.graphStore().getGraph(relationshipTypes, weightProperty);
     }
 
     private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {

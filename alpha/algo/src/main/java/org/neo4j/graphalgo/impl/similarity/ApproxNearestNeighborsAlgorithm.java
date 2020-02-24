@@ -446,10 +446,10 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             this.similarityComputer = similarityComputer;
             this.rleDecoder = rleDecoderFactory.get();
             this.localTopKConsumers = AnnTopKConsumer.initializeTopKConsumers(length, config.topK());
-            this.oldOutRelationships = oldGraphStore.getGraphProjection(ANN_OUT_GRAPH).concurrentCopy();
-            this.oldInRelationships = oldGraphStore.getGraphProjection(ANN_IN_GRAPH).concurrentCopy();
-            this.newOutRelationships = newGraphStore.getGraphProjection(ANN_OUT_GRAPH).concurrentCopy();
-            this.newInRelationships = newGraphStore.getGraphProjection(ANN_IN_GRAPH).concurrentCopy();
+            this.oldOutRelationships = oldGraphStore.getGraph(ANN_OUT_GRAPH).concurrentCopy();
+            this.oldInRelationships = oldGraphStore.getGraph(ANN_IN_GRAPH).concurrentCopy();
+            this.newOutRelationships = newGraphStore.getGraph(ANN_OUT_GRAPH).concurrentCopy();
+            this.newInRelationships = newGraphStore.getGraph(ANN_IN_GRAPH).concurrentCopy();
             this.sampleRate = sampleRate;
         }
 
