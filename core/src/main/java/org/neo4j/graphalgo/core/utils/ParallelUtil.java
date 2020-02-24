@@ -1110,7 +1110,7 @@ public final class ParallelUtil {
 
     private static ForkJoinPool getFJPoolWithConcurrency(int concurrency) {
         int actualConcurrency = Pools.allowedConcurrency(concurrency);
-        return actualConcurrency == AlgoBaseConfig.DEFAULT_CONCURRENCY
+        return actualConcurrency == Pools.CORE_POOL_SIZE
             ? Pools.FJ_POOL
             : Pools.createFJPool(actualConcurrency);
     }
