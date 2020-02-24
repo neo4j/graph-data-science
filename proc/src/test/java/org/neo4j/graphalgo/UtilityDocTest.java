@@ -71,7 +71,7 @@ class UtilityDocTest extends BaseProcTest {
         String expected = "+---------+\n" +
                           "| version |\n" +
                           "+---------+\n" +
-                          "| \"0.9.1\" |\n" +
+                          "| \"0.9.2\" |\n" +
                           "+---------+\n" +
                           "1 row\n";
 
