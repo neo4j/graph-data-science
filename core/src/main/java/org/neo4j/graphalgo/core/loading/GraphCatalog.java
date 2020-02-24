@@ -37,13 +37,13 @@ public final class GraphCatalog {
 
     private GraphCatalog() { }
 
-    public static void set(GraphCreateConfig config, GraphsByRelationshipType graph) {
-        graph.canRelease(false);
+    public static void set(GraphCreateConfig config, GraphStore graphStore) {
+        graphStore.canRelease(false);
         userGraphCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
             }
-            userCatalog.set(config, graph);
+            userCatalog.set(config, graphStore);
             return userCatalog;
         });
     }
@@ -71,13 +71,13 @@ public final class GraphCatalog {
             .orElse(null);
     }
 
-    public static void remove(String username, String graphName, Consumer<GraphWithConfig> graphRemovedConsumer) {
-        GraphWithConfig graphWithConfig = Optional.ofNullable(getUserCatalog(username).removeWithoutRelease(graphName))
+    public static void remove(String username, String graphName, Consumer<GraphStoreWithConfig> graphRemovedConsumer) {
+        GraphStoreWithConfig graphStoreWithConfig = Optional.ofNullable(getUserCatalog(username).removeWithoutRelease(graphName))
             .orElseThrow(failOnNonExistentGraph(graphName));
 
-        graphRemovedConsumer.accept(graphWithConfig);
+        graphRemovedConsumer.accept(graphStoreWithConfig);
 
-        Graph graph = graphWithConfig.getGraph();
+        Graph graph = graphStoreWithConfig.getGraph();
         graph.canRelease(true);
         graph.release();
     }
@@ -105,7 +105,7 @@ public final class GraphCatalog {
         ));
     }
 
-    public static GraphWithConfig get(
+    public static GraphStoreWithConfig get(
         String username,
         String graphName
     ) {
@@ -116,23 +116,23 @@ public final class GraphCatalog {
 
         private static final UserCatalog EMPTY = new UserCatalog();
 
-        private final Map<String, GraphWithConfig> graphsByName = new ConcurrentHashMap<>();
+        private final Map<String, GraphStoreWithConfig> graphsByName = new ConcurrentHashMap<>();
 
-        void set(GraphCreateConfig config, GraphsByRelationshipType graph) {
-            if (config.graphName() == null || graph == null) {
-                throw new IllegalArgumentException("Both name and graph must be not null");
+        void set(GraphCreateConfig config, GraphStore graphStore) {
+            if (config.graphName() == null || graphStore == null) {
+                throw new IllegalArgumentException("Both name and graph store must be not null");
             }
-            GraphWithConfig graphWithConfig = ImmutableGraphWithConfig.of(graph, config);
-            if (graphsByName.putIfAbsent(config.graphName(), graphWithConfig) != null) {
+            GraphStoreWithConfig graphStoreWithConfig = ImmutableGraphStoreWithConfig.of(graphStore, config);
+            if (graphsByName.putIfAbsent(config.graphName(), graphStoreWithConfig) != null) {
                 throw new IllegalStateException(String.format(
                     "Graph name %s already loaded",
                     config.graphName()
                 ));
             }
-            graph.canRelease(false);
+            graphStore.canRelease(false);
         }
 
-        GraphWithConfig get(String graphName) {
+        GraphStoreWithConfig get(String graphName) {
             if (graphsByName.containsKey(graphName)) {
                 return graphsByName.get(graphName);
             } else {
@@ -145,7 +145,7 @@ public final class GraphCatalog {
             if (!exists(graphName)) {
                 throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", graphName));
             }
-            return graphsByName.get(graphName).graph().getGraphProjection(relationshipType, maybeRelationshipProperty);
+            return graphsByName.get(graphName).graphStore().getGraphProjection(relationshipType, maybeRelationshipProperty);
         }
 
         /**
@@ -154,7 +154,7 @@ public final class GraphCatalog {
          * This method returns the union of all subgraphs refered to by the given name.
          */
         Optional<Graph> getUnion(String graphName) {
-            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).graph().getUnion());
+            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).graphStore().getUnion());
         }
 
         boolean exists(String graphName) {
@@ -169,15 +169,15 @@ public final class GraphCatalog {
                 // that can deal with missing graphs
                 return null;
             }
-            GraphWithConfig graphWithConfig = graphsByName.remove(graphName);
-            Graph graph = graphWithConfig.getGraph();
+            GraphStoreWithConfig graphStoreWithConfig = graphsByName.remove(graphName);
+            Graph graph = graphStoreWithConfig.getGraph();
             graph.canRelease(true);
             graph.release();
             return graph;
         }
 
         @Nullable
-        GraphWithConfig removeWithoutRelease(String graphName) {
+        GraphStoreWithConfig removeWithoutRelease(String graphName) {
             if (!exists(graphName)) {
                 // remove is allowed to return null if the graph does not exist
                 // as it's being used by algo.graph.info or algo.graph.remove,
@@ -190,13 +190,13 @@ public final class GraphCatalog {
         @Nullable
         String getType(String graphName) {
             if (graphName == null) return null;
-            GraphsByRelationshipType graph = graphsByName.get(graphName).graph();
+            GraphStore graph = graphsByName.get(graphName).graphStore();
             return graph == null ? null : graph.getGraphType();
         }
 
         Map<GraphCreateConfig, Graph> getLoadedGraphs() {
             return graphsByName.values().stream().collect(Collectors.toMap(
-                GraphWithConfig::config, GraphWithConfig::getGraph
+                GraphStoreWithConfig::config, GraphStoreWithConfig::getGraph
             ));
         }
     }

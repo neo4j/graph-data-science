@@ -175,7 +175,7 @@ final class HugeGraphLoadingTest {
                      ", (b:Node {id: 1})" +
                      ", (a)-[:TYPE]->(b)");
 
-        GraphsByRelationshipType graphsByRelationshipType = new StoreLoaderBuilder()
+        GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier(
@@ -192,21 +192,21 @@ final class HugeGraphLoadingTest {
             )
             .addNodeProperty(PropertyMapping.of("id", 42.0))
             .build()
-            .graphs(HugeGraphFactory.class);
+            .graphStore(HugeGraphFactory.class);
 
-        Graph natural = graphsByRelationshipType.getGraphProjection("TYPE_NATURAL");
+        Graph natural = graphStore.getGraphProjection("TYPE_NATURAL");
         assertGraphEquals(fromGdl("({id: 0})-->({id: 1})"), natural);
 
-        Graph reverse = graphsByRelationshipType.getGraphProjection("TYPE_REVERSE");
+        Graph reverse = graphStore.getGraphProjection("TYPE_REVERSE");
         assertGraphEquals(fromGdl("({id: 1})-->({id: 0})"), reverse);
 
-        Graph undirected = graphsByRelationshipType.getGraphProjection("TYPE_UNDIRECTED");
+        Graph undirected = graphStore.getGraphProjection("TYPE_UNDIRECTED");
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), undirected);
 
-        Graph both = graphsByRelationshipType.getGraphProjection(Arrays.asList("TYPE_NATURAL", "TYPE_REVERSE"), Optional.empty());
+        Graph both = graphStore.getGraphProjection(Arrays.asList("TYPE_NATURAL", "TYPE_REVERSE"), Optional.empty());
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), both);
 
-        Graph union = graphsByRelationshipType.getUnion();
+        Graph union = graphStore.getUnion();
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b), (a)<--(b), (a)-->(b)"), union);
     }
 }

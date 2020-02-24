@@ -78,13 +78,13 @@ class GraphCatalogTest {
             .relationshipProjections(relationshipProjections())
             .build();
 
-        GraphsByRelationshipType importedGraphs = graphLoader.graphs(HugeGraphFactory.class);
+        GraphStore graphStore = graphLoader.graphStore(HugeGraphFactory.class);
 
         final GraphCreateConfig graphCreateConfig = graphLoader.createConfig();
 
-        GraphCatalog.set(graphCreateConfig, importedGraphs);
+        GraphCatalog.set(graphCreateConfig, graphStore);
 
-        Graph filteredGraph = GraphCatalog.get("", "myGraph").graph().getGraphProjection(relTypes, relProperty);
+        Graph filteredGraph = GraphCatalog.get("", "myGraph").graphStore().getGraphProjection(relTypes, relProperty);
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
     }

@@ -259,7 +259,7 @@ class CypherGraphFactoryTest {
         Graph graph = TestGraphLoader
             .from(db)
             .withNodeProperties(PropertyMappings.of(prop1, prop2, prop3), false)
-            .buildGraph(CypherGraphFactory.class);
+            .graph(CypherGraphFactory.class);
 
         String gdl = "(a {prop1: 1, prop2: 0, prop3: 0})" +
                      "(b {prop1: 0, prop2: 2, prop3: 0})" +
@@ -289,11 +289,11 @@ class CypherGraphFactoryTest {
         PropertyMapping prop2 = PropertyMapping.of("prop2", 0D);
         PropertyMapping prop3 = PropertyMapping.of("prop3", 42D);
 
-        GraphsByRelationshipType graphs = TestGraphLoader
+        GraphStore graphs = TestGraphLoader
             .from(db)
             .withRelationshipProperties(PropertyMappings.of(prop1, prop2, prop3), false)
             .withDefaultAggregation(Aggregation.DEFAULT)
-            .buildGraphs(CypherGraphFactory.class);
+            .graphStore(CypherGraphFactory.class);
 
         String expectedGraph =
             "(a)-[{w: %f}]->(b)" +

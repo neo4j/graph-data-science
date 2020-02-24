@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -103,7 +103,7 @@ public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESU
         applyOnProcedure((proc) -> {
             Graph graph = graphLoader(graphCreateConfig).load(HugeGraphFactory.class);
 
-            GraphCatalog.set(graphCreateConfig, GraphsByRelationshipType.of(graph));
+            GraphCatalog.set(graphCreateConfig, GraphStore.of(graph));
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
                 "seedProperty",
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"

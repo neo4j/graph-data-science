@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Label;
 
@@ -140,7 +140,7 @@ class DegreesTest extends AlgoTestBase {
 
     private void setup(String cypher, Orientation orientation) {
         runQuery(cypher);
-        GraphsByRelationshipType graphs = new StoreLoaderBuilder()
+        GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_OUT",
@@ -155,16 +155,16 @@ class DegreesTest extends AlgoTestBase {
                 RelationshipProjection.of("TYPE", Orientation.UNDIRECTED)
             )
             .build()
-            .graphs(HugeGraphFactory.class);
+            .graphStore(HugeGraphFactory.class);
 
         if (orientation == Orientation.NATURAL) {
-            graph = graphs.getGraphProjection("TYPE_OUT");
+            graph = graphStore.getGraphProjection("TYPE_OUT");
         } else if (orientation == Orientation.REVERSE) {
-            graph = graphs.getGraphProjection("TYPE_IN");
+            graph = graphStore.getGraphProjection("TYPE_IN");
         } else if (orientation == Orientation.UNDIRECTED) {
-            graph = graphs.getGraphProjection("TYPE_UNDIRECTED");
+            graph = graphStore.getGraphProjection("TYPE_UNDIRECTED");
         } else if (orientation == null) { // BOTH case
-            graph = graphs.getGraphProjection(Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty());
+            graph = graphStore.getGraphProjection(Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty());
         }
     }
 

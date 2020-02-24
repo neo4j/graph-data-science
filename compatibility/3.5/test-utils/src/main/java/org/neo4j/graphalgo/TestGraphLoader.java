@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -102,15 +102,15 @@ public final class TestGraphLoader {
         return this;
     }
 
-    public <T extends GraphFactory> Graph buildGraph(Class<T> graphFactory) {
+    public <T extends GraphFactory> Graph graph(Class<T> graphFactory) {
         try (Transaction ignored = db.beginTx()) {
-            return loader(graphFactory).build(graphFactory).build().graphs().getUnion();
+            return loader(graphFactory).build(graphFactory).build().graphStore().getUnion();
         }
     }
 
-    public <T extends GraphFactory> GraphsByRelationshipType buildGraphs(Class<T> graphFactory) {
+    public <T extends GraphFactory> GraphStore graphStore(Class<T> graphFactory) {
         try (Transaction ignored = db.beginTx()) {
-            return loader(graphFactory).build(graphFactory).build().graphs();
+            return loader(graphFactory).build(graphFactory).build().graphStore();
         }
     }
 

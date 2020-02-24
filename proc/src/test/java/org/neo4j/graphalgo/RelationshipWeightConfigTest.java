@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -142,12 +142,12 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphsByRelationshipType graphs = graphLoader(graphCreateConfig)
+            GraphStore graphStore = graphLoader(graphCreateConfig)
                 .build(HugeGraphFactory.class)
                 .build()
-                .graphs();
+                .graphStore();
 
-            GraphCatalog.set(graphCreateConfig, graphs);
+            GraphCatalog.set(graphCreateConfig, graphStore);
 
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(map(
                 "relationshipWeightProperty",
@@ -304,12 +304,12 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             .relationshipProjections(relationshipProjections)
             .build();
 
-        GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig)
+        GraphStore graphStore = graphLoader(db, graphCreateConfig)
             .build(HugeGraphFactory.class)
             .build()
-            .graphs();
+            .graphStore();
 
-        GraphCatalog.set(graphCreateConfig, graphsByRelationshipType);
+        GraphCatalog.set(graphCreateConfig, graphStore);
         db.shutdown();
     }
 }

@@ -146,7 +146,7 @@ public final class HugeGraphFactory extends GraphFactory {
         Map<String, Map<String, Graph>> graphs = loadRelationships(tracker, mappingAndProperties, concurrency);
         progressLogger.logDone(tracker);
 
-        return ImportResult.of(dimensions, GraphsByRelationshipType.of(graphs));
+        return ImportResult.of(dimensions, GraphStore.of(graphs));
     }
 
     private IdsAndProperties loadNodes(AllocationTracker tracker, int concurrency) {

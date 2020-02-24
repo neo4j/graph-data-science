@@ -39,10 +39,10 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.api.GraphFactory.ANY_REL_TYPE;
 
-public final class GraphsByRelationshipType {
+public final class GraphStore {
 
     @TestOnly
-    public static GraphsByRelationshipType of(Graph graph) {
+    public static GraphStore of(Graph graph) {
         Map<String, Map<String, Graph>> mapping = Collections.singletonMap(
             "RELATIONSHIP_TYPE",
             Collections.singletonMap(
@@ -50,16 +50,16 @@ public final class GraphsByRelationshipType {
                 graph
             )
         );
-        return GraphsByRelationshipType.of(mapping);
+        return GraphStore.of(mapping);
     }
 
-    public static GraphsByRelationshipType of(Map<String, Map<String, Graph>> graphs) {
-        return new GraphsByRelationshipType(graphs);
+    public static GraphStore of(Map<String, Map<String, Graph>> graphs) {
+        return new GraphStore(graphs);
     }
 
     private final Map<String, Map<String, Graph>> graphs;
 
-    private GraphsByRelationshipType(Map<String, Map<String, Graph>> graphs) {
+    private GraphStore(Map<String, Map<String, Graph>> graphs) {
         this.graphs = graphs;
     }
 

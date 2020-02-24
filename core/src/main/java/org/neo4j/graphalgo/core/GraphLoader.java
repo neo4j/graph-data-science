@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -81,8 +81,8 @@ public interface GraphLoader {
         return load(factoryType);
     }
 
-    default GraphsByRelationshipType graphs(Class<? extends GraphFactory> factoryType) {
-        return build(factoryType).build().graphs();
+    default GraphStore graphStore(Class<? extends GraphFactory> factoryType) {
+        return build(factoryType).build().graphStore();
     }
 
     @Value.Lazy
@@ -128,7 +128,7 @@ public interface GraphLoader {
      * @return the freshly loaded graph
      */
     default Graph load(Class<? extends GraphFactory> factoryType) {
-        return build(factoryType).build().graphs().getUnion();
+        return build(factoryType).build().graphStore().getUnion();
     }
 
 }

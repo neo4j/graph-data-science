@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -100,11 +100,11 @@ public final class GraphGenerateProc extends BaseProc {
                     graph
                 )
             );
-            GraphsByRelationshipType graphFromType = GraphsByRelationshipType.of(mapping);
+            GraphStore graphStore = GraphStore.of(mapping);
 
-            stats.nodes = graphFromType.nodeCount();
-            stats.relationships = graphFromType.relationshipCount();
-            GraphCatalog.set(GraphCreateFromStoreConfig.emptyWithName(getUsername(), name), graphFromType);
+            stats.nodes = graphStore.nodeCount();
+            stats.relationships = graphStore.relationshipCount();
+            GraphCatalog.set(GraphCreateFromStoreConfig.emptyWithName(getUsername(), name), graphStore);
         }
 
         return stats;

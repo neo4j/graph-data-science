@@ -31,9 +31,9 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphWithConfig;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.loading.ImmutableGraphWithConfig;
+import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
+import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -185,7 +185,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
             : Optional.empty();
 
-        GraphWithConfig graphCandidate;
+        GraphStoreWithConfig graphCandidate;
         List<String> relationshipTypes;
 
         if (maybeGraphName.isPresent()) {
@@ -194,16 +194,16 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
-            GraphsByRelationshipType loadedGraph = loader.build(createConfig.getGraphImpl()).build().graphs();
+            GraphStore graphStore = loader.build(createConfig.getGraphImpl()).build().graphStore();
 
-            graphCandidate = ImmutableGraphWithConfig.of(loadedGraph, createConfig);
+            graphCandidate = ImmutableGraphStoreWithConfig.of(graphStore, createConfig);
             relationshipTypes = config.relationshipTypes();
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
 
         validateConfig(graphCandidate.config(), config);
-        return graphCandidate.graph().getGraphProjection(relationshipTypes, weightProperty);
+        return graphCandidate.graphStore().getGraphProjection(relationshipTypes, weightProperty);
     }
 
     private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {

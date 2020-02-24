@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphGenerator;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
@@ -144,7 +144,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
             RelationshipImporter importer = RelationshipImporter.of(nodes.idMap(), executor, tracker);
             importer.consume(topKConsumers);
-            Graph graph = importer.buildGraphs().getUnion();
+            Graph graph = importer.buildGraphStore().getUnion();
 
             RelationshipImporter oldImporter = RelationshipImporter.of(nodes.idMap(), executor, tracker);
             RelationshipImporter newImporter = RelationshipImporter.of(nodes.idMap(), executor, tracker);
@@ -160,16 +160,16 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             );
             ParallelUtil.runWithConcurrency(1, setupTasks, executor);
 
-            GraphsByRelationshipType oldGraphs = oldImporter.buildGraphs();
-            GraphsByRelationshipType newGraphs = newImporter.buildGraphs();
+            GraphStore oldGraphStore = oldImporter.buildGraphStore();
+            GraphStore newGraphStore = newImporter.buildGraphStore();
 
             Collection<NeighborhoodTask> computeTasks = computeTasks(
                 sampleSize,
                 inputs,
                 computer,
-                newGraphs,
+                newGraphStore,
                 decoderFactory,
-                oldGraphs
+                oldGraphStore
             );
             ParallelUtil.runWithConcurrency(config.concurrency(), computeTasks, executor);
 
@@ -236,9 +236,9 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         double sampleSize,
         INPUT[] inputs,
         SimilarityComputer<INPUT> similarityComputer,
-        GraphsByRelationshipType oldGraph,
+        GraphStore oldGraphStore,
         Supplier<RleDecoder> rleDecoderFactory,
-        GraphsByRelationshipType newGraph
+        GraphStore newGraphStore
     ) {
         nodeQueue.set(0);
         Collection<NeighborhoodTask> computeTasks = new ArrayList<>();
@@ -249,8 +249,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                     similarityComputer,
                     rleDecoderFactory,
                     inputs.length,
-                    oldGraph,
-                    newGraph,
+                    oldGraphStore,
+                    newGraphStore,
                     sampleSize
                 )
             );
@@ -438,18 +438,18 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             SimilarityComputer<INPUT> similarityComputer,
             Supplier<RleDecoder> rleDecoderFactory,
             int length,
-            GraphsByRelationshipType oldGraph,
-            GraphsByRelationshipType newGraph,
+            GraphStore oldGraphStore,
+            GraphStore newGraphStore,
             double sampleRate
         ) {
             this.inputs = inputs;
             this.similarityComputer = similarityComputer;
             this.rleDecoder = rleDecoderFactory.get();
             this.localTopKConsumers = AnnTopKConsumer.initializeTopKConsumers(length, config.topK());
-            this.oldOutRelationships = oldGraph.getGraphProjection(ANN_OUT_GRAPH).concurrentCopy();
-            this.oldInRelationships = oldGraph.getGraphProjection(ANN_IN_GRAPH).concurrentCopy();
-            this.newOutRelationships = newGraph.getGraphProjection(ANN_OUT_GRAPH).concurrentCopy();
-            this.newInRelationships = newGraph.getGraphProjection(ANN_IN_GRAPH).concurrentCopy();
+            this.oldOutRelationships = oldGraphStore.getGraphProjection(ANN_OUT_GRAPH).concurrentCopy();
+            this.oldInRelationships = oldGraphStore.getGraphProjection(ANN_IN_GRAPH).concurrentCopy();
+            this.newOutRelationships = newGraphStore.getGraphProjection(ANN_OUT_GRAPH).concurrentCopy();
+            this.newInRelationships = newGraphStore.getGraphProjection(ANN_IN_GRAPH).concurrentCopy();
             this.sampleRate = sampleRate;
         }
 
@@ -547,7 +547,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             inImporter().addFromInternal(target, source);
         }
 
-        default GraphsByRelationshipType buildGraphs() {
+        default GraphStore buildGraphStore() {
             Graph outGraph = outImporter().buildGraph();
             Graph inGraph = inImporter().buildGraph();
 
@@ -555,7 +555,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             annGraphs.put(ANN_OUT_GRAPH, Collections.singletonMap("", outGraph));
             annGraphs.put(ANN_IN_GRAPH, Collections.singletonMap("", inGraph));
 
-            return GraphsByRelationshipType.of(annGraphs);
+            return GraphStore.of(annGraphs);
         }
 
         static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {

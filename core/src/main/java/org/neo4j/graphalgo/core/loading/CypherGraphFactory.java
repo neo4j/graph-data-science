@@ -194,7 +194,7 @@ public class CypherGraphFactory extends GraphFactory {
                 }
             ));
 
-        return ImportResult.of(resultDimensions, GraphsByRelationshipType.of(graphs));
+        return ImportResult.of(resultDimensions, GraphStore.of(graphs));
     }
 
     private KernelTransaction.Revertable setReadOnlySecurityContext() {

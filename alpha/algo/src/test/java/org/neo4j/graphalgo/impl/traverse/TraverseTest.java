@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.traverse.Traverse.ExitPredicate.Result;
 import org.neo4j.graphdb.Node;
@@ -54,7 +54,7 @@ import static org.neo4j.graphalgo.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
  */
 class TraverseTest extends AlgoTestBase {
 
-    private static GraphsByRelationshipType graphs;
+    private static GraphStore graphs;
 
     @BeforeEach
     void setupGraph() {
@@ -87,7 +87,7 @@ class TraverseTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("REL_BOTH", RelationshipProjection.of("REL", Orientation.UNDIRECTED, Aggregation.NONE))
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
-            .graphs(HugeGraphFactory.class);
+            .graphStore(HugeGraphFactory.class);
     }
 
     @AfterEach

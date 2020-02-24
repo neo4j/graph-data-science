@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.loading.ApproximatedImportProgress;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
@@ -103,12 +103,12 @@ public abstract class GraphFactory implements Assessable {
     public interface ImportResult {
         GraphDimensions dimensions();
 
-        GraphsByRelationshipType graphs();
+        GraphStore graphStore();
 
-        static ImportResult of(GraphDimensions dimensions, GraphsByRelationshipType graphs) {
+        static ImportResult of(GraphDimensions dimensions, GraphStore graphStore) {
             return ImmutableImportResult.builder()
                 .dimensions(dimensions)
-                .graphs(graphs)
+                .graphStore(graphStore)
                 .build();
         }
     }

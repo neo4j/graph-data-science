@@ -24,21 +24,21 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -158,18 +158,19 @@ public class GraphCreateProc extends CatalogProc {
             GraphFactory graphFactory = loader.build(factoryClazz);
             GraphFactory.ImportResult importResult = graphFactory.build();
 
-            GraphsByRelationshipType graphs =  importResult.graphs();
+            GraphStore graphStore =  importResult.graphStore();
             GraphDimensions dimensions = importResult.dimensions();
             GraphCreateConfig catalogConfig = config instanceof GraphCreateFromCypherConfig
                 ? ((GraphCreateFromCypherConfig) config).inferProjections(dimensions)
                 : config;
 
             builder
-                .withGraph(graphs)
+                .withNodeCount(graphStore.nodeCount())
+                .withRelationshipCount(graphStore.relationshipCount())
                 .withNodeProjections(catalogConfig.nodeProjections())
                 .withRelationshipProjections(catalogConfig.relationshipProjections());
 
-            GraphCatalog.set(catalogConfig, graphs);
+            GraphCatalog.set(catalogConfig, graphStore);
         }
 
         return builder.build();
@@ -244,9 +245,13 @@ public class GraphCreateProc extends CatalogProc {
                 this.relationshipProjections = config.relationshipProjections();
             }
 
-            Builder withGraph(GraphsByRelationshipType graph) {
-                relationshipCount = graph.relationshipCount();
-                nodeCount = graph.nodeCount();
+            Builder withNodeCount(long nodeCount) {
+                this.nodeCount = nodeCount;
+                return this;
+            }
+
+            Builder withRelationshipCount(long relationshipCount) {
+                this.relationshipCount = relationshipCount;
                 return this;
             }
 
