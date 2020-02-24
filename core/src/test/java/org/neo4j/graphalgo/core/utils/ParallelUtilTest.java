@@ -84,7 +84,7 @@ final class ParallelUtilTest {
         ForkJoinPool commonPool = ForkJoinPool.commonPool();
         Stream<Long> stream = list.stream();
 
-        long actualTotal = parallelStream(stream, (s) -> {
+        long actualTotal = parallelStream(stream, Math.min(4, Pools.MAXIMUM_CONCURRENCY), (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
@@ -128,7 +128,7 @@ final class ParallelUtilTest {
     void shouldTakeBaseStreams() {
         double[] data = {1.0, 2.5, 3.14};
 
-        double sum = parallelStream(Arrays.stream(data), DoubleStream::sum);
+        double sum = parallelStream(Arrays.stream(data), Pools.MAXIMUM_CONCURRENCY, DoubleStream::sum);
 
         assertEquals(1.0 + 2.5 + 3.14, sum);
     }
