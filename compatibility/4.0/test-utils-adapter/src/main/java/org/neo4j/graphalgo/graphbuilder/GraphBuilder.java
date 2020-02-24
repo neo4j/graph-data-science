@@ -19,10 +19,12 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
@@ -109,7 +111,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return the created node
      */
     public Node createNode() {
-        Node node = api.createNode();
+        Node node = GraphDatabaseApiProxy.withinTransaction(api, Transaction::createNode);
         if (null != label) {
             node.addLabel(label);
         }

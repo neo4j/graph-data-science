@@ -25,12 +25,10 @@ import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
@@ -52,7 +50,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
-import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
 public class BaseProcTest {
 
@@ -63,33 +60,24 @@ public class BaseProcTest {
         GraphCatalog.removeAllLoadedGraphs();
     }
 
-    protected void registerFunctions(Class<?>... functionClasses) throws KernelException {
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
-        for (Class<?> clazz : functionClasses) {
-            procedures.registerFunction(clazz);
-        }
+    protected void registerFunctions(Class<?>... functionClasses) throws Exception {
+        GraphDatabaseApiProxy.registerFunctions(db, functionClasses);
     }
 
-    protected void registerAggregationFunctions(Class<?>... functionClasses) throws KernelException {
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
-        for (Class<?> clazz : functionClasses) {
-            procedures.registerAggregationFunction(clazz);
-        }
+    protected void registerAggregationFunctions(Class<?>... functionClasses) throws Exception {
+        GraphDatabaseApiProxy.registerAggregationFunctions(db, functionClasses);
     }
 
-    protected void registerProcedures(Class<?>... procedureClasses) throws KernelException {
+    protected void registerProcedures(Class<?>... procedureClasses) throws Exception {
         registerProcedures(db, procedureClasses);
     }
 
-    protected void registerProcedures(GraphDatabaseAPI db, Class<?>... procedureClasses) throws KernelException {
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
-        for (Class<?> clazz : procedureClasses) {
-            procedures.registerProcedure(clazz);
-        }
+    protected void registerProcedures(GraphDatabaseAPI db, Class<?>... procedureClasses) throws Exception {
+        GraphDatabaseApiProxy.registerProcedures(db, procedureClasses);
     }
 
     <T> T resolveDependency(Class<T> dependency) {
-        return db.getDependencyResolver().resolveDependency(dependency, ONLY);
+        return GraphDatabaseApiProxy.resolveDependency(db, dependency);
     }
 
     protected String getUsername() {
@@ -201,9 +189,7 @@ public class BaseProcTest {
 
     private void assertEmptyResult(String query, Map<String, Object> params) {
         List<Result.ResultRow> actual = new ArrayList<>();
-        QueryRunner.runInTransaction(db, () -> {
-            db.execute(query, params).accept(actual::add);
-        });
+        QueryRunner.runQueryWithRowConsumer(db, query, params, actual::add);
         assertTrue(actual.isEmpty());
     }
 
@@ -244,11 +230,11 @@ public class BaseProcTest {
     }
 
     protected void assertResult(final String scoreProperty, Map<Long, Double> expected) {
-        try (Transaction tx = db.beginTx()) {
+        GraphDatabaseApiProxy.withinTransaction(db, tx -> {
             for (Map.Entry<Long, Double> entry : expected.entrySet()) {
-                double score = ((Number) db
-                    .getNodeById(entry.getKey())
-                    .getProperty(scoreProperty)).doubleValue();
+                double score = ((Number) GraphDatabaseApiProxy.getNodeById(db, entry.getKey())
+                    .getProperty(scoreProperty))
+                    .doubleValue();
                 assertEquals(
                     entry.getValue(),
                     score,
@@ -256,8 +242,8 @@ public class BaseProcTest {
                     "score for " + entry.getKey()
                 );
             }
-            tx.success();
-        }
+            return null;
+        });
     }
 
     protected void assertCypherResult(@Language("Cypher") String query, List<Map<String, Object>> expected) {
@@ -269,7 +255,7 @@ public class BaseProcTest {
         Map<String, Object> queryParameters,
         List<Map<String, Object>> expected
     ) {
-        try (Transaction tx = db.beginTx()) {
+        GraphDatabaseApiProxy.withinTransaction(db, tx -> {
             List<Map<String, Object>> actual = new ArrayList<>();
             runQueryWithResultConsumer(query, queryParameters, result -> {
                 result.accept(row -> {
@@ -308,7 +294,8 @@ public class BaseProcTest {
                     );
                 });
             }
-        }
+            return null;
+        });
     }
 
     protected void assertError(

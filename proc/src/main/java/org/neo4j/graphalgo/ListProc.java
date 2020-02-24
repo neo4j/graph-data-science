@@ -52,7 +52,7 @@ public class ListProc {
     @Procedure("gds.list")
     @Description(DESCRIPTION)
     public Stream<ListResult> list(@Name(value = "name", defaultValue = "") String name) {
-        return db.execute(QUERY, singletonMap("name", name)).stream().map(ListResult::new);
+        return QueryRunner.runQuery(db, QUERY, singletonMap("name", name), res -> res.stream().map(ListResult::new));
     }
 
     public static class ListResult {

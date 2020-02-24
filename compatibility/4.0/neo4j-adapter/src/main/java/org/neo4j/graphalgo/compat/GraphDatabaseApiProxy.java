@@ -21,13 +21,21 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
+import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.internal.recordstorage.RecordStorageEngine;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.impl.api.KernelTransactions;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public final class GraphDatabaseApiProxy {
 
@@ -37,18 +45,60 @@ public final class GraphDatabaseApiProxy {
             .resolveDependency(dependency, DependencyResolver.SelectionStrategy.SINGLE);
     }
 
+    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws Exception {
+        GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
+        for (Class<?> clazz : procedureClasses) {
+            procedures.registerProcedure(clazz);
+        }
+    }
+
+    public static void registerFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws Exception {
+        GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
+        for (Class<?> clazz : functionClasses) {
+            procedures.registerFunction(clazz);
+        }
+    }
+
+    public static void registerAggregationFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws Exception {
+        GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
+        for (Class<?> clazz : functionClasses) {
+            procedures.registerAggregationFunction(clazz);
+        }
+    }
+
+    public static Node getNodeById(GraphDatabaseAPI db, long id) {
+        return withinTransaction(db, tx -> tx.getNodeById(id));
+    }
+
     public static NeoStores neoStores(GraphDatabaseService db) {
         return resolveDependency(db, RecordStorageEngine.class).testAccessNeoStores();
     }
 
-    public static Result runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
+    public static KernelTransaction newExplicitKernelTransaction(
+        GraphDatabaseService db,
+        long timeout,
+        TimeUnit timeoutUnit
+    ) {
+        return GraphDatabaseApiProxy
+            .resolveDependency(db, KernelTransactions.class)
+            .newInstance(
+                KernelTransaction.Type.explicit,
+                LoginContext.AUTH_DISABLED,
+                ClientConnectionInfo.EMBEDDED_CONNECTION,
+                timeoutUnit.toMillis(timeout)
+            );
+    }
+
+    public static <T> T withinTransaction(GraphDatabaseService db, Function<Transaction, T> block) {
         try (Transaction tx = db.beginTx()) {
-            try {
-                return tx.execute(query, params);
-            } finally {
-                tx.commit();
-            }
+            T returnValue = block.apply(tx);
+            tx.commit();
+            return returnValue;
         }
+    }
+
+    public static Result runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
+        return withinTransaction(db, tx -> tx.execute(query, params));
     }
 
     private GraphDatabaseApiProxy() {

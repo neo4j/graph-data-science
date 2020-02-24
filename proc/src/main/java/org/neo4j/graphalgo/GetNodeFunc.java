@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -39,7 +40,7 @@ public class GetNodeFunc {
     @Description("CALL gds.util.asNode(nodeId) - Return the node objects for the given node id or null if none exists.")
     public Node asNode(@Name(value = "nodeId") Number nodeId) {
         try {
-            return api.getNodeById(nodeId.longValue());
+            return GraphDatabaseApiProxy.getNodeById(api, nodeId.longValue());
         } catch (NotFoundException e) {
             return null;
         }
@@ -50,7 +51,7 @@ public class GetNodeFunc {
     public List<Node> asNodes(@Name(value = "nodeIds") List<Number> nodeIds) {
         return nodeIds.stream().map(nodeId -> {
             try {
-                return api.getNodeById(nodeId.longValue());
+                return GraphDatabaseApiProxy.getNodeById(api, nodeId.longValue());
             } catch (NotFoundException e) {
                 return null;
             }

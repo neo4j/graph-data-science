@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -37,18 +38,14 @@ public final class TestTransactionWrapper {
     }
 
     public void accept(Consumer<Transaction> block) {
-        try (final Transaction tx = db.beginTx()) {
+        GraphDatabaseApiProxy.withinTransaction(db, tx -> {
             block.accept(tx);
-            tx.success();
-        }
+            return null;
+        });
     }
 
     public <T> T apply(Function<Transaction, T> block) {
-        try (final Transaction tx = db.beginTx()) {
-            T result = block.apply(tx);
-            tx.success();
-            return result;
-        }
+        return GraphDatabaseApiProxy.withinTransaction(db, block);
     }
 }
 

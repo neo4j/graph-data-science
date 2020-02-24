@@ -23,6 +23,7 @@ package org.neo4j.graphalgo;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
@@ -32,9 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -77,7 +76,7 @@ final class GraphLoaderBuilders {
         Optional<Integer> concurrency,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
-        Optional<Projection> globalProjection,
+        Optional<Orientation> globalOrientation,
         Optional<Aggregation> globalAggregation
         ) {
 
@@ -95,7 +94,7 @@ final class GraphLoaderBuilders {
             concurrency,
             anyLabel,
             anyRelationshipType,
-            globalProjection,
+            globalOrientation,
             globalAggregation
         );
 
@@ -156,12 +155,10 @@ final class GraphLoaderBuilders {
         Map<String, Object> params,
         GraphCreateConfig graphCreateConfig
     ) {
-        try (Transaction tx = api.beginTx()) {
-            KernelTransaction kernelTransaction = api
-                .getDependencyResolver()
-                .resolveDependency(ThreadToStatementContextBridge.class)
-                .getKernelTransactionBoundToThisThread(true);
-            tx.success();
+        // TODO: How does this even work, shouldn't the ktx be closed upon returning the loader?
+        //       is it a placebo tx? They are gone, so, what is now happening here?
+        return GraphDatabaseApiProxy.withinTransaction(api, tx -> {
+            KernelTransaction kernelTransaction = GraphDatabaseApiProxy.resolveDependency(api, KernelTransaction.class);
             return ImmutableGraphLoader.of(
                 api,
                 executorService.orElse(Pools.DEFAULT),
@@ -173,6 +170,6 @@ final class GraphLoaderBuilders {
                 graphCreateConfig,
                 kernelTransaction
             );
-        }
+        });
     }
 }

@@ -27,16 +27,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.TransactionTerminatedException;
-import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.kernel.impl.api.KernelTransactions;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.lang.annotation.Retention;
@@ -45,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -53,9 +53,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.Projection.NATURAL;
-import static org.neo4j.graphalgo.Projection.REVERSE;
-import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
+import static org.neo4j.graphalgo.Orientation.NATURAL;
+import static org.neo4j.graphalgo.Orientation.REVERSE;
 
 public final class TestSupport {
 
@@ -113,7 +112,7 @@ public final class TestSupport {
         return Arrays.stream(Direction.values()).map(Direction::name);
     }
 
-    public static Stream<Projection> allDirectedProjections() {
+    public static Stream<Orientation> allDirectedProjections() {
         return Stream.of(NATURAL, REVERSE);
     }
 
@@ -183,14 +182,7 @@ public final class TestSupport {
     ) {
         assert sleepMillis >= 100 && sleepMillis <= 10_000;
 
-        KernelTransaction kernelTx = db
-            .getDependencyResolver()
-            .resolveDependency(KernelTransactions.class, ONLY)
-            .newInstance(
-                KernelTransaction.Type.explicit,
-                LoginContext.AUTH_DISABLED,
-                10_000
-            );
+        KernelTransaction kernelTx = GraphDatabaseApiProxy.newExplicitKernelTransaction(db, 10, TimeUnit.SECONDS);
 
         algorithm.withTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
 

@@ -24,9 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -37,7 +36,7 @@ public abstract class RandomGraphTestCase {
 
     private static boolean hasFailures = false;
 
-    protected static GraphDatabaseAPI db;
+    protected static GraphDbApi db;
 
     static final int NODE_COUNT = 100;
 
@@ -83,16 +82,14 @@ public abstract class RandomGraphTestCase {
         db.shutdown();
     }
 
-    static GraphDatabaseAPI buildGraph(int nodeCount) {
+    static GraphDbApi buildGraph(int nodeCount) {
         String createGraph = String.format(RANDOM_GRAPH_TPL, nodeCount);
         List<String> cyphers = Arrays.asList(createGraph, RANDOM_LABELS);
 
-        final GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
+        final GraphDbApi db = TestDatabaseCreator.createTestDatabase();
         for (String cypher : cyphers) {
             try {
-                QueryRunner.runInTransaction(db, () -> {
-                    db.execute(cypher);
-                });
+                db.runQuery(cypher);
             } catch (Exception e) {
                 markFailure();
                 throw e;
