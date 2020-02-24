@@ -37,6 +37,7 @@ RETURN gds.version() as version
 |===
 
 === Syntax
+
 [[Numeric-functions-syntax-table]]
 [opts=header,cols="1m,1m"]
 |===
@@ -45,7 +46,6 @@ RETURN gds.version() as version
 | gds.util.infinity()                   | -
 | gds.util.isFinite(value: NUMBER)      | value to be checked if it is finite
 | gds.util.isInfinite(value: NUMBER)    | value to be checked if it is infinite.
-----
 |===
 
 === Examples
@@ -66,7 +66,7 @@ RETURN gds.util.isFinite(value) as isFinite
 | false
 |===
 
-.Example for gds.util.isFinite():
+.Example for gds.util.isInfinite():
 [source, cypher]
 ----
 UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] as value
@@ -82,6 +82,8 @@ RETURN gds.util.isInfinite(value) as isInfinite
 | true
 |===
 
+The utility function `gds.util.NaN` can be used as an default value for input parameters, as shown in the examples of <<[[algorithms-similarity-cosine-procedure-sample]], cosine similarity>>.
+A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering streamed results, as for instance seen in the examples of <<algorithm-all-pairs-shortest-path-sample, `gds.alpha.allShortestPaths`>>.
 
 == Node and Path Functions
 
@@ -102,16 +104,15 @@ RETURN gds.util.isInfinite(value) as isInfinite
 |===
 | Name                                                                                      | Parameters
 | gds.util.asNode(nodeId: NUMBER)                                                           | nodeId of a node in the neo4j-graph
-| gds.util.asNodes(nodeIds: NUMBER[])                                                   | list of nodeIds of nodes in the neo4j-graph
-.3+| gds.util.asPath(nodeIds: NUMBER[], weights: NUMBER[], cumulativeWeights: BOOL) | nodeIds: nodeIds representing neo4j nodes
+| gds.util.asNodes(nodeIds: NUMBER[])                                                       | list of nodeIds of nodes in the neo4j-graph
+.3+| gds.util.asPath(nodeIds: NUMBER[], weights: NUMBER[], cumulativeWeights: BOOL)         | nodeIds: nodeIds representing neo4j nodes
                                                                                             | weights: weights for the relationships between the nodes
-                                                                                            | cumulativeWeights: whether the weights should be cumulated along the path
-----
+                                                                                            | cumulativeWeights: whether the given weights are cumulative. This means the weights also contain a base value e.g. one more value than node-ids
 |===
 
 === Examples
 
-// TODO: text for examples
+Consider the graph created by the following Cypher statement:
 
 .Example graph:
 [source, cypher]
@@ -139,6 +140,7 @@ RETURN gds.util.asNode(nodeId) as node
 | Node[0]{name:"Alice"}
 |===
 
+
 .Example for gds.util.asNodes:
 [source, cypher]
 ----
@@ -155,6 +157,7 @@ RETURN gds.util.asNodes(nodeIds) as nodes
 | [Node[0]{name:"Alice"},Node[1]{name:"Bridget"}]
 |===
 
+As many algorithms streaming mode only return the node id, `gds.util.asNode` and `gds.util.asNodes` can be used to retrieve the whole node from the neo4j database.
 
 .Example for gds.util.asPath:
 [source, cypher]
