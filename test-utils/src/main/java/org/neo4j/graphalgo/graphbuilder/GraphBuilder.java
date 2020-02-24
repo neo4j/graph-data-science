@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -29,6 +30,9 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 /**
  * The GraphBuilder intends to ease the creation
@@ -42,7 +46,6 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
     protected final HashSet<Relationship> relationships;
 
     private final GraphDatabaseAPI api;
-    private final TestTransactionWrapper tx;
     private final Random random;
 
     protected Label label;
@@ -52,7 +55,6 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
         this.api = api;
         this.label = label;
         this.relationship = relationship;
-        this.tx = new TestTransactionWrapper(api);
         nodes = new HashSet<>();
         relationships = new HashSet<>();
         this.self = me();
@@ -109,7 +111,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return the created node
      */
     public Node createNode() {
-        Node node = api.createNode();
+        Node node = GraphDatabaseApiProxy.createNode(api);
         if (null != label) {
             node.addLabel(label);
         }
@@ -140,7 +142,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return child instance to make methods of the child class accessible.
      */
     public ME withinTransaction(Runnable runnable) {
-        tx.accept(__ -> runnable.run());
+        runInTransaction(api, tx -> runnable.run());
         return self;
     }
 
@@ -152,7 +154,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return child instance to make methods of the child class accessible.
      */
     public <T> T withinTransaction(Supplier<T> supplier) {
-        return tx.apply(__ -> supplier.get());
+        return applyInTransaction(api, tx -> supplier.get());
     }
 
     /**

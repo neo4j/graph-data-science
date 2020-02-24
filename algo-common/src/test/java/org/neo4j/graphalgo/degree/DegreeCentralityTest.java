@@ -43,6 +43,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 final class DegreeCentralityTest extends AlgoTestBase {
 
@@ -124,16 +125,16 @@ final class DegreeCentralityTest extends AlgoTestBase {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, () -> {
-                expected.put(db.findNode(label, "name", "a").getId(), 0.0);
-                expected.put(db.findNode(label, "name", "b").getId(), 1.0);
-                expected.put(db.findNode(label, "name", "c").getId(), 1.0);
-                expected.put(db.findNode(label, "name", "d").getId(), 2.0);
-                expected.put(db.findNode(label, "name", "e").getId(), 3.0);
-                expected.put(db.findNode(label, "name", "f").getId(), 2.0);
-                expected.put(db.findNode(label, "name", "g").getId(), 0.0);
-                expected.put(db.findNode(label, "name", "h").getId(), 0.0);
-                expected.put(db.findNode(label, "name", "i").getId(), 0.0);
-                expected.put(db.findNode(label, "name", "j").getId(), 0.0);
+                expected.put(findNode(db, label, "name", "a").getId(), 0.0);
+                expected.put(findNode(db, label, "name", "b").getId(), 1.0);
+                expected.put(findNode(db, label, "name", "c").getId(), 1.0);
+                expected.put(findNode(db, label, "name", "d").getId(), 2.0);
+                expected.put(findNode(db, label, "name", "e").getId(), 3.0);
+                expected.put(findNode(db, label, "name", "f").getId(), 2.0);
+                expected.put(findNode(db, label, "name", "g").getId(), 0.0);
+                expected.put(findNode(db, label, "name", "h").getId(), 0.0);
+                expected.put(findNode(db, label, "name", "i").getId(), 0.0);
+                expected.put(findNode(db, label, "name", "j").getId(), 0.0);
             }
         );
 
@@ -181,16 +182,16 @@ final class DegreeCentralityTest extends AlgoTestBase {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, () -> {
-                expected.put(db.findNode(label, "name", "a").getId(), 1.0);
-                expected.put(db.findNode(label, "name", "b").getId(), 4.0);
-                expected.put(db.findNode(label, "name", "c").getId(), 1.0);
-                expected.put(db.findNode(label, "name", "d").getId(), 1.0);
-                expected.put(db.findNode(label, "name", "e").getId(), 1.0);
-                expected.put(db.findNode(label, "name", "f").getId(), 1.0);
-                expected.put(db.findNode(label, "name", "g").getId(), 0.0);
-                expected.put(db.findNode(label, "name", "h").getId(), 0.0);
-                expected.put(db.findNode(label, "name", "i").getId(), 0.0);
-                expected.put(db.findNode(label, "name", "j").getId(), 0.0);
+                expected.put(findNode(db, label, "name", "b").getId(), 4.0);
+                expected.put(findNode(db, label, "name", "c").getId(), 1.0);
+                expected.put(findNode(db, label, "name", "d").getId(), 1.0);
+                expected.put(findNode(db, label, "name", "e").getId(), 1.0);
+                expected.put(findNode(db, label, "name", "f").getId(), 1.0);
+                expected.put(findNode(db, label, "name", "g").getId(), 0.0);
+                expected.put(findNode(db, label, "name", "h").getId(), 0.0);
+                expected.put(findNode(db, label, "name", "i").getId(), 0.0);
+                expected.put(findNode(db, label, "name", "j").getId(), 0.0);
+                expected.put(findNode(db, label, "name", "a").getId(), 1.0);
             }
         );
 
@@ -236,16 +237,16 @@ final class DegreeCentralityTest extends AlgoTestBase {
         // if there are 2 relationships between a pair of nodes these get squashed into a single relationship
         // when we use an undirected graph
         runInTransaction(db, () -> {
-            expected.put(db.findNode(label, "name", "a").getId(), 1.0);
-            expected.put(db.findNode(label, "name", "b").getId(), 4.0);
-            expected.put(db.findNode(label, "name", "c").getId(), 1.0);
-            expected.put(db.findNode(label, "name", "d").getId(), 3.0);
-            expected.put(db.findNode(label, "name", "e").getId(), 3.0);
-            expected.put(db.findNode(label, "name", "f").getId(), 2.0);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.0);
+            expected.put(findNode(db, label, "name", "a").getId(), 1.0);
+            expected.put(findNode(db, label, "name", "b").getId(), 4.0);
+            expected.put(findNode(db, label, "name", "c").getId(), 1.0);
+            expected.put(findNode(db, label, "name", "d").getId(), 3.0);
+            expected.put(findNode(db, label, "name", "e").getId(), 3.0);
+            expected.put(findNode(db, label, "name", "f").getId(), 2.0);
+            expected.put(findNode(db, label, "name", "g").getId(), 0.0);
+            expected.put(findNode(db, label, "name", "h").getId(), 0.0);
+            expected.put(findNode(db, label, "name", "i").getId(), 0.0);
+            expected.put(findNode(db, label, "name", "j").getId(), 0.0);
         });
 
         final Graph graph;

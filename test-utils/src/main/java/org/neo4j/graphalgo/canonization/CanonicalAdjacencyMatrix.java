@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.canonization;
 
 import org.apache.commons.compress.utils.Lists;
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.HashMap;
@@ -29,7 +28,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-@IdenticalCompat
 public final class CanonicalAdjacencyMatrix {
 
     private CanonicalAdjacencyMatrix() {}

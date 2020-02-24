@@ -37,6 +37,7 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 final class PageRankWikiTest extends AlgoTestBase {
 
@@ -102,17 +103,17 @@ final class PageRankWikiTest extends AlgoTestBase {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, () -> {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.3040965);
-            expected.put(db.findNode(label, "name", "b").getId(), 3.5658695);
-            expected.put(db.findNode(label, "name", "c").getId(), 3.180981);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.3625935);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.7503465);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.3625935);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "k").getId(), 0.15);
+            expected.put(findNode(db, label, "name", "a").getId(), 0.3040965);
+            expected.put(findNode(db, label, "name", "b").getId(), 3.5658695);
+            expected.put(findNode(db, label, "name", "c").getId(), 3.180981);
+            expected.put(findNode(db, label, "name", "d").getId(), 0.3625935);
+            expected.put(findNode(db, label, "name", "e").getId(), 0.7503465);
+            expected.put(findNode(db, label, "name", "f").getId(), 0.3625935);
+            expected.put(findNode(db, label, "name", "g").getId(), 0.15);
+            expected.put(findNode(db, label, "name", "h").getId(), 0.15);
+            expected.put(findNode(db, label, "name", "i").getId(), 0.15);
+            expected.put(findNode(db, label, "name", "j").getId(), 0.15);
+            expected.put(findNode(db, label, "name", "k").getId(), 0.15);
         });
 
         final Graph graph = new StoreLoaderBuilder()

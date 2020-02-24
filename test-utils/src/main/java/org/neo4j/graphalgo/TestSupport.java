@@ -34,10 +34,8 @@ import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.TransactionTerminatedException;
-import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.kernel.impl.api.KernelTransactions;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.lang.annotation.Retention;
@@ -46,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -184,14 +183,7 @@ public final class TestSupport {
     ) {
         assert sleepMillis >= 100 && sleepMillis <= 10_000;
 
-        KernelTransaction kernelTx = GraphDatabaseApiProxy
-            .resolveDependency(db, KernelTransactions.class)
-            .newInstance(
-                KernelTransaction.Type.explicit,
-                LoginContext.AUTH_DISABLED,
-                10_000
-            );
-
+        KernelTransaction kernelTx = GraphDatabaseApiProxy.newExplicitKernelTransaction(db, 10, TimeUnit.SECONDS);
         algorithm.withTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
 
         Runnable algorithmThread = () -> {

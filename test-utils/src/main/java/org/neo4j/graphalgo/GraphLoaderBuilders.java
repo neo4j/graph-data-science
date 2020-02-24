@@ -27,13 +27,12 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
-import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -62,7 +61,6 @@ final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        Map<String, Object> params,
         // CreateConfig parameters
         Optional<String> graphName,
         List<String> nodeLabels,
@@ -98,8 +96,7 @@ final class GraphLoaderBuilders {
             globalAggregation
         );
 
-        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, params, graphCreateConfig);
-
+        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, graphCreateConfig);
     }
 
     /**
@@ -116,7 +113,6 @@ final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        Map<String, Object> params,
         // CreateConfig parameters
         Optional<String> graphName,
         Optional<String> nodeQuery,
@@ -126,7 +122,8 @@ final class GraphLoaderBuilders {
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
-        Optional<Aggregation> globalAggregation
+        Optional<Aggregation> globalAggregation,
+        Optional<Map<String, Object>> parameters
     ) {
         GraphCreateFromCypherConfig graphCreateConfig = GraphCreateConfigBuilders.cypherConfig(
             userName,
@@ -138,10 +135,11 @@ final class GraphLoaderBuilders {
             anyLabel,
             anyRelationshipType,
             concurrency,
-            globalAggregation
+            globalAggregation,
+            parameters
         );
 
-        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, params, graphCreateConfig);
+        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, graphCreateConfig);
     }
 
     @NotNull
@@ -152,19 +150,16 @@ final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        Map<String, Object> params,
         GraphCreateConfig graphCreateConfig
     ) {
         // TODO: How does this even work, shouldn't the ktx be closed upon returning the loader?
         //       is it a placebo tx? They are gone, so, what is now happening here?
-        return GraphDatabaseApiProxy.withinTransaction(api, tx -> {
-            KernelTransaction kernelTransaction = GraphDatabaseApiProxy.resolveDependency(api, KernelTransaction.class);
+        return GraphDatabaseApiProxy.withKernelTransaction(api, kernelTransaction -> {
             return ImmutableGraphLoader.of(
                 api,
                 executorService.orElse(Pools.DEFAULT),
                 tracker.orElse(AllocationTracker.EMPTY),
                 terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
-                params,
                 userName.orElse(""),
                 log.orElse(NullLog.getInstance()),
                 graphCreateConfig,

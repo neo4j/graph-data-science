@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -32,7 +31,6 @@ import java.util.Random;
  * connected to its successor while the last element of the
  * chain connects back to its head.
  */
-@IdenticalCompat
 public class RingBuilder extends GraphBuilder<RingBuilder> {
 
     RingBuilder(GraphDatabaseAPI api, Label label, RelationshipType relationship, Random random) {

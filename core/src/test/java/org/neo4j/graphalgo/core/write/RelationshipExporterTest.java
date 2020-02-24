@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
@@ -56,7 +57,7 @@ class RelationshipExporterTest {
     private static final double PROPERTY_VALUE_IF_MISSING = 2.0;
     private static final double PROPERTY_VALUE_IF_NOT_WRITTEN = 1337.0;
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setup() {

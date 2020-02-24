@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -31,7 +30,6 @@ import java.util.Random;
 /**
  * Builds a complete graph where all nodes are interconnected
  */
-@IdenticalCompat
 public class CompleteGraphBuilder extends GraphBuilder<CompleteGraphBuilder> {
 
     CompleteGraphBuilder(GraphDatabaseAPI api, Label label, RelationshipType relationship, Random random) {

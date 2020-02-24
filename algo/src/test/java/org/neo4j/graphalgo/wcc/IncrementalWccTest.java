@@ -43,6 +43,8 @@ import java.util.stream.LongStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
 class IncrementalWccTest extends AlgoTestBase {
 
@@ -73,8 +75,8 @@ class IncrementalWccTest extends AlgoTestBase {
     }
 
     private static void createConnection(GraphDatabaseService db, long sourceId, long targetId) {
-        final Node source = db.getNodeById(sourceId);
-        final Node target = db.getNodeById(targetId);
+        final Node source = getNodeById(db, sourceId);
+        final Node target = getNodeById(db, targetId);
 
         source.createRelationshipTo(target, RELATIONSHIP_TYPE);
     }
@@ -145,12 +147,12 @@ class IncrementalWccTest extends AlgoTestBase {
      * @return the last node id inserted into the graph
      */
     private long createLineGraph(GraphDatabaseService db) {
-        Node temp = db.createNode();
+        Node temp = createNode(db);
         long communityId = temp.getId() / COMMUNITY_SIZE;
 
         for (int i = 1; i < COMMUNITY_SIZE; i++) {
             temp.setProperty(SEED_PROPERTY, communityId);
-            Node target = db.createNode();
+            Node target = createNode(db);
             temp.createRelationshipTo(target, RELATIONSHIP_TYPE);
             temp = target;
         }

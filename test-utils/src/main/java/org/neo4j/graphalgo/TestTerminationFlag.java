@@ -19,28 +19,26 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
-import org.neo4j.graphalgo.compat.GraphDbApi;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Result;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.function.Consumer;
+public class TestTerminationFlag implements TerminationFlag {
 
-@IdenticalCompat
-public class AlgoTestBase {
+    private final KernelTransaction transaction;
+    private final long sleepMillis;
 
-    public GraphDbApi db;
-
-    protected void runQuery(String query) {
-        db.runQuery(query);
+    TestTerminationFlag(KernelTransaction transaction, long sleepMillis) {
+        this.transaction = transaction;
+        this.sleepMillis = sleepMillis;
     }
 
-    protected void runQuery(String query, Consumer<Result.ResultRow> check) {
-        db.runQuery(query, check);
-    }
-
-    protected void runQuery(GraphDatabaseService passedInDb, String query) {
-        QueryRunner.runInTransaction(passedInDb, () ->
-            QueryRunner.runQuery(passedInDb, query));
+    @Override
+    public boolean running() {
+        try {
+            Thread.sleep(sleepMillis);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+        return !transaction.getReasonIfTerminated().isPresent() && transaction.isOpen();
     }
 }

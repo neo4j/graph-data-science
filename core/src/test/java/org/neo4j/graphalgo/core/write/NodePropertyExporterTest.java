@@ -23,14 +23,12 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.test.TestGraphDatabaseFactory;
 
-import java.io.File;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,16 +40,11 @@ import static org.neo4j.graphalgo.config.ConcurrencyValidation.CORE_LIMITATION_S
 
 class NodePropertyExporterTest {
 
-    private static GraphDatabaseAPI DB;
+    private static GraphDbApi DB;
 
     @BeforeAll
     static void setup() {
-        DB = (GraphDatabaseAPI) new TestGraphDatabaseFactory()
-                .addKernelExtension(new ConcurrencyControllerExtension())
-                .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
-                .setConfig(CORE_LIMITATION_SETTING, "true")
-                .newGraphDatabase();
-
+        DB = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         runQuery(DB, "CREATE " +
                      "(n1:Node1 {prop1: 1})," +
                      "(n2:Node2 {prop2: 2})," +

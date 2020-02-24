@@ -28,20 +28,15 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.QueryExampleConsumer;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.SetupQueryConsumer;
-import org.neo4j.graphalgo.wcc.WccStreamProc;
-import org.neo4j.graphalgo.wcc.WccWriteProc;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -96,7 +91,7 @@ abstract class DocTestBase extends BaseProcTest {
 
     @Override
     protected void assertCypherResult(String query, List<Map<String, Object>> expected) {
-        try (Transaction tx = db.beginTx()) {
+        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             List<Map<String, Object>> actual = new ArrayList<>();
             runQueryWithResultConsumer(query, result -> {
                 result.accept(row -> {
@@ -135,7 +130,7 @@ abstract class DocTestBase extends BaseProcTest {
                     );
                 });
             }
-        }
+        });
     }
 
     private SetupQueryConsumer defaultSetupQueryConsumer() {

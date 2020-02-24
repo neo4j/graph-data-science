@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -30,6 +29,7 @@ import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +40,6 @@ import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
-@IdenticalCompat
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 final class GraphCreateConfigBuilders {
 
@@ -119,7 +118,7 @@ final class GraphCreateConfigBuilders {
             .relationshipProjections(rp)
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
-            .concurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
+            .readConcurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
             .build()
             .withNormalizedPropertyMappings();
     }
@@ -138,7 +137,8 @@ final class GraphCreateConfigBuilders {
         @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
-        Optional<Aggregation> globalAggregation
+        Optional<Aggregation> globalAggregation,
+        Optional<Map<String, Object>> parameters
     ) {
         if (!(nodeQuery.isPresent() || anyLabel == AnyLabel.LOAD)) {
             throw new IllegalArgumentException("Missing nodeQuery or loadAnyLabel().");
@@ -177,7 +177,8 @@ final class GraphCreateConfigBuilders {
             .relationshipProjections(relationshipProjections)
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
-            .concurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
+            .readConcurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
+            .parameters(parameters.orElse(Collections.emptyMap()))
             .build();
     }
 

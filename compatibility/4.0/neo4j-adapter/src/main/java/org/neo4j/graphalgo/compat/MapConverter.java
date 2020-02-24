@@ -17,30 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.compat;
 
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.cypher.internal.evaluator.EvaluationException;
+import org.neo4j.cypher.internal.evaluator.Evaluator;
+import org.neo4j.cypher.internal.evaluator.ExpressionEvaluator;
 
-@IdenticalCompat
-public class TestTerminationFlag implements TerminationFlag {
+import java.util.Map;
 
-    private final KernelTransaction transaction;
-    private final long sleepMillis;
+public final class MapConverter {
 
-    TestTerminationFlag(KernelTransaction transaction, long sleepMillis) {
-        this.transaction = transaction;
-        this.sleepMillis = sleepMillis;
-    }
+    private static final ExpressionEvaluator EVALUATOR = Evaluator.expressionEvaluator();
 
-    @Override
-    public boolean running() {
+    public static Map<String, Object> convert(String value) {
         try {
-            Thread.sleep(sleepMillis);
-        } catch (InterruptedException e) {
-            // ignore
+            Map map = EVALUATOR.evaluate(value, Map.class);
+            //noinspection unchecked
+            return (Map<String, Object>) map;
+        } catch (EvaluationException e) {
+            throw new IllegalArgumentException(String.format("%s is not a valid map expression", value), e);
         }
-        return !transaction.getReasonIfTerminated().isPresent() && transaction.isOpen();
     }
+
+    private MapConverter() {}
 }

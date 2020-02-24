@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
@@ -35,6 +37,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class GraphDatabaseApiProxy {
@@ -66,8 +69,20 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
-    public static Node getNodeById(GraphDatabaseAPI db, long id) {
-        return withinTransaction(db, tx -> tx.getNodeById(id));
+    public static Node getNodeById(GraphDatabaseService db, long id) {
+        return applyInTransaction(db, tx -> tx.getNodeById(id));
+    }
+
+    public static Node createNode(GraphDatabaseService db) {
+        return applyInTransaction(db, Transaction::createNode);
+    }
+
+    public static Node findNode(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue) {
+        return applyInTransaction(db, tx -> tx.findNode(label, propertyKey, propertyValue));
+    }
+
+    public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue) {
+        return applyInTransaction(db, tx -> tx.findNodes(label, propertyKey, propertyValue));
     }
 
     public static NeoStores neoStores(GraphDatabaseService db) {
@@ -89,7 +104,14 @@ public final class GraphDatabaseApiProxy {
             );
     }
 
-    public static <T> T withinTransaction(GraphDatabaseService db, Function<Transaction, T> block) {
+    public static void runInTransaction(GraphDatabaseService db, Consumer<Transaction> block) {
+        try (Transaction tx = db.beginTx()) {
+            block.accept(tx);
+            tx.commit();
+        }
+    }
+
+    public static <T> T applyInTransaction(GraphDatabaseService db, Function<Transaction, T> block) {
         try (Transaction tx = db.beginTx()) {
             T returnValue = block.apply(tx);
             tx.commit();
@@ -97,8 +119,15 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
+    public static <T> T withKernelTransaction(GraphDatabaseService db, Function<KernelTransaction, T> block) {
+        return applyInTransaction(db, tx -> {
+            KernelTransaction kernelTransaction = resolveDependency(db, KernelTransaction.class);
+            return block.apply(kernelTransaction);
+        });
+    }
+
     public static Result runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
-        return withinTransaction(db, tx -> tx.execute(query, params));
+        return applyInTransaction(db, tx -> tx.execute(query, params));
     }
 
     private GraphDatabaseApiProxy() {

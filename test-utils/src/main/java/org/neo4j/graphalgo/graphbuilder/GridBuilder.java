@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -38,7 +37,6 @@ import java.util.Random;
  * |    |    |    |    |    |
  * ..   ..   ..   ..   ..   ..
  */
-@IdenticalCompat
 public class GridBuilder extends GraphBuilder<GridBuilder> {
 
     private List<List<Node>> lines = new ArrayList<>();

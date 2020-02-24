@@ -25,12 +25,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.compat.MapConverter;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.impl.proc.MapConverter;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -127,8 +127,7 @@ class GdsCypherTest {
             "  }" +
             "}";
 
-        @SuppressWarnings("unchecked") Map<String, Object> map =
-            (Map<String, Object>) new MapConverter().apply(configString).value();
+        Map<String, Object> map = MapConverter.convert(configString);
         GraphCreateConfig parsedConfig = ImmutableGraphCreateFromStoreConfig
             .builder()
             .username("")

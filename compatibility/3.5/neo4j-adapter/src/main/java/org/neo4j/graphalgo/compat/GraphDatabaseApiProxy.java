@@ -21,12 +21,24 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.security.LoginContext;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.impl.api.KernelTransactions;
+import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
+import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.impl.storageengine.impl.recordstorage.RecordStorageEngine;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public final class GraphDatabaseApiProxy {
 
@@ -36,12 +48,86 @@ public final class GraphDatabaseApiProxy {
             .resolveDependency(dependency, DependencyResolver.SelectionStrategy.ONLY);
     }
 
+    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws Exception {
+        Procedures procedures = resolveDependency(db, Procedures.class);
+        for (Class<?> clazz : procedureClasses) {
+            procedures.registerProcedure(clazz);
+        }
+    }
+
+    public static void registerFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws Exception {
+        Procedures procedures = resolveDependency(db, Procedures.class);
+        for (Class<?> clazz : functionClasses) {
+            procedures.registerFunction(clazz);
+        }
+    }
+
+    public static void registerAggregationFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws Exception {
+        Procedures procedures = resolveDependency(db, Procedures.class);
+        for (Class<?> clazz : functionClasses) {
+            procedures.registerAggregationFunction(clazz);
+        }
+    }
+
+    public static Node getNodeById(GraphDatabaseService db, long id) {
+        return applyInTransaction(db, tx ->db.getNodeById(id));
+    }
+
+    public static Node createNode(GraphDatabaseService db) {
+        return applyInTransaction(db, tx -> db.createNode());
+    }
+
+    public static Node findNode(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue) {
+        return applyInTransaction(db, tx -> db.findNode(label, propertyKey, propertyValue));
+    }
+
+    public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue) {
+        return applyInTransaction(db, tx -> db.findNodes(label, propertyKey, propertyValue));
+    }
+
     public static NeoStores neoStores(GraphDatabaseService db) {
         return resolveDependency(db, RecordStorageEngine.class).testAccessNeoStores();
     }
 
+    public static KernelTransaction newExplicitKernelTransaction(
+        GraphDatabaseService db,
+        long timeout,
+        TimeUnit timeoutUnit
+    ) {
+        return GraphDatabaseApiProxy
+            .resolveDependency(db, KernelTransactions.class)
+            .newInstance(
+                KernelTransaction.Type.explicit,
+                LoginContext.AUTH_DISABLED,
+                timeoutUnit.toMillis(timeout)
+            );
+    }
+
+    public static void runInTransaction(GraphDatabaseService db, Consumer<Transaction> block) {
+        try (Transaction tx = db.beginTx()) {
+            block.accept(tx);
+            tx.success();
+        }
+    }
+
+    public static <T> T applyInTransaction(GraphDatabaseService db, Function<Transaction, T> block) {
+        try (Transaction tx = db.beginTx()) {
+            T returnValue = block.apply(tx);
+            tx.success();
+            return returnValue;
+        }
+    }
+
+    public static <T> T withKernelTransaction(GraphDatabaseService db, Function<KernelTransaction, T> block) {
+        return applyInTransaction(db, tx -> {
+             KernelTransaction kernelTransaction = resolveDependency(db, ThreadToStatementContextBridge.class)
+                .getKernelTransactionBoundToThisThread(true);
+            return block.apply(kernelTransaction);
+        });
+    }
+
     public static Result runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
-        return db.execute(query, params);
+        return applyInTransaction(db, tx -> db.execute(query, params));
     }
 
     private GraphDatabaseApiProxy() {

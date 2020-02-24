@@ -17,38 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.graphbuilder;
+package org.neo4j.graphalgo;
 
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Result;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
-/**
- * Runs code blocks wrapped in {@link Transaction}s.
- */
-public final class TestTransactionWrapper {
+public class AlgoTestBase {
 
-    private final GraphDatabaseAPI db;
+    public GraphDbApi db;
 
-    public TestTransactionWrapper(GraphDatabaseAPI db) {
-        this.db = db;
+    protected void runQuery(String query) {
+        db.runQuery(query);
     }
 
-    public void accept(Consumer<Transaction> block) {
-        try (final Transaction tx = db.beginTx()) {
-            block.accept(tx);
-            tx.success();
-        }
+    protected void runQuery(String query, Consumer<Result.ResultRow> check) {
+        db.runQuery(query, check);
     }
 
-    public <T> T apply(Function<Transaction, T> block) {
-        try (final Transaction tx = db.beginTx()) {
-            T result = block.apply(tx);
-            tx.success();
-            return result;
-        }
+    protected void runQuery(GraphDatabaseService passedInDb, String query) {
+        QueryRunner.runInTransaction(passedInDb, () ->
+            QueryRunner.runQuery(passedInDb, query));
     }
 }
-

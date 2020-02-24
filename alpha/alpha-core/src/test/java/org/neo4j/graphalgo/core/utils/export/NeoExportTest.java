@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -54,7 +55,7 @@ class NeoExportTest {
     @TempDir
     File tempDir;
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setup() {
@@ -85,7 +86,7 @@ class NeoExportTest {
         NeoExport neoExport = new NeoExport(inputGraph, config);
         neoExport.runFromTests();
 
-        GraphDatabaseAPI exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
+        GraphDbApi exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
         Graph outputGraph = loaderBuilder.api(exportDb).build().graph(NativeFactory.class);
 
         assertGraphEquals(inputGraph, outputGraph);
@@ -113,7 +114,7 @@ class NeoExportTest {
         NeoExport neoExport = new NeoExport(inputGraph, config);
         neoExport.runFromTests();
 
-        GraphDatabaseAPI exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
+        GraphDbApi exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
         Graph outputGraph = loaderBuilder.api(exportDb).build().graph(NativeFactory.class);
 
         assertGraphEquals(inputGraph, outputGraph);

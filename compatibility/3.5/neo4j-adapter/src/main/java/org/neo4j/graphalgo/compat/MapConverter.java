@@ -17,30 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.compat;
 
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
-import org.neo4j.graphalgo.compat.GraphDbApi;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Result;
+import java.util.Map;
 
-import java.util.function.Consumer;
+public final class MapConverter {
 
-@IdenticalCompat
-public class AlgoTestBase {
-
-    public GraphDbApi db;
-
-    protected void runQuery(String query) {
-        db.runQuery(query);
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> convert(String value) {
+        return (Map<String, Object>) new org.neo4j.kernel.impl.proc.MapConverter().apply(value).value();
     }
 
-    protected void runQuery(String query, Consumer<Result.ResultRow> check) {
-        db.runQuery(query, check);
-    }
-
-    protected void runQuery(GraphDatabaseService passedInDb, String query) {
-        QueryRunner.runInTransaction(passedInDb, () ->
-            QueryRunner.runQuery(passedInDb, query));
+    private MapConverter() {
+        throw new UnsupportedOperationException("No instances");
     }
 }
