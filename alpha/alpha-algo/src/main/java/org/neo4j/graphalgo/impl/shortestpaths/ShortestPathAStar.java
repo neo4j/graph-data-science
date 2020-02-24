@@ -36,6 +36,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPathAStar> {
@@ -158,7 +159,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
 
     private double getNodeCoordinate(int nodeId, String coordinateType) {
         long neo4jId = graph.toOriginalNodeId(nodeId);
-        Node node = db.getNodeById(neo4jId);
+        Node node = getNodeById(db, neo4jId);
         return (double) node.getProperty(coordinateType);
     }
 

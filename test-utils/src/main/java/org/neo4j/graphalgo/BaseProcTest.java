@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -55,7 +56,7 @@ import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRe
 
 public class BaseProcTest {
 
-    protected GraphDatabaseAPI db;
+    protected GraphDbApi db;
 
     @AfterAll
     static void clearLoadedGraphs() {

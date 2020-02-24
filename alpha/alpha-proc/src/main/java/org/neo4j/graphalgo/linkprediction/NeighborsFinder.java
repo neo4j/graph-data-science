@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.neo4j.graphalgo.compat.NodeProxy.getRelationships;
 import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
@@ -92,7 +93,7 @@ public class NeighborsFinder {
     }
 
     private Iterable<Relationship> loadRelationships(Node node, RelationshipType relationshipType, Direction direction) {
-        return relationshipType == null ? node.getRelationships(direction) : node.getRelationships(relationshipType, direction);
+        return relationshipType == null ? node.getRelationships(direction) : getRelationships(node, relationshipType, direction);
     }
 
 }

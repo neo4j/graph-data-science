@@ -39,6 +39,7 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 final class ArticleRankTest extends AlgoTestBase {
 
@@ -107,16 +108,16 @@ final class ArticleRankTest extends AlgoTestBase {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, () -> {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.2071625);
-            expected.put(db.findNode(label, "name", "b").getId(), 0.4706795);
-            expected.put(db.findNode(label, "name", "c").getId(), 0.3605195);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.195118);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.2071625);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.195118);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
+            expected.put(findNode(db, label, "name", "a").getId(), 0.2071625);
+            expected.put(findNode(db, label, "name", "b").getId(), 0.4706795);
+            expected.put(findNode(db, label, "name", "c").getId(), 0.3605195);
+            expected.put(findNode(db, label, "name", "d").getId(), 0.195118);
+            expected.put(findNode(db, label, "name", "e").getId(), 0.2071625);
+            expected.put(findNode(db, label, "name", "f").getId(), 0.195118);
+            expected.put(findNode(db, label, "name", "g").getId(), 0.15);
+            expected.put(findNode(db, label, "name", "h").getId(), 0.15);
+            expected.put(findNode(db, label, "name", "i").getId(), 0.15);
+            expected.put(findNode(db, label, "name", "j").getId(), 0.15);
         });
 
         final Graph graph;

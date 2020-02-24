@@ -29,10 +29,10 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -42,10 +42,11 @@ import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 
 final class HugeGraphLoadingTest {
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setup() {
@@ -82,7 +83,7 @@ final class HugeGraphLoadingTest {
         Label label = Label.label("Foo");
         runInTransaction(db, () -> {
             for (int j = 0; j < nodeCount; j++) {
-                Node node = db.createNode(label);
+                Node node = createNode(db, label);
                 node.setProperty("bar", node.getId());
             }
         });
@@ -122,7 +123,7 @@ final class HugeGraphLoadingTest {
 
         runInTransaction(db, () -> {
             for (int i = 0; i < nodeCount; i++) {
-                db.createNode();
+                createNode(db);
             }
         });
 
@@ -143,12 +144,12 @@ final class HugeGraphLoadingTest {
         int parallelEdgeCount = 10;
 
         runInTransaction(db, () -> {
-            Node n0 = db.createNode();
-            Node n1 = db.createNode();
+            Node n0 = createNode(db);
+            Node n1 = createNode(db);
             Node last = null;
 
             for (int i = 0; i < nodeCount; i++) {
-                last = db.createNode();
+                last = createNode(db);
             }
 
             n0.createRelationshipTo(n1, fooRelType).setProperty("weight", 1.0);

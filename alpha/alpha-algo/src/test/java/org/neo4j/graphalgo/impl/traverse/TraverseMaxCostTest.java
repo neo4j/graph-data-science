@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.logging.Log;
 
 import java.util.Arrays;
@@ -41,6 +40,8 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
 /**
  * Graph:
@@ -117,20 +118,18 @@ class TraverseMaxCostTest extends AlgoTestBase {
             aggregator
         ).compute().resultNodes();
 
-        try (Transaction tx = db.beginTx()) {
-            List<String> resultNodeNames = Arrays
+        List<String> resultNodeNames = applyInTransaction(db, tx -> {
+            List<String> names = Arrays
                 .stream(nodes)
-                .mapToObj(nodeId -> db.getNodeById(nodeId))
+                .mapToObj(nodeId -> getNodeById(db, nodeId))
                 .map(node -> node.getProperty("name"))
                 .map(Objects::toString)
                 .collect(Collectors.toList());
 
-            testLog.debug("Result Nodes: ", resultNodeNames);
-
-            assertThat(resultNodeNames, containsInAnyOrder(dfsExpected));
-
-            tx.success();
-        }
+            testLog.debug("Result Nodes: ", names);
+            return names;
+        });
+        assertThat(resultNodeNames, containsInAnyOrder(dfsExpected));
     }
 
     @Test
@@ -144,29 +143,22 @@ class TraverseMaxCostTest extends AlgoTestBase {
             aggregator
         ).compute().resultNodes();
 
-        try (Transaction tx = db.beginTx()) {
-            List<String> resultNodeNames = Arrays
+        List<String> resultNodeNames = applyInTransaction(db, tx -> {
+            List<String> names = Arrays
                 .stream(nodes)
-                .mapToObj(nodeId -> db.getNodeById(nodeId))
+                .mapToObj(nodeId -> getNodeById(db, nodeId))
                 .map(node -> node.getProperty("name"))
                 .map(Objects::toString)
                 .collect(Collectors.toList());
 
-            testLog.debug("Result Nodes: ", resultNodeNames);
-
-            assertThat(resultNodeNames, containsInAnyOrder(bfsExpected));
-
-            tx.success();
-        }
+            testLog.debug("Result Nodes: ", names);
+            return names;
+        });
+        assertThat(resultNodeNames, containsInAnyOrder(bfsExpected));
     }
 
     private String name(long nodeId) {
-        try (Transaction tx = db.beginTx()) {
-            Node nodeById = db.getNodeById(nodeId);
-            tx.success();
-
-            return nodeById.getProperty("name").toString();
-        }
+        return getNodeById(db, nodeId).getProperty("name").toString();
     }
 
     private long id(String name) {

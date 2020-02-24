@@ -23,10 +23,13 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.internal.recordstorage.RecordStorageEngine;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -77,12 +80,28 @@ public final class GraphDatabaseApiProxy {
         return applyInTransaction(db, Transaction::createNode);
     }
 
+    public static Node createNode(GraphDatabaseService db, Label... labels) {
+        return applyInTransaction(db, tx -> tx.createNode(labels));
+    }
+
     public static Node findNode(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue) {
         return applyInTransaction(db, tx -> tx.findNode(label, propertyKey, propertyValue));
     }
 
     public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue) {
         return applyInTransaction(db, tx -> tx.findNodes(label, propertyKey, propertyValue));
+    }
+
+    public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Label label) {
+        return applyInTransaction(db, tx -> tx.findNodes(label));
+    }
+
+    public static ResourceIterable<Node> getAllNodes(GraphDatabaseService db) {
+        return applyInTransaction(db, Transaction::getAllNodes);
+    }
+
+    public static ResourceIterable<Relationship> getAllRelationships(GraphDatabaseService db) {
+        return applyInTransaction(db, Transaction::getAllRelationships);
     }
 
     public static NeoStores neoStores(GraphDatabaseService db) {
@@ -102,6 +121,10 @@ public final class GraphDatabaseApiProxy {
                 ClientConnectionInfo.EMBEDDED_CONNECTION,
                 timeoutUnit.toMillis(timeout)
             );
+    }
+
+    public static ProcedureCallContext procedureCallContext(String... outputFieldNames) {
+        return new ProcedureCallContext(outputFieldNames, false, "", false);
     }
 
     public static void runInTransaction(GraphDatabaseService db, Consumer<Transaction> block) {

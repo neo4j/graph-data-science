@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.results;
+package org.neo4j.graphalgo.compat;
 
-import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -32,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -44,26 +44,28 @@ public class VirtualNode implements Node {
     private final List<Label> labels = new ArrayList<>();
     private final Map<String, Object> props = new HashMap<>();
     private final List<Relationship> rels = new ArrayList<>();
-    private final GraphDatabaseService db;
     private final long id;
 
+    // need to keep db param to maintain compat with 3.5 API
+    @SuppressWarnings("unused")
     public VirtualNode(Label[] labels, Map<String, Object> props, GraphDatabaseService db) {
         this.id = MIN_ID.getAndDecrement();
-        this.db = db;
         this.labels.addAll(asList(labels));
         this.props.putAll(props);
     }
 
+    // need to keep db param to maintain compat with 3.5 API
+    @SuppressWarnings("unused")
     public VirtualNode(long nodeId, Label[] labels, Map<String, Object> props, GraphDatabaseService db) {
         this.id = nodeId;
-        this.db = db;
         this.labels.addAll(asList(labels));
         this.props.putAll(props);
     }
 
+    // need to keep db param to maintain compat with 3.5 API
+    @SuppressWarnings("unused")
     public VirtualNode(long nodeId, GraphDatabaseService db) {
         this.id = nodeId;
-        this.db = db;
     }
 
     @Override
@@ -130,19 +132,9 @@ public class VirtualNode implements Node {
     }
 
     @Override
-    public Iterable<Relationship> getRelationships(RelationshipType relationshipType, Direction direction) {
-        return new FilteringIterable<>(rels, (r) -> isType(r, relationshipType) && isDirection(r, direction));
-    }
-
-    @Override
-    public boolean hasRelationship(RelationshipType relationshipType, Direction direction) {
-        return getRelationships(relationshipType, direction).iterator().hasNext();
-    }
-
-    @Override
     public Relationship getSingleRelationship(RelationshipType relationshipType, Direction direction) {
         Relationship relationship = null;
-        Iterator<Relationship> iterator = getRelationships(relationshipType, direction).iterator();
+        Iterator<Relationship> iterator = getRelationships(direction, relationshipType).iterator();
         if (iterator.hasNext()) {
             relationship = iterator.next();
             if (iterator.hasNext()) {
@@ -181,7 +173,7 @@ public class VirtualNode implements Node {
 
     @Override
     public int getDegree(RelationshipType relationshipType, Direction direction) {
-        return (int) StreamSupport.stream(getRelationships(relationshipType, direction).spliterator(), false).count();
+        return (int) StreamSupport.stream(getRelationships(direction, relationshipType).spliterator(), false).count();
     }
 
     @Override
@@ -191,10 +183,7 @@ public class VirtualNode implements Node {
 
     @Override
     public void removeLabel(Label label) {
-        for (Iterator<Label> iterator = labels.iterator(); iterator.hasNext(); ) {
-            Label next = iterator.next();
-            if (next.name().equals(label.name())) iterator.remove();
-        }
+        labels.removeIf(next -> next.name().equals(label.name()));
     }
 
     @Override
@@ -208,11 +197,6 @@ public class VirtualNode implements Node {
     @Override
     public Iterable<Label> getLabels() {
         return labels;
-    }
-
-    @Override
-    public GraphDatabaseService getGraphDatabase() {
-        return db;
     }
 
     @Override
@@ -285,9 +269,10 @@ public class VirtualNode implements Node {
      *
      * @param <T> the type of items in the iteration.
      */
-    static class FilteringIterator<T> extends AbstractIterator<T> {
+    static class FilteringIterator<T> implements Iterator<T> {
         private final Iterator<T> source;
         private final Predicate<T> predicate;
+        private T nextElement;
 
         public FilteringIterator(Iterator<T> source, Predicate<T> predicate) {
             this.source = source;
@@ -295,16 +280,30 @@ public class VirtualNode implements Node {
         }
 
         @Override
-        protected T fetch() {
-            while (source.hasNext()) {
-                T testItem = source.next();
-                if (predicate.test(testItem)) {
-                    return testItem;
+        public boolean hasNext() {
+            if (nextElement == null) {
+                while (source.hasNext()) {
+                    T testItem = source.next();
+                    if (predicate.test(testItem)) {
+                        nextElement = testItem;
+                        break;
+                    }
                 }
             }
-            return done();
+            return nextElement != null;
         }
 
+        @Override
+        public T next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            try {
+                return nextElement;
+            } finally {
+                nextElement = null;
+            }
+        }
     }
 
 

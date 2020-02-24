@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
 class TriangleProcTest extends TriangleBaseProcTest<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
 
@@ -61,7 +62,7 @@ class TriangleProcTest extends TriangleBaseProcTest<TriangleStream, Stream<Trian
 
         QueryRunner.runInTransaction(db, () -> {
             for (int i = 0; i < 9; i++) {
-                final String name = (String) db.getNodeById(i).getProperty("name");
+                final String name = (String) getNodeById(db, i).getProperty("name");
                 idToName[i] = name;
             }
         });

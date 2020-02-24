@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -38,8 +39,6 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -169,11 +168,10 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
     }
 
     default void loadExplicitGraphWithNodeWeights(String graphName, NodeProjections nodeProjections) {
-        GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
+        GraphDbApi db = TestDatabaseCreator.createTestDatabase();
 
         try {
-            Procedures procedures = GraphDatabaseApiProxy.resolveDependency(db, Procedures.class);
-            procedures.registerProcedure(GraphCreateProc.class);
+            GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
         } catch (Exception ke) {
             ke.printStackTrace();
         }

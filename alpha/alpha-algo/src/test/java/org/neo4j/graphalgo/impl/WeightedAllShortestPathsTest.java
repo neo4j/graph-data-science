@@ -27,11 +27,11 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -67,7 +67,7 @@ class WeightedAllShortestPathsTest {
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
     private Graph graph;
 
     @BeforeEach

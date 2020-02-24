@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +46,7 @@ class CypherFactoryAggregationTest {
                                            "CREATE (n2)-[:REL {weight: 10}]->(n1) " +
                                            "RETURN id(n1) AS id1, id(n2) AS id2";
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     private static int id1;
     private static int id2;

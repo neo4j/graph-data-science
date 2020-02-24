@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -57,7 +58,7 @@ class CypherFactoryTest {
                                             "CREATE (n {id: id})-[:REL {prop: id % 10}]->(n)";
     private static final String SKIP_LIMIT = "WITH * SKIP $skip LIMIT $limit";
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     private static int id1;
     private static int id2;

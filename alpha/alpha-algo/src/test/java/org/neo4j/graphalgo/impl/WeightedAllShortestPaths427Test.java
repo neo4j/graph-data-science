@@ -56,6 +56,7 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
 class WeightedAllShortestPaths427Test extends AlgoTestBase {
 
@@ -447,7 +448,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
             db,
             () -> graph.forEachNode(algoSourceId -> {
                 long neoSourceId = graph.toOriginalNodeId(algoSourceId);
-                TestDijkstra dijkstra = new TestDijkstra(db.getNodeById(neoSourceId), withWeights);
+                TestDijkstra dijkstra = new TestDijkstra(getNodeById(db, neoSourceId), withWeights);
                 graph.forEachNode(algoTargetId -> {
                     if (algoSourceId != algoTargetId) {
                         Result neoResult = null;
@@ -455,7 +456,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
 
                         dijkstra.reset();
                         long neoTargetId = graph.toOriginalNodeId(algoTargetId);
-                        Node targetNode = db.getNodeById(neoTargetId);
+                        Node targetNode = getNodeById(db, neoTargetId);
                         List<Node> path = dijkstra.getPathAsNodes(targetNode);
 
                         if (path != null) {

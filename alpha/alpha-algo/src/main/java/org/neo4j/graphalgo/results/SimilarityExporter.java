@@ -23,9 +23,6 @@ import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
-import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
-import org.neo4j.internal.kernel.api.exceptions.explicitindex.AutoIndexingKernelException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;
@@ -92,10 +89,7 @@ public class SimilarityExporter extends StatementApi {
 
     }
 
-    private void createRelationship(SimilarityResult similarityResult, KernelTransaction statement) throws
-            EntityNotFoundException,
-            InvalidTransactionTypeKernelException,
-            AutoIndexingKernelException {
+    private void createRelationship(SimilarityResult similarityResult, KernelTransaction statement) throws Exception {
         long node1 = similarityResult.item1;
         long node2 = similarityResult.item2;
         long relationshipId = statement.dataWrite().relationshipCreate(node1, relationshipTypeId, node2);

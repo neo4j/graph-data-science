@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.GraphHelper.assertRelationships;
@@ -61,7 +61,7 @@ class GraphLoaderDirectionalityTest {
         "MATCH (n)<--(m) " +
         "RETURN id(n) AS source, id(m) AS target";
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setUp() {

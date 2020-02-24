@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.compat.NodeProxy;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -40,6 +41,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 final class ShortestPathDijkstraTest extends AlgoTestBase {
 
@@ -254,11 +256,11 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
             Node prev = null;
             long[] nodeIds = new long[kvPairs.length / 2];
             for (int i = 0; i < nodeIds.length; i++) {
-                Node current = db.findNode(label, kvPairs[2 * i], kvPairs[2 * i + 1]);
+                Node current = findNode(db, label, kvPairs[2 * i], kvPairs[2 * i + 1]);
                 long id = current.getId();
                 nodeIds[i] = id;
                 if (prev != null) {
-                    for (Relationship rel : prev.getRelationships(type, Direction.OUTGOING)) {
+                    for (Relationship rel : NodeProxy.getRelationships(prev, type, Direction.OUTGOING)) {
                         if (rel.getEndNodeId() == id) {
                             double cost = ((Number) rel.getProperty("cost")).doubleValue();
                             weight += cost;

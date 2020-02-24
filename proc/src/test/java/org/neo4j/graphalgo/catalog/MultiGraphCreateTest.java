@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
@@ -41,9 +40,7 @@ class MultiGraphCreateTest {
     @Test
     void testMultipleGraphLoadsAfterDbChange() throws Exception {
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
-        GraphDatabaseApiProxy
-            .resolveDependency(db, Procedures.class)
-            .registerProcedure(GraphCreateProc.class);
+        GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
 
         String create1 = GdsCypher.call()
             .withNodeLabel("Node1")

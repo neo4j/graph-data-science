@@ -45,6 +45,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 
 class WccTest extends AlgoTestBase {
 
@@ -214,9 +215,9 @@ class WccTest extends AlgoTestBase {
     }
 
     private static void createLine(GraphDatabaseService db, int setSize) {
-        Node temp = db.createNode();
+        Node temp = createNode(db);
         for (int i = 1; i < setSize; i++) {
-            Node t = db.createNode();
+            Node t = createNode(db);
             temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
             temp = t;
         }

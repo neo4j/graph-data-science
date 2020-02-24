@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQuery;
+
 public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityAlgorithm<ME>> extends SimilarityAlgorithm<ME, WeightedInput> {
 
     public WeightedSimilarityAlgorithm(SimilarityConfig config, GraphDatabaseAPI api) {
@@ -57,7 +59,7 @@ public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityA
         long degreeCutoff = config.degreeCutoff();
         int repeatCutoff = config.sparseVectorRepeatCutoff();
 
-        Result result = api.execute(query, params);
+        Result result = runQuery(api, query, params);
 
         Map<Long, LongDoubleMap> map = new HashMap<>();
         LongSet ids = new LongHashSet();

@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
 class ShortestPathAStarProcTest extends BaseProcTest {
 
@@ -84,7 +85,7 @@ class ShortestPathAStarProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
         registerProcedures(ShortestPathAStarProc.class);
     }
-	
+
     @AfterEach
     void tearDown() {
         db.shutdown();
@@ -119,7 +120,7 @@ class ShortestPathAStarProcTest extends BaseProcTest {
                            .concat(" RETURN nodeId, cost");
         runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            Node node = db.getNodeById(nodeId);
+            Node node = getNodeById(db, nodeId);
             String nodeName = (String) node.getProperty("name");
             double distance = row.getNumber("cost").doubleValue();
             actualNode.add(nodeName);
@@ -128,5 +129,5 @@ class ShortestPathAStarProcTest extends BaseProcTest {
         assertArrayEquals(expectedNode.toArray(), actualNode.toArray());
         assertArrayEquals(expectedDistance.toArray(), actualDistance.toArray());
     }
-        
+
 }

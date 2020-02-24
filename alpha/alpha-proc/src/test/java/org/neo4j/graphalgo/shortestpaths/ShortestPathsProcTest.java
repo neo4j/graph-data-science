@@ -44,6 +44,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 
 /**         5     5      5
@@ -97,8 +98,8 @@ final class ShortestPathsProcTest extends BaseProcTest {
         registerProcedures(ShortestPathsProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
         QueryRunner.runInTransaction(db, () -> {
-            startNode = db.findNode(Label.label("Node"), "name", "s").getId();
-            endNode = db.findNode(Label.label("Node"), "name", "x").getId();
+            startNode = findNode(db, Label.label("Node"), "name", "s").getId();
+            endNode = findNode(db, Label.label("Node"), "name", "x").getId();
         });
 
         String graphCreateQuery = GdsCypher.call()

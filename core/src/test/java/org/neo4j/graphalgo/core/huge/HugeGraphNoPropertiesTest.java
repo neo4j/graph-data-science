@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +36,7 @@ import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 final class HugeGraphNoPropertiesTest {
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     private static final String DB_CYPHER =
             "CREATE " +

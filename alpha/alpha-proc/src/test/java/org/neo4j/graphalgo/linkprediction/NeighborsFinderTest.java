@@ -33,6 +33,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
 public class NeighborsFinderTest extends AlgoTestBase {
 
@@ -48,16 +50,16 @@ public class NeighborsFinderTest extends AlgoTestBase {
     @Test
     public void excludeDirectRelationships() {
         runInTransaction(db, () -> {
-            Node node1 = db.createNode();
-            Node node2 = db.createNode();
+            Node node1 = createNode(db);
+            Node node2 = createNode(db);
             node1.createRelationshipTo(node2, FRIEND);
         });
 
         NeighborsFinder neighborsFinder = new NeighborsFinder(db);
 
         runInTransaction(db, () -> {
-            Node node1 = db.getNodeById(0);
-            Node node2 = db.getNodeById(1);
+            Node node1 = getNodeById(db, 0);
+            Node node2 = getNodeById(db, 1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, null, Direction.BOTH);
 
             assertEquals(0, neighbors.size());
@@ -67,15 +69,15 @@ public class NeighborsFinderTest extends AlgoTestBase {
     @Test
     public void sameNodeHasNoCommonNeighbors() {
         runInTransaction(db, () -> {
-            Node node1 = db.createNode();
-            Node node2 = db.createNode();
+            Node node1 = createNode(db);
+            Node node2 = createNode(db);
             node1.createRelationshipTo(node2, FRIEND);
         });
 
         NeighborsFinder neighborsFinder = new NeighborsFinder(db);
 
         runInTransaction(db, () -> {
-            Node node1 = db.getNodeById(0);
+            Node node1 = getNodeById(db, 0);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node1, null, Direction.BOTH);
 
             assertEquals(0, neighbors.size());
@@ -85,10 +87,10 @@ public class NeighborsFinderTest extends AlgoTestBase {
     @Test
     public void findNeighborsExcludingDirection() {
         runInTransaction(db, () -> {
-            Node node1 = db.createNode();
-            Node node2 = db.createNode();
-            Node node3 = db.createNode();
-            Node node4 = db.createNode();
+            Node node1 = createNode(db);
+            Node node2 = createNode(db);
+            Node node3 = createNode(db);
+            Node node4 = createNode(db);
 
             node1.createRelationshipTo(node3, FRIEND);
             node2.createRelationshipTo(node3, FRIEND);
@@ -99,8 +101,8 @@ public class NeighborsFinderTest extends AlgoTestBase {
         NeighborsFinder neighborsFinder = new NeighborsFinder(db);
 
         runInTransaction(db, () -> {
-            Node node1 = db.getNodeById(0);
-            Node node2 = db.getNodeById(1);
+            Node node1 = getNodeById(db, 0);
+            Node node2 = getNodeById(db, 1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, null, Direction.BOTH);
 
             assertEquals(2, neighbors.size());
@@ -110,9 +112,9 @@ public class NeighborsFinderTest extends AlgoTestBase {
     @Test
     public void findOutgoingNeighbors() {
         runInTransaction(db, () -> {
-            Node node1 = db.createNode();
-            Node node2 = db.createNode();
-            Node node3 = db.createNode();
+            Node node1 = createNode(db);
+            Node node2 = createNode(db);
+            Node node3 = createNode(db);
 
             node1.createRelationshipTo(node3, FOLLOWS);
             node2.createRelationshipTo(node3, FOLLOWS);
@@ -121,8 +123,8 @@ public class NeighborsFinderTest extends AlgoTestBase {
         NeighborsFinder neighborsFinder = new NeighborsFinder(db);
 
         runInTransaction(db, () -> {
-            Node node1 = db.getNodeById(0);
-            Node node2 = db.getNodeById(1);
+            Node node1 = getNodeById(db, 0);
+            Node node2 = getNodeById(db, 1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, FOLLOWS, Direction.OUTGOING);
 
             assertEquals(1, neighbors.size());
@@ -132,9 +134,9 @@ public class NeighborsFinderTest extends AlgoTestBase {
     @Test
     public void findIncomingNeighbors() {
         runInTransaction(db, () -> {
-            Node node1 = db.createNode();
-            Node node2 = db.createNode();
-            Node node3 = db.createNode();
+            Node node1 = createNode(db);
+            Node node2 = createNode(db);
+            Node node3 = createNode(db);
 
             node3.createRelationshipTo(node1, FOLLOWS);
             node3.createRelationshipTo(node2, FOLLOWS);
@@ -143,8 +145,8 @@ public class NeighborsFinderTest extends AlgoTestBase {
         NeighborsFinder neighborsFinder = new NeighborsFinder(db);
 
         runInTransaction(db, () -> {
-            Node node1 = db.getNodeById(0);
-            Node node2 = db.getNodeById(1);
+            Node node1 = getNodeById(db, 0);
+            Node node2 = getNodeById(db, 1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, FOLLOWS, Direction.INCOMING);
 
             assertEquals(1, neighbors.size());
@@ -154,10 +156,10 @@ public class NeighborsFinderTest extends AlgoTestBase {
     @Test
     public void findNeighborsOfSpecificRelationshipType() {
         runInTransaction(db, () -> {
-            Node node1 = db.createNode();
-            Node node2 = db.createNode();
-            Node node3 = db.createNode();
-            Node node4 = db.createNode();
+            Node node1 = createNode(db);
+            Node node2 = createNode(db);
+            Node node3 = createNode(db);
+            Node node4 = createNode(db);
 
             node1.createRelationshipTo(node3, FRIEND);
             node2.createRelationshipTo(node3, FRIEND);
@@ -168,8 +170,8 @@ public class NeighborsFinderTest extends AlgoTestBase {
         NeighborsFinder neighborsFinder = new NeighborsFinder(db);
 
         runInTransaction(db, () -> {
-            Node node1 = db.getNodeById(0);
-            Node node2 = db.getNodeById(1);
+            Node node1 = getNodeById(db, 0);
+            Node node2 = getNodeById(db, 1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, COLLEAGUE, Direction.BOTH);
 
             assertEquals(1, neighbors.size());
@@ -180,10 +182,10 @@ public class NeighborsFinderTest extends AlgoTestBase {
     public void dontCountDuplicates() {
         Node[] nodes = new Node[4];
         runInTransaction(db, () -> {
-            nodes[0] = db.createNode();
-            nodes[1] = db.createNode();
-            nodes[2] = db.createNode();
-            nodes[3] = db.createNode();
+            nodes[0] = createNode(db);
+            nodes[1] = createNode(db);
+            nodes[2] = createNode(db);
+            nodes[3] = createNode(db);
 
             nodes[0].createRelationshipTo(nodes[2], FRIEND);
             nodes[1].createRelationshipTo(nodes[2], FRIEND);
@@ -205,8 +207,8 @@ public class NeighborsFinderTest extends AlgoTestBase {
     public void otherNodeCountsAsNeighbor() {
         Node[] nodes = new Node[2];
         runInTransaction(db, () -> {
-            nodes[0] = db.createNode();
-            nodes[1] = db.createNode();
+            nodes[0] = createNode(db);
+            nodes[1] = createNode(db);
             nodes[0].createRelationshipTo(nodes[1], FRIEND);
         });
 
@@ -224,8 +226,8 @@ public class NeighborsFinderTest extends AlgoTestBase {
     public void otherNodeCountsAsOutgoingNeighbor() {
         Node[] nodes = new Node[2];
         runInTransaction(db, () -> {
-            nodes[0] = db.createNode();
-            nodes[1] = db.createNode();
+            nodes[0] = createNode(db);
+            nodes[1] = createNode(db);
             nodes[0].createRelationshipTo(nodes[1], FRIEND);
         });
 

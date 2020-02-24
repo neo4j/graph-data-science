@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 
 import java.util.Arrays;
 
@@ -54,7 +54,7 @@ final class LoadingTest {
         ", (b)-[:TYPE2 {prop:7}]->(e)" +
         ", (a)-[:TYPE2 {prop:8}]->(e)";
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setupGraphDb() {

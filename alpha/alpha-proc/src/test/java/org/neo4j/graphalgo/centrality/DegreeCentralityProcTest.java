@@ -39,6 +39,7 @@ import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.Orientation.REVERSE;
 import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 class DegreeCentralityProcTest extends BaseProcTest {
 
@@ -72,29 +73,29 @@ class DegreeCentralityProcTest extends BaseProcTest {
 
         runInTransaction(db, () -> {
             Label label = Label.label("Label1");
-            incomingExpected.put(db.findNode(label, "name", "a").getId(), 0.0);
-            incomingExpected.put(db.findNode(label, "name", "b").getId(), 1.0);
-            incomingExpected.put(db.findNode(label, "name", "c").getId(), 2.0);
+            incomingExpected.put(findNode(db, label, "name", "a").getId(), 0.0);
+            incomingExpected.put(findNode(db, label, "name", "b").getId(), 1.0);
+            incomingExpected.put(findNode(db, label, "name", "c").getId(), 2.0);
 
-            incomingWeightedExpected.put(db.findNode(label, "name", "a").getId(), 0.0);
-            incomingWeightedExpected.put(db.findNode(label, "name", "b").getId(), 3.0);
-            incomingWeightedExpected.put(db.findNode(label, "name", "c").getId(), 7.1);
+            incomingWeightedExpected.put(findNode(db, label, "name", "a").getId(), 0.0);
+            incomingWeightedExpected.put(findNode(db, label, "name", "b").getId(), 3.0);
+            incomingWeightedExpected.put(findNode(db, label, "name", "c").getId(), 7.1);
 
-            bothExpected.put(db.findNode(label, "name", "a").getId(), 2.0);
-            bothExpected.put(db.findNode(label, "name", "b").getId(), 2.0);
-            bothExpected.put(db.findNode(label, "name", "c").getId(), 2.0);
+            bothExpected.put(findNode(db, label, "name", "a").getId(), 2.0);
+            bothExpected.put(findNode(db, label, "name", "b").getId(), 2.0);
+            bothExpected.put(findNode(db, label, "name", "c").getId(), 2.0);
 
-            bothWeightedExpected.put(db.findNode(label, "name", "a").getId(), 5.1);
-            bothWeightedExpected.put(db.findNode(label, "name", "b").getId(), 8.0);
-            bothWeightedExpected.put(db.findNode(label, "name", "c").getId(), 7.1);
+            bothWeightedExpected.put(findNode(db, label, "name", "a").getId(), 5.1);
+            bothWeightedExpected.put(findNode(db, label, "name", "b").getId(), 8.0);
+            bothWeightedExpected.put(findNode(db, label, "name", "c").getId(), 7.1);
 
-            outgoingExpected.put(db.findNode(label, "name", "a").getId(), 2.0);
-            outgoingExpected.put(db.findNode(label, "name", "b").getId(), 1.0);
-            outgoingExpected.put(db.findNode(label, "name", "c").getId(), 0.0);
+            outgoingExpected.put(findNode(db, label, "name", "a").getId(), 2.0);
+            outgoingExpected.put(findNode(db, label, "name", "b").getId(), 1.0);
+            outgoingExpected.put(findNode(db, label, "name", "c").getId(), 0.0);
 
-            outgoingWeightedExpected.put(db.findNode(label, "name", "a").getId(), 5.1);
-            outgoingWeightedExpected.put(db.findNode(label, "name", "b").getId(), 5.0);
-            outgoingWeightedExpected.put(db.findNode(label, "name", "c").getId(), 0.0);
+            outgoingWeightedExpected.put(findNode(db, label, "name", "a").getId(), 5.1);
+            outgoingWeightedExpected.put(findNode(db, label, "name", "b").getId(), 5.0);
+            outgoingWeightedExpected.put(findNode(db, label, "name", "c").getId(), 0.0);
         });
     }
 

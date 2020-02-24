@@ -35,6 +35,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 /**         5     5      5
  *      (1)---(2)---(3)----.
@@ -87,8 +88,8 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
         registerProcedures(AllShortestPathsProc.class);
         runInTransaction(db, () -> {
-            startNodeId = db.findNode(Label.label("Node"), "name", "s").getId();
-            targetNodeId = db.findNode(Label.label("Node"), "name", "x").getId();
+            startNodeId = findNode(db, Label.label("Node"), "name", "s").getId();
+            targetNodeId = findNode(db, Label.label("Node"), "name", "x").getId();
         });
     }
 

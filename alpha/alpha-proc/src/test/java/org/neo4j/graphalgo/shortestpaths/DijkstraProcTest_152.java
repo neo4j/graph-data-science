@@ -40,6 +40,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 class DijkstraProcTest_152 extends BaseProcTest {
 
@@ -71,8 +72,8 @@ class DijkstraProcTest_152 extends BaseProcTest {
         registerProcedures(DijkstraProc.class);
         runQuery(cypher);
         runInTransaction(db, () -> {
-            startNodeId = db.findNode(Label.label("Loc"), "name", "A").getId();
-            endNodeId = db.findNode(Label.label("Loc"), "name", "F").getId();
+            startNodeId = findNode(db, Label.label("Loc"), "name", "A").getId();
+            endNodeId = findNode(db, Label.label("Loc"), "name", "F").getId();
         });
     }
 
