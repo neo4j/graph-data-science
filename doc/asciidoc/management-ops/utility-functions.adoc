@@ -1,17 +1,191 @@
 [[utility-functions]]
 = Utility functions
 
-The following table lists all utility functions in the GDS library:
+This section describes the utility functions and shows their usage in concrete examples.
 
 [[utility-functions-table]]
 [opts=header,cols="1m,1m"]
 |===
 | Name                | Description
 | gds.version         | Return the version of the installed Neo4j Graph Data Science library.
-| gds.util.asNode     | Return the node object for the given node id or null if none exists.
-| gds.util.asNodes    | Return the node objects for the given node ids or an empty list if none exists.
+|===
+
+.Usage:
+[source, cypher]
+----
+RETURN gds.version() as version
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| version
+| "0.9.1"
+|===
+
+== Numeric Functions
+
+.Numeric Functions
+[[Numeric-functions-table]]
+[opts=header,cols="1m,1m"]
+|===
+| Name                | Description
+| gds.util.NaN        | Returns NaN as a Cypher value.
 | gds.util.infinity   | Return infinity as a Cypher value.
 | gds.util.isFinite   | Return true iff the given argument is a finite value (not ±Infinity, NaN, or null).
 | gds.util.isInfinite | Return true iff the given argument is not a finite value (not ±Infinity, NaN, or null).
-| gds.util.NaN        | Returns NaN as a Cypher value.
 |===
+
+=== Syntax
+[[Numeric-functions-syntax-table]]
+[opts=header,cols="1m,1m"]
+|===
+| Name                                  | Parameter
+| gds.util.NaN()                        | -
+| gds.util.infinity()                   | -
+| gds.util.isFinite(value: NUMBER)      | value to be checked if it is finite
+| gds.util.isInfinite(value: NUMBER)    | value to be checked if it is infinite.
+----
+|===
+
+=== Examples
+
+.Example for gds.util.IsFinite:
+[source, cypher]
+----
+UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] as value
+RETURN gds.util.isFinite(value) as isFinite
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| isFinite
+| true
+| false
+| false
+|===
+
+.Example for gds.util.isFinite():
+[source, cypher]
+----
+UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] as value
+RETURN gds.util.isInfinite(value) as isInfinite
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| isInfinite
+| false
+| true
+| true
+|===
+
+
+== Node and Path Functions
+
+.Node and Path Functions
+[[Node-and-Path-functions-table]]
+[opts=header,cols="1m,1m"]
+|===
+| Name                | Description
+| gds.util.asNode     | Return the node object for the given node id or null if none exists.
+| gds.util.asNodes    | Return the node objects for the given node ids or an empty list if none exists.
+| gds.util.asPath     | Return a path object for the provided node ids and weights.
+|===
+
+=== Syntax
+
+[[Node-and-Path-functions-syntax-table]]
+[opts=header,cols="1m,1m"]
+|===
+| Name                                                                                      | Parameters
+| gds.util.asNode(nodeId: NUMBER)                                                           | nodeId of a node in the neo4j-graph
+| gds.util.asNodes(nodeIds: LIST<NUMBER>)                                                   | list of nodeIds of nodes in the neo4j-graph
+.3+| gds.util.asPath(nodeIds: LIST<NUMBER>, weights: LIST<NUMBER>, cumulativeWeights: BOOL) | nodeIds: nodeIds representing neo4j nodes
+                                                                                            | weights: weights for the relationships between the nodes
+                                                                                            | cumulativeWeights: whether the weights should be cumulated along the path
+----
+|===
+
+=== Examples
+
+// TODO: text for examples
+
+.Example graph:
+[source, cypher]
+----
+CREATE  (nAlice:User {name: 'Alice'})
+CREATE  (nBridget:User {name: 'Bridget'})
+CREATE  (nCharles:User {name: 'Charles'})
+CREATE  (nAlice)-[:LINK]->(nBridget)
+CREATE  (nBridget)-[:LINK]->(nCharles)
+----
+
+
+.Example for gds.util.asNode:
+[source, cypher]
+----
+MATCH (u:User{name: 'Alice'})
+WITH id(u) as nodeId
+RETURN gds.util.asNode(nodeId) as node
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| node
+| Node[0]{name:"Alice"}
+|===
+
+.Example for gds.util.asNodes:
+[source, cypher]
+----
+MATCH (u:User)
+WHERE NOT u.name = 'Charles'
+WITH collect(id(u)) as nodeIds
+RETURN gds.util.asNodes(nodeIds) as nodes
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| nodes
+| [Node[0]{name:"Alice"},Node[1]{name:"Bridget"}]
+|===
+
+
+.Example for gds.util.asPath:
+[source, cypher]
+----
+MATCH (u1)->(u2)->(u3)
+WITH collect(id(u1), id(u2), id(u3)) as nodeIds
+RETURN gds.util.asPath(nodeIds) as path
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| path
+| (0)-[-1:NEXT]->(1)-[-2:NEXT]->(2)
+|===
+
+// TODO: uncomment example if we know how to access the relationship properties of a path
+//.Example for gds.util.asPath:
+//[source, cypher]
+//----
+//MATCH (u1)->(u2)->(u3)
+//WITH collect(id(u1), id(u2), id(u3)) as nodeIds, [2, 4] as weights
+//RETURN gds.util.asPath(nodeIds, weights, true) as path
+//----
+
+//.Results
+//[opts="header",cols="1"]
+//|===
+//| nodes
+//| [Node[0]{name:"Alice"},Node[1]{name:"Bridget"}]
+//|===
+
+// TODO: add examples with real algo calls
+
