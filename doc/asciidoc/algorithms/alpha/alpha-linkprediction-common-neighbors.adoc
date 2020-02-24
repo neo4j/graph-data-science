@@ -1,4 +1,4 @@
-[[labs-algorithms-linkprediction-common-neighbors]]
+[[alpha-algorithms-linkprediction-common-neighbors]]
 = Common Neighbors
 
 [abstract]

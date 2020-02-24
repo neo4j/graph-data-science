@@ -1,4 +1,4 @@
-[[labs-algorithms-one-hot-encoding]]
+[[alpha-algorithms-one-hot-encoding]]
 = One Hot Encoding
 
 [abstract]

@@ -1,4 +1,4 @@
-[[labs-algorithms-similarity-jaccard]]
+[[alpha-algorithms-similarity-jaccard]]
 = Jaccard Similarity
 
 [abstract]
@@ -13,11 +13,11 @@ include::alpha-note.adoc[tag=alpha-note]
 
 This section includes:
 
-* <<labs-algorithms-similarity-jaccard-context, History and explanation>>
-* <<labs-algorithms-similarity-jaccard-usecase, Use-cases - when to use the Jaccard Similarity algorithm>>
-* <<labs-algorithms-similarity-jaccard-function-sample, Jaccard Similarity algorithm function sample>>
+* <<alpha-algorithms-similarity-jaccard-context, History and explanation>>
+* <<alpha-algorithms-similarity-jaccard-usecase, Use-cases - when to use the Jaccard Similarity algorithm>>
+* <<alpha-algorithms-similarity-jaccard-function-sample, Jaccard Similarity algorithm function sample>>
 
-[[labs-algorithms-similarity-jaccard-context]]
+[[alpha-algorithms-similarity-jaccard-context]]
 == History and explanation
 
 Jaccard Similarity is computed using the following formula:
@@ -34,7 +34,7 @@ The library contains functions to calculate similarity between sets of data.
 The Jaccard Similarity function is best used when calculating the similarity between small numbers of sets.
 
 
-[[labs-algorithms-similarity-jaccard-usecase]]
+[[alpha-algorithms-similarity-jaccard-usecase]]
 == Use-cases - when to use the Jaccard Similarity algorithm
 
 We can use the Jaccard Similarity algorithm to work out the similarity between two things.
@@ -42,7 +42,7 @@ We might then use the computed similarity as part of a recommendation query.
 For example, you can use the Jaccard Similarity algorithm to show the products that were purchased by similar customers, in terms of previous products purchased.
 
 
-[[labs-algorithms-similarity-jaccard-function-sample]]
+[[alpha-algorithms-similarity-jaccard-function-sample]]
 == Jaccard Similarity algorithm function sample
 
 The Jaccard Similarity function computes the similarity of two lists of numbers.

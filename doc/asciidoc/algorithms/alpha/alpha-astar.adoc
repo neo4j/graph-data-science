@@ -1,4 +1,4 @@
-[[labs-algorithms-a_star]]
+[[alpha-algorithms-a_star]]
 = A*
 
 [abstract]

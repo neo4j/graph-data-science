@@ -12,12 +12,12 @@ The Neo4j GDS library includes the following similarity algorithms, grouped by q
 * Production-quality
 ** <<algorithms-node-similarity, Node Similarity>>
 * Alpha
-** <<labs-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbors>>
-** <<labs-algorithms-similarity-cosine, Cosine Similarity>>
-** <<labs-algorithms-similarity-euclidean, Euclidean Similarity>>
-** <<labs-algorithms-similarity-jaccard, Jaccard Similarity>>
-** <<labs-algorithms-similarity-overlap, Overlap Similarity>>
-** <<labs-algorithms-similarity-pearson, Pearson Similarity>>
+** <<alpha-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbors>>
+** <<alpha-algorithms-similarity-cosine, Cosine Similarity>>
+** <<alpha-algorithms-similarity-euclidean, Euclidean Similarity>>
+** <<alpha-algorithms-similarity-jaccard, Jaccard Similarity>>
+** <<alpha-algorithms-similarity-overlap, Overlap Similarity>>
+** <<alpha-algorithms-similarity-pearson, Pearson Similarity>>
 
 include::node-similarity.adoc[leveloffset=+1]
 

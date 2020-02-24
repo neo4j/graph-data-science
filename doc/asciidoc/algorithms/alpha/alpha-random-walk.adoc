@@ -1,4 +1,4 @@
-[[labs-algorithms-random-walk]]
+[[alpha-algorithms-random-walk]]
 = Random Walk
 
 [abstract]

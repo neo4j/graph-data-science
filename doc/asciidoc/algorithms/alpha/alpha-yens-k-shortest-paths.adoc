@@ -1,4 +1,4 @@
-[[labs-algorithms-yens-k-shortest-path]]
+[[alpha-algorithms-yens-k-shortest-path]]
 = Yen's K-Shortest Paths
 
 [abstract]

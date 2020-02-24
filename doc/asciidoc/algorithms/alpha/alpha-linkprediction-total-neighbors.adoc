@@ -1,4 +1,4 @@
-[[labs-algorithms-linkprediction-total-neighbors]]
+[[alpha-algorithms-linkprediction-total-neighbors]]
 = Total Neighbors
 
 [abstract]

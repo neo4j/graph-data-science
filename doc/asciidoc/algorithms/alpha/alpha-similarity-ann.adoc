@@ -1,4 +1,4 @@
-[[labs-algorithms-approximate-nearest-neighbors]]
+[[alpha-algorithms-approximate-nearest-neighbors]]
 = Approximate Nearest Neighbors (ANN)
 
 [abstract]
@@ -10,7 +10,7 @@ include::alpha-note.adoc[tag=alpha-note]
 
 
 The Approximate Nearest Neighbors algorithm constructs a k-Nearest Neighbors Graph for a set of objects based on a provided similarity algorithm.
-The similarity of items is computed based on <<labs-algorithms-similarity-jaccard,Jaccard Similarity>>, <<labs-algorithms-similarity-cosine,Cosine Similarity>>, <<labs-algorithms-similarity-euclidean,Euclidean Distance>>, or <<labs-algorithms-similarity-pearson,Pearson Similarity>>.
+The similarity of items is computed based on <<alpha-algorithms-similarity-jaccard,Jaccard Similarity>>, <<alpha-algorithms-similarity-cosine,Cosine Similarity>>, <<alpha-algorithms-similarity-euclidean,Euclidean Distance>>, or <<alpha-algorithms-similarity-pearson,Pearson Similarity>>.
 
 The implementation in the library is based on Dong, Charikar, and Li's paper http://www.cs.princeton.edu/cass/papers/www11.pdf[Efficient K-Nearest Neighbor Graph Construction for Generic Similarity Measures^].
 

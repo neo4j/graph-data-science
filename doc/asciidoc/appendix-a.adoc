@@ -136,7 +136,7 @@ The following table lists all functions in the GDS library:
 | <<algorithms-linkprediction-resource-allocation-syntax, gds.alpha.linkprediction.resourceAllocation>>
 | <<algorithms-linkprediction-same-community-syntax, gds.alpha.linkprediction.sameCommunity>>
 | <<algorithms-linkprediction-total-neighbors-syntax, gds.alpha.linkprediction.totalNeighbors>>
-| <<labs-algorithms-one-hot-encoding, gds.alpha.ml.oneHotEncoding>>
+| <<alpha-algorithms-one-hot-encoding, gds.alpha.ml.oneHotEncoding>>
 | gds.alpha.similarity.cosine
 | gds.alpha.similarity.euclidean
 | gds.alpha.similarity.jaccard

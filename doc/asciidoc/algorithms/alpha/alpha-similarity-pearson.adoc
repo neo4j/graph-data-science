@@ -1,5 +1,5 @@
 :procedure-name: Pearson Similarity
-[[labs-algorithms-similarity-pearson]]
+[[alpha-algorithms-similarity-pearson]]
 = Pearson Similarity
 
 [abstract]

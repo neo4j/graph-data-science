@@ -1,4 +1,4 @@
-[[labs-algorithms-shortest-path]]
+[[alpha-algorithms-shortest-path]]
 = Shortest Path
 
 [abstract]

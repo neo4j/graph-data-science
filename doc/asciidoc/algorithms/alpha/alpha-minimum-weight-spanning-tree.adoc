@@ -1,4 +1,4 @@
-[[labs-algorithms-minimum-weight-spanning-tree]]
+[[alpha-algorithms-minimum-weight-spanning-tree]]
 = Minimum Weight Spanning Tree
 
 [abstract]

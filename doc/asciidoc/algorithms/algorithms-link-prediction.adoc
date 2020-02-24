@@ -11,12 +11,12 @@ The computed scores can then be used to predict new relationships between them.
 The Neo4j GDS library includes the following link prediction algorithms, grouped by quality tier:
 
 * Alpha
-** <<labs-algorithms-linkprediction-adamic-adar, Adamic Adar>>
-** <<labs-algorithms-linkprediction-common-neighbors, Common Neighbors>>
-** <<labs-algorithms-linkprediction-preferential-attachment, Preferential Attachment>>
-** <<labs-algorithms-linkprediction-resource-allocation, Resource Allocation>>
-** <<labs-algorithms-linkprediction-same-community, Same Community>>
-** <<labs-algorithms-linkprediction-total-neighbors, Total Neighbors>>
+** <<alpha-algorithms-linkprediction-adamic-adar, Adamic Adar>>
+** <<alpha-algorithms-linkprediction-common-neighbors, Common Neighbors>>
+** <<alpha-algorithms-linkprediction-preferential-attachment, Preferential Attachment>>
+** <<alpha-algorithms-linkprediction-resource-allocation, Resource Allocation>>
+** <<alpha-algorithms-linkprediction-same-community, Same Community>>
+** <<alpha-algorithms-linkprediction-total-neighbors, Total Neighbors>>
 
 
 include::alpha/alpha-linkprediction-adamic-adar.adoc[leveloffset=+1]

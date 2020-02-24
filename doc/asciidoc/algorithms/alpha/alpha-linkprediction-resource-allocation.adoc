@@ -1,4 +1,4 @@
-[[labs-algorithms-linkprediction-resource-allocation]]
+[[alpha-algorithms-linkprediction-resource-allocation]]
 = Resource Allocation
 
 [abstract]

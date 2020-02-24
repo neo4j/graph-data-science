@@ -1,4 +1,4 @@
-[[labs-algorithm-all-pairs-shortest-path]]
+[[alpha-algorithm-all-pairs-shortest-path]]
 = All Pairs Shortest Path
 
 [abstract]

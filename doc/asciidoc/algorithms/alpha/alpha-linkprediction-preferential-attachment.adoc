@@ -1,4 +1,4 @@
-[[labs-algorithms-linkprediction-preferential-attachment]]
+[[alpha-algorithms-linkprediction-preferential-attachment]]
 = Preferential Attachment
 
 [abstract]
