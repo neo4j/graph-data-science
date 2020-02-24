@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -49,6 +50,9 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
     public static final String DEFAULT_CLUSTER_PROPERTY = "partition";
 
     @Procedure(value = "gds.alpha.spanningTree.kmax.write", mode = Mode.WRITE)
+    @Description("The maximum weight spanning tree (MST) starts from a given node, " +
+                 "and finds all its reachable nodes " +
+                 "and the set of relationships that connect the nodes together with the maximum possible weight")
     public Stream<Prim.Result> kmax(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -58,6 +62,9 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
     }
 
     @Procedure(value = "gds.alpha.spanningTree.kmin.write", mode = Mode.WRITE)
+    @Description(("The minimum weight spanning tree (MST) starts from a given node, " +
+                  "and finds all its reachable nodes " +
+                  "and the set of relationships that connect the nodes together with the minimum possible weight"))
     public Stream<Prim.Result> kmin(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

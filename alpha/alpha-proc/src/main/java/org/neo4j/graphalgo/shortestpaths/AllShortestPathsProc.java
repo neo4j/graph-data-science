@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -45,6 +46,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream<WeightedAllShortestPaths.Result>, AllShortestPathsConfig> {
 
     @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ)
+    @Description("The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.")
     public Stream<WeightedAllShortestPaths.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

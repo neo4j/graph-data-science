@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.impl.similarity.PearsonConfigImpl;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -38,7 +39,10 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public final class PearsonProc extends SimilarityProc<PearsonAlgorithm, PearsonConfig> {
 
+    private static final String PEARSON_DESCRIPTION = "Pearson-similarity is an algorithm for finding similar nodes based on the pearson correlation coefficient";
+
     @Procedure(name = "gds.alpha.similarity.pearson.stream", mode = READ)
+    @Description(PEARSON_DESCRIPTION)
     public Stream<SimilarityResult> pearsonStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -47,6 +51,7 @@ public final class PearsonProc extends SimilarityProc<PearsonAlgorithm, PearsonC
     }
 
     @Procedure(name = "gds.alpha.similarity.pearson.write", mode = WRITE)
+    @Description(PEARSON_DESCRIPTION)
     public Stream<SimilaritySummaryResult> pearsonWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

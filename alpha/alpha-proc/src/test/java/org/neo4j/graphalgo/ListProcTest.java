@@ -61,6 +61,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class ListProcTest extends BaseProcTest {
 
@@ -215,6 +216,14 @@ class ListProcTest extends BaseProcTest {
                 .stream()
                 .collect(Collectors.toSet())
             )
+        );
+    }
+
+    @Test
+    void allProcsAreDescribed() {
+        String query = "CALL gds.list()";
+        runQueryWithRowConsumer(query, resultRow ->
+            assertFalse(resultRow.getString("description").isEmpty(), resultRow.get("name") + " has no describtion")
         );
     }
 

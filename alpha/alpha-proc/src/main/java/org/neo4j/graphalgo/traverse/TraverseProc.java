@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -44,9 +45,11 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig> {
 
+    public static final String BFS_DESCRIPTION = "BFS is a traversal algorithm, which explores all of the neighbor nodes at the present depth prior to moving on to the nodes at the next depth level";
     private static boolean isBfs;
 
     @Procedure(name = "gds.alpha.bfs.stream", mode = READ)
+    @Description(BFS_DESCRIPTION)
     public Stream<WalkResult> bfs(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -56,6 +59,7 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
     }
 
     @Procedure(name = "gds.alpha.dfs.stream", mode = READ)
+    @Description(BFS_DESCRIPTION)
     public Stream<WalkResult> dfs(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

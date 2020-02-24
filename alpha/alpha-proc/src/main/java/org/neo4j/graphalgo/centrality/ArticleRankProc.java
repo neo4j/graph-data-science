@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphalgo.results.PageRankScore;
 import org.neo4j.graphalgo.utils.CentralityUtils;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -49,7 +50,10 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, ArticleRankConfig> {
 
+    private static final String ARTICLE_RANK_DESCRIPTION = "ArticleRank is a variant of the Page Rank algorithm, which measures the transitive influence or connectivity of nodes.";
+
     @Procedure(value = "gds.alpha.articleRank.write", mode = WRITE)
+    @Description(ARTICLE_RANK_DESCRIPTION)
     public Stream<PageRankScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -88,6 +92,7 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
     }
 
     @Procedure(value = "gds.alpha.articleRank.stream", mode = READ)
+    @Description(ARTICLE_RANK_DESCRIPTION)
     public Stream<CentralityScore> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

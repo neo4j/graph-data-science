@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.impl.betweenness.RandomSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.SampledBetweennessCentralityConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -55,7 +56,10 @@ import static org.neo4j.procedure.Mode.WRITE;
  */
 public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> {
 
+    public static final String BETWEENNESS_CENTRALITY_DESCRIPTION = "Sampled Betweenness centrality computes an approximate score for betweenness centrality";
+
     @Procedure(name = "gds.alpha.betweenness.sampled.stream", mode = READ)
+    @Description(BETWEENNESS_CENTRALITY_DESCRIPTION)
     public Stream<BetweennessCentrality.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -71,6 +75,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
     }
 
     @Procedure(value = "gds.alpha.betweenness.sampled.write", mode = WRITE)
+    @Description(BETWEENNESS_CENTRALITY_DESCRIPTION)
     public Stream<BetweennessCentralityProc.BetweennessCentralityProcResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

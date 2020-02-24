@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.DeltaSteppingProcResult;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -59,6 +60,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDeltaStepping, ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> {
 
     @Procedure(name = "gds.alpha.shortestPath.deltaStepping.stream", mode = READ)
+    @Description("Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm")
     public Stream<ShortestPathDeltaStepping.DeltaSteppingResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -77,6 +79,7 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
     }
 
     @Procedure(value = "gds.alpha.shortestPath.deltaStepping.write", mode = Mode.WRITE)
+    @Description("Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm")
     public Stream<DeltaSteppingProcResult> deltaStepping(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

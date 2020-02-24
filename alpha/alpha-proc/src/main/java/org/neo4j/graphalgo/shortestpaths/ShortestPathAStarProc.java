@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.shortestpaths.ShortestPathAStar;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -39,7 +40,10 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, ShortestPathAStar, ShortestPathAStarConfig> {
 
+    public static final String A_STAR_DESCRIPTION = "The A* algorithm is a search algorithm and improves on the classic Dijkstra algorithm";
+
     @Procedure(name = "gds.alpha.shortestPath.astar.stream", mode = READ)
+    @Description(A_STAR_DESCRIPTION)
     public Stream<ShortestPathAStar.Result> astarStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

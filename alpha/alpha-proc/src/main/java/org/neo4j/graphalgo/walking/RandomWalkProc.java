@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.impl.walking.WalkResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -51,7 +52,10 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkConfig> {
 
+    public static final String RANDOM_WALK_DESCRIPTION = "Random Walk is an algorithm that provides random paths in a graph.";
+
     @Procedure(name = "gds.alpha.randomWalk.stream", mode = READ)
+    @Description(RANDOM_WALK_DESCRIPTION)
     public Stream<WalkResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

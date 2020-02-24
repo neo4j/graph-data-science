@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.impl.similarity.OverlapConfigImpl;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -38,7 +39,10 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class OverlapProc extends SimilarityProc<OverlapAlgorithm, OverlapConfig> {
 
+    private static final String OVERLAP_DESCRIPTION = "Overlap-similarity is an algorithm for finding similar nodes based on the overlap coefficient";
+
     @Procedure(name = "gds.alpha.similarity.overlap.stream", mode = READ)
+    @Description(OVERLAP_DESCRIPTION)
     public Stream<SimilarityResult> overlapStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -47,6 +51,7 @@ public class OverlapProc extends SimilarityProc<OverlapAlgorithm, OverlapConfig>
     }
 
     @Procedure(name = "gds.alpha.similarity.overlap.write", mode = WRITE)
+    @Description(OVERLAP_DESCRIPTION)
     public Stream<SimilaritySummaryResult> overlapWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

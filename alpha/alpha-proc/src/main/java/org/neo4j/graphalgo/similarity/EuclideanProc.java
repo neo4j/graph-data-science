@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.impl.similarity.EuclideanConfigImpl;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -38,7 +39,10 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class EuclideanProc extends SimilarityProc<EuclideanAlgorithm, EuclideanConfig> {
 
+    public static final String EUCLIDEAN_DESCRIPTION = "Euclidean-similarity is an algorithm for finding similar nodes based on the euclidean distance";
+
     @Procedure(name = "gds.alpha.similarity.euclidean.stream", mode = READ)
+    @Description(EUCLIDEAN_DESCRIPTION)
     public Stream<SimilarityResult> euclideanStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -47,6 +51,7 @@ public class EuclideanProc extends SimilarityProc<EuclideanAlgorithm, EuclideanC
     }
 
     @Procedure(name = "gds.alpha.similarity.euclidean.write", mode = WRITE)
+    @Description(EUCLIDEAN_DESCRIPTION)
     public Stream<SimilaritySummaryResult> euclideanWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
