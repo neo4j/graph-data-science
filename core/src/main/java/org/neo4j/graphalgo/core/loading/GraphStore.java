@@ -136,10 +136,6 @@ public final class GraphStore {
         forEach(g -> g.canRelease(canRelease));
     }
 
-    public String getGraphType() {
-        return HugeGraph.TYPE;
-    }
-
     public long nodeCount() {
         return graphs
                 .values().stream()

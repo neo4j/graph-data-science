@@ -82,10 +82,6 @@ public final class GraphStoreCatalog {
         graph.release();
     }
 
-    public static @Nullable String getType(String username, String graphName) {
-        return getUserCatalog(username).getType(graphName);
-    }
-
     private static UserCatalog getUserCatalog(String username) {
         return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
     }
@@ -185,13 +181,6 @@ public final class GraphStoreCatalog {
                 return null;
             }
             return graphsByName.remove(graphName);
-        }
-
-        @Nullable
-        String getType(String graphName) {
-            if (graphName == null) return null;
-            GraphStore graph = graphsByName.get(graphName).graphStore();
-            return graph == null ? null : graph.getGraphType();
         }
 
         Map<GraphCreateConfig, Graph> getLoadedGraphs() {
