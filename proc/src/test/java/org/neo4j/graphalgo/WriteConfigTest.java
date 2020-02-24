@@ -61,11 +61,11 @@ public interface WriteConfigTest<CONFIG extends WriteConfig & AlgoBaseConfig, RE
     default void testWriteConfig() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
             "writeProperty", "writeProperty",
-            "writeConcurrency", 42
+            "writeConcurrency", 3
         ));
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertEquals("writeProperty", config.writeProperty());
-        assertEquals(42, config.writeConcurrency());
+        assertEquals(3, config.writeConcurrency());
     }
 
     default void checkMillisSet(Result.ResultRow row) {

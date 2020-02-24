@@ -19,12 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
 
 import java.util.AbstractCollection;
@@ -73,6 +75,12 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStreamConsume;
 
 final class ParallelUtilTest {
 
+    @BeforeEach
+    @AfterEach
+    void reset() {
+        ForkJoinPools.reset();
+    }
+
     @Test
     void shouldParallelizeStreams() {
         long firstNum = 1;
@@ -80,7 +88,9 @@ final class ParallelUtilTest {
 
         List<Long> list = LongStream.rangeClosed(firstNum, lastNum).boxed().collect(Collectors.toList());
 
-        ForkJoinPool pool = Pools.FJ_POOL;
+        // set unlimited
+        ConcurrencyMonitor.instance().setUnlimited();
+        ForkJoinPool expectedPool = ForkJoinPools.instance().getPool();
         ForkJoinPool commonPool = ForkJoinPool.commonPool();
         Stream<Long> stream = list.stream();
 
@@ -89,7 +99,7 @@ final class ParallelUtilTest {
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-            assertSame(threadPool, pool);
+            assertSame(threadPool, expectedPool);
             assertNotSame(threadPool, commonPool);
 
             return s.reduce(0L, Long::sum);

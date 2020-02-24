@@ -56,7 +56,6 @@ public final class Pools {
 
     public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createDefaultSingleThreadPool();
-    public static final ForkJoinPool FJ_POOL = createFJPool();
 
     private Pools() {
         throw new UnsupportedOperationException();
@@ -76,14 +75,6 @@ public final class Pools {
 
     public static ExecutorService createDefaultSingleThreadPool() {
         return Executors.newSingleThreadExecutor(NamedThreadFactoryProxy.daemon());
-    }
-
-    private static ForkJoinPool createFJPool() {
-        return createFJPool(CORE_POOL_SIZE);
-    }
-
-    static ForkJoinPool createFJPool(int concurrency) {
-        return new ForkJoinPool(concurrency);
     }
 
     static class CallerBlocksPolicy implements RejectedExecutionHandler {

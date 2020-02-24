@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -33,10 +34,10 @@ import static org.neo4j.graphalgo.config.ConcurrencyValidation.CORE_LIMITATION_S
 
 public final class TestDatabaseCreator {
 
+    private TestDatabaseCreator() {}
+
     public static GraphDatabaseAPI createTestDatabase() {
-        return (GraphDatabaseAPI) new TestGraphDatabaseFactory()
-            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
-            .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
+        return (GraphDatabaseAPI) dbBuilder().setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
             .newGraphDatabase();
     }
 
@@ -46,6 +47,12 @@ public final class TestDatabaseCreator {
             .setConfig(GraphDatabaseSettings.load_csv_file_url_root, value)
             .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
             .newGraphDatabase();
+    }
+
+    public static GraphDatabaseAPI createTestDatabase(Consumer<GraphDatabaseBuilder> configuration) {
+        GraphDatabaseBuilder builder = dbBuilder();
+        configuration.accept(builder);
+        return (GraphDatabaseAPI) builder.newGraphDatabase();
     }
 
     public static GraphDatabaseAPI createUnlimitedConcurrencyTestDatabase() {
@@ -61,4 +68,15 @@ public final class TestDatabaseCreator {
     public static GraphDatabaseAPI createTestDatabase(File storeDir) {
         return (GraphDatabaseAPI) new TestGraphDatabaseFactory().newEmbeddedDatabase(storeDir);
     }
+
+    private static GraphDatabaseBuilder dbBuilder() {
+        return dbBuilder(new File(UUID.randomUUID().toString()));
+    }
+
+    private static GraphDatabaseBuilder dbBuilder(File storeDir) {
+        return new TestGraphDatabaseFactory()
+            .addKernelExtension(new ConcurrencyControllerExtension())
+            .newImpermanentDatabaseBuilder(storeDir);
+    }
+
 }

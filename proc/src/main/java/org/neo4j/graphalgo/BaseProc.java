@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
+import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -54,9 +55,6 @@ public abstract class BaseProc {
 
     @Context
     public ProcedureCallContext callContext;
-
-    @Context
-    public DependencyResolver resolver;
 
     protected String getUsername() {
         return transaction.subjectOrAnonymous().username();
@@ -95,13 +93,6 @@ public abstract class BaseProc {
 
     protected void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
         cypherConfig.withoutAny(config.configKeys()).requireEmpty();
-
-        boolean unlimitedCores = resolver
-            .resolveDependency(Configuration.class, DependencyResolver.SelectionStrategy.ONLY)
-            .get(CORE_LIMITATION_SETTING);
-        if (!unlimitedCores) {
-            config.validateConcurrency();
-        }
     }
 
     protected void validateGraphName(String username, String graphName) {

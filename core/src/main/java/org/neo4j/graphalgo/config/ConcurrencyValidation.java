@@ -19,7 +19,8 @@
  */
 package org.neo4j.graphalgo.config;
 
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.kernel.configuration.Settings;
 
@@ -33,8 +34,12 @@ public interface ConcurrencyValidation {
 
     int CONCURRENCY_LIMITATION = 4;
 
-    @Configuration.Ignore
+    @Value.Check
     default void validateConcurrency() {
+        if (ConcurrencyMonitor.instance().isUnlimited()) {
+            // do nothing
+            return;
+        }
         if (this instanceof WriteConfig) {
             WriteConfig wc = (WriteConfig) this;
             Validator.validate(wc.concurrency());
