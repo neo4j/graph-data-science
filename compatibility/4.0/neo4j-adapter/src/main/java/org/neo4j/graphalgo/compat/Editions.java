@@ -26,6 +26,8 @@ public final class Editions {
     }
 
     public static boolean isEnterprise() {
+        // TODO: #jdk11
+        //  return Editions.class.getClassLoader().getDefinedPackage("org.neo4j.kernel.impl.enterprise") != null;
         return Package.getPackage("org.neo4j.kernel.impl.enterprise") != null;
     }
 }

@@ -82,7 +82,7 @@ public class PrimitiveIntStack implements PrimitiveIntCollection {
     }
 
     @Override
-    public void visitKeys(PrimitiveIntVisitor visitor) {
+    public <E extends Exception> void visitKeys(PrimitiveIntVisitor<E> visitor) throws E {
         throw new UnsupportedOperationException("Please implement");
     }
 
