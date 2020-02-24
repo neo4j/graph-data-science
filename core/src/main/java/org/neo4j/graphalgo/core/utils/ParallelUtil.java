@@ -94,7 +94,9 @@ public final class ParallelUtil {
 
     /**
      * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}
+     * @deprecated Use {@link org.neo4j.graphalgo.core.utils.ParallelUtil#parallelStreamConsume(java.util.stream.BaseStream, int, java.util.function.Consumer)} instead.
      */
+    @Deprecated
     public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, Consumer<T> fn) {
         parallelStreamConsume(data, AlgoBaseConfig.DEFAULT_CONCURRENCY, fn);
     }
@@ -115,8 +117,8 @@ public final class ParallelUtil {
         }
     }
 
-    public static void parallelForEachNode(Graph graph, LongConsumer consumer) {
-        parallelStreamConsume(LongStream.range(0, graph.nodeCount()), (stream) -> {
+    public static void parallelForEachNode(Graph graph, int concurrency, LongConsumer consumer) {
+        parallelStreamConsume(LongStream.range(0, graph.nodeCount()), concurrency, (stream) -> {
             stream.forEach(consumer);
         });
     }

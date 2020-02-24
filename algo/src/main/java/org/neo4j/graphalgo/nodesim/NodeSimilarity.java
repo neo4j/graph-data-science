@@ -238,6 +238,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
         ParallelUtil.parallelStreamConsume(
             loggableAndTerminatableNodeStream(),
+            config.concurrency(),
             stream -> stream
                 .forEach(node1 -> {
                     long[] vector1 = vectors.get(node1);

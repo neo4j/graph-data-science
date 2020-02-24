@@ -251,6 +251,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         // apply communityWeight updates to communityWeights
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, nodeCount),
+            concurrency,
             stream -> stream.forEach(nodeId -> {
                 final double update = communityWeightUpdates.get(nodeId);
                 communityWeights.update(nodeId, w -> w + update);
