@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -33,7 +33,7 @@ public class GraphExistsProc extends CatalogProc {
     @Description("Checks if a graph exists in the catalog.")
     public Stream<GraphExistsResult> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
         validateGraphName(graphName);
-        return Stream.of(new GraphExistsResult(graphName, GraphCatalog.exists(getUsername(), graphName)));
+        return Stream.of(new GraphExistsResult(graphName, GraphStoreCatalog.exists(getUsername(), graphName)));
     }
 
     public static class GraphExistsResult {

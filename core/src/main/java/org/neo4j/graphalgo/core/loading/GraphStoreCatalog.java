@@ -31,15 +31,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public final class GraphCatalog {
+public final class GraphStoreCatalog {
 
-    private static final ConcurrentHashMap<String, UserCatalog> userGraphCatalogs = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
 
-    private GraphCatalog() { }
+    private GraphStoreCatalog() { }
 
     public static void set(GraphCreateConfig config, GraphStore graphStore) {
         graphStore.canRelease(false);
-        userGraphCatalogs.compute(config.username(), (user, userCatalog) -> {
+        userCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
             }
@@ -87,11 +87,11 @@ public final class GraphCatalog {
     }
 
     private static UserCatalog getUserCatalog(String username) {
-        return userGraphCatalogs.getOrDefault(username, UserCatalog.EMPTY);
+        return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
     }
 
     public static void removeAllLoadedGraphs() {
-        userGraphCatalogs.clear();
+        userCatalogs.clear();
     }
 
     public static Map<GraphCreateConfig, Graph> getLoadedGraphs(String username) {

@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
@@ -127,7 +127,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             String graphName = config.graphName().get();
 
             // TODO get the dimensions from the graph itself.
-            GraphCreateConfig graphCreateConfig = GraphCatalog
+            GraphCreateConfig graphCreateConfig = GraphStoreCatalog
                 .getLoadedGraphs(getUsername())
                 .keySet()
                 .stream()
@@ -189,7 +189,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         List<String> relationshipTypes;
 
         if (maybeGraphName.isPresent()) {
-            graphCandidate = GraphCatalog.get(getUsername(), maybeGraphName.get());
+            graphCandidate = GraphStoreCatalog.get(getUsername(), maybeGraphName.get());
             relationshipTypes = config.relationshipTypes();
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();

@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -84,7 +84,7 @@ public final class GraphGenerateProc extends BaseProc {
     ) {
         GraphGenerationStats stats = new GraphGenerationStats(name, averageDegree, config);
 
-        if (GraphCatalog.exists(getUsername(), name)) {
+        if (GraphStoreCatalog.exists(getUsername(), name)) {
             throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded.", name));
         }
 
@@ -104,7 +104,7 @@ public final class GraphGenerateProc extends BaseProc {
 
             stats.nodes = graphStore.nodeCount();
             stats.relationships = graphStore.relationshipCount();
-            GraphCatalog.set(GraphCreateFromStoreConfig.emptyWithName(getUsername(), name), graphStore);
+            GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName(getUsername(), name), graphStore);
         }
 
         return stats;

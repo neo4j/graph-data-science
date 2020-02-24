@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.compat.TransactionWrapper;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -83,7 +83,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     @AfterEach
     default void removeAllLoadedGraphs() {
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     Class<? extends AlgoBaseProc<?, RESULT, CONFIG>> getProcedureClazz();
@@ -192,7 +192,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             : GraphCreateFromCypherConfig.emptyWithName("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphCatalog.set(
+            GraphStoreCatalog.set(
                 graphCreateConfig,
                 graphLoader(graphCreateConfig).build(graphFactory).build().graphStore()
             );
@@ -247,7 +247,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             : GraphCreateFromCypherConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphCatalog.set(
+            GraphStoreCatalog.set(
                 graphCreateConfig,
                 graphLoader(graphCreateConfig).build(graphFactory).build().graphStore()
             );

@@ -25,7 +25,7 @@ import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -60,7 +60,7 @@ public class BaseProcTest {
 
     @AfterAll
     static void clearLoadedGraphs() {
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     protected void registerFunctions(Class<?>... functionClasses) throws KernelException {
@@ -383,7 +383,7 @@ public class BaseProcTest {
     }
 
     protected Graph findLoadedGraph(String graphName) {
-        return GraphCatalog
+        return GraphStoreCatalog
             .getLoadedGraphs("")
             .entrySet()
             .stream()
@@ -394,7 +394,7 @@ public class BaseProcTest {
     }
 
     private Set<Graph> getLoadedGraphs(String graphName) {
-        return GraphCatalog
+        return GraphStoreCatalog
                 .getLoadedGraphs("")
                 .entrySet()
                 .stream()

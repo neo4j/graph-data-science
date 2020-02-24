@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -170,7 +170,7 @@ public class GraphCreateProc extends CatalogProc {
                 .withNodeProjections(catalogConfig.nodeProjections())
                 .withRelationshipProjections(catalogConfig.relationshipProjections());
 
-            GraphCatalog.set(catalogConfig, graphStore);
+            GraphStoreCatalog.set(catalogConfig, graphStore);
         }
 
         return builder.build();

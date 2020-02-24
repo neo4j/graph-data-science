@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -125,7 +125,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
                 .build(HugeGraphFactory.class)
                 .build()
                 .graphStore();
-            GraphCatalog.set(graphCreateConfig, graphStore);
+            GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
                 "nodeWeightProperty",
@@ -196,7 +196,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
             .build()
             .graphStore();
 
-        GraphCatalog.set(graphCreateConfig, graphStore);
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
         db.shutdown();
     }
 }

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 abstract class K1ColoringProcBaseTest extends BaseProcTest {
     private final String DB_CYPHER =
@@ -48,7 +48,7 @@ abstract class K1ColoringProcBaseTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     GdsCypher.ModeBuildStage algoBuildStage() {

@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -64,10 +64,10 @@ class MultiGraphCreateTest {
         runQuery(db, "CREATE (a:Node2), (b:Node2), (b)-[:TYPE2]->(a)");
         runQuery(db, create2);
 
-        Graph graph1 = GraphCatalog.get("", "graph1", "TYPE1", Optional.empty());
+        Graph graph1 = GraphStoreCatalog.get("", "graph1", "TYPE1", Optional.empty());
         assertGraph(graph1);
 
-        Graph graph2 = GraphCatalog.get("", "graph2", "TYPE2", Optional.empty());
+        Graph graph2 = GraphStoreCatalog.get("", "graph2", "TYPE2", Optional.empty());
         assertGraph(graph2);
     }
 

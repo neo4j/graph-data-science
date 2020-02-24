@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.config.BaseConfig;
@@ -92,7 +92,7 @@ public abstract class BaseProc {
 
     protected void validateGraphName(String username, String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
-        if (GraphCatalog.exists(username, graphName)) {
+        if (GraphStoreCatalog.exists(username, graphName)) {
             throw new IllegalArgumentException(String.format(
                 "A graph with name '%s' already exists.",
                 graphName

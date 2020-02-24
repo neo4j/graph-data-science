@@ -47,7 +47,7 @@ import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-class GraphCatalogTest {
+class GraphStoreCatalogTest {
 
     private GraphDatabaseAPI db;
 
@@ -64,7 +64,7 @@ class GraphCatalogTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @ParameterizedTest(name = "{0}")
@@ -82,9 +82,9 @@ class GraphCatalogTest {
 
         final GraphCreateConfig graphCreateConfig = graphLoader.createConfig();
 
-        GraphCatalog.set(graphCreateConfig, graphStore);
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
-        Graph filteredGraph = GraphCatalog.get("", "myGraph").graphStore().getGraphProjection(relTypes, relProperty);
+        Graph filteredGraph = GraphStoreCatalog.get("", "myGraph").graphStore().getGraphProjection(relTypes, relProperty);
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
     }

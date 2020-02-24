@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -36,7 +36,7 @@ public class GraphDropProc extends CatalogProc {
         validateGraphName(graphName);
 
         AtomicReference<GraphInfo> result = new AtomicReference<>();
-        GraphCatalog.remove(getUsername(), graphName, (removedGraph) -> {
+        GraphStoreCatalog.remove(getUsername(), graphName, (removedGraph) -> {
             result.set(new GraphInfo(removedGraph.config(), removedGraph.getGraph(), computeHistogram()));
         });
 
