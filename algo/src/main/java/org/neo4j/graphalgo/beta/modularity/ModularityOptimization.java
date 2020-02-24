@@ -207,6 +207,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         final ThreadLocal<RelationshipIterator> graphCopy = ThreadLocal.withInitial(graph::concurrentCopy);
         double doubleTotalNodeWeight = ParallelUtil.parallelStream(
             LongStream.range(0, nodeCount),
+            concurrency,
             nodeStream ->
                 nodeStream.mapToDouble(nodeId -> {
                     // Note: this map function has side effects - For performance reasons!!!11!
@@ -295,6 +296,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private double calculateModularity() {
         double ex = ParallelUtil.parallelStream(
             LongStream.range(0, nodeCount),
+            concurrency,
             nodeStream ->
                 nodeStream
                     .mapToDouble(nodeCommunityInfluences::get)
@@ -304,6 +306,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         double ax = ParallelUtil.parallelStream(
             LongStream.range(0, nodeCount),
+            concurrency,
             nodeStream ->
                 nodeStream
                     .mapToDouble(nodeId -> Math.pow(communityWeights.get(nodeId), 2.0))

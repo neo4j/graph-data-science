@@ -196,7 +196,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         progressLogger.log("NodeSimilarity#computeAllParallel");
 
         return ParallelUtil.parallelStream(
-            loggableAndTerminatableNodeStream(), stream -> stream
+            loggableAndTerminatableNodeStream(), config.concurrency(), stream -> stream
                 .boxed()
                 .flatMap(node1 -> {
                     long[] vector1 = vectors.get(node1);

@@ -71,7 +71,9 @@ public final class ParallelUtil {
 
     /**
      * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}.
+     * @deprecated Use {@link ParallelUtil#parallelStream(java.util.stream.BaseStream, int, java.util.function.Function)} instead.
      */
+    @Deprecated
     public static <T extends BaseStream<?, T>, R> R parallelStream(T data, Function<T, R> fn) {
         return parallelStream(data, AlgoBaseConfig.DEFAULT_CONCURRENCY, fn);
     }
