@@ -39,6 +39,9 @@ import java.util.function.Supplier;
 
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
+/**
+ * QueryRunner does not live in compat package (for now) to reduce the amount of tests that need to change
+ */
 public final class QueryRunner {
 
     private QueryRunner() {}
@@ -107,7 +110,7 @@ public final class QueryRunner {
      * This is to be used with caution;
      * Callers have to consume the Result and/or use try-catch resource block.
      */
-    static Result runQueryWithoutClosing(GraphDatabaseService db, String query, Map<String, Object> params) {
+    public static Result runQueryWithoutClosing(GraphDatabaseService db, String query, Map<String, Object> params) {
         return db.execute(query, params);
     }
 

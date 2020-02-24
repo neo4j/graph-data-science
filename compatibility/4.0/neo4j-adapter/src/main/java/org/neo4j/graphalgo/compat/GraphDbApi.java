@@ -17,11 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.compat;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.ResultTransformer;
@@ -42,13 +43,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public final class TestDatabaseApi implements GraphDatabaseAPI {
+public final class GraphDbApi implements GraphDatabaseAPI {
     private static final String DB_NAME = GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
     private final GraphDatabaseAPI api;
     private final DatabaseManagementService dbms;
 
-    TestDatabaseApi(DatabaseManagementService dbms) {
+    public GraphDbApi(DatabaseManagementService dbms) {
         this.api = (GraphDatabaseAPI) dbms.database(DB_NAME);
         this.dbms = dbms;
     }

@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.compat;
 
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -48,10 +49,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public final class TestDatabaseApi implements GraphDatabaseAPI {
+public final class GraphDbApi implements GraphDatabaseAPI {
     private final GraphDatabaseAPI api;
 
-    TestDatabaseApi(GraphDatabaseAPI api) {
+    public GraphDbApi(GraphDatabaseAPI api) {
         this.api = api;
     }
 

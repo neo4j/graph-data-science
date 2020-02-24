@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.annotation.IdenticalCompat;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 
@@ -28,7 +29,7 @@ import java.util.function.Consumer;
 @IdenticalCompat
 public class AlgoTestBase {
 
-    public TestDatabaseApi db;
+    public GraphDbApi db;
 
     protected void runQuery(String query) {
         db.runQuery(query);

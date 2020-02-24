@@ -85,7 +85,7 @@ class NeoExportTest {
         NeoExport neoExport = new NeoExport(inputGraph, config);
         neoExport.runFromTests();
 
-        GraphDatabaseAPI exportDb = TestDatabaseCreator.createTestDatabase(tempDir);
+        GraphDatabaseAPI exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
         Graph outputGraph = loaderBuilder.api(exportDb).build().graph(NativeFactory.class);
 
         assertGraphEquals(inputGraph, outputGraph);
@@ -113,7 +113,7 @@ class NeoExportTest {
         NeoExport neoExport = new NeoExport(inputGraph, config);
         neoExport.runFromTests();
 
-        GraphDatabaseAPI exportDb = TestDatabaseCreator.createTestDatabase(tempDir);
+        GraphDatabaseAPI exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
         Graph outputGraph = loaderBuilder.api(exportDb).build().graph(NativeFactory.class);
 
         assertGraphEquals(inputGraph, outputGraph);

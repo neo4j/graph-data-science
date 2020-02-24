@@ -20,111 +20,70 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.io.File;
 import java.util.UUID;
 
-<<<<<<< HEAD:public/compatibility/3.5/test-utils/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
 import static org.neo4j.graphalgo.config.ConcurrencyValidation.CORE_LIMITATION_SETTING;
 
 public final class TestDatabaseCreator {
 
-    private TestDatabaseCreator() {}
-||||||| parent of 24632e814... Split test-utils out of compat:public/compatibility/3.5/test-utils/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
-public class TestDatabaseCreator {
-=======
-public final class TestDatabaseCreator {
->>>>>>> 24632e814... Split test-utils out of compat:public/compatibility/3.5/test-utils-adapter/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
-
-<<<<<<< HEAD:public/compatibility/3.5/test-utils/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
-    public static GraphDatabaseAPI createTestDatabase() {
-        return (GraphDatabaseAPI) dbBuilder().setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
-||||||| parent of 24632e814... Split test-utils out of compat:public/compatibility/3.5/test-utils/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
-    public static GraphDatabaseAPI createTestDatabase() {
-        return (GraphDatabaseAPI) new TestGraphDatabaseFactory()
-            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
-            .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
-=======
-    public static TestDatabaseApi createTestDatabase() {
-        return new TestDatabaseApi(createDefault());
+    public static GraphDbApi createTestDatabase() {
+        return new GraphDbApi(createDefault());
     }
 
-    public static GraphDatabaseAPI createTestDatabaseWithCustomLoadCsvRoot(String value) {
-        return new TestDatabaseApi(createWithCustomLoadCsvRoot(value));
+    public static GraphDbApi createTestDatabaseWithCustomLoadCsvRoot(String value) {
+        return new GraphDbApi(createWithCustomLoadCsvRoot(value));
     }
 
-    public static GraphDatabaseAPI createTestDatabase(LogProvider logProvider) {
-        return new TestDatabaseApi(createWithLogger(logProvider));
+    public static GraphDbApi createUnlimitedConcurrencyTestDatabase() {
+        return new GraphDbApi(createUnlimited());
     }
 
-    public static GraphDatabaseAPI createTestDatabase(File storeDir) {
-        return new TestDatabaseApi(createEmbedded(storeDir));
+    public static GraphDbApi createEmbeddedDatabase(File storeDir) {
+        return new GraphDbApi(createEmbedded(storeDir));
     }
 
     private static GraphDatabaseAPI createDefault() {
-        return (GraphDatabaseAPI) builder()
-            .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
->>>>>>> 24632e814... Split test-utils out of compat:public/compatibility/3.5/test-utils-adapter/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
-            .newGraphDatabase();
+        return (GraphDatabaseAPI) builder().newGraphDatabase();
     }
 
     private static GraphDatabaseAPI createWithCustomLoadCsvRoot(String value) {
         return (GraphDatabaseAPI) builder()
             .setConfig(GraphDatabaseSettings.load_csv_file_url_root, value)
-            .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*")
+            .newGraphDatabase();
+    }
+        
+    private static GraphDatabaseAPI createUnlimited() {
+        return (GraphDatabaseAPI) builder()
+            .setConfig(CORE_LIMITATION_SETTING, "true")
             .newGraphDatabase();
     }
 
-<<<<<<< HEAD:public/compatibility/3.5/test-utils/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
-    public static GraphDatabaseAPI createTestDatabase(Consumer<GraphDatabaseBuilder> configuration) {
-        GraphDatabaseBuilder builder = dbBuilder();
-        configuration.accept(builder);
-        return (GraphDatabaseAPI) builder.newGraphDatabase();
-    }
-
-    public static GraphDatabaseAPI createUnlimitedConcurrencyTestDatabase() {
-        return createTestDatabase(builder -> builder.setConfig(CORE_LIMITATION_SETTING, "true"));
-    }
-
-    public static GraphDatabaseAPI createTestDatabase(LogProvider logProvider) {
-||||||| parent of 24632e814... Split test-utils out of compat:public/compatibility/3.5/test-utils/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
-    public static GraphDatabaseAPI createTestDatabase(LogProvider logProvider) {
-=======
     private static GraphDatabaseAPI createWithLogger(LogProvider logProvider) {
->>>>>>> 24632e814... Split test-utils out of compat:public/compatibility/3.5/test-utils-adapter/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
         return (GraphDatabaseAPI) new TestGraphDatabaseFactory(logProvider)
+            .addKernelExtension(new ConcurrencyControllerExtension())
             .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
             .newGraphDatabase();
     }
 
     private static GraphDatabaseAPI createEmbedded(File storeDir) {
-        return (GraphDatabaseAPI) new TestGraphDatabaseFactory().newEmbeddedDatabase(storeDir);
-    }
-<<<<<<< HEAD:public/compatibility/3.5/test-utils/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
-
-    private static GraphDatabaseBuilder dbBuilder() {
-        return dbBuilder(new File(UUID.randomUUID().toString()));
-    }
-
-    private static GraphDatabaseBuilder dbBuilder(File storeDir) {
-        return new TestGraphDatabaseFactory()
+        return (GraphDatabaseAPI) new TestGraphDatabaseFactory()
             .addKernelExtension(new ConcurrencyControllerExtension())
-            .newImpermanentDatabaseBuilder(storeDir);
+            .newEmbeddedDatabase(storeDir);
     }
-
-||||||| parent of 24632e814... Split test-utils out of compat:public/compatibility/3.5/test-utils/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
-=======
 
     private static GraphDatabaseBuilder builder() {
         return new TestGraphDatabaseFactory()
-            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()));
+            .addKernelExtension(new ConcurrencyControllerExtension())
+            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
+            .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
     }
 
     private TestDatabaseCreator() {}
->>>>>>> 24632e814... Split test-utils out of compat:public/compatibility/3.5/test-utils-adapter/src/main/java/org/neo4j/graphalgo/TestDatabaseCreator.java
 }

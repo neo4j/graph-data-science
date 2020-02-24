@@ -22,8 +22,7 @@ package org.neo4j.graphalgo;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.SettingImpl;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.LogProvider;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import java.io.File;
@@ -34,20 +33,16 @@ import static java.util.Collections.singletonList;
 
 public final class TestDatabaseCreator {
 
-    public static TestDatabaseApi createTestDatabase() {
-        return new TestDatabaseApi(createDefault());
+    public static GraphDbApi createTestDatabase() {
+        return new GraphDbApi(createDefault());
     }
 
-    public static GraphDatabaseAPI createTestDatabaseWithCustomLoadCsvRoot(String value) {
-        return new TestDatabaseApi(createWithCustomLoadCsvRoot(value));
+    public static GraphDbApi createTestDatabaseWithCustomLoadCsvRoot(String value) {
+        return new GraphDbApi(createWithCustomLoadCsvRoot(value));
     }
 
-    public static GraphDatabaseAPI createTestDatabase(LogProvider logProvider) {
-        return new TestDatabaseApi(createWithLogger(logProvider));
-    }
-
-    public static GraphDatabaseAPI createTestDatabase(File storeDir) {
-        return new TestDatabaseApi(createEmbedded(storeDir));
+    public static GraphDbApi createEmbeddedDatabase(File storeDir) {
+        return new GraphDbApi(createEmbedded(storeDir));
     }
 
     private static DatabaseManagementService createDefault() {
@@ -63,10 +58,6 @@ public final class TestDatabaseCreator {
                 (((SettingImpl<Path>) GraphDatabaseSettings.load_csv_file_url_root)).parse(value))
             .setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"))
             .build();
-    }
-
-    private static DatabaseManagementService createWithLogger(LogProvider logProvider) {
-        return builder().setUserLogProvider(logProvider).build();
     }
 
     private static DatabaseManagementService createEmbedded(File storeDir) {
