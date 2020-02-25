@@ -134,6 +134,7 @@ public abstract class GraphStoreFactory implements Assessable {
                 Map<String, PropertyCSR> propertyMap = dimensions
                     .relationshipProperties()
                     .enumerate()
+                    .filter(pair -> pair.getTwo().exists())
                     .collect(Collectors.toMap(
                         propertyEntry -> propertyEntry.getTwo().propertyKey(),
                         propertyEntry -> {

@@ -179,16 +179,16 @@ public final class GraphStore {
         return relationships.keySet();
     }
 
-    public GraphStore merge(GraphStore inGraph) {
-        if (nodes != inGraph.nodes) {
+    public GraphStore merge(GraphStore other) {
+        if (nodes != other.nodes) {
             throw new IllegalArgumentException("Graph stores cannot be merged due to different id mappings.");
         }
 
         Map<String, CSR> mergedRelationships = new HashMap<>(relationships);
-        mergedRelationships.putAll(inGraph.relationships);
+        mergedRelationships.putAll(other.relationships);
 
         Map<String, Map<String, PropertyCSR>> mergedRelationshipProperties = new HashMap<>(relationshipProperties);
-        mergedRelationshipProperties.putAll(inGraph.relationshipProperties);
+        mergedRelationshipProperties.putAll(other.relationshipProperties);
 
         return GraphStore.of(nodes, nodeProperties, mergedRelationships, mergedRelationshipProperties, tracker);
     }

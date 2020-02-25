@@ -19,15 +19,14 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 @ValueClass
 public interface CSR {
-    @Nullable AdjacencyList list();
+    AdjacencyList list();
 
-    @Nullable AdjacencyOffsets offsets();
+    AdjacencyOffsets offsets();
 
     long elementCount();
 

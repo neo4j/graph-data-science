@@ -35,6 +35,7 @@ import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -105,23 +106,23 @@ public class HugeGraph implements Graph {
 
     public static HugeGraph create(
         AllocationTracker tracker,
-        IdMap idMapping,
+        IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        CSR topology,
-        Optional<PropertyCSR> properties
+        CSR relationships,
+        Optional<PropertyCSR> maybeRelationshipProperties
     ) {
         return new HugeGraph(
             tracker,
-            idMapping,
+            nodes,
             nodeProperties,
-            topology.elementCount(),
-            topology.list(),
-            topology.offsets(),
-            properties.isPresent(),
-            properties.map(PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
-            properties.map(PropertyCSR::list).orElse(null),
-            properties.map(PropertyCSR::offsets).orElse(null),
-            topology.orientation()
+            relationships.elementCount(),
+            relationships.list(),
+            relationships.offsets(),
+            maybeRelationshipProperties.isPresent(),
+            maybeRelationshipProperties.map(PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
+            maybeRelationshipProperties.map(PropertyCSR::list).orElse(null),
+            maybeRelationshipProperties.map(PropertyCSR::offsets).orElse(null),
+            relationships.orientation()
         );
     }
 
@@ -403,17 +404,23 @@ public class HugeGraph implements Graph {
 
     @Deprecated
     public GraphStore toGraphStore(String relationshipType, String propertyKey) {
-        return GraphStore.of(idMapping, nodeProperties,
-            singletonMap(relationshipType, CSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation)),
-            singletonMap(
+        Map<String, CSR> relationships = singletonMap(
+            relationshipType,
+            CSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation)
+        );
+
+        Map<String, Map<String, PropertyCSR>> relationshipProperties = Collections.emptyMap();
+        if (hasRelationshipProperty) {
+            relationshipProperties = singletonMap(
                 relationshipType,
                 singletonMap(
                     propertyKey,
                     PropertyCSR.of(properties, propertyOffsets, relationshipCount, orientation, defaultPropertyValue)
                 )
-            ),
-            tracker
-        );
+            );
+        }
+
+        return GraphStore.of(idMapping, nodeProperties, relationships, relationshipProperties, tracker);
     }
 
     private AdjacencyList.DecompressingCursor newAdjacencyCursor(AdjacencyList adjacency) {
