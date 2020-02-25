@@ -54,7 +54,6 @@ import java.util.stream.Collectors;
 public abstract class GraphStoreFactory implements Assessable {
 
     public static final String TASK_LOADING = "LOADING";
-    public static final String ANY_REL_TYPE = "";
 
     protected final ExecutorService threadPool;
     protected final GraphDatabaseAPI api;
@@ -134,25 +133,16 @@ public abstract class GraphStoreFactory implements Assessable {
                 Map<String, PropertyCSR> propertyMap = dimensions
                     .relationshipProperties()
                     .enumerate()
-                    .filter(pair -> pair.getTwo().exists())
+                    .filter(propertyIdAndMapping -> propertyIdAndMapping.getTwo().exists())
                     .collect(Collectors.toMap(
-                        propertyEntry -> propertyEntry.getTwo().propertyKey(),
-                        propertyEntry -> {
-                            int propertyIndex = propertyEntry.getOne();
-                            ResolvedPropertyMapping propertyMapping = propertyEntry.getTwo();
-
-                            AdjacencyList properties = relationshipsBuilder.properties(propertyIndex);
-                            AdjacencyOffsets propertyOffsets = relationshipsBuilder.globalPropertyOffsets(propertyIndex);
-                            double defaultValue = propertyMapping.defaultValue();
-
-                            return PropertyCSR.of(
-                                properties,
-                                propertyOffsets,
-                                relationshipCount,
-                                relationshipProjectionMapping.orientation(),
-                                defaultValue
-                            );
-                        }
+                        propertyIdAndMapping -> propertyIdAndMapping.getTwo().propertyKey(),
+                        propertyIdAndMapping -> PropertyCSR.of(
+                            relationshipsBuilder.properties(propertyIdAndMapping.getOne()),
+                            relationshipsBuilder.globalPropertyOffsets(propertyIdAndMapping.getOne()),
+                            relationshipCount,
+                            relationshipProjectionMapping.orientation(),
+                            propertyIdAndMapping.getTwo().defaultValue()
+                        )
                     ));
                 relationshipProperties.put(relationshipProjectionMapping.elementIdentifier(), propertyMap);
             }
