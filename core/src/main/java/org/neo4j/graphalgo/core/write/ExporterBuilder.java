@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLoggerAdapter;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -61,7 +60,7 @@ public abstract class ExporterBuilder<T> {
 
     public ExporterBuilder<T> parallel(ExecutorService es, int writeConcurrency) {
         this.executorService = es;
-        this.writeConcurrency = Pools.allowedConcurrency(writeConcurrency);
+        this.writeConcurrency = writeConcurrency;
         return this;
     }
 }
