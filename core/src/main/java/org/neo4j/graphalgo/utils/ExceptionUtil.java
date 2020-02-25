@@ -26,7 +26,7 @@ public final class ExceptionUtil {
     /**
      * Returns the root cause of an exception.
      *
-     * Copied from {@link org.neo4j.helpers.Exceptions#rootCause(Throwable)} due to deprecation.
+     * Copied from {@code org.neo4j.helpers.Exceptions#rootCause(Throwable)} due to deprecation.
      *
      * @param caughtException exception to find the root cause of.
      * @return the root cause.
@@ -46,7 +46,7 @@ public final class ExceptionUtil {
     /**
      * Adds the current exception to the initial exception as suppressed.
      *
-     * Copied from {@link org.neo4j.helpers.Exceptions#chain(Throwable, Throwable)} due to deprecation.
+     * Copied from {@code org.neo4j.helpers.Exceptions#chain(Throwable, Throwable)} due to deprecation.
      */
     public static <T extends Throwable> T chain(T initial, T current) {
         if (initial == null) {

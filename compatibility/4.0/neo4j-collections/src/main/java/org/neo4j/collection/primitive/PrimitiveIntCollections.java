@@ -79,7 +79,7 @@ public class PrimitiveIntCollections {
          * This method returns {@code true} so that it can be used in short-hand conditionals
          * (TODO what are they called?), like:
          * <pre>
-         * @Override
+         * {@literal @}Override
          * protected boolean fetchNext()
          * {
          *     return source.hasNext() ? next( source.next() ) : false;
