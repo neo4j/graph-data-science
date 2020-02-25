@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("SampledBetweennessCentralityConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface SampledBetweennessCentralityConfig extends BaseBetweennessCentralityConfig {
 
     @Value.Default

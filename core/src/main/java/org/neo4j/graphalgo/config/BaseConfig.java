@@ -29,7 +29,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+@SuppressWarnings("immutables:subtype")
 public interface BaseConfig extends ConcurrencyValidation {
+
     @Configuration.Parameter
     @Value.Default
     default String username() {

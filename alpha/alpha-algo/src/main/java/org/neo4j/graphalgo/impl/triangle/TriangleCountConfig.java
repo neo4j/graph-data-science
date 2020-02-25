@@ -32,6 +32,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("TriangleCountConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface TriangleCountConfig extends TriangleConfig, WriteConfig {
 
     @Override

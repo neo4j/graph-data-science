@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("LabelPropagationWriteConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface LabelPropagationWriteConfig extends LabelPropagationBaseConfig, WriteConfig {
 
     static LabelPropagationWriteConfig of(

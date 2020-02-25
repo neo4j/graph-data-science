@@ -124,7 +124,7 @@ public final class QueryRunner {
      * This is to be used with caution;
      * Callers have to consume the Result and/or use try-catch resource block.
      */
-    static Result runQueryWithoutClosing(GraphDatabaseService db, String query, Map<String, Object> params) {
+    public static Result runQueryWithoutClosing(GraphDatabaseService db, String query, Map<String, Object> params) {
         try (Transaction tx = db.beginTx()) {
             try {
                 return tx.execute(query, params);

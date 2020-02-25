@@ -28,6 +28,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("LouvainStreamConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface LouvainStreamConfig extends LouvainBaseConfig {
 
     static LouvainStreamConfig of(

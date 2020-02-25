@@ -30,6 +30,7 @@ import java.util.Optional;
 
 @Configuration("ModularityOptimizationWriteConfigImpl")
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface ModularityOptimizationWriteConfig extends ModularityOptimizationConfig, WriteConfig {
 
     static ModularityOptimizationWriteConfig of(

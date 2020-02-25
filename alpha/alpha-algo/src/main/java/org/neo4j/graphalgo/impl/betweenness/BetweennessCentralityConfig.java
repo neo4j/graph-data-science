@@ -28,6 +28,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("BetweennessCentralityConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface BetweennessCentralityConfig extends BaseBetweennessCentralityConfig {
 
     static BetweennessCentralityConfig of(

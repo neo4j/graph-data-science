@@ -28,6 +28,7 @@ import java.util.Map;
 
 @ValueClass
 @Configuration("JaccardConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface JaccardConfig extends SimilarityConfig {
 
     @Override

@@ -89,6 +89,7 @@ abstract class DocTestBase extends BaseProcTest {
         asciidoctor.loadFile(file, Collections.emptyMap());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void assertCypherResult(String query, List<Map<String, Object>> expected) {
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
@@ -118,7 +119,6 @@ abstract class DocTestBase extends BaseProcTest {
                 expectedRow.forEach((key, expectedValue) -> {
                     Matcher<Object> matcher;
                     if (expectedValue instanceof Matcher) {
-                        //noinspection unchecked
                         matcher = (Matcher<Object>) expectedValue;
                     } else {
                         matcher = equalTo(expectedValue);

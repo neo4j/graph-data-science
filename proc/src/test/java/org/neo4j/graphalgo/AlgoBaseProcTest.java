@@ -117,7 +117,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         withKernelTransaction(graphDb(), tx -> {
             AlgoBaseProc<?, RESULT, CONFIG> proc;
             try {
-                proc = getProcedureClazz().newInstance();
+                proc = getProcedureClazz().getDeclaredConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException("Could not instantiate Procedure Class " + getProcedureClazz().getSimpleName());
             }
@@ -160,7 +160,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             assertEquals(expectedNodeProjections, actual.nodeProjections());
             assertEquals(expectedRelationshipProjections, actual.relationshipProjections());
             assertEquals(IMPLICIT_GRAPH_NAME, actual.graphName());
-            assertEquals(TEST_USERNAME, actual.username());;
+            assertEquals(TEST_USERNAME, actual.username());
         });
     }
 
@@ -286,7 +286,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                     Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
 
                     try {
-                        Stream<?> result = (Stream) method.invoke(proc, configMap, Collections.emptyMap());
+                        Stream<?> result = (Stream<?>) method.invoke(proc, configMap, Collections.emptyMap());
 
                         if (getProcedureMethodName(method).endsWith("stream")) {
                             assertEquals(0, result.count(), "Stream result should be empty.");

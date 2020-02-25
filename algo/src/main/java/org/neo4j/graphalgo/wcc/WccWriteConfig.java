@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("WccWriteConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface WccWriteConfig extends WccBaseConfig, WriteConfig {
 
     static WccWriteConfig of(

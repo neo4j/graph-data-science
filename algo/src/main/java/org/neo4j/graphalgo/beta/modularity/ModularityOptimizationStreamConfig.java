@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @Configuration("ModularityOptimizationStreamConfigImpl")
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface ModularityOptimizationStreamConfig extends ModularityOptimizationConfig {
 
     static ModularityOptimizationStreamConfig of(

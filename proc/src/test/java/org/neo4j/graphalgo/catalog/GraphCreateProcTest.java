@@ -1280,7 +1280,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failsOnInvalidNeoLabel() {
         String name = "g";
-        Map nodeProjection = map("A", map(LABEL_KEY, "INVALID"));
+        Map<String, Object> nodeProjection = map("A", map(LABEL_KEY, "INVALID"));
 
         assertError(
             "CALL gds.graph.create($name, $nodeProjection, '*')",
@@ -1293,7 +1293,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void failsOnInvalidAggregation() {
-        Map relProjection = map("A", map(TYPE_KEY, "REL", AGGREGATION_KEY, "INVALID"));
+        Map<String, Object> relProjection = map("A", map(TYPE_KEY, "REL", AGGREGATION_KEY, "INVALID"));
 
         assertError(
             "CALL gds.graph.create('g', '*', $relProjection)",
@@ -1304,7 +1304,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void failsOnInvalidProjection() {
-        Map relProjection = map("A", map(TYPE_KEY, "REL", ORIENTATION_KEY, "INVALID"));
+        Map<String, Object> relProjection = map("A", map(TYPE_KEY, "REL", ORIENTATION_KEY, "INVALID"));
 
         assertError(
             "CALL gds.graph.create('g', '*', $relProjection)",

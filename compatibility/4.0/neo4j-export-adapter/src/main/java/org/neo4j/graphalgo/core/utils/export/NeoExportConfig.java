@@ -31,13 +31,14 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 @IdenticalCompat
 @ValueClass
 @Configuration("NeoExportConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface NeoExportConfig extends BaseConfig {
 
     String storeDir();
 
     String dbName();
 
-    @Value
+    @Value.Default
     default boolean enableDebugLog() {
         return false;
     }

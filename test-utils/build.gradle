@@ -9,10 +9,10 @@ dependencies {
     annotationProcessor group: 'org.immutables',  name: 'value',       version: ver.'immutables'
 
     compileOnly group: 'org.immutables',          name: 'builder',     version: ver.'immutables'
-    compileOnly group: 'org.jetbrains',           name: 'annotations', version: ver.'jetbrains-annotations'
 
     compile project(':algo-common')
     compile project(':test-utils-adapter')
     compile platform(dep.junit5bom)
     compile dep.junit5jupiter
+    compile group: 'org.jetbrains',           name: 'annotations', version: ver.'jetbrains-annotations'
 }

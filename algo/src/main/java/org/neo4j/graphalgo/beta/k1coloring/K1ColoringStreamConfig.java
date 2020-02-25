@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @Configuration("K1ColoringStreamConfigImpl")
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 interface K1ColoringStreamConfig extends K1ColoringConfig {
 
     static K1ColoringStreamConfig of(

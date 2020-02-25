@@ -107,7 +107,7 @@ class TraverseProcTest extends BaseProcTest {
             .yields("nodeIds");
 
         runQueryWithRowConsumer(query, row -> {
-            List<Long> nodeIds = (List<Long>) row.get("nodeIds");
+            @SuppressWarnings("unchecked") List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertEquals(4, nodeIds.size());
         });
     }
@@ -124,7 +124,7 @@ class TraverseProcTest extends BaseProcTest {
             .addParameter("maxDepth", 2)
             .yields("nodeIds");
         runQueryWithRowConsumer(query, row -> {
-            List<Long> nodeIds = (List<Long>) row.get("nodeIds");
+            @SuppressWarnings("unchecked") List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"a", "b", "c", "d"}, nodeIds);
         });
     }
@@ -141,7 +141,7 @@ class TraverseProcTest extends BaseProcTest {
             .addParameter("maxDepth", 2)
             .yields("nodeIds");
         runQueryWithRowConsumer(query, row -> {
-            List<Long> nodeIds = (List<Long>) row.get("nodeIds");
+            @SuppressWarnings("unchecked") List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"g", "e", "f", "d"}, nodeIds);
         });
     }

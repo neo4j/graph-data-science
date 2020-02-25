@@ -37,7 +37,7 @@ public interface NeoExportConfig extends BaseConfig {
 
     String dbName();
 
-    @Value
+    @Value.Default
     default boolean enableDebugLog() {
         return false;
     }

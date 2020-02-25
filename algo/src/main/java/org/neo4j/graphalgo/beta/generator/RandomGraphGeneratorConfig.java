@@ -32,6 +32,7 @@ import java.util.Map;
 
 @ValueClass
 @Configuration("RandomGraphGeneratorConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface RandomGraphGeneratorConfig extends BaseConfig {
 
     String RELATIONSHIP_SEED_KEY = "relationshipSeed";

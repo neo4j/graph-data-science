@@ -32,46 +32,40 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("RandomWalkConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface RandomWalkConfig extends AlgoBaseConfig {
 
-    @Value
     @Value.Default
     default @Nullable Object start() {
         return null;
     }
 
-    @Value
     @Value.Default
     default long steps() {
         return 10L;
     }
 
-    @Value
     @Value.Default
     default long walks() {
         return 1L;
     }
 
-    @Value
     @Value.Default
     default String mode() {
         return "random";
     }
 
-    @Value
     @Value.Default
     @Configuration.Key(value = "return")
     default double returnKey() {
         return 1.0D;
     }
 
-    @Value
     @Value.Default
     default double inOut() {
         return 1.0D;
     }
 
-    @Value
     @Value.Default
     default boolean path() {
         return false;

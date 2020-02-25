@@ -252,6 +252,7 @@ public class BaseProcTest {
         assertCypherResult(query, emptyMap(), expected);
     }
 
+    @SuppressWarnings("unchecked")
     protected void assertCypherResult(
         @Language("Cypher") String query,
         Map<String, Object> queryParameters,
@@ -284,7 +285,6 @@ public class BaseProcTest {
                 expectedRow.forEach((key, expectedValue) -> {
                     Matcher<Object> matcher;
                     if (expectedValue instanceof Matcher) {
-                        //noinspection unchecked
                         matcher = (Matcher<Object>) expectedValue;
                     } else {
                         matcher = equalTo(expectedValue);

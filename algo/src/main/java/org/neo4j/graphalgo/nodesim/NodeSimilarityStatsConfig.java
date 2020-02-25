@@ -28,6 +28,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("NodeSimilarityStatsConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface NodeSimilarityStatsConfig extends NodeSimilarityBaseConfig {
 
     static NodeSimilarityStatsConfig of(

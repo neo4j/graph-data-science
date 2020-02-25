@@ -29,6 +29,7 @@ import org.neo4j.graphdb.Node;
 
 @ValueClass
 @Configuration("YensKShortestPathsConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface YensKShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     @Value.Default
