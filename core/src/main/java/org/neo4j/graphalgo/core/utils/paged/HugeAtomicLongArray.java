@@ -229,7 +229,7 @@ public abstract class HugeAtomicLongArray {
         private static void parallelSetAll(LongUnaryOperator gen, long[] page) {
             parallelStreamConsume(
                 IntStream.range(0, page.length),
-                Pools.MAXIMUM_CONCURRENCY,
+                Pools.CORE_POOL_SIZE,
                 stream -> stream.forEach(i -> page[i] = gen.applyAsLong(i))
             );
         }
@@ -328,7 +328,7 @@ public abstract class HugeAtomicLongArray {
         private static void parallelSetAll(long[] array, IntToLongFunction generator) {
             parallelStreamConsume(
                 IntStream.range(0, array.length),
-                Pools.MAXIMUM_CONCURRENCY,
+                Pools.CORE_POOL_SIZE,
                 intStream -> intStream.forEach(i -> array[i] = generator.applyAsLong(i))
             );
 

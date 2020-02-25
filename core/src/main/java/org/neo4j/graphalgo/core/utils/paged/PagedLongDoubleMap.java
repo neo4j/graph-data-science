@@ -74,7 +74,7 @@ public final class PagedLongDoubleMap {
     }
 
     public long size() {
-        return parallelStream(Arrays.stream(pages), Pools.MAXIMUM_CONCURRENCY, stream -> stream
+        return parallelStream(Arrays.stream(pages), Pools.CORE_POOL_SIZE, stream -> stream
                 .filter(Objects::nonNull)
                 .mapToLong(TrackingIntDoubleHashMap::size)
                 .sum());
@@ -129,7 +129,7 @@ public final class PagedLongDoubleMap {
     }
 
     public OptionalLong getMaxValue() {
-        return parallelStream(Arrays.stream(pages), Pools.MAXIMUM_CONCURRENCY, stream -> stream
+        return parallelStream(Arrays.stream(pages), Pools.CORE_POOL_SIZE, stream -> stream
                 .filter(Objects::nonNull)
                 .flatMapToDouble(TrackingIntDoubleHashMap::getValuesAsStream)
                 .mapToLong(d -> (long) d)

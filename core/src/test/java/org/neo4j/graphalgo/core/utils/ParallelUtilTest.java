@@ -128,7 +128,7 @@ final class ParallelUtilTest {
     void shouldTakeBaseStreams() {
         double[] data = {1.0, 2.5, 3.14};
 
-        double sum = parallelStream(Arrays.stream(data), Pools.MAXIMUM_CONCURRENCY, DoubleStream::sum);
+        double sum = parallelStream(Arrays.stream(data), Pools.CORE_POOL_SIZE, DoubleStream::sum);
 
         assertEquals(1.0 + 2.5 + 3.14, sum);
     }

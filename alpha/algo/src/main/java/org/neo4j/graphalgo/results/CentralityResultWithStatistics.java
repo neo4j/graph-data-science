@@ -71,17 +71,17 @@ public abstract class CentralityResultWithStatistics extends CentralityResult {
 
         @Override
         public double computeMax() {
-            return HugeNormalizationComputations.max(result.array(), 1.0, Pools.MAXIMUM_CONCURRENCY);
+            return HugeNormalizationComputations.max(result.array(), 1.0, Pools.CORE_POOL_SIZE);
         }
 
         @Override
         public double computeL2Norm() {
-            return Math.sqrt(HugeNormalizationComputations.squaredSum(result.array(), Pools.MAXIMUM_CONCURRENCY));
+            return Math.sqrt(HugeNormalizationComputations.squaredSum(result.array(), Pools.CORE_POOL_SIZE));
         }
 
         @Override
         public double computeL1Norm() {
-            return HugeNormalizationComputations.l1Norm(result.array(), Pools.MAXIMUM_CONCURRENCY);
+            return HugeNormalizationComputations.l1Norm(result.array(), Pools.CORE_POOL_SIZE);
         }
     }
 }
