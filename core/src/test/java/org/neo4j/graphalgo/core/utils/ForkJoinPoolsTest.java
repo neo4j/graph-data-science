@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
 
@@ -30,22 +28,15 @@ import static org.neo4j.graphalgo.config.ConcurrencyValidation.CONCURRENCY_LIMIT
 
 class ForkJoinPoolsTest {
 
-    @BeforeEach
-    @AfterEach
-    void reset() {
-        ForkJoinPools.reset();
-    }
-
     @Test
     void forkJoinPoolShouldBeLimited() {
         ConcurrencyMonitor.instance().setLimited();
-        assertThat(ForkJoinPools.instance().getPool().getParallelism(), equalTo(CONCURRENCY_LIMITATION));
+        assertThat(ForkJoinPools.createPool(128).getParallelism(), equalTo(CONCURRENCY_LIMITATION));
     }
 
     @Test
     void forkJoinPoolShouldBeUnLimited() {
         ConcurrencyMonitor.instance().setUnlimited();
-        int expectedParallelism = Runtime.getRuntime().availableProcessors();
-        assertThat(ForkJoinPools.instance().getPool().getParallelism(), equalTo(expectedParallelism));
+        assertThat(ForkJoinPools.createPool(128).getParallelism(), equalTo(128));
     }
 }

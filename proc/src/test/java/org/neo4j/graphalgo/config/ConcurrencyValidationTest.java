@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -51,7 +51,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
         db.shutdown();
     }
 

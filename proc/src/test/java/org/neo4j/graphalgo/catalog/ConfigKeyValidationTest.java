@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -49,7 +48,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void additionalKeyForGraphCreate() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.graph.create('foo', '*', '*', {readConcurrency: 42, maxIterations: 1337})")
+            () -> runQuery("CALL gds.graph.create('foo', '*', '*', {readConcurrency: 4, maxIterations: 1337})")
         );
 
         assertThat(

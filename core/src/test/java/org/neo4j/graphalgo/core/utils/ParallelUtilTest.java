@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
@@ -59,7 +57,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,12 +72,6 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
 
 final class ParallelUtilTest {
 
-    @BeforeEach
-    @AfterEach
-    void reset() {
-        ForkJoinPools.reset();
-    }
-
     @Test
     void shouldParallelizeStreams() {
         long firstNum = 1;
@@ -90,16 +81,15 @@ final class ParallelUtilTest {
 
         // set unlimited
         ConcurrencyMonitor.instance().setUnlimited();
-        ForkJoinPool expectedPool = ForkJoinPools.instance().getPool();
         ForkJoinPool commonPool = ForkJoinPool.commonPool();
         Stream<Long> stream = list.stream();
 
-        long actualTotal = parallelStream(stream, Pools.allowedConcurrency(4), (s) -> {
+        long actualTotal = parallelStream(stream, 4, (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-            assertSame(threadPool, expectedPool);
+            assertEquals(4, threadPool.getParallelism());
             assertNotSame(threadPool, commonPool);
 
             return s.reduce(0L, Long::sum);
