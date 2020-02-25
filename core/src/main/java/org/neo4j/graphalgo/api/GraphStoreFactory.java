@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.loading.ApproximatedImportProgress;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The Abstract Factory defines the construction of the graph
  */
-public abstract class GraphFactory implements Assessable {
+public abstract class GraphStoreFactory implements Assessable {
 
     public static final String TASK_LOADING = "LOADING";
     public static final String ANY_REL_TYPE = "";
@@ -51,11 +51,11 @@ public abstract class GraphFactory implements Assessable {
     protected final Log log;
     protected final ProgressLogger progressLogger;
 
-    public GraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
+    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup) {
         this(api, setup, true);
     }
 
-    public GraphFactory(GraphDatabaseAPI api, GraphSetup setup, boolean readTokens) {
+    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup, boolean readTokens) {
         this.threadPool = setup.executor();
         this.api = api;
         this.setup = setup;
@@ -103,12 +103,12 @@ public abstract class GraphFactory implements Assessable {
     public interface ImportResult {
         GraphDimensions dimensions();
 
-        GraphsByRelationshipType graphs();
+        GraphStore graphStore();
 
-        static ImportResult of(GraphDimensions dimensions, GraphsByRelationshipType graphs) {
+        static ImportResult of(GraphDimensions dimensions, GraphStore graphStore) {
             return ImmutableImportResult.builder()
                 .dimensions(dimensions)
-                .graphs(graphs)
+                .graphStore(graphStore)
                 .build();
         }
     }

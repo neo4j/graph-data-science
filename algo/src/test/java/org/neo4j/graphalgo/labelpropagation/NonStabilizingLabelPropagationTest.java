@@ -28,9 +28,9 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
@@ -68,21 +68,21 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
         db.shutdown();
     }
 
-    Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
-        if (graphImpl == CypherGraphFactory.class) {
+    Graph loadGraph(Class<? extends GraphStoreFactory> graphImpl) {
+        if (graphImpl == CypherFactory.class) {
             return QueryRunner.runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(ALL_NODES_QUERY)
                 .relationshipQuery("MATCH (u1)-[rel]-(u2) RETURN id(u1) AS source, id(u2) AS target")
                 .build()
-                .graph(CypherGraphFactory.class));
+                .graph(CypherFactory.class));
         } else {
             return new StoreLoaderBuilder()
                 .api(db)
                 .loadAnyLabel()
                 .loadAnyRelationshipType()
                 .build()
-                .graph(HugeGraphFactory.class);
+                .graph(NativeFactory.class);
         }
     }
 
@@ -90,7 +90,7 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
     // LabelPropagation will not converge unless the iteration is random. However, we don't seem to be affected by this.
     // [1]: https://arxiv.org/pdf/0709.2938.pdf, page 5
     @AllGraphTypesTest
-    void testLabelPropagationDoesStabilize(Class<? extends GraphFactory> graphImpl) {
+    void testLabelPropagationDoesStabilize(Class<? extends GraphStoreFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl);
         LabelPropagation labelPropagation = new LabelPropagation(
             graph,

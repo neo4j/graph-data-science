@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.results.CentralityResult;
 import org.neo4j.graphdb.Label;
 
@@ -122,7 +122,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void defaultWeightOf0MeansNoDiffusionOfPageRank(Class<? extends GraphFactory> graphFactory) {
+    void defaultWeightOf0MeansNoDiffusionOfPageRank(Class<? extends GraphStoreFactory> graphStoreFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -140,7 +140,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -150,7 +150,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                         "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, 0 as weight")
                     .addRelationshipProperty(PropertyMapping.of("weight", 0))
                     .build()
-                    .graph(graphFactory)
+                    .graph(graphStoreFactory)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -159,7 +159,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                 .addRelationshipType("TYPE1")
                 .addRelationshipProperty(PropertyMapping.of("weight", 0))
                 .build()
-                .graph(graphFactory);
+                .graph(graphStoreFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -179,7 +179,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void defaultWeightOf1ShouldBeTheSameAsPageRank(Class<? extends GraphFactory> graphFactory) {
+    void defaultWeightOf1ShouldBeTheSameAsPageRank(Class<? extends GraphStoreFactory> graphStoreFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -197,7 +197,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -207,7 +207,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                         "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, 1 as weight")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1))
                     .build()
-                    .graph(graphFactory)
+                    .graph(graphStoreFactory)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -216,7 +216,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .addRelationshipType("TYPE1")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1))
                     .build()
-                    .graph(graphFactory);
+                    .graph(graphStoreFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -236,7 +236,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void allWeightsTheSameShouldBeTheSameAsPageRank(Class<? extends GraphFactory> graphFactory) {
+    void allWeightsTheSameShouldBeTheSameAsPageRank(Class<? extends GraphStoreFactory> graphStoreFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -254,7 +254,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -264,7 +264,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                         "MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
                     .addRelationshipProperty(PropertyMapping.of("weight", 0))
                     .build()
-                    .graph(graphFactory)
+                    .graph(graphStoreFactory)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -273,7 +273,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .addRelationshipType("TYPE2")
                     .addRelationshipProperty(PropertyMapping.of("weight", 0))
                     .build()
-                    .graph(graphFactory);
+                    .graph(graphStoreFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -293,7 +293,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void higherWeightsLeadToHigherPageRank(Class<? extends GraphFactory> graphFactory) {
+    void higherWeightsLeadToHigherPageRank(Class<? extends GraphStoreFactory> graphStoreFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -311,7 +311,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -321,7 +321,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                             "MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
                         .addRelationshipProperty(PropertyMapping.of("weight", 0))
                         .build()
-                        .graph(graphFactory)
+                        .graph(graphStoreFactory)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -330,7 +330,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .addRelationshipType("TYPE3")
                     .addRelationshipProperty(PropertyMapping.of("weight", 0))
                     .build()
-                    .graph(graphFactory);
+                    .graph(graphStoreFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -350,7 +350,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void shouldExcludeNegativeWeights(Class<? extends GraphFactory> graphFactory) {
+    void shouldExcludeNegativeWeights(Class<? extends GraphStoreFactory> graphStoreFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -368,7 +368,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -378,7 +378,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                         "MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
                     .addRelationshipProperty(PropertyMapping.of("weight", 0))
                     .build()
-                    .graph(graphFactory)
+                    .graph(graphStoreFactory)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -387,7 +387,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .addRelationshipType("TYPE4")
                     .addRelationshipProperty(PropertyMapping.of("weight", 0))
                     .build()
-                    .graph(graphFactory);
+                    .graph(graphStoreFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED

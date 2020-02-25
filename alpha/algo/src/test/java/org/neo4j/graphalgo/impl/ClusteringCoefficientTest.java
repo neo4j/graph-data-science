@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
@@ -100,7 +100,7 @@ class ClusteringCoefficientTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(NativeFactory.class);
     }
 
     @AfterEach

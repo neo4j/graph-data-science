@@ -65,7 +65,6 @@ class TestGraphTest {
         assertTrue(graph.hasRelationshipProperty());
         assertFalse(graph.isUndirected());
         assertFalse(graph.isEmpty());
-        assertEquals(TestGraph.TYPE, graph.getType());
     }
 
     @Test

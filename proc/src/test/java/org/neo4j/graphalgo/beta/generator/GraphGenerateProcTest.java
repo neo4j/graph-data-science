@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,7 +66,7 @@ class GraphGenerateProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test

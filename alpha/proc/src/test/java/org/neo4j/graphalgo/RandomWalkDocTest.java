@@ -23,7 +23,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.walking.RandomWalkProc;
 import org.neo4j.graphdb.Result;
 
@@ -69,7 +69,7 @@ public class RandomWalkDocTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test

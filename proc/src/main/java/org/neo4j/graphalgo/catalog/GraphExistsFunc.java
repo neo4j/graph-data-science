@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
@@ -30,7 +30,7 @@ public class GraphExistsFunc extends CatalogProc {
     @Description("Checks if a graph exists in the catalog.")
     public boolean existsFunction(@Name(value = "graphName") String graphName) {
         validateGraphName(graphName);
-        return GraphCatalog.exists(getUsername(), graphName);
+        return GraphStoreCatalog.exists(getUsername(), graphName);
     }
 
 }

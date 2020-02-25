@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphdb.Result;
 
@@ -63,7 +63,7 @@ public final class K1ColoringDocTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
         db.shutdown();
     }
 

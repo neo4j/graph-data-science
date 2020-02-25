@@ -45,7 +45,7 @@ class NewOldGraphTest {
         importer.addRelationship(0, 3);
 
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
-        NewOldGraph graph = new NewOldGraph(importer.buildGraphs().getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore().getUnion(), visitedRelationships);
 
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(3, newNeighbors.length);
@@ -64,7 +64,7 @@ class NewOldGraphTest {
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(importer.buildGraphs().getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore().getUnion(), visitedRelationships);
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(2, newNeighbors.length);
         assertThat(ArrayUtils.toObject(newNeighbors), arrayContainingInAnyOrder(2L, 3L));
@@ -82,7 +82,7 @@ class NewOldGraphTest {
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(importer.buildGraphs().getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore().getUnion(), visitedRelationships);
         long[] oldNeighbors = graph.findOldNeighbors(0).toArray();
         assertEquals(1, oldNeighbors.length);
         assertThat(ArrayUtils.toObject(oldNeighbors), arrayContainingInAnyOrder(1L));

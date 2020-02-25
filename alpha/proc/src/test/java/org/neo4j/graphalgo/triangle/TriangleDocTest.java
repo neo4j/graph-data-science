@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,7 +65,7 @@ public class TriangleDocTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test

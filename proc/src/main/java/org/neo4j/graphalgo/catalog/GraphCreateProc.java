@@ -23,22 +23,22 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -76,7 +76,7 @@ public class GraphCreateProc extends CatalogProc {
         // computation
         GraphCreateResult result = runWithExceptionLogging(
             "Graph creation failed",
-            () -> createGraph(config, HugeGraphFactory.class)
+            () -> createGraph(config, NativeFactory.class)
         );
         // result
         return Stream.of(result);
@@ -98,7 +98,7 @@ public class GraphCreateProc extends CatalogProc {
             cypherConfig
         );
         validateConfig(cypherConfig, config);
-        return estimateGraph(config, HugeGraphFactory.class);
+        return estimateGraph(config, NativeFactory.class);
     }
 
     @Procedure(name = "gds.graph.create.cypher", mode = Mode.READ)
@@ -125,7 +125,7 @@ public class GraphCreateProc extends CatalogProc {
         // computation
         GraphCreateResult result = runWithExceptionLogging(
             "Graph creation failed",
-            () -> createGraph(config, CypherGraphFactory.class)
+            () -> createGraph(config, CypherFactory.class)
         );
         // result
         return Stream.of(result);
@@ -148,50 +148,51 @@ public class GraphCreateProc extends CatalogProc {
         );
         validateConfig(cypherConfig, config);
 
-        return estimateGraph(config, CypherGraphFactory.class);
+        return estimateGraph(config, CypherFactory.class);
     }
 
-    private GraphCreateResult createGraph(GraphCreateConfig config, Class<? extends GraphFactory> factoryClazz) {
+    private GraphCreateResult createGraph(GraphCreateConfig config, Class<? extends GraphStoreFactory> factoryClazz) {
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-            GraphFactory graphFactory = loader.build(factoryClazz);
-            GraphFactory.ImportResult importResult = graphFactory.build();
+            GraphStoreFactory graphStoreFactory = loader.build(factoryClazz);
+            GraphStoreFactory.ImportResult importResult = graphStoreFactory.build();
 
-            GraphsByRelationshipType graphs =  importResult.graphs();
+            GraphStore graphStore =  importResult.graphStore();
             GraphDimensions dimensions = importResult.dimensions();
             GraphCreateConfig catalogConfig = config instanceof GraphCreateFromCypherConfig
                 ? ((GraphCreateFromCypherConfig) config).inferProjections(dimensions)
                 : config;
 
             builder
-                .withGraph(graphs)
+                .withNodeCount(graphStore.nodeCount())
+                .withRelationshipCount(graphStore.relationshipCount())
                 .withNodeProjections(catalogConfig.nodeProjections())
                 .withRelationshipProjections(catalogConfig.relationshipProjections());
 
-            GraphCatalog.set(catalogConfig, graphs);
+            GraphStoreCatalog.set(catalogConfig, graphStore);
         }
 
         return builder.build();
     }
 
-    private Stream<MemoryEstimateResult> estimateGraph(GraphCreateConfig config, Class<? extends GraphFactory> factoryClazz) {
+    private Stream<MemoryEstimateResult> estimateGraph(GraphCreateConfig config, Class<? extends GraphStoreFactory> factoryClazz) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-        GraphFactory graphFactory = loader.build(factoryClazz);
-        GraphDimensions dimensions = updateDimensions(config, graphFactory, graphFactory.dimensions());
+        GraphStoreFactory graphStoreFactory = loader.build(factoryClazz);
+        GraphDimensions dimensions = updateDimensions(config, graphStoreFactory, graphStoreFactory.dimensions());
 
-        MemoryTree memoryTree = estimate(graphFactory, dimensions, config);
+        MemoryTree memoryTree = estimate(graphStoreFactory, dimensions, config);
         return Stream.of(new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
     }
 
     private GraphDimensions updateDimensions(
         GraphCreateConfig config,
-        GraphFactory graphFactory,
+        GraphStoreFactory graphStoreFactory,
         GraphDimensions dimensions
     ) {
         if (config.nodeCount() > -1) {
             dimensions = ImmutableGraphDimensions.builder()
-                .from(graphFactory.dimensions())
+                .from(graphStoreFactory.dimensions())
                 .nodeCount(config.nodeCount())
                 .highestNeoId(config.nodeCount())
                 .relationshipProjectionMappings(RelationshipProjectionMappings.all())
@@ -201,7 +202,7 @@ public class GraphCreateProc extends CatalogProc {
         return dimensions;
     }
 
-    public MemoryTree estimate(GraphFactory factory, GraphDimensions dimensions, GraphCreateConfig config) {
+    public MemoryTree estimate(GraphStoreFactory factory, GraphDimensions dimensions, GraphCreateConfig config) {
         return factory.memoryEstimation(dimensions).estimate(dimensions, config.concurrency());
     }
 
@@ -244,9 +245,13 @@ public class GraphCreateProc extends CatalogProc {
                 this.relationshipProjections = config.relationshipProjections();
             }
 
-            Builder withGraph(GraphsByRelationshipType graph) {
-                relationshipCount = graph.relationshipCount();
-                nodeCount = graph.nodeCount();
+            Builder withNodeCount(long nodeCount) {
+                this.nodeCount = nodeCount;
+                return this;
+            }
+
+            Builder withRelationshipCount(long relationshipCount) {
+                this.relationshipCount = relationshipCount;
                 return this;
             }
 

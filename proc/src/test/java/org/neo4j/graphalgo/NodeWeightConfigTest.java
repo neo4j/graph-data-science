@@ -28,9 +28,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -121,11 +121,11 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphsByRelationshipType graphs = graphLoader(graphCreateConfig)
-                .build(HugeGraphFactory.class)
+            GraphStore graphStore = graphLoader(graphCreateConfig)
+                .build(NativeFactory.class)
                 .build()
-                .graphs();
-            GraphCatalog.set(graphCreateConfig, graphs);
+                .graphStore();
+            GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
                 "nodeWeightProperty",
@@ -191,12 +191,12 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
             .relationshipProjections(RelationshipProjections.empty())
             .build();
 
-        GraphsByRelationshipType graphsByRelationshipType = graphLoader(db, graphCreateConfig)
-            .build(HugeGraphFactory.class)
+        GraphStore graphStore = graphLoader(db, graphCreateConfig)
+            .build(NativeFactory.class)
             .build()
-            .graphs();
+            .graphStore();
 
-        GraphCatalog.set(graphCreateConfig, graphsByRelationshipType);
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
         db.shutdown();
     }
 }

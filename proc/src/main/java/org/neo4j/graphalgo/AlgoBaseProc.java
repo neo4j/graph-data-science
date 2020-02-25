@@ -25,15 +25,15 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
-import org.neo4j.graphalgo.core.loading.GraphWithConfig;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.loading.ImmutableGraphWithConfig;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
+import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -110,8 +110,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
-            GraphFactory graphFactory = loader.build(config.getGraphImpl());
-            estimateDimensions = graphFactory.dimensions();
+            GraphStoreFactory graphStoreFactory = loader.build(config.getGraphImpl());
+            estimateDimensions = graphStoreFactory.dimensions();
 
             if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {
                 estimateDimensions = ImmutableGraphDimensions.builder()
@@ -122,12 +122,12 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                     .build();
             }
 
-            estimationBuilder.add("graph", graphFactory.memoryEstimation(estimateDimensions));
+            estimationBuilder.add("graph", graphStoreFactory.memoryEstimation(estimateDimensions));
         } else {
             String graphName = config.graphName().get();
 
             // TODO get the dimensions from the graph itself.
-            GraphCreateConfig graphCreateConfig = GraphCatalog
+            GraphCreateConfig graphCreateConfig = GraphStoreCatalog
                 .getLoadedGraphs(getUsername())
                 .keySet()
                 .stream()
@@ -136,8 +136,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 .get();
 
             GraphLoader loader = newLoader(graphCreateConfig, AllocationTracker.EMPTY);
-            GraphFactory graphFactory = loader.build(config.getGraphImpl());
-            estimateDimensions = graphFactory.dimensions();
+            GraphStoreFactory graphStoreFactory = loader.build(config.getGraphImpl());
+            estimateDimensions = graphStoreFactory.dimensions();
         }
 
         estimationBuilder.add("algorithm", algorithmFactory(config).memoryEstimation(config));
@@ -185,25 +185,25 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
             : Optional.empty();
 
-        GraphWithConfig graphCandidate;
+        GraphStoreWithConfig graphCandidate;
         List<String> relationshipTypes;
 
         if (maybeGraphName.isPresent()) {
-            graphCandidate = GraphCatalog.get(getUsername(), maybeGraphName.get());
+            graphCandidate = GraphStoreCatalog.get(getUsername(), maybeGraphName.get());
             relationshipTypes = config.relationshipTypes();
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
-            GraphsByRelationshipType loadedGraph = loader.build(createConfig.getGraphImpl()).build().graphs();
+            GraphStore graphStore = loader.build(createConfig.getGraphImpl()).build().graphStore();
 
-            graphCandidate = ImmutableGraphWithConfig.of(loadedGraph, createConfig);
+            graphCandidate = ImmutableGraphStoreWithConfig.of(graphStore, createConfig);
             relationshipTypes = config.relationshipTypes();
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
 
         validateConfig(graphCandidate.config(), config);
-        return graphCandidate.graph().getGraphProjection(relationshipTypes, weightProperty);
+        return graphCandidate.graphStore().getGraph(relationshipTypes, weightProperty);
     }
 
     private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {

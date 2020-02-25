@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
@@ -87,7 +87,7 @@ class IncrementalWccTest extends AlgoTestBase {
             .addRelationshipType(RELATIONSHIP_TYPE.name())
             .addNodeProperty(PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(NativeFactory.class);
 
         WccStreamConfig config = ImmutableWccStreamConfig.builder()
             .concurrency(AlgoBaseConfig.DEFAULT_CONCURRENCY)

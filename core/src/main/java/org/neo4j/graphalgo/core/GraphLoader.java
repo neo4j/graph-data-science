@@ -22,11 +22,11 @@ package org.neo4j.graphalgo.core;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -77,12 +77,12 @@ public interface GraphLoader {
 
     KernelTransaction kernelTransaction();
 
-    default Graph graph(Class<? extends GraphFactory> factoryType) {
+    default Graph graph(Class<? extends GraphStoreFactory> factoryType) {
         return load(factoryType);
     }
 
-    default GraphsByRelationshipType graphs(Class<? extends GraphFactory> factoryType) {
-        return build(factoryType).build().graphs();
+    default GraphStore graphStore(Class<? extends GraphStoreFactory> factoryType) {
+        return build(factoryType).build().graphStore();
     }
 
     @Value.Lazy
@@ -100,15 +100,15 @@ public interface GraphLoader {
     /**
      * Returns an instance of the factory that can be used to load the graph.
      */
-    default <T extends GraphFactory> T build(final Class<T> factoryType) {
+    default <T extends GraphStoreFactory> T build(final Class<T> factoryType) {
         try {
             GraphSetup setup = toSetup();
-            GraphFactory factory;
+            GraphStoreFactory factory;
 
-            if (CypherGraphFactory.class.isAssignableFrom(factoryType)) {
-                factory = new CypherGraphFactory(api(), setup, kernelTransaction());
+            if (CypherFactory.class.isAssignableFrom(factoryType)) {
+                factory = new CypherFactory(api(), setup, kernelTransaction());
             } else {
-                factory = new HugeGraphFactory(api(), setup);
+                factory = new NativeFactory(api(), setup);
             }
 
             return factoryType.cast(factory);
@@ -127,8 +127,8 @@ public interface GraphLoader {
      *
      * @return the freshly loaded graph
      */
-    default Graph load(Class<? extends GraphFactory> factoryType) {
-        return build(factoryType).build().graphs().getUnion();
+    default Graph load(Class<? extends GraphStoreFactory> factoryType) {
+        return build(factoryType).build().graphStore().getUnion();
     }
 
 }

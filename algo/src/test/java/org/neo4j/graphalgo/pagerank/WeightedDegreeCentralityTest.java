@@ -31,9 +31,9 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Label;
@@ -122,7 +122,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void buildWeightsArray(Class<? extends GraphFactory> graphFactory) {
+    void buildWeightsArray(Class<? extends GraphStoreFactory> graphStoreFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, double[]> expected = new HashMap<>();
 
@@ -140,7 +140,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -150,7 +150,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                         "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
-                    .graph(graphFactory)
+                    .graph(graphStoreFactory)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -159,7 +159,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .addRelationshipType("TYPE1")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
-                    .graph(graphFactory);
+                    .graph(graphStoreFactory);
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
@@ -191,7 +191,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                 .addNodeLabel("Label1")
                 .addRelationshipType("TYPE1")
                 .build()
-                .graph(HugeGraphFactory.class);
+                .graph(NativeFactory.class);
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
             new WeightedDegreeCentrality(
@@ -210,7 +210,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void weightedOutgoingCentrality(Class<? extends GraphFactory> graphFactory) {
+    void weightedOutgoingCentrality(Class<? extends GraphStoreFactory> graphStoreFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -228,7 +228,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db,
                 () -> new CypherLoaderBuilder()
@@ -238,7 +238,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                         "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
-                    .graph(graphFactory)
+                    .graph(graphStoreFactory)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -247,7 +247,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .addRelationshipType("TYPE1")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
-                    .graph(graphFactory);
+                    .graph(graphStoreFactory);
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
@@ -270,7 +270,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void excludeNegativeWeights(Class<? extends GraphFactory> graphFactory) {
+    void excludeNegativeWeights(Class<? extends GraphStoreFactory> graphStoreFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -289,7 +289,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
 
         final Graph graph;
 
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db, () -> new CypherLoaderBuilder()
                     .api(db)
@@ -298,7 +298,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                         "MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
-                    .graph(graphFactory)
+                    .graph(graphStoreFactory)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -307,7 +307,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                 .addRelationshipType("TYPE3")
                 .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                 .build()
-                .graph(graphFactory);
+                .graph(graphStoreFactory);
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
@@ -330,7 +330,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void weightedIncomingCentrality(Class<? extends GraphFactory> graphFactory) {
+    void weightedIncomingCentrality(Class<? extends GraphStoreFactory> graphStoreFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -348,7 +348,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
 
         Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(
                 db, () -> new CypherLoaderBuilder()
                     .api(db)
@@ -357,7 +357,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                         "MATCH (n:Label1)<-[t:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target, t.weight AS weight")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
-                    .graph(graphFactory)
+                    .graph(graphStoreFactory)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -366,7 +366,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .addRelationshipProjection(RelationshipProjection.of("TYPE1", Orientation.REVERSE))
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
-                    .graph(graphFactory);
+                    .graph(graphStoreFactory);
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(

@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.util.Map;
 import java.util.Optional;
@@ -118,7 +118,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
 
         runQuery(loadQuery);
 
-        Graph simGraph = GraphCatalog.getUnion(getUsername(), resultGraphName).orElse(null);
+        Graph simGraph = GraphStoreCatalog.getUnion(getUsername(), resultGraphName).orElse(null);
         assertNotNull(simGraph);
         assertGraphEquals(
             orientation == REVERSE

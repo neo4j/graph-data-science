@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.NODE
 import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.RELATIONSHIP;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
-public class CypherGraphFactory extends GraphFactory {
+public class CypherFactory extends GraphStoreFactory {
 
     public static final String TYPE = "cypher";
 
@@ -59,7 +59,7 @@ public class CypherGraphFactory extends GraphFactory {
     private final GraphSetup setup;
     private final KernelTransaction kernelTransaction;
 
-    public CypherGraphFactory(GraphDatabaseAPI api, GraphSetup setup, KernelTransaction kernelTransaction) {
+    public CypherFactory(GraphDatabaseAPI api, GraphSetup setup, KernelTransaction kernelTransaction) {
         super(api, setup, false);
         this.api = api;
         this.setup = setup;
@@ -76,12 +76,12 @@ public class CypherGraphFactory extends GraphFactory {
             .maxRelCount(relCount.rows())
             .build();
 
-        return HugeGraphFactory.getMemoryEstimation(estimateDimensions);
+        return NativeFactory.getMemoryEstimation(estimateDimensions);
     }
 
     @Override
     public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
-        return HugeGraphFactory.getMemoryEstimation(dimensions);
+        return NativeFactory.getMemoryEstimation(dimensions);
     }
 
     @Override
@@ -194,7 +194,7 @@ public class CypherGraphFactory extends GraphFactory {
                 }
             ));
 
-        return ImportResult.of(resultDimensions, GraphsByRelationshipType.of(graphs));
+        return ImportResult.of(resultDimensions, GraphStore.of(graphs));
     }
 
     private KernelTransaction.Revertable setReadOnlySecurityContext() {

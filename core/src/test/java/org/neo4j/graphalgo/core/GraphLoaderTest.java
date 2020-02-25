@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -65,25 +65,25 @@ class GraphLoaderTest {
     }
 
     @AllGraphTypesTest
-    void testAnyLabel(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).buildGraph(graphFactory);
+    void testAnyLabel(Class<? extends GraphStoreFactory> graphStoreFactory) {
+        Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).graph(graphStoreFactory);
         assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
     @AllGraphTypesTest
-    void testWithLabel(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = TestGraphLoader.from(db).withLabels("Node1").buildGraph(graphFactory);
+    void testWithLabel(Class<? extends GraphStoreFactory> graphStoreFactory) {
+        Graph graph = TestGraphLoader.from(db).withLabels("Node1").graph(graphStoreFactory);
         assertGraphEquals(graph, fromGdl("()"));
     }
 
     @AllGraphTypesTest
-    void testWithMultipleLabels(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = TestGraphLoader.from(db).withLabels("Node1", "Node2").buildGraph(graphFactory);
+    void testWithMultipleLabels(Class<? extends GraphStoreFactory> graphStoreFactory) {
+        Graph graph = TestGraphLoader.from(db).withLabels("Node1", "Node2").graph(graphStoreFactory);
         assertGraphEquals(graph, fromGdl("(a)-->(b)"));
     }
 
     @AllGraphTypesTest
-    void testWithMultipleLabelsAndProperties(Class<? extends GraphFactory> graphFactory) {
+    void testWithMultipleLabelsAndProperties(Class<? extends GraphStoreFactory> graphStoreFactory) {
         PropertyMappings properties = PropertyMappings.of(PropertyMapping.of("prop1", 42.0));
         PropertyMappings multipleProperties = PropertyMappings.of(
             PropertyMapping.of("prop1", 42.0),
@@ -93,42 +93,42 @@ class GraphLoaderTest {
         Graph graph = TestGraphLoader.from(db)
             .withLabels("Node1", "Node2")
             .withNodeProperties(properties)
-            .buildGraph(graphFactory);
+            .graph(graphStoreFactory);
         assertGraphEquals(graph, fromGdl("(a {prop1: 1.0})-->(b {prop1: 42.0})"));
 
         graph = TestGraphLoader.from(db)
             .withLabels("Node1", "Node2")
             .withNodeProperties(multipleProperties)
-            .buildGraph(graphFactory);
+            .graph(graphStoreFactory);
         assertGraphEquals(graph, fromGdl("(a {prop1: 1.0, prop2: 42.0})-->(b {prop1: 42.0, prop2: 2.0})"));
     }
 
     @AllGraphTypesTest
-    void testAnyRelation(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).buildGraph(graphFactory);
+    void testAnyRelation(Class<? extends GraphStoreFactory> graphStoreFactory) {
+        Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).graph(graphStoreFactory);
         assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
     @AllGraphTypesTest
-    void testWithBothWeightedRelationship(Class<? extends GraphFactory> graphFactory) {
+    void testWithBothWeightedRelationship(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipTypes("REL3")
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-            .buildGraph(graphFactory);
+            .graph(graphStoreFactory);
 
         assertGraphEquals(graph, fromGdl("(), ()-[{w:1337}]->()"));
     }
 
     @AllGraphTypesTest
-    void testWithOutgoingRelationship(Class<? extends GraphFactory> graphFactory) {
+    void testWithOutgoingRelationship(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipTypes("REL3")
-            .buildGraph(graphFactory);
+            .graph(graphStoreFactory);
         assertGraphEquals(graph, fromGdl("(), ()-->()"));
     }
 
     @AllGraphTypesTest
-    void testWithNodeProperties(Class<? extends GraphFactory> graphFactory) {
+    void testWithNodeProperties(Class<? extends GraphStoreFactory> graphStoreFactory) {
         PropertyMappings nodePropertyMappings = PropertyMappings.of(
             PropertyMapping.of("prop1", "prop1", 0D),
             PropertyMapping.of("prop2", "prop2", 0D),
@@ -139,7 +139,7 @@ class GraphLoaderTest {
             .from(db)
             .withNodeProperties(nodePropertyMappings)
             .withDefaultAggregation(Aggregation.SINGLE)
-            .buildGraph(graphFactory);
+            .graph(graphStoreFactory);
 
         assertGraphEquals(graph, fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
                                          "(b {prop1: 0, prop2: 2, prop3: 0})" +
@@ -148,11 +148,11 @@ class GraphLoaderTest {
     }
 
     @AllGraphTypesTest
-    void testWithRelationshipProperty(Class<? extends GraphFactory> graphFactory) {
+    void testWithRelationshipProperty(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipProperties(PropertyMapping.of("weight","prop1", 1337.42))
             .withDefaultAggregation(Aggregation.SINGLE)
-            .buildGraph(graphFactory);
+            .graph(graphStoreFactory);
         assertGraphEquals(graph, fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42D}]->(c), (b)-[{w: 1337.42D}]->(c)"));
     }
 
@@ -166,7 +166,7 @@ class GraphLoaderTest {
                 .loadAnyRelationshipType()
                 .terminationFlag(terminationFlag)
                 .build()
-                .load(HugeGraphFactory.class)
+                .load(NativeFactory.class)
         );
     }
 }

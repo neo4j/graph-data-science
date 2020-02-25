@@ -34,12 +34,12 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -85,9 +85,9 @@ final class LabelPropagationTest extends AlgoTestBase {
         db.shutdown();
     }
 
-    Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
+    Graph loadGraph(Class<? extends GraphStoreFactory> graphImpl) {
         GraphLoader graphLoader;
-        if (graphImpl == CypherGraphFactory.class) {
+        if (graphImpl == CypherFactory.class) {
             graphLoader = new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (u:User) RETURN id(u) AS id")
@@ -106,7 +106,7 @@ final class LabelPropagationTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing(Class<? extends GraphFactory> graphImpl) {
+    void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing(Class<? extends GraphStoreFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl);
         LabelPropagation lp = new LabelPropagation(
             graph,
@@ -127,7 +127,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             .addRelationshipType("FOLLOW")
             .addNodeProperty(PropertyMapping.of("seedId", 0.0))
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(NativeFactory.class);
 
         LabelPropagation lp = new LabelPropagation(
             graph,
@@ -146,13 +146,13 @@ final class LabelPropagationTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void testSingleThreadClustering(Class<? extends GraphFactory> graphImpl) {
+    void testSingleThreadClustering(Class<? extends GraphStoreFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl);
         testClustering(graph, 100);
     }
 
     @AllGraphTypesTest
-    void testMultiThreadClustering(Class<? extends GraphFactory> graphImpl) {
+    void testMultiThreadClustering(Class<? extends GraphStoreFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl);
         testClustering(graph, 2);
     }

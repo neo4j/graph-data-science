@@ -53,8 +53,6 @@ import static java.util.stream.Collectors.toMap;
 
 public final class TestGraph implements Graph {
 
-    public static final String TYPE = "test";
-
     private final Map<Long, Adjacency> adjacencyList;
     private final Map<String, NodeProperties> nodeProperties;
     private final NodeProperties relationshipProperty;
@@ -69,11 +67,6 @@ public final class TestGraph implements Graph {
         this.nodeProperties = nodeProperties;
         this.relationshipProperty = relationshipProperty;
         this.hasRelationshipProperty = hasRelationshipProperty;
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
     }
 
     @Override

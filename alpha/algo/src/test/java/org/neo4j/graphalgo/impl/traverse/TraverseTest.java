@@ -30,8 +30,8 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.impl.traverse.Traverse.ExitPredicate.Result;
 import org.neo4j.graphdb.Node;
 
@@ -54,7 +54,7 @@ import static org.neo4j.graphalgo.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
  */
 class TraverseTest extends AlgoTestBase {
 
-    private static GraphsByRelationshipType graphs;
+    private static GraphStore graphs;
 
     @BeforeEach
     void setupGraph() {
@@ -87,7 +87,7 @@ class TraverseTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("REL_BOTH", RelationshipProjection.of("REL", Orientation.UNDIRECTED, Aggregation.NONE))
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
-            .graphs(HugeGraphFactory.class);
+            .graphStore(NativeFactory.class);
     }
 
     @AfterEach
@@ -117,7 +117,7 @@ class TraverseTest extends AlgoTestBase {
     void testBfsToTargetOut() {
         long source = id("a");
         long target = id("d");
-        Graph graph = graphs.getGraphProjection("REL_OUT", Optional.of("cost"));
+        Graph graph = graphs.getGraph("REL_OUT", Optional.of("cost"));
         long[] nodes = Traverse.bfs(
             graph,
             source,
@@ -136,7 +136,7 @@ class TraverseTest extends AlgoTestBase {
     void testDfsToTargetOut() {
         long source = id("a");
         long target = id("g");
-        Graph graph = graphs.getGraphProjection("REL_OUT", Optional.of("cost"));
+        Graph graph = graphs.getGraph("REL_OUT", Optional.of("cost"));
         long[] nodes = Traverse.dfs(
             graph,
             source,
@@ -154,7 +154,7 @@ class TraverseTest extends AlgoTestBase {
     @Test
     void testExitConditionNeverTerminates() {
         long source = id("a");
-        Graph graph = graphs.getGraphProjection("REL_OUT", Optional.of("cost"));
+        Graph graph = graphs.getGraph("REL_OUT", Optional.of("cost"));
         long[] nodes = Traverse.dfs(
             graph,
             source,
@@ -172,7 +172,7 @@ class TraverseTest extends AlgoTestBase {
     void testDfsToTargetIn() {
         long source = id("g");
         long target = id("a");
-        Graph graph = graphs.getGraphProjection("REL_IN", Optional.of("cost"));
+        Graph graph = graphs.getGraph("REL_IN", Optional.of("cost"));
         long[] nodes = Traverse.dfs(
             graph,
             source,
@@ -191,7 +191,7 @@ class TraverseTest extends AlgoTestBase {
     void testBfsToTargetIn() {
         long source = id("g");
         long target = id("a");
-        Graph graph = graphs.getGraphProjection("REL_IN", Optional.of("cost"));
+        Graph graph = graphs.getGraph("REL_IN", Optional.of("cost"));
         long[] nodes = Traverse.bfs(
             graph,
             source,
@@ -211,7 +211,7 @@ class TraverseTest extends AlgoTestBase {
     void testBfsMaxDepthOut() {
         long source = id("a");
         double maxHops = 3.;
-        Graph graph = graphs.getGraphProjection("REL_OUT", Optional.of("cost"));
+        Graph graph = graphs.getGraph("REL_OUT", Optional.of("cost"));
         long[] nodes = Traverse.bfs(
             graph,
             source,
@@ -225,7 +225,7 @@ class TraverseTest extends AlgoTestBase {
     void testBfsMaxCostOut() {
         long source = id("a");
         double maxCost = 3.;
-        Graph graph = graphs.getGraphProjection("REL_OUT", Optional.of("cost"));
+        Graph graph = graphs.getGraph("REL_OUT", Optional.of("cost"));
         long[] nodes = Traverse.bfs(
             graph,
             source,
@@ -242,7 +242,7 @@ class TraverseTest extends AlgoTestBase {
     void testDfsMaxCostOut() {
         long source = id("a");
         double maxCost = 3.;
-        Graph graph = graphs.getGraphProjection("REL_OUT", Optional.of("cost"));
+        Graph graph = graphs.getGraph("REL_OUT", Optional.of("cost"));
         long[] nodes = Traverse.dfs(
             graph,
             source,

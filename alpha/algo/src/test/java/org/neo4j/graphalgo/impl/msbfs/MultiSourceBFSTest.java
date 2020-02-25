@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
@@ -308,7 +308,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         block.accept(new StoreLoaderBuilder()
             .api(db)
             .build()
-            .graph(HugeGraphFactory.class));
+            .graph(NativeFactory.class));
     }
 
     private void withGrid(
@@ -323,7 +323,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(NativeFactory.class);
         block.accept(graph);
     }
 

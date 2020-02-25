@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.catalog;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -37,7 +37,7 @@ public class GraphListProc extends CatalogProc {
     @Procedure(name = "gds.graph.list", mode = Mode.READ)
     @Description("Lists information about named graphs stored in the catalog.")
     public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
-        Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries = GraphCatalog
+        Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries = GraphStoreCatalog
             .getLoadedGraphs(getUsername())
             .entrySet()
             .stream();

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -76,7 +76,7 @@ final class LoadingTest {
                 .addNodeLabel("Node")
                 .addRelationshipType("TYPE")
                 .build()
-                .load(HugeGraphFactory.class);
+                .load(NativeFactory.class);
 
         assertEquals(3, graph.nodeCount());
 

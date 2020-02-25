@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.util.stream.Stream;
 
@@ -49,7 +49,7 @@ class GraphExistsProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @ParameterizedTest(name = "Existing Graphs: {0}, Lookup: {1}, Exists: {2}")

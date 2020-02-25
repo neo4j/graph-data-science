@@ -24,12 +24,12 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 
 @ValueClass
-public interface GraphWithConfig {
-    GraphsByRelationshipType graph();
+public interface GraphStoreWithConfig {
+    GraphStore graphStore();
 
     GraphCreateConfig config();
 
     default Graph getGraph() {
-        return graph().getUnion();
+        return graphStore().getUnion();
     }
 }

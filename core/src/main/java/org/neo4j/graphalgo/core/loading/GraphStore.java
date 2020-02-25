@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 
 import java.util.ArrayList;
@@ -37,12 +36,12 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.api.GraphFactory.ANY_REL_TYPE;
+import static org.neo4j.graphalgo.api.GraphStoreFactory.ANY_REL_TYPE;
 
-public final class GraphsByRelationshipType {
+public final class GraphStore {
 
     @TestOnly
-    public static GraphsByRelationshipType of(Graph graph) {
+    public static GraphStore of(Graph graph) {
         Map<String, Map<String, Graph>> mapping = Collections.singletonMap(
             "RELATIONSHIP_TYPE",
             Collections.singletonMap(
@@ -50,28 +49,28 @@ public final class GraphsByRelationshipType {
                 graph
             )
         );
-        return GraphsByRelationshipType.of(mapping);
+        return GraphStore.of(mapping);
     }
 
-    public static GraphsByRelationshipType of(Map<String, Map<String, Graph>> graphs) {
-        return new GraphsByRelationshipType(graphs);
+    public static GraphStore of(Map<String, Map<String, Graph>> graphs) {
+        return new GraphStore(graphs);
     }
 
     private final Map<String, Map<String, Graph>> graphs;
 
-    private GraphsByRelationshipType(Map<String, Map<String, Graph>> graphs) {
+    private GraphStore(Map<String, Map<String, Graph>> graphs) {
         this.graphs = graphs;
     }
 
-    public Graph getGraphProjection(String... relationshipTypes) {
-        return getGraphProjection(Arrays.asList(relationshipTypes), Optional.empty());
+    public Graph getGraph(String... relationshipTypes) {
+        return getGraph(Arrays.asList(relationshipTypes), Optional.empty());
     }
 
-    public Graph getGraphProjection(String relationshipType, Optional<String> relationshipProperty) {
-        return getGraphProjection(Collections.singletonList(relationshipType), relationshipProperty);
+    public Graph getGraph(String relationshipType, Optional<String> relationshipProperty) {
+        return getGraph(Collections.singletonList(relationshipType), relationshipProperty);
     }
 
-    public Graph getGraphProjection(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         if (relationshipTypes.isEmpty()) {
             throw new IllegalArgumentException(String.format(
                 "The parameter %s should not be empty. Use `*` to load all relationship types.",
@@ -134,10 +133,6 @@ public final class GraphsByRelationshipType {
 
     public void canRelease(boolean canRelease) {
         forEach(g -> g.canRelease(canRelease));
-    }
-
-    public String getGraphType() {
-        return HugeGraph.TYPE;
     }
 
     public long nodeCount() {

@@ -24,8 +24,6 @@ package org.neo4j.graphalgo.api;
  */
 public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipProperties, RelationshipAccess, NodePropertyContainer {
 
-    String TYPE = "huge";
-
     default boolean isEmpty() {
         return nodeCount() == 0;
     }
@@ -52,10 +50,6 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
      * Release only the properties associated with that graph.
      */
     default void releaseProperties() { }
-
-    default String getType() {
-        return TYPE;
-    }
 
     boolean isUndirected();
 

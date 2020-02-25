@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -91,7 +91,7 @@ class WccTest extends AlgoTestBase {
             .addRelationshipType(RELATIONSHIP_TYPE.name())
             .globalOrientation(orientation)
             .build()
-            .graph(HugeGraphFactory.class);
+            .graph(NativeFactory.class);
 
         DisjointSetStruct result = run(graph);
 

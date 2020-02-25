@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.louvain;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -55,7 +55,7 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
             .add("modularityOptimization()", ModularityOptimizationFactory.MEMORY_ESTIMATION)
             .rangePerGraphDimension("subGraph", (graphDimensions, concurrency) -> {
                 // TODO: copy graphDimensions but keep only one node and rel property
-                long maxGraphSize = HugeGraphFactory
+                long maxGraphSize = NativeFactory
                     .getMemoryEstimation(graphDimensions)
                     .estimate(graphDimensions, concurrency)
                     .memoryUsage()

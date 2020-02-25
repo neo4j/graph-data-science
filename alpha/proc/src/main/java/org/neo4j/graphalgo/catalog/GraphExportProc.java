@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.catalog;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.NeoExport;
 import org.neo4j.graphalgo.core.utils.export.NeoExportConfig;
 import org.neo4j.procedure.Description;
@@ -47,7 +47,7 @@ public class GraphExportProc extends BaseProc {
 
         GraphExportResult result = runWithExceptionLogging(
             "Graph creation failed", () -> {
-                Graph graph = GraphCatalog.get(getUsername(), graphName).getGraph();
+                Graph graph = GraphStoreCatalog.get(getUsername(), graphName).getGraph();
                 NeoExport neoExport = new NeoExport(graph, config);
 
                 long start = System.nanoTime();

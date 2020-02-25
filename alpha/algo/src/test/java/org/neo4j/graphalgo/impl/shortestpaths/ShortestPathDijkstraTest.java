@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -139,7 +139,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .addRelationshipType(type.name())
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
-                .graph(HugeGraphFactory.class);
+                .graph(NativeFactory.class);
 
         DijkstraConfig config = DijkstraConfig.of(nodeIds[0], nodeIds[nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
@@ -170,7 +170,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .addRelationshipType(type.name())
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
-                .graph(HugeGraphFactory.class);
+                .graph(NativeFactory.class);
 
         DijkstraConfig config = DijkstraConfig.of(nodeIds[0], nodeIds[nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
@@ -202,7 +202,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .addRelationshipType(type.name())
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
-                .graph(HugeGraphFactory.class);
+                .graph(NativeFactory.class);
 
         DijkstraConfig config = DijkstraConfig.of(expected.nodeIds[0], expected.nodeIds[expected.nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
@@ -234,7 +234,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .addRelationshipType("TYPE1")
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
-                .graph(HugeGraphFactory.class);
+                .graph(NativeFactory.class);
 
         DijkstraConfig config = DijkstraConfig.of(head, tail);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);

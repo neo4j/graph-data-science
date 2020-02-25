@@ -28,9 +28,9 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Label;
 
@@ -112,11 +112,11 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void averageOutgoingCentrality(Class<? extends GraphFactory> factoryType) {
+    void averageOutgoingCentrality(Class<? extends GraphStoreFactory> factoryType) {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -140,11 +140,11 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void averageIncomingCentrality(Class<? extends GraphFactory> factoryType) {
+    void averageIncomingCentrality(Class<? extends GraphStoreFactory> factoryType) {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -169,11 +169,11 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
     }
 
     @AllGraphTypesTest
-    void totalCentrality(Class<? extends GraphFactory> factoryType) {
+    void totalCentrality(Class<? extends GraphStoreFactory> factoryType) {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherGraphFactory.class)) {
+        if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = runInTransaction(db, () -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")

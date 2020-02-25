@@ -37,7 +37,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
@@ -126,7 +126,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphCatalog.removeAllLoadedGraphs();
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
@@ -443,7 +443,7 @@ class GraphCreateProcTest extends BaseProcTest {
             ))
         );
 
-        Graph graph = GraphCatalog.get("", name).getGraph();
+        Graph graph = GraphStoreCatalog.get("", name).getGraph();
         assertGraphEquals(fromGdl("()-[{w:55}]->()"), graph);
     }
 
@@ -476,7 +476,7 @@ class GraphCreateProcTest extends BaseProcTest {
             ))
         );
 
-        Graph graph = GraphCatalog.get("", name).getGraph();
+        Graph graph = GraphStoreCatalog.get("", name).getGraph();
         assertGraphEquals(fromGdl("(a)-[{w: 3}]->(a)"), graph);
     }
 
@@ -1012,7 +1012,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         runQuery(query, map());
 
-        Graph graph = GraphCatalog.get("", "g").getGraph();
+        Graph graph = GraphStoreCatalog.get("", "g").getGraph();
         Graph expected = fromGdl("({ fooProp: 42, barProp: 13.37D })" +
                                                    "({ fooProp: 43, barProp: 13.38D })" +
                                                    "({ fooProp: 44, barProp: 13.39D })" +
@@ -1064,7 +1064,7 @@ class GraphCreateProcTest extends BaseProcTest {
             assertEquals("MAX", maxCostParams.get("aggregation").toString());
         });
 
-        Graph actual = GraphCatalog.get("", "aggGraph").getGraph();
+        Graph actual = GraphStoreCatalog.get("", "aggGraph").getGraph();
         Graph expected = fromGdl("(a)-[{w:85.3D}]->(b),(a)-[{w:42.1D}]->(b),(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1087,9 +1087,9 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query, map("nodeQuery",
             ALL_NODES_QUERY, "relationshipQuery", relationshipQuery));
 
-        Graph foobarGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobar"));
-        Graph foobazGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("foobaz"));
-        Graph raboofGraph = GraphCatalog.get(getUsername(), "testGraph", "", Optional.of("raboof"));
+        Graph foobarGraph = GraphStoreCatalog.get(getUsername(), "testGraph", "", Optional.of("foobar"));
+        Graph foobazGraph = GraphStoreCatalog.get(getUsername(), "testGraph", "", Optional.of("foobaz"));
+        Graph raboofGraph = GraphStoreCatalog.get(getUsername(), "testGraph", "", Optional.of("raboof"));
 
         Graph expectedFoobarGraph = fromGdl("()-[{w: 23.0D}]->()");
         Graph expectedFoobazGraph = fromGdl("()-[{w: 1984.0D}]->()");

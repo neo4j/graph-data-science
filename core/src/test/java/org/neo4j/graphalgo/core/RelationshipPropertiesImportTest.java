@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
@@ -118,7 +118,7 @@ class RelationshipPropertiesImportTest {
             .globalOrientation(orientation)
             .addRelationshipProperty(PropertyMapping.of("w", 0.0))
             .build()
-            .load(HugeGraphFactory.class);
+            .load(NativeFactory.class);
 
     }
 
