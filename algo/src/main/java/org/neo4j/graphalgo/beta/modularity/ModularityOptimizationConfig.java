@@ -40,7 +40,7 @@ public interface ModularityOptimizationConfig extends
     @Value.Default
     @Override
     default double tolerance() {
-        return 1E-7;
+        return 0.0001;
     }
 
     @Override
