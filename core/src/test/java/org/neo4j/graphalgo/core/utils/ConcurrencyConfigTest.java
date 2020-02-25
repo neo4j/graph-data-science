@@ -43,6 +43,6 @@ final class ConcurrencyConfigTest {
     void unlimitedDefaultConcurrencyOnEnterpriseEdition() {
         ConcurrencyConfig config = new ConcurrencyConfig(/* cpus */ 42, /* isOnEnterprise */ true);
         assertEquals(42, config.corePoolSize);
-        assertEquals(Integer.MAX_VALUE, config.maximumConcurrency);
+        assertEquals(ConcurrencyConfig.FJ_MAX_CAP, config.maximumConcurrency);
     }
 }
