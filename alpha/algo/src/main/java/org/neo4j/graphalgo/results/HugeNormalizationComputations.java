@@ -29,15 +29,15 @@ public final class HugeNormalizationComputations {
 
     private HugeNormalizationComputations() {}
 
-    public static double squaredSum(HugeDoubleArray partition) {
-        return parallelStream(partition.stream(), stream -> stream.map(value -> value * value).sum());
+    public static double squaredSum(HugeDoubleArray partition, int concurrency) {
+        return parallelStream(partition.stream(), concurrency, stream -> stream.map(value -> value * value).sum());
     }
 
-    public static double l1Norm(HugeDoubleArray partition) {
-        return parallelStream(partition.stream(), DoubleStream::sum);
+    public static double l1Norm(HugeDoubleArray partition, int concurrency) {
+        return parallelStream(partition.stream(), concurrency, DoubleStream::sum);
     }
 
-    public static double max(HugeDoubleArray result, double defaultMax) {
-        return parallelStream(result.stream(), stream -> stream.max().orElse(defaultMax));
+    public static double max(HugeDoubleArray result, double defaultMax, int concurrency) {
+        return parallelStream(result.stream(), concurrency, stream -> stream.max().orElse(defaultMax));
     }
 }

@@ -35,7 +35,7 @@ import java.util.concurrent.TimeoutException;
 
 public final class Pools {
 
-    static final int MAXIMUM_CONCURRENCY;
+    public static final int MAXIMUM_CONCURRENCY;
     static final int CORE_POOL_SIZE;
 
     static {

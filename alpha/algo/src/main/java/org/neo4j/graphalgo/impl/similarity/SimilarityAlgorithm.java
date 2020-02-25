@@ -55,7 +55,7 @@ public abstract class SimilarityAlgorithm<ME extends SimilarityAlgorithm<ME, INP
         ImmutableSimilarityAlgorithmResult.Builder builder = ImmutableSimilarityAlgorithmResult.builder();
 
         INPUT[] inputs = prepareInputs(config.data(), config);
-        long[] inputIds = SimilarityInput.extractInputIds(inputs);
+        long[] inputIds = SimilarityInput.extractInputIds(inputs, config.concurrency());
         int[] sourceIndexIds = indexesFor(inputIds, config.sourceIds(), "sourceIds");
         int[] targetIndexIds = indexesFor(inputIds, config.targetIds(), "targetIds");
         SimilarityComputer<INPUT> computer = similarityComputer(config.skipValue(), sourceIndexIds, targetIndexIds);

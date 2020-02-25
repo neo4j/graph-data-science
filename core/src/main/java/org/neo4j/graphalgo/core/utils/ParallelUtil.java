@@ -70,15 +70,6 @@ public final class ParallelUtil {
     private ParallelUtil() {}
 
     /**
-     * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}.
-     * @deprecated Use {@link ParallelUtil#parallelStream(java.util.stream.BaseStream, int, java.util.function.Function)} instead.
-     */
-    @Deprecated
-    public static <T extends BaseStream<?, T>, R> R parallelStream(T data, Function<T, R> fn) {
-        return parallelStream(data, AlgoBaseConfig.DEFAULT_CONCURRENCY, fn);
-    }
-
-    /**
      * Executes the given function in parallel on the given {@link BaseStream}, using a FJ pool of appropriate size.
      */
     public static <T extends BaseStream<?, T>, R> R parallelStream(T data, int concurrency, Function<T, R> fn) {
@@ -92,15 +83,6 @@ public final class ParallelUtil {
                 pool.shutdown();
             }
         }
-    }
-
-    /**
-     * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}
-     * @deprecated Use {@link org.neo4j.graphalgo.core.utils.ParallelUtil#parallelStreamConsume(java.util.stream.BaseStream, int, java.util.function.Consumer)} instead.
-     */
-    @Deprecated
-    public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, Consumer<T> fn) {
-        parallelStreamConsume(data, AlgoBaseConfig.DEFAULT_CONCURRENCY, fn);
     }
 
     /**

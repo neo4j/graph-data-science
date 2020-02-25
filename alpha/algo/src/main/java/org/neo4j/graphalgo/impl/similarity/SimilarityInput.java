@@ -53,8 +53,8 @@ public interface SimilarityInput {
         return indexes;
     }
 
-    static long[] extractInputIds(SimilarityInput[] inputs) {
-        return parallelStream(Arrays.stream(inputs), stream -> stream.mapToLong(SimilarityInput::getId).toArray());
+    static long[] extractInputIds(SimilarityInput[] inputs, int concurrency) {
+        return parallelStream(Arrays.stream(inputs),  concurrency, stream -> stream.mapToLong(SimilarityInput::getId).toArray());
     }
 
     static int[] indexesFor(long[] inputIds, ProcedureConfiguration configuration, String key) {
