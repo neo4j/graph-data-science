@@ -93,13 +93,13 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
                     exitFunction = isBfs
                         // TODO: Not sure this difference is intentional.
                         //       But it is required to maintain algo behavior.
-                        ? (s, t, w) -> w >= config.maxDepth() ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW
+                        ? (s, t, w) -> w > config.maxDepth() ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW
                         : (s, t, w) -> w >  config.maxDepth() ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
                     aggregatorFunction = (s, t, w) -> w + 1.;
                     // maxCost & weightProperty given; aggregate nodes with lower cost then maxCost
                 } else if (config.relationshipWeightProperty() != null && !Double.isNaN(config.maxCost())) {
                     double maxCost = config.maxCost();
-                    exitFunction = (s, t, w) -> w >= maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
+                    exitFunction = (s, t, w) -> w > maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
                     aggregatorFunction = (s, t, w) -> w + graph.relationshipProperty(s, t, 0.0D);
                     // do complete BFS until all nodes have been visited
                 } else {
