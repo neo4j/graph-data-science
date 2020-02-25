@@ -84,7 +84,7 @@ final class ParallelUtilTest {
         ForkJoinPool commonPool = ForkJoinPool.commonPool();
         Stream<Long> stream = list.stream();
 
-        long actualTotal = parallelStream(stream, Math.min(4, Pools.MAXIMUM_CONCURRENCY), (s) -> {
+        long actualTotal = parallelStream(stream, Pools.allowedConcurrency(4), (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
