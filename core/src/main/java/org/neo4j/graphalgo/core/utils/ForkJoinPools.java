@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
 
 import java.util.concurrent.ForkJoinPool;
@@ -28,31 +27,14 @@ import static org.neo4j.graphalgo.config.ConcurrencyValidation.CONCURRENCY_LIMIT
 
 public final class ForkJoinPools {
 
-    private static ForkJoinPools INSTANCE;
+    private ForkJoinPools() {}
 
-    public static ForkJoinPools instance() {
-        if (INSTANCE == null) {
-            INSTANCE = new ForkJoinPools();
-        }
-        return INSTANCE;
-    }
-
-    private final ForkJoinPool pool;
-
-    private ForkJoinPools() {
+    public static ForkJoinPool createPool(int concurrency) {
         if (ConcurrencyMonitor.instance().isUnlimited()) {
-            pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
-        } else {
-            pool = new ForkJoinPool(CONCURRENCY_LIMITATION);
+            return new ForkJoinPool(concurrency);
         }
+
+        return new ForkJoinPool(Math.min(CONCURRENCY_LIMITATION, concurrency));
     }
 
-    ForkJoinPool getPool() {
-        return pool;
-    }
-
-    @TestOnly
-    static void reset() {
-        INSTANCE = null;
-    }
 }

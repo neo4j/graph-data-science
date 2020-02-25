@@ -72,15 +72,13 @@ public final class ParallelUtil {
      * Executes the given function in parallel on the given {@link BaseStream}, using a FJ pool of appropriate size.
      */
     public static <T extends BaseStream<?, T>, R> R parallelStream(T data, int concurrency, Function<T, R> fn) {
-        ForkJoinPool pool = getFJPoolWithConcurrency(concurrency);
+        ForkJoinPool pool = ForkJoinPools.createPool(concurrency);
         try {
             return pool.submit(() -> fn.apply(data.parallel())).get();
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            if (pool != Pools.FJ_POOL) {
-                pool.shutdown();
-            }
+            pool.shutdown();
         }
     }
 
@@ -88,15 +86,13 @@ public final class ParallelUtil {
      * Executes the given function in parallel on the given {@link BaseStream}, using an apropriate FJ pool.
      */
     public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, int concurrency, Consumer<T> fn) {
-        ForkJoinPool pool = getFJPoolWithConcurrency(concurrency);
+        ForkJoinPool pool = ForkJoinPools.createPool(concurrency);
         try {
             pool.submit(() -> fn.accept(data.parallel())).get();
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            if (pool != Pools.FJ_POOL) {
-                pool.shutdown();
-            }
+            pool.shutdown();
         }
     }
 
@@ -1087,12 +1083,5 @@ public final class ParallelUtil {
             }
             pushedElement = element;
         }
-    }
-
-    private static ForkJoinPool getFJPoolWithConcurrency(int concurrency) {
-        int actualConcurrency = Pools.allowedConcurrency(concurrency);
-        return actualConcurrency == Pools.CORE_POOL_SIZE
-            ? Pools.FJ_POOL
-            : Pools.createFJPool(actualConcurrency);
     }
 }
