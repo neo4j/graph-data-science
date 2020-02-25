@@ -29,11 +29,11 @@ import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -95,52 +95,8 @@ public final class GraphStore {
     }
 
     public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
-        if (relationshipTypes.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
-                "The parameter %s should not be empty. Use `*` to load all relationship types.",
-                ProcedureConstants.RELATIONSHIP_TYPES
-            ));
-        }
+        validateInput(relationshipTypes, maybeRelationshipProperty);
         return createGraph(relationshipTypes, maybeRelationshipProperty);
-    }
-
-    private Graph createGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
-        return createGraph(singletonList(relationshipType), maybeRelationshipProperty);
-    }
-
-    private Graph createGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
-        boolean loadAllRelationships = relationshipTypes.contains("*");
-
-        List<Graph> filteredGraphs = relationships.entrySet().stream()
-            .filter(entry -> loadAllRelationships || relationshipTypes.contains(entry.getKey()))
-            .map(entry -> {
-                String relType = entry.getKey();
-
-                Optional<PropertyCSR> properties = maybeRelationshipProperty.map(propertyKey -> relationshipProperties
-                    .get(relType)
-                    .get(propertyKey));
-
-                return HugeGraph.create(
-                    tracker,
-                    nodes,
-                    nodeProperties,
-                    entry.getValue(),
-                    properties
-                );
-            })
-            .collect(Collectors.toList());
-
-        filteredGraphs.forEach(graph -> graph.canRelease(false));
-        createdGraphs.addAll(filteredGraphs);
-
-        if (filteredGraphs.isEmpty()) {
-            throw new NoSuchElementException(String.format(
-                "Cannot find graphs for relationship types: '%s' and relationship properties '%s'.",
-                relationshipTypes, maybeRelationshipProperty.orElse("<NOT DEFINED>")
-            ));
-        } else {
-            return UnionGraph.of(filteredGraphs);
-        }
     }
 
     public Graph getUnion() {
@@ -191,6 +147,59 @@ public final class GraphStore {
         mergedRelationshipProperties.putAll(other.relationshipProperties);
 
         return GraphStore.of(nodes, nodeProperties, mergedRelationships, mergedRelationshipProperties, tracker);
+    }
+
+    private Graph createGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
+        return createGraph(singletonList(relationshipType), maybeRelationshipProperty);
+    }
+
+    private Graph createGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+        boolean loadAllRelationships = relationshipTypes.contains("*");
+
+        List<Graph> filteredGraphs = relationships.entrySet().stream()
+            .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))
+            .map(relTypeAndCSR -> HugeGraph.create(
+                tracker,
+                nodes,
+                nodeProperties,
+                relTypeAndCSR.getValue(),
+                maybeRelationshipProperty.map(propertyKey -> relationshipProperties
+                    .get(relTypeAndCSR.getKey())
+                    .get(propertyKey))
+            ))
+            .collect(Collectors.toList());
+
+        filteredGraphs.forEach(graph -> graph.canRelease(false));
+        createdGraphs.addAll(filteredGraphs);
+        return UnionGraph.of(filteredGraphs);
+    }
+
+    private void validateInput(Collection<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+        if (relationshipTypes.isEmpty()) {
+            throw new IllegalArgumentException(String.format(
+                "The parameter %s should not be empty. Use `*` to load all relationship types.",
+                ProcedureConstants.RELATIONSHIP_TYPES
+            ));
+        }
+
+        relationshipTypes.forEach(relationshipType -> {
+            if (!relationships.containsKey(relationshipType)) {
+                throw new IllegalArgumentException(String.format(
+                    "No relationships have been loaded for relationship type '%s'",
+                    relationshipType
+                ));
+            }
+
+            maybeRelationshipProperty.ifPresent(relationshipProperty -> {
+                if (!relationshipProperties.get(relationshipType).containsKey(relationshipProperty)) {
+                    throw new IllegalArgumentException(String.format(
+                        "No relationships have been loaded for relationship type '%s' and relationship property '%s'.",
+                        relationshipType,
+                        maybeRelationshipProperty.get()
+                    ));
+                }
+            });
+        });
     }
 }
 
