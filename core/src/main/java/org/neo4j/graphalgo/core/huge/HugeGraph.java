@@ -22,14 +22,13 @@ package org.neo4j.graphalgo.core.huge;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -39,8 +38,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
-
-import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 
 /**
  * Huge Graph contains two array like data structures.
@@ -105,58 +102,22 @@ public class HugeGraph implements Graph {
         AllocationTracker tracker,
         IdMap idMapping,
         Map<String, NodeProperties> nodeProperties,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
-        long relationshipCount,
-        boolean loadAsUndirected) {
-
-        return create(
+        CSR topology,
+        Optional<PropertyCSR> properties
+    ) {
+        return new HugeGraph(
             tracker,
             idMapping,
             nodeProperties,
-            relationshipCount,
-            adjacencyList,
-            adjacencyOffsets,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            loadAsUndirected);
-    }
-
-    public static HugeGraph create(
-        AllocationTracker tracker,
-        IdMap idMapping,
-        Map<String, NodeProperties> nodeProperties,
-        RelationshipsBuilder relationshipsBuilder,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
-        int propertyIndex,
-        ResolvedPropertyMapping propertyMapping,
-        long relationshipCount,
-        boolean loadAsUndirected) {
-
-        AdjacencyList properties = null;
-        AdjacencyOffsets propertyOffsets = null;
-        if (relationshipsBuilder != null) {
-            if (propertyMapping.propertyKeyId() != NO_SUCH_PROPERTY_KEY) {
-                propertyOffsets = relationshipsBuilder.globalPropertyOffsets(propertyIndex);
-                if (propertyOffsets != null) {
-                    properties = relationshipsBuilder.properties(propertyIndex);
-                }
-            }
-        }
-
-        return create(
-            tracker,
-            idMapping,
-            nodeProperties,
-            relationshipCount,
-            adjacencyList,
-            adjacencyOffsets,
-            propertyMapping.exists() ? Optional.empty() : Optional.of(propertyMapping.defaultValue()),
-            Optional.ofNullable(properties),
-            Optional.ofNullable(propertyOffsets),
-            loadAsUndirected);
+            topology.elementCount(),
+            topology.list(),
+            topology.offsets(),
+            properties.isPresent(),
+            properties.map(PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
+            properties.map(PropertyCSR::list).orElse(null),
+            properties.map(PropertyCSR::offsets).orElse(null),
+            topology.orientation() == Orientation.UNDIRECTED
+        );
     }
 
     public static HugeGraph create(

@@ -47,6 +47,10 @@ public final class RelationshipProjectionMappings implements Iterable<Relationsh
         this.mappings = mappings;
     }
 
+    public int numberOfMappings() {
+        return mappings.length;
+    }
+
     public Stream<RelationshipProjectionMapping> stream() {
         return Arrays.stream(mappings);
     }

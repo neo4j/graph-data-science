@@ -19,21 +19,34 @@
  */
 package org.neo4j.graphalgo.api;
 
+import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipProjectionMapping;
+import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsReader;
+import org.neo4j.graphalgo.core.huge.AdjacencyList;
+import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.CSR;
+import org.neo4j.graphalgo.core.huge.PropertyCSR;
 import org.neo4j.graphalgo.core.loading.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.ImportProgress;
+import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * The Abstract Factory defines the construction of the graph
@@ -95,6 +108,64 @@ public abstract class GraphStoreFactory implements Assessable {
         );
     }
 
+    protected GraphStore createGraphStore(
+        IdsAndProperties idsAndProperties,
+        RelationshipImportResult relationshipImportResult,
+        AllocationTracker tracker,
+        GraphDimensions dimensions
+    ) {
+        int relTypeCount = dimensions.relationshipProjectionMappings().numberOfMappings();
+        Map<String, CSR> relationships = new HashMap<>(relTypeCount);
+        Map<String, Map<String, PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
+
+        relationshipImportResult.builders().forEach((relationshipProjectionMapping, relationshipsBuilder) -> {
+            AdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
+            AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets();
+            long relationshipCount = relationshipImportResult.counts().getOrDefault(relationshipProjectionMapping, 0L);
+
+            relationships.put(relationshipProjectionMapping.elementIdentifier(), CSR.of(
+                adjacencyList,
+                adjacencyOffsets,
+                relationshipCount,
+                relationshipProjectionMapping.orientation()
+            ));
+
+            if (dimensions.relationshipProperties().hasMappings()) {
+                Map<String, PropertyCSR> propertyMap = dimensions
+                    .relationshipProperties()
+                    .enumerate()
+                    .collect(Collectors.toMap(
+                        propertyEntry -> propertyEntry.getTwo().propertyKey(),
+                        propertyEntry -> {
+                            int propertyIndex = propertyEntry.getOne();
+                            ResolvedPropertyMapping propertyMapping = propertyEntry.getTwo();
+
+                            AdjacencyList properties = relationshipsBuilder.properties(propertyIndex);
+                            AdjacencyOffsets propertyOffsets = relationshipsBuilder.globalPropertyOffsets(propertyIndex);
+                            double defaultValue = propertyMapping.defaultValue();
+
+                            return PropertyCSR.of(
+                                properties,
+                                propertyOffsets,
+                                relationshipCount,
+                                relationshipProjectionMapping.orientation(),
+                                defaultValue
+                            );
+                        }
+                    ));
+                relationshipProperties.put(relationshipProjectionMapping.elementIdentifier(), propertyMap);
+            }
+        });
+
+        return GraphStore.of(
+            idsAndProperties.idMap(),
+            idsAndProperties.properties(),
+            relationships,
+            relationshipProperties,
+            tracker
+        );
+    }
+
     private static ProgressLogger progressLogger(Log log, long time) {
         return ProgressLogger.wrap(log, TASK_LOADING, time, TimeUnit.MILLISECONDS);
     }
@@ -110,6 +181,23 @@ public abstract class GraphStoreFactory implements Assessable {
                 .dimensions(dimensions)
                 .graphStore(graphStore)
                 .build();
+        }
+    }
+
+    @ValueClass
+    public interface RelationshipImportResult {
+        Map<RelationshipProjectionMapping, RelationshipsBuilder> builders();
+
+        ObjectLongMap<RelationshipProjectionMapping> counts();
+
+        GraphDimensions dimensions();
+
+        static RelationshipImportResult of(
+            Map<RelationshipProjectionMapping, RelationshipsBuilder> builders,
+            ObjectLongMap<RelationshipProjectionMapping> counts,
+            GraphDimensions dimensions
+        ) {
+            return ImmutableRelationshipImportResult.of(builders, counts, dimensions);
         }
     }
 }
