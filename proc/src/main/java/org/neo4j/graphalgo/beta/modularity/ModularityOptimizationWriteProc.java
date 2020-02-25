@@ -118,7 +118,7 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
 
     public static class WriteResult {
 
-        public final long loadMillis;
+        public final long createMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final long postProcessingMillis;
@@ -131,7 +131,7 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
         public final Map<String, Object> configuration;
 
         WriteResult(
-            long loadMillis,
+            long createMillis,
             long computeMillis,
             long postProcessingMillis,
             long writeMillis,
@@ -143,7 +143,7 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
             Map<String, Object> communityDistribution,
             Map<String, Object> configuration
         ) {
-            this.loadMillis = loadMillis;
+            this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.postProcessingMillis = postProcessingMillis;
