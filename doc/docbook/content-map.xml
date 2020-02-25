@@ -81,6 +81,9 @@
                 <d:tocentry linkend="algorithms-k1coloring">
                     <?dbhtml filename="algorithms/k1coloring/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-modularity-optimization">
+                    <?dbhtml filename="algorithms/modularity-optimization/index.html"?>
+                </d:tocentry>
 
                 <d:tocentry linkend="algorithms-strongly-connected-components">
                     <?dbhtml filename="algorithms/strongly-connected-components/index.html"?>

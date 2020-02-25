@@ -1,0 +1,198 @@
+[[algorithms-modularity-optimization]]
+= Modularity Optimization
+
+[abstract]
+--
+This section describes the Modularity Optimization algorithm in the Neo4j Graph Data Science library.
+--
+
+This topic includes:
+
+* <<algorithms-modularity-optimization-intro, Introduction>>
+* <<algorithms-modularity-optimization-syntax, Syntax>>
+* <<algorithms-modularity-optimization-examples, Examples>>
+
+[[algorithms-modularity-optimization-intro]]
+== Introduction
+
+The Modularity Optimization algorithm tries to detect communities in the graph based on their _modularity_.
+_Modularity_ is a measure of the structure of a graph, measuring the density of connections within a module or community.
+Graphs with a high modularity score will have many connections within a community but only few pointing outwards to other communities.
+The algorithm will explore for every node if its modularity score might increase if it changes its community to one of its neighboring nodes.
+
+For more information on this algorithm, see:
+
+* https://arxiv.org/pdf/cond-mat/0308217.pdf[MEJ Newman, M Girvan "Finding and evaluating community structure in networks"^]
+* https://++en.wikipedia.org/wiki/Modularity_(networks)++
+
+[NOTE]
+====
+Running this algorithm requires sufficient memory availability.
+Before running this algorithm, we recommend that you read <<memory-estimation>>.
+====
+
+[[algorithms-modularity-optimization-syntax]]
+== Syntax
+
+.The following describes the API for running the algorithm and writing results back to Neo4j:
+[source, cypher]
+----
+CALL gds.beta.modularityOptimization.write(graphNameOrConfig: String|Map, configuration: Map})
+YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, writeMillis
+----
+
+include::../common-parameters.adoc[]
+
+include::../common-configuration.adoc[]
+
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                           | Type    | Default     | Optional | Description
+| weightProperty                 | String  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
+| seedProperty                   | String  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| writeProperty                  | String  | n/a         | yes      | The property name written back the ID of the partition particular node belongs to.
+| maxIterations                  | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
+| tolerance                      | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| createMillis          | Integer   | Milliseconds for loading data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| writeMillis           | Integer   | Milliseconds for writing result data back.
+| postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
+| nodes                 | Integer   | The number of nodes considered.
+| didConverge           | Boolean   | True if the algorithm did converge to a stable modularity score within the provided number of maximum iterations.
+| ranIterations         | Integer   | The number of iterations run.
+| modularity            | Float     | The final modularity score.
+| communityCount        | Integer   | The number of communities found.
+| communityDistribution | Map       | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+
+.The following will run the algorithm and stream back results:
+[source, cypher]
+----
+CALL gds.modularityOptimization.stream(graphNameOrConfig: String|Map, configuration: Map})
+YIELD nodeId, communityId
+----
+
+include::../common-parameters.adoc[]
+
+include::../common-configuration.adoc[]
+
+.Algorithm specific configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                       | Type    | Default                | Optional | Description
+| maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
+| tolerance                  | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
+| seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
+|===
+
+.Results
+[opts="header"]
+|===
+| Name        | Type    | Description
+| nodeId      | Integer | Node ID
+| communityId | Integer | Community ID
+|===
+
+
+[[algorithms-modularity-optimization-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher]
+----
+CREATE
+  (a:Person {name:'Alice'})
+, (b:Person {name:'Bridget'})
+, (c:Person {name:'Charles'})
+, (d:Person {name:'Doug'})
+, (e:Person {name:'Elton'})
+, (f:Person {name:'Frank'})
+, (a)-[:KNOWS {weight: 0.01}]->(b)
+, (a)-[:KNOWS {weight: 5.0}]->(e)
+, (a)-[:KNOWS {weight: 5.0}]->(f)
+, (b)-[:KNOWS {weight: 5.0}]->(c)
+, (b)-[:KNOWS {weight: 5.0}]->(d)
+, (c)-[:KNOWS {weight: 0.01}]->(e)
+, (f)-[:KNOWS {weight: 0.01}]->(d)
+----
+
+This graph consists of two center nodes "Alice" and "Bridget" each of which have two more neighbors.
+Additionally each neighbor of "Alice" is connected to one of the neighbors of "Bridget".
+Looking at the weights of the relationships, it can be seen that the connections from the two center nodes to their neighbors are very strong, while connections between those groups are weak.
+Therefore the Modularity Optimization algorithm should detect two communities: "Alice" and "Bob" together with their neighbors respectively.
+
+
+[NOTE]
+====
+In the examples below we will use named graphs and standard projections as the norm.
+However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+====
+
+.The following statement will create the graph and store it in the graph catalog.
+[source, cypher]
+----
+CALL gds.graph.create(
+    'myGraph',
+    'Person',
+    {
+        KNOWS: {
+            type: 'KNOWS',
+            orientation: 'UNDIRECTED',
+            properties: ['weight']
+        }
+    })
+----
+
+The following example demonstrates using the Modularity Algorithm on this weighted graph.
+
+.Running the Modularity Optimization algorithm in stream mode:
+[source, cypher]
+----
+CALL gds.beta.modularityOptimization.stream('myGraph', { relationshipWeightProperty: 'weight' })
+YIELD nodeId, communityId
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY name
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| name      | communityId
+| "Alice"   | 4
+| "Bridget" | 1
+| "Charles" | 1
+| "Doug"    | 1
+| "Elton"   | 4
+| "Frank"   | 4
+|===
+
+It is also possible to write the assigned community ids back to the database using the `write` mode.
+
+.Running the Modularity Optimization algorithm in write mode:
+[source, cypher]
+----
+CALL gds.beta.modularityOptimization.write('myGraph', { relationshipWeightProperty: 'weight', writeProperty: 'community' })
+YIELD nodes, communityCount, ranIterations, didConverge
+----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m"]
+|===
+| nodes | colorCount | ranIterations | didConverge
+| 6     | 2          | 3             | true
+|===
+
+When using `write` mode the procedure will return information about the algorithm execution.
+In this example we return the number of processed nodes, the number of communities assigned to the nodes in the graph, the number of iterations and information whether the algorithm converged.
+
+Running the algorithm without specifying the `relationshipWeightProperty` will default all relationship weights to 1.0.
