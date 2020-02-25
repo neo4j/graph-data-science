@@ -66,9 +66,6 @@ public final class ConcurrencyMonitor {
     }
 
     private State get() {
-        if (currentState == State.UNSET) {
-            throw new IllegalStateException();
-        }
         return currentState;
     }
 
