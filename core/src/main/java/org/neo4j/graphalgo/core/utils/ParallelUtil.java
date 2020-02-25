@@ -70,13 +70,6 @@ public final class ParallelUtil {
     private ParallelUtil() {}
 
     /**
-     * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}.
-     */
-    public static <T extends BaseStream<?, T>, R> R parallelStream(T data, Function<T, R> fn) {
-        return parallelStream(data, AlgoBaseConfig.DEFAULT_CONCURRENCY, fn);
-    }
-
-    /**
      * Executes the given function in parallel on the given {@link BaseStream}, using a FJ pool of appropriate size.
      */
     public static <T extends BaseStream<?, T>, R> R parallelStream(T data, int concurrency, Function<T, R> fn) {
@@ -90,13 +83,6 @@ public final class ParallelUtil {
                 pool.shutdown();
             }
         }
-    }
-
-    /**
-     * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}
-     */
-    public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, Consumer<T> fn) {
-        parallelStreamConsume(data, AlgoBaseConfig.DEFAULT_CONCURRENCY, fn);
     }
 
     /**
@@ -115,8 +101,8 @@ public final class ParallelUtil {
         }
     }
 
-    public static void parallelForEachNode(Graph graph, LongConsumer consumer) {
-        parallelStreamConsume(LongStream.range(0, graph.nodeCount()), (stream) -> {
+    public static void parallelForEachNode(Graph graph, int concurrency, LongConsumer consumer) {
+        parallelStreamConsume(LongStream.range(0, graph.nodeCount()), concurrency, (stream) -> {
             stream.forEach(consumer);
         });
     }
@@ -1106,7 +1092,7 @@ public final class ParallelUtil {
 
     private static ForkJoinPool getFJPoolWithConcurrency(int concurrency) {
         int actualConcurrency = Pools.allowedConcurrency(concurrency);
-        return actualConcurrency == AlgoBaseConfig.DEFAULT_CONCURRENCY
+        return actualConcurrency == Pools.CORE_POOL_SIZE
             ? Pools.FJ_POOL
             : Pools.createFJPool(actualConcurrency);
     }

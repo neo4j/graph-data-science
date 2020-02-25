@@ -21,10 +21,13 @@ package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.graphalgo.compat.Editions;
 
+import java.util.concurrent.ForkJoinPool;
+
 final class ConcurrencyConfig {
 
     private static final String PROCESSORS_OVERRIDE_PROPERTY = "neo4j.graphalgo.processors";
     private static final int CONCURRENCY_LIMITATION = 4;
+    public static final int FJ_MAX_CAP = 32767;  // ForkJoinPool.MAX_CAP
 
     final int maximumConcurrency;
     final int corePoolSize;
@@ -43,7 +46,7 @@ final class ConcurrencyConfig {
 
     /* test-private */ ConcurrencyConfig(int availableProcessors, boolean isOnEnterprise) {
         if (isOnEnterprise) {
-            maximumConcurrency = Integer.MAX_VALUE;
+            maximumConcurrency = FJ_MAX_CAP;
             corePoolSize = availableProcessors;
         } else {
             maximumConcurrency = CONCURRENCY_LIMITATION;

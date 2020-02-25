@@ -99,6 +99,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
 
                 PrimitiveIterator.OfInt idStream = parallelStream(
                     IntStream.range(0, limit).unordered(),
+                    config.concurrency(),
                     stream -> stream.flatMap((s) -> idStream(config.start(), graph, limit)).limit(limit).iterator()
                 );
 

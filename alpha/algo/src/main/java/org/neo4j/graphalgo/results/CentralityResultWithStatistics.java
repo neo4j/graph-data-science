@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.results;
 
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 
 import java.util.function.DoubleUnaryOperator;
@@ -70,17 +71,17 @@ public abstract class CentralityResultWithStatistics extends CentralityResult {
 
         @Override
         public double computeMax() {
-            return HugeNormalizationComputations.max(result.array(), 1.0);
+            return HugeNormalizationComputations.max(result.array(), 1.0, Pools.CORE_POOL_SIZE);
         }
 
         @Override
         public double computeL2Norm() {
-            return Math.sqrt(HugeNormalizationComputations.squaredSum(result.array()));
+            return Math.sqrt(HugeNormalizationComputations.squaredSum(result.array(), Pools.CORE_POOL_SIZE));
         }
 
         @Override
         public double computeL1Norm() {
-            return HugeNormalizationComputations.l1Norm(result.array());
+            return HugeNormalizationComputations.l1Norm(result.array(), Pools.CORE_POOL_SIZE);
         }
     }
 }

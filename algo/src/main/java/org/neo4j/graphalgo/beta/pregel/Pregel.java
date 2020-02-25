@@ -78,6 +78,7 @@ public final class Pregel {
         HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
+                concurrency,
                 nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, defaultNodeValue))
         );
 
@@ -107,6 +108,7 @@ public final class Pregel {
         HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
+                concurrency,
                 nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, initialNodeValues.nodeProperty(nodeId)))
         );
 
@@ -178,7 +180,7 @@ public final class Pregel {
     }
 
     private BitSet unionBitSets(Collection<ComputeStep> computeSteps, Function<ComputeStep, BitSet> fn) {
-        return ParallelUtil.parallelStream(computeSteps.stream(), stream ->
+        return ParallelUtil.parallelStream(computeSteps.stream(), concurrency, stream ->
                 stream.map(fn).reduce((bitSet1, bitSet2) -> {
                     bitSet1.union(bitSet2);
                     return bitSet1;
@@ -200,6 +202,7 @@ public final class Pregel {
             if (iteration > 0) {
                 ParallelUtil.parallelStreamConsume(
                         LongStream.range(0, graph.nodeCount()),
+                        concurrency,
                         nodeIds -> nodeIds.forEach(nodeId -> {
                             if (messageBits.get(nodeId)) {
                                 messageQueues.get(nodeId).add(TERMINATION_SYMBOL);
@@ -244,6 +247,7 @@ public final class Pregel {
 
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
+                concurrency,
                 nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, MpscLinkedQueue.newMpscLinkedQueue())));
 
         return messageQueues;

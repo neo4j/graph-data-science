@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.impl.similarity;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.utils.Pools;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,7 +38,7 @@ class SimilarityInputTest {
         ids[1] = new CategoricalInput(6, new long[]{});
         ids[2] = new CategoricalInput(7, new long[]{});
 
-        int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Collections.singletonList(5L));
+        int[] indexes = SimilarityInput.indexes(extractInputIds(ids, Pools.CORE_POOL_SIZE), Collections.singletonList(5L));
 
         assertArrayEquals(indexes, new int[] {0});
     }
@@ -51,7 +52,7 @@ class SimilarityInputTest {
         ids[3] = new CategoricalInput(8, new long[]{});
         ids[4] = new CategoricalInput(9, new long[]{});
 
-        int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList(5L, 9L));
+        int[] indexes = SimilarityInput.indexes(extractInputIds(ids, Pools.CORE_POOL_SIZE), Arrays.asList(5L, 9L));
 
         assertArrayEquals(indexes, new int[] {0, 4});
     }
@@ -66,7 +67,7 @@ class SimilarityInputTest {
                     ids[3] = new CategoricalInput(8, new long[]{});
                     ids[4] = new CategoricalInput(9, new long[]{});
 
-                    int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Collections.singletonList(10L));
+                    int[] indexes = SimilarityInput.indexes(extractInputIds(ids, Pools.CORE_POOL_SIZE), Collections.singletonList(10L));
 
                     assertArrayEquals(indexes, new int[] {});
                 }, "Node ids [10] do not exist in node ids list"
@@ -83,7 +84,7 @@ class SimilarityInputTest {
                     ids[3] = new CategoricalInput(8, new long[]{});
                     ids[4] = new CategoricalInput(9, new long[]{});
 
-                    int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList(10L, 11L, -1L, 29L));
+                    int[] indexes = SimilarityInput.indexes(extractInputIds(ids, Pools.CORE_POOL_SIZE), Arrays.asList(10L, 11L, -1L, 29L));
 
                     assertArrayEquals(indexes, new int[]{});
                 }, "Node ids [10, 11, -1, 29] do not exist in node ids list"
@@ -100,7 +101,7 @@ class SimilarityInputTest {
                     ids[3] = new CategoricalInput(8, new long[]{});
                     ids[4] = new CategoricalInput(9, new long[]{});
 
-                    int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList(10L, 5L, 7L, 12L));
+                    int[] indexes = SimilarityInput.indexes(extractInputIds(ids, Pools.CORE_POOL_SIZE), Arrays.asList(10L, 5L, 7L, 12L));
 
                     assertArrayEquals(indexes, new int[]{0, 2});
                 }, "Node ids [10, 12] do not exist in node ids list"

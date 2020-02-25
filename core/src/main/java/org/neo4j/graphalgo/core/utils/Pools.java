@@ -36,7 +36,7 @@ import java.util.concurrent.TimeoutException;
 public final class Pools {
 
     static final int MAXIMUM_CONCURRENCY;
-    private static final int CORE_POOL_SIZE;
+    public static final int CORE_POOL_SIZE;
 
     static {
         ConcurrencyConfig concurrencyConfig = ConcurrencyConfig.of();
@@ -45,7 +45,7 @@ public final class Pools {
     }
 
     public static int allowedConcurrency(int concurrency) {
-        return Math.min(MAXIMUM_CONCURRENCY, concurrency);
+        return Math.min(Pools.CORE_POOL_SIZE, concurrency);
     }
 
     private static final int DEFAULT_QUEUE_SIZE = CORE_POOL_SIZE * 50;
