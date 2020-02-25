@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConstants;
@@ -30,18 +29,17 @@ import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
-import static org.neo4j.graphalgo.api.GraphStoreFactory.ANY_REL_TYPE;
 
 public final class GraphStore {
 
@@ -53,6 +51,8 @@ public final class GraphStore {
 
     private final Map<String, Map<String, PropertyCSR>> relationshipProperties;
 
+    private final Set<Graph> createdGraphs;
+
     private final AllocationTracker tracker;
 
     public static GraphStore of(
@@ -63,7 +63,6 @@ public final class GraphStore {
         AllocationTracker tracker
     ) {
         return new GraphStore(
-            null,
             nodes,
             nodeProperties,
             relationships,
@@ -72,41 +71,18 @@ public final class GraphStore {
         );
     }
 
-    @TestOnly
-    public static GraphStore of(Graph graph) {
-        Map<String, Map<String, Graph>> mapping = Collections.singletonMap(
-            "RELATIONSHIP_TYPE",
-            Collections.singletonMap(
-                "PROPERTY",
-                graph
-            )
-        );
-        return GraphStore.of(mapping);
-    }
-
-    public static GraphStore of(Map<String, Map<String, Graph>> graphs) {
-        return new GraphStore(graphs);
-    }
-
-    private final Map<String, Map<String, Graph>> graphs;
-
-    private GraphStore(Map<String, Map<String, Graph>> graphs) {
-        this(graphs, null, null, null, null, null);
-    }
-
     private GraphStore(
-        Map<String, Map<String, Graph>> graphs,
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
         Map<String, CSR> relationships,
         Map<String, Map<String, PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
     ) {
-        this.graphs = graphs;
         this.nodes = nodes;
         this.nodeProperties = nodeProperties;
         this.relationships = relationships;
         this.relationshipProperties = relationshipProperties;
+        this.createdGraphs = new HashSet<>();
         this.tracker = tracker;
     }
 
@@ -125,37 +101,11 @@ public final class GraphStore {
                 ProcedureConstants.RELATIONSHIP_TYPES
             ));
         }
-
-        if (graphs != null) {
-            return getGraphFromGraphs(relationshipTypes, maybeRelationshipProperty);
-        } else {
-            return createGraph(relationshipTypes, maybeRelationshipProperty);
-        }
+        return createGraph(relationshipTypes, maybeRelationshipProperty);
     }
 
-    private Graph getGraphFromGraphs(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
-        Map<String, Map<String, Graph>> graphsWithRelTypes = relationshipTypes.contains("*") ?
-            graphs :
-            graphs.entrySet()
-                .stream()
-                .filter(entry -> relationshipTypes.contains(entry.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        List<Graph> filteredGraphs = graphsWithRelTypes.values().stream().map(graphsByProperty -> {
-            if (maybeRelationshipProperty.isPresent()) {
-                return getExistingByProperty(maybeRelationshipProperty.get(), graphsByProperty);
-            } else {
-                if (graphsByProperty.containsKey(ANY_REL_TYPE)) {
-                    return graphsByProperty.get(ANY_REL_TYPE);
-                } else {
-                    return graphsByProperty
-                        .get(graphsByProperty.keySet().iterator().next())
-                        .withoutRelationshipProperties();
-                }
-            }
-        }).collect(Collectors.toList());
-
-        return createUnionGraph(relationshipTypes, maybeRelationshipProperty, filteredGraphs);
+    private Graph createGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
+        return createGraph(singletonList(relationshipType), maybeRelationshipProperty);
     }
 
     private Graph createGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
@@ -180,14 +130,9 @@ public final class GraphStore {
             })
             .collect(Collectors.toList());
 
-        return createUnionGraph(relationshipTypes, maybeRelationshipProperty, filteredGraphs);
-    }
+        filteredGraphs.forEach(graph -> graph.canRelease(false));
+        createdGraphs.addAll(filteredGraphs);
 
-    private Graph createUnionGraph(
-        List<String> relationshipTypes,
-        Optional<String> maybeRelationshipProperty,
-        List<Graph> filteredGraphs
-    ) {
         if (filteredGraphs.isEmpty()) {
             throw new NoSuchElementException(String.format(
                 "Cannot find graphs for relationship types: '%s' and relationship properties '%s'.",
@@ -202,55 +147,50 @@ public final class GraphStore {
         return UnionGraph.of(relationships
             .keySet()
             .stream()
-            .flatMap(relationshipType ->
-                (relationshipProperties.containsKey(relationshipType))
-                    ? relationshipProperties.get(relationshipType).keySet().stream().map(propertyKey -> createGraph(singletonList(relationshipType), Optional.of(propertyKey)))
-                    : Stream.of(createGraph(singletonList(relationshipType), Optional.empty())))
+            .flatMap(relationshipType -> {
+                if (relationshipProperties.containsKey(relationshipType)) {
+                    return relationshipProperties
+                        .get(relationshipType)
+                        .keySet()
+                        .stream()
+                        .map(propertyKey -> createGraph(relationshipType, Optional.of(propertyKey)));
+                } else {
+                    return Stream.of(createGraph(relationshipType, Optional.empty()));
+                }
+            })
             .collect(Collectors.toList()));
     }
 
-    private Graph getExistingByProperty(String property, Map<String, ? extends Graph> graphs) {
-        return getExisting(property, "property", graphs);
-    }
-
-    private <T> T getExisting(String key, String type, Map<String, ? extends T> graphs) {
-        T graph = graphs.get(key);
-        if (graph == null) {
-            throw new IllegalArgumentException(String.format("No graph was loaded for %s %s", type, key));
-        }
-        return graph;
-    }
-
     public void canRelease(boolean canRelease) {
-        forEach(g -> g.canRelease(canRelease));
+        createdGraphs.forEach(graph -> graph.canRelease(canRelease));
     }
 
     public long nodeCount() {
-        return graphs
-            .values().stream()
-            .flatMap(g -> g.values().stream())
-            .mapToLong(Graph::nodeCount)
-            .findFirst()
-            .orElse(0);
+        return nodes.nodeCount();
     }
 
     public long relationshipCount() {
-        return graphs
-            .values().stream()
-            .mapToLong(g -> g.values().stream().mapToLong(Graph::relationshipCount).max().orElse(0L))
+        return relationships.values().stream()
+            .mapToLong(CSR::elementCount)
             .sum();
     }
 
-    public Set<String> availableRelationshipTypes() {
+    public Set<String> relationshipTypes() {
         return relationships.keySet();
     }
 
-    private void forEach(Consumer<? super Graph> action) {
-        for (Map<String, ? extends Graph> graphsByProperty : graphs.values()) {
-            for (Graph graph : graphsByProperty.values()) {
-                action.accept(graph);
-            }
+    public GraphStore merge(GraphStore inGraph) {
+        if (nodes != inGraph.nodes) {
+            throw new IllegalArgumentException("Graph stores cannot be merged due to different id mappings.");
         }
+
+        Map<String, CSR> mergedRelationships = new HashMap<>(relationships);
+        mergedRelationships.putAll(inGraph.relationships);
+
+        Map<String, Map<String, PropertyCSR>> mergedRelationshipProperties = new HashMap<>(relationshipProperties);
+        mergedRelationshipProperties.putAll(inGraph.relationshipProperties);
+
+        return GraphStore.of(nodes, nodeProperties, mergedRelationships, mergedRelationshipProperties, tracker);
     }
 }
 

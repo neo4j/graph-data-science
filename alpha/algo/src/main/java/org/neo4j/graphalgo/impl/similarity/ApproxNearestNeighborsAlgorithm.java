@@ -45,9 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -548,14 +546,9 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         default GraphStore buildGraphStore() {
-            Graph outGraph = outImporter().buildGraph();
-            Graph inGraph = inImporter().buildGraph();
-
-            Map<String, Map<String, Graph>> annGraphs = new HashMap<>();
-            annGraphs.put(ANN_OUT_GRAPH, Collections.singletonMap("", outGraph));
-            annGraphs.put(ANN_IN_GRAPH, Collections.singletonMap("", inGraph));
-
-            return GraphStore.of(annGraphs);
+            GraphStore outGraphStore = outImporter().buildGraph().toGraphStore(ANN_OUT_GRAPH, "");
+            GraphStore inGraphStore = inImporter().buildGraph().toGraphStore(ANN_IN_GRAPH, "");
+            return outGraphStore.merge(inGraphStore);
         }
 
         static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {

@@ -20,19 +20,17 @@
 package org.neo4j.graphalgo.beta.generator;
 
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -93,14 +91,12 @@ public final class GraphGenerateProc extends BaseProc {
 
             HugeGraph graph = generator.generate();
 
-            Map<String, Map<String, Graph>> mapping = Collections.singletonMap(
-                DUMMY_RELATIONSHIP_NAME,
-                Collections.singletonMap(
-                    generator.getMaybePropertyProducer().map(RelationshipPropertyProducer::getPropertyName).orElse("PROPERTY"),
-                    graph
-                )
+            GraphStore graphStore = graph.toGraphStore(DUMMY_RELATIONSHIP_NAME,
+                generator
+                    .getMaybePropertyProducer()
+                    .map(RelationshipPropertyProducer::getPropertyName)
+                    .orElse("PROPERTY")
             );
-            GraphStore graphStore = GraphStore.of(mapping);
 
             stats.nodes = graphStore.nodeCount();
             stats.relationships = graphStore.relationshipCount();

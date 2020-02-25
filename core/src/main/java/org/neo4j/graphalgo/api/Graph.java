@@ -58,8 +58,4 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
     void canRelease(boolean canRelease);
 
     RelationshipIntersect intersection();
-
-    default Graph withoutRelationshipProperties() {
-        return this;
-    };
 }

@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.AdjacencyList;
-import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.CSR;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.PropertyCSR;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
@@ -146,7 +146,7 @@ public final class GraphGenerator {
         private final RelationshipImporter.Imports imports;
         private final RelationshipsBatchBuffer relationshipBuffer;
         private final IdMap idMap;
-        private final boolean loadUndirected;
+        private final Orientation orientation;
         private final boolean loadRelationshipProperty;
         private final ExecutorService executorService;
         private final AllocationTracker tracker;
@@ -165,7 +165,7 @@ public final class GraphGenerator {
             this.executorService = executorService;
             this.tracker = tracker;
             this.idMap = idMap;
-            this.loadUndirected = orientation == Orientation.UNDIRECTED;
+            this.orientation = orientation;
 
             ImportSizing importSizing = ImportSizing.of(1, idMap.nodeCount());
             int pageSize = importSizing.pageSize();
@@ -238,27 +238,25 @@ public final class GraphGenerator {
             flushBuffer();
 
             Relationships relationships = buildRelationships();
-            AdjacencyList adjacencyList = relationships.adjacencyList();
-            AdjacencyOffsets adjacencyOffsets = relationships.adjacencyOffsets();
-            Optional<AdjacencyList> properties = loadRelationshipProperty
-                ? Optional.of(relationships.properties())
-                : Optional.empty();
-            Optional<AdjacencyOffsets> propertyOffsets = loadRelationshipProperty
-                ? Optional.of(relationships.propertyOffsets())
+            CSR topology = CSR.of(
+                relationships.adjacencyList(),
+                relationships.adjacencyOffsets(),
+                relationships.relationshipCount(),
+                orientation
+            );
+
+            Optional<PropertyCSR> properties = loadRelationshipProperty
+                ? Optional.of(
+                PropertyCSR.of(
+                    relationships.properties(),
+                    relationships.propertyOffsets(),
+                    relationships.relationshipCount(),
+                    orientation,
+                    Double.NaN
+                ))
                 : Optional.empty();
 
-            return HugeGraph.create(
-                tracker,
-                idMap,
-                Collections.emptyMap(),
-                relationships.relationshipCount(),
-                adjacencyList,
-                adjacencyOffsets,
-                Optional.empty(),
-                properties,
-                propertyOffsets,
-                loadUndirected
-            );
+           return HugeGraph.create(tracker, idMap, Collections.emptyMap(), topology, properties);
         }
 
         private void flushBuffer() {

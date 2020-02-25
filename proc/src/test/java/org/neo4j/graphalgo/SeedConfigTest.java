@@ -22,16 +22,15 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.GraphStore;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -101,9 +100,9 @@ public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESU
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            Graph graph = graphLoader(graphCreateConfig).load(NativeFactory.class);
+            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore(NativeFactory.class);
 
-            GraphStoreCatalog.set(graphCreateConfig, GraphStore.of(graph));
+            GraphStoreCatalog.set(graphCreateConfig, graphStore);
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
                 "seedProperty",
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"

@@ -203,11 +203,6 @@ public final class TestGraph implements Graph {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public Graph withoutRelationshipProperties() {
-        return this;
-    }
-
     private static class Relationship {
         private final long id;
         private final long sourceId;
