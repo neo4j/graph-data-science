@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
 
 public class ListProc {
 
@@ -52,7 +53,12 @@ public class ListProc {
     @Procedure("gds.list")
     @Description(DESCRIPTION)
     public Stream<ListResult> list(@Name(value = "name", defaultValue = "") String name) {
-        return QueryRunner.runQuery(db, QUERY, singletonMap("name", name), res -> res.stream().map(ListResult::new));
+        return QueryRunner.runQuery(
+            db,
+            QUERY,
+            singletonMap("name", name),
+            res -> res.stream().map(ListResult::new).collect(toList())
+        ).stream();
     }
 
     public static class ListResult {

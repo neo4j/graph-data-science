@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphdb.Result;
@@ -41,6 +41,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 abstract class CypherRecordLoader<R> {
 
@@ -140,7 +142,7 @@ abstract class CypherRecordLoader<R> {
         boolean working = true;
         do {
             long skip = offset;
-            futures.add(pool.submit(() -> loadOneBatch(skip, batchSize, bufferSize)));
+            futures.add(pool.submit(() -> applyInTransaction(api, tx -> loadOneBatch(skip, batchSize, bufferSize))));
             offset += batchSize;
             if (futures.size() >= threads) {
                 Future<BatchLoadResult> oldestTask = futures.removeFirst();
@@ -166,7 +168,7 @@ abstract class CypherRecordLoader<R> {
                 batchSize == CypherLoadingUtils.NO_BATCHING
                         ? setup.parameters()
                         : CypherLoadingUtils.params(setup.parameters(), offset, batchSize);
-        Result result = GraphDatabaseApiProxy.runQuery(api, loadQuery, parameters);
+        Result result = QueryRunner.runQueryWithoutClosing(api, loadQuery, parameters);
         validateMandatoryColumns(Lists.newArrayList(result.columns().iterator()));
         return result;
     }
