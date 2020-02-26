@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 
 public final class GraphStore {
 
@@ -154,7 +155,7 @@ public final class GraphStore {
     }
 
     private Graph createGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
-        boolean loadAllRelationships = relationshipTypes.contains("*");
+        boolean loadAllRelationships = relationshipTypes.contains(PROJECT_ALL.name);
 
         List<Graph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))
@@ -177,29 +178,31 @@ public final class GraphStore {
     private void validateInput(Collection<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         if (relationshipTypes.isEmpty()) {
             throw new IllegalArgumentException(String.format(
-                "The parameter %s should not be empty. Use `*` to load all relationship types.",
+                "The parameter '%s' should not be empty. Use '*' to load all relationship types.",
                 ProcedureConstants.RELATIONSHIP_TYPES
             ));
         }
 
-        relationshipTypes.forEach(relationshipType -> {
-            if (!relationships.containsKey(relationshipType)) {
-                throw new IllegalArgumentException(String.format(
-                    "No relationships have been loaded for relationship type '%s'",
-                    relationshipType
-                ));
-            }
-
-            maybeRelationshipProperty.ifPresent(relationshipProperty -> {
-                if (!relationshipProperties.get(relationshipType).containsKey(relationshipProperty)) {
+        if (!relationshipTypes.contains(PROJECT_ALL.name)) {
+            relationshipTypes.forEach(relationshipType -> {
+                if (!relationships.containsKey(relationshipType)) {
                     throw new IllegalArgumentException(String.format(
-                        "No relationships have been loaded for relationship type '%s' and relationship property '%s'.",
-                        relationshipType,
-                        maybeRelationshipProperty.get()
+                        "No relationships have been loaded for relationship type '%s'",
+                        relationshipType
                     ));
                 }
+
+                maybeRelationshipProperty.ifPresent(relationshipProperty -> {
+                    if (!relationshipProperties.get(relationshipType).containsKey(relationshipProperty)) {
+                        throw new IllegalArgumentException(String.format(
+                            "No relationships have been loaded for relationship type '%s' and relationship property '%s'.",
+                            relationshipType,
+                            maybeRelationshipProperty.get()
+                        ));
+                    }
+                });
             });
-        });
+        }
     }
 }
 
