@@ -67,7 +67,7 @@ include::../common-configuration.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CREATE
        (nA:Node {tag: 'a'}),
@@ -83,13 +83,15 @@ CREATE
 ----
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CALL gds.graph.create('myGraph', 'Node', 'REL', { relationshipProperties: 'cost' })
 ----
 
 In the following examples we will demonstrate using the Breadth First Search algorithm on this graph.
 
+[role=query-example]
+--
 .Running the Breadth First Search algorithm:
 [source, cypher]
 ----
@@ -103,18 +105,20 @@ ORDER BY tags
 ----
 
 .Results
-[opts="header",cols="1m"]
+[opts="header"]
 |===
 | tags
-| a
-| b
-| c
-| d
-| e
+| "a"
+| "b"
+| "c"
+| "d"
+| "e"
 |===
 
 Since none of the options for early termination are specified, the whole graph is visited during the traversal.
 
+[role=query-example]
+--
 .Running the Breadth First Search algorithm with target nodes:
 [source, cypher]
 ----
@@ -128,15 +132,17 @@ ORDER BY tags
 ----
 
 .Results
-[opts="header",cols="1m"]
+[opts="header"]
 |===
 | tags
-| a
-| b
-| c
-| e
+| "a"
+| "b"
+| "c"
+| "e"
 |===
 
+[role=query-example]
+--
 .Running the Breadth First Search algorithm with maxDepth:
 [source, cypher]
 ----
@@ -146,20 +152,22 @@ CALL gds.alpha.bfs.stream('myGraph', {startNode: startNode, maxDepth: 1})
 YIELD path
 UNWIND [ n in nodes(path) | n.tag ] as tags
 RETURN tags
-ORDER BY tag
+ORDER BY tags
 ----
 
 .Results
-[opts="header",cols="1m"]
+[opts="header"]
 |===
 | tags
-| a
-| b
-| c
+| "a"
+| "b"
+| "c"
 |===
 
 In the above example, nodes d and e were not visited since they are at distance 2 from a.
 
+[role=query-example]
+--
 .Running the Breadth First Search algorithm with maxCost:
 [source, cypher]
 ----
@@ -169,17 +177,17 @@ CALL gds.alpha.bfs.stream('myGraph', {startNode: startNode, maxCost: 10, relatio
 YIELD path
 UNWIND [ n in nodes(path) | n.tag ] as tags
 RETURN tags
-ORDER BY tag
+ORDER BY tags
 ----
 
 .Results
-[opts="header",cols="1m"]
+[opts="header"]
 |===
 | tags
-| a
-| b
-| c
-| e
+| "a"
+| "b"
+| "c"
+| "e"
 |===
 
 Due to the max cost limit of 10, node d cannot be reached since the total cost of the path from a to d is 14.

@@ -36,6 +36,7 @@ dependencies {
     compile group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.asciidoctorj
     compile project(':test-utils')
     testCompile project(':proc')
+    testCompile project(':alpha-proc')
 }
 
 apply plugin: 'ch.kk7.spawn'
