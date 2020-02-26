@@ -1,14 +1,38 @@
 [[System-requirements]]
 = System Requirements
 
-== Memory
+== Main Memory
 
-The library operates completely on heap memory, which means we'll need to configure our Neo4j Server with a much larger heap size than we would for transactional workloads.
-The diagram below shows how the library uses heap memory.
+The GDS library runs within a Neo4j instance and is therefore subject to the general https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuration/[Neo4j memory configuration].
 
-image::memory-usage.png[width=500]
+.GDS heap memory usage
+image::memory-usage.png[width=600]
 
-See <<memory-estimation>> for more details on the memory used by the projected graph model.
+=== Heap size
+
+The heap space is used for storing graph projections in the graph catalog and algorithm state.
+When writing algorithm results back to Neo4j, heap space is also used for handling transaction state (see https://neo4j.com/docs/operations-manual/3.5/reference/configuration-settings/#config_dbms.tx_state.memory_allocation[dbms.tx_state.memory_allocation]).
+For purely analytical workloads, a general recommendation is to set the heap space to about 90% of the available main memory.
+This can be done via https://neo4j.com/docs/operations-manual/3.5/reference/configuration-settings/#config_dbms.memory.heap.initial_size[dbms.memory.heap.initial_size] and https://neo4j.com/docs/operations-manual/3.5/reference/configuration-settings/#config_dbms.memory.heap.max_size[dbms.memory.heap.max_size].
+
+To better estimate the heap space required to create in-memory graphs and run algorithms, consider the <<memory-estimation>> feature.
+The feature estimates the memory consumption of all involved data structures using information about number of nodes and relationships from the Neo4j count store.
+
+=== Page cache
+
+The page cache is used to cache the Neo4j data and will help to avoid costly disk access.
+
+For purely analytical workloads using <<native-projection, native projections>>, it is recommended to decrease https://neo4j.com/docs/operations-manual/3.5/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size] in favor of an increased heap size.
+However, setting a minimum page cache size is still important while creating in-memory graphs:
+
+* For <<native-projection, native projections>>, the minimum page cache size can be roughly estimated by `8KB * 100 * readConcurrency`.
+* For <<cypher-projection, Cypher projections>>, a higher page cache is required depending on the query complexity.
+
+[NOTE]
+====
+Decreasing the page cache size is *not* recommended if the Neo4j instance runs both, operational and analytical workloads at the same time.
+See https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuration/[Neo4j memory configuration] for general information about page cache sizing.
+====
 
 [[system-requirements-cpu]]
 == CPU
