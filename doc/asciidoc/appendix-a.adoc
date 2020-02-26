@@ -33,29 +33,39 @@ The following table lists all graph operations available in the GDS library:
 The following table lists all production-quality procedures in the GDS library:
 
 [[table-product]]
-[opts=header,cols="1m"]
+[opts=header,cols="1, 1"]
 |===
-| Name
-| <<catalog-graph-create, gds.graph.create>>
-| <<catalog-graph-create, gds.graph.create.cypher>>
-| <<catalog-graph-exists, gds.graph.exists>>
-| <<catalog-graph-list, gds.graph.list>>
-| <<catalog-graph-drop, gds.graph.drop>>
+| Algorithm | Procedures
+.5+<.^|<<algorithms-label-propagation, Label Propagation>>
 | <<algorithms-label-propagation-syntax, gds.labelPropagation.write>>
+| <<algorithms-label-propagation-syntax, gds.labelPropagation.write.estimate>>
 | <<algorithms-label-propagation-syntax, gds.labelPropagation.stream>>
+| <<algorithms-label-propagation-syntax, gds.labelPropagation.stream.estimate>>
 | <<algorithms-label-propagation-syntax, gds.labelPropagation.stats>>
+.5+<.^|<<algorithms-louvain, Louvain>>
 | <<algorithms-louvain-syntax, gds.louvain.write>>
+| <<algorithms-louvain-syntax, gds.louvain.write.estimate>>
 | <<algorithms-louvain-syntax, gds.louvain.stream>>
+| <<algorithms-louvain-syntax, gds.louvain.stream.estimate>>
 | <<algorithms-louvain-syntax, gds.louvain.stats>>
-| <<algorithms-pagerank-syntax, gds.pageRank.write>>
-| <<algorithms-pagerank-syntax, gds.pageRank.stream>>
-| <<algorithms-pagerank-syntax, gds.pageRank.stats>>
-| <<algorithms-wcc-syntax, gds.wcc.write>>
-| <<algorithms-wcc-syntax-stream, gds.wcc.stream>>
-| <<algorithms-wcc-syntax, gds.wcc.stats>>
+.5+<.^|<<algorithms-node-similarity, Node Similarity>>
 | <<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write>>
+| <<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write.estimate>>
 | <<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream>>
+| <<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream.estimate>>
 | <<algorithms-node-similarity, gds.nodeSimilarity.stats>>
+.5+<.^|<<algorithms-pagerank, PageRank>>
+| <<algorithms-pagerank-syntax, gds.pageRank.write>>
+| <<algorithms-pagerank-syntax, gds.pageRank.write.estimate>>
+| <<algorithms-pagerank-syntax, gds.pageRank.stream>>
+| <<algorithms-pagerank-syntax, gds.pageRank.stream.estimate>>
+| <<algorithms-pagerank-syntax, gds.pageRank.stats>>
+.5+<.^|<<algorithms-wcc, Weakly Connected Components>>
+| <<algorithms-wcc-syntax, gds.wcc.write>>
+| <<algorithms-wcc-syntax, gds.wcc.write.estimate>>
+| <<algorithms-wcc-syntax-stream, gds.wcc.stream>>
+| <<algorithms-wcc-syntax-stream, gds.wcc.stream.estimate>>
+| <<algorithms-wcc-syntax, gds.wcc.stats>>
 |===
 
 [[beta-tier]]
