@@ -29,20 +29,17 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
-
-import static java.util.Collections.singletonMap;
 
 /**
  * Huge Graph contains two array like data structures.
@@ -393,29 +390,21 @@ public class HugeGraph implements Graph {
         return orientation == Orientation.UNDIRECTED;
     }
 
+    public Orientation orientation() {
+        return orientation;
+    }
+
+    public Relationships relationships() {
+        return new Relationships(relationshipCount, adjacencyList, adjacencyOffsets, properties, propertyOffsets);
+    }
+
     @Override
     public boolean hasRelationshipProperty() {
         return hasRelationshipProperty;
     }
 
-    public GraphStore toGraphStore(String relationshipType, String propertyKey) {
-        Map<String, CSR> relationships = singletonMap(
-            relationshipType,
-            ImmutableCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation)
-        );
-
-        Map<String, Map<String, PropertyCSR>> relationshipProperties = Collections.emptyMap();
-        if (hasRelationshipProperty) {
-            relationshipProperties = singletonMap(
-                relationshipType,
-                singletonMap(
-                    propertyKey,
-                    ImmutablePropertyCSR.of(properties, propertyOffsets, relationshipCount, orientation, defaultPropertyValue)
-                )
-            );
-        }
-
-        return GraphStore.of(idMapping, nodeProperties, relationships, relationshipProperties, tracker);
+    public double defaultRelationshipProperty() {
+        return defaultPropertyValue;
     }
 
     private AdjacencyList.DecompressingCursor newAdjacencyCursor(AdjacencyList adjacency) {

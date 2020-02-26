@@ -19,37 +19,29 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 
-import java.util.Optional;
-
 public class Relationships {
-    private final long rows;
     private final long relationshipCount;
     private final AdjacencyList adjacencyList;
     private final AdjacencyOffsets adjacencyOffsets;
-    private final AdjacencyList properties;
-    private final AdjacencyOffsets propertyOffsets;
+    private final @Nullable AdjacencyList properties;
+    private final @Nullable AdjacencyOffsets propertyOffsets;
 
     public Relationships(
-        long rows,
         long relationshipCount,
         AdjacencyList adjacencyList,
         AdjacencyOffsets adjacencyOffsets,
-        AdjacencyList properties,
-        AdjacencyOffsets propertyOffsets
+        @Nullable AdjacencyList properties,
+        @Nullable AdjacencyOffsets propertyOffsets
     ) {
-        this.rows = rows;
         this.relationshipCount = relationshipCount;
         this.adjacencyList = adjacencyList;
         this.adjacencyOffsets = adjacencyOffsets;
         this.properties = properties;
         this.propertyOffsets = propertyOffsets;
-    }
-
-    public long rows() {
-        return rows;
     }
 
     public long relationshipCount() { return relationshipCount; }
@@ -58,7 +50,7 @@ public class Relationships {
 
     public AdjacencyOffsets adjacencyOffsets() { return adjacencyOffsets; }
 
-    public AdjacencyList properties() { return properties; }
+    public @Nullable AdjacencyList properties() { return properties; }
 
-    public AdjacencyOffsets propertyOffsets() { return propertyOffsets; }
+    public @Nullable AdjacencyOffsets propertyOffsets() { return propertyOffsets; }
 }

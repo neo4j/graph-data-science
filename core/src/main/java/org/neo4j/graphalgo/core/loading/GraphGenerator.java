@@ -270,7 +270,6 @@ public final class GraphGenerator {
         private Relationships buildRelationships() {
             ParallelUtil.run(relationshipImporter.flushTasks(), executorService);
             return new Relationships(
-                -1,
                 importedRelationships,
                 relationshipsBuilder.adjacencyList(),
                 relationshipsBuilder.globalAdjacencyOffsets(),

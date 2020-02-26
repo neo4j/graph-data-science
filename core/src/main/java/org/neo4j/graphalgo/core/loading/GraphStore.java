@@ -23,12 +23,14 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.ImmutableCSR;
+import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 
 public final class GraphStore {
@@ -68,6 +71,42 @@ public final class GraphStore {
             relationshipProperties,
             tracker
         );
+    }
+
+    public static GraphStore of(
+        HugeGraph graph,
+        String relationshipType,
+        Optional<String> relationshipProperty,
+        AllocationTracker tracker
+    ) {
+        Relationships relationships = graph.relationships();
+
+        Map<String, HugeGraph.CSR> topology = singletonMap(
+            relationshipType,
+            ImmutableCSR.of(relationships.adjacencyList(), relationships.adjacencyOffsets(), graph.relationshipCount(), graph.orientation())
+        );
+
+        Map<String, NodeProperties> nodeProperties = graph.availableNodeProperties().stream()
+            .collect(Collectors.toMap(property -> property, graph::nodeProperties));
+
+        Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = Collections.emptyMap();
+        if (relationshipProperty.isPresent() && graph.hasRelationshipProperty()) {
+            relationshipProperties = singletonMap(
+                relationshipType,
+                singletonMap(
+                    relationshipProperty.get(),
+                    ImmutablePropertyCSR.of(
+                        relationships.properties(),
+                        relationships.propertyOffsets(),
+                        graph.relationshipCount(),
+                        graph.orientation(),
+                        graph.defaultRelationshipProperty()
+                    )
+                )
+            );
+        }
+
+        return GraphStore.of(graph.idMapping(), nodeProperties, topology, relationshipProperties, tracker);
     }
 
     private GraphStore(
@@ -132,20 +171,6 @@ public final class GraphStore {
 
     public Set<String> relationshipTypes() {
         return relationships.keySet();
-    }
-
-    public GraphStore merge(GraphStore other) {
-        if (nodes != other.nodes) {
-            throw new IllegalArgumentException("Graph stores cannot be merged due to different id mappings.");
-        }
-
-        Map<String, HugeGraph.CSR> mergedRelationships = new HashMap<>(relationships);
-        mergedRelationships.putAll(other.relationships);
-
-        Map<String, Map<String, HugeGraph.PropertyCSR>> mergedRelationshipProperties = new HashMap<>(relationshipProperties);
-        mergedRelationshipProperties.putAll(other.relationshipProperties);
-
-        return GraphStore.of(nodes, nodeProperties, mergedRelationships, mergedRelationshipProperties, tracker);
     }
 
     private Graph createGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {

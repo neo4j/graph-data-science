@@ -91,12 +91,10 @@ public final class GraphGenerateProc extends BaseProc {
 
             HugeGraph graph = generator.generate();
 
-            GraphStore graphStore = graph.toGraphStore(DUMMY_RELATIONSHIP_NAME,
-                generator
-                    .getMaybePropertyProducer()
-                    .map(RelationshipPropertyProducer::getPropertyName)
-                    .orElse("PROPERTY")
-            );
+            GraphStore graphStore = GraphStore.of(graph, DUMMY_RELATIONSHIP_NAME, Optional.of(generator
+                .getMaybePropertyProducer()
+                .map(RelationshipPropertyProducer::getPropertyName)
+                .orElse("PROPERTY")), AllocationTracker.EMPTY);
 
             stats.nodes = graphStore.nodeCount();
             stats.relationships = graphStore.relationshipCount();
