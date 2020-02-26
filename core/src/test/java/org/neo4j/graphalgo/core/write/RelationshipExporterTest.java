@@ -112,17 +112,18 @@ class RelationshipExporterTest {
         GraphDatabaseAPI fromDb = TestDatabaseCreator.createTestDatabase();
         runQuery(fromDb, NODE_QUERY_PART + RELS_QUERY_PART);
 
-        Graph fromGraph = new StoreLoaderBuilder()
+        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
             .api(fromDb)
             .loadAnyLabel()
-            .addRelationshipType("BARFOO")
-            .addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_MISSING))
+            .addRelationshipType("BARFOO");
+        if (includeProperties) {
+            storeLoaderBuilder.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_MISSING));
+        }
+
+        Graph fromGraph = storeLoaderBuilder
             .build()
             .graph(NativeFactory.class);
 
-        if (!includeProperties) {
-            fromGraph = fromGraph.withoutRelationshipProperties();
-        }
 
         // export into new database
         return RelationshipExporter

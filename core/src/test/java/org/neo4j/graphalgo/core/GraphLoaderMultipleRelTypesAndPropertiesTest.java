@@ -180,8 +180,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withRelationshipTypes("REL1", "REL2")
             .graphStore(graphStoreFactory);
 
-        assertEquals(2, graphStore.availableRelationshipTypes().size());
-        assertEquals(graphStore.availableRelationshipTypes(), new HashSet<>(asList("REL1", "REL2")));
+        assertEquals(2, graphStore.relationshipTypes().size());
+        assertEquals(graphStore.relationshipTypes(), new HashSet<>(asList("REL1", "REL2")));
 
         Graph rel1Graph = graphStore.getGraph("REL1");
         Graph rel2Graph = graphStore.getGraph("REL2");
@@ -199,8 +199,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .withRelationshipProperties(PropertyMapping.of("prop1", 1337D))
             .graphStore(graphStoreFactory);
 
-        assertEquals(2, graphStore.availableRelationshipTypes().size());
-        assertEquals(graphStore.availableRelationshipTypes(), new HashSet<>(asList("REL1", "REL2")));
+        assertEquals(2, graphStore.relationshipTypes().size());
+        assertEquals(graphStore.relationshipTypes(), new HashSet<>(asList("REL1", "REL2")));
 
         Graph rel1Graph = graphStore.getGraph("REL1");
         Graph rel2Graph = graphStore.getGraph("REL2");
@@ -573,6 +573,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
         Graph rel1Graph = graphStore.getGraph("REL1");
         Graph unionGraph = graphStore.getUnion();
+
+        graphStore.canRelease(true);
 
         rel1Graph.release();
 

@@ -21,14 +21,11 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -40,7 +37,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -142,11 +138,12 @@ public final class NativeFactory extends GraphStoreFactory {
 
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker();
-        IdsAndProperties mappingAndProperties = loadNodes(tracker, concurrency);
-        Map<String, Map<String, Graph>> graphs = loadRelationships(tracker, mappingAndProperties, concurrency);
+        IdsAndProperties nodes = loadNodes(tracker, concurrency);
+        RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency);
+        GraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
         progressLogger.logDone(tracker);
 
-        return ImportResult.of(dimensions, GraphStore.of(graphs));
+        return ImportResult.of(dimensions, graphStore);
     }
 
     private IdsAndProperties loadNodes(AllocationTracker tracker, int concurrency) {
@@ -162,7 +159,7 @@ public final class NativeFactory extends GraphStoreFactory {
         ).call(setup.log());
     }
 
-    private Map<String, Map<String, Graph>> loadRelationships(
+    private RelationshipImportResult loadRelationships(
         AllocationTracker tracker,
         IdsAndProperties idsAndProperties,
         int concurrency
@@ -177,7 +174,7 @@ public final class NativeFactory extends GraphStoreFactory {
                 mapping -> new RelationshipsBuilder(aggregations, tracker, propertyCount)
             ));
 
-        ScanningRelationshipsImporter scanningImporter = new ScanningRelationshipsImporter(
+        ObjectLongMap<RelationshipProjectionMapping> relationshipCounts = new ScanningRelationshipsImporter(
             setup,
             api,
             dimensions,
@@ -187,51 +184,8 @@ public final class NativeFactory extends GraphStoreFactory {
             allBuilders,
             threadPool,
             concurrency
-        );
-        ObjectLongMap<RelationshipProjectionMapping> relationshipCounts = scanningImporter.call(setup.log());
+        ).call(setup.log());
 
-        return allBuilders.entrySet().stream().collect(Collectors.toMap(
-            entry -> entry.getKey().elementIdentifier(),
-            entry -> {
-                RelationshipProjectionMapping relProjectionMapping = entry.getKey();
-                RelationshipsBuilder relationshipsBuilder = entry.getValue();
-
-                AdjacencyList adjacencyList = relationshipsBuilder.adjacencyListBuilder.build();
-                AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets;
-                long relationshipCount = relationshipCounts.getOrDefault(relProjectionMapping, 0L);
-                boolean isUndirected = relProjectionMapping.orientation() == Orientation.UNDIRECTED;
-
-                if (!dimensions.relationshipProperties().hasMappings()) {
-                    HugeGraph graph = HugeGraph.create(
-                        tracker,
-                        idsAndProperties.hugeIdMap,
-                        idsAndProperties.properties,
-                        adjacencyList,
-                        adjacencyOffsets,
-                        relationshipCount,
-                        isUndirected
-                    );
-                    return Collections.singletonMap(ANY_REL_TYPE, graph);
-                } else {
-                    return dimensions.relationshipProperties().enumerate().map(propertyEntry -> {
-                        int weightIndex = propertyEntry.getOne();
-                        ResolvedPropertyMapping property = propertyEntry.getTwo();
-                        HugeGraph graph = HugeGraph.create(
-                            tracker,
-                            idsAndProperties.hugeIdMap,
-                            idsAndProperties.properties,
-                            relationshipsBuilder,
-                            adjacencyList,
-                            adjacencyOffsets,
-                            weightIndex,
-                            property,
-                            relationshipCount,
-                            isUndirected
-                        );
-                        return Tuples.pair(property.propertyKey(), graph);
-                    }).collect(Collectors.toMap(Pair::getOne, Pair::getTwo));
-                }
-            }
-        ));
+        return RelationshipImportResult.of(allBuilders, relationshipCounts, dimensions);
     }
 }

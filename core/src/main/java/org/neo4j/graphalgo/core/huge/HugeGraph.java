@@ -22,14 +22,15 @@ package org.neo4j.graphalgo.core.huge;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -39,8 +40,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
-
-import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 
 /**
  * Huge Graph contains two array like data structures.
@@ -79,12 +78,15 @@ import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERT
 public class HugeGraph implements Graph {
 
     public static final double NO_PROPERTY_VALUE = Double.NaN;
-    public static final int NO_SUCH_NODE = 0;
+    private static final int NO_SUCH_NODE = 0;
 
     private final IdMap idMapping;
     private final AllocationTracker tracker;
 
     private final Map<String, NodeProperties> nodeProperties;
+
+    private final Orientation orientation;
+
     private final long relationshipCount;
     private AdjacencyList adjacencyList;
     private AdjacencyOffsets adjacencyOffsets;
@@ -99,90 +101,26 @@ public class HugeGraph implements Graph {
     private boolean canRelease = true;
 
     private final boolean hasRelationshipProperty;
-    private final boolean isUndirected;
 
     public static HugeGraph create(
         AllocationTracker tracker,
-        IdMap idMapping,
+        IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
-        long relationshipCount,
-        boolean loadAsUndirected) {
-
-        return create(
-            tracker,
-            idMapping,
-            nodeProperties,
-            relationshipCount,
-            adjacencyList,
-            adjacencyOffsets,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            loadAsUndirected);
-    }
-
-    public static HugeGraph create(
-        AllocationTracker tracker,
-        IdMap idMapping,
-        Map<String, NodeProperties> nodeProperties,
-        RelationshipsBuilder relationshipsBuilder,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
-        int propertyIndex,
-        ResolvedPropertyMapping propertyMapping,
-        long relationshipCount,
-        boolean loadAsUndirected) {
-
-        AdjacencyList properties = null;
-        AdjacencyOffsets propertyOffsets = null;
-        if (relationshipsBuilder != null) {
-            if (propertyMapping.propertyKeyId() != NO_SUCH_PROPERTY_KEY) {
-                propertyOffsets = relationshipsBuilder.globalPropertyOffsets(propertyIndex);
-                if (propertyOffsets != null) {
-                    properties = relationshipsBuilder.properties(propertyIndex);
-                }
-            }
-        }
-
-        return create(
-            tracker,
-            idMapping,
-            nodeProperties,
-            relationshipCount,
-            adjacencyList,
-            adjacencyOffsets,
-            propertyMapping.exists() ? Optional.empty() : Optional.of(propertyMapping.defaultValue()),
-            Optional.ofNullable(properties),
-            Optional.ofNullable(propertyOffsets),
-            loadAsUndirected);
-    }
-
-    public static HugeGraph create(
-        AllocationTracker tracker,
-        IdMap idMapping,
-        Map<String, NodeProperties> nodeProperties,
-        long relationshipCount,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
-        Optional<Double> defaultPropertyValue,
-        Optional<AdjacencyList> properties,
-        Optional<AdjacencyOffsets> propertyOffsets,
-        boolean isUndirected
+        CSR relationships,
+        Optional<PropertyCSR> maybeRelationshipProperties
     ) {
         return new HugeGraph(
             tracker,
-            idMapping,
+            nodes,
             nodeProperties,
-            relationshipCount,
-            adjacencyList,
-            adjacencyOffsets,
-            properties.isPresent(),
-            defaultPropertyValue.orElse(Double.NaN),
-            properties.orElse(null),
-            propertyOffsets.orElse(null),
-            isUndirected
+            relationships.elementCount(),
+            relationships.list(),
+            relationships.offsets(),
+            maybeRelationshipProperties.isPresent(),
+            maybeRelationshipProperties.map(PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
+            maybeRelationshipProperties.map(PropertyCSR::list).orElse(null),
+            maybeRelationshipProperties.map(PropertyCSR::offsets).orElse(null),
+            relationships.orientation()
         );
     }
 
@@ -197,7 +135,7 @@ public class HugeGraph implements Graph {
         double defaultPropertyValue,
         @Nullable AdjacencyList properties,
         @Nullable AdjacencyOffsets propertyOffsets,
-        boolean isUndirected
+        Orientation orientation
     ) {
         this.idMapping = idMapping;
         this.tracker = tracker;
@@ -208,7 +146,7 @@ public class HugeGraph implements Graph {
         this.defaultPropertyValue = defaultPropertyValue;
         this.properties = properties;
         this.propertyOffsets = propertyOffsets;
-        this.isUndirected = isUndirected;
+        this.orientation = orientation;
         this.hasRelationshipProperty = hasRelationshipProperty;
         this.cursorCache = newAdjacencyCursor(this.adjacencyList);
         this.emptyCursor = newAdjacencyCursor(this.adjacencyList);
@@ -348,7 +286,7 @@ public class HugeGraph implements Graph {
             defaultPropertyValue,
             properties,
             propertyOffsets,
-            isUndirected
+            orientation
         );
     }
 
@@ -449,7 +387,15 @@ public class HugeGraph implements Graph {
 
     @Override
     public boolean isUndirected() {
-        return isUndirected;
+        return orientation == Orientation.UNDIRECTED;
+    }
+
+    public Orientation orientation() {
+        return orientation;
+    }
+
+    public Relationships relationships() {
+        return new Relationships(relationshipCount, adjacencyList, adjacencyOffsets, properties, propertyOffsets);
     }
 
     @Override
@@ -457,27 +403,8 @@ public class HugeGraph implements Graph {
         return hasRelationshipProperty;
     }
 
-    @Override
-    public Graph withoutRelationshipProperties() {
-        if (!hasRelationshipProperty()) {
-            return this;
-        } else {
-            Graph graphWithoutProperties = new HugeGraph(
-                tracker,
-                idMapping,
-                nodeProperties,
-                relationshipCount,
-                adjacencyList,
-                adjacencyOffsets,
-                false,
-                Double.NaN,
-                null,
-                null,
-                isUndirected
-            );
-            graphWithoutProperties.canRelease(canRelease);
-            return graphWithoutProperties;
-        }
+    public double defaultRelationshipProperty() {
+        return defaultPropertyValue;
     }
 
     private AdjacencyList.DecompressingCursor newAdjacencyCursor(AdjacencyList adjacency) {
@@ -551,5 +478,21 @@ public class HugeGraph implements Graph {
             }
             return true;
         }
+    }
+
+    @ValueClass
+    public interface CSR {
+        AdjacencyList list();
+
+        AdjacencyOffsets offsets();
+
+        long elementCount();
+
+        Orientation orientation();
+    }
+
+    @ValueClass
+    public interface PropertyCSR extends CSR {
+        double defaultPropertyValue();
     }
 }

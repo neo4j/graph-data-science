@@ -139,7 +139,7 @@ class LouvainTest extends AlgoTestBase {
 
     @AllGraphTypesTest
     void unweightedLouvain(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER).withoutRelationshipProperties();
+        Graph graph = loadGraph(graphImpl, DB_CYPHER, false);
 
         Louvain algorithm = new Louvain(
             graph,
@@ -374,42 +374,54 @@ class LouvainTest extends AlgoTestBase {
     private Graph loadGraph(
         Class<? extends GraphStoreFactory> factoryType,
         String cypher,
-        boolean loadRelWeight,
+        boolean loadRelationshipProperty,
         String... nodeProperties
     ) {
         runQuery(cypher);
 
         String nodeStatement = "MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2";
-        String relStatement = "MATCH (u1:Node)-[rel]-(u2:Node) RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight";
+        String relStatement = loadRelationshipProperty
+            ? "MATCH (u1:Node)-[rel]-(u2:Node) RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight"
+            : "MATCH (u1:Node)-[rel]-(u2:Node) RETURN id(u1) AS source, id(u2) AS target";
 
         PropertyMapping[] nodePropertyMappings = Arrays.stream(nodeProperties)
             .map(p -> PropertyMapping.of(p, -1))
             .toArray(PropertyMapping[]::new);
 
-        PropertyMapping relWeightProperty = PropertyMapping.of("weight", 1.0);
+        PropertyMapping relationshipPropertyMapping = PropertyMapping.of("weight", 1.0);
 
         if (factoryType == CypherFactory.class) {
-            return QueryRunner.runInTransaction(db, () -> new CypherLoaderBuilder()
-                .api(db)
-                .nodeQuery(nodeStatement)
-                .relationshipQuery(relStatement)
-                .addNodeProperties(nodePropertyMappings)
-                .addRelationshipProperty(relWeightProperty)
-                .build()
-                .graph(factoryType)
+            return QueryRunner.runInTransaction(db, () -> {
+                    CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder()
+                        .api(db)
+                        .nodeQuery(nodeStatement)
+                        .relationshipQuery(relStatement)
+                        .addNodeProperties(nodePropertyMappings);
+                    if (loadRelationshipProperty) {
+                        cypherLoaderBuilder.addRelationshipProperty(relationshipPropertyMapping);
+                    }
+                    return cypherLoaderBuilder
+                        .build()
+                        .graph(factoryType);
+                }
             );
         } else {
-            return new StoreLoaderBuilder()
+            StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
                 .api(db)
                 .addNodeLabel("Node")
                 .putRelationshipProjectionsWithIdentifier(
                     "TYPE_OUT",
-                    RelationshipProjection.of("TYPE", Orientation.NATURAL))
+                    RelationshipProjection.of("TYPE", Orientation.NATURAL)
+                )
                 .putRelationshipProjectionsWithIdentifier(
                     "TYPE_IN",
-                    RelationshipProjection.of("TYPE", Orientation.REVERSE))
-                .addNodeProperties(nodePropertyMappings)
-                .addRelationshipProperty(relWeightProperty)
+                    RelationshipProjection.of("TYPE", Orientation.REVERSE)
+                )
+                .addNodeProperties(nodePropertyMappings);
+            if (loadRelationshipProperty) {
+                storeLoaderBuilder.addRelationshipProperty(relationshipPropertyMapping);
+            }
+            return storeLoaderBuilder
                 .build()
                 .graph(factoryType);
         }

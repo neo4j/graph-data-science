@@ -19,20 +19,10 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.ObjectLongMap;
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipProjectionMapping;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.huge.AdjacencyList;
-import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -40,17 +30,11 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.NODE;
 import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.RELATIONSHIP;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class CypherFactory extends GraphStoreFactory {
-
-    public static final String TYPE = "cypher";
 
     static final String LIMIT = "limit";
     static final String SKIP = "skip";
@@ -90,7 +74,7 @@ public class CypherFactory extends GraphStoreFactory {
         try (KernelTransaction.Revertable ignored = setReadOnlySecurityContext()) {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, setup).load();
 
-            CypherNodeLoader.LoadResult loadResult = new CypherNodeLoader(
+            CypherNodeLoader.LoadResult nodes = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
                 api,
@@ -98,14 +82,21 @@ public class CypherFactory extends GraphStoreFactory {
                 dimensions
             ).load();
 
-            ImportResult importResult = loadRelationships(
+            RelationshipImportResult relationships = loadRelationships(
                 relationshipQuery(),
-                loadResult.idsAndProperties(),
-                loadResult.dimensions()
+                nodes.idsAndProperties(),
+                nodes.dimensions()
             );
-            progressLogger.logDone(setup.tracker());
 
-            return importResult;
+            GraphStore graphStore = createGraphStore(
+                nodes.idsAndProperties(),
+                relationships,
+                setup.tracker(),
+                relationships.dimensions()
+            );
+
+            progressLogger.logDone(setup.tracker());
+            return ImportResult.of(relationships.dimensions(), graphStore);
         }
     }
 
@@ -117,7 +108,7 @@ public class CypherFactory extends GraphStoreFactory {
         return setup.relationshipQuery().orElseThrow(() -> new IllegalArgumentException("Missing relationship query"));
     }
 
-    private ImportResult loadRelationships(
+    private RelationshipImportResult loadRelationships(
         String relationshipQuery,
         IdsAndProperties idsAndProperties,
         GraphDimensions nodeLoadDimensions
@@ -132,69 +123,11 @@ public class CypherFactory extends GraphStoreFactory {
 
         CypherRelationshipLoader.LoadResult result = relationshipLoader.load();
 
-        GraphDimensions resultDimensions = result.dimensions();
-        ObjectLongMap<RelationshipProjectionMapping> relationshipCounts = result.relationshipCounts();
-
-        Map<String, Map<String, Graph>> graphs = relationshipLoader
-            .allBuilders()
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(
-                entry -> entry.getKey().typeName(),
-                entry -> {
-
-                    RelationshipProjectionMapping relationshipProjectionMapping = entry.getKey();
-                    RelationshipsBuilder relationshipsBuilder = entry.getValue();
-
-                    if (relationshipsBuilder == null) {
-                        throw new IllegalStateException(
-                            String.format(
-                                "RelationshipsBuilder must not be `null` for relationship type `%s`.",
-                                relationshipProjectionMapping.typeName()
-                            )
-                        );
-                    }
-
-                    AdjacencyList adjacencyList = relationshipsBuilder.adjacencyListBuilder.build();
-                    AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets;
-                    boolean loadAsUndirected = relationshipProjectionMapping.orientation() == Orientation.UNDIRECTED;
-
-                    long relationshipCount = relationshipCounts.getOrDefault(relationshipProjectionMapping, 0L);
-
-                    if (!resultDimensions.relationshipProperties().hasMappings()) {
-                        HugeGraph graph = HugeGraph.create(
-                            setup.tracker(),
-                            idsAndProperties.hugeIdMap,
-                            idsAndProperties.properties,
-                            adjacencyList,
-                            adjacencyOffsets,
-                            relationshipCount,
-                            loadAsUndirected
-                        );
-                        return Collections.singletonMap(ANY_REL_TYPE, graph);
-                    } else {
-                        return resultDimensions.relationshipProperties().enumerate().map(propertyEntry -> {
-                            int propertyKeyId = propertyEntry.getOne();
-                            ResolvedPropertyMapping propertyMapping = propertyEntry.getTwo();
-                            HugeGraph graph = HugeGraph.create(
-                                setup.tracker(),
-                                idsAndProperties.hugeIdMap,
-                                idsAndProperties.properties,
-                                relationshipsBuilder,
-                                adjacencyList,
-                                adjacencyOffsets,
-                                propertyKeyId,
-                                propertyMapping,
-                                relationshipCount,
-                                loadAsUndirected
-                            );
-                            return Tuples.pair(propertyMapping.propertyKey(), graph);
-                        }).collect(Collectors.toMap(Pair::getOne, Pair::getTwo));
-                    }
-                }
-            ));
-
-        return ImportResult.of(resultDimensions, GraphStore.of(graphs));
+        return RelationshipImportResult.of(
+            relationshipLoader.allBuilders(),
+            result.relationshipCounts(),
+            result.dimensions()
+        );
     }
 
     private KernelTransaction.Revertable setReadOnlySecurityContext() {
