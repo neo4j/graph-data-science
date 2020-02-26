@@ -38,12 +38,4 @@ class ConcurrencyMonitorTest {
         assertFalse(ConcurrencyMonitor.instance().isLimited());
         assertTrue(ConcurrencyMonitor.instance().isUnlimited());
     }
-
-    @Test
-    void throwsWhenUnset() {
-        ConcurrencyMonitor.instance().reset();
-        assertThrows(IllegalStateException.class, () -> ConcurrencyMonitor.instance().isLimited());
-        assertThrows(IllegalStateException.class, () -> ConcurrencyMonitor.instance().isUnlimited());
-    }
-
 }
