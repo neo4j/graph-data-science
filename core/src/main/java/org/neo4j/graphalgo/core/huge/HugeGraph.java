@@ -398,12 +398,6 @@ public class HugeGraph implements Graph {
         return hasRelationshipProperty;
     }
 
-    @Deprecated
-    public GraphStore toGraphStore() {
-        return toGraphStore("RELATIONSHIP_TYPE", "PROPERTY");
-    }
-
-    @Deprecated
     public GraphStore toGraphStore(String relationshipType, String propertyKey) {
         Map<String, CSR> relationships = singletonMap(
             relationshipType,
