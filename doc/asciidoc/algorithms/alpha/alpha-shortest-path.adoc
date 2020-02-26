@@ -70,7 +70,6 @@ YIELD nodeCount, totalCost, loadMillis, evalMillis, writeMillis
 | endNode                    | node    | null     | no       | The end node
 | relationshipWeightProperty | string  | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | writeProperty              | string  | 'sssp'   | yes      | The property name written back to the node sequence of the node in the path
-| direction                  | string  | outgoing | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 |===
 
 .Results
@@ -98,7 +97,6 @@ YIELD nodeId, cost
 | startNode                  | node   | null     | no       | The start node
 | endNode                    | node   | null     | no       | The end node
 | relationshipWeightProperty | string | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| direction                  | string | outgoing | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 |===
 
 .Results

@@ -59,7 +59,7 @@ The constraints of <<algorithms-pagerank-usage,Page Rank>> also apply to Random 
 
 * Dead-ends occur when pages have no out-links.
   In this case, the random walk will abort and a path containing only the first first node will be returned.
-  This problem can be avoided by passing the `direction: BOTH` parameter, so that the random walk will traverse relationships in both directions
+  This problem can be avoided by running on an undirected graph, so that the random walk will traverse relationships in both directions.
 
 * If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
   Random walks starting from any of the nodes in that group will only traverse to the others in the group - our implementation of the algorithm doesn't allow a random walk to jump to non-neighbouring nodes.
@@ -84,7 +84,6 @@ YIELD startNodeId, nodeIds, path
 | start             | object  | null                   | yes      | Starting points: null - whole graph, "Label" - nodes with that label, node-id - that node, list of node-ids - these nodes.
 | steps             | int     | 10                     | yes      | Length of paths returned, in case of error only path of lenght 1 is returned.
 | walks             | int     | 1                      | yes      | Number of paths returned.
-| direction         | string  | 'BOTH'                 | yes      | Direction of relationships to follow.
 | mode              | string  | random                 | yes      | Strategy for choosing the next relationship, modes: random and node2vec.
 | inOut             | float   | 1.0                    | yes      | Parameter for node2vec.
 | return            | float   | 1.0                    | yes      | Parameter for node2vec.

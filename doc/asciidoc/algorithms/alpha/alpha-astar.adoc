@@ -67,7 +67,6 @@ YIELD nodeId, cost
 | nodeQuery                     | string | null     | yes      | The label to load from the graph. If null, load all nodes
 | relationshipQuery             | string | null     | yes      | The relationship type to load from the graph. If null, load all nodes
 | defaultValue                  | float  | null     | yes      | The default value of the weight in case it is missing or invalid
-| direction                     | string | outgoing | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 |===
 
 .Results

@@ -68,7 +68,6 @@ YIELD resultCount, loadMillis, evalMillis, writeMillis
 | endNode                       | node    | n/a             | no       | The end node
 | k                             | int     | n/a             | no       | The number of paths to return
 | relationshipWeightProperty    | string  | null            | yes      | The property name that contains a relationship weight. If null, treats the graph as unweighted. Must be of numeric type.
-| direction                     | string  | both            | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 | maxDepth                      | int     | Integer.MAX     | yes      | The depth of the shortest paths traversal
 | writePropertyPrefix           | string  | 'PATH_'         | yes      | The relationship-type prefix written back to the graph
 | relationshipWriteProperty     | string  | 'weight'        | yes      | The relationship property written back to the graph
@@ -99,7 +98,6 @@ YIELD index, sourceNodeId, targetNodeId, nodeIds, costs, path
 | endNode                       | node      | null          | no       | The end node
 | k                             | int       | N/A           | no       | The number of paths to return
 | relationshipWeightProperty    | string    | null          | yes      | The relationship property name that contains weight. If null, treats the graph as unweighted. Must be of numeric type.
-| direction                     | string    | both          | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 | maxDepth                      | int       | Integer.MAX   | yes      | The depth of the shortest paths traversal
 | path                          | boolean   | false         | yes      | Whether or not to include string representation of the path with the result
 |===
