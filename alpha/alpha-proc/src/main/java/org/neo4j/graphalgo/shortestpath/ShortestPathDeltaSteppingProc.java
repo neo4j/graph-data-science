@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 /**
  * Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm
@@ -61,7 +61,7 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
 
     private static final String DESCRIPTION = "Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm.";
 
-    @Procedure(name = "gds.alpha.shortestPath.deltaStepping.stream", mode = READ)
+    @Procedure(name = "gds.alpha.shortestPath.deltaStepping.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<ShortestPathDeltaStepping.DeltaSteppingResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

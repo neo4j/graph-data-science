@@ -57,15 +57,16 @@ class TriangleCountExpTest {
     @BeforeAll
     static void setup() {
         DB = TestDatabaseCreator.createTestDatabase();
-        final RelationshipType type = RelationshipType.withName(RELATIONSHIP);
-        final DefaultBuilder builder = GraphBuilder.create(DB)
-                .setLabel(LABEL)
-                .setRelationship(RELATIONSHIP)
-                .newDefaultBuilder();
-        final Node center = builder.createNode();
+        RelationshipType type = RelationshipType.withName(RELATIONSHIP);
+        DefaultBuilder builder = GraphBuilder.create(DB)
+            .setLabel(LABEL)
+            .setRelationship(RELATIONSHIP)
+            .newDefaultBuilder();
+        Node center = builder.createNode();
         builder.newRingBuilder()
-                .createRing((int) TRIANGLE_COUNT)
-                .forEachNodeInTx(node -> center.createRelationshipTo(node, type));
+            .createRing((int) TRIANGLE_COUNT)
+            .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
+            .close();
         centerId = center.getId();
     }
 

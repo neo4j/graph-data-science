@@ -37,20 +37,26 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
+        setup(true);
+    }
+
+    private void setup(boolean runSetupQuery) throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(LabelPropagationStreamProc.class, PageRankStreamProc.class, GraphCreateProc.class);
 
-        String dbQuery =
-            "CREATE " +
-            "  (alice:Person)" +
-            ", (bob:Person)" +
-            ", (sanLeetCisco:City {population: 1337, stateId: 1234})" +
-            ", (newOrwellCity:City {population: 1984, stateId: 5678})" +
-            ", (sanLeetCisco)-[:ROAD {length: 23, condition: 1.0}]->(newOrwellCity)" +
-            ", (sanLeetCisco)-[:ROAD {length: 32}]->(newOrwellCity)" +
-            ", (sanLeetCisco)-[:RAIL {length: 42, condition: 0.8}]->(newOrwellCity)";
+        if (runSetupQuery) {
+            String dbQuery =
+                "CREATE " +
+                "  (alice:Person)" +
+                ", (bob:Person)" +
+                ", (sanLeetCisco:City {population: 1337, stateId: 1234})" +
+                ", (newOrwellCity:City {population: 1984, stateId: 5678})" +
+                ", (sanLeetCisco)-[:ROAD {length: 23, condition: 1.0}]->(newOrwellCity)" +
+                ", (sanLeetCisco)-[:ROAD {length: 32}]->(newOrwellCity)" +
+                ", (sanLeetCisco)-[:RAIL {length: 42, condition: 0.8}]->(newOrwellCity)";
 
-        runQuery(dbQuery);
+            runQuery(dbQuery);
+        }
     }
 
     @AfterEach
@@ -345,8 +351,10 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
     }
 
     @Test
-    void loadMultipleRelationshipTypesWithDifferentProjectionAndRunPageRank() {
-        runQuery("MATCH (n) DETACH DELETE n");
+    void loadMultipleRelationshipTypesWithDifferentProjectionAndRunPageRank() throws Exception {
+        db.shutdown();
+        setup(false);
+
         String dbQuery = "CREATE (alice:Person {name: 'Alice'})\n" +
                          "CREATE (bob:Person {name: 'Bob'})\n" +
                          "CREATE (eve:Person {name: 'Eve'})\n" +

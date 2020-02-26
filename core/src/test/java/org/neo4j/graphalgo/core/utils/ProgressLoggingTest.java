@@ -58,13 +58,14 @@ class ProgressLoggingTest {
         DB = TestDatabaseCreator.createTestDatabase();
 
         GraphBuilder.create(DB)
-                .setLabel(LABEL)
-                .setRelationship(RELATIONSHIP)
-                .newGridBuilder()
-                .createGrid(100, 10)
-                .forEachRelInTx(rel -> {
-                    rel.setProperty(PROPERTY, Math.random() * 5); // (0-5)
-                });
+            .setLabel(LABEL)
+            .setRelationship(RELATIONSHIP)
+            .newGridBuilder()
+            .createGrid(100, 10)
+            .forEachRelInTx(rel -> {
+                rel.setProperty(PROPERTY, Math.random() * 5); // (0-5)
+            })
+            .close();
     }
 
     @AfterAll

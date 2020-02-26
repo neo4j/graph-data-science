@@ -23,8 +23,8 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
@@ -34,8 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
-
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQuery;
 
 public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityAlgorithm<ME>> extends SimilarityAlgorithm<ME, WeightedInput> {
 
@@ -59,51 +57,54 @@ public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityA
         long degreeCutoff = config.degreeCutoff();
         int repeatCutoff = config.sparseVectorRepeatCutoff();
 
-        Result result = runQuery(api, query, params);
-
-        Map<Long, LongDoubleMap> map = new HashMap<>();
-        LongSet ids = new LongHashSet();
-        result.accept(resultRow -> {
-            try {
-                long item = resultRow.getNumber("item").longValue();
-                long id = resultRow.getNumber("category").longValue();
-                double weight = resultRow.getNumber("weight").doubleValue();
-                ids.add(id);
-                map.compute(item, (key, agg) -> {
-                    if (agg == null) agg = new LongDoubleHashMap();
-                    agg.put(id, weight);
-                    return agg;
-                });
-            } catch (NoSuchElementException nse) {
-                throw new IllegalArgumentException(String.format("Query %s does not return expected columns 'item', 'category' and 'weight'.", query));
-            }
-            return true;
-        });
-
-        WeightedInput[] inputs = new WeightedInput[map.size()];
-        int idx = 0;
-
-        long[] idsArray = ids.toArray();
-        for (Map.Entry<Long, LongDoubleMap> entry : map.entrySet()) {
-            Long item = entry.getKey();
-            LongDoubleMap sparseWeights = entry.getValue();
-
-            if (sparseWeights.size() > degreeCutoff) {
-                List<Number> weightsList = new ArrayList<>(ids.size());
-                for (long id : idsArray) {
-                    weightsList.add(sparseWeights.getOrDefault(id, skipValue));
+        return QueryRunner.runQuery(api, query, params, result -> {
+            Map<Long, LongDoubleMap> map = new HashMap<>();
+            LongSet ids = new LongHashSet();
+            result.accept(resultRow -> {
+                try {
+                    long item = resultRow.getNumber("item").longValue();
+                    long id = resultRow.getNumber("category").longValue();
+                    double weight = resultRow.getNumber("weight").doubleValue();
+                    ids.add(id);
+                    map.compute(item, (key, agg) -> {
+                        if (agg == null) agg = new LongDoubleHashMap();
+                        agg.put(id, weight);
+                        return agg;
+                    });
+                } catch (NoSuchElementException nse) {
+                    throw new IllegalArgumentException(String.format(
+                        "Query %s does not return expected columns 'item', 'category' and 'weight'.",
+                        query
+                    ));
                 }
-                int size = weightsList.size();
-                int nonSkipSize = sparseWeights.size();
-                double[] weights = Weights.buildRleWeights(weightsList, repeatCutoff);
+                return true;
+            });
 
-                inputs[idx++] = WeightedInput.sparse(item, weights, size, nonSkipSize);
+            WeightedInput[] inputs = new WeightedInput[map.size()];
+            int idx = 0;
+
+            long[] idsArray = ids.toArray();
+            for (Map.Entry<Long, LongDoubleMap> entry : map.entrySet()) {
+                Long item = entry.getKey();
+                LongDoubleMap sparseWeights = entry.getValue();
+
+                if (sparseWeights.size() > degreeCutoff) {
+                    List<Number> weightsList = new ArrayList<>(ids.size());
+                    for (long id : idsArray) {
+                        weightsList.add(sparseWeights.getOrDefault(id, skipValue));
+                    }
+                    int size = weightsList.size();
+                    int nonSkipSize = sparseWeights.size();
+                    double[] weights = Weights.buildRleWeights(weightsList, repeatCutoff);
+
+                    inputs[idx++] = WeightedInput.sparse(item, weights, size, nonSkipSize);
+                }
             }
-        }
 
-        if (idx != inputs.length) inputs = Arrays.copyOf(inputs, idx);
-        Arrays.sort(inputs);
-        return inputs;
+            if (idx != inputs.length) inputs = Arrays.copyOf(inputs, idx);
+            Arrays.sort(inputs);
+            return inputs;
+        });
     }
 
     @Override

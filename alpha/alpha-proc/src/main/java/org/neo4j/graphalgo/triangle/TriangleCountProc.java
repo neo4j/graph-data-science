@@ -46,11 +46,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
 
-    @Procedure(name = "gds.alpha.triangleCount.stream", mode = READ)
+    @Procedure(name = "gds.alpha.triangleCount.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<IntersectingTriangleCount.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

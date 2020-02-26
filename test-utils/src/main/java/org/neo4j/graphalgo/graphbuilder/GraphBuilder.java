@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -32,14 +31,11 @@ import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
-
 /**
  * The GraphBuilder intends to ease the creation
  * of test graphs with well known properties
  */
-public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
+public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoCloseable {
 
     private final ME self;
 
@@ -47,13 +43,15 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
     protected final HashSet<Relationship> relationships;
 
     private final GraphDatabaseAPI api;
+    private final Transaction tx;
     private final Random random;
 
     protected Label label;
     protected RelationshipType relationship;
 
-    protected GraphBuilder(GraphDatabaseAPI api, Label label, RelationshipType relationship, Random random) {
+    protected GraphBuilder(GraphDatabaseAPI api, Transaction tx, Label label, RelationshipType relationship, Random random) {
         this.api = api;
+        this.tx = tx;
         this.label = label;
         this.relationship = relationship;
         nodes = new HashSet<>();
@@ -63,7 +61,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
     }
 
     /**
-     * set the label for all subsequent {@link GraphBuilder#createNode(Transaction)} operations
+     * set the label for all subsequent {@link GraphBuilder#createNode()} operations
      * in the current and in derived builders.
      *
      * @param label the label
@@ -78,7 +76,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
     }
 
     /**
-     * set the relationship type for all subsequent {@link GraphBuilder#createRelationship(Transaction, Node, Node)}
+     * set the relationship type for all subsequent {@link GraphBuilder#createRelationship(Node, Node)}
      * operations in the current and in derived builders.
      *
      * @param relationship the name of the relationship type
@@ -100,7 +98,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @param q the target node
      * @return the relationship object
      */
-    public Relationship createRelationship(Transaction tx, Node p, Node q) {
+    public Relationship createRelationship(Node p, Node q) {
         final Relationship relationshipTo = p.createRelationshipTo(q, relationship);
         relationships.add(relationshipTo);
         return relationshipTo;
@@ -111,8 +109,8 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      *
      * @return the created node
      */
-    public Node createNode(Transaction tx) {
-        Node node = GraphDatabaseApiProxy.createNode(api, tx);
+    public Node createNode() {
+        Node node = tx.createNode();
         if (null != label) {
             node.addLabel(label);
         }
@@ -127,12 +125,18 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return child instance to make methods of the child class accessible.
      */
     public ME forEachNodeInTx(Consumer<Node> consumer) {
-        withinTransaction(tx -> nodes.forEach(consumer));
+        nodes.forEach(node -> {
+//            Node node = tx.getNodeById(n.getId());
+            consumer.accept(node);
+        });
         return self;
     }
 
     public ME forEachRelInTx(Consumer<Relationship> consumer) {
-        withinTransaction(tx -> relationships.forEach(consumer));
+        relationships.forEach(rel -> {
+//            Relationship relationship = tx.getRelationshipById(rel.getId());
+            consumer.accept(rel);
+        });
         return self;
     }
 
@@ -143,7 +147,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return child instance to make methods of the child class accessible.
      */
     public ME withinTransaction(Consumer<Transaction> runnable) {
-        runInTransaction(api, runnable);
+        runnable.accept(tx);
         return self;
     }
 
@@ -155,7 +159,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return child instance to make methods of the child class accessible.
      */
     public <T> T applyWithinTransaction(Function<Transaction, T> supplier) {
-        return applyInTransaction(api, supplier);
+        return supplier.apply(tx);
     }
 
     /**
@@ -165,7 +169,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return a new default builder
      */
     public DefaultBuilder newDefaultBuilder() {
-        return new DefaultBuilder(api, label, relationship, random);
+        return new DefaultBuilder(api, tx, label, relationship, random);
     }
 
     /**
@@ -175,7 +179,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return a new ring builder
      */
     public RingBuilder newRingBuilder() {
-        return new RingBuilder(api, label, relationship, random);
+        return new RingBuilder(api, tx, label, relationship, random);
     }
 
     /**
@@ -185,7 +189,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return the GridBuilder
      */
     public GridBuilder newGridBuilder() {
-        return new GridBuilder(api, label, relationship, random);
+        return new GridBuilder(api, tx, label, relationship, random);
     }
 
     /**
@@ -195,7 +199,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return the CompleteGraphBuilder
      */
     public CompleteGraphBuilder newCompleteGraphBuilder() {
-        return new CompleteGraphBuilder(api, label, relationship, random);
+        return new CompleteGraphBuilder(api, tx, label, relationship, random);
     }
 
     protected double randomDouble() {
@@ -216,7 +220,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return a new default builder
      */
     public static DefaultBuilder create(GraphDatabaseAPI api) {
-        return new DefaultBuilder(api, null, null, RNGHolder.rng);
+        return new DefaultBuilder(api, api.beginTx(), null, null, RNGHolder.rng);
     }
 
     /**
@@ -227,7 +231,13 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return a new default builder
      */
     public static DefaultBuilder create(GraphDatabaseAPI api, Random random) {
-        return new DefaultBuilder(api, null, null, random);
+        return new DefaultBuilder(api, api.beginTx(), null, null, random);
+    }
+
+    @Override
+    public void close() {
+        tx.commit();
+        tx.close();
     }
 
     private static final class RNGHolder {

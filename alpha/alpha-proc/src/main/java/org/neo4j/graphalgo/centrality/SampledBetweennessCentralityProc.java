@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 import static org.neo4j.procedure.Mode.WRITE;
 
 /**
@@ -58,7 +58,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
 
     private static final String DESCRIPTION = "Sampled Betweenness centrality computes an approximate score for betweenness centrality.";
 
-    @Procedure(name = "gds.alpha.betweenness.sampled.stream", mode = READ)
+    @Procedure(name = "gds.alpha.betweenness.sampled.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<BetweennessCentrality.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

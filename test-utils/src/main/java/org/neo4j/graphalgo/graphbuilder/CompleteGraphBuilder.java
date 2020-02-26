@@ -22,9 +22,11 @@ package org.neo4j.graphalgo.graphbuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -32,48 +34,42 @@ import java.util.Random;
  */
 public class CompleteGraphBuilder extends GraphBuilder<CompleteGraphBuilder> {
 
-    CompleteGraphBuilder(GraphDatabaseAPI api, Label label, RelationshipType relationship, Random random) {
-        super(api, label, relationship, random);
+    CompleteGraphBuilder(GraphDatabaseAPI api, Transaction tx, Label label, RelationshipType relationship, Random random) {
+        super(api, tx, label, relationship, random);
     }
 
     public CompleteGraphBuilder createCompleteGraph(int nodeCount) {
-        ArrayList<Node> nodes = new ArrayList<>();
-        withinTransaction(tx -> {
-
-            for (int i = 0; i < nodeCount; i++) {
-                nodes.add(createNode(tx));
-            }
-            for (int i = 0; i < nodeCount; i++) {
-                for (int j = 0; j < nodeCount; j++) {
-                    if (i == j) {
-                        continue;
-                    }
-                    createRelationship(tx, nodes.get(i), nodes.get(j));
+        List<Node> nodes = new ArrayList<>();
+        for (int i = 0; i < nodeCount; i++) {
+            nodes.add(createNode());
+        }
+        for (int i = 0; i < nodeCount; i++) {
+            for (int j = 0; j < nodeCount; j++) {
+                if (i == j) {
+                    continue;
                 }
+                createRelationship(nodes.get(i), nodes.get(j));
             }
-        });
+        }
         return this;
     }
 
 
     public CompleteGraphBuilder createCompleteGraph(int nodeCount, double connectedness) {
-        ArrayList<Node> nodes = new ArrayList<>();
-        withinTransaction(tx -> {
-
-            for (int i = 0; i < nodeCount; i++) {
-                nodes.add(createNode(tx));
-            }
-            for (int i = 0; i < nodeCount; i++) {
-                for (int j = 0; j < nodeCount; j++) {
-                    if (i == j) {
-                        continue;
-                    }
-                    if (randomDouble() < connectedness) {
-                        createRelationship(tx, nodes.get(i), nodes.get(j));
-                    }
+        List<Node> nodes = new ArrayList<>();
+        for (int i = 0; i < nodeCount; i++) {
+            nodes.add(createNode());
+        }
+        for (int i = 0; i < nodeCount; i++) {
+            for (int j = 0; j < nodeCount; j++) {
+                if (i == j) {
+                    continue;
+                }
+                if (randomDouble() < connectedness) {
+                    createRelationship(nodes.get(i), nodes.get(j));
                 }
             }
-        });
+        }
         return this;
     }
 

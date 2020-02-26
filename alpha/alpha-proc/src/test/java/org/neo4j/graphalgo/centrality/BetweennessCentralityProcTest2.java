@@ -80,7 +80,8 @@ public class BetweennessCentralityProcTest2 extends BaseProcTest {
             .forEachNodeInTx(node -> node.createRelationshipTo(center, type))
             .newRingBuilder()
             .createRing(5)
-            .forEachNodeInTx(node -> center.createRelationshipTo(node, type));
+            .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
+            .close();
 
         registerProcedures(BetweennessCentralityProc.class);
         when(consumer.consume(anyLong(), anyDouble()))

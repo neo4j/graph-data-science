@@ -297,7 +297,8 @@ public class EuclideanDocTest extends BaseProcTest {
         String controlQuery = " MATCH (p:Person {name: \"Praveena\"})-[:SIMILAR]->(other)," +
                               "       (other)-[:LIKES]->(cuisine)" +
                               " WHERE not((p)-[:LIKES]->(cuisine))" +
-                              " RETURN cuisine.name AS cuisine";
+                              " RETURN cuisine.name AS cuisine" +
+                              " ORDER BY cuisine";
 
         String expectedResult2 = "+------------+\n" +
                                  "| cuisine    |\n" +

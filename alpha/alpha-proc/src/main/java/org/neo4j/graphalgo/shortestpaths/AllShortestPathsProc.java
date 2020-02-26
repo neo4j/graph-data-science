@@ -41,13 +41,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream<WeightedAllShortestPaths.Result>, AllShortestPathsConfig> {
 
     private static final String DESCRIPTION = "The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.";
 
-    @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ)
+    @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WeightedAllShortestPaths.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

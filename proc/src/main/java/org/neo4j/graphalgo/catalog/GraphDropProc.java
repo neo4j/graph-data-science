@@ -32,7 +32,7 @@ public class GraphDropProc extends CatalogProc {
 
     private static final String DESCRIPTION = "Drops a named graph from the catalog and frees up the resources it occupies.";
 
-    @Procedure(name = "gds.graph.drop", mode = Mode.READ)
+    @Procedure(name = "gds.graph.drop", mode = Mode.WRITE)
     @Description(DESCRIPTION)
     public Stream<GraphInfo> drop(@Name(value = "graphName") String graphName) {
         validateGraphName(graphName);

@@ -47,7 +47,7 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig> {
 
@@ -99,7 +99,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         return Stream.of(builder.build());
     }
 
-    @Procedure(value = "gds.alpha.scc.stream", mode = READ)
+    @Procedure(value = "gds.alpha.scc.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<SccAlgorithm.StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

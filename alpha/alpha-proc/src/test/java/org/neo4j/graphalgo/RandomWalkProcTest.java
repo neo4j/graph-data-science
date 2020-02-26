@@ -39,7 +39,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class RandomWalkProcTest extends BaseProcTest {
 
@@ -120,19 +119,20 @@ class RandomWalkProcTest extends BaseProcTest {
             .yields();
 
         // TODO: make this test predictable (i.e. set random seed)
-        runInTransaction(db, tx -> {
-            ResourceIterator<Path> results = runQuery(query, r -> r.columnAs("path"));
-            int count = 0;
+        int count = runQuery(query, r -> {
+            ResourceIterator<Path> results = r.columnAs("path");
+            int resultCount = 0;
             while (results.hasNext()) {
                 Path path = results.next();
                 assertTrue(path.startNode().hasLabel(Label.label("Fred")), "Nodes should be of type 'Fred'.");
                 assertEquals(2, path.length());
                 Relationship firstRel = path.relationships().iterator().next();
                 assertEquals(path.startNode(), firstRel.getStartNode());
-                count++;
+                resultCount++;
             }
-            assertEquals(5, count);
+            return resultCount;
         });
+        assertEquals(5, count);
     }
 
     @Test

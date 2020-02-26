@@ -53,7 +53,7 @@ public class GraphCreateProc extends CatalogProc {
     private static final String NO_GRAPH_NAME = "";
     private static final String DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
 
-    @Procedure(name = "gds.graph.create", mode = Mode.READ)
+    @Procedure(name = "gds.graph.create", mode = Mode.WRITE)
     @Description(DESCRIPTION)
     public Stream<GraphCreateResult> create(
         @Name(value = "graphName") String graphName,
@@ -83,7 +83,7 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.graph.create.estimate", mode = Mode.READ)
+    @Procedure(name = "gds.graph.create.estimate", mode = Mode.WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> createEstimate(
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,
@@ -102,7 +102,7 @@ public class GraphCreateProc extends CatalogProc {
         return estimateGraph(config, NativeFactory.class);
     }
 
-    @Procedure(name = "gds.graph.create.cypher", mode = Mode.READ)
+    @Procedure(name = "gds.graph.create.cypher", mode = Mode.WRITE)
     @Description(DESCRIPTION)
     public Stream<GraphCreateResult> create(
         @Name(value = "graphName") String graphName,
@@ -132,7 +132,7 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.graph.create.cypher.estimate", mode = Mode.READ)
+    @Procedure(name = "gds.graph.create.cypher.estimate", mode = Mode.WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> createCypherEstimate(
         @Name(value = "nodeQuery") String nodeQuery,

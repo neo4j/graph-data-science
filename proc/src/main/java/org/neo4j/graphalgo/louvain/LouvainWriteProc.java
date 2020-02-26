@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
@@ -52,7 +52,7 @@ public class LouvainWriteProc extends LouvainBaseProc<LouvainWriteConfig> {
         return write(computationResult);
     }
 
-    @Procedure(value = "gds.louvain.write.estimate", mode = READ)
+    @Procedure(value = "gds.louvain.write.estimate", mode = WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

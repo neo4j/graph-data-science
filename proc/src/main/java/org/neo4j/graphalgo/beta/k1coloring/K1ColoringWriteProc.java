@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfig> {
     private static final String COLOR_COUNT_FIELD_NAME = "colorCount";
@@ -51,7 +51,7 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         return computationResult.isGraphEmpty() ? Stream.empty() : write(computationResult);
     }
 
-    @Procedure(value = "gds.beta.k1coloring.write.estimate", mode = READ)
+    @Procedure(value = "gds.beta.k1coloring.write.estimate", mode = WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

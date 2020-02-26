@@ -39,11 +39,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class TriangleProc extends TriangleBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
 
-    @Procedure(name = "gds.alpha.triangle.stream", mode = READ)
+    @Procedure(name = "gds.alpha.triangle.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<TriangleStream.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -67,6 +67,7 @@ class ParallelDeltaSteppingTest {
                     .forEachRelInTx(rel -> {
                         rel.setProperty(PROPERTY, Math.random() * 5); // (0-5)
                     });
+            gridBuilder.close();
 
             rootNodeId = gridBuilder.getLineNodes()
                     .get(0)

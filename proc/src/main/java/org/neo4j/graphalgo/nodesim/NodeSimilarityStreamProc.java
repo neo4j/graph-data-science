@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilarityStreamConfig> {
 
-    @Procedure(value = "gds.nodeSimilarity.stream", mode = Mode.READ)
+    @Procedure(value = "gds.nodeSimilarity.stream", mode = Mode.WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -59,7 +59,7 @@ public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilar
             });
     }
 
-    @Procedure(value = "gds.nodeSimilarity.stream.estimate", mode = Mode.READ)
+    @Procedure(value = "gds.nodeSimilarity.stream.estimate", mode = Mode.WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

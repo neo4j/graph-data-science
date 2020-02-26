@@ -47,7 +47,7 @@ public class LinkPredictionFunc extends BaseProc {
         RelationshipType relationshipType = configuration.getRelationship();
         Direction direction = configuration.getDirection(Direction.BOTH);
 
-        Set<Node> neighbors = new NeighborsFinder(api).findCommonNeighbors(node1, node2, relationshipType, direction);
+        Set<Node> neighbors = new NeighborsFinder().findCommonNeighbors(node1, node2, relationshipType, direction);
         return neighbors.stream().mapToDouble(nb -> 1.0 / Math.log(degree(nb, relationshipType, direction))).sum();
     }
 
@@ -65,7 +65,7 @@ public class LinkPredictionFunc extends BaseProc {
         RelationshipType relationshipType = configuration.getRelationship();
         Direction direction = configuration.getDirection(Direction.BOTH);
 
-        Set<Node> neighbors = new NeighborsFinder(api).findCommonNeighbors(node1, node2, relationshipType, direction);
+        Set<Node> neighbors = new NeighborsFinder().findCommonNeighbors(node1, node2, relationshipType, direction);
         return neighbors.stream().mapToDouble(nb -> 1.0 / degree(nb, relationshipType, direction)).sum();
     }
 
@@ -81,7 +81,7 @@ public class LinkPredictionFunc extends BaseProc {
         RelationshipType relationshipType = configuration.getRelationship();
         Direction direction = configuration.getDirection(Direction.BOTH);
 
-        Set<Node> neighbors = new NeighborsFinder(api).findCommonNeighbors(node1, node2, relationshipType, direction);
+        Set<Node> neighbors = new NeighborsFinder().findCommonNeighbors(node1, node2, relationshipType, direction);
         return neighbors.size();
     }
 
@@ -108,7 +108,7 @@ public class LinkPredictionFunc extends BaseProc {
         RelationshipType relationshipType = configuration.getRelationship();
         Direction direction = configuration.getDirection(Direction.BOTH);
 
-        NeighborsFinder neighborsFinder = new NeighborsFinder(api);
+        NeighborsFinder neighborsFinder = new NeighborsFinder();
         return neighborsFinder.findNeighbors(node1, node2, relationshipType, direction).size();
     }
 

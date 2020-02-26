@@ -34,14 +34,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class EuclideanProc extends SimilarityProc<EuclideanAlgorithm, EuclideanConfig> {
 
     private static final String DESCRIPTION = "Euclidean-similarity is an algorithm for finding similar nodes based on the euclidean distance.";
 
-    @Procedure(name = "gds.alpha.similarity.euclidean.stream", mode = READ)
+    @Procedure(name = "gds.alpha.similarity.euclidean.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> euclideanStream(
         @Name(value = "graphName") Object graphNameOrConfig,

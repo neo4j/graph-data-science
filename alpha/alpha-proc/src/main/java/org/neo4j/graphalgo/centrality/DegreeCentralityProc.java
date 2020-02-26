@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeCentrality, DegreeCentralityConfig> {
 
@@ -60,7 +60,7 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
         return write(computeResult);
     }
 
-    @Procedure(name = "gds.alpha.degree.stream", mode = READ)
+    @Procedure(name = "gds.alpha.degree.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<CentralityScore> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

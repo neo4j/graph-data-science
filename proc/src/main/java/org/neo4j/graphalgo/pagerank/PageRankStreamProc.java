@@ -32,11 +32,11 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
 
-    @Procedure(value = "gds.pageRank.stream", mode = READ)
+    @Procedure(value = "gds.pageRank.stream", mode = WRITE)
     @Description(PAGE_RANK_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -49,7 +49,7 @@ public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
         return stream(computationResult);
     }
 
-    @Procedure(value = "gds.pageRank.stream.estimate", mode = READ)
+    @Procedure(value = "gds.pageRank.stream.estimate", mode = WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -58,7 +58,7 @@ public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.pageRank.stats", mode = READ)
+    @Procedure(value = "gds.pageRank.stats", mode = WRITE)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -72,7 +72,7 @@ public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
             .map(StatsResult::from);
     }
 
-    @Procedure(value = "gds.pageRank.stats.estimate", mode = READ)
+    @Procedure(value = "gds.pageRank.stats.estimate", mode = WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

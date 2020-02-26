@@ -68,7 +68,6 @@ class RelationshipPredicateTest {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(db, DB_CYPHER);
         runInTransaction(db,tx -> {
-            runQuery(db, tx, DB_CYPHER, emptyMap());
             nodeA = findNode(db, tx, LABEL, "name", "a").getId();
             nodeB = findNode(db, tx, LABEL, "name", "b").getId();
             nodeC = findNode(db, tx, LABEL, "name", "c").getId();

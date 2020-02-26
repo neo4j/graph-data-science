@@ -45,7 +45,7 @@ public final class GraphGenerateProc extends BaseProc {
 
     private static final String DUMMY_RELATIONSHIP_NAME = "RELATIONSHIP";
 
-    @Procedure(name = "gds.beta.graph.generate", mode = Mode.READ)
+    @Procedure(name = "gds.beta.graph.generate", mode = Mode.WRITE)
     public Stream<GraphGenerationStats> generate(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeCount") long nodeCount,

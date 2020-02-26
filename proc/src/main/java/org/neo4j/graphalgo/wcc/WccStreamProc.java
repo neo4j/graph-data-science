@@ -35,11 +35,11 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
 
-    @Procedure(value = "gds.wcc.stream", mode = READ)
+    @Procedure(value = "gds.wcc.stream", mode = WRITE)
     @Description(WCC_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -52,7 +52,7 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
         return stream(computationResult);
     }
 
-    @Procedure(value = "gds.wcc.stream.estimate", mode = READ)
+    @Procedure(value = "gds.wcc.stream.estimate", mode = WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> streamEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -61,7 +61,7 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.wcc.stats", mode = READ)
+    @Procedure(value = "gds.wcc.stats", mode = WRITE)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -75,7 +75,7 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
             .map(StatsResult::from);
     }
 
-    @Procedure(value = "gds.wcc.stats.estimate", mode = READ)
+    @Procedure(value = "gds.wcc.stats.estimate", mode = WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> statsEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

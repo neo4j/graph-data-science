@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseProc<ModularityOptimizationWriteConfig> {
 
@@ -57,7 +57,7 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
             : Stream.empty();
     }
 
-    @Procedure(value = "gds.beta.modularityOptimization.write.estimate", mode = READ)
+    @Procedure(value = "gds.beta.modularityOptimization.write.estimate", mode = WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

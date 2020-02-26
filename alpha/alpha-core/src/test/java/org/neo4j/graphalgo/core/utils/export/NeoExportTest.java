@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.File;
 
@@ -69,6 +69,7 @@ class NeoExportTest {
     }
 
     @Test
+//    @Disabled("fix missing, shutdown state persists")
     void exportTopology() {
         StoreLoaderBuilder loaderBuilder = new StoreLoaderBuilder()
             .loadAnyLabel()
@@ -95,6 +96,7 @@ class NeoExportTest {
     }
 
     @Test
+//    @Disabled("fix missing, shutdown state persists")
     void exportTopologyAndNodeProperties() {
         StoreLoaderBuilder loaderBuilder = new StoreLoaderBuilder()
             .loadAnyLabel()

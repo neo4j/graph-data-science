@@ -50,6 +50,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 abstract class DocTestBase extends BaseProcTest {
 
@@ -92,7 +93,7 @@ abstract class DocTestBase extends BaseProcTest {
     @SuppressWarnings("unchecked")
     @Override
     protected void assertCypherResult(String query, List<Map<String, Object>> expected) {
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        runInTransaction(db, tx -> {
             List<Map<String, Object>> actual = new ArrayList<>();
             runQueryWithResultConsumer(query, result -> {
                 result.accept(row -> {
@@ -141,20 +142,22 @@ abstract class DocTestBase extends BaseProcTest {
 
     private QueryExampleConsumer defaultQueryExampleConsumer() {
         return (query, expectedColumns, expectedRows) -> {
-            Result result = runQueryWithoutClosing(query, Collections.emptyMap());
-            assertEquals(expectedColumns, result.columns());
-            AtomicInteger index = new AtomicInteger(0);
-            result.accept(actualRow -> {
-                Row expectedRow = expectedRows.get(index.getAndIncrement());
-                List<Cell> cells = expectedRow.getCells();
-                IntStream.range(0, expectedColumns.size()).forEach(i -> {
-                    String expected = cells.get(i).getText();
-                    String actual = valueToString(actualRow.get(expectedColumns.get(i)));
-                    assertEquals(expected, actual);
-                });
-                return true;
+            runInTransaction(db, tx -> {
+                try (Result result = GraphDatabaseApiProxy.runQuery(db, tx, query, Collections.emptyMap())) {
+                    assertEquals(expectedColumns, result.columns());
+                    AtomicInteger index = new AtomicInteger(0);
+                    result.accept(actualRow -> {
+                        Row expectedRow = expectedRows.get(index.getAndIncrement());
+                        List<Cell> cells = expectedRow.getCells();
+                        IntStream.range(0, expectedColumns.size()).forEach(i -> {
+                            String expected = cells.get(i).getText();
+                            String actual = valueToString(actualRow.get(expectedColumns.get(i)));
+                            assertEquals(expected, actual);
+                        });
+                        return true;
+                    });
+                }
             });
-            result.close();
         };
     }
 

@@ -42,13 +42,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class ShortestPathsProc extends AlgoBaseProc<ShortestPaths, ShortestPaths, ShortestPathsConfig> {
 
     private static final String DESCRIPTION = "The Shortest Path algorithm calculates the shortest (weighted) path between a pair of nodes.";
 
-    @Procedure(name = "gds.alpha.shortestPaths.stream", mode = READ)
+    @Procedure(name = "gds.alpha.shortestPaths.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<ShortestPaths.Result> dijkstraStream(
         @Name(value = "graphName") Object graphNameOrConfig,

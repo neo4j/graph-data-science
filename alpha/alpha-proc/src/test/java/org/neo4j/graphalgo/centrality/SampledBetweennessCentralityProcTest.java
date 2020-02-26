@@ -76,7 +76,8 @@ class SampledBetweennessCentralityProcTest extends BaseProcTest {
             .forEachNodeInTx(node -> node.createRelationshipTo(center, TYPE))
             .newRingBuilder()
             .createRing(5)
-            .forEachNodeInTx(node -> center.createRelationshipTo(node, TYPE));
+            .forEachNodeInTx(node -> center.createRelationshipTo(node, TYPE))
+            .close();
     }
 
     @AfterEach

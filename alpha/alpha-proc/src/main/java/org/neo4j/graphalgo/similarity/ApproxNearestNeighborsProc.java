@@ -57,7 +57,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ApproximateNearestNeighborsConfig> {
@@ -66,7 +66,7 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
         "The Approximate Nearest Neighbors algorithm constructs a k-Nearest Neighbors " +
         "graph for a set of objects based on a provided similarity function.";
 
-    @Procedure(name = "gds.alpha.ml.ann.stream", mode = READ)
+    @Procedure(name = "gds.alpha.ml.ann.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> annStream(
         @Name(value = "graphName") Object graphNameOrConfig,

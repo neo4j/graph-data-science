@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
@@ -49,7 +49,7 @@ public class PageRankWriteProc extends PageRankBaseProc<PageRankWriteConfig> {
         return write(computationResult);
     }
 
-    @Procedure(value = "gds.pageRank.write.estimate", mode = READ)
+    @Procedure(value = "gds.pageRank.write.estimate", mode = WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

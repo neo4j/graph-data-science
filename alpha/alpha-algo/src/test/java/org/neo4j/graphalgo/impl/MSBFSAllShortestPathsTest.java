@@ -70,10 +70,11 @@ class MSBFSAllShortestPathsTest {
     static void setup() {
         DB = TestDatabaseCreator.createTestDatabase();
         GraphBuilder.create(DB)
-                .setLabel(LABEL)
-                .setRelationship(RELATIONSHIP)
-                .newGridBuilder()
-                .createGrid(width, height);
+            .setLabel(LABEL)
+            .setRelationship(RELATIONSHIP)
+            .newGridBuilder()
+            .createGrid(width, height)
+            .close();
     }
 
     @AfterAll

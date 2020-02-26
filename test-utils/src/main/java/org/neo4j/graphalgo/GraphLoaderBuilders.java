@@ -158,8 +158,7 @@ final class GraphLoaderBuilders {
             terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
             userName.orElse(""),
             log.orElse(NullLog.getInstance()),
-            graphCreateConfig,
-            Optional.empty()
+            graphCreateConfig
         );
     }
 }

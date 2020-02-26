@@ -33,7 +33,6 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
@@ -48,13 +47,11 @@ public class CypherFactory extends GraphStoreFactory {
 
     private final GraphDatabaseAPI api;
     private final GraphSetup setup;
-    private final Optional<KernelTransaction> kernelTransaction;
 
-    public CypherFactory(GraphDatabaseAPI api, GraphSetup setup, Optional<KernelTransaction> kernelTransaction) {
+    public CypherFactory(GraphDatabaseAPI api, GraphSetup setup) {
         super(api, setup, false);
         this.api = api;
         this.setup = setup;
-        this.kernelTransaction = kernelTransaction;
     }
 
     public final MemoryEstimation memoryEstimation() {
@@ -144,20 +141,14 @@ public class CypherFactory extends GraphStoreFactory {
     }
 
     private Ktx setReadOnlySecurityContext() {
-        return kernelTransaction
-            .map(this::setReadOnlySecurityContext)
-            .orElseGet(() -> setReadOnlySecurityContext(newKernelTransaction(api), true));
+        return setReadOnlySecurityContext(newKernelTransaction(api));
     }
 
     private Ktx setReadOnlySecurityContext(KernelTransaction ktx) {
-        return setReadOnlySecurityContext(ktx, false);
-    }
-
-    private Ktx setReadOnlySecurityContext(KernelTransaction ktx, boolean closeTopKernelTransaction) {
         try {
             AuthSubject subject = ktx.securityContext().subject();
             SecurityContext securityContext = new SecurityContext(subject, READ);
-            return new Ktx(api, ktx, securityContext, closeTopKernelTransaction);
+            return new Ktx(api, ktx, securityContext);
         } catch (NotInTransactionException ex) {
             // happens only in tests
             throw new IllegalStateException("Must run in a transaction.", ex);
@@ -168,19 +159,16 @@ public class CypherFactory extends GraphStoreFactory {
         private final GraphDatabaseService db;
         private final KernelTransaction top;
         private final SecurityContext securityContext;
-        private final boolean closeTopKernelTransaction;
         private final KernelTransaction.Revertable revertTop;
 
         private Ktx(
             GraphDatabaseService db,
             KernelTransaction top,
-            SecurityContext securityContext,
-            boolean closeTopKernelTransaction
+            SecurityContext securityContext
         ) {
             this.db = db;
             this.top = top;
             this.securityContext = securityContext;
-            this.closeTopKernelTransaction = closeTopKernelTransaction;
             this.revertTop = top.overrideWith(securityContext);
         }
 
@@ -200,12 +188,10 @@ public class CypherFactory extends GraphStoreFactory {
         @Override
         public void close() {
             this.revertTop.close();
-            if (closeTopKernelTransaction) {
-                try {
-                    top.close();
-                } catch (TransactionFailureException e) {
-                    throw new RuntimeException(e);
-                }
+            try {
+                top.close();
+            } catch (TransactionFailureException e) {
+                throw new RuntimeException(e);
             }
         }
     }

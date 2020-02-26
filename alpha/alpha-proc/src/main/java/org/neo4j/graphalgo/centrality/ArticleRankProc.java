@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, ArticleRankConfig> {
@@ -92,7 +92,7 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
         return Stream.of(statsBuilder.build());
     }
 
-    @Procedure(value = "gds.alpha.articleRank.stream", mode = READ)
+    @Procedure(value = "gds.alpha.articleRank.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<CentralityScore> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

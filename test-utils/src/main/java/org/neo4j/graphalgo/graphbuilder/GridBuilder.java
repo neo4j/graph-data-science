@@ -40,10 +40,10 @@ import java.util.Random;
  */
 public class GridBuilder extends GraphBuilder<GridBuilder> {
 
-    private List<List<Node>> lines = new ArrayList<>();
+    private final List<List<Node>> lines = new ArrayList<>();
 
-    GridBuilder(GraphDatabaseAPI api, Label label, RelationshipType relationship, Random random) {
-        super(api, label, relationship, random);
+    GridBuilder(GraphDatabaseAPI api, Transaction tx, Label label, RelationshipType relationship, Random random) {
+        super(api, tx, label, relationship, random);
     }
 
     public GridBuilder createGrid(int width, int height) {
@@ -51,30 +51,28 @@ public class GridBuilder extends GraphBuilder<GridBuilder> {
     }
 
     public GridBuilder createGrid(int width, int height, double connectivity) {
-        withinTransaction(tx -> {
-            List<Node> temp = null;
-            for (int i = 0; i < height; i++) {
-                List<Node> line = createLine(tx, width);
-                if (null != temp) {
-                    for (int j = 0; j < width; j++) {
-                        if (randomDouble() < connectivity) {
-                            createRelationship(tx, temp.get(j), line.get(j));
-                        }
+        List<Node> temp = null;
+        for (int i = 0; i < height; i++) {
+            List<Node> line = createLine(width);
+            if (null != temp) {
+                for (int j = 0; j < width; j++) {
+                    if (randomDouble() < connectivity) {
+                        createRelationship(temp.get(j), line.get(j));
                     }
                 }
-                temp = line;
             }
-        });
+            temp = line;
+        }
         return this;
     }
 
-    private List<Node> createLine(Transaction tx, int length) {
-        ArrayList<Node> nodes = new ArrayList<>();
-        Node temp = createNode(tx);
+    private List<Node> createLine(int length) {
+        List<Node> nodes = new ArrayList<>();
+        Node temp = createNode();
         for (int i = 1; i < length; i++) {
-            Node node = createNode(tx);
+            Node node = createNode();
             nodes.add(temp);
-            createRelationship(tx, temp, node);
+            createRelationship(temp, node);
             temp = node;
         }
         nodes.add(temp);

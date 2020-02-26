@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.graphbuilder;
 
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Random;
@@ -32,17 +32,14 @@ import java.util.Random;
  */
 public class DefaultBuilder extends GraphBuilder<DefaultBuilder> {
 
-    protected DefaultBuilder(GraphDatabaseAPI api, Label label, RelationshipType relationship, Random random) {
-        super(api, label, relationship, random);
-    }
-
-    /**
-     * create a node within a transaction
-     *
-     * @return the node
-     */
-    public Node createNode() {
-        return applyWithinTransaction(super::createNode);
+    protected DefaultBuilder(
+        GraphDatabaseAPI api,
+        Transaction tx,
+        Label label,
+        RelationshipType relationship,
+        Random random
+    ) {
+        super(api, tx, label, relationship, random);
     }
 
     @Override

@@ -76,13 +76,12 @@ class WeightedAllShortestPathsTest {
 
         try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("setup took " + t + "ms"))) {
             GraphBuilder.create(db)
-                    .setLabel(LABEL)
-                    .setRelationship(RELATIONSHIP)
-                    .newGridBuilder()
-                    .createGrid(width, height)
-                    .forEachRelInTx(rel -> {
-                        rel.setProperty(PROPERTY, 1.0);
-                    });
+                .setLabel(LABEL)
+                .setRelationship(RELATIONSHIP)
+                .newGridBuilder()
+                .createGrid(width, height)
+                .forEachRelInTx(rel -> rel.setProperty(PROPERTY, 1.0))
+                .close();
         }
 
         try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("load took " + t + "ms"))) {

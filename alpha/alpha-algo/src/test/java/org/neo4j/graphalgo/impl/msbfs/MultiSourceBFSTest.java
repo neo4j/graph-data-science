@@ -315,12 +315,11 @@ final class MultiSourceBFSTest extends AlgoTestBase {
     private void withGrid(
             Consumer<? super GraphBuilder<?>> build,
             Consumer<? super Graph> block) {
-        runInTransaction(db, tx -> {
-            DefaultBuilder graphBuilder = GraphBuilder.create(db)
-                    .setLabel("Foo")
-                    .setRelationship("BAR");
-            build.accept(graphBuilder);
-        });
+        DefaultBuilder graphBuilder = GraphBuilder.create(db)
+            .setLabel("Foo")
+            .setRelationship("BAR");
+        build.accept(graphBuilder);
+        graphBuilder.close();
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .build()

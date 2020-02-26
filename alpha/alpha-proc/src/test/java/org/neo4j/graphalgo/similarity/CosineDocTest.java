@@ -167,7 +167,7 @@ class CosineDocTest extends BaseProcTest {
 
         assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
-    
+
     @Test
     void streamWithSymCutoff() {
         // TODO: Solve regression
@@ -262,11 +262,12 @@ class CosineDocTest extends BaseProcTest {
                                 "1 row\n";
 
         assertEquals(expectedString, runQuery(query, Result::resultAsString));
-        
+
         String controlQuery = "MATCH (p:Person {name: \"Praveena\"})-[:SIMILAR]->(other)," +
                               "       (other)-[:LIKES]->(cuisine)" +
                               " WHERE not((p)-[:LIKES]->(cuisine))" +
-                              " RETURN cuisine.name AS cuisine";
+                              " RETURN cuisine.name AS cuisine" +
+                              " ORDER BY cuisine";
 
         expectedString = "+------------+\n" +
                          "| cuisine    |\n" +
@@ -278,7 +279,7 @@ class CosineDocTest extends BaseProcTest {
 
         assertEquals(expectedString, runQuery(controlQuery, Result::resultAsString));
     }
-    
+
     @Test
     void sourceTargetIds() {
         String query = " MATCH (p:Person), (c:Cuisine)" +
@@ -308,7 +309,7 @@ class CosineDocTest extends BaseProcTest {
                                 "2 rows\n";
 
         assertEquals(expectedString, runQuery(query, Result::resultAsString));
-        
+
     }
 
     @Test

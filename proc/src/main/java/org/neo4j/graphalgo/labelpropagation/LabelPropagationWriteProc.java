@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPropagationWriteConfig> {
 
@@ -50,7 +50,7 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
         return write(result);
     }
 
-    @Procedure(value = "gds.labelPropagation.write.estimate", mode = READ)
+    @Procedure(value = "gds.labelPropagation.write.estimate", mode = WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

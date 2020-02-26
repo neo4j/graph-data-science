@@ -36,10 +36,7 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
 
 public class NeighborsFinder {
 
-    private GraphDatabaseAPI api;
-
-    public NeighborsFinder(GraphDatabaseAPI api) {
-        this.api = api;
+    public NeighborsFinder() {
     }
 
     public Set<Node> findCommonNeighbors(Node node1, Node node2, RelationshipType relationshipType, Direction direction) {

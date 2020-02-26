@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, PageRank, EigenvectorCentralityConfig> {
@@ -92,7 +92,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         return Stream.of(statsBuilder.build());
     }
 
-    @Procedure(name = "gds.alpha.eigenvector.stream", mode = READ)
+    @Procedure(name = "gds.alpha.eigenvector.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<CentralityScore> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

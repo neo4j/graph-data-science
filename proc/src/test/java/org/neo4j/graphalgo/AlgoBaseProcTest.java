@@ -508,13 +508,13 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     @NotNull
     default GraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig) {
-        return QueryRunner.runWithKernelTransaction(db, kernelTransaction ->  ImmutableGraphLoader
+        return ImmutableGraphLoader
             .builder()
             .api(db)
-            .kernelTransaction(kernelTransaction)
             .username("")
             .log(new TestLog())
-            .createConfig(graphCreateConfig).build());
+            .createConfig(graphCreateConfig)
+            .build();
     }
 
 }

@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilarityWriteConfig> {
 
@@ -55,7 +55,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
         return write(result);
     }
 
-    @Procedure(value = "gds.nodeSimilarity.write.estimate", mode = READ)
+    @Procedure(value = "gds.nodeSimilarity.write.estimate", mode = WRITE)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateWrite(
         @Name(value = "graphName") Object graphNameOrConfig,

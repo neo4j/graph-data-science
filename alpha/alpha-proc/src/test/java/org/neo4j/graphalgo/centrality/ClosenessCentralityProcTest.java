@@ -76,11 +76,12 @@ class ClosenessCentralityProcTest extends BaseProcTest {
         centerNodeId = center.getId();
 
         builder.newRingBuilder()
-                .createRing(5)
-                .forEachNodeInTx(node -> node.createRelationshipTo(center, type))
-                .newRingBuilder()
-                .createRing(5)
-                .forEachNodeInTx(node -> center.createRelationshipTo(node, type));
+            .createRing(5)
+            .forEachNodeInTx(node -> node.createRelationshipTo(center, type))
+            .newRingBuilder()
+            .createRing(5)
+            .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
+            .close();
 
         registerProcedures(ClosenessCentralityProc.class);
     }

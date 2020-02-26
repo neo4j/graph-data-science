@@ -51,7 +51,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 /**
  * Yen's K shortest paths algorithm. Computes multiple shortest
@@ -65,7 +65,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
         "Yen's K-shortest paths algorithm computes single-source K-shortest " +
         "loopless paths for a graph with non-negative relationship weights.";
 
-    @Procedure(name = "gds.alpha.kShortestPaths.stream", mode = READ)
+    @Procedure(name = "gds.alpha.kShortestPaths.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<KspStreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.graphbuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Random;
@@ -33,8 +34,8 @@ import java.util.Random;
  */
 public class RingBuilder extends GraphBuilder<RingBuilder> {
 
-    RingBuilder(GraphDatabaseAPI api, Label label, RelationshipType relationship, Random random) {
-        super(api, label, relationship, random);
+    RingBuilder(GraphDatabaseAPI api, Transaction tx, Label label, RelationshipType relationship, Random random) {
+        super(api, tx, label, relationship, random);
     }
 
     /**
@@ -47,16 +48,14 @@ public class RingBuilder extends GraphBuilder<RingBuilder> {
         if (size < 2) {
             throw new IllegalArgumentException("size must be >= 2");
         }
-        withinTransaction(tx -> {
-            final Node head = createNode(tx);
-            Node temp = head;
-            for (int i = 1; i < size; i++) {
-                Node node = createNode(tx);
-                createRelationship(tx, temp, node);
-                temp = node;
-            }
-            createRelationship(tx, temp, head);
-        });
+        Node head = createNode();
+        Node temp = head;
+        for (int i = 1; i < size; i++) {
+            Node node = createNode();
+            createRelationship(temp, node);
+            temp = node;
+        }
+        createRelationship(temp, head);
         return this;
     }
 

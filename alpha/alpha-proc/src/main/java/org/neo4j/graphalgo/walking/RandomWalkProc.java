@@ -48,7 +48,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkConfig> {
 
@@ -56,7 +56,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
         "Random Walk is an algorithm that provides random paths in a graph. " +
         "It’s similar to how a drunk person traverses a city.";
 
-    @Procedure(name = "gds.alpha.randomWalk.stream", mode = READ)
+    @Procedure(name = "gds.alpha.randomWalk.stream", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WalkResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

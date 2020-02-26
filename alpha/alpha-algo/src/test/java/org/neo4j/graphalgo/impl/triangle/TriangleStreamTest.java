@@ -54,16 +54,16 @@ class TriangleStreamTest {
     @BeforeAll
     static void setupGraphDb() {
         DB = TestDatabaseCreator.createTestDatabase();
-
         RelationshipType type = RelationshipType.withName(RELATIONSHIP);
         DefaultBuilder builder = GraphBuilder.create(DB)
-                .setLabel(LABEL)
-                .setRelationship(RELATIONSHIP)
-                .newDefaultBuilder();
+            .setLabel(LABEL)
+            .setRelationship(RELATIONSHIP)
+            .newDefaultBuilder();
         Node center = builder.createNode();
         builder.newRingBuilder()
-                .createRing((int) TRIANGLES)
-                .forEachNodeInTx(node -> center.createRelationshipTo(node, type));
+            .createRing((int) TRIANGLES)
+            .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
+            .close();
         centerId = center.getId();
     }
 
