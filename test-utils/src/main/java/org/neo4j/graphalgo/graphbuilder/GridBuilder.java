@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.graphbuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
@@ -50,14 +51,14 @@ public class GridBuilder extends GraphBuilder<GridBuilder> {
     }
 
     public GridBuilder createGrid(int width, int height, double connectivity) {
-        withinTransaction(() -> {
+        withinTransaction(tx -> {
             List<Node> temp = null;
             for (int i = 0; i < height; i++) {
-                List<Node> line = createLine(width);
+                List<Node> line = createLine(tx, width);
                 if (null != temp) {
                     for (int j = 0; j < width; j++) {
                         if (randomDouble() < connectivity) {
-                            createRelationship(temp.get(j), line.get(j));
+                            createRelationship(tx, temp.get(j), line.get(j));
                         }
                     }
                 }
@@ -67,13 +68,13 @@ public class GridBuilder extends GraphBuilder<GridBuilder> {
         return this;
     }
 
-    private List<Node> createLine(int length) {
+    private List<Node> createLine(Transaction tx, int length) {
         ArrayList<Node> nodes = new ArrayList<>();
-        Node temp = createNode();
+        Node temp = createNode(tx);
         for (int i = 1; i < length; i++) {
-            Node node = createNode();
+            Node node = createNode(tx);
             nodes.add(temp);
-            createRelationship(temp, node);
+            createRelationship(tx, temp, node);
             temp = node;
         }
         nodes.add(temp);

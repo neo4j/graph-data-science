@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -42,8 +41,9 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class DegreeCentralityTest extends AlgoTestBase {
 
@@ -124,30 +124,28 @@ final class DegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, () -> {
-                expected.put(findNode(db, label, "name", "a").getId(), 0.0);
-                expected.put(findNode(db, label, "name", "b").getId(), 1.0);
-                expected.put(findNode(db, label, "name", "c").getId(), 1.0);
-                expected.put(findNode(db, label, "name", "d").getId(), 2.0);
-                expected.put(findNode(db, label, "name", "e").getId(), 3.0);
-                expected.put(findNode(db, label, "name", "f").getId(), 2.0);
-                expected.put(findNode(db, label, "name", "g").getId(), 0.0);
-                expected.put(findNode(db, label, "name", "h").getId(), 0.0);
-                expected.put(findNode(db, label, "name", "i").getId(), 0.0);
-                expected.put(findNode(db, label, "name", "j").getId(), 0.0);
+        runInTransaction(db, tx -> {
+                expected.put(findNode(db, tx, label, "name", "a").getId(), 0.0);
+                expected.put(findNode(db, tx, label, "name", "b").getId(), 1.0);
+                expected.put(findNode(db, tx, label, "name", "c").getId(), 1.0);
+                expected.put(findNode(db, tx, label, "name", "d").getId(), 2.0);
+                expected.put(findNode(db, tx, label, "name", "e").getId(), 3.0);
+                expected.put(findNode(db, tx, label, "name", "f").getId(), 2.0);
+                expected.put(findNode(db, tx, label, "name", "g").getId(), 0.0);
+                expected.put(findNode(db, tx, label, "name", "h").getId(), 0.0);
+                expected.put(findNode(db, tx, label, "name", "i").getId(), 0.0);
+                expected.put(findNode(db, tx, label, "name", "j").getId(), 0.0);
             }
         );
 
         final Graph graph;
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
-            graph = QueryRunner.runInTransaction(
-                db, () -> new CypherLoaderBuilder()
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                     .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target")
                     .build()
-                    .graph(factoryType)
-            );
+                    .graph(factoryType));
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)
@@ -181,30 +179,28 @@ final class DegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, () -> {
-                expected.put(findNode(db, label, "name", "b").getId(), 4.0);
-                expected.put(findNode(db, label, "name", "c").getId(), 1.0);
-                expected.put(findNode(db, label, "name", "d").getId(), 1.0);
-                expected.put(findNode(db, label, "name", "e").getId(), 1.0);
-                expected.put(findNode(db, label, "name", "f").getId(), 1.0);
-                expected.put(findNode(db, label, "name", "g").getId(), 0.0);
-                expected.put(findNode(db, label, "name", "h").getId(), 0.0);
-                expected.put(findNode(db, label, "name", "i").getId(), 0.0);
-                expected.put(findNode(db, label, "name", "j").getId(), 0.0);
-                expected.put(findNode(db, label, "name", "a").getId(), 1.0);
+        runInTransaction(db, tx -> {
+                expected.put(findNode(db, tx, label, "name", "b").getId(), 4.0);
+                expected.put(findNode(db, tx, label, "name", "c").getId(), 1.0);
+                expected.put(findNode(db, tx, label, "name", "d").getId(), 1.0);
+                expected.put(findNode(db, tx, label, "name", "e").getId(), 1.0);
+                expected.put(findNode(db, tx, label, "name", "f").getId(), 1.0);
+                expected.put(findNode(db, tx, label, "name", "g").getId(), 0.0);
+                expected.put(findNode(db, tx, label, "name", "h").getId(), 0.0);
+                expected.put(findNode(db, tx, label, "name", "i").getId(), 0.0);
+                expected.put(findNode(db, tx, label, "name", "j").getId(), 0.0);
+                expected.put(findNode(db, tx, label, "name", "a").getId(), 1.0);
             }
         );
 
         final Graph graph;
 
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
-            graph = QueryRunner.runInTransaction(
-                db, () -> new CypherLoaderBuilder().api(db)
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                     .relationshipQuery("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
                     .build()
-                    .graph(factoryType)
-            );
+                    .graph(factoryType));
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)
@@ -236,31 +232,28 @@ final class DegreeCentralityTest extends AlgoTestBase {
 
         // if there are 2 relationships between a pair of nodes these get squashed into a single relationship
         // when we use an undirected graph
-        runInTransaction(db, () -> {
-            expected.put(findNode(db, label, "name", "a").getId(), 1.0);
-            expected.put(findNode(db, label, "name", "b").getId(), 4.0);
-            expected.put(findNode(db, label, "name", "c").getId(), 1.0);
-            expected.put(findNode(db, label, "name", "d").getId(), 3.0);
-            expected.put(findNode(db, label, "name", "e").getId(), 3.0);
-            expected.put(findNode(db, label, "name", "f").getId(), 2.0);
-            expected.put(findNode(db, label, "name", "g").getId(), 0.0);
-            expected.put(findNode(db, label, "name", "h").getId(), 0.0);
-            expected.put(findNode(db, label, "name", "i").getId(), 0.0);
-            expected.put(findNode(db, label, "name", "j").getId(), 0.0);
+        runInTransaction(db, tx -> {
+            expected.put(findNode(db, tx, label, "name", "a").getId(), 1.0);
+            expected.put(findNode(db, tx, label, "name", "b").getId(), 4.0);
+            expected.put(findNode(db, tx, label, "name", "c").getId(), 1.0);
+            expected.put(findNode(db, tx, label, "name", "d").getId(), 3.0);
+            expected.put(findNode(db, tx, label, "name", "e").getId(), 3.0);
+            expected.put(findNode(db, tx, label, "name", "f").getId(), 2.0);
+            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.0);
         });
 
         final Graph graph;
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
-            graph = QueryRunner.runInTransaction(
-                db,
-                () -> new CypherLoaderBuilder()
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
-                .graph(factoryType)
-            );
+                .graph(factoryType));
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)

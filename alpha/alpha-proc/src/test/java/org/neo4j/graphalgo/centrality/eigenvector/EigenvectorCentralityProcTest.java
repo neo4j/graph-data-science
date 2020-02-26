@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 class EigenvectorCentralityProcTest extends BaseProcTest {
@@ -87,60 +87,60 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             GraphCreateProc.class
         );
 
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             final Label label = Label.label("Character");
-            noNormExpected.put(findNode(db, label, "name", "Ned").getId(), 111.68570401574802);
-            noNormExpected.put(findNode(db, label, "name", "Robert").getId(), 88.09448401574804);
-            noNormExpected.put(findNode(db, label, "name", "Cersei").getId(), 84.59226401574804);
-            noNormExpected.put(findNode(db, label, "name", "Catelyn").getId(), 84.51566401574803);
-            noNormExpected.put(findNode(db, label, "name", "Tyrion").getId(), 82.00291401574802);
-            noNormExpected.put(findNode(db, label, "name", "Joffrey").getId(), 77.67397401574803);
-            noNormExpected.put(findNode(db, label, "name", "Robb").getId(), 73.56551401574802);
-            noNormExpected.put(findNode(db, label, "name", "Arya").getId(), 73.32532401574804);
-            noNormExpected.put(findNode(db, label, "name", "Petyr").getId(), 72.26733401574802);
-            noNormExpected.put(findNode(db, label, "name", "Sansa").getId(), 71.56470401574803);
+            noNormExpected.put(findNode(db, tx, label, "name", "Ned").getId(), 111.68570401574802);
+            noNormExpected.put(findNode(db, tx, label, "name", "Robert").getId(), 88.09448401574804);
+            noNormExpected.put(findNode(db, tx, label, "name", "Cersei").getId(), 84.59226401574804);
+            noNormExpected.put(findNode(db, tx, label, "name", "Catelyn").getId(), 84.51566401574803);
+            noNormExpected.put(findNode(db, tx, label, "name", "Tyrion").getId(), 82.00291401574802);
+            noNormExpected.put(findNode(db, tx, label, "name", "Joffrey").getId(), 77.67397401574803);
+            noNormExpected.put(findNode(db, tx, label, "name", "Robb").getId(), 73.56551401574802);
+            noNormExpected.put(findNode(db, tx, label, "name", "Arya").getId(), 73.32532401574804);
+            noNormExpected.put(findNode(db, tx, label, "name", "Petyr").getId(), 72.26733401574802);
+            noNormExpected.put(findNode(db, tx, label, "name", "Sansa").getId(), 71.56470401574803);
         });
 
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             final Label label = Label.label("Character");
-            maxNormExpected.put(findNode(db, label, "name", "Ned").getId(), 1.0);
-            maxNormExpected.put(findNode(db, label, "name", "Robert").getId(), 0.78823475553106);
-            maxNormExpected.put(findNode(db, label, "name", "Cersei").getId(), 0.7567972769062152);
-            maxNormExpected.put(findNode(db, label, "name", "Catelyn").getId(), 0.7561096813631987);
-            maxNormExpected.put(findNode(db, label, "name", "Tyrion").getId(), 0.7335541239126161);
-            maxNormExpected.put(findNode(db, label, "name", "Joffrey").getId(), 0.694695640231341);
-            maxNormExpected.put(findNode(db, label, "name", "Robb").getId(), 0.6578162827292336);
-            maxNormExpected.put(findNode(db, label, "name", "Arya").getId(), 0.6556602308561643);
-            maxNormExpected.put(findNode(db, label, "name", "Petyr").getId(), 0.6461632437992975);
-            maxNormExpected.put(findNode(db, label, "name", "Sansa").getId(), 0.6398561255696676);
+            maxNormExpected.put(findNode(db, tx, label, "name", "Ned").getId(), 1.0);
+            maxNormExpected.put(findNode(db, tx, label, "name", "Robert").getId(), 0.78823475553106);
+            maxNormExpected.put(findNode(db, tx, label, "name", "Cersei").getId(), 0.7567972769062152);
+            maxNormExpected.put(findNode(db, tx, label, "name", "Catelyn").getId(), 0.7561096813631987);
+            maxNormExpected.put(findNode(db, tx, label, "name", "Tyrion").getId(), 0.7335541239126161);
+            maxNormExpected.put(findNode(db, tx, label, "name", "Joffrey").getId(), 0.694695640231341);
+            maxNormExpected.put(findNode(db, tx, label, "name", "Robb").getId(), 0.6578162827292336);
+            maxNormExpected.put(findNode(db, tx, label, "name", "Arya").getId(), 0.6556602308561643);
+            maxNormExpected.put(findNode(db, tx, label, "name", "Petyr").getId(), 0.6461632437992975);
+            maxNormExpected.put(findNode(db, tx, label, "name", "Sansa").getId(), 0.6398561255696676);
         });
 
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             final Label label = Label.label("Character");
-            l2NormExpected.put(findNode(db, label, "name", "Ned").getId(), 0.31424020248680057);
-            l2NormExpected.put(findNode(db, label, "name", "Robert").getId(), 0.2478636701002979);
-            l2NormExpected.put(findNode(db, label, "name", "Cersei").getId(), 0.23800978296539527);
-            l2NormExpected.put(findNode(db, label, "name", "Catelyn").getId(), 0.23779426030989856);
-            l2NormExpected.put(findNode(db, label, "name", "Tyrion").getId(), 0.23072435753445136);
-            l2NormExpected.put(findNode(db, label, "name", "Joffrey").getId(), 0.21854440134273145);
-            l2NormExpected.put(findNode(db, label, "name", "Robb").getId(), 0.2069847902565455);
-            l2NormExpected.put(findNode(db, label, "name", "Arya").getId(), 0.20630898886459065);
-            l2NormExpected.put(findNode(db, label, "name", "Petyr").getId(), 0.20333221583209818);
-            l2NormExpected.put(findNode(db, label, "name", "Sansa").getId(), 0.20135528784996212);
+            l2NormExpected.put(findNode(db, tx, label, "name", "Ned").getId(), 0.31424020248680057);
+            l2NormExpected.put(findNode(db, tx, label, "name", "Robert").getId(), 0.2478636701002979);
+            l2NormExpected.put(findNode(db, tx, label, "name", "Cersei").getId(), 0.23800978296539527);
+            l2NormExpected.put(findNode(db, tx, label, "name", "Catelyn").getId(), 0.23779426030989856);
+            l2NormExpected.put(findNode(db, tx, label, "name", "Tyrion").getId(), 0.23072435753445136);
+            l2NormExpected.put(findNode(db, tx, label, "name", "Joffrey").getId(), 0.21854440134273145);
+            l2NormExpected.put(findNode(db, tx, label, "name", "Robb").getId(), 0.2069847902565455);
+            l2NormExpected.put(findNode(db, tx, label, "name", "Arya").getId(), 0.20630898886459065);
+            l2NormExpected.put(findNode(db, tx, label, "name", "Petyr").getId(), 0.20333221583209818);
+            l2NormExpected.put(findNode(db, tx, label, "name", "Sansa").getId(), 0.20135528784996212);
         });
 
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             final Label label = Label.label("Character");
-            l1NormExpected.put(findNode(db, label, "name", "Ned").getId(), 0.04193172127455592);
-            l1NormExpected.put(findNode(db, label, "name", "Robert").getId(), 0.03307454057909963);
-            l1NormExpected.put(findNode(db, label, "name", "Cersei").getId(), 0.031759653287334266);
-            l1NormExpected.put(findNode(db, label, "name", "Catelyn").getId(), 0.03173089428117553);
-            l1NormExpected.put(findNode(db, label, "name", "Tyrion").getId(), 0.030787497509304138);
-            l1NormExpected.put(findNode(db, label, "name", "Joffrey").getId(), 0.029162223199633484);
-            l1NormExpected.put(findNode(db, label, "name", "Robb").getId(), 0.027619726770875055);
-            l1NormExpected.put(findNode(db, label, "name", "Arya").getId(), 0.027529548889814154);
-            l1NormExpected.put(findNode(db, label, "name", "Petyr").getId(), 0.027132332950834063);
-            l1NormExpected.put(findNode(db, label, "name", "Sansa").getId(), 0.026868534772018032);
+            l1NormExpected.put(findNode(db, tx, label, "name", "Ned").getId(), 0.04193172127455592);
+            l1NormExpected.put(findNode(db, tx, label, "name", "Robert").getId(), 0.03307454057909963);
+            l1NormExpected.put(findNode(db, tx, label, "name", "Cersei").getId(), 0.031759653287334266);
+            l1NormExpected.put(findNode(db, tx, label, "name", "Catelyn").getId(), 0.03173089428117553);
+            l1NormExpected.put(findNode(db, tx, label, "name", "Tyrion").getId(), 0.030787497509304138);
+            l1NormExpected.put(findNode(db, tx, label, "name", "Joffrey").getId(), 0.029162223199633484);
+            l1NormExpected.put(findNode(db, tx, label, "name", "Robb").getId(), 0.027619726770875055);
+            l1NormExpected.put(findNode(db, tx, label, "name", "Arya").getId(), 0.027529548889814154);
+            l1NormExpected.put(findNode(db, tx, label, "name", "Petyr").getId(), 0.027132332950834063);
+            l1NormExpected.put(findNode(db, tx, label, "name", "Sansa").getId(), 0.026868534772018032);
         });
 
         createExplicitGraph(EXPLICIT_GRAPH_NAME);

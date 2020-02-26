@@ -95,7 +95,7 @@ class PearsonDocTest extends BaseProcTest {
             row -> assertEquals(0.28767798089123053, row.get("similarity"))
         );
     }
-    
+
     @Test
     void functionCallOnGraph() {
         String query = " MATCH (p1:Person {name: 'Arya'})-[rated:RATED]->(movie)" +
@@ -235,7 +235,7 @@ class PearsonDocTest extends BaseProcTest {
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
-    
+
     @Test
     void write() {
         String query = " MATCH (p:Person), (m:Movie)" +
@@ -352,7 +352,7 @@ class PearsonDocTest extends BaseProcTest {
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }
-    
+
     @Test
     void cypherProjection() {
         String query = " WITH \"MATCH (person:Person)-[rated:RATED]->(c)" +

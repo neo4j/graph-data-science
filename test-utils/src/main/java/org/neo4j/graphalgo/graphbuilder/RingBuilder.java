@@ -47,15 +47,15 @@ public class RingBuilder extends GraphBuilder<RingBuilder> {
         if (size < 2) {
             throw new IllegalArgumentException("size must be >= 2");
         }
-        withinTransaction(() -> {
-            final Node head = createNode();
+        withinTransaction(tx -> {
+            final Node head = createNode(tx);
             Node temp = head;
             for (int i = 1; i < size; i++) {
-                Node node = createNode();
-                createRelationship(temp, node);
+                Node node = createNode(tx);
+                createRelationship(tx, temp, node);
                 temp = node;
             }
-            createRelationship(temp, head);
+            createRelationship(tx, temp, head);
         });
         return this;
     }

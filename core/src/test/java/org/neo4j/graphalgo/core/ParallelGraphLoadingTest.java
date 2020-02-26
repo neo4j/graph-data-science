@@ -31,6 +31,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.lang.invoke.MethodHandle;
@@ -55,8 +56,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNodes;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllNodes;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 import static org.neo4j.graphalgo.core.utils.RawValues.combineIntInt;
@@ -76,14 +78,14 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
         GraphDbApi largerGraph = buildGraph(PageUtil.pageSizeFor(Long.BYTES) << 1);
         try {
             Graph sparseGraph = load(largerGraph, l -> l.addNodeLabel("Label2"));
-            runInTransaction(largerGraph, () -> {
-                findNodes(largerGraph, Label.label("Label2"))
+            runInTransaction(largerGraph, tx -> {
+                findNodes(largerGraph, tx, Label.label("Label2"))
                     .stream().forEach(n -> {
                         long graphId = sparseGraph.toMappedNodeId(n.getId());
                         assertNotEquals(-1, graphId, n + " not mapped");
                         long neoId = sparseGraph.toOriginalNodeId(graphId);
                         assertEquals(n.getId(), neoId, n + " mapped wrongly");
-                    });
+                });
             });
         } finally {
             largerGraph.shutdown();
@@ -95,9 +97,8 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     void shouldLoadNodesInOrder() {
         Graph graph = loadEverything();
         final Set<Long> nodeIds;
-        nodeIds = runInTransaction(
-            db,
-            () -> getAllNodes(db).stream()
+        nodeIds = applyInTransaction(db, tx ->
+            getAllNodes(db, tx).stream()
                 .map(Node::getId)
                 .collect(Collectors.toSet())
         );
@@ -116,7 +117,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     @Timeout(value = 5)
     void shouldLoadAllRelationships() {
         Graph graph = loadEverything();
-        runInTransaction(db, () -> graph.forEachNode(id -> testRelationships(graph, id)));
+        runInTransaction(db, tx -> graph.forEachNode(id -> testRelationships(tx, graph, id)));
     }
 
     @Test
@@ -144,8 +145,9 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
         }
     }
 
-    private boolean testRelationships(Graph graph, long nodeId) {
-        final Node node = getNodeById(db, graph.toOriginalNodeId(nodeId));
+    private boolean testRelationships(Transaction tx, Graph graph, long nodeId) {
+        final Node node = getNodeById(db, tx, graph.toOriginalNodeId(nodeId));
+        assertNotNull(node);
         final Map<Long, Relationship> relationships = StreamSupport
                 .stream(node.getRelationships(Direction.OUTGOING).spliterator(), false)
                 .collect(Collectors.toMap(

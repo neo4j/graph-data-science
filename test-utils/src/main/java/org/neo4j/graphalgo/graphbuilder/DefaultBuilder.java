@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.graphbuilder;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -38,25 +37,12 @@ public class DefaultBuilder extends GraphBuilder<DefaultBuilder> {
     }
 
     /**
-     * create a relationship within a transaction
-     *
-     * @param p the source node
-     * @param q the target node
-     * @return the relationship object
-     */
-    @Override
-    public Relationship createRelationship(Node p, Node q) {
-        return withinTransaction(() -> super.createRelationship(p, q));
-    }
-
-    /**
      * create a node within a transaction
      *
      * @return the node
      */
-    @Override
     public Node createNode() {
-        return withinTransaction(super::createNode);
+        return applyWithinTransaction(super::createNode);
     }
 
     @Override

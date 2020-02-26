@@ -38,17 +38,17 @@ public class CompleteGraphBuilder extends GraphBuilder<CompleteGraphBuilder> {
 
     public CompleteGraphBuilder createCompleteGraph(int nodeCount) {
         ArrayList<Node> nodes = new ArrayList<>();
-        withinTransaction(() -> {
+        withinTransaction(tx -> {
 
             for (int i = 0; i < nodeCount; i++) {
-                nodes.add(createNode());
+                nodes.add(createNode(tx));
             }
             for (int i = 0; i < nodeCount; i++) {
                 for (int j = 0; j < nodeCount; j++) {
                     if (i == j) {
                         continue;
                     }
-                    createRelationship(nodes.get(i), nodes.get(j));
+                    createRelationship(tx, nodes.get(i), nodes.get(j));
                 }
             }
         });
@@ -58,10 +58,10 @@ public class CompleteGraphBuilder extends GraphBuilder<CompleteGraphBuilder> {
 
     public CompleteGraphBuilder createCompleteGraph(int nodeCount, double connectedness) {
         ArrayList<Node> nodes = new ArrayList<>();
-        withinTransaction(() -> {
+        withinTransaction(tx -> {
 
             for (int i = 0; i < nodeCount; i++) {
-                nodes.add(createNode());
+                nodes.add(createNode(tx));
             }
             for (int i = 0; i < nodeCount; i++) {
                 for (int j = 0; j < nodeCount; j++) {
@@ -69,7 +69,7 @@ public class CompleteGraphBuilder extends GraphBuilder<CompleteGraphBuilder> {
                         continue;
                     }
                     if (randomDouble() < connectedness) {
-                        createRelationship(nodes.get(i), nodes.get(j));
+                        createRelationship(tx, nodes.get(i), nodes.get(j));
                     }
                 }
             }

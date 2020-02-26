@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo;
 
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -34,19 +36,23 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
 public class GetNodeFunc {
     @Context
-    public GraphDatabaseAPI api;
+    public GraphDatabaseService api;
 
+    @Context
+    public Transaction tx;
+
+    @Nullable
     @UserFunction("gds.util.asNode")
     @Description("CALL gds.util.asNode(nodeId) - Return the node objects for the given node id or null if none exists.")
     public Node asNode(@Name(value = "nodeId") Number nodeId) {
-        return getNodeById(api, nodeId.longValue());
+        return getNodeById(api, tx, nodeId.longValue());
     }
 
     @UserFunction("gds.util.asNodes")
     @Description("CALL gds.util.asNodes(nodeIds) - Return the node objects for the given node ids or an empty list if none exists.")
     public List<Node> asNodes(@Name(value = "nodeIds") List<Number> nodeIds) {
         return nodeIds.stream()
-            .map(nodeId -> getNodeById(api, nodeId.longValue()))
+            .map(nodeId -> getNodeById(api, tx, nodeId.longValue()))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }

@@ -38,11 +38,11 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class HugeGraphLoadingTest {
 
@@ -81,9 +81,9 @@ final class HugeGraphLoadingTest {
         // something larger than one batch
         int nodeCount = 60_000;
         Label label = Label.label("Foo");
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             for (int j = 0; j < nodeCount; j++) {
-                Node node = createNode(db, label);
+                Node node = createNode(db, tx, label);
                 node.setProperty("bar", node.getId());
             }
         });
@@ -121,9 +121,9 @@ final class HugeGraphLoadingTest {
         final int pages = 10;
         int nodeCount = recordsPerPage * pages;
 
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             for (int i = 0; i < nodeCount; i++) {
-                createNode(db);
+                createNode(db, tx);
             }
         });
 
@@ -143,13 +143,13 @@ final class HugeGraphLoadingTest {
         int nodeCount = 1_000;
         int parallelEdgeCount = 10;
 
-        runInTransaction(db, () -> {
-            Node n0 = createNode(db);
-            Node n1 = createNode(db);
+        runInTransaction(db, tx -> {
+            Node n0 = createNode(db, tx);
+            Node n1 = createNode(db, tx);
             Node last = null;
 
             for (int i = 0; i < nodeCount; i++) {
-                last = createNode(db);
+                last = createNode(db, tx);
             }
 
             n0.createRelationshipTo(n1, fooRelType).setProperty("weight", 1.0);

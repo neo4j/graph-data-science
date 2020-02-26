@@ -40,11 +40,12 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 
 class WccTest extends AlgoTestBase {
@@ -207,17 +208,17 @@ class WccTest extends AlgoTestBase {
     }
 
     private void createTestGraph(int... setSizes) {
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             for (int setSize : setSizes) {
-                createLine(db, setSize);
+                createLine(db, tx, setSize);
             }
         });
     }
 
-    private static void createLine(GraphDatabaseService db, int setSize) {
-        Node temp = createNode(db);
+    private static void createLine(GraphDatabaseService db, Transaction tx, int setSize) {
+        Node temp = createNode(db, tx);
         for (int i = 1; i < setSize; i++) {
-            Node t = createNode(db);
+            Node t = createNode(db, tx);
             temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
             temp = t;
         }

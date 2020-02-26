@@ -114,9 +114,9 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
             Path path = null;
             if (returnPath) {
                 if (config.relationshipWeightProperty() != null) {
-                    path = WalkPath.toPath(api, nodeIds, costs);
+                    path = WalkPath.toPath(api, transaction.internalTransaction(), nodeIds, costs);
                 } else {
-                    path = WalkPath.toPath(api, nodeIds);
+                    path = WalkPath.toPath(api, transaction.internalTransaction(), nodeIds);
                 }
             }
 

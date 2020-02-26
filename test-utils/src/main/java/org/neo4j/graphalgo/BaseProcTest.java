@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -39,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
 
@@ -87,8 +90,20 @@ public class BaseProcTest {
         return AuthSubject.ANONYMOUS.username();
     }
 
-    protected void runQueryWithRowConsumer(@Language("Cypher") String query, Consumer<Result.ResultRow> check) {
+    protected void runQueryWithRowConsumer(@Language("Cypher") String query, BiConsumer<Transaction, Result.ResultRow> check) {
         runQueryWithRowConsumer(query, emptyMap(), check);
+    }
+
+    protected void runQueryWithRowConsumer(@Language("Cypher") String query, Consumer<Result.ResultRow> check) {
+        runQueryWithRowConsumer(query, emptyMap(), (tx, row) -> check.accept(row));
+    }
+
+    protected void runQueryWithRowConsumer(
+        @Language("Cypher") String query,
+        Map<String, Object> params,
+        BiConsumer<Transaction, Result.ResultRow> check
+    ) {
+        runQueryWithRowConsumer(db, query, params, check);
     }
 
     protected void runQueryWithRowConsumer(
@@ -96,14 +111,14 @@ public class BaseProcTest {
         Map<String, Object> params,
         Consumer<Result.ResultRow> check
     ) {
-        runQueryWithRowConsumer(db, query, params, check);
+        runQueryWithRowConsumer(db, query, params, (tx, row) -> check.accept(row));
     }
 
     protected void runQueryWithRowConsumer(
         GraphDatabaseAPI localDb,
         @Language("Cypher") String query,
         Map<String, Object> params,
-        Consumer<Result.ResultRow> check
+        BiConsumer<Transaction, Result.ResultRow> check
     ) {
         QueryRunner.runQueryWithRowConsumer(localDb, query, params, check);
     }
@@ -111,9 +126,33 @@ public class BaseProcTest {
     protected void runQueryWithRowConsumer(
         GraphDatabaseAPI localDb,
         @Language("Cypher") String query,
+        Map<String, Object> params,
         Consumer<Result.ResultRow> check
     ) {
+        QueryRunner.runQueryWithRowConsumer(localDb, query, params, (tx, row) -> check.accept(row));
+    }
+
+    protected void runQueryWithRowConsumer(
+        GraphDatabaseAPI localDb,
+        @Language("Cypher") String query,
+        BiConsumer<Transaction, Result.ResultRow> check
+    ) {
         runQueryWithRowConsumer(localDb, query, emptyMap(), check);
+    }
+    protected void runQueryWithRowConsumer(
+        GraphDatabaseAPI localDb,
+        @Language("Cypher") String query,
+        Consumer<Result.ResultRow> check
+    ) {
+        runQueryWithRowConsumer(localDb, query, emptyMap(), (tx, row) -> check.accept(row));
+    }
+
+    protected void runQueryWithRowConsumer(
+        String username,
+        String query,
+        BiConsumer<Transaction, Result.ResultRow> check
+    ) {
+        runQueryWithRowConsumer(db, username, query, emptyMap(), check);
     }
 
     protected void runQueryWithRowConsumer(
@@ -121,7 +160,7 @@ public class BaseProcTest {
         String query,
         Consumer<Result.ResultRow> check
     ) {
-        runQueryWithRowConsumer(db, username, query, emptyMap(), check);
+        runQueryWithRowConsumer(db, username, query, emptyMap(), (tx, row) -> check.accept(row));
     }
 
     protected void runQueryWithRowConsumer(
@@ -129,7 +168,7 @@ public class BaseProcTest {
         String username,
         String query,
         Map<String, Object> params,
-        Consumer<Result.ResultRow> check
+        BiConsumer<Transaction, Result.ResultRow> check
     ) {
         QueryRunner.runQueryWithRowConsumer(db, username, query, params, check);
     }
@@ -192,7 +231,7 @@ public class BaseProcTest {
 
     private void assertEmptyResult(String query, Map<String, Object> params) {
         List<Result.ResultRow> actual = new ArrayList<>();
-        QueryRunner.runQueryWithRowConsumer(db, query, params, actual::add);
+        QueryRunner.runQueryWithRowConsumer(db, query, params, (tx, row) -> actual.add(row));
         assertTrue(actual.isEmpty());
     }
 
@@ -233,9 +272,9 @@ public class BaseProcTest {
     }
 
     protected void assertResult(final String scoreProperty, Map<Long, Double> expected) {
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        runInTransaction(db, tx -> {
             for (Map.Entry<Long, Double> entry : expected.entrySet()) {
-                double score = ((Number) getNodeById(db, entry.getKey())
+                double score = ((Number) getNodeById(db, tx, entry.getKey())
                     .getProperty(scoreProperty))
                     .doubleValue();
                 assertEquals(
@@ -258,7 +297,7 @@ public class BaseProcTest {
         Map<String, Object> queryParameters,
         List<Map<String, Object>> expected
     ) {
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        runInTransaction(db, tx -> {
             List<Map<String, Object>> actual = new ArrayList<>();
             runQueryWithResultConsumer(query, queryParameters, result -> {
                 result.accept(row -> {

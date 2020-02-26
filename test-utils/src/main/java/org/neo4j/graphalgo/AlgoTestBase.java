@@ -38,7 +38,6 @@ public class AlgoTestBase {
     }
 
     protected void runQuery(GraphDatabaseService passedInDb, String query) {
-        QueryRunner.runInTransaction(passedInDb, () ->
-            QueryRunner.runQuery(passedInDb, query));
+        org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction(passedInDb, tx -> QueryRunner.runQuery(passedInDb, query));
     }
 }

@@ -24,12 +24,13 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
 import java.util.Random;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
@@ -62,7 +63,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
     }
 
     /**
-     * set the label for all subsequent {@link GraphBuilder#createNode()} operations
+     * set the label for all subsequent {@link GraphBuilder#createNode(Transaction)} operations
      * in the current and in derived builders.
      *
      * @param label the label
@@ -77,7 +78,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
     }
 
     /**
-     * set the relationship type for all subsequent {@link GraphBuilder#createRelationship(Node, Node)}
+     * set the relationship type for all subsequent {@link GraphBuilder#createRelationship(Transaction, Node, Node)}
      * operations in the current and in derived builders.
      *
      * @param relationship the name of the relationship type
@@ -99,7 +100,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @param q the target node
      * @return the relationship object
      */
-    public Relationship createRelationship(Node p, Node q) {
+    public Relationship createRelationship(Transaction tx, Node p, Node q) {
         final Relationship relationshipTo = p.createRelationshipTo(q, relationship);
         relationships.add(relationshipTo);
         return relationshipTo;
@@ -110,8 +111,8 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      *
      * @return the created node
      */
-    public Node createNode() {
-        Node node = GraphDatabaseApiProxy.createNode(api);
+    public Node createNode(Transaction tx) {
+        Node node = GraphDatabaseApiProxy.createNode(api, tx);
         if (null != label) {
             node.addLabel(label);
         }
@@ -126,12 +127,12 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @return child instance to make methods of the child class accessible.
      */
     public ME forEachNodeInTx(Consumer<Node> consumer) {
-        withinTransaction(() -> nodes.forEach(consumer));
+        withinTransaction(tx -> nodes.forEach(consumer));
         return self;
     }
 
     public ME forEachRelInTx(Consumer<Relationship> consumer) {
-        withinTransaction(() -> relationships.forEach(consumer));
+        withinTransaction(tx -> relationships.forEach(consumer));
         return self;
     }
 
@@ -141,8 +142,8 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @param runnable the runnable
      * @return child instance to make methods of the child class accessible.
      */
-    public ME withinTransaction(Runnable runnable) {
-        runInTransaction(api, tx -> runnable.run());
+    public ME withinTransaction(Consumer<Transaction> runnable) {
+        runInTransaction(api, runnable);
         return self;
     }
 
@@ -153,8 +154,8 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      * @param <T>      the return type
      * @return child instance to make methods of the child class accessible.
      */
-    public <T> T withinTransaction(Supplier<T> supplier) {
-        return applyInTransaction(api, tx -> supplier.get());
+    public <T> T applyWithinTransaction(Function<Transaction, T> supplier) {
+        return applyInTransaction(api, supplier);
     }
 
     /**

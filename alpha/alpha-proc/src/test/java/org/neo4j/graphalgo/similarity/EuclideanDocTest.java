@@ -46,26 +46,26 @@ public class EuclideanDocTest extends BaseProcTest {
                                     " MERGE (michael:Person {name: \"Michael\"})" +
                                     " MERGE (arya:Person {name: \"Arya\"})" +
                                     " MERGE (karin:Person {name: \"Karin\"})" +
-                                    
+
                                     " MERGE (praveena)-[:LIKES {score: 9}]->(indian)" +
                                     " MERGE (praveena)-[:LIKES {score: 7}]->(portuguese)" +
                                     " MERGE (praveena)-[:LIKES {score: 8}]->(british)" +
                                     " MERGE (praveena)-[:LIKES {score: 1}]->(mauritian)" +
-                                    
+
                                     " MERGE (zhen)-[:LIKES {score: 10}]->(french)" +
                                     " MERGE (zhen)-[:LIKES {score: 6}]->(indian)" +
                                     " MERGE (zhen)-[:LIKES {score: 2}]->(british)" +
-                                    
+
                                     " MERGE (michael)-[:LIKES {score: 8}]->(french)" +
                                     " MERGE (michael)-[:LIKES {score: 7}]->(italian)" +
                                     " MERGE (michael)-[:LIKES {score: 9}]->(indian)" +
                                     " MERGE (michael)-[:LIKES {score: 3}]->(portuguese)" +
-                                    
+
                                     " MERGE (arya)-[:LIKES {score: 10}]->(lebanese)" +
                                     " MERGE (arya)-[:LIKES {score: 10}]->(italian)" +
                                     " MERGE (arya)-[:LIKES {score: 7}]->(portuguese)" +
                                     " MERGE (arya)-[:LIKES {score: 9}]->(mauritian)" +
-                                    
+
                                     " MERGE (karin)-[:LIKES {score: 9}]->(lebanese)" +
                                     " MERGE (karin)-[:LIKES {score: 7}]->(italian)" +
                                     " MERGE (karin)-[:LIKES {score: 10}]->(portuguese)";
@@ -206,7 +206,7 @@ public class EuclideanDocTest extends BaseProcTest {
     @Test
     void streamSimilarityCutoff()
     {
-        String query = 
+        String query =
             " MATCH (p:Person), (c:Cuisine)" +
             " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
             " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
@@ -354,7 +354,7 @@ public class EuclideanDocTest extends BaseProcTest {
             " MERGE (portuguese:Cuisine {name:'Portuguese'})  SET portuguese.embedding = [0.47, 0.98, 0.81, 0.72, 0.89]" +
             " MERGE (british:Cuisine {name:'British'})        SET british.embedding = [0.94, 0.12, 0.23, 0.4, 0.71]" +
             " MERGE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31, 0.56, 0.98, 0.21, 0.62]";
-        
+
         runQuery(embeddingsQuery);
 
         String query =
@@ -424,7 +424,7 @@ public class EuclideanDocTest extends BaseProcTest {
                                 "| 5     | 5               | true  | \"SIMILAR\"             | \"score\"       | 0.0 | 3.6055450439453125 | 2.642218017578125 | 3.6055450439453125 |\n" +
                                 "+---------------------------------------------------------------------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
-        
+
         runQueryWithResultConsumer(query, result-> assertEquals(expectedResult, result.resultAsString()));
     }
 }

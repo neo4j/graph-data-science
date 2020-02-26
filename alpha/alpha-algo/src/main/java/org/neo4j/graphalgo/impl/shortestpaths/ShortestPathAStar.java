@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.stream.Stream;
@@ -42,6 +43,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPathAStar> {
 
     private final GraphDatabaseAPI db;
+    private final Transaction tx;
     private static final int PATH_END = -1;
 
     private Graph graph;
@@ -64,6 +66,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
     public ShortestPathAStar(
         Graph graph,
         GraphDatabaseAPI db,
+        Transaction tx,
         long startNode,
         long goalNode,
         String propertyKeyLat,
@@ -72,6 +75,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
         this.graph = graph;
         this.db = db;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
+        this.tx = tx;
         this.startNode = startNode;
         this.goalNode = goalNode;
         this.propertyKeyLat = propertyKeyLat;
@@ -159,7 +163,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
 
     private double getNodeCoordinate(int nodeId, String coordinateType) {
         long neo4jId = graph.toOriginalNodeId(nodeId);
-        Node node = getNodeById(db, neo4jId);
+        Node node = getNodeById(db, tx, neo4jId);
         return (double) node.getProperty(coordinateType);
     }
 

@@ -38,7 +38,8 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 final class EigenvectorCentralityTest extends AlgoTestBase {
@@ -107,28 +108,27 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, () -> {
-            expected.put(findNode(db, label, "name", "a").getId(), 1.762540000000000);
-            expected.put(findNode(db, label, "name", "b").getId(), 31.156790000000008);
-            expected.put(findNode(db, label, "name", "c").getId(), 28.694439999999993);
-            expected.put(findNode(db, label, "name", "d").getId(), 1.7625400000000004);
-            expected.put(findNode(db, label, "name", "e").getId(), 1.7625400000000004);
-            expected.put(findNode(db, label, "name", "f").getId(), 1.7625400000000004);
-            expected.put(findNode(db, label, "name", "g").getId(), 0.1);
-            expected.put(findNode(db, label, "name", "h").getId(), 0.1);
-            expected.put(findNode(db, label, "name", "i").getId(), 0.1);
-            expected.put(findNode(db, label, "name", "j").getId(), 0.1);
+        runInTransaction(db, tx -> {
+            expected.put(findNode(db, tx, label, "name", "a").getId(), 1.762540000000000);
+            expected.put(findNode(db, tx, label, "name", "b").getId(), 31.156790000000008);
+            expected.put(findNode(db, tx, label, "name", "c").getId(), 28.694439999999993);
+            expected.put(findNode(db, tx, label, "name", "d").getId(), 1.7625400000000004);
+            expected.put(findNode(db, tx, label, "name", "e").getId(), 1.7625400000000004);
+            expected.put(findNode(db, tx, label, "name", "f").getId(), 1.7625400000000004);
+            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.1);
+            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.1);
+            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.1);
+            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.1);
         });
 
         final Graph graph;
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(db, () -> new CypherLoaderBuilder()
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                 .build()
-                .graph(factoryType)
-            );
+                .graph(factoryType));
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)

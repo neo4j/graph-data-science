@@ -26,7 +26,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CostEvaluator;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -56,7 +55,8 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.expectNodeById;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class WeightedAllShortestPaths427Test extends AlgoTestBase {
 
@@ -444,11 +444,9 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
     private List<Result> calculateExpected(Graph graph, boolean withWeights) {
         List<Result> expected = new ArrayList<>();
         List<Executable> assertions = new ArrayList<>();
-        QueryRunner.runInTransaction(
-            db,
-            () -> graph.forEachNode(algoSourceId -> {
+        runInTransaction(db, tx -> graph.forEachNode(algoSourceId -> {
                 long neoSourceId = graph.toOriginalNodeId(algoSourceId);
-                TestDijkstra dijkstra = new TestDijkstra(getNodeById(db, neoSourceId), withWeights);
+                TestDijkstra dijkstra = new TestDijkstra(expectNodeById(db, tx, neoSourceId), withWeights);
                 graph.forEachNode(algoTargetId -> {
                     if (algoSourceId != algoTargetId) {
                         Result neoResult = null;
@@ -456,7 +454,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
 
                         dijkstra.reset();
                         long neoTargetId = graph.toOriginalNodeId(algoTargetId);
-                        Node targetNode = getNodeById(db, neoTargetId);
+                        Node targetNode = expectNodeById(db, tx, neoTargetId);
                         List<Node> path = dijkstra.getPathAsNodes(targetNode);
 
                         if (path != null) {
@@ -494,8 +492,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
                     return true;
                 });
                 return true;
-            })
-        );
+            }));
         assertAll(assertions);
 
         expected.sort(Comparator.naturalOrder());

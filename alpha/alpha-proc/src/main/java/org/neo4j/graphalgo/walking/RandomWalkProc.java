@@ -73,7 +73,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
         return computationResult.result()
             .map(nodes -> new WalkResult(
                 nodes,
-                computationResult.config().path() ? WalkPath.toPath(api, nodes) : null
+                computationResult.config().path() ? WalkPath.toPath(api, transaction.internalTransaction(), nodes) : null
             ));
     }
 
@@ -145,7 +145,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
             }
             return ids.map(graph::toMappedNodeId).mapToInt(Math::toIntExact).onClose(cursor::close);
         } else if (start instanceof Collection) {
-            return ((Collection) start)
+            return ((Collection<?>) start)
                 .stream()
                 .mapToLong(e -> ((Number) e).longValue())
                 .map(graph::toMappedNodeId)

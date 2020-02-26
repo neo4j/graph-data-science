@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -52,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 final class LabelPropagationTest extends AlgoTestBase {
 
@@ -102,7 +102,7 @@ final class LabelPropagationTest extends AlgoTestBase {
                 .build();
         }
 
-        return QueryRunner.runInTransaction(db, () -> graphLoader.load(graphImpl));
+        return applyInTransaction(db, tx -> graphLoader.load(graphImpl));
     }
 
     @AllGraphTypesTest

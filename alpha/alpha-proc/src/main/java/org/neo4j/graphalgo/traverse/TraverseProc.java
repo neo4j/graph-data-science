@@ -127,6 +127,6 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
 
         Traverse traverse = computationResult.algorithm();
         long[] nodes = traverse.resultNodes();
-        return Stream.of(new WalkResult(nodes, WalkPath.toPath(api, nodes)));
+        return Stream.of(new WalkResult(nodes, WalkPath.toPath(api, transaction.internalTransaction(), nodes)));
     }
 }

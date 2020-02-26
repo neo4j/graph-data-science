@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
@@ -66,6 +65,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
@@ -391,20 +391,19 @@ class LouvainTest extends AlgoTestBase {
         PropertyMapping relationshipPropertyMapping = PropertyMapping.of("weight", 1.0);
 
         if (factoryType == CypherFactory.class) {
-            return QueryRunner.runInTransaction(db, () -> {
-                    CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder()
-                        .api(db)
-                        .nodeQuery(nodeStatement)
-                        .relationshipQuery(relStatement)
-                        .addNodeProperties(nodePropertyMappings);
-                    if (loadRelationshipProperty) {
-                        cypherLoaderBuilder.addRelationshipProperty(relationshipPropertyMapping);
-                    }
-                    return cypherLoaderBuilder
-                        .build()
-                        .graph(factoryType);
+            return applyInTransaction(db, tx -> {
+                CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder()
+                    .api(db)
+                    .nodeQuery(nodeStatement)
+                    .relationshipQuery(relStatement)
+                    .addNodeProperties(nodePropertyMappings);
+                if (loadRelationshipProperty) {
+                    cypherLoaderBuilder.addRelationshipProperty(relationshipPropertyMapping);
                 }
-            );
+                return cypherLoaderBuilder
+                    .build()
+                    .graph(factoryType);
+            });
         } else {
             StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
                 .api(db)

@@ -35,7 +35,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 final class AverageDegreeCentralityTest extends AlgoTestBase {
 
@@ -117,13 +117,12 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
 
         final Graph graph;
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(db, () -> new CypherLoaderBuilder()
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                 .build()
-                .graph(factoryType)
-            );
+                .graph(factoryType));
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)
@@ -145,13 +144,12 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
 
         final Graph graph;
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(db, () -> new CypherLoaderBuilder()
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
                 .build()
-                .graph(factoryType)
-            );
+                .graph(factoryType));
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)
@@ -174,14 +172,13 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
 
         final Graph graph;
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(db, () -> new CypherLoaderBuilder()
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
-                .graph(factoryType)
-            );
+                .graph(factoryType));
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)

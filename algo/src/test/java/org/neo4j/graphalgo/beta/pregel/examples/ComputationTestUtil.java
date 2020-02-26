@@ -45,7 +45,7 @@ final class ComputationTestUtil {
         Map<Long, Long> expectedValues = new HashMap<>();
         runInTransaction(db, tx -> {
             for (int i = 0; i < values.length; i++) {
-                expectedValues.put(findNode(db, nodeLabel, idProperty, i).getId(), values[i]);
+                expectedValues.put(findNode(db, tx, nodeLabel, idProperty, i).getId(), values[i]);
             }
         });
         expectedValues.forEach((idProp, expectedValue) -> {
@@ -69,7 +69,7 @@ final class ComputationTestUtil {
         Map<Long, Double> expectedValues = new HashMap<>();
         runInTransaction(db, tx -> {
             for (int i = 0; i < values.length; i++) {
-                expectedValues.put(findNode(db, nodeLabel, idProperty, i).getId(), values[i]);
+                expectedValues.put(findNode(db, tx, nodeLabel, idProperty, i).getId(), values[i]);
             }
         });
 

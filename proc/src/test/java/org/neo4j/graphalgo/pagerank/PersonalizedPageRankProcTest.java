@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
@@ -83,26 +83,24 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
 
         expected = new HashMap<>();
 
-        runInTransaction(db, () -> {
-            expected.put(findNode(db, PERSON_LABEL, "name", "John").getId(), 0.24851499999999993);
-            expected.put(findNode(db, PERSON_LABEL, "name", "Jill").getId(), 0.12135449999999998);
-            expected.put(findNode(db, PERSON_LABEL, "name", "Mary").getId(), 0.12135449999999998);
-            expected.put(findNode(db, PERSON_LABEL, "name", "Todd").getId(), 0.043511499999999995);
+        runInTransaction(db, tx -> {
+            expected.put(findNode(db, tx, PERSON_LABEL, "name", "John").getId(), 0.24851499999999993);
+            expected.put(findNode(db, tx, PERSON_LABEL, "name", "Jill").getId(), 0.12135449999999998);
+            expected.put(findNode(db, tx, PERSON_LABEL, "name", "Mary").getId(), 0.12135449999999998);
+            expected.put(findNode(db, tx, PERSON_LABEL, "name", "Todd").getId(), 0.043511499999999995);
 
-            expected.put(findNode(db, PRODUCT_LABEL, "name", "Kindle Fire").getId(), 0.17415649999999996);
-            expected.put(findNode(db, PRODUCT_LABEL, "name", "iPhone5").getId(), 0.17415649999999996);
-            expected.put(findNode(db, PRODUCT_LABEL, "name", "Fitbit Flex Wireless").getId(), 0.08085200000000001);
-            expected.put(findNode(db, PRODUCT_LABEL, "name", "Harry Potter").getId(), 0.01224);
-            expected.put(findNode(db, PRODUCT_LABEL, "name", "Hobbit").getId(), 0.01224);
+            expected.put(findNode(db, tx, PRODUCT_LABEL, "name", "Kindle Fire").getId(), 0.17415649999999996);
+            expected.put(findNode(db, tx, PRODUCT_LABEL, "name", "iPhone5").getId(), 0.17415649999999996);
+            expected.put(findNode(db, tx, PRODUCT_LABEL, "name", "Fitbit Flex Wireless").getId(), 0.08085200000000001);
+            expected.put(findNode(db, tx, PRODUCT_LABEL, "name", "Harry Potter").getId(), 0.01224);
+            expected.put(findNode(db, tx, PRODUCT_LABEL, "name", "Hobbit").getId(), 0.01224);
         });
     }
 
     @Test
     void personalizedPageRankOnImplicitGraph() {
         List<Node> startNodes = new ArrayList<>();
-        runInTransaction(db, () -> {
-            startNodes.add(findNode(db, PERSON_LABEL, "name", "John"));
-        });
+        runInTransaction(db, tx -> startNodes.add(findNode(db, tx, PERSON_LABEL, "name", "John")));
 
         @Language("Cypher")
         String query = GdsCypher.call().implicitCreation(ImmutableGraphCreateFromStoreConfig
@@ -142,9 +140,9 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
     @Test
     void personalizedPageRankWithTwoSourceNodesOnImplicitGraph() {
         List<Node> startNodes = new ArrayList<>();
-        runInTransaction(db, () -> {
-            startNodes.add(findNode(db, PERSON_LABEL, "name", "John"));
-            startNodes.add(findNode(db, PERSON_LABEL, "name", "Mary"));
+        runInTransaction(db, tx -> {
+            startNodes.add(findNode(db, tx, PERSON_LABEL, "name", "John"));
+            startNodes.add(findNode(db, tx, PERSON_LABEL, "name", "Mary"));
         });
 
         @Language("Cypher")
@@ -180,17 +178,17 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         );
 
         Map<Long, Double> expectedResult = new HashMap<>();
-        runInTransaction(db, () -> {
-            expectedResult.put(findNode(db, PERSON_LABEL, "name", "John").getId(), 0.3260027844575233);
-            expectedResult.put(findNode(db, PERSON_LABEL, "name", "Jill").getId(), 0.23342811424518006);
-            expectedResult.put(findNode(db, PERSON_LABEL, "name", "Mary").getId(), 0.3834281142451801);
-            expectedResult.put(findNode(db, PERSON_LABEL, "name", "Todd").getId(), 0.10794770773500204);
+        runInTransaction(db, tx -> {
+            expectedResult.put(findNode(db, tx, PERSON_LABEL, "name", "John").getId(), 0.3260027844575233);
+            expectedResult.put(findNode(db, tx, PERSON_LABEL, "name", "Jill").getId(), 0.23342811424518006);
+            expectedResult.put(findNode(db, tx, PERSON_LABEL, "name", "Mary").getId(), 0.3834281142451801);
+            expectedResult.put(findNode(db, tx, PERSON_LABEL, "name", "Todd").getId(), 0.10794770773500204);
 
-            expectedResult.put(findNode(db, PRODUCT_LABEL, "name", "Kindle Fire").getId(), 0.3105931498808786);
-            expectedResult.put(findNode(db, PRODUCT_LABEL, "name", "iPhone5").getId(), 0.3105931498808786);
-            expectedResult.put(findNode(db, PRODUCT_LABEL, "name", "Fitbit Flex Wireless").getId(), 0.2026776185026392);
-            expectedResult.put(findNode(db, PRODUCT_LABEL, "name", "Harry Potter").getId(), 0.029719049402046945);
-            expectedResult.put(findNode(db, PRODUCT_LABEL, "name", "Hobbit").getId(), 0.029719049402046945);
+            expectedResult.put(findNode(db, tx, PRODUCT_LABEL, "name", "Kindle Fire").getId(), 0.3105931498808786);
+            expectedResult.put(findNode(db, tx, PRODUCT_LABEL, "name", "iPhone5").getId(), 0.3105931498808786);
+            expectedResult.put(findNode(db, tx, PRODUCT_LABEL, "name", "Fitbit Flex Wireless").getId(), 0.2026776185026392);
+            expectedResult.put(findNode(db, tx, PRODUCT_LABEL, "name", "Harry Potter").getId(), 0.029719049402046945);
+            expectedResult.put(findNode(db, tx, PRODUCT_LABEL, "name", "Hobbit").getId(), 0.029719049402046945);
         });
 
         assertMapEquals(expectedResult, actual);
@@ -199,9 +197,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
     @Test
     void personalizedPageRankOnExplicitGraph() {
         List<Node> startNodes = new ArrayList<>();
-        runInTransaction(db, () -> {
-            startNodes.add(findNode(db, PERSON_LABEL, "name", "John"));
-        });
+        runInTransaction(db, tx -> startNodes.add(findNode(db, tx, PERSON_LABEL, "name", "John")));
 
         runQuery("CALL  gds.graph.create('personalisedGraph', " +
                  "  ['Person', 'Product']," +

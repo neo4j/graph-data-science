@@ -37,14 +37,15 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.expectNodeById;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class IncrementalWccTest extends AlgoTestBase {
 
@@ -60,11 +61,11 @@ class IncrementalWccTest extends AlgoTestBase {
     @BeforeEach
     void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             for (int i = 0; i < COMMUNITY_COUNT; i = i + 2) {
-                long community1 = createLineGraph(db);
-                long community2 = createLineGraph(db);
-                createConnection(db, community1, community2);
+                long community1 = createLineGraph(db, tx);
+                long community2 = createLineGraph(db, tx);
+                createConnection(db, tx, community1, community2);
             }
         });
     }
@@ -74,9 +75,14 @@ class IncrementalWccTest extends AlgoTestBase {
         db.shutdown();
     }
 
-    private static void createConnection(GraphDatabaseService db, long sourceId, long targetId) {
-        final Node source = getNodeById(db, sourceId);
-        final Node target = getNodeById(db, targetId);
+    private static void createConnection(
+        GraphDatabaseService db,
+        Transaction tx,
+        long sourceId,
+        long targetId
+    ) {
+        final Node source = expectNodeById(db, tx, sourceId);
+        final Node target = expectNodeById(db, tx, targetId);
 
         source.createRelationshipTo(target, RELATIONSHIP_TYPE);
     }
@@ -146,13 +152,13 @@ class IncrementalWccTest extends AlgoTestBase {
      * @param db database
      * @return the last node id inserted into the graph
      */
-    private long createLineGraph(GraphDatabaseService db) {
-        Node temp = createNode(db);
+    private long createLineGraph(GraphDatabaseService db, Transaction tx) {
+        Node temp = createNode(db, tx);
         long communityId = temp.getId() / COMMUNITY_SIZE;
 
         for (int i = 1; i < COMMUNITY_SIZE; i++) {
             temp.setProperty(SEED_PROPERTY, communityId);
-            Node target = createNode(db);
+            Node target = createNode(db, tx);
             temp.createRelationshipTo(target, RELATIONSHIP_TYPE);
             temp = target;
         }

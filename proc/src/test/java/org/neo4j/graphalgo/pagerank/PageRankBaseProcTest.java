@@ -50,7 +50,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends BaseProcTest implements
@@ -145,29 +145,29 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
                  "   }" +
                  ")");
 
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             final Label label = Label.label("Label1");
-            expected.put(findNode(db, label, "name", "a").getId(), 0.243);
-            expected.put(findNode(db, label, "name", "b").getId(), 1.844);
-            expected.put(findNode(db, label, "name", "c").getId(), 1.777);
-            expected.put(findNode(db, label, "name", "d").getId(), 0.218);
-            expected.put(findNode(db, label, "name", "e").getId(), 0.243);
-            expected.put(findNode(db, label, "name", "f").getId(), 0.218);
-            expected.put(findNode(db, label, "name", "g").getId(), 0.150);
-            expected.put(findNode(db, label, "name", "h").getId(), 0.150);
-            expected.put(findNode(db, label, "name", "i").getId(), 0.150);
-            expected.put(findNode(db, label, "name", "j").getId(), 0.150);
+            expected.put(findNode(db, tx, label, "name", "a").getId(), 0.243);
+            expected.put(findNode(db, tx, label, "name", "b").getId(), 1.844);
+            expected.put(findNode(db, tx, label, "name", "c").getId(), 1.777);
+            expected.put(findNode(db, tx, label, "name", "d").getId(), 0.218);
+            expected.put(findNode(db, tx, label, "name", "e").getId(), 0.243);
+            expected.put(findNode(db, tx, label, "name", "f").getId(), 0.218);
+            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.150);
+            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.150);
+            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.150);
+            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.150);
 
-            weightedExpected.put(findNode(db, label, "name", "a").getId(), 0.218);
-            weightedExpected.put(findNode(db, label, "name", "b").getId(), 2.008);
-            weightedExpected.put(findNode(db, label, "name", "c").getId(), 1.850);
-            weightedExpected.put(findNode(db, label, "name", "d").getId(), 0.185);
-            weightedExpected.put(findNode(db, label, "name", "e").getId(), 0.182);
-            weightedExpected.put(findNode(db, label, "name", "f").getId(), 0.174);
-            weightedExpected.put(findNode(db, label, "name", "g").getId(), 0.150);
-            weightedExpected.put(findNode(db, label, "name", "h").getId(), 0.150);
-            weightedExpected.put(findNode(db, label, "name", "i").getId(), 0.150);
-            weightedExpected.put(findNode(db, label, "name", "j").getId(), 0.150);
+            weightedExpected.put(findNode(db, tx, label, "name", "a").getId(), 0.218);
+            weightedExpected.put(findNode(db, tx, label, "name", "b").getId(), 2.008);
+            weightedExpected.put(findNode(db, tx, label, "name", "c").getId(), 1.850);
+            weightedExpected.put(findNode(db, tx, label, "name", "d").getId(), 0.185);
+            weightedExpected.put(findNode(db, tx, label, "name", "e").getId(), 0.182);
+            weightedExpected.put(findNode(db, tx, label, "name", "f").getId(), 0.174);
+            weightedExpected.put(findNode(db, tx, label, "name", "g").getId(), 0.150);
+            weightedExpected.put(findNode(db, tx, label, "name", "h").getId(), 0.150);
+            weightedExpected.put(findNode(db, tx, label, "name", "i").getId(), 0.150);
+            weightedExpected.put(findNode(db, tx, label, "name", "j").getId(), 0.150);
         });
     }
 

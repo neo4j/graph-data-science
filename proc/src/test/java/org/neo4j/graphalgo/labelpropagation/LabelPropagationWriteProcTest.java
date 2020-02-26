@@ -200,8 +200,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
                        "    }" +
                        ")";
 
-        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName, "writeProperty", writeProperty),
-            row -> {
+        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName, "writeProperty", writeProperty), row -> {
                 assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
                 checkMillisSet(row);
                 assertEquals(

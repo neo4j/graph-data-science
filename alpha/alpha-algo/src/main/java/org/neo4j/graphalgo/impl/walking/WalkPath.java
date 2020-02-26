@@ -21,11 +21,12 @@ package org.neo4j.graphalgo.impl.walking;
 
 import org.neo4j.graphalgo.compat.PathProxy;
 import org.neo4j.graphalgo.compat.VirtualRelationship;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,13 +48,13 @@ public class WalkPath extends PathProxy {
         this.size = size;
     }
 
-    public static Path toPath(GraphDatabaseAPI api, long[] nodes) {
+    public static Path toPath(GraphDatabaseService api, Transaction tx, long[] nodes) {
         if (nodes.length == 0) return EMPTY;
         WalkPath result = new WalkPath(nodes.length);
-        Node node = getNodeById(api, nodes[0]);
+        Node node = getNodeById(api, tx, nodes[0]);
         result.addNode(node);
         for (int i = 1; i < nodes.length; i++) {
-            Node nextNode = getNodeById(api, nodes[i]);
+            Node nextNode = getNodeById(api, tx, nodes[i]);
             result.addRelationship(new VirtualRelationship(node, nextNode, NEXT));
             result.addNode(nextNode);
             node = nextNode;
@@ -61,13 +62,13 @@ public class WalkPath extends PathProxy {
         return result;
     }
 
-    public static Path toPath(GraphDatabaseAPI api, long[] nodes, double[] costs) {
+    public static Path toPath(GraphDatabaseService api, Transaction tx, long[] nodes, double[] costs) {
         if (nodes.length == 0) return EMPTY;
         WalkPath result = new WalkPath(nodes.length);
-        Node node = getNodeById(api, nodes[0]);
+        Node node = getNodeById(api, tx, nodes[0]);
         result.addNode(node);
         for (int i = 1; i < nodes.length; i++) {
-            Node nextNode = getNodeById(api, nodes[i]);
+            Node nextNode = getNodeById(api, tx, nodes[i]);
             VirtualRelationship relationship = new VirtualRelationship(node, nextNode, NEXT);
             relationship.setProperty("cost", costs[i-1]);
             result.addRelationship(relationship);

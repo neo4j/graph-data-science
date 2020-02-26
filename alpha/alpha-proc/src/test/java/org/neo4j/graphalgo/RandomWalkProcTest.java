@@ -39,7 +39,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class RandomWalkProcTest extends BaseProcTest {
 
@@ -120,7 +120,7 @@ class RandomWalkProcTest extends BaseProcTest {
             .yields();
 
         // TODO: make this test predictable (i.e. set random seed)
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             ResourceIterator<Path> results = runQuery(query, r -> r.columnAs("path"));
             int count = 0;
             while (results.hasNext()) {

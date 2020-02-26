@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 final class ShortestPathDijkstraTest extends AlgoTestBase {
@@ -251,12 +251,12 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
             Label label,
             RelationshipType type,
             String... kvPairs) {
-        return runInTransaction(db, () -> {
+        return applyInTransaction(db, tx -> {
             double weight = 0.0;
             Node prev = null;
             long[] nodeIds = new long[kvPairs.length / 2];
             for (int i = 0; i < nodeIds.length; i++) {
-                Node current = findNode(db, label, kvPairs[2 * i], kvPairs[2 * i + 1]);
+                Node current = findNode(db, tx, label, kvPairs[2 * i], kvPairs[2 * i + 1]);
                 long id = current.getId();
                 nodeIds[i] = id;
                 if (prev != null) {
