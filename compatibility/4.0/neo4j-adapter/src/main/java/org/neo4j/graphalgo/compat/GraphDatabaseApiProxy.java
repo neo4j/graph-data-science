@@ -36,6 +36,7 @@ import org.neo4j.internal.recordstorage.RecordStorageEngine;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.api.KernelTransactions;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -210,12 +211,18 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
-    // TODO: broken
     public static <T> T withKernelTransaction(GraphDatabaseService db, Function<KernelTransaction, T> block) {
-        return applyInTransaction(db, tx -> {
-            KernelTransaction kernelTransaction = resolveDependency(db, KernelTransaction.class);
-            return block.apply(kernelTransaction);
-        });
+        return applyInTransaction(db, tx -> withKernelTransaction(db, tx, block));
+    }
+
+    public static <T> T withKernelTransaction(GraphDatabaseService db, Transaction tx, Function<KernelTransaction, T> block) {
+        KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
+        return block.apply(ktx);
+    }
+
+    public static KernelTransaction newKernelTransaction(GraphDatabaseService db) {
+        Transaction tx = db.beginTx();
+        return ((InternalTransaction) tx).kernelTransaction();
     }
 
     public static Result runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
