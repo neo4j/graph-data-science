@@ -32,6 +32,7 @@ import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -47,29 +48,38 @@ public final class QueryRunner {
         String username,
         String query,
         Map<String, Object> params,
-        Consumer<Result.ResultRow> check
+        BiConsumer<Transaction, Result.ResultRow> check
     ) {
-        try (KernelTransaction.Revertable ignored = withUsername(db.beginTx(), username)) {
-            try(Result result = db.execute(query, params)) {
-                result.accept(row -> {
-                    check.accept(row);
-                    return true;
-                });
-            }
+        try (Transaction tx = db.beginTx();
+             KernelTransaction.Revertable ignored = withUsername(tx, username);
+             Result result = db.execute(query, params)
+        ) {
+            result.accept(row -> {
+                check.accept(tx, row);
+                return true;
+            });
+            tx.success();
         }
     }
 
-    public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, Map<String, Object> params, Consumer<Result.ResultRow> rowConsumer) {
-        try(Result result = db.execute(query, params)) {
+    public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, Map<String, Object> params, BiConsumer<Transaction, Result.ResultRow> rowConsumer) {
+        try (Transaction tx = db.beginTx();
+             Result result = db.execute(query, params)
+        ) {
             result.accept(row -> {
-                rowConsumer.accept(row);
+                rowConsumer.accept(tx, row);
                 return true;
             });
+            tx.success();
         }
+    }
+
+    public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, BiConsumer<Transaction, Result.ResultRow> rowConsumer) {
+        runQueryWithRowConsumer(db, query, Collections.emptyMap(), rowConsumer);
     }
 
     public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, Consumer<Result.ResultRow> rowConsumer) {
-        runQueryWithRowConsumer(db, query, Collections.emptyMap(), rowConsumer);
+        runQueryWithRowConsumer(db, query, Collections.emptyMap(), (tx, row) -> rowConsumer.accept(row));
     }
 
     public static void runQuery(GraphDatabaseService db, String query) {
@@ -77,12 +87,18 @@ public final class QueryRunner {
     }
 
     public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
-        db.execute(query, params).close();
+        try (Transaction tx = db.beginTx()) {
+            db.execute(query, params).close();
+            tx.success();
+        }
     }
 
     public static void runQuery(GraphDatabaseService db, String username, String query, Map<String, Object> params) {
-        try (KernelTransaction.Revertable ignored = withUsername(db.beginTx(), username)) {
+        try (Transaction tx = db.beginTx();
+             KernelTransaction.Revertable ignored = withUsername(tx, username)
+        ) {
             db.execute(query, params).close();
+            tx.success();
         }
     }
 
@@ -91,14 +107,21 @@ public final class QueryRunner {
     }
 
     public static <T> T runQuery(GraphDatabaseService db, String query, Map<String, Object> params, Function<Result, T> resultFunction) {
-        try (Result result = db.execute(query, params)) {
-            return resultFunction.apply(result);
+        try (Transaction tx = db.beginTx();
+             Result result = db.execute(query, params)
+        ) {
+            T resultValue = resultFunction.apply(result);
+            tx.success();
+            return resultValue;
         }
     }
 
     public static void runQueryWithResultConsumer(GraphDatabaseService db, String query, Map<String, Object> params, Consumer<Result> resultConsumer) {
-        try (Result result = db.execute(query, params)) {
+        try (Transaction tx = db.beginTx();
+             Result result = db.execute(query, params)
+        ) {
             resultConsumer.accept(result);
+            tx.success();
         }
     }
 
@@ -107,14 +130,18 @@ public final class QueryRunner {
      * Callers have to consume the Result and/or use try-catch resource block.
      */
     public static Result runQueryWithoutClosing(GraphDatabaseService db, String query, Map<String, Object> params) {
-        return db.execute(query, params);
+        try (Transaction tx = db.beginTx()) {
+            Result result = db.execute(query, params);
+            tx.success();
+            return result;
+        }
     }
 
     public static <T> T runInTransaction(GraphDatabaseService db, Supplier<T> supplier) {
         try (Transaction tx = db.beginTx()) {
-            T t = supplier.get();
+            T result = supplier.get();
             tx.success();
-            return t;
+            return result;
         }
     }
 
@@ -123,9 +150,9 @@ public final class QueryRunner {
             KernelTransaction kernelTransaction = GraphDatabaseApiProxy
                 .resolveDependency(db, ThreadToStatementContextBridge.class)
                 .getKernelTransactionBoundToThisThread(true);
-            R t = function.apply(kernelTransaction);
+            R result = function.apply(kernelTransaction);
             tx.success();
-            return t;
+            return result;
         }
     }
 

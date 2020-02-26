@@ -30,6 +30,7 @@ import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -45,34 +46,38 @@ public final class QueryRunner {
         String username,
         String query,
         Map<String, Object> params,
-        Consumer<Result.ResultRow> check
+        BiConsumer<Transaction, Result.ResultRow> check
     ) {
         try (Transaction tx = db.beginTx();
              KernelTransaction.Revertable ignored = withUsername(tx, username);
              Result result = tx.execute(query, params)
         ) {
             result.accept(row -> {
-                check.accept(row);
+                check.accept(tx, row);
                 return true;
             });
             tx.commit();
         }
     }
 
-    public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, Map<String, Object> params, Consumer<Result.ResultRow> rowConsumer) {
+    public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, Map<String, Object> params, BiConsumer<Transaction, Result.ResultRow> rowConsumer) {
         try (Transaction tx = db.beginTx();
              Result result = tx.execute(query, params)
         ) {
             result.accept(row -> {
-                rowConsumer.accept(row);
+                rowConsumer.accept(tx, row);
                 return true;
             });
             tx.commit();
         }
     }
 
-    public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, Consumer<Result.ResultRow> rowConsumer) {
+    public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, BiConsumer<Transaction, Result.ResultRow> rowConsumer) {
         runQueryWithRowConsumer(db, query, Collections.emptyMap(), rowConsumer);
+    }
+
+    public static void runQueryWithRowConsumer(GraphDatabaseService db, String query, Consumer<Result.ResultRow> rowConsumer) {
+        runQueryWithRowConsumer(db, query, Collections.emptyMap(), (tx, row) -> rowConsumer.accept(row));
     }
 
     public static void runQuery(GraphDatabaseService db, String query) {

@@ -195,7 +195,7 @@ public final class CypherExporter {
 
         @Override
         public void forEachNode(GraphDatabaseService graph, Consumer<Node> action) {
-            GraphDatabaseApiProxy.getAllNodes(graph).forEach(action);
+            GraphDatabaseApiProxy.getAllNodes(graph, action);
         }
 
         @Override

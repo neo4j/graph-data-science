@@ -40,6 +40,7 @@ import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -73,42 +74,104 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
-    public static Node getNodeById(GraphDatabaseService db, long id) {
-        return applyInTransaction(db, tx -> {
-            try {
-                return db.getNodeById(id);
-            } catch (NotFoundException e) {
-                return null;
+    public static <T> T getNodeById(GraphDatabaseService db, long id, Function<Optional<Node>, T> action) {
+        return applyInTransaction(db, tx -> action.apply(Optional.ofNullable(getNodeById(db, tx, id))));
+    }
+
+    public static Node getNodeById(GraphDatabaseService db, Transaction tx, long id) {
+        try {
+            return db.getNodeById(id);
+        } catch (NotFoundException e) {
+            return null;
+        }
+    }
+
+    public static <T> T expectNodeById(GraphDatabaseService db, long id, Function<Node, T> action) {
+        return applyInTransaction(db, tx -> action.apply(expectNodeById(db, tx, id)));
+    }
+
+    public static Node expectNodeById(GraphDatabaseService db, Transaction tx, long id) {
+        return db.getNodeById(id);
+    }
+
+    public static <T> T findNode(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue, Function<Optional<Node>, T> action) {
+        return applyInTransaction(db, tx -> action.apply(Optional.ofNullable(findNode(db, tx, label,  propertyKey, propertyValue))));
+    }
+
+    public static Node findNode(GraphDatabaseService db, Transaction tx, Label label, String propertyKey, Object propertyValue) {
+        return db.findNode(label, propertyKey, propertyValue);
+    }
+
+    public static void findNodes(GraphDatabaseService db, Label label, Consumer<Node> action) {
+        runInTransaction(db, tx -> {
+            try (ResourceIterator<Node> nodes = findNodes(db, tx, label)) {
+                while (nodes.hasNext()) {
+                    action.accept(nodes.next());
+                }
             }
         });
     }
 
-    public static Node createNode(GraphDatabaseService db) {
-        return applyInTransaction(db, tx -> db.createNode());
+    public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Transaction tx, Label label) {
+        return db.findNodes(label);
     }
 
-    public static Node createNode(GraphDatabaseService db, Label... labels) {
-        return applyInTransaction(db, tx -> db.createNode(labels));
+    public static void findNodes(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue, Consumer<Node> action) {
+        runInTransaction(db, tx -> {
+            try (ResourceIterator<Node> nodes = findNodes(db, tx, label, propertyKey, propertyValue)) {
+                while (nodes.hasNext()) {
+                    action.accept(nodes.next());
+                }
+            }
+        });
     }
 
-    public static Node findNode(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue) {
-        return applyInTransaction(db, tx -> db.findNode(label, propertyKey, propertyValue));
+    public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Transaction tx, Label label, String propertyKey, Object propertyValue) {
+        return db.findNodes(label, propertyKey, propertyValue);
     }
 
-    public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Label label, String propertyKey, Object propertyValue) {
-        return applyInTransaction(db, tx -> db.findNodes(label, propertyKey, propertyValue));
+    public static void getAllNodes(GraphDatabaseService db, Consumer<Node> action) {
+        runInTransaction(db, tx -> {
+            try (ResourceIterator<Node> nodes = getAllNodes(db, tx).iterator()) {
+                while (nodes.hasNext()) {
+                    action.accept(nodes.next());
+                }
+            }
+        });
     }
 
-    public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Label label) {
-        return applyInTransaction(db, tx -> db.findNodes(label));
+    public static ResourceIterable<Node> getAllNodes(GraphDatabaseService db, Transaction tx) {
+        return db.getAllNodes();
     }
 
-    public static ResourceIterable<Node> getAllNodes(GraphDatabaseService db) {
-        return applyInTransaction(db, tx -> db.getAllNodes());
+    public static <T> T createNode(GraphDatabaseService db, Function<Node, T> action) {
+        return applyInTransaction(db, tx -> action.apply(createNode(db, tx)));
     }
 
-    public static ResourceIterable<Relationship> getAllRelationships(GraphDatabaseService db) {
-        return applyInTransaction(db, tx -> db.getAllRelationships());
+    public static Node createNode(GraphDatabaseService db, Transaction tx) {
+        return tx.createNode();
+    }
+
+    public static <T> T createNode(GraphDatabaseService db, Function<Node, T> action, Label... labels) {
+        return applyInTransaction(db, tx -> action.apply(createNode(db, tx, labels)));
+    }
+
+    public static Node createNode(GraphDatabaseService db, Transaction tx, Label... labels) {
+        return db.createNode(labels);
+    }
+
+    public static void getAllRelationships(GraphDatabaseService db, Consumer<Relationship> action) {
+        runInTransaction(db, tx -> {
+            try (ResourceIterator<Relationship> nodes = getAllRelationships(db, tx).iterator()) {
+                while (nodes.hasNext()) {
+                    action.accept(nodes.next());
+                }
+            }
+        });
+    }
+
+    public static ResourceIterable<Relationship> getAllRelationships(GraphDatabaseService db, Transaction tx) {
+        return db.getAllRelationships();
     }
 
     public static NeoStores neoStores(GraphDatabaseService db) {
@@ -149,15 +212,31 @@ public final class GraphDatabaseApiProxy {
     }
 
     public static <T> T withKernelTransaction(GraphDatabaseService db, Function<KernelTransaction, T> block) {
-        return applyInTransaction(db, tx -> {
-             KernelTransaction kernelTransaction = resolveDependency(db, ThreadToStatementContextBridge.class)
-                .getKernelTransactionBoundToThisThread(true);
-            return block.apply(kernelTransaction);
-        });
+        return applyInTransaction(db, tx -> withKernelTransaction(db, tx, block));
+    }
+
+    public static <T> T withKernelTransaction(GraphDatabaseService db, Transaction tx, Function<KernelTransaction, T> block) {
+        KernelTransaction ktx = resolveDependency(
+            db,
+            ThreadToStatementContextBridge.class
+        ).getKernelTransactionBoundToThisThread(true);
+        return block.apply(ktx);
+    }
+
+    public static KernelTransaction newKernelTransaction(GraphDatabaseService db) {
+        Transaction tx = db.beginTx();
+        return resolveDependency(
+            db,
+            ThreadToStatementContextBridge.class
+        ).getKernelTransactionBoundToThisThread(true);
     }
 
     public static Result runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
-        return applyInTransaction(db, tx -> db.execute(query, params));
+        return applyInTransaction(db, tx -> runQuery(db, tx, query, params));
+    }
+
+    public static Result runQuery(GraphDatabaseService db, Transaction tx, String query, Map<String, Object> params) {
+        return db.execute(query, params);
     }
 
     private GraphDatabaseApiProxy() {
