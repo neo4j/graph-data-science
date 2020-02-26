@@ -1,0 +1,35 @@
+plugins {
+    id 'com.github.hierynomus.license'              version '0.15.0'                apply false
+    id 'com.github.johnrengelman.shadow'            version '4.0.4'                 apply false
+    id 'de.undercouch.download'                     version '3.4.3'                 apply false
+    id "ch.kk7.spawn"                               version "1.0.20180924200750"    apply false
+    id "org.ajoberstar.grgit"                       version "4.0.1"                 apply false
+    id "com.vanniktech.dependency.graph.generator"  version "0.5.0"
+    id 'de.thetaphi.forbiddenapis'                  version '2.7'                   apply false
+}
+
+ext {
+    distributionDir = "$buildDir/distributions"
+    distributionLicenseFile = file('LICENSE.txt')
+    publicDir = "${project.rootDir}"
+}
+
+allprojects {
+    apply plugin: 'base'
+
+    group = 'org.neo4j.gds'
+    version = '0.9.2'
+
+    task ci {
+        dependsOn tasks.check
+    }
+
+    task cipr {
+        dependsOn tasks.check
+    }
+}
+
+apply from: 'gradle/licensing.gradle'
+apply from: 'gradle/dependencies.gradle'
+apply from: 'gradle/defaults-java.gradle'
+apply from: 'gradle/forbidden-apis.gradle'

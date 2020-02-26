@@ -1,0 +1,166 @@
+// All licenses that we accept, and their aliases
+def whitelist = [
+        [name: 'BSD-2-Clause', url: 'http://opensource.org/licenses/BSD-2-Clause', aliases: [
+                [name: 'BSD-style', url: 'http://www.opensource.org/licenses/bsd-license.php'],
+                [name: 'BSD 2-Clause License'],
+        ]],
+        [name: 'BSD-3-Clause', url: 'http://opensource.org/licenses/BSD-3-Clause', aliases: [
+                [name: 'The BSD 3-Clause License'],
+                [name: 'The 3-Clause BSD License'],
+                [name: 'BSD 3-Clause'],
+                [name: 'BSD 3 Clause'],
+                [name: 'BSD 3-clause'],
+                [name: 'New BSD License'],
+                [name: 'New BSD license'],
+                [name: 'The New BSD License'],
+                [name: 'BSD License', url: 'http://www.antlr.org/license.html'],
+                [name: 'BSD licence', url: 'http://antlr.org/license.html'],
+                [name: 'The BSD License', url: 'http://www.antlr.org/license.html'],
+                [name: 'BSD', url: 'http://asm.ow2.org/license.html'],
+                [name: 'BSD', url: 'http://www.jcraft.com/jsch/LICENSE.txt'],
+                [name: 'BSD', url: 'https://github.com/sbt/test-interface/blob/master/LICENSE'],
+                [name: 'BSD', url: 'LICENSE.txt'],
+                [name: '', url: 'http://asm.ow2.org/license.html'],
+        ]],
+        [name: 'Apache-2.0', url: 'https://opensource.org/licenses/Apache-2.0', aliases: [
+                [name: 'The Apache Software License, Version 2.0'],
+                [name: 'The Apache License, Version 2.0'],
+                [name: 'Apache 2'],
+                [name: 'Apache v2'],
+                [name: 'Apache License, Version 2.0'],
+                [name: 'Apache License, Version 2'],
+                [name: 'Apache Software License - Version 2.0'],
+                [name: 'Apache License 2.0'],
+                [name: 'Apache License'],
+                [name: 'Apache 2.0'],
+                [name: 'Apache-2.0'],
+                [name: 'Apache 2.0 License'],
+                [name: 'ASL'],
+                [name: 'ASL 2.0'],
+                [name: 'the Apache License, ASL Version 2.0'],
+                [name: '', url: 'http://www.apache.org/licenses/LICENSE-2.0.txt'],
+        ]],
+        [name: 'MIT', url: 'https://opensource.org/licenses/MIT', aliases: [
+                [name: 'MIT'],
+                [name: 'MIT license'],
+                [name: 'MIT License'],
+                [name: 'The MIT License'],
+                [name: 'Bouncy Castle Licence'],
+        ]],
+        [name: 'Eclipse Distribution License - v 1.0', url: 'https://www.eclipse.org/licenses/edl-v10.html'],
+        [name: 'Eclipse Public License - v 1.0', url: 'https://www.eclipse.org/legal/epl-v10.html', aliases: [
+                [name: 'Eclipse Public License 1.0'],
+        ]],
+        [name: 'GNU General Public License, Version 3', url: 'http://www.gnu.org/licenses/gpl-3.0-standalone.html'],
+        [name: 'Public Domain, per Creative Commons CC0', url: 'http://creativecommons.org/publicdomain/zero/1.0/']
+]
+
+def product = [
+    ':algo',
+    ':algo-common',
+    ':alpha-algo',
+    ':alpha-core',
+    ':alpha-proc',
+    ':annotations',
+    ':config-generator',
+    ':core',
+    ':cypher-printer',
+    ':neo4j-adapter',
+    ':packaging',
+    ':proc',
+]
+
+allprojects { proj ->
+    plugins.withType(JavaPlugin) {
+        if (proj.path in product) {
+            proj.apply plugin: 'com.github.hierynomus.license'
+            // License header checking and insertion
+            license {
+                header = rootProject.file("$publicDir/etc/licenses/headers/source-header.txt")
+                // what comment style to use
+                mapping {
+                    java = 'SLASHSTAR_STYLE'
+                }
+                // /issues/145
+                // exclude 'test/resources/**'
+                // exclude 'main/resources/**'
+                include '**/*.java'
+            }
+            tasks.check.dependsOn tasks.license
+
+            // Dependency license reporting
+            downloadLicenses {
+                dependencyConfiguration = 'compile'
+                aliases = whitelist.collectEntries { lic ->
+                    def actual = license(lic.name, lic.url)
+                    def alternatives = lic.aliases.collect { it.url ? license(it.name, it.url) : it.name }
+                    [(actual): alternatives]
+                }
+            }
+            tasks.downloadLicenses.outputs.upToDateWhen { false }
+
+            tasks.downloadLicenses.ext.licenseToDependencyJson = { ->
+                def jsonDir = tasks.downloadLicenses.jsonDestination
+                def jsonFile = file("$jsonDir/license-dependency.json")
+                new groovy.json.JsonSlurper().parseText(jsonFile.text)
+            }
+
+            tasks.downloadLicenses.ext.dependencyToLicenseJson = { ->
+                def jsonDir = tasks.downloadLicenses.jsonDestination
+                def jsonFile = file("$jsonDir/dependency-license.json")
+                new groovy.json.JsonSlurper().parseText(jsonFile.text)
+            }
+
+            // Dependency license validation
+            task validateLicenses {
+                group 'license'
+                description 'Checks dependency licenses against a whitelist'
+                dependsOn tasks.downloadLicenses
+                doLast {
+                    def whitelistNames = whitelist.collect { it.name }
+                    tasks.downloadLicenses.dependencyToLicenseJson().dependencies
+                        .findAll { dep -> whitelistNames.intersect(dep.licenses.collect { it.name }).isEmpty() }
+                        .each { dep -> logger.error("The dependency '$dep.name' has no whitelisted license. Details: ${dep.toMapString()}") }
+                        .each { dep -> throw new GradleException("The dependency '$dep.name' has no whitelisted license") }
+                }
+            }
+            tasks.check.dependsOn tasks.validateLicenses
+
+            // Compound dependency licenses files
+            task generateLicensesFiles {
+                description 'Generates dependency license report files'
+                dependsOn tasks.downloadLicenses, tasks.validateLicenses
+                ext.licensesFile = file("$tasks.downloadLicenses.jsonDestination/LICENSES.txt")
+                ext.noticeFile = file("$tasks.downloadLicenses.jsonDestination/NOTICE.txt")
+                outputs.file(ext.licensesFile)
+                outputs.file(ext.noticeFile)
+                doLast {
+                    licensesFile.createNewFile()
+                    licensesFile.text = rootProject.file("$publicDir/etc/licenses/headers/LICENSES-header.txt").text
+                    tasks.downloadLicenses.licenseToDependencyJson().licences
+                        .findAll { lic -> whitelist.any { lic.name == it.name }}
+                        .sort { it.name }.each {
+                        licensesFile << '\n\n'
+                        licensesFile << "------------------------------------------------------------------------------\n"
+                        licensesFile << "$it.name\n"
+                        it.dependencies.sort { it }.each { licensesFile << "  $it\n" }
+                        licensesFile << "------------------------------------------------------------------------------\n"
+                        licensesFile << '\n'
+                        licensesFile << rootProject.file("$publicDir/etc/licenses/text/$it.name").text
+                    }
+                    noticeFile.createNewFile()
+                    noticeFile.text = rootProject.file("$publicDir/etc/licenses/headers/NOTICE-header.txt").text
+                    noticeFile << '\n\n'
+                    noticeFile << "Third-party licenses\n"
+                    noticeFile << "--------------------\n"
+                    tasks.downloadLicenses.licenseToDependencyJson().licences.sort { it.name }.each {
+                        noticeFile << '\n'
+                        noticeFile << "$it.name\n"
+                        it.dependencies.sort { it }.each { noticeFile << "  $it\n" }
+                    }
+                }
+            }
+            tasks.check.dependsOn tasks.generateLicensesFiles
+        }
+    }
+}

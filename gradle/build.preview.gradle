@@ -1,0 +1,20 @@
+task preview(type: SpawnTask) {
+    group 'preview'
+    description 'Builds and serves html'
+    dependsOn 'stopPreview'
+    dependsOn tasks.html
+    commandLine 'python', "${rootProject.projectDir}/bin/http-server.py"
+    workingDir tasks.html.outputDir.toString()
+    doLast {
+        println ''
+        println '== Preview: http://localhost:8001/'
+    }
+}
+
+task stopPreview(type: KillTask) {
+    group 'preview'
+    description 'Stop serving preview'
+    kills preview
+}
+
+clean.dependsOn stopPreview

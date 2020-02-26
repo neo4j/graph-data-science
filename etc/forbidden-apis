@@ -1,0 +1,3 @@
+org.neo4j.graphdb.GraphDatabaseService#execute(java.lang.String) @ Use test tooling to run queries.
+org.neo4j.stream.Streams @ Don't use deprecated utility code.
+org.neo4j.helpers.collection.MapUtil @ Use the GDS MapUtil instead.

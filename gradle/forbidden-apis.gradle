@@ -1,0 +1,12 @@
+allprojects { proj ->
+    plugins.withType(JavaPlugin) {
+        proj.apply plugin: 'de.thetaphi.forbiddenapis'
+        proj.forbiddenApis {
+            signaturesFiles = files("$publicDir/etc/forbidden-apis")
+            failOnUnresolvableSignatures = false
+            suppressAnnotations = ["org.neo4j.graphalgo.annotation.SuppressForbidden"]
+        }
+        proj.tasks.matching { it.name.startsWith('forbiddenApis') }.each { tasks.check.dependsOn it }
+        proj.forbiddenApisMain.signaturesFiles = files("$publicDir/etc/forbidden-apis-main")
+    }
+}

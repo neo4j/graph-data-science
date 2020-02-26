@@ -360,6 +360,6 @@ tasks.assemble.dependsOn packageHtml, packagePdf
 tasks.ci.dependsOn assemble
 tasks.cipr.dependsOn packageHtml
 
-apply from: "${rootProject.projectDir}/build.preview.gradle"
+apply from: "$publicDir/gradle/build.preview.gradle"
 
 // vim: set fdm=expr:

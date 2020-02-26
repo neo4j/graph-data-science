@@ -1,0 +1,47 @@
+pluginManagement {
+    repositories {
+        maven {
+            url 'https://neo.jfrog.io/neo/docs-maven'
+        }
+        gradlePluginPortal()
+    }
+}
+
+
+ext {
+    neo4jMajorVersion = properties.getOrDefault('neo4jVersion', '3.5')
+    compatibilityModules = [
+            "cypher-printer",
+            "neo4j-adapter",
+            "neo4j-collections",
+            "test-utils"
+    ]
+}
+
+rootProject.name = 'graph-data-science'
+
+def registerSubModules(File file) {
+    def moduleDirectories = new LinkedList<File>()
+
+    file.eachFileRecurse {f ->
+        if (f.name == "build.gradle") {
+            moduleDirectories.add(f.parentFile)
+        }
+    }
+
+    moduleDirectories.stream()
+            .filter { moduleDir -> moduleDir != new File("./") && moduleDir != new File("./public") }
+            .filter { moduleDir ->
+                if (compatibilityModules.contains(moduleDir.getName())) {
+                    moduleDir.getParentFile().name == neo4jMajorVersion
+                } else {
+                    true
+                }
+            }
+            .forEach { moduleDir ->
+                include(moduleDir.name)
+                project(":${moduleDir.name}").projectDir = moduleDir
+            }
+}
+
+registerSubModules(new File("./"))

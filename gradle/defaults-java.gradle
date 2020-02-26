@@ -1,0 +1,59 @@
+allprojects {
+    plugins.withType(JavaPlugin) {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+
+        repositories {
+            mavenLocal()
+            maven {
+                url = 'https://repo.maven.apache.org/maven2'
+            }
+            if (project.hasProperty('pipelineRepository')) {
+                maven {
+                    url = "file://${project.getProperty('pipelineRepository')}"
+                }
+            }
+        }
+
+        task sourcesJar(type: Jar) {
+            classifier = 'sources'
+            from(sourceSets.main.allJava)
+        }
+
+        javadoc {
+            StandardJavadocDocletOptions opts = (options as StandardJavadocDocletOptions)
+            opts.addBooleanOption('Xdoclint:all', true)
+        }
+
+        task javadocJar(type: Jar) {
+            classifier = 'javadoc'
+            from javadoc
+        }
+
+        test {
+            maxHeapSize = "1G"
+            useJUnitPlatform {
+                includeEngines 'junit-jupiter'
+            }
+            // enable verbose test logging
+            // testLogging {
+            //     events "passed", "skipped", "failed", "standardOut", "standardError"
+            // }
+            testLogging {
+                afterSuite { desc, result ->
+                    if (!desc.parent) { // will match the outermost suite
+                        println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+                    }
+                }
+            }
+        }
+
+        tasks.withType(JavaCompile) {
+            sourceCompatibility = '1.8'
+            targetCompatibility = '1.8'
+            options.warnings = true
+            options.encoding = 'UTF-8'
+            options.compilerArgs += ['-parameters', '-Xlint:all,-try,-unchecked,-serial,-deprecation,-varargs,-processing']
+        }
+    }
+}

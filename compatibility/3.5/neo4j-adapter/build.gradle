@@ -11,5 +11,4 @@ dependencies {
     compileOnly group: 'org.neo4j',                             name: 'neo4j-kernel-api',         version: ver.'neo4j'
     compileOnly group: 'org.neo4j',                             name: 'neo4j-kernel',             version: ver.'neo4j'
     compileOnly group: 'org.neo4j',                             name: 'procedure-compiler',       version: ver.'neo4j'
-
 }
