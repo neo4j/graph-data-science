@@ -22,14 +22,14 @@ package org.neo4j.graphalgo.api;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
-import org.neo4j.graphalgo.core.huge.CSR;
-import org.neo4j.graphalgo.core.huge.PropertyCSR;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.ImmutableCSR;
+import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
 import org.neo4j.graphalgo.core.loading.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
@@ -114,15 +114,15 @@ public abstract class GraphStoreFactory implements Assessable {
         GraphDimensions dimensions
     ) {
         int relTypeCount = dimensions.relationshipProjectionMappings().numberOfMappings();
-        Map<String, CSR> relationships = new HashMap<>(relTypeCount);
-        Map<String, Map<String, PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
+        Map<String, HugeGraph.CSR> relationships = new HashMap<>(relTypeCount);
+        Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
 
         relationshipImportResult.builders().forEach((relationshipProjectionMapping, relationshipsBuilder) -> {
             AdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
             AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets();
             long relationshipCount = relationshipImportResult.counts().getOrDefault(relationshipProjectionMapping, 0L);
 
-            relationships.put(relationshipProjectionMapping.elementIdentifier(), CSR.of(
+            relationships.put(relationshipProjectionMapping.elementIdentifier(), ImmutableCSR.of(
                 adjacencyList,
                 adjacencyOffsets,
                 relationshipCount,
@@ -130,13 +130,13 @@ public abstract class GraphStoreFactory implements Assessable {
             ));
 
             if (dimensions.relationshipProperties().hasMappings()) {
-                Map<String, PropertyCSR> propertyMap = dimensions
+                Map<String, HugeGraph.PropertyCSR> propertyMap = dimensions
                     .relationshipProperties()
                     .enumerate()
                     .filter(propertyIdAndMapping -> propertyIdAndMapping.getTwo().exists())
                     .collect(Collectors.toMap(
                         propertyIdAndMapping -> propertyIdAndMapping.getTwo().propertyKey(),
-                        propertyIdAndMapping -> PropertyCSR.of(
+                        propertyIdAndMapping -> ImmutablePropertyCSR.of(
                             relationshipsBuilder.properties(propertyIdAndMapping.getOne()),
                             relationshipsBuilder.globalPropertyOffsets(propertyIdAndMapping.getOne()),
                             relationshipCount,

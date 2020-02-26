@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -406,7 +407,7 @@ public class HugeGraph implements Graph {
     public GraphStore toGraphStore(String relationshipType, String propertyKey) {
         Map<String, CSR> relationships = singletonMap(
             relationshipType,
-            CSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation)
+            ImmutableCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation)
         );
 
         Map<String, Map<String, PropertyCSR>> relationshipProperties = Collections.emptyMap();
@@ -415,7 +416,7 @@ public class HugeGraph implements Graph {
                 relationshipType,
                 singletonMap(
                     propertyKey,
-                    PropertyCSR.of(properties, propertyOffsets, relationshipCount, orientation, defaultPropertyValue)
+                    ImmutablePropertyCSR.of(properties, propertyOffsets, relationshipCount, orientation, defaultPropertyValue)
                 )
             );
         }
@@ -494,5 +495,21 @@ public class HugeGraph implements Graph {
             }
             return true;
         }
+    }
+
+    @ValueClass
+    public interface CSR {
+        AdjacencyList list();
+
+        AdjacencyOffsets offsets();
+
+        long elementCount();
+
+        Orientation orientation();
+    }
+
+    @ValueClass
+    public interface PropertyCSR extends CSR {
+        double defaultPropertyValue();
     }
 }

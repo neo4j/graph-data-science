@@ -22,9 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphalgo.core.huge.CSR;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.PropertyCSR;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
@@ -48,9 +46,9 @@ public final class GraphStore {
 
     private final Map<String, NodeProperties> nodeProperties;
 
-    private final Map<String, CSR> relationships;
+    private final Map<String, HugeGraph.CSR> relationships;
 
-    private final Map<String, Map<String, PropertyCSR>> relationshipProperties;
+    private final Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties;
 
     private final Set<Graph> createdGraphs;
 
@@ -59,8 +57,8 @@ public final class GraphStore {
     public static GraphStore of(
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        Map<String, CSR> relationships,
-        Map<String, Map<String, PropertyCSR>> relationshipProperties,
+        Map<String, HugeGraph.CSR> relationships,
+        Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
     ) {
         return new GraphStore(
@@ -75,8 +73,8 @@ public final class GraphStore {
     private GraphStore(
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        Map<String, CSR> relationships,
-        Map<String, Map<String, PropertyCSR>> relationshipProperties,
+        Map<String, HugeGraph.CSR> relationships,
+        Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
     ) {
         this.nodes = nodes;
@@ -128,7 +126,7 @@ public final class GraphStore {
 
     public long relationshipCount() {
         return relationships.values().stream()
-            .mapToLong(CSR::elementCount)
+            .mapToLong(HugeGraph.CSR::elementCount)
             .sum();
     }
 
@@ -141,10 +139,10 @@ public final class GraphStore {
             throw new IllegalArgumentException("Graph stores cannot be merged due to different id mappings.");
         }
 
-        Map<String, CSR> mergedRelationships = new HashMap<>(relationships);
+        Map<String, HugeGraph.CSR> mergedRelationships = new HashMap<>(relationships);
         mergedRelationships.putAll(other.relationships);
 
-        Map<String, Map<String, PropertyCSR>> mergedRelationshipProperties = new HashMap<>(relationshipProperties);
+        Map<String, Map<String, HugeGraph.PropertyCSR>> mergedRelationshipProperties = new HashMap<>(relationshipProperties);
         mergedRelationshipProperties.putAll(other.relationshipProperties);
 
         return GraphStore.of(nodes, nodeProperties, mergedRelationships, mergedRelationshipProperties, tracker);

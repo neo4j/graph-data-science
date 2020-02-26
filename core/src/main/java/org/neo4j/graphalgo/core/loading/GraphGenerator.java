@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.CSR;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.PropertyCSR;
+import org.neo4j.graphalgo.core.huge.ImmutableCSR;
+import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
@@ -238,16 +238,16 @@ public final class GraphGenerator {
             flushBuffer();
 
             Relationships relationships = buildRelationships();
-            CSR topology = CSR.of(
+            HugeGraph.CSR topology = ImmutableCSR.of(
                 relationships.adjacencyList(),
                 relationships.adjacencyOffsets(),
                 relationships.relationshipCount(),
                 orientation
             );
 
-            Optional<PropertyCSR> properties = loadRelationshipProperty
+            Optional<HugeGraph.PropertyCSR> properties = loadRelationshipProperty
                 ? Optional.of(
-                PropertyCSR.of(
+                ImmutablePropertyCSR.of(
                     relationships.properties(),
                     relationships.propertyOffsets(),
                     relationships.relationshipCount(),
