@@ -95,7 +95,7 @@ include::common-configuration.adoc[]
 | ranIterations         | Integer | The number of iterations that were executed.
 | didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
 
-| communityDistribution | Map     | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+| communityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size.
 | configuration         | Map     | The configuration used for running the algorithm.
 
 |===
@@ -153,7 +153,7 @@ The configuration is the same as for the `write` mode.
 | communityCount        | Integer | The number of communities found.
 | ranIterations         | Integer | The number of iterations that were executed.
 | didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
-| communityDistribution | Map     | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+| communityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size.
 | configuration         | Map     | The configuration used for running the algorithm.
 |===
 
