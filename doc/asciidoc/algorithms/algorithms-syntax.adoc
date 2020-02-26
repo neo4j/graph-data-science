@@ -74,7 +74,7 @@ For iterative algorithms this parameter controls the maximum number of iteration
 tolerance - FLOAT::
 Many iterative algorithms accept the tolerance parameter.
 It controls the minimum delta between two iterations.
-If the delta is less than the tolerance value, the algorithm is considered converged.
+If the delta is less than the tolerance value, the algorithm is considered converged and stops.
 
 seedProperty - STRING::
 Some algorithms can be calculated incrementally.
