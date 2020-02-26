@@ -106,7 +106,7 @@ include::common-configuration.adoc[]
 | computeMillis          | Integer | Milliseconds for running the algorithm.
 | writeMillis            | Integer | Milliseconds for writing result data back to Neo4j.
 | postProcessingMillis   | Integer | Milliseconds for computing percentiles.
-| similarityDistribution | Map     | Min, max, mean, stdDev and percentile distribution of the computed similarity results.
+| similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
 
