@@ -195,7 +195,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 ----
 
-Similarly, loading a graph with Cypher also requires to load the whole pool of nodes of the bipartite graph as well a the relationship that link them.
+Similarly, loading a graph with Cypher also requires to load the whole pool of nodes of the bipartite graph as well a the relationships that link them.
 
 --
 .The following statement will create a graph with Cypher and store it in the catalog.
@@ -450,4 +450,3 @@ ORDER BY Person1
 3+|6 rows
 |===
 --
-
