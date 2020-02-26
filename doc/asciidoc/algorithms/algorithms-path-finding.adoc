@@ -17,6 +17,8 @@ The Neo4j GDS library includes the following path finding algorithms, grouped by
 ** <<labs-algorithms-a_star, A*>>
 ** <<labs-algorithms-yens-k-shortest-path, Yen’s K-shortest paths>>
 ** <<labs-algorithms-random-walk, Random Walk>>
+** <<algorithms-bfs, Breadth First Search>>
+** <<algorithms-dfs, Depth First Search>>
 
 include::alpha/alpha-minimum-weight-spanning-tree.adoc[leveloffset=+1]
 
@@ -31,3 +33,7 @@ include::alpha/alpha-astar.adoc[leveloffset=+1]
 include::alpha/alpha-yens-k-shortest-paths.adoc[leveloffset=+1]
 
 include::alpha/alpha-random-walk.adoc[leveloffset=+1]
+
+include::alpha/alpha-bfs.adoc[leveloffset=+1]
+
+include::alpha/alpha-dfs.adoc[leveloffset=+1]
