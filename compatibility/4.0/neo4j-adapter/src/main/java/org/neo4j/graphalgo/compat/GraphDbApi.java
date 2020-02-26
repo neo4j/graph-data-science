@@ -79,7 +79,6 @@ public final class GraphDbApi implements GraphDatabaseAPI {
     }
 
     public void shutdown() {
-        dbms.shutdownDatabase(DB_NAME);
         dbms.shutdown();
     }
 
