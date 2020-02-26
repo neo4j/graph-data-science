@@ -131,10 +131,18 @@ final class AstHelpers {
             return string(((Enum<?>) value).name());
         }
         if (value instanceof CypherPrinter.CypherParameter) {
-            return parameter(((CypherPrinter.CypherParameter) value).name());
+            String name = ((CypherPrinter.CypherParameter) value).name();
+            // 3.5 erroneously throws on an empty string, but we test for that
+            //  reintroduce the 3.5 bug to maintain the same "feature"
+            name.chars().iterator().nextInt();
+            return parameter(name);
         }
         if (value instanceof CypherPrinter.CypherVariable) {
-            return variable(((CypherPrinter.CypherVariable) value).name());
+            String name = ((CypherPrinter.CypherVariable) value).name();
+            // 3.5 erroneously throws on an empty string, but we test for that
+            //  reintroduce the 3.5 bug to maintain the same "feature"
+            name.chars().iterator().nextInt();
+            return variable(name);
         }
         if (value instanceof Iterable) {
             return list((Iterable<?>) value);

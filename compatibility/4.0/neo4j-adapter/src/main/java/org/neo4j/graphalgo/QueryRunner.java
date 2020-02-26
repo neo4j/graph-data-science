@@ -108,11 +108,9 @@ public final class QueryRunner {
         try (Transaction tx = db.beginTx();
              Result result = tx.execute(query, params)
         ) {
-            try {
-                return resultFunction.apply(result);
-            } finally {
-                tx.commit();
-            }
+            T resultValue = resultFunction.apply(result);
+            tx.commit();
+            return resultValue;
         }
     }
 
@@ -131,32 +129,26 @@ public final class QueryRunner {
      */
     public static Result runQueryWithoutClosing(GraphDatabaseService db, String query, Map<String, Object> params) {
         try (Transaction tx = db.beginTx()) {
-            try {
-                return tx.execute(query, params);
-            } finally {
-                tx.commit();
-            }
+            Result result = tx.execute(query, params);
+            tx.commit();
+            return result;
         }
     }
 
     public static <T> T runInTransaction(GraphDatabaseService db, Supplier<T> supplier) {
         try (Transaction tx = db.beginTx()) {
-            try {
-                return supplier.get();
-            } finally {
-                tx.commit();
-            }
+            T result = supplier.get();
+            tx.commit();
+            return result;
         }
     }
 
     public static <R> R runWithKernelTransaction(GraphDatabaseService db, Function<KernelTransaction, R> function) {
         try (Transaction tx = db.beginTx()) {
             InternalTransaction internalTx = (InternalTransaction) tx;
-            try {
-                return function.apply(internalTx.kernelTransaction());
-            } finally {
-                tx.commit();
-            }
+            R result = function.apply(internalTx.kernelTransaction());
+            tx.commit();
+            return result;
         }
     }
 

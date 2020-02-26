@@ -61,7 +61,9 @@ public final class TestDatabaseCreator {
     }
 
     private static DatabaseManagementService createEmbedded(File storeDir) {
-        return new TestDatabaseManagementServiceBuilder(storeDir).build();
+        return new TestDatabaseManagementServiceBuilder(storeDir)
+            .setConfig(GraphDatabaseSettings.fail_on_missing_files, false)
+            .build();
     }
 
     private static TestDatabaseManagementServiceBuilder builder() {

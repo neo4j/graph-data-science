@@ -149,7 +149,7 @@ public final class GraphDatabaseApiProxy {
     }
 
     public static Node createNode(GraphDatabaseService db, Transaction tx) {
-        return tx.createNode();
+        return db.createNode();
     }
 
     public static <T> T createNode(GraphDatabaseService db, Function<Node, T> action, Label... labels) {
