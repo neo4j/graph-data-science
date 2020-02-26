@@ -9,10 +9,23 @@ This chapter contains a reference of all the procedures and functions in the Neo
 
 This chapter contains the following sections:
 
+* <<appendix-a-graph-ops>>
 * <<production-quality-tier>>
 * <<beta-tier>>
 * <<alpha-tier>>
 
+[[appendix-a-graph-ops]]
+== Graph Operations
+The following table lists all graph operations available in the GDS library:
+[opts=header,cols="1, 1"]
+|===
+|Operation | Name
+|Create Graph | <<catalog-graph-create, gds.graph.create>>
+|Create Graph using Cypher | <<catalog-graph-create, gds.graph.create.cypher>>
+|Check if a named graph exists | <<catalog-graph-exists, gds.graph.exists>>
+|List graphs| <<catalog-graph-list, gds.graph.list>>
+|Remove a named graph from memory | <<catalog-graph-drop, gds.graph.drop>>
+|===
 
 [[production-quality-tier]]
 == Production-quality tier
