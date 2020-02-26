@@ -101,12 +101,13 @@ final class ParallelUtilTest {
     @Test
     void shouldParallelizeStreamsWithLimitedConcurrency() {
         LongStream data = LongStream.range(0, 100_000);
-        parallelStream(data, AlgoBaseConfig.DEFAULT_CONCURRENCY - 1, (s) -> {
+        int concurrency = limitedStreamConcurrency();
+        parallelStream(data, concurrency, (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-            assertEquals(AlgoBaseConfig.DEFAULT_CONCURRENCY - 1, threadPool.getParallelism());
+            assertEquals(concurrency, threadPool.getParallelism());
 
             return s.reduce(0L, Long::sum);
         });
@@ -115,12 +116,13 @@ final class ParallelUtilTest {
     @Test
     void shouldParallelizeAndConsumeStreamsWithLimitedConcurrency() {
         LongStream data = LongStream.range(0, 100_000);
-        parallelStreamConsume(data, AlgoBaseConfig.DEFAULT_CONCURRENCY - 1, (s) -> {
+        int concurrency = limitedStreamConcurrency();
+        parallelStreamConsume(data, concurrency, (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-            assertEquals(AlgoBaseConfig.DEFAULT_CONCURRENCY - 1, threadPool.getParallelism());
+            assertEquals(concurrency, threadPool.getParallelism());
         });
     }
 
@@ -404,6 +406,13 @@ final class ParallelUtilTest {
 
     private PrimitiveLongIterable longs(int from, int size) {
         return () -> PrimitiveLongCollections.range(from, from + size - 1);
+    }
+
+    private int limitedStreamConcurrency() {
+        return Math.min(
+            Runtime.getRuntime().availableProcessors(),
+            (AlgoBaseConfig.DEFAULT_CONCURRENCY - 1)
+        );
     }
 
     static final class Tasks extends AbstractCollection<Runnable> {
