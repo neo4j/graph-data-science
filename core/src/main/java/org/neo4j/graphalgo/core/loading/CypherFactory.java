@@ -24,12 +24,19 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.NotInTransactionException;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
+import java.util.function.Function;
+
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.NODE;
 import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.RELATIONSHIP;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
@@ -41,9 +48,9 @@ public class CypherFactory extends GraphStoreFactory {
 
     private final GraphDatabaseAPI api;
     private final GraphSetup setup;
-    private final KernelTransaction kernelTransaction;
+    private final Optional<KernelTransaction> kernelTransaction;
 
-    public CypherFactory(GraphDatabaseAPI api, GraphSetup setup, KernelTransaction kernelTransaction) {
+    public CypherFactory(GraphDatabaseAPI api, GraphSetup setup, Optional<KernelTransaction> kernelTransaction) {
         super(api, setup, false);
         this.api = api;
         this.setup = setup;
@@ -51,8 +58,12 @@ public class CypherFactory extends GraphStoreFactory {
     }
 
     public final MemoryEstimation memoryEstimation() {
-        BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, setup).load();
-        BatchLoadResult relCount = new CountingCypherRecordLoader(relationshipQuery(), RELATIONSHIP, api, setup).load();
+        BatchLoadResult nodeCount;
+        BatchLoadResult relCount;
+        try (Ktx ktx = setReadOnlySecurityContext()) {
+            nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, setup).load(ktx);
+            relCount = new CountingCypherRecordLoader(relationshipQuery(), RELATIONSHIP, api, setup).load(ktx);
+        }
 
         GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
             .from(dimensions)
@@ -70,9 +81,9 @@ public class CypherFactory extends GraphStoreFactory {
 
     @Override
     public ImportResult build() {
-//         Temporarily override the security context to enforce read-only access during load
-        try (KernelTransaction.Revertable ignored = setReadOnlySecurityContext()) {
-            BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, setup).load();
+        // Temporarily override the security context to enforce read-only access during load
+        try (Ktx ktx = setReadOnlySecurityContext()) {
+            BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, setup).load(ktx);
 
             CypherNodeLoader.LoadResult nodes = new CypherNodeLoader(
                 nodeQuery(),
@@ -80,12 +91,13 @@ public class CypherFactory extends GraphStoreFactory {
                 api,
                 setup,
                 dimensions
-            ).load();
+            ).load(ktx);
 
             RelationshipImportResult relationships = loadRelationships(
                 relationshipQuery(),
                 nodes.idsAndProperties(),
-                nodes.dimensions()
+                nodes.dimensions(),
+                ktx
             );
 
             GraphStore graphStore = createGraphStore(
@@ -111,7 +123,8 @@ public class CypherFactory extends GraphStoreFactory {
     private RelationshipImportResult loadRelationships(
         String relationshipQuery,
         IdsAndProperties idsAndProperties,
-        GraphDimensions nodeLoadDimensions
+        GraphDimensions nodeLoadDimensions,
+        Ktx ktx
     ) {
         CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
             relationshipQuery,
@@ -121,7 +134,7 @@ public class CypherFactory extends GraphStoreFactory {
             nodeLoadDimensions
         );
 
-        CypherRelationshipLoader.LoadResult result = relationshipLoader.load();
+        CypherRelationshipLoader.LoadResult result = relationshipLoader.load(ktx);
 
         return RelationshipImportResult.of(
             relationshipLoader.allBuilders(),
@@ -130,14 +143,70 @@ public class CypherFactory extends GraphStoreFactory {
         );
     }
 
-    private KernelTransaction.Revertable setReadOnlySecurityContext() {
+    private Ktx setReadOnlySecurityContext() {
+        return kernelTransaction
+            .map(this::setReadOnlySecurityContext)
+            .orElseGet(() -> setReadOnlySecurityContext(newKernelTransaction(api), true));
+    }
+
+    private Ktx setReadOnlySecurityContext(KernelTransaction ktx) {
+        return setReadOnlySecurityContext(ktx, false);
+    }
+
+    private Ktx setReadOnlySecurityContext(KernelTransaction ktx, boolean closeTopKernelTransaction) {
         try {
-            AuthSubject subject = kernelTransaction.securityContext().subject();
+            AuthSubject subject = ktx.securityContext().subject();
             SecurityContext securityContext = new SecurityContext(subject, READ);
-            return kernelTransaction.overrideWith(securityContext);
+            return new Ktx(api, ktx, securityContext, closeTopKernelTransaction);
         } catch (NotInTransactionException ex) {
             // happens only in tests
             throw new IllegalStateException("Must run in a transaction.", ex);
+        }
+    }
+
+    static final class Ktx implements AutoCloseable {
+        private final GraphDatabaseService db;
+        private final KernelTransaction top;
+        private final SecurityContext securityContext;
+        private final boolean closeTopKernelTransaction;
+        private final KernelTransaction.Revertable revertTop;
+
+        private Ktx(
+            GraphDatabaseService db,
+            KernelTransaction top,
+            SecurityContext securityContext,
+            boolean closeTopKernelTransaction
+        ) {
+            this.db = db;
+            this.top = top;
+            this.securityContext = securityContext;
+            this.closeTopKernelTransaction = closeTopKernelTransaction;
+            this.revertTop = top.overrideWith(securityContext);
+        }
+
+        <T> T run(Function<Transaction, T> block) {
+            return block.apply(top.internalTransaction());
+        }
+
+        <T> T fork(Function<Transaction, T> block) {
+            try (KernelTransaction ktx = newKernelTransaction(db);
+                 KernelTransaction.Revertable ignore = ktx.overrideWith(securityContext)) {
+                return block.apply(ktx.internalTransaction());
+            } catch (TransactionFailureException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void close() {
+            this.revertTop.close();
+            if (closeTopKernelTransaction) {
+                try {
+                    top.close();
+                } catch (TransactionFailureException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 }

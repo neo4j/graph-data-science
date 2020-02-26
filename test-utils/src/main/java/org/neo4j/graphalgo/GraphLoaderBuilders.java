@@ -23,7 +23,6 @@ package org.neo4j.graphalgo;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
@@ -152,19 +151,15 @@ final class GraphLoaderBuilders {
         Optional<String> userName,
         GraphCreateConfig graphCreateConfig
     ) {
-        // TODO: How does this even work, shouldn't the ktx be closed upon returning the loader?
-        //       is it a placebo tx? They are gone, so, what is now happening here?
-        return GraphDatabaseApiProxy.withKernelTransaction(api, kernelTransaction -> {
-            return ImmutableGraphLoader.of(
-                api,
-                executorService.orElse(Pools.DEFAULT),
-                tracker.orElse(AllocationTracker.EMPTY),
-                terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
-                userName.orElse(""),
-                log.orElse(NullLog.getInstance()),
-                graphCreateConfig,
-                kernelTransaction
-            );
-        });
+        return ImmutableGraphLoader.of(
+            api,
+            executorService.orElse(Pools.DEFAULT),
+            tracker.orElse(AllocationTracker.EMPTY),
+            terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
+            userName.orElse(""),
+            log.orElse(NullLog.getInstance()),
+            graphCreateConfig,
+            Optional.empty()
+        );
     }
 }

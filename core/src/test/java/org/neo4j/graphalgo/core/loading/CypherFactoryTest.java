@@ -50,6 +50,7 @@ import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestGraphLoader.addSuffix;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class CypherFactoryTest {
 
@@ -141,11 +142,15 @@ class CypherFactoryTest {
 
         IllegalArgumentException readOnlyException = assertThrows(
             IllegalArgumentException.class,
-            () -> org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
+            () -> {
+                GraphLoader build = new CypherLoaderBuilder()
+                    .api(db)
                     .nodeQuery(nodes)
                     .relationshipQuery(relationships)
-                    .build()
-                    .load(CypherFactory.class))
+                    .build();
+                build
+                    .load(CypherFactory.class);
+            }
         );
 
         assertTrue(readOnlyException.getMessage().contains("Query must be read only"));

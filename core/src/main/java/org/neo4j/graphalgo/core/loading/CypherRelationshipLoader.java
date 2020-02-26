@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -138,8 +139,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     }
 
     @Override
-    BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
-        Result queryResult = runLoadingQuery(offset, batchSize);
+    BatchLoadResult loadOneBatch(Transaction tx, long offset, int batchSize, int bufferSize) {
+        Result queryResult = runLoadingQuery(tx, offset, batchSize);
 
         List<String> allColumns = queryResult.columns();
 

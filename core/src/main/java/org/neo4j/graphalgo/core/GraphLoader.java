@@ -37,6 +37,7 @@ import org.neo4j.logging.Log;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
@@ -70,7 +71,7 @@ public interface GraphLoader {
 
     GraphCreateConfig createConfig();
 
-    KernelTransaction kernelTransaction();
+    Optional<KernelTransaction> kernelTransaction();
 
     default Graph graph(Class<? extends GraphStoreFactory> factoryType) {
         return load(factoryType);
