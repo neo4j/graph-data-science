@@ -1,4 +1,0 @@
-// tag::explanation[]
-The default label and relationship-type projection has a limitation of 2 billion nodes and 2 billion relationships.
-Therefore, if our projected graph contains more than 2 billion nodes or relationships, we will need to use huge graph projection.
-// end::explanation[]
