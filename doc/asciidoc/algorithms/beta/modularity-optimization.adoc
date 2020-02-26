@@ -108,7 +108,7 @@ include::../common-configuration.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CREATE
   (a:Person {name:'Alice'})
@@ -139,7 +139,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CALL gds.graph.create(
     'myGraph',
@@ -155,6 +155,8 @@ CALL gds.graph.create(
 
 The following example demonstrates using the Modularity Algorithm on this weighted graph.
 
+[role=query-example]
+--
 .Running the Modularity Optimization algorithm in stream mode:
 [source, cypher]
 ----
@@ -165,7 +167,7 @@ ORDER BY name
 ----
 
 .Results
-[opts="header",cols="1m,1m"]
+[opts="header"]
 |===
 | name      | communityId
 | "Alice"   | 4
@@ -178,6 +180,8 @@ ORDER BY name
 
 It is also possible to write the assigned community ids back to the database using the `write` mode.
 
+[role=query-example]
+--
 .Running the Modularity Optimization algorithm in write mode:
 [source, cypher]
 ----
@@ -186,7 +190,7 @@ YIELD nodes, communityCount, ranIterations, didConverge
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m"]
+[opts="header"]
 |===
 | nodes | colorCount | ranIterations | didConverge
 | 6     | 2          | 3             | true
