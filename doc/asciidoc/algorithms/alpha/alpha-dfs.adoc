@@ -19,7 +19,7 @@ The Depth First Search algorithm is a graph traversal that starts at a given nod
 A related algorithm is the Breath First Search algorithm, <<algorithms-bfs, Breath First Search>>.
 This algorithm can be preferred over Breath First Search for example if one wants to find a target node at a large distance and exploring a random path has decent probability of success.
 There are multiple termination conditions supported for the traversal, based on either reaching one of several target nodes, reaching a maximum depth, exhausting a given budget of traversed relationship cost, or just traversing the whole graph.
-The output of the procedure contains information about what nodes were visited and in what order.
+The output of the procedure contains information about which nodes were visited and in what order.
 
 [[algorithms-dfs-syntax]]
 == Syntax
@@ -45,20 +45,20 @@ include::../common-configuration.adoc[]
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                       | Type    | Default   | Optional | Description
-| startNodeId            | int          | n/a                    | no       | The node id of the node where to start the traversal.
-| targetNodes            | list of int  | empty list             | yes      | Ids for target nodes. Traversal terminates when any target node is visited.
-| maxDepth               | int          | -1                     | yes      | The maximum distance from the start node at which nodes are visited.
-| maxCost                | int          | NaN                    | yes      | The maximum accumulated cost of any path from start node to a node that should be visited.
+| Name                   | Type             | Default                | Optional | Description
+| startNodeId            | INTEGER          | n/a                    | no       | The node id of the node where to start the traversal.
+| targetNodes            | LIST OF INTEGER  | empty list             | yes      | Ids for target nodes. Traversal terminates when any target node is visited.
+| maxDepth               | INTEGER          | -1                     | yes      | The maximum distance from the start node at which nodes are visited.
+| maxCost                | INTEGER          | NaN                    | yes      | The maximum accumulated cost of any path from start node to a node that should be visited.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type        | Description
-| startNodeId   | int         | The node id of the node where to start the traversal.
-| nodeIds       | list of int | The ids of all nodes that were visited during the traversal.
-| path          | path        | A path containing all the nodes that were visited during the traversal.
+| Name          | Type            | Description
+| startNodeId   | INTEGER         | The node id of the node where to start the traversal.
+| nodeIds       | LIST OF INTEGER | The ids of all nodes that were visited during the traversal.
+| path          | PATH            | A path containing all the nodes that were visited during the traversal.
 |===
 
 
