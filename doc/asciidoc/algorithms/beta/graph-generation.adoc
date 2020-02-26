@@ -44,7 +44,7 @@ YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegre
 | graphName           | string  | null    | no       | The name under which the generated graph is stored.
 | nodeCount           | integer | null    | no       | The number of generated nodes.
 | averageDistribution | integer | null    | no       | The average out-degree of generated nodes.
-| config              | map     | {}      | yes      | Additional configuration, see below.
+| configuration       | map     | {}      | yes      | Additional configuration, see below.
 |===
 
 .Configuration

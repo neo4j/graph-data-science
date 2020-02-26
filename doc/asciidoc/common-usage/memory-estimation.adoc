@@ -42,7 +42,7 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 |===
 | Name              | Type          | Default   | Optional  | Description
 | graphNameOrConfig | string or map | -         | no        | The name of the projected graph or the algorithm configuration in case of implicit loading.
-| config            | map           | {}        | yes       | If the first parameter is the name of a projected graph, this parameter is the algorithm config, otherwise it needs to be null or an empty map.
+| configuration     | map           | {}        | yes       | If the first parameter is the name of a projected graph, this parameter is the algorithm config, otherwise it needs to be null or an empty map.
 |===
 
 The configuration parameter accepts the same configuration parameters as the estimated algorithm.
@@ -82,7 +82,7 @@ The `nodeProjection` and `relationshipProjection` parameters follow the same syn
 | Name                   | Type                  | Default   | Optional  | Description
 | nodeProjection         | string or list or map | -         | no        | The node projection to estimate for.
 | relationshipProjection | string or list or map | -         | no        | The relationship projection to estimate for.
-| config                 | map                   | {}        | yes       | Additional configuration, such as concurrency.
+| configuration          | map                   | {}        | yes       | Additional configuration, such as concurrency.
 |===
 
 It is also possible to estimate the memory of a fictive graph, by explicitly specifying its node and relationship count.
@@ -137,5 +137,5 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 | Name              | Type   | Default   | Optional  | Description
 | nodeQuery         | string | -         | no        | The node query to estimate for.
 | relationshipQuery | string | -         | no        | The relationship query to estimate for.
-| config            | map    | {}        | yes       | Additional configuration, such as concurrency.
+| configuration     | map    | {}        | yes       | Additional configuration, such as concurrency.
 |===
