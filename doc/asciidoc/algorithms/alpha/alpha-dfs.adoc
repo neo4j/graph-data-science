@@ -1,0 +1,194 @@
+[[algorithms-dfs]]
+= Depth First Search
+
+[abstract]
+--
+This section describes the Depth First Search traversal algorithm in the Neo4j Graph Data Science library.
+--
+
+This topic includes:
+
+* <<algorithms-dfs-intro, Introduction>>
+* <<algorithms-dfs-syntax, Syntax>>
+* <<algorithms-dfs-examples, Examples>>
+
+[[algorithms-dfs-intro]]
+== Introduction
+
+The Depth First Search algorithm is a graph traversal that starts at a given node and explores as far as possible along each branch before backtracking, see https://en.wikipedia.org/wiki/Depth-first_search.
+A related algorithm is the Breath First Search algorithm, <<algorithms-bfs, Breath First Search>>.
+This algorithm can be preferred over Breath First Search for example if one wants to find a target node at a large distance and exploring a random path has decent probability of success.
+There are multiple termination conditions supported for the traversal, based on either reaching one of several target nodes, reaching a maximum depth, exhausting a given budget of traversed relationship cost, or just traversing the whole graph.
+The output of the procedure contains information about which nodes were visited and in what order.
+
+[[algorithms-dfs-syntax]]
+== Syntax
+
+.The following describes the API for running the algorithm and stream results:
+[source, cypher]
+----
+CALL gds.alpha.dfs.stream(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  // general stream return columns
+  startNodeId: int,
+  nodeIds: int,
+  path: Path
+----
+
+include::../common-parameters.adoc[]
+
+include::../common-configuration.adoc[]
+
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                   | Type             | Default                | Optional | Description
+| startNodeId            | INTEGER          | n/a                    | no       | The node id of the node where to start the traversal.
+| targetNodes            | LIST OF INTEGER  | empty list             | yes      | Ids for target nodes. Traversal terminates when any target node is visited.
+| maxDepth               | INTEGER          | -1                     | yes      | The maximum distance from the start node at which nodes are visited.
+| maxCost                | INTEGER          | NaN                    | yes      | The maximum accumulated cost of any path from start node to a node that should be visited.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type            | Description
+| startNodeId   | INTEGER         | The node id of the node where to start the traversal.
+| nodeIds       | LIST OF INTEGER | The ids of all nodes that were visited during the traversal.
+| path          | PATH            | A path containing all the nodes that were visited during the traversal.
+|===
+
+
+[[algorithms-dfs-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher, role=setup-query]
+----
+CREATE
+       (nA:Node {tag: 'a'}),
+       (nB:Node {tag: 'b'}),
+       (nC:Node {tag: 'c'}),
+       (nD:Node {tag: 'd'}),
+       (nE:Node {tag: 'e'}),
+
+       (nA)-[:REL {cost: 8.0}]->(nB),
+       (nA)-[:REL {cost: 9.0}]->(nC),
+       (nB)-[:REL {cost: 1.0}]->(nE),
+       (nC)-[:REL {cost: 5.0}]->(nD)
+----
+
+.The following statement will create the graph and store it in the graph catalog.
+[source, cypher, role=setup-query]
+----
+CALL gds.graph.create('myGraph', 'Node', 'REL', { relationshipProperties: 'cost' })
+----
+
+In the following examples we will demonstrate using the Depth First Search algorithm on this graph.
+If we do not specify any of the options for early termination, the whole graph is visited:
+
+[role=query-example]
+--
+.Running the Depth First Search algorithm:
+[source, cypher]
+----
+MATCH (a:Node{tag:'a'})
+WITH id(a) as startNode
+CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode})
+YIELD path
+UNWIND [ n in nodes(path) | n.tag ] as tags
+RETURN tags
+ORDER BY tags
+----
+
+.Results
+[opts="header"]
+|===
+| tags
+| "a"
+| "b"
+| "c"
+| "d"
+| "e"
+|===
+
+If specifying d and e as target nodes, not all nodes at distance 1 will be visited due to the depth first traversal order, in which node d is reached before b:
+
+[role=query-example]
+--
+.Running the Depth First Search algorithm with target nodes:
+[source, cypher]
+----
+MATCH (a:Node{tag:'a'}), (d:Node{tag:'d'}), (e:Node{tag:'e'})
+WITH id(a) as startNode, [id(d), id(e)] as targetNodes
+CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode, targetNodes: targetNodes})
+YIELD path
+UNWIND [ n in nodes(path) | n.tag ] as tags
+RETURN tags
+ORDER BY tags
+----
+
+.Results
+[opts="header"]
+|===
+| tags
+| "a"
+| "c"
+| "d"
+|===
+
+
+[role=query-example]
+--
+.Running the Depth First Search algorithm with maxDepth:
+[source, cypher]
+----
+MATCH (a:Node{tag:'a'})
+WITH id(a) as startNode
+CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode, maxDepth: 1})
+YIELD path
+UNWIND [ n in nodes(path) | n.tag ] as tags
+RETURN tags
+ORDER BY tags
+----
+
+.Results
+[opts="header"]
+|===
+| tags
+| "a"
+| "b"
+| "c"
+|===
+
+In the above case, nodes d and e were not visited since they are at distance 2 from a.
+
+[role=query-example]
+--
+.Running the Depth First Search algorithm with maxCost:
+[source, cypher]
+----
+MATCH (a:Node{tag:'a'})
+WITH id(a) as startNode
+CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode, maxCost: 10, relationshipWeightProperty: 'cost'})
+YIELD path
+UNWIND [ n in nodes(path) | n.tag ] as tags
+RETURN tags
+ORDER BY tags
+----
+
+.Results
+[opts="header"]
+|===
+| tags
+| "a"
+| "b"
+| "c"
+| "e"
+|===
+
+Due to the max cost limit of 10, node d cannot be reached since the total cost of the path from a to d is 14.

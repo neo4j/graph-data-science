@@ -79,11 +79,11 @@ public class ModularityOptimizationStreamProc extends ModularityOptimizationBase
 
     public static class StreamResult {
         public final long nodeId;
-        public final long community;
+        public final long communityId;
 
-        public StreamResult(long nodeId, long community) {
+        public StreamResult(long nodeId, long communityId) {
             this.nodeId = nodeId;
-            this.community = community;
+            this.communityId = communityId;
         }
     }
 }

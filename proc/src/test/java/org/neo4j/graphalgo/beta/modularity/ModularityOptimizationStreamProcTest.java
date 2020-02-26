@@ -34,12 +34,12 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcBas
     void testStreaming() {
         String query = algoBuildStage()
             .streamMode()
-            .yields("nodeId", "community");
+            .yields("nodeId", "communityId");
 
         long[] communities = new long[6];
         runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int) nodeId] = row.getNumber("community").longValue();
+            communities[(int) nodeId] = row.getNumber("communityId").longValue();
         });
 
         assertCommunities(communities, UNWEIGHTED_COMMUNITIES);
@@ -53,12 +53,12 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcBas
             .algo("gds", "beta", "modularityOptimization")
             .streamMode()
             .addParameter("relationshipWeightProperty", "weight")
-            .yields("nodeId", "community");
+            .yields("nodeId", "communityId");
 
         long[] communities = new long[6];
         runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int) nodeId] = row.getNumber("community").longValue();
+            communities[(int) nodeId] = row.getNumber("communityId").longValue();
         });
 
         assertCommunities(communities, WEIGHTED_COMMUNITIES);
@@ -72,12 +72,12 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcBas
             .algo("gds", "beta", "modularityOptimization")
             .streamMode()
             .addParameter("seedProperty", "seed1")
-            .yields("nodeId", "community");
+            .yields("nodeId", "communityId");
 
         long[] communities = new long[6];
         runQueryWithRowConsumer(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int) nodeId] = row.getNumber("community").longValue();
+            communities[(int) nodeId] = row.getNumber("communityId").longValue();
         });
 
         assertCommunities(communities, SEEDED_COMMUNITIES);

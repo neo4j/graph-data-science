@@ -59,10 +59,10 @@ The following table lists all beta procedures in the GDS library:
 | <<algorithms-k1coloring, gds.beta.k1coloring.stream.estimate>>
 | <<algorithms-k1coloring, gds.beta.k1coloring.write>>
 | <<algorithms-k1coloring, gds.beta.k1coloring.write.estimate>>
-| gds.beta.modularityOptimization.stream
-| gds.beta.modularityOptimization.stream.estimate
-| gds.beta.modularityOptimization.write
-| gds.beta.modularityOptimization.write.estimate
+| <<algorithms-modularity-optimization, gds.beta.modularityOptimization.stream>>
+| <<algorithms-modularity-optimization, gds.beta.modularityOptimization.stream.estimate>>
+| <<algorithms-modularity-optimization, gds.beta.modularityOptimization.write>>
+| <<algorithms-modularity-optimization, gds.beta.modularityOptimization.write.estimate>>
 |===
 
 [[alpha-tier]]
