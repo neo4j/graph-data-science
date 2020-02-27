@@ -516,35 +516,22 @@ class GraphCreateProcTest extends BaseProcTest {
     void relationshipProjectionPropertyPropagateAggregations(String aggregation) {
         String name = "g";
 
-        String extraPropAggregation = Optional.of(aggregation)
-            .filter(a -> a.equals("NONE"))
-            .orElse("MAX");
+        Map<String, Object> relationshipProjection = map("B", map(
+            "type", "REL",
+            "aggregation", aggregation,
+            "properties", map("weight", emptyMap())
+        ));
 
-        String graphCreate =
-            "CALL gds.graph.create($name, '*', " +
-            "{" +
-            "  B: {" +
-            "    type: 'REL', " +
-            "    aggregation: $aggregation, " +
-            "    properties: {" +
-            "      weight: {" +
-            "        property: 'weight'" +
-            "      }" +
-            "    }" +
-            "  }" +
-            "}," +
-            "{ " +
-            "  relationshipProperties: {" +
-            "    foo: {" +
-            "      property: 'weight', " +
-            "      aggregation: '" + extraPropAggregation + "'" +
-            "    }" +
-            "  }" +
-            "})";
+        Map<String, Object> relationshipProperties = map("foo", map(
+            "property", "weight",
+            "aggregation", Optional.of(aggregation)
+                .filter(a1 -> a1.equals("NONE"))
+                .orElse("MAX")
+        ));
 
         assertCypherResult(
-            graphCreate,
-            map("name", name, "aggregation", aggregation),
+            "CALL gds.graph.create($name, '*', $relationshipProjection, { relationshipProperties: $relationshipProperties })",
+            map("name", name, "relationshipProjection", relationshipProjection, "relationshipProperties", relationshipProperties),
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
@@ -561,7 +548,9 @@ class GraphCreateProcTest extends BaseProcTest {
                             ),
                             "foo", map(
                                 "property", "weight",
-                                AGGREGATION_KEY, extraPropAggregation,
+                                AGGREGATION_KEY, Optional.of(aggregation)
+                                    .filter(a -> a.equals("NONE"))
+                                    .orElse("MAX"),
                                 "defaultValue", Double.NaN
                             )
                         )
@@ -574,6 +563,10 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
+        Graph weightGraph = GraphStoreCatalog.get("", name).graphStore().getGraph("B", Optional.of("weight"));
+        Graph fooGraph = GraphStoreCatalog.get("", name).graphStore().getGraph("B", Optional.of("foo"));
+        assertGraphEquals(fromGdl("(a)-[{w: 55}]->()"), weightGraph);
+        assertGraphEquals(fromGdl("(a)-[{w: 55}]->()"), fooGraph);
     }
 
     @ParameterizedTest(name = "aggregation={0}")
@@ -581,25 +574,15 @@ class GraphCreateProcTest extends BaseProcTest {
     void relationshipProjectionPropertyAggregations(String aggregation) {
         String name = "g";
 
-        String graphCreate =
-            "CALL gds.graph.create($name, '*', " +
-            "{" +
-            "  B: {" +
-            "    type: 'REL', " +
-            "    aggregation: 'DEFAULT'," +
-            "    properties: {" +
-            "      weight: {" +
-            "        property: 'weight'," +
-            "        aggregation: $aggregation" +
-            "      }" +
-            "    }" +
-            "  }" +
-            "})";
+        Map<String, Object> relationshipProjection = map("B", map(
+            "type", "REL",
+            "aggregation", Aggregation.DEFAULT.name(),
+            "properties", map("weight", map("aggregation", aggregation))
+        ));
 
-        // TODO: check property values on graph
         assertCypherResult(
-            graphCreate,
-            map("name", name, "aggregation", aggregation),
+            "CALL gds.graph.create($name, '*', $relationshipProjection)",
+            map("name", name, "relationshipProjection", relationshipProjection),
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
@@ -618,6 +601,10 @@ class GraphCreateProcTest extends BaseProcTest {
                 "createMillis", instanceOf(Long.class)
             ))
         );
+
+        assertGraphExists(name);
+        Graph graph = GraphStoreCatalog.get("", name).getGraph();
+        assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
     @ParameterizedTest(name = "aggregation={0}")
@@ -625,28 +612,13 @@ class GraphCreateProcTest extends BaseProcTest {
     void relationshipQueryPropertyAggregations(String aggregation) {
         String name = "g";
 
-        String graphCreateCypher =
-            "CALL gds.graph.create.cypher(" +
-            "   $name, " +
-            "   $nodeQuery, " +
-            "   $relationshipQuery, " +
-            "   { " +
-            "       relationshipProperties: {" +
-            "           weight: {" +
-            "               property: 'weight'," +
-            "               aggregation: $aggregation" +
-            "           }" +
-            "       }" +
-            "   }" +
-            ")";
-
-        // TODO: check property values on graph
         assertCypherResult(
-            graphCreateCypher,
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
             map("name", name,
-                "nodeQuery", "RETURN 0 AS id",
-                "relationshipQuery", "RETURN 0 AS source, 0 AS target, 1 AS weight",
-                "aggregation", aggregation),
+                "nodeQuery", ALL_NODES_QUERY,
+                "relationshipQuery", "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target, r.weight AS weight",
+                "relationshipProperties", map("weight", map("aggregation", aggregation))
+            ),
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
@@ -663,11 +635,15 @@ class GraphCreateProcTest extends BaseProcTest {
                         )
                     )
                 ),
-                "nodeCount", 1L,
+                "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
+
+        assertGraphExists(name);
+        Graph graph = GraphStoreCatalog.get("", name).getGraph();
+        assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
     @ParameterizedTest(name = "aggregation={0}")
@@ -709,30 +685,14 @@ class GraphCreateProcTest extends BaseProcTest {
             }
         );
 
-        String graphCreateCypher =
-            "CALL gds.graph.create.cypher(" +
-            "   $name, " +
-            "   $nodeQuery, " +
-            "   $relationshipQuery, " +
-            "   { " +
-            "       relationshipProperties: {" +
-            "           weight: {" +
-            "               property: 'weight'," +
-            "               aggregation: $aggregation" +
-            "           }" +
-            "       }" +
-            "   }" +
-            ")";
-
         AtomicInteger cypherNodeCount = new AtomicInteger();
         AtomicInteger cypherRelCount = new AtomicInteger();
         runQueryWithRowConsumer(
-            graphCreateCypher,
-            map(
-                "name", cypher,
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
+            map("name", cypher,
                 "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", "MATCH (a)-[r:KNOWS]->(b) RETURN id(a) AS source, id(b) AS target, r.weight AS weight",
-                "aggregation", aggregation
+                "relationshipQuery", "MATCH (s)-[r:KNOWS]->(t) RETURN id(s) AS source, id(t) AS target, r.weight AS weight",
+                "relationshipProperties", map("weight", map("aggregation", aggregation))
             ),
             row -> {
                 cypherNodeCount.set(row.getNumber("nodeCount").intValue());
@@ -760,23 +720,11 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void defaultRelationshipProjectionProperty() {
-        String graphCreateQuery =
-            "CALL gds.graph.create(" +
-            "  'testGraph', " +
-            "  '*'," +
-            "  {" +
-            "    REL: {" +
-            "      projection: 'NATURAL'," +
-            "      properties: {" +
-            "        weight: {" +
-            "          aggregation: 'SINGLE'" +
-            "        }" +
-            "      }" +
-            "    }" +
-            "  }" +
-            ");";
-
-        assertCypherResult(graphCreateQuery, singletonList(map(
+        assertCypherResult("CALL gds.graph.create('testGraph', '*', $relationshipProjection)",
+            singletonMap("relationshipProjection", map(
+                "REL", map("properties", map("weight", map("aggregation", "SINGLE"))
+            ))),
+            singletonList(map(
             "graphName", "testGraph",
             NODE_PROJECTION_KEY, isA(Map.class),
             RELATIONSHIP_PROJECTION_KEY, map(
@@ -799,22 +747,11 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void defaultNodeProjectionProperty() {
-        String graphCreateQuery =
-            "CALL gds.graph.create(" +
-            "  'testGraph', " +
-            "  {" +
-            "    A: {" +
-            "      properties: {" +
-            "        age: {" +
-            "          defaultValue: 1" +
-            "        }" +
-            "      }" +
-            "    }" +
-            "  }, " +
-            "  '*'" +
-            ");";
-
-        assertCypherResult(graphCreateQuery, singletonList(map(
+        assertCypherResult("CALL gds.graph.create('testGraph', $nodeProjection, '*')",
+            singletonMap("nodeProjection", map(
+                "A", map("properties", map("age", map("defaultValue", 1)))
+            )),
+            singletonList(map(
             "graphName", "testGraph",
             NODE_PROJECTION_KEY, map(
                 "A", map(
