@@ -31,7 +31,6 @@ import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
-import java.util.function.LongToDoubleFunction;
 
 import static io.qala.datagen.RandomShortApi.bool;
 import static io.qala.datagen.RandomShortApi.integer;
@@ -77,7 +76,8 @@ final class HugeAtomicDoubleArrayTest {
     @Test
     void testConstructor2() {
         double[] a = {17.0D, 3.0D, -42.0D, 99.0D, -7.0D};
-        testArray(a.length, i -> a[(int) i], aa -> {
+        PageFiller pageFiller = PageFiller.longToDouble(4, i -> a[(int) i]);
+        testArray(a.length, pageFiller, aa -> {
             assertEquals(a.length, aa.size());
             for (int i = 0; i < a.length; i++) {
                 assertEquals(a[i], aa.get(i));
@@ -340,30 +340,30 @@ final class HugeAtomicDoubleArrayTest {
         }
     }
 
-    private void testArray(int size, LongToDoubleFunction gen, Consumer<HugeAtomicDoubleArray> block) {
+    private void testArray(int size, PageFiller pageFiller, Consumer<HugeAtomicDoubleArray> block) {
         if (bool()) {
-            block.accept(singleArray(size, gen));
-            block.accept(pagedArray(size, gen));
+            block.accept(singleArray(size, pageFiller));
+            block.accept(pagedArray(size, pageFiller));
         } else {
-            block.accept(pagedArray(size, gen));
-            block.accept(singleArray(size, gen));
+            block.accept(pagedArray(size, pageFiller));
+            block.accept(singleArray(size, pageFiller));
         }
     }
 
     private HugeAtomicDoubleArray singleArray(final int size) {
-        return HugeAtomicDoubleArray.newSingleArray(size, null, AllocationTracker.EMPTY);
+        return HugeAtomicDoubleArray.newSingleArray(size, PageFiller.passThrough(), AllocationTracker.EMPTY);
     }
 
-    private HugeAtomicDoubleArray singleArray(final int size, final LongToDoubleFunction gen) {
-        return HugeAtomicDoubleArray.newSingleArray(size, gen, AllocationTracker.EMPTY);
+    private HugeAtomicDoubleArray singleArray(final int size, final PageFiller pageFiller) {
+        return HugeAtomicDoubleArray.newSingleArray(size, pageFiller, AllocationTracker.EMPTY);
     }
 
     private HugeAtomicDoubleArray pagedArray(final int size) {
-        return HugeAtomicDoubleArray.newPagedArray(size, null, AllocationTracker.EMPTY);
+        return HugeAtomicDoubleArray.newPagedArray(size, PageFiller.passThrough(), AllocationTracker.EMPTY);
     }
 
-    private HugeAtomicDoubleArray pagedArray(final int size, final LongToDoubleFunction gen) {
-        return HugeAtomicDoubleArray.newPagedArray(size, gen, AllocationTracker.EMPTY);
+    private HugeAtomicDoubleArray pagedArray(final int size, final PageFiller pageFiller) {
+        return HugeAtomicDoubleArray.newPagedArray(size, pageFiller, AllocationTracker.EMPTY);
     }
 
     /**

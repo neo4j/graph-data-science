@@ -108,21 +108,21 @@ public class HugeAtomicDoubleArray {
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static HugeAtomicDoubleArray newArray(long size, AllocationTracker tracker) {
-        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newArray(size, null, tracker));
+        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newArray(size, PageFiller.passThrough(), tracker));
     }
 
-    public static HugeAtomicDoubleArray newArray(long size, LongToDoubleFunction gen, AllocationTracker tracker) {
-        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newArray(size, convertLongDoubleFunctionToLongUnary(gen), tracker));
-    }
-
-    /* test-only */
-    static HugeAtomicDoubleArray newPagedArray(long size, final LongToDoubleFunction gen, AllocationTracker tracker) {
-        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newPagedArray(size, convertLongDoubleFunctionToLongUnary(gen), tracker));
+    public static HugeAtomicDoubleArray newArray(long size, PageFiller pageFiller, AllocationTracker tracker) {
+        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newArray(size, pageFiller, tracker));
     }
 
     /* test-only */
-    static HugeAtomicDoubleArray newSingleArray(int size, final LongToDoubleFunction gen, AllocationTracker tracker) {
-        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newSingleArray(size, convertLongDoubleFunctionToLongUnary(gen), tracker));
+    static HugeAtomicDoubleArray newPagedArray(long size, final PageFiller pageFiller, AllocationTracker tracker) {
+        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newPagedArray(size, pageFiller, tracker));
+    }
+
+    /* test-only */
+    static HugeAtomicDoubleArray newSingleArray(int size, final PageFiller pageFiller, AllocationTracker tracker) {
+        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newSingleArray(size, pageFiller, tracker));
     }
 
     private static LongUnaryOperator convertLongDoubleFunctionToLongUnary(LongToDoubleFunction gen) {

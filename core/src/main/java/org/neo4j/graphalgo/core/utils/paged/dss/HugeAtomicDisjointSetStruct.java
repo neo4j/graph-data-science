@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.PageFiller;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -82,17 +83,21 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     private final AtomicLong maxCommunityId;
 
     public HugeAtomicDisjointSetStruct(long capacity, AllocationTracker tracker) {
-        this.parent = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
+        this.parent = HugeAtomicLongArray.newArray(capacity, PageFiller.identity(4), tracker); // FIXME
         this.communities = null;
         this.maxCommunityId = null;
     }
 
     public HugeAtomicDisjointSetStruct(long capacity, NodeProperties communityMapping, AllocationTracker tracker) {
-        this.parent = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
-        this.communities = HugeAtomicLongArray.newArray(capacity, nodeId -> {
-            double communityIdValue = communityMapping.nodeProperty(nodeId, Double.NaN);
-            return Double.isNaN(communityIdValue) ? -1L : (long) communityIdValue;
-        }, tracker);
+        this.parent = HugeAtomicLongArray.newArray(capacity, PageFiller.identity(4), tracker); // FIXME
+        this.communities = HugeAtomicLongArray.newArray(
+            capacity,
+            PageFiller.of(4, nodeId -> { // FIXME
+                double communityIdValue = communityMapping.nodeProperty(nodeId, Double.NaN);
+                return Double.isNaN(communityIdValue) ? -1L : (long) communityIdValue;
+            }),
+            tracker
+        );
         maxCommunityId = new AtomicLong(communityMapping.getMaxPropertyValue().orElse(NO_SUCH_SEED_VALUE));
     }
 

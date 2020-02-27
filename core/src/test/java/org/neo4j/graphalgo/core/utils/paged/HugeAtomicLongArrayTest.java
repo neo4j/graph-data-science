@@ -31,7 +31,6 @@ import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
-import java.util.function.LongUnaryOperator;
 
 import static io.qala.datagen.RandomShortApi.bool;
 import static io.qala.datagen.RandomShortApi.integer;
@@ -77,7 +76,7 @@ final class HugeAtomicLongArrayTest {
     @Test
     void testConstructor2() {
         long[] a = {17L, 3L, -42L, 99L, -7L};
-        testArray(a.length, i -> a[(int) i], aa -> {
+        testArray(a.length, PageFiller.of(4, i -> a[(int) i]), aa -> {
             assertEquals(a.length, aa.size());
             for (int i = 0; i < a.length; i++) {
                 assertEquals(a[i], aa.get(i));
@@ -340,30 +339,30 @@ final class HugeAtomicLongArrayTest {
         }
     }
 
-    private void testArray(int size, LongUnaryOperator gen, Consumer<HugeAtomicLongArray> block) {
+    private void testArray(int size, PageFiller pageFiller, Consumer<HugeAtomicLongArray> block) {
         if (bool()) {
-            block.accept(singleArray(size, gen));
-            block.accept(pagedArray(size, gen));
+            block.accept(singleArray(size, pageFiller));
+            block.accept(pagedArray(size, pageFiller));
         } else {
-            block.accept(pagedArray(size, gen));
-            block.accept(singleArray(size, gen));
+            block.accept(pagedArray(size, pageFiller));
+            block.accept(singleArray(size, pageFiller));
         }
     }
 
     private HugeAtomicLongArray singleArray(final int size) {
-        return HugeAtomicLongArray.newSingleArray(size, null, AllocationTracker.EMPTY);
+        return HugeAtomicLongArray.newSingleArray(size, PageFiller.passThrough(), AllocationTracker.EMPTY);
     }
 
-    private HugeAtomicLongArray singleArray(final int size, final LongUnaryOperator gen) {
-        return HugeAtomicLongArray.newSingleArray(size, gen, AllocationTracker.EMPTY);
+    private HugeAtomicLongArray singleArray(final int size, final PageFiller pageFiller) {
+        return HugeAtomicLongArray.newSingleArray(size, pageFiller, AllocationTracker.EMPTY);
     }
 
     private HugeAtomicLongArray pagedArray(final int size) {
-        return HugeAtomicLongArray.newPagedArray(size, null, AllocationTracker.EMPTY);
+        return HugeAtomicLongArray.newPagedArray(size, PageFiller.passThrough(), AllocationTracker.EMPTY);
     }
 
-    private HugeAtomicLongArray pagedArray(final int size, final LongUnaryOperator gen) {
-        return HugeAtomicLongArray.newPagedArray(size, gen, AllocationTracker.EMPTY);
+    private HugeAtomicLongArray pagedArray(final int size, final PageFiller pageFiller) {
+        return HugeAtomicLongArray.newPagedArray(size, pageFiller, AllocationTracker.EMPTY);
     }
 
     /**
