@@ -22,9 +22,7 @@ package org.neo4j.graphalgo.compat;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.ResultTransformer;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
@@ -40,8 +38,6 @@ import org.neo4j.storageengine.api.StoreId;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public final class GraphDbApi implements GraphDatabaseAPI {
     private static final String DB_NAME = GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
@@ -54,36 +50,11 @@ public final class GraphDbApi implements GraphDatabaseAPI {
         this.dbms = dbms;
     }
 
-    public void withinTransaction(Consumer<Transaction> action) {
-        try (Transaction transaction = api.beginTx()) {
-            action.accept(transaction);
-        }
-    }
-
-    public <T> T withinTransactionApply(Function<Transaction, T> action) {
-        try (Transaction transaction = api.beginTx()) {
-            return action.apply(transaction);
-        }
-    }
-
-    public void runQuery(String query) throws QueryExecutionException {
-        QueryRunner.runQuery(api, query);
-    }
-
-    public void runQuery( String query, Consumer<Result.ResultRow> check ) throws QueryExecutionException {
-        QueryRunner.runQueryWithRowConsumer(api, query, check);
-    }
-
-    public void runQuery( String query, Map<String,Object> parameters ) throws QueryExecutionException {
-        QueryRunner.runQuery(api, query, parameters);
-    }
-
     public void shutdown() {
         dbms.shutdown();
     }
 
     // delegate methods
-
 
     @Override
     public DependencyResolver getDependencyResolver() {
