@@ -55,7 +55,7 @@ include::common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                           | Type    | Default     | Optional | Description
-| weightProperty                 | String  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
+| relationshipWeightProperty     | String  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
 | seedProperty                   | String  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
 | writeProperty                  | String  | n/a         | yes      | The property name written back the ID of the partition particular node belongs to.
 | maxLevels                      | Integer | 10          | yes      | The maximum number of levels in which the graph is clustered and then condensed.
@@ -67,18 +67,18 @@ include::common-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                 | Type      | Description
-| loadMillis           | Integer   | Milliseconds for loading data.
-| computeMillis        | Integer   | Milliseconds for running the algorithm.
-| writeMillis          | Integer   | Milliseconds for writing result data back.
-| postProcessingMillis | Integer   | Milliseconds for computing percentiles and community count.
-| nodes                | Integer   | The number of nodes considered.
-| communityCount       | Integer   | The number of communities found.
-| levels               | Integer   | The number of supersteps the algorithm actually ran.
-| modularity           | Float     | The final modularity score.
-| modularities         | Integer[] | The final modularity scores for each level.
-| communityDistribution | Map      | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
-| configuration        | Map       | The configuration used for running the algorithm.
+| Name                  | Type      | Description
+| createMillis          | Integer   | Milliseconds for loading data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| writeMillis           | Integer   | Milliseconds for writing result data back.
+| postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
+| nodePropertiesWritten | Integer   | The number of nodes considered.
+| communityCount        | Integer   | The number of communities found.
+| ranLevels             | Integer   | The number of supersteps the algorithm actually ran.
+| modularity            | Float     | The final modularity score.
+| modularities          | Integer[] | The final modularity scores for each level.
+| communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| configuration         | Map       | The configuration used for running the algorithm.
 |===
 
 
@@ -100,8 +100,8 @@ include::common-configuration.adoc[]
 | Name                           | Type     | Default | Optional | Description
 | relationshipWeightProperty     | String   | null    | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
 | seedProperty                   | String   | n/a     | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| levels                         | Integer  | 10      | yes      | The maximum number of levels in which the graph is clustered and then condensed.
-| innerIterations                | Integer  | 10      | yes      | The maximum number of iterations that the modularity optimization will run for each level.
+| maxLevels                      | Integer  | 10      | yes      | The maximum number of levels in which the graph is clustered and then condensed.
+| maxIterations                  | Integer  | 10      | yes      | The maximum number of iterations that the modularity optimization will run for each level.
 | tolerance                      | Float    | 0.0001  | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | includeIntermediateCommunities | Boolean  | false   | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
 |===
@@ -110,10 +110,10 @@ include::common-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name        | Type      | Description
-| nodeId      | Integer   | Node ID.
-| community   | Integer   | The community ID of the final level.
-| communities | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
+| Name         | Type      | Description
+| nodeId       | Integer   | Node ID.
+| communityId  | Integer   | The community ID of the final level.
+| communityIds | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
 |===
 
 [[algorithms-louvain-examples]]
