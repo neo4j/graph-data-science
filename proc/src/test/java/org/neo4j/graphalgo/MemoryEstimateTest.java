@@ -82,8 +82,8 @@ public interface MemoryEstimateTest<CONFIG extends AlgoBaseConfig, RESULT> exten
                 .filter(procMethod -> getProcedureMethodName(procMethod).endsWith(".estimate"))
                 .forEach(estimateMethod -> {
                     Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()
-                        .withNumber("nodeCount", 10000)
-                        .withNumber("relationshipCount", 10000)).toMap();
+                        .withNumber("nodeCount", 10000L)
+                        .withNumber("relationshipCount", 10000L)).toMap();
                     try {
                         Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(proc, config, Collections.emptyMap());
                         result.forEach(row -> {
