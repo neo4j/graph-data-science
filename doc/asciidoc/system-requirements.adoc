@@ -25,12 +25,16 @@ The page cache is used to cache the Neo4j data and will help to avoid costly dis
 For purely analytical workloads using <<native-projection, native projections>>, it is recommended to decrease https://neo4j.com/docs/operations-manual/3.5/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size] in favor of an increased heap size.
 However, setting a minimum page cache size is still important while creating in-memory graphs:
 
-* For <<native-projection, native projections>>, the minimum page cache size can be roughly estimated by `8KB * 100 * readConcurrency`.
+* For <<native-projection, native projections>>, the minimum page cache size for creating the in-memory graph can be roughly estimated by `8KB * 100 * readConcurrency`.
 * For <<cypher-projection, Cypher projections>>, a higher page cache is required depending on the query complexity.
+
+However, if it is required to write algorithm results back to Neo4j, the write performance is highly depended on store fragmentation as well as the number of properties and relationships to write.
+We recommend starting with a page cache size of roughly `~250MB * writeConcurrency` and evaluate write performance and adapt accordingly.
+Ideally, if the <<memory-estimation, memory estimation>> feature has been used to find a good heap size, the remaining memory can be used for page cache and OS.
 
 [NOTE]
 ====
-Decreasing the page cache size is *not* recommended if the Neo4j instance runs both, operational and analytical workloads at the same time.
+Decreasing the page cache size in favor of heap size is *not* recommended if the Neo4j instance runs both, operational and analytical workloads at the same time.
 See https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuration/[Neo4j memory configuration] for general information about page cache sizing.
 ====
 
