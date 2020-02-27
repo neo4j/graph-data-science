@@ -73,7 +73,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
         return computationResult.result()
             .map(nodes -> new WalkResult(
                 nodes,
-                computationResult.config().path() ? WalkPath.toPath(api, transaction.internalTransaction(), nodes) : null
+                computationResult.config().path() ? WalkPath.toPath(api, transaction, nodes) : null
             ));
     }
 

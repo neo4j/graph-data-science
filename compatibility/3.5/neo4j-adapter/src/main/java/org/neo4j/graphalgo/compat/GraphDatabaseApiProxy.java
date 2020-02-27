@@ -19,8 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -36,6 +35,8 @@ import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.api.KernelTransactions;
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
+import org.neo4j.kernel.impl.coreapi.PlaceboTransaction;
+import org.neo4j.kernel.impl.coreapi.TopLevelTransaction;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.impl.storageengine.impl.recordstorage.RecordStorageEngine;
 import org.neo4j.kernel.impl.store.NeoStores;
@@ -81,6 +82,14 @@ public final class GraphDatabaseApiProxy {
     }
 
     public static Node getNodeById(GraphDatabaseService db, Transaction tx, long id) {
+        try {
+            return db.getNodeById(id);
+        } catch (NotFoundException e) {
+            return null;
+        }
+    }
+
+    public static Node getNodeById(GraphDatabaseService db, KernelTransaction tx, long id) {
         try {
             return db.getNodeById(id);
         } catch (NotFoundException e) {
@@ -225,13 +234,13 @@ public final class GraphDatabaseApiProxy {
         return block.apply(ktx);
     }
 
-    public static Pair<Transaction, KernelTransaction> newKernelTransaction(GraphDatabaseService db) {
+    public static Transactions newKernelTransaction(GraphDatabaseService db) {
         Transaction tx = db.beginTx();
         KernelTransaction ktx = resolveDependency(
             db,
             ThreadToStatementContextBridge.class
         ).getKernelTransactionBoundToThisThread(true);
-        return Tuples.pair(tx, ktx);
+        return ImmutableTransactions.of(tx instanceof TopLevelTransaction, tx, ktx);
     }
 
     public static Result runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
@@ -240,6 +249,15 @@ public final class GraphDatabaseApiProxy {
 
     public static Result runQuery(GraphDatabaseService db, Transaction tx, String query, Map<String, Object> params) {
         return db.execute(query, params);
+    }
+
+    @ValueClass
+    public interface Transactions {
+        boolean txShouldBeClosed();
+
+        Transaction tx();
+
+        KernelTransaction ktx();
     }
 
     private GraphDatabaseApiProxy() {

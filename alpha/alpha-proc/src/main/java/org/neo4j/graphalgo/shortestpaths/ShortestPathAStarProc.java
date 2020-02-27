@@ -85,7 +85,7 @@ public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, Short
                 return new ShortestPathAStar(
                     graph,
                     api,
-                    transaction.internalTransaction(),
+                    transaction,
                     configuration.startNodeId(),
                     configuration.endNodeId(),
                     configuration.propertyKeyLat(),

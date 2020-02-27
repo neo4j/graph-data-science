@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -39,7 +40,7 @@ public class GetNodeFunc {
     public GraphDatabaseService api;
 
     @Context
-    public Transaction tx;
+    public KernelTransaction tx;
 
     @Nullable
     @UserFunction("gds.util.asNode")

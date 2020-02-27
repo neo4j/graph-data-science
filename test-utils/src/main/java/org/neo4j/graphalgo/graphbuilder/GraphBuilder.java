@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.compat.Transactions;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -29,7 +31,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * The GraphBuilder intends to ease the creation
@@ -110,7 +111,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
      * @return the created node
      */
     public Node createNode() {
-        Node node = tx.createNode();
+        Node node = GraphDatabaseApiProxy.createNode(api, tx);
         if (null != label) {
             node.addLabel(label);
         }
@@ -125,41 +126,13 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
      * @return child instance to make methods of the child class accessible.
      */
     public ME forEachNodeInTx(Consumer<Node> consumer) {
-        nodes.forEach(node -> {
-//            Node node = tx.getNodeById(n.getId());
-            consumer.accept(node);
-        });
+        nodes.forEach(consumer);
         return self;
     }
 
     public ME forEachRelInTx(Consumer<Relationship> consumer) {
-        relationships.forEach(rel -> {
-//            Relationship relationship = tx.getRelationshipById(rel.getId());
-            consumer.accept(rel);
-        });
+        relationships.forEach(consumer);
         return self;
-    }
-
-    /**
-     * run the runnable in a transaction
-     *
-     * @param runnable the runnable
-     * @return child instance to make methods of the child class accessible.
-     */
-    public ME withinTransaction(Consumer<Transaction> runnable) {
-        runnable.accept(tx);
-        return self;
-    }
-
-    /**
-     * run supplier within a transaction and returns its result
-     *
-     * @param supplier the supplier
-     * @param <T>      the return type
-     * @return child instance to make methods of the child class accessible.
-     */
-    public <T> T applyWithinTransaction(Function<Transaction, T> supplier) {
-        return supplier.apply(tx);
     }
 
     /**
@@ -236,8 +209,8 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
 
     @Override
     public void close() {
-        tx.commit();
-        tx.close();
+        Transactions.commit(tx);
+        Transactions.close(tx);
     }
 
     private static final class RNGHolder {

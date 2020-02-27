@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -141,14 +142,12 @@ public class CypherFactory extends GraphStoreFactory {
     }
 
     private Ktx setReadOnlySecurityContext() {
-        return setReadOnlySecurityContext(newKernelTransaction(api));
-    }
-
-    private Ktx setReadOnlySecurityContext(KernelTransaction ktx) {
+        GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(api);
+        KernelTransaction ktx = transactions.ktx();
         try {
             AuthSubject subject = ktx.securityContext().subject();
             SecurityContext securityContext = new SecurityContext(subject, READ);
-            return new Ktx(api, ktx, securityContext);
+            return new Ktx(api, transactions, securityContext);
         } catch (NotInTransactionException ex) {
             // happens only in tests
             throw new IllegalStateException("Must run in a transaction.", ex);
@@ -157,29 +156,31 @@ public class CypherFactory extends GraphStoreFactory {
 
     static final class Ktx implements AutoCloseable {
         private final GraphDatabaseService db;
-        private final KernelTransaction top;
+        private final GraphDatabaseApiProxy.Transactions top;
         private final SecurityContext securityContext;
         private final KernelTransaction.Revertable revertTop;
 
         private Ktx(
             GraphDatabaseService db,
-            KernelTransaction top,
+            GraphDatabaseApiProxy.Transactions top,
             SecurityContext securityContext
         ) {
             this.db = db;
             this.top = top;
             this.securityContext = securityContext;
-            this.revertTop = top.overrideWith(securityContext);
+            this.revertTop = top.ktx().overrideWith(securityContext);
         }
 
         <T> T run(Function<Transaction, T> block) {
-            return block.apply(top.internalTransaction());
+            return block.apply(top.tx());
         }
 
         <T> T fork(Function<Transaction, T> block) {
-            try (KernelTransaction ktx = newKernelTransaction(db);
+            GraphDatabaseApiProxy.Transactions txs = newKernelTransaction(db);
+            try (Transaction tx = txs.tx();
+                 KernelTransaction ktx = txs.ktx();
                  KernelTransaction.Revertable ignore = ktx.overrideWith(securityContext)) {
-                return block.apply(ktx.internalTransaction());
+                return block.apply(tx);
             } catch (TransactionFailureException e) {
                 throw new RuntimeException(e);
             }
@@ -187,11 +188,19 @@ public class CypherFactory extends GraphStoreFactory {
 
         @Override
         public void close() {
-            this.revertTop.close();
+            // need to make sure to call every close, so ugly nested try-finally
             try {
-                top.close();
-            } catch (TransactionFailureException e) {
-                throw new RuntimeException(e);
+                this.revertTop.close();
+            } finally {
+                if (top.txShouldBeClosed()) {
+                    try {
+                        top.ktx().close();
+                    } catch (TransactionFailureException e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        top.tx().close();
+                    }
+                }
             }
         }
     }

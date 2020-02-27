@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -84,6 +85,14 @@ public final class GraphDatabaseApiProxy {
     public static Node getNodeById(GraphDatabaseService db, Transaction tx, long id) {
         try {
             return tx.getNodeById(id);
+        } catch (NotFoundException e) {
+            return null;
+        }
+    }
+
+    public static Node getNodeById(GraphDatabaseService db, KernelTransaction tx, long id) {
+        try {
+            return tx.internalTransaction().getNodeById(id);
         } catch (NotFoundException e) {
             return null;
         }
@@ -220,9 +229,10 @@ public final class GraphDatabaseApiProxy {
         return block.apply(ktx);
     }
 
-    public static KernelTransaction newKernelTransaction(GraphDatabaseService db) {
+    public static Transactions newKernelTransaction(GraphDatabaseService db) {
         Transaction tx = db.beginTx();
-        return ((InternalTransaction) tx).kernelTransaction();
+        KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
+        return ImmutableTransactions.of(true, tx, ktx);
     }
 
     public static Result runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
@@ -231,6 +241,15 @@ public final class GraphDatabaseApiProxy {
 
     public static Result runQuery(GraphDatabaseService db, Transaction tx, String query, Map<String, Object> params) {
         return tx.execute(query, params);
+    }
+
+    @ValueClass
+    public interface Transactions {
+        boolean txShouldBeClosed();
+
+        Transaction tx();
+
+        KernelTransaction ktx();
     }
 
     private GraphDatabaseApiProxy() {

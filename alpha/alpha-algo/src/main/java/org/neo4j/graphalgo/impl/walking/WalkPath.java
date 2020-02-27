@@ -26,7 +26,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +48,7 @@ public class WalkPath extends PathProxy {
         this.size = size;
     }
 
-    public static Path toPath(GraphDatabaseService api, Transaction tx, long[] nodes) {
+    public static Path toPath(GraphDatabaseService api, KernelTransaction tx, long[] nodes) {
         if (nodes.length == 0) return EMPTY;
         WalkPath result = new WalkPath(nodes.length);
         Node node = getNodeById(api, tx, nodes[0]);
@@ -62,7 +62,7 @@ public class WalkPath extends PathProxy {
         return result;
     }
 
-    public static Path toPath(GraphDatabaseService api, Transaction tx, long[] nodes, double[] costs) {
+    public static Path toPath(GraphDatabaseService api, KernelTransaction tx, long[] nodes, double[] costs) {
         if (nodes.length == 0) return EMPTY;
         WalkPath result = new WalkPath(nodes.length);
         Node node = getNodeById(api, tx, nodes[0]);
