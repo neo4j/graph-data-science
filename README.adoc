@@ -4,6 +4,25 @@ This repository hosts the sources of the Neo4j Graph Data Science (GDS) library.
 The GDS library is a plugin for the Neo4j graph database.
 The library consists of a number of graph algorithms, exposed as procedures and executed in Neo4j.
 
+== Building the library
+
+The Neo4j Graph Data Science library uses the build tool `Gradle`.
+Gradle is shipped with this repository using the Gradle Wrapper.
+This means you can simply run all Gradle commands by running `./gradlew TASK` from the repository root.
+
+Running tests::
+To run all tests you can simply run `./gradlew check`
+
+Packaging the library::
+To package the library you can run `./gradlew packaging:shadowJar`.
+This will create the bundeled jar at `packaging/build/libs/neo4j-graph-data-science-VERSION-standalone.jar`.
+
+Preview of the Documentation::
+To generate a preview you can run `./gradlew doc:preview`.
+This will build the documentation and make it available under `http://localhost:8001/`.
+When you are done run `./gradlew doc:stopPreview` to stop the web server.
+
+
 == Contributing
 
 Please report any bugs, concerns, or other questions as GitHub issues to this repository.
