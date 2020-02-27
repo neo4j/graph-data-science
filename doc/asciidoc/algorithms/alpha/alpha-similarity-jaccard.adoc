@@ -11,6 +11,8 @@ It is defined as the size of the intersection divided by the size of the union o
 
 include::alpha-note.adoc[tag=alpha-note]
 
+A related procedure for computing Jaccard similarity is described in <<algorithms-node-similarity>>.
+
 This section includes:
 
 * <<labs-algorithms-similarity-jaccard-context, History and explanation>>
