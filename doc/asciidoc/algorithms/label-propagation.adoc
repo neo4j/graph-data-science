@@ -132,8 +132,8 @@ include::common-configuration.adoc[]
 .The following will run the algorithm and returns the result in form of statistical and measurement values:
 [source, cypher]
 ----
-CALL gds.labelPropagation.stats(graphNameOrConfig: String|Map, configuration: Map})
-YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
+CALL gds.labelPropagation.stats(graphNameOrConfig: String|Map, configuration: Map)
+YIELD ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 
 include::common-parameters.adoc[]
@@ -146,10 +146,7 @@ The configuration is the same as for the `write` mode.
 | Name                  | Type    | Description
 | createMillis          | Integer | Milliseconds for loading data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
-// TODO: stats mode should not have writeMillis in the result
-| writeMillis           | Integer | Milliseconds for writing result data back.
 | postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
-| nodes                 | Integer | The number of nodes considered.
 | communityCount        | Integer | The number of communities found.
 | ranIterations         | Integer | The number of iterations that were executed.
 | didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
