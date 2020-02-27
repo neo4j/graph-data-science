@@ -23,8 +23,8 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
+
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 
 public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityAlgorithm<ME>> extends SimilarityAlgorithm<ME, WeightedInput> {
 
@@ -57,7 +60,8 @@ public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityA
         long degreeCutoff = config.degreeCutoff();
         int repeatCutoff = config.sparseVectorRepeatCutoff();
 
-        return QueryRunner.runQuery(api, query, params, result -> {
+        return applyInTransaction(api, tx -> {
+            Result result = runQueryWithoutClosingTheResult(api, tx, query, params);
             Map<Long, LongDoubleMap> map = new HashMap<>();
             LongSet ids = new LongHashSet();
             result.accept(resultRow -> {
