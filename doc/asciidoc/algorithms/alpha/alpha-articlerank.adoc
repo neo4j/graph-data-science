@@ -14,8 +14,6 @@ This section includes:
 
 * <<algorithms-articlerank-context, History and explanation>>
 * <<algorithms-articlerank-sample, ArticleRank algorithm sample>>
-* <<algorithms-articlerank-hgp, Huge graph projection>>
-* <<algorithms-articlerank-cp, Cypher projection>>
 * <<algorithms-articlerank-syntax, Syntax>>
 * <<algorithms-articlerank-support, Graph type support>>
 
@@ -91,29 +89,6 @@ Paper 0 is the most important paper, but it's only the 2nd most cited paper - Pa
 However, Paper 1 cites Paper 0, which lets us see that it's not only the number of incoming links that is important, but also the importance of the papers behind those links.
 Papers 5 and 6 are not cited by any other papers, so their score doesn't increase above the initial score of `1 - dampingFactor`.
 // end::stream-sample-graph-explanation[]
-
-
-[[algorithms-articlerank-hgp]]
-== Huge graph projection
-
-include::../../huge-projection.adoc[tag=explanation]
-
-[source, cypher]
-----
-include::scripts/articlerank.cypher[tag=huge-projection]
-----
-
-
-[[algorithms-articlerank-cp]]
-== Cypher projection
-
-include::../../management-ops/cypher-projection.adoc[tag=explanation]
-
-[source, cypher]
-----
-include::scripts/articlerank.cypher[tag=cypher-loading]
-----
-
 
 [[algorithms-articlerank-syntax]]
 == Syntax
