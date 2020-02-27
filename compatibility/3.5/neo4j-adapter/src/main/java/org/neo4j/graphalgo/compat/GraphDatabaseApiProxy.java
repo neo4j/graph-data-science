@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -223,12 +225,13 @@ public final class GraphDatabaseApiProxy {
         return block.apply(ktx);
     }
 
-    public static KernelTransaction newKernelTransaction(GraphDatabaseService db) {
+    public static Pair<Transaction, KernelTransaction> newKernelTransaction(GraphDatabaseService db) {
         Transaction tx = db.beginTx();
-        return resolveDependency(
+        KernelTransaction ktx = resolveDependency(
             db,
             ThreadToStatementContextBridge.class
         ).getKernelTransactionBoundToThisThread(true);
+        return Tuples.pair(tx, ktx);
     }
 
     public static Result runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
