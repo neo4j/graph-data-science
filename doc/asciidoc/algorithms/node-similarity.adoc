@@ -93,7 +93,7 @@ include::common-configuration.adoc[]
 | topN                   | Integer | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned.
 | bottomN                | Integer | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
 | writeRelationshipType  | String  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
-| writeProperty          | String  | 'score'                | yes      | The relationship property that stores the similarity score.
+| writeProperty          | String  | n/a                    | no       | The relationship property that stores the similarity score.
 |===
 
 .Results
