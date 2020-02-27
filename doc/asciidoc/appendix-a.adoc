@@ -81,10 +81,12 @@ The following table lists all alpha procedures in the GDS library:
 | <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.write>>
 | <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.sampled.stream>>
 | <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.sampled.write>>
+| <<algorithms-bfs-syntax, gds.alpha.bfs.stream>>
 | <<algorithms-closeness-centrality-syntax, gds.alpha.closeness.stream>>
 | <<algorithms-closeness-centrality-syntax, gds.alpha.closeness.write>>
 | <<algorithms-degree-syntax, gds.alpha.degree.stream>>
 | <<algorithms-degree-syntax, gds.alpha.degree.write>>
+| <<algorithms-dfs-syntax, gds.alpha.dfs.stream>>
 | <<algorithms-eigenvector-syntax, gds.alpha.eigenvector.stream>>
 | <<algorithms-eigenvector-syntax, gds.alpha.eigenvector.write>>
 | <<algorithms-yens-k-shortest-path-syntax, gds.alpha.kShortestPaths.stream>>
@@ -110,6 +112,8 @@ The following table lists all alpha procedures in the GDS library:
 | <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.kmin.write>>
 | <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.maximum.write>>
 | <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.minimum.write>>
+| <<ann-syntax, gds.alpha.ml.ann.stream>>
+| <<ann-syntax, gds.alpha.ml.ann.write>>
 | <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangle.stream>>
 | <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.stream>>
 | <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.write>>
