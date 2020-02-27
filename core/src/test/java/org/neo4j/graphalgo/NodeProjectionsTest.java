@@ -33,6 +33,8 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
@@ -120,6 +122,15 @@ class NodeProjectionsTest {
             equalTo(expected)
         );
         assertThat(actual.labelProjection(), equalTo(PROJECT_ALL.name));
+    }
+
+    @Test
+    void shouldFailOnUnsupportedType() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> NodeProjections.fromObject(Arrays.asList("T", 42))
+        );
+        assertThat(ex.getMessage(), matchesPattern("Cannot construct a node projection out of a java.lang.Integer"));
     }
 
     static Stream<Arguments> syntacticSugarsSimple() {

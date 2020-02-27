@@ -78,24 +78,6 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIO
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
-/*
-TODO:
- - node label as LIST OF ANY
- - multiple relationship types in various sugared forms
- - no filter -> load everything
- - different projections
- - type aliasing
- - relationship properties in various sugared forms
- - global definition
- - local definition
- - different aggregations
- - different default values
- - merging of global + local -> positive
- - literal Cypher maps + params as Java maps (borders on Neo responsibilty)
- - uniqueness constraints: -> negative
- - (rel type + projection)s
- - properties in global+local
-*/
 class GraphCreateProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER = "CREATE (:A {age: 2})-[:REL {weight: 55}]->(:A)";
@@ -131,10 +113,13 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void createNativeProjection() {
+        String graphName = "name";
+
         assertCypherResult(
-            "CALL gds.graph.create('name', 'A', 'REL')",
+            "CALL gds.graph.create($name, 'A', 'REL')",
+            map("name", graphName),
             singletonList(map(
-                "graphName", "name",
+                "graphName", graphName,
                 NODE_PROJECTION_KEY, map(
                     "A", map(
                         LABEL_KEY, "A",
@@ -155,18 +140,18 @@ class GraphCreateProcTest extends BaseProcTest {
             ))
         );
 
-        assertGraphExists("name");
+        assertGraphExists(graphName);
     }
 
     @Test
     void createCypherProjection() {
-        String name = "name";
+        String graphName = "name";
 
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
-            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
+            map("name", graphName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             singletonList(map(
-                "graphName", name,
+                "graphName", graphName,
                 NODE_PROJECTION_KEY, map(
                     "*", map(
                         LABEL_KEY, "*",
@@ -187,7 +172,7 @@ class GraphCreateProcTest extends BaseProcTest {
             ))
         );
 
-        assertGraphExists(name);
+        assertGraphExists(graphName);
     }
 
     @Test
@@ -201,14 +186,16 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, map("*", map(
+                NODE_PROJECTION_KEY, map(
+                    "*", map(
                         LABEL_KEY, "*",
                         PROPERTIES_KEY, emptyMap()
                     )
                 ),
-                RELATIONSHIP_PROJECTION_KEY, map("REL", map(
+                RELATIONSHIP_PROJECTION_KEY, map(
+                    "REL", map(
                         TYPE_KEY, "REL",
-                    ORIENTATION_KEY, Orientation.NATURAL.name(),
+                        ORIENTATION_KEY, Orientation.NATURAL.name(),
                         AGGREGATION_KEY, Aggregation.DEFAULT.name(),
                         PROPERTIES_KEY, emptyMap()
                     )
@@ -223,7 +210,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void projectAllNodesWithAsterisk() {
+    void nodeProjectionWithAsterisk() {
         String query = "CALL gds.graph.create('g', '*', 'REL') YIELD nodeCount";
 
         runQuery("CREATE (), (:B), (:C:D:E)");
@@ -235,7 +222,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void projectAllRelationshipsWithAsterisk() {
+    void relationshipProjectionWithAsterisk() {
         String query = "CALL gds.graph.create('g', 'A', '*') YIELD relationshipCount";
 
         runQuery("CREATE (:A)-[:R]->(:A), (:B:A)-[:T]->(:A:B), (cde:C:D:E)-[:SELF]->(cde)");
@@ -246,9 +233,20 @@ class GraphCreateProcTest extends BaseProcTest {
         assertGraphExists("g");
     }
 
+    @Test
+    void emptyProjectionsShouldProjectAll() {
+        String query = "CALL gds.graph.create('g', '', '') YIELD nodeCount, relationshipCount";
+
+        assertCypherResult(query, singletonList(
+            map("nodeCount", 2L, "relationshipCount", 1L)
+        ));
+
+        assertGraphExists("g");
+    }
+
     @ParameterizedTest(name = "{0}, nodeProjection = {1}")
     @MethodSource("nodeProjectionVariants")
-    void nodeProjectionVariants(String descr, Object nodeProjection, Map<String, Object> desugaredNodeProjection) {
+    void nodeProjectionVariants(String description, Object nodeProjection, Map<String, Object> desugaredNodeProjection) {
         String name = "g";
 
         assertCypherResult(
@@ -293,7 +291,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "nodeProperties")
-    void nodeQueryAndProperties(Object nodeProperties, Map<String, Object> expectedProperties) {
+    void nodeQueryWithProperties(Object nodeProperties, Map<String, Object> expectedProperties) {
         String name = "g";
 
         Map<String, Object> expectedNodeProjection = map("*", map(LABEL_KEY, "*", PROPERTIES_KEY, expectedProperties));
@@ -320,7 +318,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void nodeQueryAndQueryProperties() {
+    void nodeQueryWithQueryProperties() {
         String name = "g";
 
         String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.age AS age";
@@ -350,7 +348,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "{0}, relProjection = {1}")
     @MethodSource("relationshipProjectionVariants")
-    void relationshipProjectionVariants(String descr, Object relProjection, Map<String, Object> desugaredRelProjection) {
+    void relationshipProjectionVariants(String description, Object relProjection, Map<String, Object> desugaredRelProjection) {
         String name = "g";
 
         assertCypherResult(
@@ -370,11 +368,11 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "projection={0}")
-    @MethodSource("relationshipProjectionTypes")
-    void relationshipProjectionProjections(String projection) {
+    @MethodSource("relationshipOrientations")
+    void relationshipProjectionOrientations(String orientation) {
         String name = "g";
 
-        Long expectedRels = projection.equals("UNDIRECTED") ? 2L : 1L;
+        Long expectedRelationshipCount = orientation.equals("UNDIRECTED") ? 2L : 1L;
 
         String graphCreate = GdsCypher.call()
             .withAnyLabel()
@@ -382,26 +380,24 @@ class GraphCreateProcTest extends BaseProcTest {
                 "B",
                 RelationshipProjection.builder()
                     .type("REL")
-                    .orientation(Orientation.of(projection))
+                    .orientation(Orientation.of(orientation))
                     .build()
             )
             .graphCreate(name)
             .yields();
 
-
-        // TODO: Validate reverse
         assertCypherResult(
             graphCreate,
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, map("B", genericMap(
-                    map("type", "REL", ORIENTATION_KEY, projection, PROPERTIES_KEY, emptyMap()),
+                    map("type", "REL", ORIENTATION_KEY, orientation, PROPERTIES_KEY, emptyMap()),
                     AGGREGATION_KEY,
                     Aggregation.DEFAULT.name()
                 )),
                 "nodeCount", 2L,
-                "relationshipCount", expectedRels,
+                "relationshipCount", expectedRelationshipCount,
                 "createMillis", instanceOf(Long.class)
             ))
         );
@@ -425,7 +421,6 @@ class GraphCreateProcTest extends BaseProcTest {
             .graphCreate(name)
             .yields();
 
-        // TODO: check property values on graph
         assertCypherResult(graphCreate,
             singletonList(map(
                 "graphName", name,
@@ -452,12 +447,11 @@ class GraphCreateProcTest extends BaseProcTest {
     void relationshipQueryAndProperties(Object relationshipProperties, Map<String, Object> expectedProperties) {
         String name = "g";
 
-        String nodeQuery = "RETURN 0 AS id";
-        String relationshipQuery = "RETURN 0 AS source, 0 AS target, 3 AS weight";
+        String relationshipQuery = "MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
             map("name", name,
-                "nodeQuery", nodeQuery,
+                "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", relationshipQuery,
                 "relationshipProperties", relationshipProperties),
             singletonList(map(
@@ -470,14 +464,14 @@ class GraphCreateProcTest extends BaseProcTest {
                         PROPERTIES_KEY, expectedProperties
                     )
                 ),
-                "nodeCount", 1L,
+                "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
             ))
         );
 
         Graph graph = GraphStoreCatalog.get("", name).getGraph();
-        assertGraphEquals(fromGdl("(a)-[{w: 3}]->(a)"), graph);
+        assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
     @Test
@@ -513,10 +507,12 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
+        Graph graph = GraphStoreCatalog.get("", name).getGraph();
+        assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @MethodSource("relationshipAggregationTypes")
+    @MethodSource("relationshipAggregations")
     void relationshipProjectionPropertyPropagateAggregations(String aggregation) {
         String name = "g";
 
@@ -581,7 +577,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @MethodSource("relationshipAggregationTypes")
+    @MethodSource("relationshipAggregations")
     void relationshipProjectionPropertyAggregations(String aggregation) {
         String name = "g";
 
@@ -625,7 +621,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @MethodSource("relationshipAggregationTypes")
+    @MethodSource("relationshipAggregations")
     void relationshipQueryPropertyAggregations(String aggregation) {
         String name = "g";
 
@@ -675,8 +671,8 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @MethodSource("relationshipAggregationTypes")
-    void relationshipProjectionPropertyAggregationsCypherVsStandard(String aggregation) {
+    @MethodSource("relationshipAggregations")
+    void relationshipProjectionPropertyAggregationsNativeVsCypher(String aggregation) {
 
         runQuery(
             " CREATE (p:Person)-[:KNOWS]->(k:Person)," +
@@ -1043,9 +1039,9 @@ class GraphCreateProcTest extends BaseProcTest {
 
         Graph graph = GraphStoreCatalog.get("", "g").getGraph();
         Graph expected = fromGdl("({ fooProp: 42, barProp: 13.37D })" +
-                                                   "({ fooProp: 43, barProp: 13.38D })" +
-                                                   "({ fooProp: 44, barProp: 13.39D })" +
-                                                   "({ fooProp: 45, barProp: 19.84D })");
+                                 "({ fooProp: 43, barProp: 13.38D })" +
+                                 "({ fooProp: 44, barProp: 13.39D })" +
+                                 "({ fooProp: 45, barProp: 19.84D })");
         assertGraphEquals(expected, graph);
     }
 
@@ -1608,7 +1604,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
-    static Stream<String> relationshipProjectionTypes() {
+    static Stream<String> relationshipOrientations() {
         return Stream.of(
             "NATURAL",
             "REVERSE",
@@ -1616,7 +1612,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
-    static Stream<String> relationshipAggregationTypes() {
+    static Stream<String> relationshipAggregations() {
         return Stream.of(
             "MAX",
             "MIN",

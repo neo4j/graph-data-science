@@ -57,7 +57,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             return fromList(list);
         }
         throw new IllegalArgumentException(String.format(
-            "Cannot construct a relationship filter out of a %s",
+            "Cannot construct a relationship projection out of a %s",
             object.getClass().getName()
         ));
     }

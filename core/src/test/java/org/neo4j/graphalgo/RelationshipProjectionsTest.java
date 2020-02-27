@@ -174,6 +174,15 @@ class RelationshipProjectionsTest {
         assertThat(ex.getMessage(), matchesPattern("A star projection .* cannot be combined.*"));
     }
 
+    @Test
+    void shouldFailOnUnsupportedType() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> RelationshipProjections.fromObject(Arrays.asList("T", 42))
+        );
+        assertThat(ex.getMessage(), matchesPattern("Cannot construct a relationship projection out of a java.lang.Integer"));
+    }
+
     static Stream<Arguments> syntacticSugarsSimple() {
         return Stream.of(
             Arguments.of(
