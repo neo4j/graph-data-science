@@ -70,14 +70,14 @@ public interface GraphCreateConfig extends BaseConfig {
     @Value.Default
     @Value.Parameter(false)
     @Configuration.Key(ProcedureConstants.NODECOUNT_KEY)
-    default int nodeCount() {
+    default long nodeCount() {
         return -1;
     }
 
     @Value.Default
     @Value.Parameter(false)
     @Configuration.Key(ProcedureConstants.RELCOUNT_KEY)
-    default int relationshipCount() {
+    default long relationshipCount() {
         return -1;
     }
 
