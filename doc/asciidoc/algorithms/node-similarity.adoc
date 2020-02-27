@@ -84,8 +84,6 @@ include::common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                   | Type    | Default                | Optional | Description
-| nodeProjection         | String  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
-| relationshipProjection | String  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
 | similarityCutoff       | Float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
 | degreeCutoff           | Integer | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
 | topK                   | Integer | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned.
@@ -101,8 +99,8 @@ include::common-configuration.adoc[]
 |===
 | Name                   | Type    | Description
 | nodesCompared          | Integer | The number of nodes compared.
-| relationships          | Integer | The number of relationships created.
-| loadMillis             | Integer | Milliseconds for loading data.
+| relationshipsWritten   | Integer | The number of relationships created.
+| createMillis           | Integer | Milliseconds for loading data.
 | computeMillis          | Integer | Milliseconds for running the algorithm.
 | writeMillis            | Integer | Milliseconds for writing result data back to Neo4j.
 | postProcessingMillis   | Integer | Milliseconds for computing percentiles.
