@@ -51,7 +51,7 @@ class VersionFuncTest extends BaseProcTest {
     @Test
     void shouldReturnGradleVersion() throws IOException {
         // we find the current version in the gradle file
-        File file = new File("../../build.gradle");
+        File file = new File("../gradle/version.gradle");
         Optional<String> maybeVersion = findVersion(file);
 
         if (!maybeVersion.isPresent()) {
@@ -64,7 +64,7 @@ class VersionFuncTest extends BaseProcTest {
 
     private Optional<String> findVersion(File file) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
-        Pattern pattern = Pattern.compile(".*version = '(\\d\\.\\d\\.\\d+)'.*");
+        Pattern pattern = Pattern.compile(".*gdsVersion = '(\\d\\.\\d\\.\\d+)'.*");
 
         String version = null;
         while (reader.ready()) {
