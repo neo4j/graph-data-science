@@ -69,7 +69,8 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
-    public static void registerAggregationFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws Exception {
+    public static void registerAggregationFunctions(GraphDatabaseService db, Class<?>... functionClasses)
+    throws Exception {
         Procedures procedures = resolveDependency(db, Procedures.class);
         for (Class<?> clazz : functionClasses) {
             procedures.registerAggregationFunction(clazz);
@@ -96,7 +97,13 @@ public final class GraphDatabaseApiProxy {
         return db.getNodeById(id);
     }
 
-    public static Node findNode(GraphDatabaseService db, Transaction tx, Label label, String propertyKey, Object propertyValue) {
+    public static Node findNode(
+        GraphDatabaseService db,
+        Transaction tx,
+        Label label,
+        String propertyKey,
+        Object propertyValue
+    ) {
         return db.findNode(label, propertyKey, propertyValue);
     }
 
@@ -194,6 +201,7 @@ public final class GraphDatabaseApiProxy {
 
         @Override
         default void close() {
+            tx().success();
             if (txShouldBeClosed()) {
                 try {
                     ktx().close();

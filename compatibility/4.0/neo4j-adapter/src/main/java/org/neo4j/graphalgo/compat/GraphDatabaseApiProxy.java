@@ -199,6 +199,7 @@ public final class GraphDatabaseApiProxy {
 
         @Override
         default void close() {
+            tx().commit();
             if (txShouldBeClosed()) {
                 try {
                     ktx().close();
