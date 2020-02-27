@@ -16,7 +16,9 @@ This chapter contains the following sections:
 
 [[appendix-a-graph-ops]]
 == Graph Operations
-The following table lists all graph operations available in the GDS library:
+
+The following table lists all production-quality graph operations in the GDS library:
+
 [opts=header,cols="1, 1"]
 |===
 |Operation | Name
@@ -71,21 +73,30 @@ The following table lists all production-quality procedures in the GDS library:
 [[beta-tier]]
 == Beta tier
 
+The following table lists all beta graph operations in the GDS library:
+
+[opts=header,cols="1, 1"]
+|===
+|Operation | Name
+|Generate Random Graph| <<graph-generation, gds.beta.graph.generate>>
+|===
+
 The following table lists all beta procedures in the GDS library:
 
 [[table-beta]]
-[opts=header,cols="1m"]
+[opts=header,cols="1, 1"]
 |===
-| Name
-| <<graph-generation, gds.beta.graph.generate>>
-| <<algorithms-k1coloring, gds.beta.k1coloring.stream>>
-| <<algorithms-k1coloring, gds.beta.k1coloring.stream.estimate>>
-| <<algorithms-k1coloring, gds.beta.k1coloring.write>>
-| <<algorithms-k1coloring, gds.beta.k1coloring.write.estimate>>
-| <<algorithms-modularity-optimization, gds.beta.modularityOptimization.stream>>
-| <<algorithms-modularity-optimization, gds.beta.modularityOptimization.stream.estimate>>
-| <<algorithms-modularity-optimization, gds.beta.modularityOptimization.write>>
-| <<algorithms-modularity-optimization, gds.beta.modularityOptimization.write.estimate>>
+|Algorithm | Name
+.4+<.^|<<algorithms-k1coloring, K1Coloring>>
+| gds.beta.k1coloring.stream
+| gds.beta.k1coloring.stream.estimate
+| gds.beta.k1coloring.write
+| gds.beta.k1coloring.write.estimate
+.4+<.^| <<algorithms-modularity-optimization, Modularity Optimization>>
+| gds.beta.modularityOptimization.stream
+| gds.beta.modularityOptimization.stream.estimate
+| gds.beta.modularityOptimization.write
+| gds.beta.modularityOptimization.write.estimate
 |===
 
 [[alpha-tier]]
@@ -94,7 +105,7 @@ The following table lists all beta procedures in the GDS library:
 The following table lists all alpha procedures in the GDS library:
 
 [[table-alpha]]
-[opts=header,cols="1m"]
+[opts=header,cols="1"]
 |===
 | Name
 | <<algorithm-all-pairs-shortest-path-sample, gds.alpha.allShortestPaths.stream>>
@@ -149,6 +160,7 @@ The following table lists all functions in the GDS library:
 |===
 | Name
 | gds.version
+| gds.list
 | gds.graph.exists
 | gds.util.asNode
 | gds.util.asNodes
