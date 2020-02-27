@@ -8,7 +8,7 @@ The library consists of a number of graph algorithms, exposed as procedures and 
 
 Please report any bugs, concerns, or other questions as GitHub issues to this repository.
 
-For more information see the [contribution guidelines for this project](CONTRIBUTING.md).
+For more information see the link:CONTRIBUTING.md[contribution guidelines for this project].
 
 == License
 
