@@ -51,6 +51,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 
 abstract class DocTestBase extends BaseProcTest {
 
@@ -143,7 +144,7 @@ abstract class DocTestBase extends BaseProcTest {
     private QueryExampleConsumer defaultQueryExampleConsumer() {
         return (query, expectedColumns, expectedRows) -> {
             runInTransaction(db, tx -> {
-                try (Result result = GraphDatabaseApiProxy.runQuery(db, tx, query, Collections.emptyMap())) {
+                try (Result result = runQueryWithoutClosingTheResult(db, tx, query, Collections.emptyMap())) {
                     assertEquals(expectedColumns, result.columns());
                     AtomicInteger index = new AtomicInteger(0);
                     result.accept(actualRow -> {

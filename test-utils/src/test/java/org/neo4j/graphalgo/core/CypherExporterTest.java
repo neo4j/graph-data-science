@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -52,7 +53,7 @@ final class CypherExporterTest {
                 "  (nC)-[:TYPE]->(nD)";
 
         db = TestDatabaseCreator.createTestDatabase();
-        db.runQuery(createGraph);
+        QueryRunner.runQuery(db, createGraph);
     }
 
     @AfterEach

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 
@@ -89,7 +90,7 @@ public abstract class RandomGraphTestCase {
         final GraphDbApi db = TestDatabaseCreator.createTestDatabase();
         for (String cypher : cyphers) {
             try {
-                db.runQuery(cypher);
+                QueryRunner.runQuery(db, cypher);
             } catch (Exception e) {
                 markFailure();
                 throw e;

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -178,29 +177,17 @@ public class CypherFactory extends GraphStoreFactory {
         <T> T fork(Function<Transaction, T> block) {
             GraphDatabaseApiProxy.Transactions txs = newKernelTransaction(db);
             try (Transaction tx = txs.tx();
-                 KernelTransaction ktx = txs.ktx();
-                 KernelTransaction.Revertable ignore = ktx.overrideWith(securityContext)) {
+                 KernelTransaction.Revertable ignore = txs.ktx().overrideWith(securityContext)) {
                 return block.apply(tx);
-            } catch (TransactionFailureException e) {
-                throw new RuntimeException(e);
             }
         }
 
         @Override
         public void close() {
-            // need to make sure to call every close, so ugly nested try-finally
             try {
                 this.revertTop.close();
             } finally {
-                if (top.txShouldBeClosed()) {
-                    try {
-                        top.ktx().close();
-                    } catch (TransactionFailureException e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        top.tx().close();
-                    }
-                }
+                top.close();
             }
         }
     }

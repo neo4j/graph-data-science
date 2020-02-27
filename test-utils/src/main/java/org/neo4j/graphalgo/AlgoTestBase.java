@@ -30,11 +30,11 @@ public class AlgoTestBase {
     public GraphDbApi db;
 
     protected void runQuery(String query) {
-        db.runQuery(query);
+        QueryRunner.runQuery(db, query);
     }
 
     protected void runQuery(String query, Consumer<Result.ResultRow> check) {
-        db.runQuery(query, check);
+        QueryRunner.runQueryWithRowConsumer(db, query, check);
     }
 
     protected void runQuery(GraphDatabaseService passedInDb, String query) {

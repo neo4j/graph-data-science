@@ -19,10 +19,11 @@
  */
 package org.neo4j.graphalgo.utils;
 
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.Transactions;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.withKernelTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
 public abstract class StatementApi {
@@ -42,26 +43,21 @@ public abstract class StatementApi {
     }
 
     protected final <T> T applyInTransaction(TxFunction<T> fun) {
-        return withKernelTransaction(api, ktx -> {
-            try {
-                return fun.apply(ktx);
-            } catch (Exception e) {
-                throwIfUnchecked(e);
-                throw new RuntimeException(e);
-            }
-        });
+        try (Transactions transactions = newKernelTransaction(api)) {
+            return fun.apply(transactions.ktx());
+        } catch (Exception e) {
+            throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
     }
 
     protected final void acceptInTransaction(TxConsumer fun) {
-        withKernelTransaction(api, ktx -> {
-            try {
-                fun.accept(ktx);
-            } catch (Exception e) {
-                throwIfUnchecked(e);
-                throw new RuntimeException(e);
-            }
-            return null;
-        });
+        try (Transactions transactions = newKernelTransaction(api)) {
+            fun.accept(transactions.ktx());
+        } catch (Exception e) {
+            throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
     }
 
     protected final int getOrCreatePropertyToken(String propertyKey) {

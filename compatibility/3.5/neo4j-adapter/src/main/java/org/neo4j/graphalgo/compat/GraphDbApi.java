@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -46,8 +45,6 @@ import org.neo4j.storageengine.api.StoreId;
 import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public final class GraphDbApi implements GraphDatabaseAPI {
     private final GraphDatabaseAPI api;
@@ -56,33 +53,8 @@ public final class GraphDbApi implements GraphDatabaseAPI {
         this.api = api;
     }
 
-    public void withinTransaction(Consumer<Transaction> action) {
-        try (Transaction transaction = api.beginTx()) {
-            action.accept(transaction);
-        }
-    }
-
-    public <T> T withinTransactionApply(Function<Transaction, T> action) {
-        try (Transaction transaction = api.beginTx()) {
-            return action.apply(transaction);
-        }
-    }
-
-    public void runQuery(String query) throws QueryExecutionException {
-        QueryRunner.runQuery(api, query);
-    }
-
-    public void runQuery( String query, Consumer<Result.ResultRow> check ) throws QueryExecutionException {
-        QueryRunner.runQueryWithRowConsumer(api, query, check);
-    }
-
-    public void runQuery( String query, Map<String,Object> parameters ) throws QueryExecutionException {
-        QueryRunner.runQuery(api, query, parameters);
-    }
-
     // delegate methods
 
-    @Override
     public void shutdown() {
         api.shutdown();
     }
