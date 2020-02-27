@@ -41,6 +41,8 @@ public final class QueryRunner {
 
     private QueryRunner() {}
 
+    private static final Result.ResultVisitor<RuntimeException> CONSUME_ROWS = ignore -> true;
+
     public static void runQueryWithRowConsumer(
         GraphDatabaseService db,
         String username,
@@ -86,7 +88,9 @@ public final class QueryRunner {
 
     public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
         try (Transaction tx = db.beginTx()) {
-            tx.execute(query, params).close();
+            Result result = tx.execute(query, params);
+            result.accept(CONSUME_ROWS);
+            result.close();
             tx.commit();
         }
     }
@@ -95,7 +99,9 @@ public final class QueryRunner {
         try (Transaction tx = db.beginTx();
              KernelTransaction.Revertable ignored = withUsername(tx, username)
         ) {
-            tx.execute(query, params).close();
+            Result result = tx.execute(query, params);
+            result.accept(CONSUME_ROWS);
+            result.close();
             tx.commit();
         }
     }

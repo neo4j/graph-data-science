@@ -289,7 +289,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @Test
     void returnEmptyStreamWhenNoGraphsAreLoaded() {
-        long numberOfRows = runQuery("CALL gds.graph.list()", Result::stream).count();
+        long numberOfRows = runQuery("CALL gds.graph.list()", r -> r.stream().count());
         assertThat(numberOfRows, is(0L));
     }
 

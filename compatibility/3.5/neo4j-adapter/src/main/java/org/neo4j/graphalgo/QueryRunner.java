@@ -41,6 +41,8 @@ import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public final class QueryRunner {
 
+    private static final Result.ResultVisitor<RuntimeException> CONSUME_ROWS = ignore -> true;
+
     private QueryRunner() {}
 
     public static void runQueryWithRowConsumer(
@@ -88,7 +90,9 @@ public final class QueryRunner {
 
     public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
         try (Transaction tx = db.beginTx()) {
-            db.execute(query, params).close();
+            Result result = db.execute(query, params);
+            result.accept(CONSUME_ROWS);
+            result.close();
             tx.success();
         }
     }
@@ -97,7 +101,9 @@ public final class QueryRunner {
         try (Transaction tx = db.beginTx();
              KernelTransaction.Revertable ignored = withUsername(tx, username)
         ) {
-            db.execute(query, params).close();
+            Result result = db.execute(query, params);
+            result.accept(CONSUME_ROWS);
+            result.close();
             tx.success();
         }
     }

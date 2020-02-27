@@ -83,14 +83,12 @@ class RandomWalkProcTest extends BaseProcTest {
             .addParameter("walks", 1)
             .yields();
 
-        try (ResourceIterator<List<Long>> result = runQuery(
-            query,
-            r -> r.columnAs("nodeIds")
-        )) {
+        runQueryWithResultConsumer(query, r -> {
+            ResourceIterator<List<Long>> result = r.columnAs("nodeIds");
             List<Long> path = result.next();
             assertEquals(1L, path.get(0).longValue());
             assertNotEquals(1L, path.get(1).longValue());
-        }
+        });
     }
 
     @Test
@@ -145,14 +143,15 @@ class RandomWalkProcTest extends BaseProcTest {
             .addParameter("walks", 100)
             .yields();
 
-        ResourceIterator<List<Long>> results = runQuery(query, r -> r.columnAs("nodeIds"));
-
-        Set<Long> nodeIds = new HashSet<>();
-        while (results.hasNext()) {
-            List<Long> path = results.next();
-            nodeIds.add(path.get(0));
-        }
-        assertEquals(NODE_COUNT, nodeIds.size(), "Should have visited all nodes.");
+        runQueryWithResultConsumer(query, r -> {
+            ResourceIterator<List<Long>> results = r.columnAs("nodeIds");
+                Set<Long> nodeIds = new HashSet<>();
+            while (results.hasNext()) {
+                List<Long> path = results.next();
+                nodeIds.add(path.get(0));
+            }
+            assertEquals(NODE_COUNT, nodeIds.size(), "Should have visited all nodes.");
+        });
     }
 
     @Test
@@ -207,9 +206,10 @@ class RandomWalkProcTest extends BaseProcTest {
             .addParameter("inOut", 1)
             .yields();
 
-        ResourceIterator<List<Long>> results = runQuery(query, r -> r.columnAs("nodeIds"));
-
-        assertTrue(results.hasNext());
+        runQueryWithResultConsumer(query, r -> {
+            ResourceIterator<List<Long>> results = r.columnAs("nodeIds");
+            assertTrue(results.hasNext());
+        });
     }
 
     @Test
@@ -225,14 +225,15 @@ class RandomWalkProcTest extends BaseProcTest {
             .addParameter("inOut", 1)
             .yields();
 
-        ResourceIterator<List<Long>> results = runQuery(query, r -> r.columnAs("nodeIds"));
-
-        Set<Long> nodeIds = new HashSet<>();
-        while (results.hasNext()) {
-            List<Long> record = results.next();
-            nodeIds.add(record.get(0));
-        }
-        assertEquals(NODE_COUNT, nodeIds.size(), "Should have visited all nodes.");
+        runQueryWithResultConsumer(query, r -> {
+            ResourceIterator<List<Long>> results = r.columnAs("nodeIds");
+            Set<Long> nodeIds = new HashSet<>();
+            while (results.hasNext()) {
+                List<Long> record = results.next();
+                nodeIds.add(record.get(0));
+            }
+            assertEquals(NODE_COUNT, nodeIds.size(), "Should have visited all nodes.");
+        });
     }
 
     @Test
@@ -249,10 +250,11 @@ class RandomWalkProcTest extends BaseProcTest {
             .addParameter("inOut", 1)
             .yields();
 
-        ResourceIterator<List<Long>> results = runQuery(query, r -> r.columnAs("nodeIds"));
-
-        results.next();
-        results.next();
-        assertTrue(!results.hasNext(), "There should be only two results.");
+        runQueryWithResultConsumer(query, r -> {
+            ResourceIterator<List<Long>> results = r.columnAs("nodeIds");
+            results.next();
+            results.next();
+            assertTrue(!results.hasNext(), "There should be only two results.");
+        });
     }
 }
