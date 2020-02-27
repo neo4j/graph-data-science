@@ -45,8 +45,8 @@ import org.neo4j.graphdb.Transaction;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class WccTest extends AlgoTestBase {
 

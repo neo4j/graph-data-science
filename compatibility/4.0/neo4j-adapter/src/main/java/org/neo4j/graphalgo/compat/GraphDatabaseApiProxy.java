@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.common.DependencyResolver;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;

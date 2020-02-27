@@ -56,11 +56,11 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNodes;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNodes;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllNodes;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.core.utils.RawValues.combineIntInt;
 
 class ParallelGraphLoadingTest extends RandomGraphTestCase {
