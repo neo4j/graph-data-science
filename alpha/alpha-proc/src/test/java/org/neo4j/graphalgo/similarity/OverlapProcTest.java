@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.Result;
 
 import java.util.Collections;
@@ -36,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class OverlapProcTest extends BaseProcTest {
@@ -122,19 +122,19 @@ class OverlapProcTest extends BaseProcTest {
 
         int count = applyInTransaction(db, tx -> {
             try (
-                Result result1 = GraphDatabaseApiProxy.runQuery(db, tx,
+                Result result1 = runQueryWithoutClosingTheResult(db, tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 1, "topK", 0))
                 );
-                Result result2 = GraphDatabaseApiProxy.runQuery(db, tx,
+                Result result2 = runQueryWithoutClosingTheResult(db, tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 2, "topK", 0))
                 );
-                Result result4 = GraphDatabaseApiProxy.runQuery(db, tx,
+                Result result4 = runQueryWithoutClosingTheResult(db, tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 4, "topK", 0))
                 );
-                Result result8 = GraphDatabaseApiProxy.runQuery(db, tx,
+                Result result8 = runQueryWithoutClosingTheResult(db, tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 8, "topK", 0))
                 )
@@ -162,19 +162,19 @@ class OverlapProcTest extends BaseProcTest {
 
         runInTransaction(db, tx -> {
             try (
-                Result result1 = GraphDatabaseApiProxy.runQuery(db, tx,
+                Result result1 = runQueryWithoutClosingTheResult(db, tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 1))
                 );
-                Result result2 = GraphDatabaseApiProxy.runQuery(db, tx,
+                Result result2 = runQueryWithoutClosingTheResult(db, tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 2))
                 );
-                Result result4 = GraphDatabaseApiProxy.runQuery(db, tx,
+                Result result4 = runQueryWithoutClosingTheResult(db, tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 4))
                 );
-                Result result8 = GraphDatabaseApiProxy.runQuery(db, tx,
+                Result result8 = runQueryWithoutClosingTheResult(db, tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 8))
                 )

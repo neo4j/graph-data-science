@@ -68,6 +68,10 @@ public class BaseProcTest {
         GraphDatabaseApiProxy.registerFunctions(db, functionClasses);
     }
 
+    protected void registerAggregationFunctions(Class<?>... functionClasses) throws Exception {
+        GraphDatabaseApiProxy.registerAggregationFunctions(db, functionClasses);
+    }
+
     protected void registerProcedures(Class<?>... procedureClasses) throws Exception {
         registerProcedures(db, procedureClasses);
     }
@@ -88,7 +92,14 @@ public class BaseProcTest {
         @Language("Cypher") String query,
         Consumer<Result.ResultRow> check
     ) {
-        QueryRunner.runQueryWithRowConsumer(db, query, emptyMap(), discardTx(check));
+        QueryRunner.runQueryWithRowConsumer(db, query, check);
+    }
+
+    protected void runQueryWithRowConsumer(
+        @Language("Cypher") String query,
+        BiConsumer<Transaction, Result.ResultRow> check
+    ) {
+        QueryRunner.runQueryWithRowConsumer(db, query, emptyMap(), check);
     }
 
     protected void runQueryWithRowConsumer(
@@ -175,7 +186,7 @@ public class BaseProcTest {
         return QueryRunner.runQuery(db, query, params, resultFunction);
     }
 
-    private void runQueryWithResultConsumer(
+    protected void runQueryWithResultConsumer(
         @Language("Cypher") String query,
         Map<String, Object> params,
         Consumer<Result> check

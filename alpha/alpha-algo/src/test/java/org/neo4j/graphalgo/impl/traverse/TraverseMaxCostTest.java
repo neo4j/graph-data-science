@@ -158,7 +158,7 @@ class TraverseMaxCostTest extends AlgoTestBase {
     }
 
     private String name(long nodeId) {
-        return expectNodeById(db, nodeId, node -> node.getProperty("name").toString());
+        return applyInTransaction(db, tx -> expectNodeById(db, tx, nodeId).getProperty("name").toString());
     }
 
     private long id(String name) {

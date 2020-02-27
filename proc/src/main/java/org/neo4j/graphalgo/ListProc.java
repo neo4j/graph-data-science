@@ -35,7 +35,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutCl
 public class ListProc {
 
     @Context
-    KernelTransaction transaction;
+    public KernelTransaction transaction;
 
     private static final String QUERY =
             " CALL dbms.procedures() " +
