@@ -128,7 +128,21 @@ public final class GraphDatabaseApiProxy {
         return new ProcedureCallContext(outputFieldNames, false);
     }
 
-    public static Result runQueryWithoutClosingTheResult(GraphDatabaseService db, Transaction tx, String query, Map<String, Object> params) {
+    public static Result runQueryWithoutClosingTheResult(
+        GraphDatabaseService db,
+        Transaction tx,
+        String query,
+        Map<String, Object> params
+    ) {
+        return db.execute(query, params);
+    }
+
+    public static Result runQueryWithoutClosingTheResult(
+        GraphDatabaseService db,
+        KernelTransaction tx,
+        String query,
+        Map<String, Object> params
+    ) {
         return db.execute(query, params);
     }
 

@@ -144,6 +144,15 @@ public final class GraphDatabaseApiProxy {
         return tx.execute(query, params);
     }
 
+    public static Result runQueryWithoutClosingTheResult(
+        GraphDatabaseService db,
+        KernelTransaction tx,
+        String query,
+        Map<String, Object> params
+    ) {
+        return tx.internalTransaction().execute(query, params);
+    }
+
     public static void runInTransaction(GraphDatabaseService db, Consumer<Transaction> block) {
         try (Transaction tx = db.beginTx()) {
             block.accept(tx);
