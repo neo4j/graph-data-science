@@ -67,7 +67,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
 
     public static NodeProjections fromString(@Nullable String labelString) {
         if (StringUtils.isEmpty(labelString)) {
-            return empty();
+            create(emptyMap());
         }
         if (labelString.equals(PROJECT_ALL.name)) {
             return create(singletonMap(PROJECT_ALL, NodeProjection.all()));

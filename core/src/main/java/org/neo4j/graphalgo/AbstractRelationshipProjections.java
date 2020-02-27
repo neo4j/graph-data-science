@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 
@@ -64,7 +65,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
 
     public static RelationshipProjections fromString(@Nullable String typeString) {
         if (StringUtils.isEmpty(typeString)) {
-            return empty();
+            create(emptyMap());
         }
         if (typeString.equals(PROJECT_ALL.name)) {
             return create(singletonMap(PROJECT_ALL, RelationshipProjection.all()));

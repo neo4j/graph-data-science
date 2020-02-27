@@ -233,17 +233,6 @@ class GraphCreateProcTest extends BaseProcTest {
         assertGraphExists("g");
     }
 
-    @Test
-    void emptyProjectionsShouldProjectAll() {
-        String query = "CALL gds.graph.create('g', '', '') YIELD nodeCount, relationshipCount";
-
-        assertCypherResult(query, singletonList(
-            map("nodeCount", 2L, "relationshipCount", 1L)
-        ));
-
-        assertGraphExists("g");
-    }
-
     @ParameterizedTest(name = "{0}, nodeProjection = {1}")
     @MethodSource("nodeProjectionVariants")
     void nodeProjectionVariants(String description, Object nodeProjection, Map<String, Object> desugaredNodeProjection) {
@@ -1107,7 +1096,7 @@ class GraphCreateProcTest extends BaseProcTest {
     // Failure cases
 
     @ParameterizedTest(name = "projections: {0}")
-    @ValueSource(strings = {"'*', {}", "{}, '*'"})
+    @ValueSource(strings = {"'*', {}", "{}, '*'", "'', '*'", "'*', ''", "'', ''"})
     void failsOnEmptyProjection(String projection) {
         String query = "CALL gds.graph.create('g', " + projection + ")";
 
