@@ -38,11 +38,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityStatsProc extends NodeSimilarityBaseProc<NodeSimilarityStatsConfig> {
 
-    @Procedure(name = "gds.nodeSimilarity.stats", mode = Mode.WRITE)
+    @Procedure(name = "gds.nodeSimilarity.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -55,7 +55,7 @@ public class NodeSimilarityStatsProc extends NodeSimilarityBaseProc<NodeSimilari
         return stats(result);
     }
 
-    @Procedure(value = "gds.nodeSimilarity.stats.estimate", mode = WRITE)
+    @Procedure(value = "gds.nodeSimilarity.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

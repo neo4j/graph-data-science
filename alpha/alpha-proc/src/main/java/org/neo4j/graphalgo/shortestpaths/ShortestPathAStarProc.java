@@ -36,13 +36,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, ShortestPathAStar, ShortestPathAStarConfig> {
 
     private static final String DESCRIPTION = "The A* algorithm is a search algorithm and improves on the classic Dijkstra algorithm.";
 
-    @Procedure(name = "gds.alpha.shortestPath.astar.stream", mode = WRITE)
+    @Procedure(name = "gds.alpha.shortestPath.astar.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ShortestPathAStar.Result> astarStream(
         @Name(value = "graphName") Object graphNameOrConfig,

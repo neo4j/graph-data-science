@@ -43,6 +43,8 @@ import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.WRITE;
+
 public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree, KSpanningTreeConfig> {
 
     private static final String MAX_DESCRIPTION =
@@ -57,7 +59,7 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
 
     public static final String DEFAULT_CLUSTER_PROPERTY = "partition";
 
-    @Procedure(value = "gds.alpha.spanningTree.kmax.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.spanningTree.kmax.write", mode = WRITE)
     @Description(MAX_DESCRIPTION)
     public Stream<Prim.Result> kmax(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -67,7 +69,7 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
         return computeAndWrite(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.alpha.spanningTree.kmin.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.spanningTree.kmin.write", mode = WRITE)
     @Description(MIN_DESCRIPTION)
     public Stream<Prim.Result> kmin(
         @Name(value = "graphName") Object graphNameOrConfig,

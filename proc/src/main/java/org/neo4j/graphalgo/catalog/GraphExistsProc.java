@@ -27,11 +27,13 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class GraphExistsProc extends CatalogProc {
 
     private static final String DESCRIPTION = "Checks if a graph exists in the catalog.";
 
-    @Procedure(name = "gds.graph.exists", mode = Mode.WRITE)
+    @Procedure(name = "gds.graph.exists", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphExistsResult> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
         validateGraphName(graphName);

@@ -34,14 +34,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class OverlapProc extends SimilarityProc<OverlapAlgorithm, OverlapConfig> {
 
     private static final String DESCRIPTION = "Overlap-similarity is an algorithm for finding similar nodes based on the overlap coefficient.";
 
-    @Procedure(name = "gds.alpha.similarity.overlap.stream", mode = WRITE)
+    @Procedure(name = "gds.alpha.similarity.overlap.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> overlapStream(
         @Name(value = "graphName") Object graphNameOrConfig,

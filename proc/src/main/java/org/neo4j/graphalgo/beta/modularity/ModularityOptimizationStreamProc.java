@@ -33,11 +33,11 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
 public class ModularityOptimizationStreamProc extends ModularityOptimizationBaseProc<ModularityOptimizationStreamConfig> {
 
-    @Procedure(name = "gds.beta.modularityOptimization.stream", mode = WRITE)
+    @Procedure(name = "gds.beta.modularityOptimization.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -58,7 +58,7 @@ public class ModularityOptimizationStreamProc extends ModularityOptimizationBase
             }).orElse(Stream.empty());
     }
 
-    @Procedure(value = "gds.beta.modularityOptimization.stream.estimate", mode = WRITE)
+    @Procedure(value = "gds.beta.modularityOptimization.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -33,9 +33,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class GraphExportProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.graph.export", mode = Mode.WRITE)
+    @Procedure(name = "gds.alpha.graph.export", mode = READ)
     @Description("Exports a named graph into a new Neo4j database.")
     public Stream<GraphExportResult> create(
         @Name(value = "graphName") String graphName,

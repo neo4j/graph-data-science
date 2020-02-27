@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public final class PearsonProc extends SimilarityProc<PearsonAlgorithm, PearsonConfig> {
@@ -43,7 +43,7 @@ public final class PearsonProc extends SimilarityProc<PearsonAlgorithm, PearsonC
         "Pearson-similarity is an algorithm for finding similar nodes " +
         "based on the pearson correlation coefficient.";
 
-    @Procedure(name = "gds.alpha.similarity.pearson.stream", mode = WRITE)
+    @Procedure(name = "gds.alpha.similarity.pearson.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> pearsonStream(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -41,7 +41,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
 public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig> {
 
@@ -50,7 +50,7 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
         "the present depth prior to moving on to the nodes at the next depth level.";
     private static boolean isBfs;
 
-    @Procedure(name = "gds.alpha.bfs.stream", mode = WRITE)
+    @Procedure(name = "gds.alpha.bfs.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<WalkResult> bfs(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -60,7 +60,7 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
         return stream(graphNameOrConfig, configuration);
     }
 
-    @Procedure(name = "gds.alpha.dfs.stream", mode = WRITE)
+    @Procedure(name = "gds.alpha.dfs.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<WalkResult> dfs(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -127,6 +127,6 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
 
         Traverse traverse = computationResult.algorithm();
         long[] nodes = traverse.resultNodes();
-        return Stream.of(new WalkResult(nodes, WalkPath.toPath(api, transaction.internalTransaction(), nodes)));
+        return Stream.of(new WalkResult(nodes, WalkPath.toPath(api, transaction, nodes)));
     }
 }

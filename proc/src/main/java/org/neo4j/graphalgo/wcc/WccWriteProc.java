@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
@@ -51,7 +51,7 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
         return write(computationResult);
     }
 
-    @Procedure(value = "gds.wcc.write.estimate", mode = WRITE)
+    @Procedure(value = "gds.wcc.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> writeEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

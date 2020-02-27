@@ -36,11 +36,11 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
 public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
 
-    @Procedure(value = "gds.louvain.stream", mode = WRITE)
+    @Procedure(value = "gds.louvain.stream", mode = READ)
     @Description(LOUVAIN_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -67,7 +67,7 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
             });
     }
 
-    @Procedure(value = "gds.louvain.stream.estimate", mode = WRITE)
+    @Procedure(value = "gds.louvain.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -76,7 +76,7 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.louvain.stats", mode = WRITE)
+    @Procedure(value = "gds.louvain.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -90,7 +90,7 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
             .map(StatsResult::from);
     }
 
-    @Procedure(value = "gds.louvain.stats.estimate", mode = WRITE)
+    @Procedure(value = "gds.louvain.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

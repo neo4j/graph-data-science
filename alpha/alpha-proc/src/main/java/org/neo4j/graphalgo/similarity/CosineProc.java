@@ -34,14 +34,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class CosineProc extends SimilarityProc<CosineAlgorithm, CosineConfig> {
 
     private static final String DESCRIPTION = "Cosine-similarity is an algorithm for finding similar nodes based on the cosine similarity metric.";
 
-    @Procedure(name = "gds.alpha.similarity.cosine.stream", mode = WRITE)
+    @Procedure(name = "gds.alpha.similarity.cosine.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityResult> cosineStream(
         @Name(value = "graphName") Object graphNameOrConfig,

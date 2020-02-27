@@ -33,11 +33,11 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
 public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPropagationStreamConfig> {
 
-    @Procedure(value = "gds.labelPropagation.stream", mode = WRITE)
+    @Procedure(value = "gds.labelPropagation.stream", mode = READ)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -51,7 +51,7 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
         return stream(computationResult);
     }
 
-    @Procedure(value = "gds.labelPropagation.stream.estimate", mode = WRITE)
+    @Procedure(value = "gds.labelPropagation.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -60,7 +60,7 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.labelPropagation.stats", mode = WRITE)
+    @Procedure(value = "gds.labelPropagation.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -74,7 +74,7 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
             .map(StatsResult::from);
     }
 
-    @Procedure(value = "gds.labelPropagation.stats.estimate", mode = WRITE)
+    @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

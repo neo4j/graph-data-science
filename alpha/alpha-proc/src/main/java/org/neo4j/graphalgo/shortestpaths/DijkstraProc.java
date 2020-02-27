@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -44,6 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPathDijkstra, DijkstraConfig> {
@@ -58,7 +58,7 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
      * supports direction flag in configuration ( see {@link org.neo4j.graphalgo.core.utils.Directions})
      * default is: BOTH
      */
-    @Procedure(name = "gds.alpha.shortestPath.stream", mode = WRITE)
+    @Procedure(name = "gds.alpha.shortestPath.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ShortestPathDijkstra.Result> dijkstraStream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -71,7 +71,7 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
         return computationResult.algorithm().resultStream();
     }
 
-    @Procedure(value = "gds.alpha.shortestPath.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.shortestPath.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<DijkstraResult> dijkstraWrite(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -33,11 +33,11 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
 public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringStreamConfig> {
 
-    @Procedure(name = "gds.beta.k1coloring.stream", mode = WRITE)
+    @Procedure(name = "gds.beta.k1coloring.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -57,7 +57,7 @@ public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringStreamCon
             }).orElse(Stream.empty());
     }
 
-    @Procedure(value = "gds.beta.k1coloring.stream.estimate", mode = WRITE)
+    @Procedure(value = "gds.beta.k1coloring.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
