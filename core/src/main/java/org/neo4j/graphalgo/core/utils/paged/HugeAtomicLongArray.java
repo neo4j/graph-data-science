@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.unsafe.impl.internal.dragons.UnsafeUtil;
 
@@ -215,6 +214,9 @@ public abstract class HugeAtomicLongArray {
 
     private static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {
 
+        // FIXME
+        private static int concurrency = 1;
+
         private static HugeAtomicLongArray of(long size, LongUnaryOperator gen, AllocationTracker tracker) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
@@ -229,7 +231,7 @@ public abstract class HugeAtomicLongArray {
         private static void parallelSetAll(LongUnaryOperator gen, long[] page) {
             parallelStreamConsume(
                 IntStream.range(0, page.length),
-                Pools.CORE_POOL_SIZE,
+                concurrency,
                 stream -> stream.forEach(i -> page[i] = gen.applyAsLong(i))
             );
         }
@@ -301,6 +303,9 @@ public abstract class HugeAtomicLongArray {
 
     private static final class PagedHugeAtomicLongArray extends HugeAtomicLongArray {
 
+        // FIXME
+        private static int concurrency = 1;
+
         private static HugeAtomicLongArray of(long size, LongUnaryOperator gen, AllocationTracker tracker) {
             int numPages = numberOfPages(size);
             int lastPage = numPages - 1;
@@ -328,7 +333,7 @@ public abstract class HugeAtomicLongArray {
         private static void parallelSetAll(long[] array, IntToLongFunction generator) {
             parallelStreamConsume(
                 IntStream.range(0, array.length),
-                Pools.CORE_POOL_SIZE,
+                concurrency,
                 intStream -> intStream.forEach(i -> array[i] = generator.applyAsLong(i))
             );
 

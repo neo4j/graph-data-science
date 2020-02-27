@@ -29,7 +29,7 @@ class CentralityResultWithStatisticsTest {
     @Test
     void doubleArrayResult() {
         CentralityResultWithStatistics result = CentralityResultWithStatistics
-                .of(new CentralityResult(HugeDoubleArray.of(1, 2, 3, 4)));
+                .of(new CentralityResult(HugeDoubleArray.of(1, 2, 3, 4)), 4);
 
         assertEquals(4.0, result.computeMax(), 0.01);
         assertEquals(10.0, result.computeL1Norm(), 0.01);

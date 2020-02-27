@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 
 import java.util.function.DoubleUnaryOperator;
@@ -33,8 +32,8 @@ public abstract class CentralityResultWithStatistics extends CentralityResult {
         this.result = result;
     }
 
-    public static CentralityResultWithStatistics of(CentralityResult result) {
-        return new HugeDoubleArrayResultWithStatistics(result);
+    public static CentralityResultWithStatistics of(CentralityResult result, int concurrency) {
+        return new HugeDoubleArrayResultWithStatistics(result, concurrency);
     }
 
     public abstract double computeMax();
@@ -65,23 +64,26 @@ public abstract class CentralityResultWithStatistics extends CentralityResult {
 
     static final class HugeDoubleArrayResultWithStatistics extends CentralityResultWithStatistics {
 
-        HugeDoubleArrayResultWithStatistics(CentralityResult result) {
+        private final int concurrency;
+
+        HugeDoubleArrayResultWithStatistics(CentralityResult result, int concurrency) {
             super(result);
+            this.concurrency = concurrency;
         }
 
         @Override
         public double computeMax() {
-            return HugeNormalizationComputations.max(result.array(), 1.0, Pools.CORE_POOL_SIZE);
+            return HugeNormalizationComputations.max(result.array(), 1.0, concurrency);
         }
 
         @Override
         public double computeL2Norm() {
-            return Math.sqrt(HugeNormalizationComputations.squaredSum(result.array(), Pools.CORE_POOL_SIZE));
+            return Math.sqrt(HugeNormalizationComputations.squaredSum(result.array(), concurrency));
         }
 
         @Override
         public double computeL1Norm() {
-            return HugeNormalizationComputations.l1Norm(result.array(), Pools.CORE_POOL_SIZE);
+            return HugeNormalizationComputations.l1Norm(result.array(), concurrency);
         }
     }
 }

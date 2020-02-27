@@ -61,7 +61,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         );
         PageRank algorithm = computationResult.algorithm();
         Graph graph = computationResult.graph();
-        CentralityResultWithStatistics stats = CentralityResultWithStatistics.of(algorithm.result());
+        CentralityResultWithStatistics stats = CentralityResultWithStatistics.of(algorithm.result(), computationResult.config().concurrency());
         EigenvectorCentralityConfig config = computationResult.config();
         CentralityResult normalizedResults = normalization(config.normalization()).apply(stats);
 
@@ -99,13 +99,13 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRank, PageRank, EigenvectorCentralityConfig> result = compute(
+        ComputationResult<PageRank, PageRank, EigenvectorCentralityConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        CentralityResultWithStatistics centralityResult = CentralityResultWithStatistics.of(result.result().result());
-        String normalization = result.config().normalization();
-        return CentralityUtils.streamResults(result.graph(), normalization(normalization).apply(centralityResult));
+        CentralityResultWithStatistics centralityResult = CentralityResultWithStatistics.of(computationResult.result().result(), computationResult.config().concurrency());
+        String normalization = computationResult.config().normalization();
+        return CentralityUtils.streamResults(computationResult.graph(), normalization(normalization).apply(centralityResult));
     }
 
 

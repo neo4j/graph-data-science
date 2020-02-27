@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
-import org.jetbrains.annotations.TestOnly;
-
 public final class ConcurrencyMonitor {
 
     private static ConcurrencyMonitor INSTANCE;
@@ -33,7 +31,6 @@ public final class ConcurrencyMonitor {
     }
 
     private enum State {
-        UNSET,
         UNLIMITED,
         LIMITED
     }
@@ -41,7 +38,7 @@ public final class ConcurrencyMonitor {
     private State currentState;
 
     private ConcurrencyMonitor() {
-        this.currentState = State.UNSET;
+        this.currentState = State.LIMITED;
     }
 
     public boolean isUnlimited() {
@@ -67,10 +64,5 @@ public final class ConcurrencyMonitor {
 
     private State get() {
         return currentState;
-    }
-
-    @TestOnly
-    void reset() {
-        instance().set(State.UNSET);
     }
 }

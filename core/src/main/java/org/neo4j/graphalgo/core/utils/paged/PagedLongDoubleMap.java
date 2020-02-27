@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.IntDoubleMap;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -52,6 +51,9 @@ public final class PagedLongDoubleMap {
                         .build();
             })).build();
 
+    // FIXME
+    private int concurrency = 1;
+
     public static PagedLongDoubleMap of(long size, AllocationTracker tracker) {
         int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
         tracker.add(sizeOfObjectArray(numPages));
@@ -74,7 +76,7 @@ public final class PagedLongDoubleMap {
     }
 
     public long size() {
-        return parallelStream(Arrays.stream(pages), Pools.CORE_POOL_SIZE, stream -> stream
+        return parallelStream(Arrays.stream(pages), concurrency, stream -> stream
                 .filter(Objects::nonNull)
                 .mapToLong(TrackingIntDoubleHashMap::size)
                 .sum());
@@ -129,7 +131,7 @@ public final class PagedLongDoubleMap {
     }
 
     public OptionalLong getMaxValue() {
-        return parallelStream(Arrays.stream(pages), Pools.CORE_POOL_SIZE, stream -> stream
+        return parallelStream(Arrays.stream(pages), concurrency, stream -> stream
                 .filter(Objects::nonNull)
                 .flatMapToDouble(TrackingIntDoubleHashMap::getValuesAsStream)
                 .mapToLong(d -> (long) d)

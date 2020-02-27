@@ -20,12 +20,32 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PoolsTest {
 
-    // TODO: add tests
+    @Test
+    void shouldGetLimitedPool() {
+        ConcurrencyMonitor.instance().setLimited();
+        ThreadPoolExecutor defaultPool = (ThreadPoolExecutor) Pools.createDefaultPool();
+
+        assertEquals(4, defaultPool.getCorePoolSize());
+        assertEquals(4, defaultPool.getMaximumPoolSize());
+    }
+
+    @Test
+    void shouldGetUnlimitedPool() {
+        ConcurrencyMonitor.instance().setUnlimited();
+        ThreadPoolExecutor defaultPool = (ThreadPoolExecutor) Pools.createDefaultPool();
+
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        assertEquals(availableProcessors, defaultPool.getCorePoolSize());
+        assertEquals(2 * availableProcessors, defaultPool.getMaximumPoolSize());
+    }
+
 
 }

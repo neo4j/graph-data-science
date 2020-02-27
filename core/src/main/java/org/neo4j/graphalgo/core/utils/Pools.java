@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.graphalgo.compat.NamedThreadFactoryProxy;
+import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -32,24 +33,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static org.neo4j.graphalgo.config.ConcurrencyValidation.CONCURRENCY_LIMITATION;
+
 public final class Pools {
-
-    public static final int CORE_POOL_SIZE;
-
-    static {
-        ConcurrencyConfig concurrencyConfig = ConcurrencyConfig.of();
-        CORE_POOL_SIZE = concurrencyConfig.corePoolSize;
-    }
-
-    /**
-     * @deprecated legacy only; we validate this on the config classes now
-     */
-    @Deprecated
-    public static int allowedConcurrency(int concurrency) {
-        return Math.min(CORE_POOL_SIZE, concurrency);
-    }
-
-    private static final int DEFAULT_QUEUE_SIZE = CORE_POOL_SIZE * 50;
 
     public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createDefaultSingleThreadPool();
@@ -58,13 +44,21 @@ public final class Pools {
         throw new UnsupportedOperationException();
     }
 
-    private static ExecutorService createDefaultPool() {
+    static ExecutorService createDefaultPool() {
+        int corePoolSize, maxPoolSize;
+        if (ConcurrencyMonitor.instance().isUnlimited()) {
+            corePoolSize = Runtime.getRuntime().availableProcessors();
+            maxPoolSize = corePoolSize * 2;
+        } else {
+            corePoolSize = maxPoolSize = CONCURRENCY_LIMITATION;
+        }
+
         return new ThreadPoolExecutor(
-            CORE_POOL_SIZE,
-            CORE_POOL_SIZE * 2,
+            corePoolSize,
+            maxPoolSize,
             30L,
             TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(DEFAULT_QUEUE_SIZE),
+            new ArrayBlockingQueue<>(corePoolSize * 50),
             NamedThreadFactoryProxy.daemon(),
             new CallerBlocksPolicy()
         );

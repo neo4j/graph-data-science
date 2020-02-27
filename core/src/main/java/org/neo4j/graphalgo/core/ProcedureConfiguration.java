@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -140,21 +139,19 @@ public class ProcedureConfiguration implements AlgoBaseConfig, WriteConfig {
 
     @Override
     public int concurrency() {
-        int requestedConcurrency = configurationMap
-            .getNumber(ProcedureConstants.CONCURRENCY_KEY, AlgoBaseConfig.DEFAULT_CONCURRENCY)
-            .intValue();
-        return Pools.allowedConcurrency(requestedConcurrency);
+        return configurationMap.getNumber(
+            ProcedureConstants.CONCURRENCY_KEY,
+            AlgoBaseConfig.DEFAULT_CONCURRENCY
+        ).intValue();
     }
 
     @Override
     public int writeConcurrency() {
-        Number writeConcurrency = configurationMap.getNumber(
+        return configurationMap.getNumber(
             ProcedureConstants.WRITE_CONCURRENCY_KEY,
             ProcedureConstants.CONCURRENCY_KEY,
             AlgoBaseConfig.DEFAULT_CONCURRENCY
-        );
-        int requestedConcurrency = writeConcurrency.intValue();
-        return Pools.allowedConcurrency(requestedConcurrency);
+        ).intValue();
     }
 
     public int getBatchSize() {
