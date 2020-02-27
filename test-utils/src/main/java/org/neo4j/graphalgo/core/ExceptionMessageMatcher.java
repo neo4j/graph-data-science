@@ -22,13 +22,11 @@ package org.neo4j.graphalgo.core;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 
-@IdenticalCompat
 public final class ExceptionMessageMatcher<EX extends Throwable>
         extends TypeSafeMatcher<EX> {
 

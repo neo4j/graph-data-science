@@ -21,9 +21,7 @@ package org.neo4j.graphalgo.core;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -39,13 +37,15 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllNodes;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+
 /**
  * Exports a graph as Cypher statements, so that you could inspect it during tests or similar.
  * Absolutely NOT intented for any kind of larger graph (say, &gt; 100 nodes).
  *
  * The Cypher statement should be valid, but might not reproduce the input graph 100%.
  */
-@IdenticalCompat
 public final class CypherExporter {
 
     /**
@@ -189,13 +189,13 @@ public final class CypherExporter {
 
         @Override
         public void runInTx(GraphDatabaseService graph, Runnable action) {
-            GraphDatabaseApiProxy.runInTransaction(graph, tx -> action.run());
+            runInTransaction(graph, tx -> action.run());
         }
 
 
         @Override
         public void forEachNode(GraphDatabaseService graph, Consumer<Node> action) {
-            GraphDatabaseApiProxy.getAllNodes(graph, action);
+            runInTransaction(graph, tx -> getAllNodes(graph, tx).forEach(action));
         }
 
         @Override
