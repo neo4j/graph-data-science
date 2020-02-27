@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.impl.spanningTrees;
 
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
@@ -41,7 +41,7 @@ import java.util.function.DoubleUnaryOperator;
 public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
 
     private IdMapping idMapping;
-    private RelationshipIterator relationshipIterator;
+    private Graph graph;
     private RelationshipProperties weights;
     private final int nodeCount;
     private final DoubleUnaryOperator minMax;
@@ -52,18 +52,18 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
 
     public KSpanningTree(
         IdMapping idMapping,
-        RelationshipIterator relationshipIterator,
+        Graph graph,
         RelationshipProperties weights,
         DoubleUnaryOperator minMax,
-        int startNodeId,
+        long startNodeId,
         long k
 ) {
         this.idMapping = idMapping;
-        this.relationshipIterator = relationshipIterator;
+        this.graph = graph;
         this.weights = weights;
         this.nodeCount = Math.toIntExact(idMapping.nodeCount());
         this.minMax = minMax;
-        this.startNodeId = startNodeId;
+        this.startNodeId = (int)graph.toMappedNodeId(startNodeId);
         this.k = k;
     }
 
@@ -72,7 +72,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         ProgressLogger logger = getProgressLogger();
         Prim prim = new Prim(
             idMapping,
-            relationshipIterator,
+            graph,
             minMax,
             startNodeId
         ).withProgressLogger(getProgressLogger())
@@ -110,7 +110,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
     @Override
     public void release() {
         idMapping = null;
-        relationshipIterator = null;
+        graph = null;
         weights = null;
         spanningTree = null;
     }

@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.impl.spanningTrees;
 import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
@@ -50,18 +50,18 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
 
     public static final DoubleUnaryOperator MAX_OPERATOR = (w) -> -w;
     public static final DoubleUnaryOperator MIN_OPERATOR = (w) -> w;
-    private final RelationshipIterator relationshipIterator;
+    private final Graph graph;
     private final int nodeCount;
     private final DoubleUnaryOperator minMax;
     private final int startNodeId;
 
     private SpanningTree spanningTree;
 
-    public Prim(IdMapping idMapping, RelationshipIterator relationshipIterator, DoubleUnaryOperator minMax, int startNodeId) {
-        this.relationshipIterator = relationshipIterator;
+    public Prim(IdMapping idMapping, Graph graph, DoubleUnaryOperator minMax, long startNodeId) {
+        this.graph = graph;
         this.nodeCount = Math.toIntExact(idMapping.nodeCount());
         this.minMax = minMax;
-        this.startNodeId = startNodeId;
+        this.startNodeId = (int)graph.toMappedNodeId(startNodeId);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
             }
             effectiveNodeCount++;
             visited.put(node);
-            relationshipIterator.forEachRelationship(node, 0.0D, longToIntConsumer((s, t, w) -> {
+            graph.forEachRelationship(node, 0.0D, longToIntConsumer((s, t, w) -> {
                 if (visited.contains(t)) {
                     return true;
                 }

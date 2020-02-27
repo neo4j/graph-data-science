@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,7 +63,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(cypher);
-        registerProcedures(SpanningTreeProc.class);
+        registerProcedures(SpanningTreeProc.class, GraphCreateProc.class);
     }
 
     private long getStartNodeId() {
@@ -70,6 +71,36 @@ public class SpanningTreeProcTest extends BaseProcTest {
             "MATCH (n) WHERE n.start = true RETURN id(n) AS id",
             result -> result.<Long>columnAs("id").next()
         );
+    }
+
+    @Test
+    void github8_testOutOfBounds() {
+        String importQuery = "WITH \"https://github.com/neo4j-graph-analytics/book/raw/master/data/transport-nodes.csv\"\n" +
+                             "AS uri\n" +
+                             "LOAD CSV WITH HEADERS FROM uri  AS row\n" +
+                             "MERGE (place:Place {id:row.id})";
+        String importRelsQuery =
+                             "// Import relationships\n" +
+                             "WITH \"https://github.com/neo4j-graph-analytics/book/raw/master/data/transport-relationships.csv\"\n" +
+                             "AS uri\n" +
+                             "LOAD CSV WITH HEADERS FROM uri AS row\n" +
+                             "MATCH (origin:Place {id: row.src})\n" +
+                             "MATCH (destination:Place {id: row.dst})\n" +
+                             "MERGE (origin)-[:EROAD {distance: toInteger(row.cost)}]->(destination);";
+        String insert1024NodesQuery = "";
+        for (int i = 0; i < 1024; i++) {
+            insert1024NodesQuery = insert1024NodesQuery + "CREATE(x" + i + ":Node) ";
+        }
+        String createQuery = "CALL gds.graph.create('spanningtree_example', 'Place', {EROAD:{type:'EROAD',projection:'Undirected',properties:'distance'}})";
+        String algoQuery = "MATCH (n:Place {id:\"Amsterdam\"})\n" +
+                           "CALL gds.alpha.spanningTree.minimum.write('spanningtree_example', {weightWriteProperty:'cost', startNodeId: id(n), writeProperty:'MNIST', relationshipWeightProperty:'distance'})\n" +
+                           "YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount\n" +
+                           "RETURN createMillis, computeMillis, writeMillis, effectiveNodeCount";
+        runQuery(insert1024NodesQuery);
+        runQuery(importQuery);
+        runQuery(importRelsQuery);
+        runQuery(createQuery);
+        runQuery(algoQuery);
     }
 
     @Test

@@ -29,5 +29,5 @@ public interface SpanningTreeBaseConfig extends
     WriteConfig,
     RelationshipWeightConfig
 {
-    int startNodeId();
+    long startNodeId();
 }
