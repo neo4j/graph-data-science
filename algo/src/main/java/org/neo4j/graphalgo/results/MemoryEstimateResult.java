@@ -32,6 +32,8 @@ public class MemoryEstimateResult {
     public final Map<String, Object> mapView;
     public final long bytesMin, bytesMax;
     public long nodeCount, relationshipCount;
+    public final double heapPercentageMin;
+    public final double heapPercentageMax;
 
     public MemoryEstimateResult(MemoryTreeWithDimensions memory) {
         this(memory.memoryTree, memory.graphDimensions);
@@ -47,12 +49,23 @@ public class MemoryEstimateResult {
         MemoryRange estimateMemoryUsage,
         GraphDimensions dimensions
     ) {
+        long heapSize = Runtime.getRuntime().maxMemory();
         this.requiredMemory = estimateMemoryUsage.toString();
         this.treeView = treeView;
         this.mapView = mapView;
         this.bytesMin = estimateMemoryUsage.min;
         this.bytesMax = estimateMemoryUsage.max;
+        this.heapPercentageMin = getPercentage(bytesMin, heapSize);
+        this.heapPercentageMax = getPercentage(bytesMax, heapSize);
         this.nodeCount = dimensions.nodeCount();
         this.relationshipCount = dimensions.maxRelCount();
+    }
+
+    private double getPercentage(long bytes, long heapSize) {
+        if (heapSize == 0) {
+            return Double.NaN;
+        }
+        long milli = 1000*bytes/heapSize;
+        return (double)milli/10;
     }
 }

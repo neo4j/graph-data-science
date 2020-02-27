@@ -34,7 +34,7 @@ To make this process easier every algorithm supports the `.estimate` mode, which
 [source, cypher]
 ----
 CALL gds.<ALGO>.<MODE>.estimate(graphNameOrConfig: String|Map, configuration: Map})
-YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
+YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
 ----
 
 .Parameters
@@ -52,13 +52,15 @@ See the algorithm documentation for more information.
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type      | Description
-| requiredMemory        | string    | An estimation of the required memory in a human readable format.
-| treeView              | string    | A more detailed, human readable representation of the required memory, including estimates of the different components.
-| mapView               | string    | A more detailed representation of the required memory, including estimates of the different components.
-| bytesMin              | int       | The minimum number of bytes required.
-| bytesMax              | int       | The maximum number of bytes required.
-| nodeCount             | int       | The estimated number of nodes in the graph
-| relationshipCount     | int       | The estimated number of relationships in the graph
+| requiredMemory        | String    | An estimation of the required memory in a human readable format.
+| treeView              | String    | A more detailed, human readable representation of the required memory, including estimates of the different components.
+| mapView               | String    | A more detailed representation of the required memory, including estimates of the different components.
+| bytesMin              | Integer   | The minimum number of bytes required.
+| bytesMax              | Integer   | The maximum number of bytes required.
+| heapPercentageMin     | Float     | The minimum percentage of configured maximum heap required.
+| heapPercentageMax     | Float     | The maximum percentage of configured maximum heap required.
+| nodeCount             | Integer   | The estimated number of nodes in the graph
+| relationshipCount     | Integer   | The estimated number of relationships in the graph
 |===
 
 [[estimate-procedure-graph]]
@@ -71,7 +73,7 @@ Those procedures don't accept the graph name as the first argument, as they don'
 [source, cypher]
 ----
 CALL gds.graph.create.estimate(nodeProjection: String|List|Map, relationshipProjection: String|List|Map, configuration: Map})
-YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
+YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
 ----
 
 The `nodeProjection` and `relationshipProjection` parameters follow the same syntax as in <<catalog-graph-create, `gds.graph.create`>>.
@@ -84,6 +86,8 @@ The `nodeProjection` and `relationshipProjection` parameters follow the same syn
 | relationshipProjection | string or list or map | -         | no        | The relationship projection to estimate for.
 | config                 | map                   | {}        | yes       | Additional configuration, such as concurrency.
 |===
+
+The result of running `gds.graph.create.estimate` has the same form as the algorithm memory estimation results above.
 
 It is also possible to estimate the memory of a fictive graph, by explicitly specifying its node and relationship count.
 Using this feature, one can estimate the memory consumption of an arbitrarily sized graph.
@@ -128,7 +132,7 @@ The <<cypher-projection, `gds.graph.create.cypher`>> procedure has to execute bo
 [source, cypher]
 ----
 CALL gds.graph.create.cypher.estimate(nodeQuery: String, relationshipQuery: String, configuration: Map})
-YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relationshipCount
+YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
 ----
 
 .Parameters

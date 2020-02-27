@@ -130,7 +130,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void createStoreProjection() {
+    void createNativeProjection() {
         assertCypherResult(
             "CALL gds.graph.create('name', 'A', 'REL')",
             singletonList(map(
@@ -840,7 +840,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void computeMemoryEstimationForStoreProjection() throws Exception {
+    void estimateHeapPercentageForNativeProjection() throws Exception {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         registerProcedures(localDb, GraphCreateProc.class);
         runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
@@ -850,16 +850,45 @@ class GraphCreateProcTest extends BaseProcTest {
             map("type", "REL")
         );
         String query = "CALL gds.graph.create.estimate('*', $relProjection)";
+        long heapSize = Runtime.getRuntime().maxMemory();
         runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
             row -> {
-                assertEquals(303504, row.getNumber("bytesMin").longValue());
                 assertEquals(303504, row.getNumber("bytesMax").longValue());
+                assertEquals(303504, row.getNumber("bytesMin").longValue());
+                long expectedMilli = 1000*303504L/heapSize;
+                double expectedPerc = (double)expectedMilli/10;
+                assertEquals(expectedPerc, row.getNumber("heapPercentageMin").doubleValue());
+                assertEquals(expectedPerc, row.getNumber("heapPercentageMax").doubleValue());
             }
         );
     }
 
     @Test
-    void computeMemoryEstimationForStoreProjectionWithProperties() throws Exception {
+    void virutalEstimateHeapPercentage() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
+
+        Map<String, Object> relProjection = map(
+            "B",
+            map("type", "REL")
+        );
+        String query = "CALL gds.graph.create.estimate('*', $relProjection, {nodeCount: 1000000})";
+        long heapSize = Runtime.getRuntime().maxMemory();
+        runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
+            row -> {
+                assertEquals(30190200, row.getNumber("bytesMin").longValue());
+                assertEquals(30190200, row.getNumber("bytesMax").longValue());
+                long expectedMilli = 1000*30190200L/heapSize;
+                double expectedPerc = (double)expectedMilli/10;
+                assertEquals(expectedPerc, row.getNumber("heapPercentageMin").doubleValue());
+                assertEquals(expectedPerc, row.getNumber("heapPercentageMax").doubleValue());
+            }
+        );
+    }
+
+    @Test
+    void computeMemoryEstimationForNativeProjectionWithProperties() throws Exception {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         registerProcedures(localDb, GraphCreateProc.class);
         runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());

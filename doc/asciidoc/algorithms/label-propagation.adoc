@@ -161,7 +161,7 @@ The configuration is the same as for the `write` mode.
 [source,cypher]
 ----
 CALL gds.labelPropagation.<mode>.estimate(graphNameOrConfig: String|Map, configuration: Map})
-YIELD nodes, relationships, bytesMin, bytesMax, requiredMemory, mapView
+YIELD nodes, relationships, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, requiredMemory, mapView
 ----
 
 The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
@@ -183,14 +183,15 @@ Additionally algorithm specific parameters can also be provided as config.
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name           | Type    | Description
-| requiredMemory | String  | The required memory in human readable format.
-| bytesMin       | Integer | The minimum number of bytes required.
-| bytesMax       | Integer | The maximum number of bytes required.
-| mapView        | Map     | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
-
-| nodes          | Integer | The number of nodes in the graph.
-| relationships  | Integer | The number of relationships in the graph.
+| Name              | Type    | Description
+| requiredMemory    | String  | The required memory in human readable format.
+| bytesMin          | Integer | The minimum number of bytes required.
+| bytesMax          | Integer | The maximum number of bytes required.
+| heapPercentageMin | Float   | The minimum percentage of configured maximum heap required.
+| heapPercentageMax | Float   | The maximum percentage of configured maximum heap required.
+| mapView           | Map     | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
+| nodes             | Integer | The number of nodes in the graph.
+| relationships     | Integer | The number of relationships in the graph.
 |===
 
 [[algorithms-label-propagation-examples]]
