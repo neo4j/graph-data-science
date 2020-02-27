@@ -66,7 +66,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
             .addParameter("writeProperty", "score")
             .yields(
                 "computeMillis",
-                "loadMillis",
+                "createMillis",
                 "nodesCompared ",
                 "relationshipsWritten",
                 "writeMillis",
@@ -81,7 +81,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
             assertUserInput(row, "writeRelationshipType", "SIMILAR");
             assertUserInput(row, "writeProperty", "score");
             assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat("Missing loadMillis", -1L, lessThan(row.getNumber("loadMillis").longValue()));
+            assertThat("Missing createMillis", -1L, lessThan(row.getNumber("createMillis").longValue()));
             assertThat("Missing writeMillis", -1L, lessThan(row.getNumber("writeMillis").longValue()));
 
             Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");
