@@ -19,19 +19,18 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.IntIntMap;
-import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,15 +68,11 @@ public class BaseProcTest {
         GraphDatabaseApiProxy.registerFunctions(db, functionClasses);
     }
 
-    protected void registerAggregationFunctions(Class<?>... functionClasses) throws Exception {
-        GraphDatabaseApiProxy.registerAggregationFunctions(db, functionClasses);
-    }
-
     protected void registerProcedures(Class<?>... procedureClasses) throws Exception {
         registerProcedures(db, procedureClasses);
     }
 
-    protected void registerProcedures(GraphDatabaseAPI db, Class<?>... procedureClasses) throws Exception {
+    protected void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws Exception {
         GraphDatabaseApiProxy.registerProcedures(db, procedureClasses);
     }
 
@@ -89,20 +84,11 @@ public class BaseProcTest {
         return AuthSubject.ANONYMOUS.username();
     }
 
-    protected void runQueryWithRowConsumer(@Language("Cypher") String query, BiConsumer<Transaction, Result.ResultRow> check) {
-        runQueryWithRowConsumer(query, emptyMap(), check);
-    }
-
-    protected void runQueryWithRowConsumer(@Language("Cypher") String query, Consumer<Result.ResultRow> check) {
-        runQueryWithRowConsumer(query, emptyMap(), (tx, row) -> check.accept(row));
-    }
-
     protected void runQueryWithRowConsumer(
         @Language("Cypher") String query,
-        Map<String, Object> params,
-        BiConsumer<Transaction, Result.ResultRow> check
+        Consumer<Result.ResultRow> check
     ) {
-        runQueryWithRowConsumer(db, query, params, check);
+        QueryRunner.runQueryWithRowConsumer(db, query, emptyMap(), discardTx(check));
     }
 
     protected void runQueryWithRowConsumer(
@@ -110,97 +96,90 @@ public class BaseProcTest {
         Map<String, Object> params,
         Consumer<Result.ResultRow> check
     ) {
-        runQueryWithRowConsumer(db, query, params, (tx, row) -> check.accept(row));
+        QueryRunner.runQueryWithRowConsumer(db, query, params, discardTx(check));
     }
 
     protected void runQueryWithRowConsumer(
-        GraphDatabaseAPI localDb,
-        @Language("Cypher") String query,
-        Map<String, Object> params,
-        BiConsumer<Transaction, Result.ResultRow> check
-    ) {
-        QueryRunner.runQueryWithRowConsumer(localDb, query, params, check);
-    }
-
-    protected void runQueryWithRowConsumer(
-        GraphDatabaseAPI localDb,
+        GraphDatabaseService localDb,
         @Language("Cypher") String query,
         Map<String, Object> params,
         Consumer<Result.ResultRow> check
     ) {
-        QueryRunner.runQueryWithRowConsumer(localDb, query, params, (tx, row) -> check.accept(row));
+        QueryRunner.runQueryWithRowConsumer(localDb, query, params, discardTx(check));
     }
 
     protected void runQueryWithRowConsumer(
-        GraphDatabaseAPI localDb,
-        @Language("Cypher") String query,
-        BiConsumer<Transaction, Result.ResultRow> check
-    ) {
-        runQueryWithRowConsumer(localDb, query, emptyMap(), check);
-    }
-    protected void runQueryWithRowConsumer(
-        GraphDatabaseAPI localDb,
+        GraphDatabaseService localDb,
         @Language("Cypher") String query,
         Consumer<Result.ResultRow> check
     ) {
-        runQueryWithRowConsumer(localDb, query, emptyMap(), (tx, row) -> check.accept(row));
+        QueryRunner.runQueryWithRowConsumer(localDb, query, emptyMap(), discardTx(check));
     }
 
     protected void runQueryWithRowConsumer(
         String username,
-        String query,
-        BiConsumer<Transaction, Result.ResultRow> check
-    ) {
-        runQueryWithRowConsumer(db, username, query, emptyMap(), check);
-    }
-
-    protected void runQueryWithRowConsumer(
-        String username,
-        String query,
+        @Language("Cypher") String query,
         Consumer<Result.ResultRow> check
     ) {
-        runQueryWithRowConsumer(db, username, query, emptyMap(), (tx, row) -> check.accept(row));
+        QueryRunner.runQueryWithRowConsumer(db, username, query, emptyMap(), discardTx(check));
     }
 
-    protected void runQueryWithRowConsumer(
-        GraphDatabaseAPI db,
+    protected void runQuery(
         String username,
-        String query,
-        Map<String, Object> params,
-        BiConsumer<Transaction, Result.ResultRow> check
+        @Language("Cypher") String query,
+        Map<String, Object> params
     ) {
-        QueryRunner.runQueryWithRowConsumer(db, username, query, params, check);
-    }
-
-    protected void runQuery(String username, String query, Map<String, Object> params) {
         QueryRunner.runQuery(db, username, query, params);
     }
 
-    protected void runQuery(GraphDatabaseAPI db, String query, Map<String, Object> params) {
+    protected void runQuery(
+        GraphDatabaseService db,
+        @Language("Cypher") String query,
+        Map<String, Object> params
+    ) {
         QueryRunner.runQuery(db, query, params);
     }
 
-    protected void runQuery(String query) {
+    protected void runQuery(@Language("Cypher") String query) {
         QueryRunner.runQuery(db, query);
     }
 
-    protected void runQuery(String query, Map<String, Object> params) {
+    protected void runQuery(
+        @Language("Cypher") String query,
+        Map<String, Object> params
+    ) {
         QueryRunner.runQuery(db, query, params);
     }
 
-    protected <T> T runQuery(String query, Function<Result, T> resultFunction) {
-        return runQuery(query, emptyMap(), resultFunction);
+    protected <T> T runQuery(
+        @Language("Cypher") String query,
+        Function<Result, T> resultFunction
+    ) {
+        return QueryRunner.runQuery(db, query, emptyMap(), resultFunction);
     }
 
-    protected <T> T runQuery(String query, Map<String, Object> params, Function<Result, T> resultFunction) {
-        return runQuery(db, query, params, resultFunction);
-    }
-
-    protected <T> T runQuery(GraphDatabaseAPI db, String query, Map<String, Object> params, Function<Result, T> resultFunction) {
+    protected <T> T runQuery(
+        @Language("Cypher") String query,
+        Map<String, Object> params,
+        Function<Result, T> resultFunction
+    ) {
         return QueryRunner.runQuery(db, query, params, resultFunction);
     }
 
-    protected void runQueryWithResultConsumer(@Language("Cypher") String query, Map<String, Object> params, Consumer<Result> check) {
+    protected <T> T runQuery(
+        GraphDatabaseService db,
+        @Language("Cypher") String query,
+        Map<String, Object> params,
+        Function<Result, T> resultFunction
+    ) {
+        return QueryRunner.runQuery(db, query, params, resultFunction);
+    }
+
+    private void runQueryWithResultConsumer(
+        @Language("Cypher") String query,
+        Map<String, Object> params,
+        Consumer<Result> check
+    ) {
         QueryRunner.runQueryWithResultConsumer(
             db,
             query,
@@ -208,30 +187,17 @@ public class BaseProcTest {
             check
         );
     }
-    protected void runQueryWithResultConsumer(@Language("Cypher") String query, Consumer<Result> check) {
-        runQueryWithResultConsumer(
+
+    protected void runQueryWithResultConsumer(
+        @Language("Cypher") String query,
+        Consumer<Result> check
+    ) {
+        QueryRunner.runQueryWithResultConsumer(
+            db,
             query,
             emptyMap(),
             check
         );
-    }
-
-    /**
-     * This is to be used with caution;
-     * Callers have to consume the Result and/or use try-catch resource block.
-     */
-    protected Result runQueryWithoutClosing(String query, Map<String, Object> params) {
-        return QueryRunner.runQueryWithoutClosing(db, query, params);
-    }
-
-    protected void assertEmptyResult(String query) {
-        assertEmptyResult(query, emptyMap());
-    }
-
-    private void assertEmptyResult(String query, Map<String, Object> params) {
-        List<Result.ResultRow> actual = new ArrayList<>();
-        QueryRunner.runQueryWithRowConsumer(db, query, params, (tx, row) -> actual.add(row));
-        assertTrue(actual.isEmpty());
     }
 
     protected void assertMapEquals(Map<Long, Double> expected, Map<Long, Double> actual) {
@@ -254,23 +220,7 @@ public class BaseProcTest {
         }
     }
 
-    protected void assertMapContains(IntIntMap map, int... values) {
-        assertEquals(values.length, map.size(), "set count does not match");
-        for (int count : values) {
-            assertTrue(mapContainsValue(map, count), "set size " + count + " does not match");
-        }
-    }
-
-    private boolean mapContainsValue(IntIntMap map, int value) {
-        for (IntIntCursor cursor : map) {
-            if (cursor.value == value) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected void assertResult(final String scoreProperty, Map<Long, Double> expected) {
+    protected void assertResult(String scoreProperty, Map<Long, Double> expected) {
         runInTransaction(db, tx -> {
             for (Map.Entry<Long, Double> entry : expected.entrySet()) {
                 double score = ((Number) GraphDatabaseApiProxy.getNodeById(db, tx, entry.getKey())
@@ -341,7 +291,7 @@ public class BaseProcTest {
         @Language("Cypher") String query,
         String messageSubstring
     ) {
-       assertError(query, emptyMap(), messageSubstring);
+        assertError(query, emptyMap(), messageSubstring);
     }
 
     protected void assertError(
@@ -359,7 +309,7 @@ public class BaseProcTest {
         assertErrorRegex(query, emptyMap(), regex);
     }
 
-    protected void assertErrorRegex(
+    private void assertErrorRegex(
         @Language("Cypher") String query,
         Map<String, Object> queryParameters,
         String regex
@@ -373,18 +323,11 @@ public class BaseProcTest {
         Matcher<Throwable> matcher
     ) {
         try {
-            runQueryWithResultConsumer(query, queryParameters, this::consume);
+            runQueryWithResultConsumer(query, queryParameters, BaseProcTest::consume);
             fail(format("Expected an exception to be thrown by query:\n%s", query));
         } catch (Throwable e) {
             assertThat(e, matcher);
         }
-    }
-
-    private void consume(Result result) {
-        while (result.hasNext()) {
-            result.next();
-        }
-        result.close();
     }
 
     protected void assertUserInput(Result.ResultRow row, String key, Object expected) {
@@ -399,13 +342,12 @@ public class BaseProcTest {
     }
 
     protected void assertGraphExists(String graphName) {
-        final Set<Graph> graphs = getLoadedGraphs(graphName);
-
+        Set<Graph> graphs = getLoadedGraphs(graphName);
         assertEquals(1, graphs.size());
     }
 
     protected void assertGraphDoesNotExist(String graphName) {
-        final Set<Graph> graphs = getLoadedGraphs(graphName);
+        Set<Graph> graphs = getLoadedGraphs(graphName);
         assertTrue(graphs.isEmpty());
     }
 
@@ -422,11 +364,22 @@ public class BaseProcTest {
 
     private Set<Graph> getLoadedGraphs(String graphName) {
         return GraphStoreCatalog
-                .getLoadedGraphs("")
-                .entrySet()
-                .stream()
-                .filter(e -> e.getKey().graphName().equals(graphName))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toSet());
+            .getLoadedGraphs("")
+            .entrySet()
+            .stream()
+            .filter(e -> e.getKey().graphName().equals(graphName))
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toSet());
+    }
+
+    private static BiConsumer<Transaction, Result.ResultRow> discardTx(Consumer<Result.ResultRow> check) {
+        return (tx, row) -> check.accept(row);
+    }
+
+    private static void consume(ResourceIterator<Map<String, Object>> result) {
+        while (result.hasNext()) {
+            result.next();
+        }
+        result.close();
     }
 }
