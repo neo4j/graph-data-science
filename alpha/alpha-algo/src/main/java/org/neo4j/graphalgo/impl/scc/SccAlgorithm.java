@@ -211,11 +211,11 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
     public static class StreamResult {
 
         public final long nodeId;
-        public final long partition;
+        public final long componentId;
 
-        public StreamResult(long nodeId, long partition) {
+        public StreamResult(long nodeId, long componentId) {
             this.nodeId = nodeId;
-            this.partition = partition;
+            this.componentId = componentId;
         }
     }
 }

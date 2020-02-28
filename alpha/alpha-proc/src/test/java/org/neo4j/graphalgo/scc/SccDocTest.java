@@ -69,12 +69,12 @@ class SccDocTest extends BaseProcTest {
                        "  nodeProjection: 'User', " +
                        "  relationshipProjection: 'FOLLOW' " +
                        "}) " +
-                       "YIELD nodeId, partition " +
-                       "RETURN gds.util.asNode(nodeId).name AS Name, partition AS Partition " +
-                       "ORDER BY partition DESC";
+                       "YIELD nodeId, componentId " +
+                       "RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component " +
+                       "ORDER BY Component DESC";
 
         String expected = "+-----------------------+\n" +
-                          "| Name      | Partition |\n" +
+                          "| Name      | Component |\n" +
                           "+-----------------------+\n" +
                           "| \"Doug\"    | 3         |\n" +
                           "| \"Mark\"    | 3         |\n" +
@@ -93,7 +93,7 @@ class SccDocTest extends BaseProcTest {
         String query = "CALL gds.alpha.scc.write({ " +
                        "  nodeProjection: 'User', " +
                        "  relationshipProjection: 'FOLLOW', " +
-                       "  writeProperty: 'partition' " +
+                       "  writeProperty: 'componentId' " +
                        "}) " +
                        "YIELD setCount, maxSetSize, minSetSize; ";
 
@@ -112,18 +112,18 @@ class SccDocTest extends BaseProcTest {
         String writeQ = "CALL gds.alpha.scc.write({ " +
                        "  nodeProjection: 'User', " +
                        "  relationshipProjection: 'FOLLOW', " +
-                       "  writeProperty: 'partition' " +
+                       "  writeProperty: 'componentId' " +
                        "}) " +
                        "YIELD setCount, maxSetSize, minSetSize; ";
         runQuery(writeQ);
 
         String query = "MATCH (u:User) " +
-                       "RETURN u.partition AS Partition, count(*) AS PartitionSize " +
+                       "RETURN u.componentId AS Component, count(*) AS PartitionSize " +
                        "ORDER BY PartitionSize DESC " +
                        "LIMIT 1 ";
 
         String expected = "+---------------------------+\n" +
-                          "| Partition | PartitionSize |\n" +
+                          "| Component | PartitionSize |\n" +
                           "+---------------------------+\n" +
                           "| 0         | 3             |\n" +
                           "+---------------------------+\n" +
@@ -138,13 +138,13 @@ class SccDocTest extends BaseProcTest {
                        "  nodeQuery: 'MATCH (u:User) RETURN id(u) AS id', " +
                        "  relationshipQuery: 'MATCH (u1:User)-[:FOLLOW]->(u2:User) RETURN id(u1) AS source, id(u2) AS target' " +
                        "}) " +
-                       "YIELD nodeId, partition " +
-                       "RETURN gds.util.asNode(nodeId).name AS Name, partition AS Partition " +
-                       "ORDER BY partition DESC ";
+                       "YIELD nodeId, componentId " +
+                       "RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component " +
+                       "ORDER BY componentId DESC ";
         System.out.println(query);
 
         String expected = "+-----------------------+\n" +
-                          "| Name      | Partition |\n" +
+                          "| Name      | Component |\n" +
                           "+-----------------------+\n" +
                           "| \"Doug\"    | 3         |\n" +
                           "| \"Mark\"    | 3         |\n" +
