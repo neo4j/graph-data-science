@@ -88,13 +88,13 @@ class SccProcTest extends BaseProcTest {
             assertEquals(3, row.getNumber("setCount").longValue());
             assertEquals(3, row.getNumber("minSetSize").longValue());
             assertEquals(3, row.getNumber("maxSetSize").longValue());
-            assertEquals("partition", row.getString("writeProperty"));
-            assertNotEquals(-1, createMillis);
+            assertEquals("componentId", row.getString("writeProperty"));
+            assertNotEquals(-1, loadMillis);
             assertNotEquals(-1, computeMillis);
             assertNotEquals(-1, writeMillis);
         });
 
-        String validationQuery = "MATCH (n) RETURN n.partition as c";
+        String validationQuery = "MATCH (n) RETURN n.componentId as c";
         final IntIntScatterMap testMap = new IntIntScatterMap();
         runQueryWithRowConsumer(validationQuery, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
 
@@ -153,7 +153,7 @@ class SccProcTest extends BaseProcTest {
             .yields();
 
         runQueryWithRowConsumer(query, row ->
-            testMap.addTo(row.getNumber("partition").intValue(), 1)
+            testMap.addTo(row.getNumber("componentId").intValue(), 1)
         );
 
         // 3 sets with 3 elements each

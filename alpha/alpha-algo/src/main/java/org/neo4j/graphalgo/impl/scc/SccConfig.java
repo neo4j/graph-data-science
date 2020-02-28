@@ -38,7 +38,7 @@ public interface SccConfig extends AlgoBaseConfig, WriteConfig {
     @Value.Default
     @Override
     default String writeProperty() {
-        return "partition";
+        return "componentId";
     }
 
     static SccConfig of(

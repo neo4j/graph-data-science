@@ -61,7 +61,7 @@ YIELD createMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type    | Default                | Optional | Description
-| writeProperty    | String  | 'partition'            | yes      | The property name written back to.
+| writeProperty    | String  | 'componentId'            | yes      | The property name written back to.
 | concurrency      | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
@@ -95,7 +95,7 @@ YIELD createMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 [source, cypher]
 ----
 CALL gds.alpha.scc.stream(graphName: String, configuration: Map)
-YIELD nodeId, partition
+YIELD nodeId, componentId
 ----
 
 .Parameters
@@ -111,7 +111,7 @@ YIELD nodeId, partition
 |===
 | Name      | Type    | Description
 | nodeId    | Integer | Node ID.
-| partition | Integer | Partition ID.
+| componentId | Integer | Partition ID.
 |===
 
 
@@ -148,7 +148,7 @@ CREATE (nMichael)-[:FOLLOW]->(nBridget);
 CALL gds.alpha.scc.write({
   nodeProjection: 'User',
   relationshipProjection: 'FOLLOW',
-  writeProperty: 'partition'
+  writeProperty: 'componentId'
 })
 YIELD setCount, maxSetSize, minSetSize;
 ----
@@ -167,15 +167,15 @@ CALL gds.alpha.scc.stream({
   nodeProjection: 'User',
   relationshipProjection: 'FOLLOW'
 })
-YIELD nodeId, partition
-RETURN gds.util.asNode(nodeId).name AS Name, partition AS Partition
-ORDER BY partition DESC
+YIELD nodeId, componentId
+RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component
+ORDER BY Component DESC
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| Name      | Partition
+| Name      | Component
 | "Doug"    | 3
 | "Mark"    | 3
 | "Charles" | 2
@@ -195,15 +195,15 @@ Charles ends up in his own component because there isn't an outgoing relationshi
 [source, cypher]
 ----
 MATCH (u:User)
-RETURN u.partition AS partition, count(*) AS size_of_partition
-ORDER BY size_of_partition DESC
+RETURN u.componentId AS component, count(*) AS size_of_component
+ORDER BY size_of_component DESC
 LIMIT 1
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| Partition | PartitionSize
+| Partition | ComponentSize
 | 0         | 3
 |===
 
@@ -220,15 +220,15 @@ include::../../management-ops/cypher-projection.adoc[tag=explanation]
 CALL gds.alpha.scc.stream({
   nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
   relationshipQuery: 'MATCH (u1:User)-[:FOLLOW]->(u2:User) RETURN id(u1) AS source, id(u2) AS target' })
-YIELD nodeId, partition
-RETURN gds.util.asNode(nodeId).name AS Name, partition AS Partition
-ORDER BY partition DESC
+YIELD nodeId, componentId
+RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component
+ORDER BY Component DESC
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| Name      | Partition
+| Name      | Component
 | "Doug"    | 3
 | "Mark"    | 3
 | "Charles" | 2
