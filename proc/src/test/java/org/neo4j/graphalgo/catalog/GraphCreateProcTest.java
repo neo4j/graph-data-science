@@ -43,6 +43,8 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -783,21 +785,22 @@ class GraphCreateProcTest extends BaseProcTest {
             map("type", "REL")
         );
         String query = "CALL gds.graph.create.estimate('*', $relProjection)";
-        long heapSize = Runtime.getRuntime().maxMemory();
+        double expectedPercentage = BigDecimal.valueOf(303504)
+            .divide(BigDecimal.valueOf(Runtime.getRuntime().maxMemory()), 1, RoundingMode.UP)
+            .doubleValue();
+
         runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
             row -> {
                 assertEquals(303504, row.getNumber("bytesMax").longValue());
                 assertEquals(303504, row.getNumber("bytesMin").longValue());
-                long expectedMilli = 1000*303504L/heapSize;
-                double expectedPerc = (double)expectedMilli/10;
-                assertEquals(expectedPerc, row.getNumber("heapPercentageMin").doubleValue());
-                assertEquals(expectedPerc, row.getNumber("heapPercentageMax").doubleValue());
+                assertEquals(expectedPercentage, row.getNumber("heapPercentageMin").doubleValue());
+                assertEquals(expectedPercentage, row.getNumber("heapPercentageMax").doubleValue());
             }
         );
     }
 
     @Test
-    void virutalEstimateHeapPercentage() throws Exception {
+    void virtualEstimateHeapPercentage() throws Exception {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
         registerProcedures(localDb, GraphCreateProc.class);
         runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
@@ -807,15 +810,17 @@ class GraphCreateProcTest extends BaseProcTest {
             map("type", "REL")
         );
         String query = "CALL gds.graph.create.estimate('*', $relProjection, {nodeCount: 1000000})";
-        long heapSize = Runtime.getRuntime().maxMemory();
+
+        double expectedPercentage = BigDecimal.valueOf(30190200L)
+            .divide(BigDecimal.valueOf(Runtime.getRuntime().maxMemory()), 1, RoundingMode.UP)
+            .doubleValue();
+
         runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
             row -> {
                 assertEquals(30190200, row.getNumber("bytesMin").longValue());
                 assertEquals(30190200, row.getNumber("bytesMax").longValue());
-                long expectedMilli = 1000*30190200L/heapSize;
-                double expectedPerc = (double)expectedMilli/10;
-                assertEquals(expectedPerc, row.getNumber("heapPercentageMin").doubleValue());
-                assertEquals(expectedPerc, row.getNumber("heapPercentageMax").doubleValue());
+                assertEquals(expectedPercentage, row.getNumber("heapPercentageMin").doubleValue());
+                assertEquals(expectedPercentage, row.getNumber("heapPercentageMax").doubleValue());
             }
         );
     }

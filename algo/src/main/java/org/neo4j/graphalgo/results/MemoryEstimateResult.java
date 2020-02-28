@@ -24,6 +24,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 public class MemoryEstimateResult {
@@ -65,7 +67,8 @@ public class MemoryEstimateResult {
         if (heapSizeBytes == 0) {
             return Double.NaN;
         }
-        long milli = 1000 * requiredBytes / heapSizeBytes;
-        return (double) milli / 10;
+        return BigDecimal.valueOf(requiredBytes)
+            .divide(BigDecimal.valueOf(heapSizeBytes), 1, RoundingMode.UP)
+            .doubleValue();
     }
 }
