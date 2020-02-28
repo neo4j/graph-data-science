@@ -51,28 +51,30 @@ public final class PagedLongDoubleMap {
                         .build();
             })).build();
 
-    // FIXME
-    private int concurrency = 1;
 
-    public static PagedLongDoubleMap of(long size, AllocationTracker tracker) {
+    public static PagedLongDoubleMap of(long size, AllocationTracker tracker, int concurrency) {
         int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
         tracker.add(sizeOfObjectArray(numPages));
         TrackingIntDoubleHashMap[] pages = new TrackingIntDoubleHashMap[numPages];
-        return new PagedLongDoubleMap(pages, tracker);
+        return new PagedLongDoubleMap(pages, tracker, concurrency);
     }
-
-    private final AllocationTracker tracker;
-    private TrackingIntDoubleHashMap[] pages;
 
     public static MemoryEstimation memoryEstimation() {
         return MEMORY_REQUIREMENTS;
     }
 
+    private final AllocationTracker tracker;
+    private TrackingIntDoubleHashMap[] pages;
+    private final int concurrency;
+
     private PagedLongDoubleMap(
-            TrackingIntDoubleHashMap[] pages,
-            AllocationTracker tracker) {
+        TrackingIntDoubleHashMap[] pages,
+        AllocationTracker tracker,
+        int concurrency
+    ) {
         this.pages = pages;
         this.tracker = tracker;
+        this.concurrency = concurrency;
     }
 
     public long size() {

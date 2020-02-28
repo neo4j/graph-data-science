@@ -53,6 +53,8 @@ import static java.util.stream.Collectors.toMap;
 
 public final class TestGraph implements Graph {
 
+    private static final int STREAM_CONCURRENCY = 4;
+
     private final Map<Long, Adjacency> adjacencyList;
     private final Map<String, NodeProperties> nodeProperties;
     private final NodeProperties relationshipProperty;
@@ -346,11 +348,19 @@ public final class TestGraph implements Graph {
             }
 
             Map<String, NodePropertiesBuilder> nodePropertiesBuilders = properties
-                    .keySet()
-                    .parallelStream()
-                    .collect(Collectors.toMap(
-                            Function.identity(),
-                            key -> NodePropertiesBuilder.of(elements.size(), AllocationTracker.EMPTY, 1.0, -2, key)));
+                .keySet()
+                .parallelStream()
+                .collect(Collectors.toMap(
+                    Function.identity(),
+                    key -> NodePropertiesBuilder.of(
+                        elements.size(),
+                        AllocationTracker.EMPTY,
+                        1.0,
+                        -2,
+                        key,
+                        STREAM_CONCURRENCY
+                    )
+                ));
 
             elements.forEach(element ->
                     element.getProperties().forEach((propertyKey, value) ->

@@ -162,7 +162,8 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
                 AllocationTracker.EMPTY,
                 propertyMapping.defaultValue(),
                 CYPHER_RESULT_PROPERTY_KEY,
-                propertyMapping.propertyKey()
+                propertyMapping.propertyKey(),
+                setup.concurrency()
             )
         ));
     }

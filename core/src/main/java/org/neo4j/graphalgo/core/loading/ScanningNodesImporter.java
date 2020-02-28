@@ -100,11 +100,13 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
         for (ResolvedPropertyMapping resolvedPropertyMapping : dimensions.nodeProperties()) {
             if (resolvedPropertyMapping.exists()) {
                 NodePropertiesBuilder builder = NodePropertiesBuilder.of(
-                        nodeCount,
-                        tracker,
-                        resolvedPropertyMapping.defaultValue(),
-                        resolvedPropertyMapping.propertyKeyId(),
-                        resolvedPropertyMapping.propertyKey());
+                    nodeCount,
+                    tracker,
+                    resolvedPropertyMapping.defaultValue(),
+                    resolvedPropertyMapping.propertyKeyId(),
+                    resolvedPropertyMapping.propertyKey(),
+                    concurrency
+                );
                 builders.put(resolvedPropertyMapping.propertyKey(), builder);
             }
         }

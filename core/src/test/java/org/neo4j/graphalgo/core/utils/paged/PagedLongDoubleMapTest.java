@@ -32,13 +32,17 @@ final class PagedLongDoubleMapTest {
 
     @Test
     void canGetMaxValueFromEmptyMap() {
-        PagedLongDoubleMap map = PagedLongDoubleMap.of(100_000, AllocationTracker.EMPTY);
+        PagedLongDoubleMap map = PagedLongDoubleMap.of(
+            100_000,
+            AllocationTracker.EMPTY,
+            4
+        );
         assertEquals(OptionalLong.empty(), map.getMaxValue());
     }
 
     @Test
     void canReadFromPut() {
-        PagedLongDoubleMap map = PagedLongDoubleMap.of(4L, AllocationTracker.EMPTY);
+        PagedLongDoubleMap map = PagedLongDoubleMap.of(4L, AllocationTracker.EMPTY, 4);
         map.put(1L, 1.0);
 
         double actual = map.getOrDefault(1L, 0.0);
@@ -51,7 +55,7 @@ final class PagedLongDoubleMapTest {
 
     @Test
     void supportsZeroKeys() {
-        PagedLongDoubleMap map = PagedLongDoubleMap.of(4L, AllocationTracker.EMPTY);
+        PagedLongDoubleMap map = PagedLongDoubleMap.of(4L, AllocationTracker.EMPTY, 4);
 
         map.put(0L, 1.0);
         double actual = map.getOrDefault(0L, 0.0);
@@ -61,17 +65,17 @@ final class PagedLongDoubleMapTest {
     @Test
     void acceptsInitialSize() {
         AllocationTracker tracker = AllocationTracker.create();
-        PagedLongDoubleMap.of(0L, tracker);
+        PagedLongDoubleMap.of(0L, tracker, 4);
         // size 0 creates an empty page array
         assertEquals(sizeOfObjectArray(0), tracker.tracked());
 
         tracker = AllocationTracker.create();
-        PagedLongDoubleMap.of(100L, tracker);
+        PagedLongDoubleMap.of(100L, tracker, 4);
         // size 100 creates a page array with a single (null) page
         assertEquals(sizeOfObjectArray(1), tracker.tracked());
 
         tracker = AllocationTracker.create();
-        PagedLongDoubleMap.of(100_000L, tracker);
+        PagedLongDoubleMap.of(100_000L, tracker, 4);
         // size 100_000 creates a page array with a 7 (null) pages (based on page size of 2^14)
         assertEquals(sizeOfObjectArray(7), tracker.tracked());
     }
@@ -79,7 +83,7 @@ final class PagedLongDoubleMapTest {
     @Test
     void resizeOnGrowthAndTrackMemoryUsage() {
         AllocationTracker tracker = AllocationTracker.create();
-        PagedLongDoubleMap map = PagedLongDoubleMap.of(0L, tracker);
+        PagedLongDoubleMap map = PagedLongDoubleMap.of(0L, tracker, 4);
 
         long expected = sizeOfObjectArray(0); // empty pages
         assertEquals(expected, tracker.tracked());
@@ -123,7 +127,7 @@ final class PagedLongDoubleMapTest {
     @Test
     void releaseMemory() {
         AllocationTracker tracker = AllocationTracker.create();
-        PagedLongDoubleMap map = PagedLongDoubleMap.of(4, tracker);
+        PagedLongDoubleMap map = PagedLongDoubleMap.of(4, tracker, 4);
 
         for (long i = 0L; i < 20L; i++) {
             map.put(i, (double) i * 13.37);

@@ -33,13 +33,15 @@ public final class NodePropertiesBuilder {
     private final String propertyKey;
 
     public static NodePropertiesBuilder of(
-            long numberOfNodes,
-            AllocationTracker tracker,
-            double defaultValue,
-            int propertyId,
-            String propertyKey) {
+        long numberOfNodes,
+        AllocationTracker tracker,
+        double defaultValue,
+        int propertyId,
+        String propertyKey,
+        int concurrency
+    ) {
         assert propertyId != NO_SUCH_PROPERTY_KEY;
-        PagedLongDoubleMap properties = PagedLongDoubleMap.of(numberOfNodes, tracker);
+        PagedLongDoubleMap properties = PagedLongDoubleMap.of(numberOfNodes, tracker, concurrency);
         return new NodePropertiesBuilder(defaultValue, propertyId, properties, propertyKey);
     }
 
