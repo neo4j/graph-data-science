@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.compat.ExceptionUtil;
 import org.neo4j.graphalgo.compat.StatementApi;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
@@ -38,7 +38,7 @@ import org.neo4j.values.storable.Values;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.neo4j.graphalgo.core.utils.Pools.DEFAULT_SINGLE_THREAD_POOL;
+import static org.neo4j.graphalgo.core.concurrency.Pools.DEFAULT_SINGLE_THREAD_POOL;
 import static org.neo4j.graphalgo.core.write.NodePropertyExporter.MIN_BATCH_SIZE;
 
 public final class RelationshipExporter extends StatementApi {

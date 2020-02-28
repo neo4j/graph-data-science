@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import java.util.stream.DoubleStream;
 
-import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
+import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
 
 public final class HugeNormalizationComputations {
 

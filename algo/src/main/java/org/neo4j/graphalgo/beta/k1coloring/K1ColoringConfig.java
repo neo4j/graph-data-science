@@ -21,7 +21,7 @@
 package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 

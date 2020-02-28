@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
+import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
 
 public interface SimilarityInput {
     long getId();

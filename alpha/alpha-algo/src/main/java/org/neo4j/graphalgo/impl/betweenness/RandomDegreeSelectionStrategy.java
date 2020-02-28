@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 
 import java.security.SecureRandom;

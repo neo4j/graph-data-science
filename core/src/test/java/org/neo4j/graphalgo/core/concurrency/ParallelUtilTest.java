@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils;
+package org.neo4j.graphalgo.core.concurrency;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,6 +27,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;
@@ -68,8 +69,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
-import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
-import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStreamConsume;
+import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
+import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 
 final class ParallelUtilTest {
 

@@ -25,7 +25,7 @@ import java.util.function.LongToDoubleFunction;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.IntStream;
 
-import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStreamConsume;
+import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 
 public class PageFiller implements Consumer<long[]>, BiConsumer<long[], Long> {
 

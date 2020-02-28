@@ -17,13 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils;
+package org.neo4j.graphalgo.core.concurrency;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.ExceptionUtil;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
+import org.neo4j.graphalgo.core.utils.BiLongConsumer;
+import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils;
 
 import com.carrotsearch.hppc.AbstractIterator;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 
 import java.util.AbstractCollection;
 import java.util.ArrayList;
