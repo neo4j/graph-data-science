@@ -187,8 +187,8 @@ Additionally algorithm specific parameters can also be provided as config.
 | requiredMemory    | String  | The required memory in human readable format.
 | bytesMin          | Integer | The minimum number of bytes required.
 | bytesMax          | Integer | The maximum number of bytes required.
-| heapPercentageMin | Float   | The minimum percentage of configured maximum heap required.
-| heapPercentageMax | Float   | The maximum percentage of configured maximum heap required.
+| heapPercentageMin | Float   | The minimum percentage of the configured maximum heap required.
+| heapPercentageMax | Float   | The maximum percentage of the configured maximum heap required.
 | mapView           | Map     | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
 | nodes             | Integer | The number of nodes in the graph.
 | relationships     | Integer | The number of relationships in the graph.

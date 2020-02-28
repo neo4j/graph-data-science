@@ -57,8 +57,8 @@ See the algorithm documentation for more information.
 | mapView               | String    | A more detailed representation of the required memory, including estimates of the different components.
 | bytesMin              | Integer   | The minimum number of bytes required.
 | bytesMax              | Integer   | The maximum number of bytes required.
-| heapPercentageMin     | Float     | The minimum percentage of configured maximum heap required.
-| heapPercentageMax     | Float     | The maximum percentage of configured maximum heap required.
+| heapPercentageMin     | Float     | The minimum percentage of the configured maximum heap required.
+| heapPercentageMax     | Float     | The maximum percentage of the configured maximum heap required.
 | nodeCount             | Integer   | The estimated number of nodes in the graph
 | relationshipCount     | Integer   | The estimated number of relationships in the graph
 |===

@@ -61,11 +61,11 @@ public class MemoryEstimateResult {
         this.relationshipCount = dimensions.maxRelCount();
     }
 
-    private double getPercentage(long bytes, long heapSize) {
-        if (heapSize == 0) {
+    private double getPercentage(long requiredBytes, long heapSizeBytes) {
+        if (heapSizeBytes == 0) {
             return Double.NaN;
         }
-        long milli = 1000*bytes/heapSize;
-        return (double)milli/10;
+        long milli = 1000 * requiredBytes / heapSizeBytes;
+        return (double) milli / 10;
     }
 }
