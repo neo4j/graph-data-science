@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.core.utils.paged.dss;
 
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-public class HugeAtomicDisjointSetStructTest extends DisjointSetStructTest {
+class HugeAtomicDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     DisjointSetStruct newSet(int capacity) {
-        return new HugeAtomicDisjointSetStruct(capacity, AllocationTracker.EMPTY);
+        return new HugeAtomicDisjointSetStruct(capacity, AllocationTracker.EMPTY, 4);
     }
 }

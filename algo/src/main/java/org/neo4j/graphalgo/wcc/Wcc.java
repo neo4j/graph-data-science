@@ -108,8 +108,8 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         long nodeCount = graph.nodeCount();
 
         DisjointSetStruct dss = config.isIncremental()
-            ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, tracker)
-            : new HugeAtomicDisjointSetStruct(nodeCount, tracker);
+            ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, tracker, config.concurrency())
+            : new HugeAtomicDisjointSetStruct(nodeCount, tracker, config.concurrency());
 
         final Collection<Runnable> tasks = new ArrayList<>(threadSize);
         for (long i = 0L; i < this.nodeCount; i += batchSize) {
