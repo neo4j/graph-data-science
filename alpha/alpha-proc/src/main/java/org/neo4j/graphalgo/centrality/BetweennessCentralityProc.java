@@ -54,10 +54,12 @@ import static org.neo4j.procedure.Mode.READ;
  */
 public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityConfig> {
 
-    public static final String BETWEENNESS_CENTRALITY_DESCRIPTION = "Betweenness centrality is a way of detecting the amount of influence a node has over the flow of information in a graph.";
+    private static final String DESCRIPTION =
+        "Betweenness centrality is a way of detecting the amount of influence a node has " +
+        "over the flow of information in a graph.";
 
     @Procedure(name = "gds.alpha.betweenness.stream", mode = READ)
-    @Description(BETWEENNESS_CENTRALITY_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<BetweennessCentrality.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -73,7 +75,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
     }
 
     @Procedure(value = "gds.alpha.betweenness.write", mode = Mode.WRITE)
-    @Description(BETWEENNESS_CENTRALITY_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<BetweennessCentralityProcResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -62,10 +62,12 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ApproximateNearestNeighborsConfig> {
 
-    public static final String ANN_DESCRIPTION = "The Approximate Nearest Neighbors algorithm constructs a k-Nearest Neighbors Graph for a set of objects based on a provided similarity algorithm";
+    private static final String DESCRIPTION =
+        "The Approximate Nearest Neighbors algorithm constructs a k-Nearest Neighbors Graph for a set of objects " +
+        "based on a provided similarity function";
 
     @Procedure(name = "gds.alpha.ml.ann.stream", mode = READ)
-    @Description(ANN_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<SimilarityResult> annStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -74,7 +76,7 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
     }
 
     @Procedure(name = "gds.alpha.ml.ann.write", mode = WRITE)
-    @Description(ANN_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<ApproxSimilaritySummaryResult> annWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

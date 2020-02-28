@@ -51,11 +51,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig> {
 
-    private static final String SCC_DESCRIPTION =
-        "The SCC algorithm finds sets of connected nodes in an directed graph, where all nodes in the same set form a connected component.";
+    private static final String DESCRIPTION =
+        "The SCC algorithm finds sets of connected nodes in an directed graph, " +
+        "where all nodes in the same set form a connected component.";
 
     @Procedure(value = "gds.alpha.scc.write", mode = Mode.WRITE)
-    @Description(SCC_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<SccResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -99,7 +100,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
     }
 
     @Procedure(value = "gds.alpha.scc.stream", mode = READ)
-    @Description(SCC_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<SccAlgorithm.StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

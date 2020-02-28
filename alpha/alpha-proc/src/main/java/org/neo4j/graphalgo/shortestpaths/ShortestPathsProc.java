@@ -46,10 +46,10 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathsProc extends AlgoBaseProc<ShortestPaths, ShortestPaths, ShortestPathsConfig> {
 
-    private static final String SHORTEST_PATHS_DESCRIPTION = "The Shortest Path algorithm calculates the shortest (weighted) path between a pair of nodes.";
+    private static final String DESCRIPTION = "The Shortest Path algorithm calculates the shortest (weighted) path between a pair of nodes.";
 
     @Procedure(name = "gds.alpha.shortestPaths.stream", mode = READ)
-    @Description(SHORTEST_PATHS_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<ShortestPaths.Result> dijkstraStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -67,7 +67,7 @@ public class ShortestPathsProc extends AlgoBaseProc<ShortestPaths, ShortestPaths
     }
 
     @Procedure(value = "gds.alpha.shortestPaths.write", mode = Mode.WRITE)
-    @Description(SHORTEST_PATHS_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<ShortestPathResult> dijkstra(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

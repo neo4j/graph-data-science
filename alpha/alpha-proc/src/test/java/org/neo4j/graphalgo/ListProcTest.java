@@ -220,10 +220,10 @@ class ListProcTest extends BaseProcTest {
     }
 
     @Test
-    void allProcsAreDescribed() {
+    void allProcsHaveDescriptions() {
         String query = "CALL gds.list()";
         runQueryWithRowConsumer(query, resultRow ->
-            assertFalse(resultRow.getString("description").isEmpty(), resultRow.get("name") + " has no describtion")
+            assertFalse(resultRow.getString("description").isEmpty(), resultRow.get("name") + " has no description")
         );
     }
 

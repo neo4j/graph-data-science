@@ -39,10 +39,10 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class EuclideanProc extends SimilarityProc<EuclideanAlgorithm, EuclideanConfig> {
 
-    public static final String EUCLIDEAN_DESCRIPTION = "Euclidean-similarity is an algorithm for finding similar nodes based on the euclidean distance";
+    private static final String DESCRIPTION = "Euclidean-similarity is an algorithm for finding similar nodes based on the euclidean distance.";
 
     @Procedure(name = "gds.alpha.similarity.euclidean.stream", mode = READ)
-    @Description(EUCLIDEAN_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<SimilarityResult> euclideanStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -51,7 +51,7 @@ public class EuclideanProc extends SimilarityProc<EuclideanAlgorithm, EuclideanC
     }
 
     @Procedure(name = "gds.alpha.similarity.euclidean.write", mode = WRITE)
-    @Description(EUCLIDEAN_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<SimilaritySummaryResult> euclideanWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -52,10 +52,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkConfig> {
 
-    public static final String RANDOM_WALK_DESCRIPTION = "Random Walk is an algorithm that provides random paths in a graph.";
+    private static final String DESCRIPTION =
+        "Random Walk is an algorithm that provides random paths in a graph. " +
+        "It’s similar to how a drunk person traverses a city.";
 
     @Procedure(name = "gds.alpha.randomWalk.stream", mode = READ)
-    @Description(RANDOM_WALK_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<WalkResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

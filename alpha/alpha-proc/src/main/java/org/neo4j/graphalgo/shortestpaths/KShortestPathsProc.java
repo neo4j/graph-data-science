@@ -61,10 +61,12 @@ import static org.neo4j.procedure.Mode.READ;
  */
 public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKShortestPaths, YensKShortestPathsConfig> {
 
-    public static final String YEN_S_K_SHORTEST_PATHS_DESCRIPTION = "Yen's K-shortest paths algorithm computes single-source K-shortest loopless paths for a graph with non-negative relationship weights.";
+    private static final String DESCRIPTION =
+        "Yen's K-shortest paths algorithm computes single-source K-shortest loopless paths " +
+        "for a graph with non-negative relationship weights.";
 
     @Procedure(name = "gds.alpha.kShortestPaths.stream", mode = READ)
-    @Description(YEN_S_K_SHORTEST_PATHS_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<KspStreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -130,7 +132,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
     }
 
     @Procedure(value = "gds.alpha.kShortestPaths.write", mode = Mode.WRITE)
-    @Description(YEN_S_K_SHORTEST_PATHS_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<KspResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

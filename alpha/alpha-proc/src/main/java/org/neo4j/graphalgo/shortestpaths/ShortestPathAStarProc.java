@@ -40,10 +40,10 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, ShortestPathAStar, ShortestPathAStarConfig> {
 
-    public static final String A_STAR_DESCRIPTION = "The A* algorithm is a search algorithm and improves on the classic Dijkstra algorithm";
+    private static final String DESCRIPTION = "The A* algorithm is a search algorithm and improves on the classic Dijkstra algorithm.";
 
     @Procedure(name = "gds.alpha.shortestPath.astar.stream", mode = READ)
-    @Description(A_STAR_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<ShortestPathAStar.Result> astarStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

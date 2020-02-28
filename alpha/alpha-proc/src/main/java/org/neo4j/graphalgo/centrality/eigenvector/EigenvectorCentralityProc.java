@@ -47,7 +47,7 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, PageRank, EigenvectorCentralityConfig> {
-    private static final String DESCRIPTION = "Eigenvector Centrality measures the transitive influence or connectivity of nodes";
+    private static final String DESCRIPTION = "Eigenvector Centrality measures the transitive influence or connectivity of nodes.";
 
     @Procedure(value = "gds.alpha.eigenvector.write", mode = WRITE)
     @Description(DESCRIPTION)

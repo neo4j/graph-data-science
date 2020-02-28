@@ -48,7 +48,9 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPathDijkstra, DijkstraConfig> {
 
-    public static final String SHORTEST_PATH_DESCRIPTION = "The Shortest Path algorithm calculates the shortest (weighted) path between a pair of nodes using the Dijkstra algorithm.";
+    private static final String DESCRIPTION =
+        "The Shortest Path algorithm calculates the shortest (weighted) " +
+        "path between a pair of nodes using the Dijkstra algorithm.";
 
     /**
      * single threaded dijkstra impl.
@@ -57,7 +59,7 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
      * default is: BOTH
      */
     @Procedure(name = "gds.alpha.shortestPath.stream", mode = READ)
-    @Description(SHORTEST_PATH_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<ShortestPathDijkstra.Result> dijkstraStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -70,7 +72,7 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
     }
 
     @Procedure(value = "gds.alpha.shortestPath.write", mode = Mode.WRITE)
-    @Description(SHORTEST_PATH_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<DijkstraResult> dijkstraWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

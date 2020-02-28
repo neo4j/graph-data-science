@@ -39,10 +39,10 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class CosineProc extends SimilarityProc<CosineAlgorithm, CosineConfig> {
 
-    public static final String COSINE_DESCRIPTION = "Cosine-similarity is an algorithm for finding similar nodes based on the cosine similarity";
+    private static final String DESCRIPTION = "Cosine-similarity is an algorithm for finding similar nodes based on the cosine similarity metric.";
 
     @Procedure(name = "gds.alpha.similarity.cosine.stream", mode = READ)
-    @Description(COSINE_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<SimilarityResult> cosineStream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -51,7 +51,7 @@ public class CosineProc extends SimilarityProc<CosineAlgorithm, CosineConfig> {
     }
 
     @Procedure(name = "gds.alpha.similarity.cosine.write", mode = WRITE)
-    @Description(COSINE_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<SimilaritySummaryResult> cosineWrite(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

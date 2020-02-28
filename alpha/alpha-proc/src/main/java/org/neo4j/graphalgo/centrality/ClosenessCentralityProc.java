@@ -50,10 +50,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig> {
 
-    public static final String CLOSENESS_DESCRIPTION = "Closeness centrality is a way of detecting nodes that are able to spread information very efficiently through a graph";
+    private static final String DESCRIPTION =
+        "Closeness centrality is a way of detecting nodes " +
+        "that are able to spread information very efficiently through a graph.";
 
     @Procedure(name = "gds.alpha.closeness.stream", mode = READ)
-    @Description(CLOSENESS_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<MSClosenessCentrality.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -76,7 +78,7 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
     }
 
     @Procedure(value = "gds.alpha.closeness.write", mode = Mode.WRITE)
-    @Description(CLOSENESS_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<CentralityScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

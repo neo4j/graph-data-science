@@ -56,10 +56,10 @@ import static org.neo4j.procedure.Mode.WRITE;
  */
 public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> {
 
-    public static final String BETWEENNESS_CENTRALITY_DESCRIPTION = "Sampled Betweenness centrality computes an approximate score for betweenness centrality";
+    private static final String DESCRIPTION = "Sampled Betweenness centrality computes an approximate score for betweenness centrality.";
 
     @Procedure(name = "gds.alpha.betweenness.sampled.stream", mode = READ)
-    @Description(BETWEENNESS_CENTRALITY_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<BetweennessCentrality.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -75,7 +75,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
     }
 
     @Procedure(value = "gds.alpha.betweenness.sampled.write", mode = WRITE)
-    @Description(BETWEENNESS_CENTRALITY_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<BetweennessCentralityProc.BetweennessCentralityProcResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

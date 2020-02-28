@@ -44,10 +44,10 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeCentrality, DegreeCentralityConfig> {
 
-    public static final String DEGREE_CENTRALITY_DESCRIPTION = "Degree centrality measures the number of incoming and outgoing relationships from a node";
+    private static final String DESCRIPTION = "Degree centrality measures the number of incoming and outgoing relationships from a node.";
 
     @Procedure(value = "gds.alpha.degree.write", mode = Mode.WRITE)
-    @Description(DEGREE_CENTRALITY_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<CentralityScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -61,7 +61,7 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
     }
 
     @Procedure(name = "gds.alpha.degree.stream", mode = READ)
-    @Description(DEGREE_CENTRALITY_DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<CentralityScore> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
