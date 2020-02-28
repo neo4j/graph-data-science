@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
 
 import java.util.AbstractCollection;
@@ -69,27 +69,27 @@ import static org.mockito.Mockito.when;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStreamConsume;
 
 final class ParallelUtilTest {
 
-    @Test
-    void shouldParallelizeStreams() {
+    @ValueSource(ints = {1, 2, 4, 8, 16, 27, 32, 53, 64})
+    @ParameterizedTest
+    void shouldParallelizeStreams(int concurrency) {
         long firstNum = 1;
         long lastNum = 1_000_000;
 
         List<Long> list = LongStream.rangeClosed(firstNum, lastNum).boxed().collect(Collectors.toList());
 
-        // set unlimited
-        ConcurrencyMonitor.instance().setUnlimited();
         ForkJoinPool commonPool = ForkJoinPool.commonPool();
         Stream<Long> stream = list.stream();
 
-        long actualTotal = parallelStream(stream, 4, (s) -> {
+        long actualTotal = parallelStream(stream, concurrency, (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-            assertEquals(4, threadPool.getParallelism());
+            assertEquals(concurrency, threadPool.getParallelism());
             assertNotSame(threadPool, commonPool);
 
             return s.reduce(0L, Long::sum);
@@ -98,33 +98,38 @@ final class ParallelUtilTest {
         assertEquals((lastNum + firstNum) * lastNum / 2, actualTotal);
     }
 
-//    @Test
-//    void shouldParallelizeStreamsWithLimitedConcurrency() {
-//        LongStream data = LongStream.range(0, 100_000);
-//        int concurrency = limitedStreamConcurrency();
-//        parallelStream(data, concurrency, (s) -> {
-//            assertTrue(s.isParallel());
-//            Thread thread = Thread.currentThread();
-//            assertTrue(thread instanceof ForkJoinWorkerThread);
-//            ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-//            assertEquals(concurrency, threadPool.getParallelism());
-//
-//            return s.reduce(0L, Long::sum);
-//        });
-//    }
-//
-//    @Test
-//    void shouldParallelizeAndConsumeStreamsWithLimitedConcurrency() {
-//        LongStream data = LongStream.range(0, 100_000);
-//        int concurrency = limitedStreamConcurrency();
-//        parallelStreamConsume(data, concurrency, (s) -> {
-//            assertTrue(s.isParallel());
-//            Thread thread = Thread.currentThread();
-//            assertTrue(thread instanceof ForkJoinWorkerThread);
-//            ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-//            assertEquals(concurrency, threadPool.getParallelism());
-//        });
-//    }
+    @ValueSource(ints = {1, 2, 3, 4})
+    @ParameterizedTest
+    void shouldParallelizeStreamsWithLimitedConcurrency(int concurrency) {
+        LongStream data = LongStream.range(0, 100_000);
+        Long result = parallelStream(data, concurrency, (s) -> {
+            assertTrue(s.isParallel());
+            Thread thread = Thread.currentThread();
+            assertTrue(thread instanceof ForkJoinWorkerThread);
+            ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
+            assertEquals(concurrency, threadPool.getParallelism());
+
+            return s.reduce(0L, Long::sum);
+        });
+
+        assertEquals((99_999L * 100_000L / 2), result);
+    }
+
+    @ValueSource(ints = {1, 2, 3, 4})
+    @ParameterizedTest
+    void shouldParallelizeAndConsumeStreamsWithLimitedConcurrency(int concurrency) {
+        LongStream data = LongStream.range(0, 100_000);
+        parallelStreamConsume(data, concurrency, (s) -> {
+            assertTrue(s.isParallel());
+            Thread thread = Thread.currentThread();
+            assertTrue(thread instanceof ForkJoinWorkerThread);
+            ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
+            assertEquals(concurrency, threadPool.getParallelism());
+
+            long result = s.reduce(0L, Long::sum);
+            assertEquals((99_999L * 100_000L / 2), result);
+        });
+    }
 
     @Test
     void shouldTakeBaseStreams() {
@@ -406,13 +411,6 @@ final class ParallelUtilTest {
 
     private PrimitiveLongIterable longs(int from, int size) {
         return () -> PrimitiveLongCollections.range(from, from + size - 1);
-    }
-
-    private int limitedStreamConcurrency() {
-        return Math.min(
-            Runtime.getRuntime().availableProcessors(),
-            (AlgoBaseConfig.DEFAULT_CONCURRENCY - 1)
-        );
     }
 
     static final class Tasks extends AbstractCollection<Runnable> {

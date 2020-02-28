@@ -69,10 +69,11 @@ public final class ParallelUtil {
     private ParallelUtil() {}
 
     /**
-     * Executes the given function in parallel on the given {@link BaseStream}, using a FJ pool of appropriate size.
+     * Executes the given function in parallel on the given {@link BaseStream}, using a FJ pool of the requested size.
+     * The concurrency value is assumed to already be validated towards the edition limitation.
      */
     public static <T extends BaseStream<?, T>, R> R parallelStream(T data, int concurrency, Function<T, R> fn) {
-        ForkJoinPool pool = ForkJoinPools.createPool(concurrency);
+        ForkJoinPool pool = getFJPoolWithConcurrency(concurrency);
         try {
             return pool.submit(() -> fn.apply(data.parallel())).get();
         } catch (Exception e) {
@@ -83,17 +84,14 @@ public final class ParallelUtil {
     }
 
     /**
-     * Executes the given function in parallel on the given {@link BaseStream}, using an apropriate FJ pool.
+     * Executes the given function in parallel on the given {@link BaseStream}, using a FJ pool of the requested size.
+     * The concurrency value is assumed to already be validated towards the edition limitation.
      */
-    public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, int concurrency, Consumer<T> fn) {
-        ForkJoinPool pool = ForkJoinPools.createPool(concurrency);
-        try {
-            pool.submit(() -> fn.accept(data.parallel())).get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            pool.shutdown();
-        }
+    public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, int concurrency, Consumer<T> consumer) {
+        parallelStream(data, concurrency, (Function<T, Void>) t -> {
+            consumer.accept(t);
+            return null;
+        });
     }
 
     public static void parallelForEachNode(Graph graph, int concurrency, LongConsumer consumer) {
@@ -1083,5 +1081,9 @@ public final class ParallelUtil {
             }
             pushedElement = element;
         }
+    }
+
+    private static ForkJoinPool getFJPoolWithConcurrency(int concurrency) {
+        return new ForkJoinPool(concurrency);
     }
 }
