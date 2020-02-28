@@ -287,8 +287,6 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
             .addParameter("nodeWeightProperty", "weight")
             .yields();
 
-        System.out.println(query);
-
         runQueryWithRowConsumer(
             query,
             row -> {
