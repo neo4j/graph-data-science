@@ -39,7 +39,6 @@ task versionsJson {
         indexedVersionsJson[ver.neo4j] = [
                 'neo4j': ver.neo4j,
                 'version': project.version,
-                'url': "",
                 'jar': "$bucketUrl/${shadowJar.archiveName}",
         ]
         outFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(indexedVersionsJson.values()))
