@@ -45,8 +45,8 @@ public interface ConcurrencyValidation {
             Validator.validate(wc.concurrency());
             Validator.validate(wc.writeConcurrency());
         } else if (this instanceof AlgoBaseConfig) {
-            AlgoBaseConfig wc = (AlgoBaseConfig) this;
-            Validator.validate(wc.concurrency());
+            AlgoBaseConfig algoConfig = (AlgoBaseConfig) this;
+            Validator.validate(algoConfig.concurrency());
         } else if (this instanceof GraphCreateConfig) {
             GraphCreateConfig gcc = (GraphCreateConfig) this;
             Validator.validate(gcc.readConcurrency());
