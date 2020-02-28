@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 
+import java.io.File;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -61,7 +63,9 @@ public class SpanningTreeProcTest extends BaseProcTest {
                         "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
                         "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
 
-        db = TestDatabaseCreator.createTestDatabase();
+        ClassLoader classLoader = SpanningTreeProcTest.class.getClassLoader();
+        File file = new File(classLoader.getResource("transport-nodes.csv").getFile());
+        db = TestDatabaseCreator.createTestDatabaseWithCustomLoadCsvRoot(file.getParent());
         runQuery(cypher);
         registerProcedures(SpanningTreeProc.class, GraphCreateProc.class);
     }
@@ -75,15 +79,11 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void github8_testOutOfBounds() {
-        String importQuery = "WITH \"https://github.com/neo4j-graph-analytics/book/raw/master/data/transport-nodes.csv\"\n" +
-                             "AS uri\n" +
-                             "LOAD CSV WITH HEADERS FROM uri  AS row\n" +
+        String importQuery = "LOAD CSV WITH HEADERS FROM 'file:///transport-nodes.csv' AS row\n" +
                              "MERGE (place:Place {id:row.id})";
         String importRelsQuery =
                              "// Import relationships\n" +
-                             "WITH \"https://github.com/neo4j-graph-analytics/book/raw/master/data/transport-relationships.csv\"\n" +
-                             "AS uri\n" +
-                             "LOAD CSV WITH HEADERS FROM uri AS row\n" +
+                             "LOAD CSV WITH HEADERS FROM 'file:///transport-relationships.csv' AS row\n" +
                              "MATCH (origin:Place {id: row.src})\n" +
                              "MATCH (destination:Place {id: row.dst})\n" +
                              "MERGE (origin)-[:EROAD {distance: toInteger(row.cost)}]->(destination);";

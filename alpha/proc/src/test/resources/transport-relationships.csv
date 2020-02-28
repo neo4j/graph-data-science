@@ -1,0 +1,16 @@
+src,dst,relationship,cost
+"Amsterdam","Utrecht","EROAD",46
+"Amsterdam","Den Haag","EROAD",59
+"Den Haag","Rotterdam","EROAD",26
+"Amsterdam","Immingham","EROAD",369
+"Immingham","Doncaster","EROAD",74
+"Doncaster","London","EROAD",277
+"Hoek van Holland","Den Haag","EROAD",27
+"Felixstowe","Hoek van Holland","EROAD",207
+"Ipswich","Felixstowe","EROAD",22
+"Colchester","Ipswich","EROAD",32
+"London","Colchester","EROAD",106
+"Gouda","Rotterdam","EROAD",25
+"Gouda","Utrecht","EROAD",35
+"Den Haag","Gouda","EROAD",32
+"Hoek van Holland","Rotterdam","EROAD",33
