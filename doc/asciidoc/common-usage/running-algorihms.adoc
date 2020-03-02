@@ -1,14 +1,31 @@
 [[running-algos]]
 = Running algorithms
 
+[abstract]
+--
+This section describes the common execution modes for algorithms: `stream`, `write`, and `stats`.
+--
+
 All algorithms are exposed as Neo4j procedures.
 They can be called directly from Cypher using Neo4j Browser, `cypher-shell`, or from your client code using a Neo4j Driver in the language of your choice.
 
 For a detailed guide on the syntax to run algorithms, please see the <<algorithms-syntax, Syntax overview>> section.
-In short, there are two main execution modes to consider: `write` and `stream`, which we cover in this chapter.
+In short, there are three main execution modes to consider: `stream`, `write`, and `stats`, which we cover in this chapter.
 
 The execution of any algorithm can be canceled by terminating the Cypher transaction that is executing the procedure call.
 For more on how transactions are used, see <<transaction-handling, Transaction Handling>>.
+
+
+[[running-algos-stream]]
+== Stream
+
+The `stream` mode will return the results of the algorithm computation as Cypher result rows.
+This is similar to how standard Cypher reading queries operate.
+
+The returned data can be a node ID and a computed value for the node (such as a Page Rank score, or WCC componentId), or two node IDs and a computed value for the node pair (such as a Node Similarity similarity score).
+
+If the graph is very large, the result of a `stream` mode computation will also be very large.
+Using the `ORDER BY` and `LIMIT` subclauses in the Cypher query could be useful to support 'top N'-style use cases.
 
 
 [[running-algos-write]]
@@ -25,13 +42,11 @@ The `write` mode can be very useful for use cases where the algorithm results wo
 In order for the results from a `write` mode computation to be used in another algorithm, a new graph must be created from the Neo4j database with the updated graph.
 
 
-[[running-algos-stream]]
-== Stream
+[[running-algos-write]]
+== Stats
 
-The `stream` mode will return the results of the algorithm computation as Cypher result rows.
-This is similar to how standard Cypher reading queries operate.
+The `stats` mode returns statistical results for the algorithm computation.
+These may include counts or a percentile distribution for the algorithm results.
+The same results can be acquired from the `write` mode of the procedure, but an algorithm in `stats` mode makes no modifications to the underlying Neo4j graph.
 
-The returned data can be a node ID and a computed value for the node (such as a Page Rank score, or WCC componentID), or two node IDs and a computed value for the node pair (such as a Node Similarity similarity score).
 
-If the graph is very large, the result of a `stream` mode computation will also be very large.
-Using the `ORDER BY` and `LIMIT` subclauses in the Cypher query could be useful to support 'top N'-style use cases.
