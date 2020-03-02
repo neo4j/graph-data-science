@@ -65,9 +65,9 @@ include::common-configuration.adoc[]
 | writeProperty              | String  | n/a     | no        | The node property to which the component ID is written to.
 | relationshipWeightProperty | String  | null    | yes       | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
 | defaultValue               | Float   | null    | yes       | The default value of the relationship weight in case it is missing or invalid.
-| seedProperty               | String  | n/a     | yes       | Used to set the initial community for a node. The property value needs to be a number.
+| seedProperty               | String  | n/a     | yes       | Used to set the initial component for a node. The property value needs to be a number.
 | threshold                  | Float   | null    | yes       | The value of the weight above which the relationship is considered in the computation.
-| consecutiveIds             | Boolean | false   | yes       | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
+| consecutiveIds             | Boolean | false   | yes       | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
@@ -96,7 +96,7 @@ CALL gds.wcc.stream(
 YIELD
   // general stream return columns
   nodeId: int,
-  communityId: int
+  componentId: int
 ----
 
 include::common-parameters.adoc[]
@@ -109,9 +109,9 @@ include::common-configuration.adoc[]
 | Name                       | Type    | Default | Optional | Description
 | relationshipWeightProperty | String  | null    | yes      | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
 | defaultValue               | Float   | null    | yes      | The default value of the relationship weight in case it is missing or invalid.
-| seedProperty               | String  | n/a     | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| seedProperty               | String  | n/a     | yes      | Used to set the initial component for a node. The property value needs to be a number.
 | threshold                  | Float   | null    | yes      | The value of the weight above which the relationship is considered in the computation.
-| consecutiveIds             | Boolean | false   | yes      | Flag to decide whether community identifiers are mapped into a consecutive id space (requires additional memory).
+| consecutiveIds             | Boolean | false   | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
