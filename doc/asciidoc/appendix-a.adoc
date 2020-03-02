@@ -105,49 +105,64 @@ The following table lists all beta procedures in the GDS library:
 The following table lists all alpha procedures in the GDS library:
 
 [[table-alpha]]
-[opts=header,cols="1"]
+[opts=header,cols="1, 1"]
 |===
-| Name
-| <<algorithm-all-pairs-shortest-path-sample, gds.alpha.allShortestPaths.stream>>
+|Algorithm | Name
+|All Shortest Paths | <<algorithm-all-pairs-shortest-path-sample, gds.alpha.allShortestPaths.stream>>
+.2+<.^|Article Rank
 | <<algorithms-articlerank-syntax, gds.alpha.articleRank.stream>>
 | <<algorithms-articlerank-syntax, gds.alpha.articleRank.write>>
+.4+<.^|Betweenness Centrality
 | <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.stream>>
 | <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.write>>
 | <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.sampled.stream>>
 | <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.sampled.write>>
-| <<algorithms-bfs-syntax, gds.alpha.bfs.stream>>
+|Breadth First Search | <<algorithms-bfs-syntax, gds.alpha.bfs.stream>>
+.2+<.^|Closeness Centrality
 | <<algorithms-closeness-centrality-syntax, gds.alpha.closeness.stream>>
 | <<algorithms-closeness-centrality-syntax, gds.alpha.closeness.write>>
+.2+<.^|Degree Centrality
 | <<algorithms-degree-syntax, gds.alpha.degree.stream>>
 | <<algorithms-degree-syntax, gds.alpha.degree.write>>
-| <<algorithms-dfs-syntax, gds.alpha.dfs.stream>>
+|Depth First Search | <<algorithms-dfs-syntax, gds.alpha.dfs.stream>>
+.2+<.^|Eigenvector Centrality
 | <<algorithms-eigenvector-syntax, gds.alpha.eigenvector.stream>>
 | <<algorithms-eigenvector-syntax, gds.alpha.eigenvector.write>>
+.2+<.^|K-Shortest Paths
 | <<algorithms-yens-k-shortest-path-syntax, gds.alpha.kShortestPaths.stream>>
 | <<algorithms-yens-k-shortest-path-syntax, gds.alpha.kShortestPaths.write>>
-| <<algorithms-random-walk-syntax, gds.alpha.randomWalk.stream>>
+|Random Walk | <<algorithms-random-walk-syntax, gds.alpha.randomWalk.stream>>
+.2+<.^|Strongly Connected Components
 | <<algorithms-strongly-connected-components-syntax, gds.alpha.scc.stream>>
 | <<algorithms-strongly-connected-components-syntax, gds.alpha.scc.write>>
+.5+<.^|Shortest Path
 | <<algorithms-shortest-path-syntax, gds.alpha.shortestPath.stream>>
 | <<algorithms-shortest-path-syntax, gds.alpha.shortestPath.write>>
 | <<algorithms-a_star-syntax, gds.alpha.shortestPath.astar.stream>>
 | <<algorithms-single-source-shortest-path-syntax, gds.alpha.shortestPath.deltaStepping.write>>
 | <<algorithms-single-source-shortest-path-syntax, gds.alpha.shortestPath.deltaStepping.stream>>
+.2+<.^|Cosine Similarity
 | <<algorithms-similarity-cosine-syntax, gds.alpha.similarity.cosine.stream>>
 | <<algorithms-similarity-cosine-syntax, gds.alpha.similarity.cosine.write>>
+.2+<.^|Euclidean Similarity
 | <<algorithms-similarity-euclidean-syntax, gds.alpha.similarity.euclidean.stream>>
 | <<algorithms-similarity-euclidean-syntax, gds.alpha.similarity.euclidean.write>>
+.2+<.^|Overlap Similarity
 | <<algorithms-similarity-overlap-syntax, gds.alpha.similarity.overlap.stream>>
 | <<algorithms-similarity-overlap-syntax, gds.alpha.similarity.overlap.write>>
+.2+<.^|Pearson Similarity
 | <<algorithms-similarity-pearson-syntax, gds.alpha.similarity.pearson.write>>
 | <<algorithms-similarity-pearson-syntax, gds.alpha.similarity.pearson.stream>>
+.5+<.^|Spanning Tree
 | <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.write>>
 | <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.kmax.write>>
 | <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.kmin.write>>
 | <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.maximum.write>>
 | <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.minimum.write>>
+.2+<.^|Approximate Nearest Neighbours
 | <<ann-syntax, gds.alpha.ml.ann.stream>>
 | <<ann-syntax, gds.alpha.ml.ann.write>>
+.3+<.^|Triangle Count
 | <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangle.stream>>
 | <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.stream>>
 | <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.write>>
