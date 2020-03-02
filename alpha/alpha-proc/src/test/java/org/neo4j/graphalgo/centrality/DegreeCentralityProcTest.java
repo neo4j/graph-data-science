@@ -131,10 +131,9 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .writeMode()
             .yields();
         runQueryWithRowConsumer(query, row -> {
-                assertNotEquals(-1L, row.getNumber("loadMillis").longValue());
+                assertNotEquals(-1L, row.getNumber("createMillis").longValue());
                 assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
                 assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(
                     row.getNumber("writeMillis").intValue() >= 0,
@@ -150,9 +149,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
         String query = queryBuilder(REVERSE)
             .writeMode()
             .addParameter("relationshipWeightProperty", "foo")
-            .yields("writeMillis", "write", "writeProperty");
+            .yields("writeMillis", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(
                     row.getNumber("writeMillis").intValue() >= 0,
@@ -194,9 +192,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
     public void testDegreeBothWriteBack() {
         String query = queryBuilder(UNDIRECTED)
             .writeMode()
-            .yields("writeMillis", "write", "writeProperty");
+            .yields("writeMillis", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
@@ -209,9 +206,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
         String query = queryBuilder(UNDIRECTED)
             .writeMode()
             .addParameter("relationshipWeightProperty", "foo")
-            .yields("writeMillis", "write", "writeProperty");
+            .yields("writeMillis", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
@@ -248,9 +244,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
     public void testDegreeOutgoingWriteBack() {
         String query = queryBuilder(NATURAL)
             .writeMode()
-            .yields("writeMillis", "write", "writeProperty");
+            .yields("writeMillis", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
@@ -263,9 +258,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
         String query = queryBuilder(NATURAL)
             .writeMode()
             .addParameter("relationshipWeightProperty", "foo")
-            .yields("writeMillis", "write", "writeProperty");
+            .yields("writeMillis", "writeProperty");
         runQueryWithRowConsumer(query, row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }

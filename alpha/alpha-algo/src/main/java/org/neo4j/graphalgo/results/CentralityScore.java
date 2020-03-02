@@ -32,22 +32,19 @@ public class CentralityScore {
     // TODO: return number of relationships as well
     //  the Graph API doesn't expose this value yet
     public static final class Stats {
-        public final long nodes, loadMillis, computeMillis, writeMillis;
-        public final boolean write;
+        public final long nodes, createMillis, computeMillis, writeMillis;
         public final String writeProperty;
 
         public Stats(
                 long nodes,
-                long loadMillis,
+                long createMillis,
                 long computeMillis,
                 long writeMillis,
-                boolean write,
                 String writeProperty) {
             this.nodes = nodes;
-            this.loadMillis = loadMillis;
+            this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
-            this.write = write;
             this.writeProperty = writeProperty;
         }
 
@@ -59,7 +56,6 @@ public class CentralityScore {
                     loadMillis,
                     computeMillis,
                     writeMillis,
-                    write,
                     writeProperty
                 );
             }

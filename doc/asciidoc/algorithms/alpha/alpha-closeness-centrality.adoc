@@ -84,7 +84,7 @@ In practice, a variation on the original formula is used so that we don't run in
 [source, cypher]
 ----
 CALL gds.alpha.closeness.write(configuration: Map)
-YIELD nodes, loadMillis, computeMillis, writeMillis
+YIELD nodes, createMillis, computeMillis, writeMillis
 ----
 
 .Parameters
@@ -102,7 +102,7 @@ YIELD nodes, loadMillis, computeMillis, writeMillis
 |===
 | Name          | Type | Description
 | nodes         | int  | The number of nodes considered.
-| loadMillis    | int  | Milliseconds for loading data.
+| createMillis  | int  | Milliseconds for loading data.
 | evalMillis    | int  | Milliseconds for running the algorithm.
 | writeMillis   | int  | Milliseconds for writing result data back.
 | writeProperty | string  | The property name written back to.

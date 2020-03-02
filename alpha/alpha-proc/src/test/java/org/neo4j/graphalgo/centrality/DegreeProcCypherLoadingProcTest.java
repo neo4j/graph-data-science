@@ -153,12 +153,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "            aggregation: 'single'" +
                        "        }" +
                        "    }" +
-                       "}) YIELD writeMillis, write, writeProperty";
+                       "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
             MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
             row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
@@ -178,12 +177,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "        }" +
                        "    }," +
                        "    relationshipWeightProperty: 'foo'" +
-                       "}) YIELD writeMillis, write, writeProperty";
+                       "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
             MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
             row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
@@ -245,12 +243,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "            aggregation: 'single'" +
                        "        }" +
                        "    }" +
-                       "}) YIELD writeMillis, write, writeProperty";
+                       "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
             MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
             row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
@@ -270,12 +267,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "        }" +
                        "    }," +
                        "    relationshipWeightProperty: 'foo'" +
-                       "}) YIELD writeMillis, write, writeProperty";
+                       "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
             MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
             row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
@@ -337,12 +333,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "            aggregation: 'single'" +
                        "        }" +
                        "    }" +
-                       "}) YIELD writeMillis, write, writeProperty";
+                       "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
             MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
             row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
@@ -362,12 +357,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "        }" +
                        "    }," +
                        "    relationshipWeightProperty: 'foo'" +
-                       "}) YIELD writeMillis, write, writeProperty";
+                       "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
             MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
             row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
