@@ -44,7 +44,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [source, cypher]
 ----
 CALL gds.louvain.write(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodes, communities, modularity, loadMillis, computeMillis, writeMillis
+YIELD nodePropertiesWritten, communityCount, modularity, createMillis, computeMillis, writeMillis
 ----
 
 include::common-parameters.adoc[]
@@ -87,7 +87,7 @@ include::common-configuration.adoc[]
 [source, cypher]
 ----
 CALL gds.louvain.stream(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodeId, community, communities
+YIELD nodeId, communityId, communityIds
 ----
 
 include::common-parameters.adoc[]
