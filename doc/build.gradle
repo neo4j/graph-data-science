@@ -37,6 +37,8 @@ dependencies {
     compile project(':test-utils')
     testCompile project(':proc')
     testCompile project(':alpha-proc')
+
+    testCompile group: 'org.reflections',  name: 'reflections',       version: '0.9.11'
 }
 
 apply plugin: 'ch.kk7.spawn'

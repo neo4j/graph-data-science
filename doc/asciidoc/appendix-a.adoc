@@ -19,11 +19,14 @@ This chapter contains the following sections:
 
 The following table lists all production-quality graph operations in the GDS library:
 
+[role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
 |Operation | Procedure
 |Create Graph |<<catalog-graph-create, gds.graph.create>>
+|Create Graph |<<catalog-graph-create, gds.graph.create.estimate>>
 |Create Graph using Cypher | <<catalog-graph-create, gds.graph.create.cypher>>
+|Create Graph using Cypher | <<catalog-graph-create, gds.graph.create.cypher.estimate>>
 |Check if a named graph exists | <<catalog-graph-exists, gds.graph.exists>>
 |List graphs| <<catalog-graph-list, gds.graph.list>>
 |Remove a named graph from memory | <<catalog-graph-drop, gds.graph.drop>>
@@ -35,39 +38,45 @@ The following table lists all production-quality graph operations in the GDS lib
 The following table lists all production-quality procedures in the GDS library:
 
 [[table-product]]
+[role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
 | Algorithm | Procedure
-.5+<.^|<<algorithms-label-propagation, Label Propagation>>
+.6+<.^|<<algorithms-label-propagation, Label Propagation>>
 | `<<algorithms-label-propagation-syntax, gds.labelPropagation.write>>`
 | `<<algorithms-label-propagation-syntax, gds.labelPropagation.write.estimate>>`
 | `<<algorithms-label-propagation-syntax, gds.labelPropagation.stream>>`
 | `<<algorithms-label-propagation-syntax, gds.labelPropagation.stream.estimate>>`
 | `<<algorithms-label-propagation-syntax, gds.labelPropagation.stats>>`
-.5+<.^|<<algorithms-louvain, Louvain>>
+| `<<algorithms-label-propagation-syntax, gds.labelPropagation.stats.estimate>>`
+.6+<.^|<<algorithms-louvain, Louvain>>
 | `<<algorithms-louvain-syntax, gds.louvain.write>>`
 | `<<algorithms-louvain-syntax, gds.louvain.write.estimate>>`
 | `<<algorithms-louvain-syntax, gds.louvain.stream>>`
 | `<<algorithms-louvain-syntax, gds.louvain.stream.estimate>>`
 | `<<algorithms-louvain-syntax, gds.louvain.stats>>`
-.5+<.^|<<algorithms-node-similarity, Node Similarity>>
+| `<<algorithms-louvain-syntax, gds.louvain.stats.estimate>>`
+.6+<.^|<<algorithms-node-similarity, Node Similarity>>
 | `<<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write>>`
 | `<<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write.estimate>>`
 | `<<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream>>`
 | `<<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream.estimate>>`
 | `<<algorithms-node-similarity, gds.nodeSimilarity.stats>>`
-.5+<.^|<<algorithms-pagerank, PageRank>>
+| `<<algorithms-node-similarity, gds.nodeSimilarity.stats.estimate>>`
+.6+<.^|<<algorithms-pagerank, PageRank>>
 | `<<algorithms-pagerank-syntax, gds.pageRank.write>>`
 | `<<algorithms-pagerank-syntax, gds.pageRank.write.estimate>>`
 | `<<algorithms-pagerank-syntax, gds.pageRank.stream>>`
 | `<<algorithms-pagerank-syntax, gds.pageRank.stream.estimate>>`
 | `<<algorithms-pagerank-syntax, gds.pageRank.stats>>`
-.5+<.^|<<algorithms-wcc, Weakly Connected Components>>
+| `<<algorithms-pagerank-syntax, gds.pageRank.stats.estimate>>`
+.6+<.^|<<algorithms-wcc, Weakly Connected Components>>
 | `<<algorithms-wcc-syntax, gds.wcc.write>>`
 | `<<algorithms-wcc-syntax, gds.wcc.write.estimate>>`
 | `<<algorithms-wcc-syntax-stream, gds.wcc.stream>>`
 | `<<algorithms-wcc-syntax-stream, gds.wcc.stream.estimate>>`
 | `<<algorithms-wcc-syntax, gds.wcc.stats>>`
+| `<<algorithms-wcc-syntax, gds.wcc.stats.estimate>>`
 |===
 
 [[beta-tier]]
@@ -75,6 +84,7 @@ The following table lists all production-quality procedures in the GDS library:
 
 The following table lists all beta graph operations in the GDS library:
 
+[role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
 |Operation | Procedure
@@ -84,6 +94,7 @@ The following table lists all beta graph operations in the GDS library:
 The following table lists all beta procedures in the GDS library:
 
 [[table-beta]]
+[role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
 |Algorithm | Procedure
@@ -102,9 +113,19 @@ The following table lists all beta procedures in the GDS library:
 [[alpha-tier]]
 == Alpha tier
 
+The following table lists all beta graph operations in the GDS library:
+
+[role=procedure-listing]
+[opts=header,cols="1, 1"]
+|===
+|Operation | Procedure
+|Graph Export | `gds.alpha.graph.export`
+|===
+
 The following table lists all alpha procedures in the GDS library:
 
 [[table-alpha]]
+[role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
 |Algorithm | Procedure
@@ -131,6 +152,9 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<alpha-algorithms-yens-k-shortest-path, K-Shortest Paths>>
 | `gds.alpha.kShortestPaths.stream`
 | `gds.alpha.kShortestPaths.write`
+.2+<.^|Shortest Paths
+| `gds.alpha.shortestPaths.stream`
+| `gds.alpha.shortestPaths.write`
 |<<alpha-algorithms-random-walk, Random Walk>> | `gds.alpha.randomWalk.stream`
 .2+<.^|<<algorithms-strongly-connected-components, Strongly Connected Components>>
 | `gds.alpha.scc.stream`
@@ -172,6 +196,7 @@ The following table lists all alpha procedures in the GDS library:
 The following table lists all functions in the GDS library:
 
 [[table-functions]]
+[role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
 |Group | Function
