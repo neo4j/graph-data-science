@@ -122,6 +122,10 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
             throw new IllegalArgumentException("Must set degree cutoff to 1 or greater");
         }
 
+        if (similarityCutoff() < 0 || similarityCutoff() > 1) {
+            throw new IllegalArgumentException("Must set similarity cutoff to a value in [0, 1] (inclusive).");
+        }
+
         if (topK() != TOP_K_DEFAULT && bottomK() != BOTTOM_K_DEFAULT) {
             throw new IllegalArgumentException(String.format(
                 "Invalid parameter combination: %s combined with %s",

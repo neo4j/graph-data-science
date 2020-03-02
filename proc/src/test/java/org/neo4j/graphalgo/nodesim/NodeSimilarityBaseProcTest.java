@@ -214,6 +214,21 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
         assertThat(illegalArgumentException.getMessage(), is("Must set degree cutoff to 1 or greater"));
     }
 
+    @ParameterizedTest
+    @ValueSource(doubles = {-4.2, 4.2})
+    void shouldThrowIfSimilarityCutoffIsOutOfRange(double cutoff) {
+        CypherMapWrapper input = baseUserInput().withNumber("similarityCutoff", cutoff);
+
+        IllegalArgumentException illegalArgumentException = assertThrows(
+            IllegalArgumentException.class,
+            () -> config(input)
+        );
+        assertThat(
+            illegalArgumentException.getMessage(),
+            is("Must set similarity cutoff to a value in [0, 1] (inclusive).")
+        );
+    }
+
     @Test
     void shouldCreateValidDefaultAlgoConfig() {
         CypherMapWrapper input = baseUserInput();
