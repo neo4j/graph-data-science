@@ -57,7 +57,7 @@ The algorithm assumes that adding a relationship to a path can never make a path
 [source, cypher]
 ----
 CALL gds.alpha.kShortestPaths.write(configuration: Map)
-YIELD resultCount, loadMillis, evalMillis, writeMillis
+YIELD resultCount, createMillis, evalMillis, writeMillis
 ----
 
 .Configuration
@@ -76,11 +76,11 @@ YIELD resultCount, loadMillis, evalMillis, writeMillis
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name        | Type | Description
-| resultCount | int  | The number of shortest paths results
-| loadMillis  | int  | Milliseconds for loading data
-| evalMillis  | int  | Milliseconds for running the algorithm
-| writeMillis | int  | Milliseconds for writing result data back
+| Name         | Type | Description
+| resultCount  | int  | The number of shortest paths results
+| createMillis | int  | Milliseconds for loading data
+| evalMillis   | int  | Milliseconds for running the algorithm
+| writeMillis  | int  | Milliseconds for writing result data back
 |===
 
 .The following will run the algorithm and stream the results:

@@ -84,12 +84,12 @@ class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCou
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            long loadMillis = row.getNumber("loadMillis").longValue();
+            long createMillis = row.getNumber("createMillis").longValue();
             long computeMillis = row.getNumber("computeMillis").longValue();
             long writeMillis = row.getNumber("writeMillis").longValue();
             long nodeCount = row.getNumber("nodeCount").longValue();
             long triangleCount = row.getNumber("triangleCount").longValue();
-            assertNotEquals(-1, loadMillis);
+            assertNotEquals(-1, createMillis);
             assertNotEquals(-1, computeMillis);
             assertNotEquals(-1, writeMillis);
             assertEquals(3, triangleCount);
@@ -113,7 +113,7 @@ class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCou
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            long loadMillis = row.getNumber("loadMillis").longValue();
+            long createMillis = row.getNumber("createMillis").longValue();
             long computeMillis = row.getNumber("computeMillis").longValue();
             long writeMillis = row.getNumber("writeMillis").longValue();
             long nodeCount = row.getNumber("nodeCount").longValue();
@@ -121,7 +121,7 @@ class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCou
             double coefficient = row.getNumber("averageClusteringCoefficient").doubleValue();
             long p100 = row.getNumber("p100").longValue();
 
-            assertNotEquals(-1, loadMillis);
+            assertNotEquals(-1, createMillis);
             assertNotEquals(-1, computeMillis);
             assertNotEquals(-1, writeMillis);
             assertEquals(9, nodeCount);

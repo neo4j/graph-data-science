@@ -152,7 +152,7 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
 
         public Result build() {
             return new Result(
-                loadMillis,
+                createMillis,
                 computeMillis,
                 writeMillis,
                 effectiveNodeCount);

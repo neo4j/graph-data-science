@@ -21,18 +21,20 @@ package org.neo4j.graphalgo.results;
 
 public class ShortestPathResult {
 
-    public final long loadMillis;
+    public final long createMillis;
     public final long evalMillis;
     public final long writeMillis;
     public final long nodeCount;
     public final String targetProperty;
 
-    public ShortestPathResult(long loadMillis,
-                              long evalMillis,
-                              long writeMillis,
-                              long nodeCount,
-                              String targetProperty) {
-        this.loadMillis = loadMillis;
+    public ShortestPathResult(
+        long createMillis,
+        long evalMillis,
+        long writeMillis,
+        long nodeCount,
+        String targetProperty
+    ) {
+        this.createMillis = createMillis;
         this.evalMillis = evalMillis;
         this.writeMillis = writeMillis;
         this.nodeCount = nodeCount;
@@ -61,11 +63,12 @@ public class ShortestPathResult {
         @Override
         public ShortestPathResult build() {
             return new ShortestPathResult(
-                    loadMillis,
-                    computeMillis,
-                    writeMillis,
-                    nodeCount,
-                    targetProperty);
+                createMillis,
+                computeMillis,
+                writeMillis,
+                nodeCount,
+                targetProperty
+            );
         }
     }
 

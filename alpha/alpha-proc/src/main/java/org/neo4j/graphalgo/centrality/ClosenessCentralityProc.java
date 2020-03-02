@@ -89,7 +89,7 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
             .withNodeCount(graph.nodeCount())
             .withWriteProperty(config.writeProperty())
             .withComputeMillis(computationResult.computeMillis())
-            .withLoadMillis(computationResult.createMillis());
+            .withCreateMillis(computationResult.createMillis());
 
         if (graph.isEmpty()) {
             graph.release();

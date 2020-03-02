@@ -79,7 +79,7 @@ It was considered to be one of the "three distinct intuitive conceptions of cent
 [source, cypher]
 ----
 CALL gds.alpha.betweenness.write(configuration: Map)
-YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis
+YIELD nodes, minCentrality, maxCentrality, sumCentrality, createMillis, computeMillis, writeMillis
 ----
 
 .Parameters
@@ -107,7 +107,7 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 | minCentrality | int  | The minimum centrality value
 | maxCentrality | int  | The maximum centrality value
 | sumCentrality | int  | The sum of all centrality values
-| loadMillis    | int  | Milliseconds for loading data
+| createMillis  | int  | Milliseconds for loading data
 | computeMillis | int  | Milliseconds for running the algorithm
 | writeMillis   | int  | Milliseconds for writing result data back
 |===
@@ -141,7 +141,7 @@ YIELD nodeId, centrality
 [source,cypher]
 ----
 CALL gds.alpha.betweenness.sampled.write(configuration: Map)
-YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis
+YIELD nodes, minCentrality, maxCentrality, sumCentrality, createMillis, computeMillis, writeMillis
 ----
 
 .Parameters
@@ -165,7 +165,7 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 | minCentrality | int  | The minimum centrality value
 | maxCentrality | int  | The maximum centrality value
 | sumCentrality | int  | The sum of all centrality values
-| loadMillis    | int  | Milliseconds for loading data
+| createMillis  | int  | Milliseconds for loading data
 | computeMillis | int  | Milliseconds for running the algorithm
 | writeMillis   | int  | Milliseconds for writing result data back
 |===

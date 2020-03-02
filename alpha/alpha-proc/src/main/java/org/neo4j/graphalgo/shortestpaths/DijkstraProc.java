@@ -76,7 +76,7 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
             configuration
         );
         DijkstraResult.Builder builder = DijkstraResult.builder();
-        builder.setLoadMillis(computationResult.createMillis());
+        builder.setCreateMillis(computationResult.createMillis());
         builder.setComputeMillis(computationResult.computeMillis());
 
         Graph graph = computationResult.graph();
@@ -178,14 +178,14 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
 
     public static class DijkstraResult {
 
-        public final long loadMillis;
+        public final long createMillis;
         public final long evalMillis;
         public final long writeMillis;
         public final long nodeCount;
         public final double totalCost;
 
-        public DijkstraResult(long loadMillis, long evalMillis, long writeMillis, long nodeCount, double totalCost) {
-            this.loadMillis = loadMillis;
+        public DijkstraResult(long createMillis, long evalMillis, long writeMillis, long nodeCount, double totalCost) {
+            this.createMillis = createMillis;
             this.evalMillis = evalMillis;
             this.writeMillis = writeMillis;
             this.nodeCount = nodeCount;
@@ -212,7 +212,7 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
             }
 
             public DijkstraResult build() {
-                return new DijkstraResult(loadMillis, computeMillis, writeMillis, nodeCount, totalCosts);
+                return new DijkstraResult(createMillis, computeMillis, writeMillis, nodeCount, totalCosts);
             }
         }
     }

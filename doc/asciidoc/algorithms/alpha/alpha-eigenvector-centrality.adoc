@@ -42,7 +42,7 @@ Eigenvector Centrality can be used in many of the https://arxiv.org/pdf/1407.510
 [source, cypher]
 ----
 CALL gds.alpha.eigenvector.write(configuration: Map)
-YIELD nodes, iterations, dampingFactor, writeProperty, write, loadMillis, computeMillis, writeMillis
+YIELD nodes, iterations, dampingFactor, writeProperty, createMillis, computeMillis, writeMillis
 ----
 
 .Configuration
@@ -66,8 +66,7 @@ YIELD nodes, iterations, dampingFactor, writeProperty, write, loadMillis, comput
 | iterations    | int     | The number of iterations run.
 | dampingFactor | float   | The damping factor used.
 | writeProperty | string  | The property name written back to.
-| write         | boolean | Specifies if the result was written back as node property.
-| loadMillis    | int     | Milliseconds for loading data.
+| createMillis  | int     | Milliseconds for loading data.
 | computeMillis | int     | Milliseconds for running the algorithm.
 | writeMillis   | int     | Milliseconds for writing result data back.
 |===

@@ -102,7 +102,7 @@ public class BetweennessCentralityProcTest2 extends BaseProcTest {
             .addParameter("concurrency", 4)
             .addParameter("writeProperty", "bc")
             .yields(
-                "loadMillis",
+                "createMillis",
                 "computeMillis",
                 "writeMillis",
                 "nodes",
@@ -124,7 +124,7 @@ public class BetweennessCentralityProcTest2 extends BaseProcTest {
             .addParameter("concurrency", 1)
             .addParameter("writeProperty", "bc")
             .yields(
-                "loadMillis",
+                "createMillis",
                 "computeMillis",
                 "writeMillis",
                 "nodes",

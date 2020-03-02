@@ -52,7 +52,7 @@ CALL gds.alpha.articleRank.write({
   iterations:20, dampingFactor:0.85,
   writeProperty: "pagerank"
 })
-YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
+YIELD nodes, iterations, createMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
 
 // end::write-sample-graph[]
 
@@ -73,6 +73,6 @@ CALL gds.alpha.articleRank.write({
   nodeProjection: 'Paper',
   relationshipProjection: 'CITES'
 })
-YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, writeProperty;
+YIELD nodes, iterations, createMillis, computeMillis, writeMillis, dampingFactor, writeProperty;
 
 // end::huge-projection[]

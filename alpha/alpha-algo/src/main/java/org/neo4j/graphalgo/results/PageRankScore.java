@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.pagerank.PageRank;
-
 public class PageRankScore {
 
     public final long nodeId;
@@ -34,27 +32,24 @@ public class PageRankScore {
     // TODO: return number of relationships as well
     //  the Graph API doesn't expose this value yet
     public static final class Stats {
-        public final long nodes, iterations, loadMillis, computeMillis, writeMillis;
+        public final long nodes, iterations, createMillis, computeMillis, writeMillis;
         public final double dampingFactor;
-        public final boolean write;
         public final String writeProperty;
 
         Stats(
                 long nodes,
                 long iterations,
-                long loadMillis,
+                long createMillis,
                 long computeMillis,
                 long writeMillis,
                 double dampingFactor,
-                boolean write,
                 String writeProperty) {
             this.nodes = nodes;
             this.iterations = iterations;
-            this.loadMillis = loadMillis;
+            this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.dampingFactor = dampingFactor;
-            this.write = write;
             this.writeProperty = writeProperty;
         }
 
@@ -83,7 +78,7 @@ public class PageRankScore {
                 return new Stats(
                     nodeCount,
                     iterations,
-                    loadMillis,
+                    createMillis,
                     computeMillis,
                     writeMillis,
                     dampingFactor,
