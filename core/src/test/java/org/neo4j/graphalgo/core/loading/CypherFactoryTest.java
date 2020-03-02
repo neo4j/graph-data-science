@@ -327,7 +327,7 @@ class CypherFactoryTest {
             .parameters(MapUtil.map("nodeProp", 42, "relProp", 21))
             .build();
 
-        Graph graph = runInTransaction(db, () -> loader.load(CypherFactory.class));
+        Graph graph = applyInTransaction(db, tx -> loader.load(CypherFactory.class));
 
         assertGraphEquals(fromGdl("(a { nodeProp: 42 })-[{ w: 21 }]->(a)"), graph);
     }
