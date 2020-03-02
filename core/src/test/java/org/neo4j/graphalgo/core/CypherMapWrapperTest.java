@@ -65,19 +65,41 @@ class CypherMapWrapperTest {
 
     @ParameterizedTest
     @MethodSource("positiveRangeValidationParameters")
-    void shouldValidateRange(double value, double min, double max, boolean minInclusive, boolean maxInclusive) {
-        assertEquals(value, CypherMapWrapper.validateRange("value", value, min, max, minInclusive, maxInclusive));
+    void shouldValidateDoubleRange(double value, double min, double max, boolean minInclusive, boolean maxInclusive) {
+        assertEquals(value, CypherMapWrapper.validateDoubleRange("value", value, min, max, minInclusive, maxInclusive));
     }
 
     @ParameterizedTest
     @MethodSource("negativeRangeValidationParameters")
-    void shouldThrowForInvalidRange(double value, double min, double max, boolean minInclusive, boolean maxInclusive) {
+    void shouldThrowForInvalidDoubleRange(double value, double min, double max, boolean minInclusive, boolean maxInclusive) {
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> CypherMapWrapper.validateRange("value", value, min, max, minInclusive, maxInclusive)
+            () -> CypherMapWrapper.validateDoubleRange("value", value, min, max, minInclusive, maxInclusive)
         );
 
         assertEquals(String.format("Value for `value` must be within %s%.2f, %.2f%s.",
+            minInclusive ? "[" : "(",
+            min,
+            max,
+            maxInclusive ? "]" : ")"
+        ), ex.getMessage());
+    }
+
+    @ParameterizedTest
+    @MethodSource("positiveRangeValidationParameters")
+    void shouldValidateIntegerRange(int value, int min, int max, boolean minInclusive, boolean maxInclusive) {
+        assertEquals(value, CypherMapWrapper.validateIntegerRange("value", value, min, max, minInclusive, maxInclusive));
+    }
+
+    @ParameterizedTest
+    @MethodSource("negativeRangeValidationParameters")
+    void shouldThrowForInvalidIntegerRange(int value, int min, int max, boolean minInclusive, boolean maxInclusive) {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> CypherMapWrapper.validateIntegerRange("value", value, min, max, minInclusive, maxInclusive)
+        );
+
+        assertEquals(String.format("Value for `value` must be within %s%d, %d%s.",
             minInclusive ? "[" : "(",
             min,
             max,

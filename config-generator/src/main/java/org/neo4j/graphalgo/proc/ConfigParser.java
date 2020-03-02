@@ -169,9 +169,8 @@ final class ConfigParser {
             memberBuilder.toMap(true);
         }
 
-        if (isAnnotationPresent(method, Configuration.DoubleRange.class)) {
-            memberBuilder.validatesRange(true);
-        }
+        memberBuilder.validatesIntegerRange(isAnnotationPresent(method, Configuration.IntegerRange.class));
+        memberBuilder.validatesDoubleRange(isAnnotationPresent(method, Configuration.DoubleRange.class));
 
         if (isAnnotationPresent(method, Value.Check.class)) {
             if (method.getReturnType().getKind() == TypeKind.VOID) {
@@ -237,7 +236,10 @@ final class ConfigParser {
         }
 
         @Value.Default
-        public boolean validatesRange() { return false; }
+        public boolean validatesIntegerRange() { return false; }
+
+        @Value.Default
+        public boolean validatesDoubleRange() { return false; }
 
         @Value.Default
         public boolean validates() {

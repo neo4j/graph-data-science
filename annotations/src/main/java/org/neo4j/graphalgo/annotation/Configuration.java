@@ -84,6 +84,16 @@ public @interface Configuration {
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
+    @interface IntegerRange {
+        int min() default Integer.MIN_VALUE;
+        int max() default Integer.MAX_VALUE;
+        boolean minInclusive() default true;
+        boolean maxInclusive() default true;
+    }
+
+    @Documented
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.CLASS)
     @interface DoubleRange {
         double min() default Double.MIN_VALUE;
         double max() default Double.MAX_VALUE;

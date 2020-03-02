@@ -27,10 +27,17 @@ import javax.annotation.processing.Generated;
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class RangeValidationConfig implements RangeValidation {
 
+    private final int integerWithinRange;
     private final double doubleWithinRange;
 
     public DefaultValuesConfig(@NotNull CypherMapWrapper config) {
-        this.doubleWithinRange = CypherMapWrapper.validateRange("doubleWithinRange", config.requireDouble("doubleWithinRange"), 21.0, 42.0, false, true);
+        this.integerWithinRange = CypherMapWrapper.validateIntegerRange("integerWithinRange", config.requireInt("integerWithinRange"), 21, 42, false, true);
+        this.doubleWithinRange = CypherMapWrapper.validateDoubleRange("doubleWithinRange", config.requireDouble("doubleWithinRange"), 21.0, 42.0, false, true);
+    }
+
+    @Override
+    public int integerWithinRange() {
+        return this.integerWithinRange;
     }
 
     @Override

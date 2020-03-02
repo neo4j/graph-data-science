@@ -24,6 +24,9 @@ import org.neo4j.graphalgo.annotation.Configuration;
 @Configuration("RangeValidationConfig")
 public interface RangeValidation {
 
-    @Configuration.DoubleRange(min = 21, max = 42, minInclusive = false, maxInclusive = true)
+    @Configuration.IntegerRange(min = 21, max = 42, minInclusive = false, maxInclusive = true)
+    int integerWithinRange();
+
+    @Configuration.DoubleRange(min = 21.0, max = 42.0, minInclusive = false, maxInclusive = true)
     double doubleWithinRange();
 }

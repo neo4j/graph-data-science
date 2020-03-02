@@ -287,10 +287,30 @@ final class GenerateConfiguration {
             }
         }
 
-        if (definition.member().validatesRange()) {
-            Configuration.DoubleRange range = definition.member().method().getAnnotation(Configuration.DoubleRange.class);
+        if (definition.member().validatesIntegerRange()) {
+            Configuration.IntegerRange range = definition
+                .member()
+                .method()
+                .getAnnotation(Configuration.IntegerRange.class);
             codeBlock = CodeBlock.of(
-                "$T.validateRange($S, $L, $L, $L, $L, $L)",
+                "$T.validateIntegerRange($S, $L, $L, $L, $L, $L)",
+                CypherMapWrapper.class,
+                definition.configKey(),
+                codeBlock,
+                range.min(),
+                range.max(),
+                range.minInclusive(),
+                range.maxInclusive()
+            );
+        }
+
+        if (definition.member().validatesDoubleRange()) {
+            Configuration.DoubleRange range = definition
+                .member()
+                .method()
+                .getAnnotation(Configuration.DoubleRange.class);
+            codeBlock = CodeBlock.of(
+                "$T.validateDoubleRange($S, $L, $L, $L, $L, $L)",
                 CypherMapWrapper.class,
                 definition.configKey(),
                 codeBlock,
