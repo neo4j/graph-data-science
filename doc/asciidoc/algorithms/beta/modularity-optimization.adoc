@@ -193,8 +193,8 @@ YIELD nodes, communityCount, ranIterations, didConverge
 .Results
 [opts="header"]
 |===
-| nodes | colorCount | ranIterations | didConverge
-| 6     | 2          | 3             | true
+| nodes | communityCount | ranIterations | didConverge
+| 6     | 2              | 3             | true
 |===
 --
 
