@@ -58,12 +58,6 @@ public class PageRankScore {
             private long iterations;
             private double dampingFactor;
 
-            public Builder withConfig(PageRank.Config config) {
-                this.dampingFactor = config.dampingFactor;
-                this.iterations = config.iterations;
-                return this;
-            }
-
             public Builder withIterations(long iterations) {
                 this.iterations = iterations;
                 return this;
@@ -82,7 +76,6 @@ public class PageRankScore {
                     computeMillis,
                     writeMillis,
                     dampingFactor,
-                    write,
                     writeProperty
                 );
             }

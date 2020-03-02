@@ -92,11 +92,6 @@ public abstract class AbstractResultBuilder<R> {
         return this;
     }
 
-    public AbstractResultBuilder<R> withWrite(boolean write) {
-        this.write = write;
-        return this;
-    }
-
     public AbstractResultBuilder<R> withWriteProperty(String writeProperty) {
         this.writeProperty = writeProperty;
         return this;

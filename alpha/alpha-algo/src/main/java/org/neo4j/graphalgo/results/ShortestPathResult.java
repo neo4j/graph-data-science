@@ -55,11 +55,6 @@ public class ShortestPathResult {
             return this;
         }
 
-        public Builder withTargetProperty(String targetProperty) {
-            this.targetProperty = targetProperty;
-            return this;
-        }
-
         @Override
         public ShortestPathResult build() {
             return new ShortestPathResult(
