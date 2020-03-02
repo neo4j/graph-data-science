@@ -94,9 +94,9 @@ YIELD nodeId, color
 .Parameters
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name      | Type    | Default | Optional | Description
-| graphName | string  | null    | yes      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the config map must contain configuration for creating a graph.
-| config    | map     | {}      | yes      | Additional configuration, see below.
+| Name          | Type    | Default | Optional | Description
+| graphName     | string  | null    | yes      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the configuration map must contain configuration for creating a graph.
+| configuration | map     | {}      | yes      | Additional configuration, see below.
 |===
 
 .Configuration
