@@ -84,7 +84,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         IntersectingTriangleCount algorithm = computationResult.algorithm();
 
         TriangleCountResultBuilder builder = new TriangleCountResultBuilder(true, true, tracker);
-        builder.withLoadMillis(computationResult.createMillis());
+        builder.withCreateMillis(computationResult.createMillis());
         builder.withComputeMillis(computationResult.computeMillis());
 
         if (graph.isEmpty()) {
@@ -164,7 +164,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
     }
 
     public static class Result {
-        public final long loadMillis;
+        public final long createMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final long postProcessingMillis;
@@ -185,7 +185,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         public final String clusteringCoefficientProperty;
 
         public Result(
-            long loadMillis,
+            long createMillis,
             long computeMillis,
             long postProcessingMillis,
             long writeMillis,
@@ -205,7 +205,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
             String writeProperty,
             String clusteringCoefficientProperty
         ) {
-            this.loadMillis = loadMillis;
+            this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.writeMillis = writeMillis;
@@ -265,7 +265,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         @Override
         protected Result buildResult() {
             return new Result(
-                loadMillis,
+                createMillis,
                 computeMillis,
                 writeMillis,
                 postProcessingDuration,

@@ -98,7 +98,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
         computeStats(builder, algo.getCentrality());
         builder.withNodeCount(graph.nodeCount())
             .withComputeMillis(computationResult.computeMillis())
-            .withLoadMillis((computationResult.createMillis()));
+            .withCreateMillis((computationResult.createMillis()));
 
         graph.release();
 
@@ -174,7 +174,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
 
     public static final class BetweennessCentralityProcResult {
 
-        public final long loadMillis;
+        public final long createMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final long nodes;
@@ -183,7 +183,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
         public final double sumCentrality;
 
         private BetweennessCentralityProcResult(
-            Long loadMillis,
+            Long createMillis,
             Long computeMillis,
             Long writeMillis,
             Long nodes,
@@ -191,7 +191,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
             Double centralityMax,
             Double centralitySum
         ) {
-            this.loadMillis = loadMillis;
+            this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.nodes = nodes;
@@ -233,7 +233,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
 
             public BetweennessCentralityProcResult build() {
                 return new BetweennessCentralityProcResult(
-                    loadMillis,
+                    createMillis,
                     computeMillis,
                     writeMillis,
                     nodes,

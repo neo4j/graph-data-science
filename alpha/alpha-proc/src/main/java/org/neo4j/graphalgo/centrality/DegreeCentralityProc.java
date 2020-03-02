@@ -93,7 +93,7 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
         DegreeCentrality algorithm = computeResult.algorithm();
 
         AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
-            .withLoadMillis(computeResult.createMillis())
+            .withCreateMillis(computeResult.createMillis())
             .withComputeMillis(computeResult.computeMillis())
             .withNodeCount(graph.nodeCount());
 

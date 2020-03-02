@@ -48,7 +48,7 @@ CALL gds.beta.k1coloring.write(graphName: String, {
   writeProperty: String
   // additional configuration
 })
-YIELD nodes, colorCount, ranIterations, didConverge, writeProperty, loadMillis, computeMillis, writeMillis
+YIELD nodes, colorCount, ranIterations, didConverge, writeProperty, createMillis, computeMillis, writeMillis
 ----
 
 include::../common-parameters.adoc[]
@@ -75,7 +75,7 @@ include::../common-parameters.adoc[]
 | didConverge   | boolean | An indicator of whether the algorithm found a correct coloring.
 | colorCount    | int     | The number of colors used.
 | write         | boolean | Specifies if the result was written back as a node property.
-| loadMillis    | int     | Milliseconds for loading data.
+| createMillis  | int     | Milliseconds for loading data.
 | computeMillis | int     | Milliseconds for running the algorithm.
 | writeMillis   | int     | Milliseconds for writing result data back to Neo4j.
 | configuration | map     | The configuration used for running the algorithm.

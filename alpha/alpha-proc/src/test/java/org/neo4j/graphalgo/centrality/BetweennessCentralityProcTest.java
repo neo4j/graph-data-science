@@ -120,7 +120,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
         String query = gdsCypher()
             .writeMode()
             .addParameter("concurrency", 4)
-            .yields("nodes", "minCentrality", "maxCentrality", "sumCentrality", "loadMillis", "computeMillis", "writeMillis");
+            .yields("nodes", "minCentrality", "maxCentrality", "sumCentrality", "createMillis", "computeMillis", "writeMillis");
         runQueryWithRowConsumer(query, row -> {
                 assertEquals(85.0, (double) row.getNumber("sumCentrality"), 0.01);
                 assertEquals(25.0, (double) row.getNumber("maxCentrality"), 0.01);
@@ -140,7 +140,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
             .algo("gds.alpha.betweenness")
             .writeMode()
             .addParameter("concurrency", 4)
-            .yields("nodes", "minCentrality", "maxCentrality", "sumCentrality", "loadMillis", "computeMillis", "writeMillis");
+            .yields("nodes", "minCentrality", "maxCentrality", "sumCentrality", "createMillis", "computeMillis", "writeMillis");
         runQueryWithRowConsumer(query, row -> {
                 assertEquals(35.0, (double) row.getNumber("sumCentrality"), 0.01);
                 assertEquals(30.0, (double) row.getNumber("maxCentrality"), 0.01);
@@ -161,7 +161,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
                 "minCentrality",
                 "maxCentrality",
                 "sumCentrality",
-                "loadMillis",
+                "createMillis",
                 "computeMillis",
                 "writeMillis"
             );
@@ -184,7 +184,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
             .algo("gds.alpha.betweenness")
             .writeMode()
             .addParameter("concurrency", 4)
-            .yields("nodes", "minCentrality", "maxCentrality", "sumCentrality", "loadMillis", "computeMillis", "writeMillis");
+            .yields("nodes", "minCentrality", "maxCentrality", "sumCentrality", "createMillis", "computeMillis", "writeMillis");
         runQueryWithRowConsumer(query, row -> {
                 assertEquals(35.0, (double) row.getNumber("sumCentrality"), 0.01);
                 assertEquals(30.0, (double) row.getNumber("maxCentrality"), 0.01);

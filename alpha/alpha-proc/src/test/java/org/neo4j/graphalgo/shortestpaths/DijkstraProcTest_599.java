@@ -75,7 +75,7 @@ class DijkstraProcTest_599 extends BaseProcTest {
         String totalCostCommand =
             "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
             "CALL gds.alpha.shortestPath.write({startNode: startNode, endNode: endNode, relationshipWeightProperty: 'WEIGHT', relationshipProperties: 'WEIGHT'})\n" +
-            "YIELD nodeCount, totalCost, loadMillis, evalMillis, writeMillis\n" +
+            "YIELD nodeCount, totalCost, createMillis, evalMillis, writeMillis\n" +
             "RETURN totalCost\n";
 
         double totalCost = runQuery(totalCostCommand, result -> result

@@ -97,7 +97,7 @@ Papers 5 and 6 are not cited by any other papers, so their score doesn't increas
 [source, cypher]
 ----
 CALL gds.alpha.articleRank.write(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
+YIELD nodes, iterations, createMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
 ----
 
 .Parameters
@@ -126,7 +126,7 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, 
 | dampingFactor | float   | The damping factor used.
 | writeProperty | string  | The property name written back to.
 | write         | boolean | Specifies if the result was written back as node property.
-| loadMillis    | int     | Milliseconds for loading data.
+| createMillis  | int     | Milliseconds for loading data.
 | computeMillis | int     | Milliseconds for running the algorithm.
 | writeMillis   | int     | Milliseconds for writing result data back.
 |===

@@ -104,7 +104,7 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
                 SpanningTree.TRANSLATOR);
         });
         builder.setComputeMillis(computationResult.computeMillis());
-        builder.setLoadMillis(computationResult.createMillis());
+        builder.setCreateMillis(computationResult.createMillis());
         return Stream.of(builder.build());
     }
 

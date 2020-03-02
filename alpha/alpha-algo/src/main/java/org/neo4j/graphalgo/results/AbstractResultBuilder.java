@@ -25,18 +25,17 @@ import java.util.function.Supplier;
 
 public abstract class AbstractResultBuilder<R> {
 
-    protected long loadMillis = -1;
+    protected long createMillis = -1;
     protected long computeMillis = -1;
     protected long writeMillis = -1;
 
     protected long nodeCount;
     protected long relationshipCount;
 
-    protected boolean write = false;
     protected String writeProperty;
 
-    public void setLoadMillis(long loadMillis) {
-        this.loadMillis = loadMillis;
+    public void setCreateMillis(long createMillis) {
+        this.createMillis = createMillis;
     }
 
     public void setComputeMillis(long computeMillis) {
@@ -48,7 +47,7 @@ public abstract class AbstractResultBuilder<R> {
     }
 
     public ProgressTimer timeLoad() {
-        return ProgressTimer.start(this::setLoadMillis);
+        return ProgressTimer.start(this::setCreateMillis);
     }
 
     public ProgressTimer timeCompute() {
@@ -93,11 +92,6 @@ public abstract class AbstractResultBuilder<R> {
         return this;
     }
 
-    public AbstractResultBuilder<R> withWrite(boolean write) {
-        this.write = write;
-        return this;
-    }
-
     public AbstractResultBuilder<R> withWriteProperty(String writeProperty) {
         this.writeProperty = writeProperty;
         return this;
@@ -108,8 +102,8 @@ public abstract class AbstractResultBuilder<R> {
         return this;
     }
 
-    public AbstractResultBuilder<R> withLoadMillis(long loadMillis) {
-        this.loadMillis = loadMillis;
+    public AbstractResultBuilder<R> withCreateMillis(long createMillis) {
+        this.createMillis = createMillis;
         return this;
     }
 

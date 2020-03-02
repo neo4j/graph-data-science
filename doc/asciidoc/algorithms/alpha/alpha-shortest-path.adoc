@@ -58,7 +58,7 @@ The algorithm assumes that adding a relationship to a path can never make a path
 [source, cypher]
 ----
 CALL gds.alpha.shortestPath.write(configuration: Map)
-YIELD nodeCount, totalCost, loadMillis, evalMillis, writeMillis
+YIELD nodeCount, totalCost, createMillis, evalMillis, writeMillis
 
 ----
 
@@ -75,12 +75,12 @@ YIELD nodeCount, totalCost, loadMillis, evalMillis, writeMillis
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name        | Type  | Description
-| nodeCount   | int   | The number of nodes considered
-| totalCost   | float | The sum of all weights along the path
-| loadMillis  | int   | Milliseconds for loading data
-| evalMillis  | int   | Milliseconds for running the algorithm
-| writeMillis | int   | Milliseconds for writing result data back
+| Name         | Type  | Description
+| nodeCount    | int   | The number of nodes considered
+| totalCost    | float | The sum of all weights along the path
+| createMillis | int   | Milliseconds for loading data
+| evalMillis   | int   | Milliseconds for running the algorithm
+| writeMillis  | int   | Milliseconds for writing result data back
 |===
 
 .The following will run the algorithm and stream results:

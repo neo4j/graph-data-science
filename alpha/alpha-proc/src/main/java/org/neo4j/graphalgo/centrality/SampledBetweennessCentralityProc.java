@@ -99,7 +99,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
         computeStats(builder, algo.getCentrality());
         builder.withNodeCount(graph.nodeCount())
             .withComputeMillis(computationResult.computeMillis())
-            .withLoadMillis((computationResult.createMillis()));
+            .withCreateMillis((computationResult.createMillis()));
 
         graph.release();
 

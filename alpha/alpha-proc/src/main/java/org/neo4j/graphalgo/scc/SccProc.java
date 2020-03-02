@@ -71,7 +71,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
 
         AbstractResultBuilder<SccResult> builder = new SccResultBuilder(true, true, tracker)
             .withCommunityFunction(components != null ? components::get : null)
-            .withLoadMillis(computationResult.createMillis())
+            .withCreateMillis(computationResult.createMillis())
             .withComputeMillis(computationResult.computeMillis())
             .withWriteProperty(config.writeProperty())
             .withNodeCount(graph.nodeCount());
@@ -150,7 +150,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
 
     public static class SccResult {
 
-        public final long loadMillis;
+        public final long createMillis;
         public final long computeMillis;
         public final long writeMillis;
         public final long postProcessingMillis;
@@ -172,7 +172,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         public final String writeProperty;
 
         public SccResult(
-            long loadMillis,
+            long createMillis,
             long computeMillis,
             long postProcessingMillis,
             long writeMillis,
@@ -192,7 +192,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
             long maxSetSize,
             String writeProperty
         ) {
-            this.loadMillis = loadMillis;
+            this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.writeMillis = writeMillis;
@@ -224,7 +224,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         @Override
         public SccResult buildResult() {
             return new SccResult(
-                loadMillis,
+                createMillis,
                 computeMillis,
                 writeMillis,
                 postProcessingDuration,

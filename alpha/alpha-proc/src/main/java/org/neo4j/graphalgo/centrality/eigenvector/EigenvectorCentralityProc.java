@@ -68,9 +68,8 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         AbstractResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder()
             .withIterations(algorithm.iterations())
             .withDampingFactor(algorithm.dampingFactor())
-            .withWrite(true)
             .withWriteProperty(config.writeProperty())
-            .withLoadMillis(computationResult.createMillis())
+            .withCreateMillis(computationResult.createMillis())
             .withComputeMillis(computationResult.computeMillis());
 
         if (graph.isEmpty()) {

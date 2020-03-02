@@ -147,7 +147,7 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             null
         );
 
-        public final long loadMillis;
+        public final long createMillis;
         public final long computeMillis;
         public final long writeMillis;
 
@@ -161,7 +161,7 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         public Map<String, Object> configuration;
 
         WriteResult(
-            long loadMillis,
+            long createMillis,
             long computeMillis,
             long writeMillis,
             long nodes,
@@ -171,7 +171,7 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             boolean didConverge,
             Map<String, Object> configuration
         ) {
-            this.loadMillis = loadMillis;
+            this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.nodes = nodes;

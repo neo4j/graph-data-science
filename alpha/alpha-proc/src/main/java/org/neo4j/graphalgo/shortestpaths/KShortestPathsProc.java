@@ -78,7 +78,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
         );
 
         KspResult.Builder builder = new KspResult.Builder();
-        builder.setLoadMillis(computationResult.createMillis());
+        builder.setCreateMillis(computationResult.createMillis());
         builder.setComputeMillis(computationResult.computeMillis());
 
         Graph graph = computationResult.graph();
@@ -144,7 +144,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
         );
 
         KspResult.Builder builder = new KspResult.Builder();
-        builder.setLoadMillis(computationResult.createMillis());
+        builder.setCreateMillis(computationResult.createMillis());
         builder.setComputeMillis(computationResult.computeMillis());
 
         Graph graph = computationResult.graph();
@@ -234,13 +234,13 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
 
     public static class KspResult {
 
-        public final long loadMillis;
+        public final long createMillis;
         public final long evalMillis;
         public final long writeMillis;
         public final long resultCount;
 
-        public KspResult(long loadMillis, long evalMillis, long writeMillis, long resultCount) {
-            this.loadMillis = loadMillis;
+        public KspResult(long createMillis, long evalMillis, long writeMillis, long resultCount) {
+            this.createMillis = createMillis;
             this.evalMillis = evalMillis;
             this.writeMillis = writeMillis;
             this.resultCount = resultCount;
@@ -258,7 +258,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
             @Override
             public KspResult build() {
                 return new KspResult(
-                    loadMillis,
+                    createMillis,
                     computeMillis,
                     writeMillis,
                     resultCount

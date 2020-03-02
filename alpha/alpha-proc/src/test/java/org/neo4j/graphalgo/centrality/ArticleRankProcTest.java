@@ -137,7 +137,7 @@ class ArticleRankProcTest extends BaseProcTest {
             "7 rows" + NL;
 
         runQueryWithRowConsumer(algoQuery, row -> {
-            assertNotEquals(-1L, row.getNumber("loadMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("createMillis").longValue());
             assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
             assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
         });

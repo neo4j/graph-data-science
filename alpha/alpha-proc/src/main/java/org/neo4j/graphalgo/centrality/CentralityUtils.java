@@ -21,11 +21,11 @@ package org.neo4j.graphalgo.centrality;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityResult;
 import org.neo4j.graphalgo.results.CentralityScore;
@@ -58,7 +58,7 @@ public final class CentralityUtils {
                 .build();
             result.export(propertyName, exporter);
         }
-        statsBuilder.withWrite(true).withWriteProperty(propertyName);
+        statsBuilder.withWriteProperty(propertyName);
     }
 
     public static Stream<CentralityScore> streamResults(Graph graph, CentralityResult scores) {

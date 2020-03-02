@@ -98,7 +98,7 @@ class SampledBetweennessCentralityProcTest extends BaseProcTest {
                 "minCentrality",
                 "maxCentrality",
                 "sumCentrality",
-                "loadMillis",
+                "createMillis",
                 "computeMillis",
                 "writeMillis"
             );
@@ -126,7 +126,7 @@ class SampledBetweennessCentralityProcTest extends BaseProcTest {
                 "minCentrality",
                 "maxCentrality",
                 "sumCentrality",
-                "loadMillis",
+                "createMillis",
                 "computeMillis",
                 "writeMillis"
             );
@@ -152,7 +152,7 @@ class SampledBetweennessCentralityProcTest extends BaseProcTest {
                 "minCentrality",
                 "maxCentrality",
                 "sumCentrality",
-                "loadMillis",
+                "createMillis",
                 "computeMillis",
                 "writeMillis"
             );
