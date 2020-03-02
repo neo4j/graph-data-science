@@ -133,7 +133,7 @@ include::common-configuration.adoc[]
 [source, cypher]
 ----
 CALL gds.labelPropagation.stats(graphNameOrConfig: String|Map, configuration: Map)
-YIELD ranIterations, didConverge, createMillis, computeMillis, writeMillis
+YIELD ranIterations, didConverge, createMillis, computeMillis
 ----
 
 include::common-parameters.adoc[]
