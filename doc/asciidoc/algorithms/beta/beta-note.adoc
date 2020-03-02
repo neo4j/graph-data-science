@@ -1,0 +1,6 @@
+// tag::beta-note[]
+[NOTE]
+--
+`This algorithm is in the beta tier and could be changed in a future release.`
+--
+// end::beta-note[]
