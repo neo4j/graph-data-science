@@ -44,8 +44,6 @@ public class GraphSetup {
 
     private final GraphCreateConfig createConfig;
 
-    private final Map<String, Object> params;
-
     private final Log log;
     private final AllocationTracker tracker;
     private final TerminationFlag terminationFlag;
@@ -57,14 +55,12 @@ public class GraphSetup {
      * @param executor  the executor. null means single threaded evaluation
      */
     public GraphSetup(
-        Map<String, Object> params,
         ExecutorService executor,
         Log log,
         AllocationTracker tracker,
         TerminationFlag terminationFlag,
         GraphCreateConfig createConfig
     ) {
-        this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
         this.log = log;
         this.tracker = tracker;
@@ -179,8 +175,13 @@ public class GraphSetup {
             .orElse(Aggregation.DEFAULT);
     }
 
-    public Map<String, Object> params() {
-        return params;
+    public Map<String, Object> parameters() {
+        if (createConfig instanceof GraphCreateFromCypherConfig) {
+            GraphCreateFromCypherConfig cypherConfig = (GraphCreateFromCypherConfig) this.createConfig;
+            return cypherConfig.parameters();
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
     public Log log() {

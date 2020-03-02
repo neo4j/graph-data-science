@@ -35,6 +35,9 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 
+import java.util.Collections;
+import java.util.Map;
+
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
@@ -73,6 +76,11 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String relationshipQuery();
+
+    @Value.Default
+    default Map<String, Object> parameters() {
+        return Collections.emptyMap();
+    }
 
     @Configuration.Ignore
     default GraphCreateFromCypherConfig inferProjections(GraphDimensions dimensions) {

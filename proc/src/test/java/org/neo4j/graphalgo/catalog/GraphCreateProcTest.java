@@ -212,6 +212,40 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
+    void createCypherProjectionWithParameters() {
+        String graphName = "name";
+
+        String nodeQuery = "MATCH (n) WHERE n.age = $age RETURN id(n) AS id";
+
+        assertCypherResult(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { parameters: { age: 2 }})",
+            map("name", graphName, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
+            singletonList(map(
+                "graphName", graphName,
+                NODE_PROJECTION_KEY, map(
+                    "*", map(
+                        LABEL_KEY, "*",
+                        PROPERTIES_KEY, emptyMap()
+                    )
+                ),
+                RELATIONSHIP_PROJECTION_KEY, map(
+                    "*", map(
+                        TYPE_KEY, "*",
+                        ORIENTATION_KEY, Orientation.NATURAL.name(),
+                        AGGREGATION_KEY, Aggregation.DEFAULT.name(),
+                        PROPERTIES_KEY, emptyMap()
+                    )
+                ),
+                "nodeCount", 1L,
+                "relationshipCount", 0L,
+                "createMillis", instanceOf(Long.class)
+            ))
+        );
+
+        assertGraphExists(graphName);
+    }
+
+    @Test
     void nodeProjectionWithAsterisk() {
         String query = "CALL gds.graph.create('g', '*', 'REL') YIELD nodeCount";
 

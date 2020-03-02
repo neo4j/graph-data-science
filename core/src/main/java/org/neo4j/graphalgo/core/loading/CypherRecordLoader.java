@@ -163,8 +163,8 @@ abstract class CypherRecordLoader<R> {
     Result runLoadingQuery(long offset, int batchSize) {
         Map<String, Object> parameters =
                 batchSize == CypherLoadingUtils.NO_BATCHING
-                        ? setup.params()
-                        : CypherLoadingUtils.params(setup.params(), offset, batchSize);
+                        ? setup.parameters()
+                        : CypherLoadingUtils.params(setup.parameters(), offset, batchSize);
         Result result = api.execute(loadQuery, parameters);
         validateMandatoryColumns(Lists.newArrayList(result.columns().iterator()));
         return result;

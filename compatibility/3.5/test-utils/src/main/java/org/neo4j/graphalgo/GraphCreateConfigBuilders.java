@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +137,8 @@ final class GraphCreateConfigBuilders {
         @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
-        Optional<Aggregation> globalAggregation
+        Optional<Aggregation> globalAggregation,
+        Optional<Map<String, Object>> parameters
     ) {
         if (!(nodeQuery.isPresent() || anyLabel == AnyLabel.LOAD)) {
             throw new IllegalArgumentException("Missing nodeQuery or loadAnyLabel().");
@@ -176,6 +178,7 @@ final class GraphCreateConfigBuilders {
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
             .readConcurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
+            .parameters(parameters.orElse(Collections.emptyMap()))
             .build();
     }
 

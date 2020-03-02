@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -314,6 +315,20 @@ class CypherFactoryTest {
             fromGdl(String.format(expectedGraph, prop3.defaultValue(), prop3.defaultValue(), 3.0)),
             graphs.getGraph("*", Optional.of(addSuffix(prop3.propertyKey(), 2)))
         );
+    }
+
+    @Test
+    void loadGraphWithParameterizedCypherQuery() {
+        GraphLoader loader = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery("MATCH (n) WHERE n.id = $nodeProp RETURN id(n) AS id, n.id as nodeProp")
+            .relationshipQuery("MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target, $relProp as relProp")
+            .parameters(MapUtil.map("nodeProp", 42, "relProp", 21))
+            .build();
+
+        Graph graph = runInTransaction(db, () -> loader.load(CypherFactory.class));
+
+        assertGraphEquals(fromGdl("(a { nodeProp: 42 })-[{ w: 21 }]->(a)"), graph);
     }
 
     private void loadAndTestGraph(

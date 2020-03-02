@@ -63,7 +63,6 @@ final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        Map<String, Object> params,
         // CreateConfig parameters
         Optional<String> graphName,
         List<String> nodeLabels,
@@ -99,7 +98,7 @@ final class GraphLoaderBuilders {
             globalAggregation
         );
 
-        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, params, graphCreateConfig);
+        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, graphCreateConfig);
 
     }
 
@@ -117,7 +116,6 @@ final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        Map<String, Object> params,
         // CreateConfig parameters
         Optional<String> graphName,
         Optional<String> nodeQuery,
@@ -127,7 +125,8 @@ final class GraphLoaderBuilders {
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
-        Optional<Aggregation> globalAggregation
+        Optional<Aggregation> globalAggregation,
+        Optional<Map<String, Object>> parameters
     ) {
         GraphCreateFromCypherConfig graphCreateConfig = GraphCreateConfigBuilders.cypherConfig(
             userName,
@@ -139,10 +138,11 @@ final class GraphLoaderBuilders {
             anyLabel,
             anyRelationshipType,
             concurrency,
-            globalAggregation
+            globalAggregation,
+            parameters
         );
 
-        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, params, graphCreateConfig);
+        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, graphCreateConfig);
     }
 
     @NotNull
@@ -153,7 +153,6 @@ final class GraphLoaderBuilders {
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
         Optional<String> userName,
-        Map<String, Object> params,
         GraphCreateConfig graphCreateConfig
     ) {
         try (Transaction tx = api.beginTx()) {
@@ -167,7 +166,6 @@ final class GraphLoaderBuilders {
                 executorService.orElse(Pools.DEFAULT),
                 tracker.orElse(AllocationTracker.EMPTY),
                 terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
-                params,
                 userName.orElse(""),
                 log.orElse(NullLog.getInstance()),
                 graphCreateConfig,

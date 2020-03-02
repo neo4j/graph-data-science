@@ -62,11 +62,6 @@ public interface GraphLoader {
     }
 
     @Value.Default
-    default Map<String, Object> params() {
-        return new HashMap<>();
-    }
-
-    @Value.Default
     default String username() {
         return createConfig().username();
     }
@@ -88,7 +83,6 @@ public interface GraphLoader {
     @Value.Lazy
     default GraphSetup toSetup() {
         return new GraphSetup(
-            params(),
             executorService(),
             log(),
             tracker(),
