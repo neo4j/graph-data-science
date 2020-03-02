@@ -46,8 +46,8 @@ class EigenvectorCentralityAlgorithmFactory extends AlgorithmFactory<PageRank, E
             .create(
                 graph,
                 Pools.DEFAULT,
-                configuration.concurrency(),
                 ParallelUtil.DEFAULT_BATCH_SIZE,
+                configuration.concurrency(),
                 algoConfig,
                 configuration.sourceNodeIds(),
                 tracker

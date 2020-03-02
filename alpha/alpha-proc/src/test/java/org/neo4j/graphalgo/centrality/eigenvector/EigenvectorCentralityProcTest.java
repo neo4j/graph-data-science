@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.centrality.eigenvector;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -49,7 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
-@Disabled
 class EigenvectorCentralityProcTest extends BaseProcTest {
 
     private static final Map<Long, Double> noNormExpected = new HashMap<>();
