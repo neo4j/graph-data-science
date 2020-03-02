@@ -147,15 +147,15 @@ ORDER BY score DESC
 .Results
 [opts="header",cols="1,1"]
 |===
-| page    | score
-| Home    | 31.4586636
-| About   | 14.4039280
-| Product | 14.4039280
-| Links   | 14.4039280
-| Site A  | 6.57243168
-| Site B  | 6.57243168
-| Site C  | 6.57243168
-| Site D  | 6.57243168
+| page      | score
+| "Home"    | 31.458663403987885
+| "About"   | 14.403928011655807
+| "Product" | 14.403928011655807
+| "Links"   | 14.403928011655807
+| "Site A"  | 6.572431668639183
+| "Site B"  | 6.572431668639183
+| "Site C"  | 6.572431668639183
+| "Site D"  | 6.572431668639183
 |===
 
 As we might expect, the _Home_ page has the highest Eigenvector Centrality because it has incoming links from all other pages.
@@ -196,23 +196,22 @@ CALL gds.alpha.eigenvector.stream({
   normalization: 'max'
 })
 YIELD nodeId, score
-RETURN gds.util.asNode(nodeId).name AS page,score
+RETURN gds.util.asNode(nodeId).name AS page, score
 ORDER BY score DESC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | Eigenvector Centrality
-| Home    | 1.0
-| About   | 0.4578684012627926
-| Product | 0.4578684012627926
-| Links   | 0.4578684012627926
-| Site A  | 0.2089227868044046
-| Site B  | 0.2089227868044046
-| Site C  | 0.2089227868044046
-| Site D  | 0.2089227868044046
-
+| page      | score
+| "Home"    | 1.0
+| "About"   | 0.4578684042192931
+| "Product" | 0.4578684042192931
+| "Links"   | 0.4578684042192931
+| "Site A"  | 0.20892278811203477
+| "Site B"  | 0.20892278811203477
+| "Site C"  | 0.20892278811203477
+| "Site D"  | 0.20892278811203477
 |===
 
 

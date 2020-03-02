@@ -254,15 +254,16 @@ final class PageRankTest extends AlgoTestBase {
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
         PageRank algorithm = PageRankAlgorithmType.NON_WEIGHTED
-                .create(
-                        graph,
-                        null,
-                        1,
-                        1,
-                        DEFAULT_CONFIG,
-                        LongStream.range(0L, graph.nodeCount()),
-                        AllocationTracker.EMPTY)
-                .compute();
+            .create(
+                graph,
+                LongStream.range(0L, graph.nodeCount()),
+                DEFAULT_CONFIG,
+                1,
+                null,
+                1,
+                AllocationTracker.EMPTY
+            )
+            .compute();
         // should not throw
     }
 

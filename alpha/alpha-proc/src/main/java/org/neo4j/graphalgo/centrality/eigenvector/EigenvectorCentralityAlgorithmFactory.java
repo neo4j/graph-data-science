@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.centrality.eigenvector;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -45,11 +44,10 @@ class EigenvectorCentralityAlgorithmFactory extends AlgorithmFactory<PageRank, E
         return LabsPageRankAlgorithmType.EIGENVECTOR_CENTRALITY
             .create(
                 graph,
-                Pools.DEFAULT,
-                ParallelUtil.DEFAULT_BATCH_SIZE,
-                configuration.concurrency(),
-                algoConfig,
                 configuration.sourceNodeIds(),
+                algoConfig,
+                configuration.concurrency(),
+                Pools.DEFAULT,
                 tracker
             );
     }

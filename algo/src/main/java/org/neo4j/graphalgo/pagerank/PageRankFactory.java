@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
-import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends AlgorithmFactory<PageRank, CONFIG> {
 
@@ -53,11 +52,10 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends Algorith
     ) {
         return algorithmType.create(
             graph,
-            Pools.DEFAULT,
-            DEFAULT_BATCH_SIZE,
-            configuration.concurrency(),
-            configuration.toOldConfig(),
             configuration.sourceNodeIds(),
+            configuration.toOldConfig(),
+            configuration.concurrency(),
+            Pools.DEFAULT,
             tracker
         );
     }

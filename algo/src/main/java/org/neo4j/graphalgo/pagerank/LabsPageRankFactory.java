@@ -63,13 +63,13 @@ public class LabsPageRankFactory extends AlgorithmFactory<PageRank, ProcedureCon
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
         return algorithmType.create(
-                graph,
-                Pools.DEFAULT,
-                batchSize,
-                concurrency,
-                algoConfig,
-                sourceNodeIds,
-                tracker
+            graph,
+            sourceNodeIds,
+            algoConfig,
+            concurrency,
+            Pools.DEFAULT,
+            batchSize,
+            tracker
         );
     }
 

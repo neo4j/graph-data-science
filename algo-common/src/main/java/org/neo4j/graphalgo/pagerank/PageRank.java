@@ -151,14 +151,15 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
      * executor and batchSize.
      */
     PageRank(
-            ExecutorService executor,
-            int concurrency,
-            int batchSize,
-            AllocationTracker tracker,
-            Graph graph,
-            PageRank.Config algoConfig,
-            LongStream sourceNodeIds,
-            PageRankVariant pageRankVariant) {
+        Graph graph,
+        PageRankVariant pageRankVariant,
+        LongStream sourceNodeIds,
+        PageRank.Config algoConfig,
+        int concurrency,
+        ExecutorService executor,
+        int batchSize,
+        AllocationTracker tracker
+    ) {
         assert algoConfig.iterations >= 1;
         this.executor = executor;
         this.concurrency = concurrency;
