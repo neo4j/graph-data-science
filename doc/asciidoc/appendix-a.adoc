@@ -21,8 +21,8 @@ The following table lists all production-quality graph operations in the GDS lib
 
 [opts=header,cols="1, 1"]
 |===
-|Operation | Name
-|Create Graph | <<catalog-graph-create, gds.graph.create>>
+|Operation | Procedure
+|Create Graph |<<catalog-graph-create, gds.graph.create>>
 |Create Graph using Cypher | <<catalog-graph-create, gds.graph.create.cypher>>
 |Check if a named graph exists | <<catalog-graph-exists, gds.graph.exists>>
 |List graphs| <<catalog-graph-list, gds.graph.list>>
@@ -37,37 +37,37 @@ The following table lists all production-quality procedures in the GDS library:
 [[table-product]]
 [opts=header,cols="1, 1"]
 |===
-| Algorithm | Procedures
+| Algorithm | Procedure
 .5+<.^|<<algorithms-label-propagation, Label Propagation>>
-| <<algorithms-label-propagation-syntax, gds.labelPropagation.write>>
-| <<algorithms-label-propagation-syntax, gds.labelPropagation.write.estimate>>
-| <<algorithms-label-propagation-syntax, gds.labelPropagation.stream>>
-| <<algorithms-label-propagation-syntax, gds.labelPropagation.stream.estimate>>
-| <<algorithms-label-propagation-syntax, gds.labelPropagation.stats>>
+| `<<algorithms-label-propagation-syntax, gds.labelPropagation.write>>`
+| `<<algorithms-label-propagation-syntax, gds.labelPropagation.write.estimate>>`
+| `<<algorithms-label-propagation-syntax, gds.labelPropagation.stream>>`
+| `<<algorithms-label-propagation-syntax, gds.labelPropagation.stream.estimate>>`
+| `<<algorithms-label-propagation-syntax, gds.labelPropagation.stats>>`
 .5+<.^|<<algorithms-louvain, Louvain>>
-| <<algorithms-louvain-syntax, gds.louvain.write>>
-| <<algorithms-louvain-syntax, gds.louvain.write.estimate>>
-| <<algorithms-louvain-syntax, gds.louvain.stream>>
-| <<algorithms-louvain-syntax, gds.louvain.stream.estimate>>
-| <<algorithms-louvain-syntax, gds.louvain.stats>>
+| `<<algorithms-louvain-syntax, gds.louvain.write>>`
+| `<<algorithms-louvain-syntax, gds.louvain.write.estimate>>`
+| `<<algorithms-louvain-syntax, gds.louvain.stream>>`
+| `<<algorithms-louvain-syntax, gds.louvain.stream.estimate>>`
+| `<<algorithms-louvain-syntax, gds.louvain.stats>>`
 .5+<.^|<<algorithms-node-similarity, Node Similarity>>
-| <<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write>>
-| <<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write.estimate>>
-| <<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream>>
-| <<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream.estimate>>
-| <<algorithms-node-similarity, gds.nodeSimilarity.stats>>
+| `<<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write>>`
+| `<<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write.estimate>>`
+| `<<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream>>`
+| `<<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream.estimate>>`
+| `<<algorithms-node-similarity, gds.nodeSimilarity.stats>>`
 .5+<.^|<<algorithms-pagerank, PageRank>>
-| <<algorithms-pagerank-syntax, gds.pageRank.write>>
-| <<algorithms-pagerank-syntax, gds.pageRank.write.estimate>>
-| <<algorithms-pagerank-syntax, gds.pageRank.stream>>
-| <<algorithms-pagerank-syntax, gds.pageRank.stream.estimate>>
-| <<algorithms-pagerank-syntax, gds.pageRank.stats>>
+| `<<algorithms-pagerank-syntax, gds.pageRank.write>>`
+| `<<algorithms-pagerank-syntax, gds.pageRank.write.estimate>>`
+| `<<algorithms-pagerank-syntax, gds.pageRank.stream>>`
+| `<<algorithms-pagerank-syntax, gds.pageRank.stream.estimate>>`
+| `<<algorithms-pagerank-syntax, gds.pageRank.stats>>`
 .5+<.^|<<algorithms-wcc, Weakly Connected Components>>
-| <<algorithms-wcc-syntax, gds.wcc.write>>
-| <<algorithms-wcc-syntax, gds.wcc.write.estimate>>
-| <<algorithms-wcc-syntax-stream, gds.wcc.stream>>
-| <<algorithms-wcc-syntax-stream, gds.wcc.stream.estimate>>
-| <<algorithms-wcc-syntax, gds.wcc.stats>>
+| `<<algorithms-wcc-syntax, gds.wcc.write>>`
+| `<<algorithms-wcc-syntax, gds.wcc.write.estimate>>`
+| `<<algorithms-wcc-syntax-stream, gds.wcc.stream>>`
+| `<<algorithms-wcc-syntax-stream, gds.wcc.stream.estimate>>`
+| `<<algorithms-wcc-syntax, gds.wcc.stats>>`
 |===
 
 [[beta-tier]]
@@ -77,8 +77,8 @@ The following table lists all beta graph operations in the GDS library:
 
 [opts=header,cols="1, 1"]
 |===
-|Operation | Name
-|Generate Random Graph| <<graph-generation, gds.beta.graph.generate>>
+|Operation | Procedure
+|<<graph-generation, Generate Random Graph>>| `gds.beta.graph.generate`
 |===
 
 The following table lists all beta procedures in the GDS library:
@@ -86,17 +86,17 @@ The following table lists all beta procedures in the GDS library:
 [[table-beta]]
 [opts=header,cols="1, 1"]
 |===
-|Algorithm | Name
+|Algorithm | Procedure
 .4+<.^|<<algorithms-k1coloring, K1Coloring>>
-| gds.beta.k1coloring.stream
-| gds.beta.k1coloring.stream.estimate
-| gds.beta.k1coloring.write
-| gds.beta.k1coloring.write.estimate
+| `gds.beta.k1coloring.stream`
+| `gds.beta.k1coloring.stream.estimate`
+| `gds.beta.k1coloring.write`
+| `gds.beta.k1coloring.write.estimate`
 .4+<.^| <<algorithms-modularity-optimization, Modularity Optimization>>
-| gds.beta.modularityOptimization.stream
-| gds.beta.modularityOptimization.stream.estimate
-| gds.beta.modularityOptimization.write
-| gds.beta.modularityOptimization.write.estimate
+| `gds.beta.modularityOptimization.stream`
+| `gds.beta.modularityOptimization.stream.estimate`
+| `gds.beta.modularityOptimization.write`
+| `gds.beta.modularityOptimization.write.estimate`
 |===
 
 [[alpha-tier]]
@@ -107,93 +107,99 @@ The following table lists all alpha procedures in the GDS library:
 [[table-alpha]]
 [opts=header,cols="1, 1"]
 |===
-|Algorithm | Name
-|All Shortest Paths | <<algorithm-all-pairs-shortest-path-sample, gds.alpha.allShortestPaths.stream>>
-.2+<.^|Article Rank
-| <<algorithms-articlerank-syntax, gds.alpha.articleRank.stream>>
-| <<algorithms-articlerank-syntax, gds.alpha.articleRank.write>>
-.4+<.^|Betweenness Centrality
-| <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.stream>>
-| <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.write>>
-| <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.sampled.stream>>
-| <<algorithms-betweenness-centrality-syntax, gds.alpha.betweenness.sampled.write>>
-|Breadth First Search | <<algorithms-bfs-syntax, gds.alpha.bfs.stream>>
-.2+<.^|Closeness Centrality
-| <<algorithms-closeness-centrality-syntax, gds.alpha.closeness.stream>>
-| <<algorithms-closeness-centrality-syntax, gds.alpha.closeness.write>>
-.2+<.^|Degree Centrality
-| <<algorithms-degree-syntax, gds.alpha.degree.stream>>
-| <<algorithms-degree-syntax, gds.alpha.degree.write>>
-|Depth First Search | <<algorithms-dfs-syntax, gds.alpha.dfs.stream>>
-.2+<.^|Eigenvector Centrality
-| <<algorithms-eigenvector-syntax, gds.alpha.eigenvector.stream>>
-| <<algorithms-eigenvector-syntax, gds.alpha.eigenvector.write>>
-.2+<.^|K-Shortest Paths
-| <<algorithms-yens-k-shortest-path-syntax, gds.alpha.kShortestPaths.stream>>
-| <<algorithms-yens-k-shortest-path-syntax, gds.alpha.kShortestPaths.write>>
-|Random Walk | <<algorithms-random-walk-syntax, gds.alpha.randomWalk.stream>>
-.2+<.^|Strongly Connected Components
-| <<algorithms-strongly-connected-components-syntax, gds.alpha.scc.stream>>
-| <<algorithms-strongly-connected-components-syntax, gds.alpha.scc.write>>
-.5+<.^|Shortest Path
-| <<algorithms-shortest-path-syntax, gds.alpha.shortestPath.stream>>
-| <<algorithms-shortest-path-syntax, gds.alpha.shortestPath.write>>
-| <<algorithms-a_star-syntax, gds.alpha.shortestPath.astar.stream>>
-| <<algorithms-single-source-shortest-path-syntax, gds.alpha.shortestPath.deltaStepping.write>>
-| <<algorithms-single-source-shortest-path-syntax, gds.alpha.shortestPath.deltaStepping.stream>>
-.2+<.^|Cosine Similarity
-| <<algorithms-similarity-cosine-syntax, gds.alpha.similarity.cosine.stream>>
-| <<algorithms-similarity-cosine-syntax, gds.alpha.similarity.cosine.write>>
-.2+<.^|Euclidean Similarity
-| <<algorithms-similarity-euclidean-syntax, gds.alpha.similarity.euclidean.stream>>
-| <<algorithms-similarity-euclidean-syntax, gds.alpha.similarity.euclidean.write>>
-.2+<.^|Overlap Similarity
-| <<algorithms-similarity-overlap-syntax, gds.alpha.similarity.overlap.stream>>
-| <<algorithms-similarity-overlap-syntax, gds.alpha.similarity.overlap.write>>
-.2+<.^|Pearson Similarity
-| <<algorithms-similarity-pearson-syntax, gds.alpha.similarity.pearson.write>>
-| <<algorithms-similarity-pearson-syntax, gds.alpha.similarity.pearson.stream>>
-.5+<.^|Spanning Tree
-| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.write>>
-| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.kmax.write>>
-| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.kmin.write>>
-| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.maximum.write>>
-| <<algorithms-minimum-weight-spanning-tree-syntax, gds.alpha.spanningTree.minimum.write>>
-.2+<.^|Approximate Nearest Neighbours
-| <<ann-syntax, gds.alpha.ml.ann.stream>>
-| <<ann-syntax, gds.alpha.ml.ann.write>>
-.3+<.^|Triangle Count
-| <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangle.stream>>
-| <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.stream>>
-| <<algorithms-triangle-count-clustering-coefficient-syntax, gds.alpha.triangleCount.write>>
+|Algorithm | Procedure
+|<<alpha-algorithm-all-pairs-shortest-path, All Shortest Paths>> | `gds.alpha.allShortestPaths.stream`
+.2+<.^|<<algorithms-articlerank, Article Rank>>
+| `gds.alpha.articleRank.stream`
+| `gds.alpha.articleRank.write`
+.4+<.^|<<algorithms-betweenness-centrality, Betweenness Centrality>>
+| `gds.alpha.betweenness.stream`
+| `gds.alpha.betweenness.write`
+| `gds.alpha.betweenness.sampled.stream`
+| `gds.alpha.betweenness.sampled.write`
+|<<algorithms-bfs, Breadth First Search>> | `gds.alpha.bfs.stream`
+.2+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
+| `gds.alpha.closeness.stream`
+| `gds.alpha.closeness.write`
+.2+<.^|<<algorithms-degree-centrality, Degree Centrality>>
+| `gds.alpha.degree.stream`
+| `gds.alpha.degree.write`
+|<<algorithms-dfs, Depth First Search>> | `gds.alpha.dfs.stream`
+.2+<.^|<<algorithms-eigenvector, Eigenvector Centrality>>
+| `gds.alpha.eigenvector.stream`
+| `gds.alpha.eigenvector.write`
+.2+<.^|<<alpha-algorithms-yens-k-shortest-path, K-Shortest Paths>>
+| `gds.alpha.kShortestPaths.stream`
+| `gds.alpha.kShortestPaths.write`
+|<<alpha-algorithms-random-walk, Random Walk>> | `gds.alpha.randomWalk.stream`
+.2+<.^|<<algorithms-strongly-connected-components, Strongly Connected Components>>
+| `gds.alpha.scc.stream`
+| `gds.alpha.scc.write`
+.2+<.^|<<alpha-algorithms-shortest-path, Shortest Path>>
+| `gds.alpha.shortestPath.stream`
+| `gds.alpha.shortestPath.write`
+|<<alpha-algorithms-a_star, A-Star>>| `gds.alpha.shortestPath.astar.stream`
+.2+<.^|<<alpha-algorithms-single-source-shortest-path, Single Source Shortest Path>>
+| `gds.alpha.shortestPath.deltaStepping.write`
+| `gds.alpha.shortestPath.deltaStepping.stream`
+.2+<.^|<<alpha-algorithms-similarity-cosine, Cosine Similarity>>
+| `gds.alpha.similarity.cosine.stream`
+| `gds.alpha.similarity.cosine.write`
+.2+<.^|<<alpha-algorithms-similarity-euclidean, Euclidean Similarity>>
+| `gds.alpha.similarity.euclidean.stream`
+| `gds.alpha.similarity.euclidean.write`
+.2+<.^|<<alpha-algorithms-similarity-overlap, Overlap Similarity>>
+| `gds.alpha.similarity.overlap.stream`
+| `gds.alpha.similarity.overlap.write`
+.2+<.^|<<alpha-algorithms-similarity-pearson, Pearson Similarity>>
+| `gds.alpha.similarity.pearson.write`
+| `gds.alpha.similarity.pearson.stream`
+.5+<.^|<<alpha-algorithms-minimum-weight-spanning-tree, Spanning Tree>>
+| `gds.alpha.spanningTree.write`
+| `gds.alpha.spanningTree.kmax.write`
+| `gds.alpha.spanningTree.kmin.write`
+| `gds.alpha.spanningTree.maximum.write`
+| `gds.alpha.spanningTree.minimum.write`
+.2+<.^|<<alpha-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbours>>
+| `gds.alpha.ml.ann.stream`
+| `gds.alpha.ml.ann.write`
+.3+<.^|<<algorithms-triangle-count-clustering-coefficient, Triangle Count>>
+| `gds.alpha.triangle.stream`
+| `gds.alpha.triangleCount.stream`
+| `gds.alpha.triangleCount.write`
 |===
 
 The following table lists all functions in the GDS library:
 
 [[table-functions]]
-[opts=header,cols="1m"]
+[opts=header,cols="1, 1"]
 |===
-| Name
-| gds.version
-| gds.list
-| gds.graph.exists
-| gds.util.asNode
-| gds.util.asNodes
-| gds.util.infinity
-| gds.util.isFinite
-| gds.util.isInfinite
-| gds.util.NaN
-| <<algorithms-linkprediction-adamic-adar-syntax, gds.alpha.linkprediction.adamicAdar>>
-| <<algorithms-linkprediction-common-neighbors-syntax, gds.alpha.linkprediction.commonNeighbors>>
-| <<algorithms-linkprediction-preferential-attachment-syntax, gds.alpha.linkprediction.preferentialAttachment>>
-| <<algorithms-linkprediction-resource-allocation-syntax, gds.alpha.linkprediction.resourceAllocation>>
-| <<algorithms-linkprediction-same-community-syntax, gds.alpha.linkprediction.sameCommunity>>
-| <<algorithms-linkprediction-total-neighbors-syntax, gds.alpha.linkprediction.totalNeighbors>>
-| <<alpha-algorithms-one-hot-encoding, gds.alpha.ml.oneHotEncoding>>
-| gds.alpha.similarity.cosine
-| gds.alpha.similarity.euclidean
-| gds.alpha.similarity.jaccard
-| gds.alpha.similarity.euclideanDistance
-| gds.alpha.similarity.overlap
-| gds.alpha.similarity.pearson
+|Group | Function
+.2+<.^| Miscellaneous
+| `gds.version`
+| `gds.list`
+|Graph Operations | `gds.graph.exists`
+.7+<.^| Utilities
+| `gds.util.asNode`
+| `gds.util.asNodes`
+| `gds.util.asPath`
+| `gds.util.infinity`
+| `gds.util.isFinite`
+| `gds.util.isInfinite`
+| `gds.util.NaN`
+.6+<.^| Link Prediction
+| `<<algorithms-linkprediction-adamic-adar-syntax, gds.alpha.linkprediction.adamicAdar>>`
+| `<<algorithms-linkprediction-common-neighbors-syntax, gds.alpha.linkprediction.commonNeighbors>>`
+| `<<algorithms-linkprediction-preferential-attachment-syntax, gds.alpha.linkprediction.preferentialAttachment>>`
+| `<<algorithms-linkprediction-resource-allocation-syntax, gds.alpha.linkprediction.resourceAllocation>>`
+| `<<algorithms-linkprediction-same-community-syntax, gds.alpha.linkprediction.sameCommunity>>`
+| `<<algorithms-linkprediction-total-neighbors-syntax, gds.alpha.linkprediction.totalNeighbors>>`
+|Encoding | `<<alpha-algorithms-one-hot-encoding, gds.alpha.ml.oneHotEncoding>>`
+.6+<.^| Similarity Functions
+| `gds.alpha.similarity.cosine`
+| `gds.alpha.similarity.euclidean`
+| `gds.alpha.similarity.jaccard`
+| `gds.alpha.similarity.euclideanDistance`
+| `gds.alpha.similarity.overlap`
+| `gds.alpha.similarity.pearson`
 |===
