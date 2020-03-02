@@ -920,6 +920,23 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
+    void computeMemoryEstimationForVirtualGraphWithLargeValues() throws Exception {
+        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(localDb, GraphCreateProc.class);
+        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
+
+        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 5000000000, relationshipCount: 20000000000})";
+        runQueryWithRowConsumer(localDb, query,
+            row -> {
+                assertEquals(170836586792L, row.getNumber("bytesMin").longValue());
+                assertEquals(230841207440L, row.getNumber("bytesMax").longValue());
+                assertEquals(5000000000L, row.getNumber("nodeCount").longValue());
+                assertEquals(20000000000L, row.getNumber("relationshipCount").longValue());
+            }
+        );
+    }
+
+    @Test
     void loadGraphWithSaturatedThreadPool() {
         // ensure that we don't drop task that can't be scheduled while importing a graph.
 
