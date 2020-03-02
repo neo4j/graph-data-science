@@ -249,6 +249,19 @@ public final class CypherMapWrapper {
         return value;
     }
 
+    public static double validateRange(String key, double value, double min, double max, boolean minInclusive, boolean maxInclusive) {
+        boolean meetsLowerBound = minInclusive ? value >= min : value > min;
+        boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
+
+        if (!meetsLowerBound || !meetsUpperBound) {
+            throw new IllegalArgumentException(String.format(
+                "Value for `%s` must be within %s%.2f, %.2f%s.", key, minInclusive ? "[" : "(", min, max, maxInclusive ? "]" : ")"
+            ));
+        }
+
+        return value;
+    }
+
     static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
         if (canHardCastToDouble(expectedType, value)) {
             return expectedType.cast(((Number) value).doubleValue());

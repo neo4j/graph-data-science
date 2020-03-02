@@ -21,9 +21,13 @@
 package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.compat.MapUtil;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,5 +61,46 @@ class CypherMapWrapperTest {
         );
 
         assertTrue(doubleEx.getMessage().contains("must be of type `Long` but was `Double`"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("positiveRangeValidationParameters")
+    void shouldValidateRange(double value, double min, double max, boolean minInclusive, boolean maxInclusive) {
+        assertEquals(value, CypherMapWrapper.validateRange("value", value, min, max, minInclusive, maxInclusive));
+    }
+
+    @ParameterizedTest
+    @MethodSource("negativeRangeValidationParameters")
+    void shouldThrowForInvalidRange(double value, double min, double max, boolean minInclusive, boolean maxInclusive) {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> CypherMapWrapper.validateRange("value", value, min, max, minInclusive, maxInclusive)
+        );
+
+        assertEquals(String.format("Value for `value` must be within %s%.2f, %.2f%s.",
+            minInclusive ? "[" : "(",
+            min,
+            max,
+            maxInclusive ? "]" : ")"
+        ), ex.getMessage());
+    }
+
+    static Stream<Arguments> positiveRangeValidationParameters() {
+        return Stream.of(
+            Arguments.of(42, 42, 84, true, false),
+            Arguments.of(84, 42, 84, false, true),
+            Arguments.of(42, 42, 42, true, true)
+        );
+    }
+
+    static Stream<Arguments> negativeRangeValidationParameters() {
+        return Stream.of(
+            Arguments.of(42, 42, 84, false, false),
+            Arguments.of(84, 42, 84, false, false),
+            Arguments.of(42, 42, 42, false, false),
+
+            Arguments.of(21, 42, 84, true, false),
+            Arguments.of(85, 42, 84, false, true)
+        );
     }
 }

@@ -225,7 +225,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
         );
         assertThat(
             illegalArgumentException.getMessage(),
-            is("Must set similarity cutoff to a value in [0, 1] (inclusive).")
+            is("Value for `similarityCutoff` must be within [0,00, 1,00].")
         );
     }
 

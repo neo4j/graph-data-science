@@ -287,6 +287,20 @@ final class GenerateConfiguration {
             }
         }
 
+        if (definition.member().validatesRange()) {
+            Configuration.DoubleRange range = definition.member().method().getAnnotation(Configuration.DoubleRange.class);
+            codeBlock = CodeBlock.of(
+                "$T.validateRange($S, $L, $L, $L, $L, $L)",
+                CypherMapWrapper.class,
+                definition.configKey(),
+                codeBlock,
+                range.min(),
+                range.max(),
+                range.minInclusive(),
+                range.maxInclusive()
+            );
+        }
+
         constructor.addStatement("this.$N = $L", definition.fieldName(), codeBlock);
     }
 

@@ -38,6 +38,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
     int BOTTOM_N_DEFAULT = TOP_N_DEFAULT;
 
     @Value.Default
+    @Configuration.DoubleRange(min = 0, max = 1)
     default double similarityCutoff() {
         return 1E-42;
     }
@@ -120,10 +121,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
     default void validate() {
         if (degreeCutoff() < 1) {
             throw new IllegalArgumentException("Must set degree cutoff to 1 or greater");
-        }
-
-        if (similarityCutoff() < 0 || similarityCutoff() > 1) {
-            throw new IllegalArgumentException("Must set similarity cutoff to a value in [0, 1] (inclusive).");
         }
 
         if (topK() != TOP_K_DEFAULT && bottomK() != BOTTOM_K_DEFAULT) {
