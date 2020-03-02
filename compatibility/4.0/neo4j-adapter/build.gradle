@@ -5,6 +5,7 @@ description = 'Neo4j Graph Data Science :: Neo4j Adapter'
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
+    annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: ver.'neo4j'
 
     compileOnly project(':annotations')
     compileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'

@@ -32,14 +32,8 @@ import static org.neo4j.configuration.SettingImpl.newBuilder;
 
 public final class SettingsProxy {
 
-    private static final Setting<Boolean> CORE_LIMITATION = newBuilder(
-        "gds.enterprise.licensed",
-        SettingValueParsers.BOOL,
-        false
-    ).build();
-
     public static Setting<Boolean> unlimitedCores() {
-        return CORE_LIMITATION;
+        return ConcurrencyControllerSettings.unlimitedCores;
     }
 
     public static Setting<Boolean> boltEnabled() {
