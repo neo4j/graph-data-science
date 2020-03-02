@@ -49,7 +49,7 @@ class DegreeCentralityProcIssue848Test extends BaseProcTest {
     @Test
     void multipleBatches() {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = "CALL gds.alpha.degree.stream({nodeProjection: 'Node', relationshipProjection: ''}) " +
+        String query = "CALL gds.alpha.degree.stream({nodeProjection: 'Node', relationshipProjection: '*'}) " +
                        "YIELD nodeId, score";
         runQueryWithRowConsumer(query, row -> actual.put(
             (Long)row.get("nodeId"),

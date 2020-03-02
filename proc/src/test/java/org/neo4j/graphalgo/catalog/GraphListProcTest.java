@@ -29,7 +29,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 
@@ -329,8 +328,7 @@ class GraphListProcTest extends BaseProcTest {
 
     @Test
     void listAllAvailableGraphsForUser() {
-        String loadQuery = "CALL gds.graph.create(" +
-                           "    $name, '', '')";
+        String loadQuery = "CALL gds.graph.create($name, '*', '*')";
 
         runQuery("alice", loadQuery, map("name", "aliceGraph"));
         runQuery("bob", loadQuery, map("name", "bobGraph"));
