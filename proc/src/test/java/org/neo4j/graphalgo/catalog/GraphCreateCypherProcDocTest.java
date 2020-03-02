@@ -39,7 +39,7 @@ class GraphCreateCypherProcDocTest extends BaseProcTest {
 
         String dbQuery =
             "CREATE " +
-            "  (sanLeetCisco:City {population: 1337, stateId: 1234})" +
+            "  (sanLeetCisco:City {name: 'Leipzig', population: 1337, stateId: 1234})" +
             ", (newOrwellCity:City {population: 1984, stateId: 5678})" +
             ", (sanLeetCisco)-[:ROAD {distance: 23, quality: 1.0}]->(newOrwellCity)" +
             ", (sanLeetCisco)-[:ROAD {distance: 32}]->(newOrwellCity)" +
@@ -168,6 +168,27 @@ class GraphCreateCypherProcDocTest extends BaseProcTest {
                           "+-------------------------------+\n" +
                           "| 2         | 1                 |\n" +
                           "+-------------------------------+\n" +
+                          "1 row\n";
+
+        assertEquals(expected, runQuery(createQuery, Result::resultAsString));
+    }
+
+    @Test
+    void loadGraphWithParameters() {
+        String createQuery = "CALL gds.graph.create.cypher(\n" +
+                             "    'myCypherGraph',\n" +
+                             "    'MATCH (n:City) WHERE n.name IN $cities RETURN id(n) AS id',\n" +
+                             "    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target',\n" +
+                             "    {\n" +
+                             "       parameters: { cities: [\"Leipzig\", \"Malmö\"] }\n" +
+                             "    }\n" +
+                             ") YIELD graphName, nodeCount, relationshipCount";
+
+        String expected = "+-------------------------------------------------+\n" +
+                          "| graphName       | nodeCount | relationshipCount |\n" +
+                          "+-------------------------------------------------+\n" +
+                          "| \"myCypherGraph\" | 1         | 0                 |\n" +
+                          "+-------------------------------------------------+\n" +
                           "1 row\n";
 
         assertEquals(expected, runQuery(createQuery, Result::resultAsString));
