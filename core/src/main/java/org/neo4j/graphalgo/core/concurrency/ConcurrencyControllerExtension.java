@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
-import org.neo4j.helpers.Service;
+import com.google.auto.service.AutoService;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.KernelExtensionFactory;
@@ -29,7 +29,7 @@ import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
 import static org.neo4j.graphalgo.config.ConcurrencyValidation.CORE_LIMITATION_SETTING;
 
-@Service.Implementation(KernelExtensionFactory.class)
+@AutoService(KernelExtensionFactory.class)
 public final class ConcurrencyControllerExtension extends KernelExtensionFactory<ConcurrencyControllerExtension.Dependencies> {
 
     public ConcurrencyControllerExtension() {
