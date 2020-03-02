@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
@@ -28,8 +29,6 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.io.File;
 import java.util.UUID;
-
-import static org.neo4j.graphalgo.config.ConcurrencyValidation.CORE_LIMITATION_SETTING;
 
 public final class TestDatabaseCreator {
 
@@ -58,17 +57,10 @@ public final class TestDatabaseCreator {
             .setConfig(GraphDatabaseSettings.load_csv_file_url_root, value)
             .newGraphDatabase();
     }
-        
+
     private static GraphDatabaseAPI createUnlimited() {
         return (GraphDatabaseAPI) builder()
-            .setConfig(CORE_LIMITATION_SETTING, "true")
-            .newGraphDatabase();
-    }
-
-    private static GraphDatabaseAPI createWithLogger(LogProvider logProvider) {
-        return (GraphDatabaseAPI) new TestGraphDatabaseFactory(logProvider)
-            .addKernelExtension(new ConcurrencyControllerExtension())
-            .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
+            .setConfig(SettingsProxy.unlimitedCores(), "true")
             .newGraphDatabase();
     }
 

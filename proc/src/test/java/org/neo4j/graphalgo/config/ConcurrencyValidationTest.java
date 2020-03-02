@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,13 +36,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ConcurrencyValidationTest extends BaseProcTest {
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() throws Exception {
         // we start a non-EE database
         db = TestDatabaseCreator.createTestDatabase();
         initDb(db, "'myG'");
     }
 
-    private void initDb(GraphDatabaseAPI db, String graphName) throws KernelException {
+    private void initDb(GraphDatabaseAPI db, String graphName) throws Exception {
         registerProcedures(db, PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
         QueryRunner.runQuery(db, "CREATE (:A)");
         QueryRunner.runQuery(db, "CALL gds.graph.create(" + graphName + ", '*', '*')");
@@ -89,7 +88,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
     }
 
     @Test
-    void shouldAllowHighConcurrencyForEE() throws KernelException {
+    void shouldAllowHighConcurrencyForEE() throws Exception {
         GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 
@@ -104,7 +103,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
     }
 
     @Test
-    void shouldAllowHighReadConcurrencyForEE() throws KernelException {
+    void shouldAllowHighReadConcurrencyForEE() throws Exception {
         GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 
@@ -115,7 +114,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
     }
 
     @Test
-    void shouldAllowHighWriteConcurrencyForEE() throws KernelException {
+    void shouldAllowHighWriteConcurrencyForEE() throws Exception {
         GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 

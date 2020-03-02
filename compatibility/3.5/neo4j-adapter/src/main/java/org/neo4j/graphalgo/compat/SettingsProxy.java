@@ -30,8 +30,14 @@ import java.nio.file.Path;
 
 public final class SettingsProxy {
 
-    private SettingsProxy() {
-        throw new UnsupportedOperationException();
+    private static final Setting<Boolean> CORE_LIMITATION = Settings.setting(
+        "gds.concurrency.unlimited",
+        Settings.BOOLEAN,
+        "false"
+    );
+
+    public static Setting<Boolean> unlimitedCores() {
+        return CORE_LIMITATION;
     }
 
     public static Setting<Boolean> boltEnabled() {
@@ -65,5 +71,9 @@ public final class SettingsProxy {
             logs -> logs.toPath().resolve("debug.log"),
             Settings.PATH.andThen(File::toPath)
         );
+    }
+
+    private SettingsProxy() {
+        throw new UnsupportedOperationException();
     }
 }
