@@ -109,11 +109,11 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     void testClosenessWrite() {
         String query = gdsCypher()
             .writeMode()
-            .yields("nodes", "loadMillis", "computeMillis", "writeMillis");
+            .yields("nodes", "createMillis", "computeMillis", "writeMillis");
 
         runQueryWithRowConsumer(query, row -> {
             assertNotEquals(-1L, row.getNumber("writeMillis"));
-            assertNotEquals(-1L, row.getNumber("loadMillis"));
+            assertNotEquals(-1L, row.getNumber("createMillis"));
             assertNotEquals(-1L, row.getNumber("computeMillis"));
             assertNotEquals(-1L, row.getNumber("nodes"));
         });

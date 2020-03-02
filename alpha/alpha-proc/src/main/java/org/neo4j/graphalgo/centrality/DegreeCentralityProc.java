@@ -79,7 +79,6 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
                     0,
                     computeResult.createMillis(),
                     0,
-                    false,
                     computeResult.config().writeProperty()
                 )
             );

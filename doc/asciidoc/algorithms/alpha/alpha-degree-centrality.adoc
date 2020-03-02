@@ -47,7 +47,7 @@ Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two 
 [source, cypher]
 ----
 CALL gds.alpha.degree.write(configuration: Map)
-YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
+YIELD nodes, createMillis, computeMillis, writeMillis, write, writeProperty
 ----
 
 .Configuration
@@ -67,7 +67,7 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 | Name          | Type    | Description
 | nodes         | int     | The number of nodes considered.
 | writeProperty | string  | The property name written back to.
-| loadMillis    | int     | Milliseconds for loading data.
+| createMillis  | int     | Milliseconds for loading data.
 | computeMillis | int     | Milliseconds for running the algorithm.
 | writeMillis   | int     | Milliseconds for writing result data back.
 |===
