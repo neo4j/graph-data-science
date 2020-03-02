@@ -177,6 +177,7 @@ ORDER BY name
 | "Elton"   | 4
 | "Frank"   | 4
 |===
+--
 
 It is also possible to write the assigned community ids back to the database using the `write` mode.
 
@@ -195,6 +196,7 @@ YIELD nodes, communityCount, ranIterations, didConverge
 | nodes | colorCount | ranIterations | didConverge
 | 6     | 2          | 3             | true
 |===
+--
 
 When using `write` mode the procedure will return information about the algorithm execution.
 In this example we return the number of processed nodes, the number of communities assigned to the nodes in the graph, the number of iterations and information whether the algorithm converged.

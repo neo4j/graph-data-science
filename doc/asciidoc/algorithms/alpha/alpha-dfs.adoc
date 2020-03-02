@@ -115,6 +115,7 @@ ORDER BY tags
 | "d"
 | "e"
 |===
+--
 
 If specifying d and e as target nodes, not all nodes at distance 1 will be visited due to the depth first traversal order, in which node d is reached before b:
 
@@ -140,6 +141,7 @@ ORDER BY tags
 | "c"
 | "d"
 |===
+--
 
 
 [role=query-example]
@@ -164,6 +166,7 @@ ORDER BY tags
 | "b"
 | "c"
 |===
+--
 
 In the above case, nodes d and e were not visited since they are at distance 2 from a.
 
@@ -190,5 +193,6 @@ ORDER BY tags
 | "c"
 | "e"
 |===
+--
 
 Due to the max cost limit of 10, node d cannot be reached since the total cost of the path from a to d is 14.
