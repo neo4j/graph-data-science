@@ -179,7 +179,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
     @ParameterizedTest(name = "parameter: {0}, value: {1}")
     @CsvSource(value = {"topN, -2", "bottomN, -2", "topK, -2", "bottomK, -2", "topK, 0", "bottomK, 0"})
     void shouldThrowForInvalidTopsAndBottoms(String parameter, long value) {
-        String message = String.format("Invalid value for %s: must be a positive integer", parameter);
+        String message = String.format("Value for `%s` must be within", parameter);
         CypherMapWrapper input = baseUserInput().withNumber(parameter, value);
 
         IllegalArgumentException illegalArgumentException = assertThrows(
@@ -211,7 +211,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
             IllegalArgumentException.class,
             () -> config(input)
         );
-        assertThat(illegalArgumentException.getMessage(), is("Must set degree cutoff to 1 or greater"));
+        assertThat(illegalArgumentException.getMessage(), is(String.format("Value for `degreeCutoff` must be within [1, %d].", Integer.MAX_VALUE)));
     }
 
     @ParameterizedTest

@@ -44,30 +44,35 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
     }
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
     default int degreeCutoff() {
         return 1;
     }
 
     @Value.Default
     @Configuration.Key(TOP_K_KEY)
+    @Configuration.IntegerRange(min = 1)
     default int topK() {
         return TOP_K_DEFAULT;
     }
 
     @Value.Default
     @Configuration.Key(TOP_N_KEY)
+    @Configuration.IntegerRange(min = 0)
     default int topN() {
         return TOP_N_DEFAULT;
     }
 
     @Value.Default
     @Configuration.Key(BOTTOM_K_KEY)
+    @Configuration.IntegerRange(min = 1)
     default int bottomK() {
         return BOTTOM_K_DEFAULT;
     }
 
     @Value.Default
     @Configuration.Key(BOTTOM_N_KEY)
+    @Configuration.IntegerRange(min = 0)
     default int bottomN() {
         return BOTTOM_N_DEFAULT;
     }
@@ -119,10 +124,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
 
     @Value.Check
     default void validate() {
-        if (degreeCutoff() < 1) {
-            throw new IllegalArgumentException("Must set degree cutoff to 1 or greater");
-        }
-
         if (topK() != TOP_K_DEFAULT && bottomK() != BOTTOM_K_DEFAULT) {
             throw new IllegalArgumentException(String.format(
                 "Invalid parameter combination: %s combined with %s",
@@ -136,21 +137,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
                 TOP_N_KEY,
                 BOTTOM_N_KEY
             ));
-        }
-
-        String kMessage = "Invalid value for %s: must be a positive integer";
-        if (bottomK() < 1) {
-            throw new IllegalArgumentException(String.format(kMessage, BOTTOM_K_KEY));
-        }
-        if (topK() < 1) {
-            throw new IllegalArgumentException(String.format(kMessage, TOP_K_KEY));
-        }
-        String nMessage = "Invalid value for %s: must be a positive integer or zero";
-        if (bottomN() < 0) {
-            throw new IllegalArgumentException(String.format(nMessage, BOTTOM_N_KEY));
-        }
-        if (topN() < 0) {
-            throw new IllegalArgumentException(String.format(nMessage, TOP_N_KEY));
         }
     }
 }
