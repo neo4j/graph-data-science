@@ -62,8 +62,8 @@ import static org.neo4j.procedure.Mode.READ;
 public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKShortestPaths, YensKShortestPathsConfig> {
 
     private static final String DESCRIPTION =
-        "Yen's K-shortest paths algorithm computes single-source K-shortest loopless paths " +
-        "for a graph with non-negative relationship weights.";
+        "Yen's K-shortest paths algorithm computes single-source K-shortest " +
+        "loopless paths for a graph with non-negative relationship weights.";
 
     @Procedure(name = "gds.alpha.kShortestPaths.stream", mode = READ)
     @Description(DESCRIPTION)

@@ -45,14 +45,20 @@ import java.util.stream.Stream;
 
 public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree, KSpanningTreeConfig> {
 
+    private static final String MAX_DESCRIPTION =
+        "The maximum weight spanning tree (MST) starts from a given node, and finds all its reachable nodes " +
+        "and the set of relationships that connect the nodes together with the maximum possible weight.";
+
+    private static final String MIN_DESCRIPTION =
+        "The minimum weight spanning tree (MST) starts from a given node, and finds all its reachable nodes " +
+        "and the set of relationships that connect the nodes together with the minimum possible weight.";
+
     static DoubleUnaryOperator minMax;
 
     public static final String DEFAULT_CLUSTER_PROPERTY = "partition";
 
     @Procedure(value = "gds.alpha.spanningTree.kmax.write", mode = Mode.WRITE)
-    @Description("The maximum weight spanning tree (MST) starts from a given node, " +
-                 "and finds all its reachable nodes " +
-                 "and the set of relationships that connect the nodes together with the maximum possible weight")
+    @Description(MAX_DESCRIPTION)
     public Stream<Prim.Result> kmax(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -62,9 +68,7 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
     }
 
     @Procedure(value = "gds.alpha.spanningTree.kmin.write", mode = Mode.WRITE)
-    @Description(("The minimum weight spanning tree (MST) starts from a given node, " +
-                  "and finds all its reachable nodes " +
-                  "and the set of relationships that connect the nodes together with the minimum possible weight"))
+    @Description(MIN_DESCRIPTION)
     public Stream<Prim.Result> kmin(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

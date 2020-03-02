@@ -46,8 +46,8 @@ import static org.neo4j.procedure.Mode.READ;
 public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig> {
 
     private static final String DESCRIPTION =
-        "BFS is a traversal algorithm, which explores all of the neighbor nodes at the present depth " +
-        "prior to moving on to the nodes at the next depth level";
+        "BFS is a traversal algorithm, which explores all of the neighbor nodes at " +
+        "the present depth prior to moving on to the nodes at the next depth level.";
     private static boolean isBfs;
 
     @Procedure(name = "gds.alpha.bfs.stream", mode = READ)

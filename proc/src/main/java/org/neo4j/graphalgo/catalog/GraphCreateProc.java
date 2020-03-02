@@ -51,9 +51,10 @@ import java.util.stream.Stream;
 public class GraphCreateProc extends CatalogProc {
 
     private static final String NO_GRAPH_NAME = "";
+    private static final String DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
 
     @Procedure(name = "gds.graph.create", mode = Mode.READ)
-    @Description("Creates a named graph in the catalog for use by algorithms.")
+    @Description(DESCRIPTION)
     public Stream<GraphCreateResult> create(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,
@@ -102,7 +103,7 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     @Procedure(name = "gds.graph.create.cypher", mode = Mode.READ)
-    @Description("Creates a named graph in the catalog for use by algorithms.")
+    @Description(DESCRIPTION)
     public Stream<GraphCreateResult> create(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeQuery") String nodeQuery,

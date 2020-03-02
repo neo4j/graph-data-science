@@ -44,11 +44,13 @@ public class ListProc {
             " RETURN name, signature, description, 'function' AS type " +
             " ORDER BY name";
 
+    private static final String DESCRIPTION = "CALL gds.list - lists all algorithm procedures, their description and signature";
+
     @Context
     public GraphDatabaseService db;
 
     @Procedure("gds.list")
-    @Description("CALL gds.list - lists all algorithm procedures, their description and signature")
+    @Description(DESCRIPTION)
     public Stream<ListResult> list(@Name(value = "name", defaultValue = "") String name) {
         return db.execute(QUERY, singletonMap("name", name)).stream().map(ListResult::new);
     }

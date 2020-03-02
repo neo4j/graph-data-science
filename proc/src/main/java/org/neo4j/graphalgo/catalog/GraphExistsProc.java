@@ -29,8 +29,10 @@ import java.util.stream.Stream;
 
 public class GraphExistsProc extends CatalogProc {
 
+    private static final String DESCRIPTION = "Checks if a graph exists in the catalog.";
+
     @Procedure(name = "gds.graph.exists", mode = Mode.READ)
-    @Description("Checks if a graph exists in the catalog.")
+    @Description(DESCRIPTION)
     public Stream<GraphExistsResult> exists(@Name(value = "graphName", defaultValue = "null") String graphName) {
         validateGraphName(graphName);
         return Stream.of(new GraphExistsResult(graphName, GraphStoreCatalog.exists(getUsername(), graphName)));

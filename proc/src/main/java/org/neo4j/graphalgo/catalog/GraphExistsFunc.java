@@ -26,8 +26,10 @@ import org.neo4j.procedure.UserFunction;
 
 public class GraphExistsFunc extends CatalogProc {
 
+    private static final String DESCRIPTION = "Checks if a graph exists in the catalog.";
+
     @UserFunction("gds.graph.exists")
-    @Description("Checks if a graph exists in the catalog.")
+    @Description(DESCRIPTION)
     public boolean existsFunction(@Name(value = "graphName") String graphName) {
         validateGraphName(graphName);
         return GraphStoreCatalog.exists(getUsername(), graphName);

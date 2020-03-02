@@ -63,8 +63,8 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ApproximateNearestNeighborsConfig> {
 
     private static final String DESCRIPTION =
-        "The Approximate Nearest Neighbors algorithm constructs a k-Nearest Neighbors Graph for a set of objects " +
-        "based on a provided similarity function";
+        "The Approximate Nearest Neighbors algorithm constructs a k-Nearest Neighbors " +
+        "graph for a set of objects based on a provided similarity function.";
 
     @Procedure(name = "gds.alpha.ml.ann.stream", mode = READ)
     @Description(DESCRIPTION)

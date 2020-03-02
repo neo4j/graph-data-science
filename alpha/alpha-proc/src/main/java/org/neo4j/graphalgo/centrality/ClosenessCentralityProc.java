@@ -51,8 +51,8 @@ import static org.neo4j.procedure.Mode.READ;
 public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig> {
 
     private static final String DESCRIPTION =
-        "Closeness centrality is a way of detecting nodes " +
-        "that are able to spread information very efficiently through a graph.";
+        "Closeness centrality is a way of detecting nodes that are " +
+        "able to spread information very efficiently through a graph.";
 
     @Procedure(name = "gds.alpha.closeness.stream", mode = READ)
     @Description(DESCRIPTION)

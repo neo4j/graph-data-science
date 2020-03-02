@@ -44,13 +44,18 @@ import java.util.stream.Stream;
 // TODO: Always undirected
 public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningTreeConfig> {
 
-    public static final String MINIMUM_SPANNING_TREE = "Minimum weight spanning tree visits all nodes that are in the same connected component as the starting node, " +
-                 "and returns a spanning tree of all nodes in the component where the total weight of the relationships is minimized.";
+    private static final String MIN_DESCRIPTION =
+        "Minimum weight spanning tree visits all nodes that are in the same connected component as the starting node, " +
+        "and returns a spanning tree of all nodes in the component where the total weight of the relationships is minimized.";
+
+    private static final String MAX_DESCRIPTION =
+        "Maximum weight spanning tree visits all nodes that are in the same connected component as the starting node, " +
+        "and returns a spanning tree of all nodes in the component where the total weight of the relationships is maximized.";
 
     static DoubleUnaryOperator minMax;
 
     @Procedure(value = "gds.alpha.spanningTree.write", mode = Mode.WRITE)
-    @Description(MINIMUM_SPANNING_TREE)
+    @Description(MIN_DESCRIPTION)
     public Stream<Prim.Result> spanningTree(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -60,7 +65,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
     }
 
     @Procedure(value = "gds.alpha.spanningTree.minimum.write", mode = Mode.WRITE)
-    @Description(MINIMUM_SPANNING_TREE)
+    @Description(MIN_DESCRIPTION)
     public Stream<Prim.Result> minimumSpanningTree(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -70,8 +75,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
     }
 
     @Procedure(value = "gds.alpha.spanningTree.maximum.write", mode = Mode.WRITE)
-    @Description("Maximum weight spanning tree visits all nodes that are in the same connected component as the starting node, " +
-                 "and returns a spanning tree of all nodes in the component where the total weight of the relationships is maximized.")
+    @Description(MAX_DESCRIPTION)
     public Stream<Prim.Result> maximumSpanningTree(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

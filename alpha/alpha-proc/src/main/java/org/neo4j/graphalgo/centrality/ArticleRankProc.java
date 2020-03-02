@@ -51,8 +51,8 @@ import static org.neo4j.procedure.Mode.WRITE;
 public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, ArticleRankConfig> {
 
     private static final String DESCRIPTION =
-        "ArticleRank is a variant of the Page Rank algorithm, " +
-        "which measures the transitive influence or connectivity of nodes.";
+        "ArticleRank is a variant of the Page Rank algorithm, which " +
+        "measures the transitive influence or connectivity of nodes.";
 
     @Procedure(value = "gds.alpha.articleRank.write", mode = WRITE)
     @Description(DESCRIPTION)
