@@ -61,9 +61,9 @@ In this section we will focus on side-by-side examples of operations using the s
 
 This section is divided into the following sub-sections:
 
-. <<migration-algos-common, Common Changes>>
-. <<graph-ops, Graph Operations>>
-. <<product-algos, Production-quality algorithms>>
+* <<migration-algos-common, Common Changes>>
+* <<graph-ops, Graph Operations>>
+* <<product-algos, Production-quality algorithms>>
 
 include::migration-algos-common.adoc[leveloffset=+2]
 
