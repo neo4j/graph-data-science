@@ -145,7 +145,6 @@ class ListProcTest extends BaseProcTest {
             AllShortestPathsProc.class,
             ApproxNearestNeighborsProc.class,
             ArticleRankProc.class,
-            AsPathFunc.class,
             BetweennessCentralityProc.class,
             ClosenessCentralityProc.class,
             DegreeCentralityProc.class,
