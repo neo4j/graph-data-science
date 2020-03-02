@@ -129,7 +129,6 @@ The following table lists all functions in the GDS library:
 | gds.graph.exists
 | gds.util.asNode
 | gds.util.asNodes
-| gds.util.asPath
 | gds.util.infinity
 | gds.util.isFinite
 | gds.util.isInfinite
