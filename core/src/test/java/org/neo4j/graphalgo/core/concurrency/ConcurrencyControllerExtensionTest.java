@@ -22,14 +22,14 @@ package org.neo4j.graphalgo.core.concurrency;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConcurrencyControllerExtensionTest {
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @AfterEach
     void reset() {

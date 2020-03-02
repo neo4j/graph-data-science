@@ -23,6 +23,8 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.SettingImpl;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.compat.SettingsProxy;
+import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import java.io.File;
@@ -41,34 +43,46 @@ public final class TestDatabaseCreator {
         return new GraphDbApi(createWithCustomLoadCsvRoot(value));
     }
 
+    public static GraphDbApi createUnlimitedConcurrencyTestDatabase() {
+        return new GraphDbApi(createUnlimited());
+    }
+
     public static GraphDbApi createEmbeddedDatabase(File storeDir) {
         return new GraphDbApi(createEmbedded(storeDir));
     }
 
     private static DatabaseManagementService createDefault() {
-        return builder()
-            .setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"))
-            .build();
+        return builder().build();
     }
 
     private static DatabaseManagementService createWithCustomLoadCsvRoot(String value) {
+        Path fileRoot = (((SettingImpl<Path>) GraphDatabaseSettings.load_csv_file_url_root)).parse(value);
         return builder()
-            .setConfig(
-                GraphDatabaseSettings.load_csv_file_url_root,
-                (((SettingImpl<Path>) GraphDatabaseSettings.load_csv_file_url_root)).parse(value))
-            .setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"))
+            .setConfig(GraphDatabaseSettings.load_csv_file_url_root, fileRoot)
+            .build();
+    }
+
+    private static DatabaseManagementService createUnlimited() {
+        return builder()
+            .setConfig(SettingsProxy.unlimitedCores(), true)
             .build();
     }
 
     private static DatabaseManagementService createEmbedded(File storeDir) {
-        return new TestDatabaseManagementServiceBuilder(storeDir)
+        return anyDbBuilder(storeDir)
             .setConfig(GraphDatabaseSettings.fail_on_missing_files, false)
             .build();
     }
 
     private static TestDatabaseManagementServiceBuilder builder() {
         File testDir = new File(UUID.randomUUID().toString());
-        return new TestDatabaseManagementServiceBuilder(testDir).impermanent();
+        return anyDbBuilder(testDir).impermanent();
+    }
+
+    private static TestDatabaseManagementServiceBuilder anyDbBuilder(File testDir) {
+        return new TestDatabaseManagementServiceBuilder(testDir)
+            .addExtension(new ConcurrencyControllerExtension())
+            .setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"));
     }
 
     private TestDatabaseCreator() {}

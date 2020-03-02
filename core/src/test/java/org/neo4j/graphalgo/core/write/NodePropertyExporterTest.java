@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.write;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
@@ -36,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
-import static org.neo4j.graphalgo.config.ConcurrencyValidation.CORE_LIMITATION_SETTING;
 
 class NodePropertyExporterTest {
 

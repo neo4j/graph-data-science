@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
+import org.neo4j.graphalgo.annotation.IdenticalCompat;
+
+@IdenticalCompat
 public final class ConcurrencyMonitor {
 
     private static ConcurrencyMonitor INSTANCE;
@@ -53,6 +56,7 @@ public final class ConcurrencyMonitor {
         set(State.UNLIMITED);
     }
 
+    // TODO move it all to concurrency package
     public void setLimited() {
         set(State.LIMITED);
     }

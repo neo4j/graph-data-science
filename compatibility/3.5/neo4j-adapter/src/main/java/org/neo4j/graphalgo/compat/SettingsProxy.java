@@ -31,7 +31,7 @@ import java.nio.file.Path;
 public final class SettingsProxy {
 
     private static final Setting<Boolean> CORE_LIMITATION = Settings.setting(
-        "gds.concurrency.unlimited",
+        "gds.enterprise.licensed",
         Settings.BOOLEAN,
         "false"
     );

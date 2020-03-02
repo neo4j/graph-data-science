@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
@@ -89,7 +90,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
 
     @Test
     void shouldAllowHighConcurrencyForEE() throws Exception {
-        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
+        GraphDbApi unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 
         String query = "CALL gds.pageRank.write('myG2', {concurrency: 10, writeProperty: 'p'}) " +
@@ -104,7 +105,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
 
     @Test
     void shouldAllowHighReadConcurrencyForEE() throws Exception {
-        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
+        GraphDbApi unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 
         String query = "CALL gds.graph.create('myG3', '*', '*', {readConcurrency: 12})";
@@ -115,7 +116,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
 
     @Test
     void shouldAllowHighWriteConcurrencyForEE() throws Exception {
-        GraphDatabaseAPI unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
+        GraphDbApi unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 
         String query = "CALL gds.pageRank.write('myG2', {writeConcurrency: 9, writeProperty: 'p'}) " +

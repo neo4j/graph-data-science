@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
+import org.neo4j.graphalgo.compat.SettingsProxy;
+import org.neo4j.helpers.Service;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.KernelExtensionFactory;
@@ -26,8 +28,7 @@ import org.neo4j.kernel.impl.spi.KernelContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
-import static org.neo4j.graphalgo.config.ConcurrencyValidation.CORE_LIMITATION_SETTING;
-
+@Service.Implementation(KernelExtensionFactory.class)
 public final class ConcurrencyControllerExtension extends KernelExtensionFactory<ConcurrencyControllerExtension.Dependencies> {
 
     public ConcurrencyControllerExtension() {
@@ -45,7 +46,7 @@ public final class ConcurrencyControllerExtension extends KernelExtensionFactory
             {
                 boolean unlimitedCores = dependencies
                     .config()
-                    .get(CORE_LIMITATION_SETTING);
+                    .get(SettingsProxy.unlimitedCores());
                 ConcurrencyMonitor concurrencyMonitor = ConcurrencyMonitor.instance();
                 if (unlimitedCores) {
                     concurrencyMonitor.setUnlimited();

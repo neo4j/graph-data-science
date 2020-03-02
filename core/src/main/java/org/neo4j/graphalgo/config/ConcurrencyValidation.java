@@ -21,16 +21,8 @@ package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
-import org.neo4j.graphdb.config.Setting;
-import org.neo4j.kernel.configuration.Settings;
 
 public interface ConcurrencyValidation {
-
-    Setting<Boolean> CORE_LIMITATION_SETTING = Settings.setting(
-        "gds.enterprise.licensed",
-        Settings.BOOLEAN,
-        "false"
-    );
 
     int CONCURRENCY_LIMITATION = 4;
 

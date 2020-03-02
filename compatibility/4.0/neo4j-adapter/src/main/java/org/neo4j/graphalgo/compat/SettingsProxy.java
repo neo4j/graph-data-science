@@ -32,8 +32,14 @@ import static org.neo4j.configuration.SettingImpl.newBuilder;
 
 public final class SettingsProxy {
 
-    private SettingsProxy() {
-        throw new UnsupportedOperationException();
+    private static final Setting<Boolean> CORE_LIMITATION = newBuilder(
+        "gds.enterprise.licensed",
+        SettingValueParsers.BOOL,
+        false
+    ).build();
+
+    public static Setting<Boolean> unlimitedCores() {
+        return CORE_LIMITATION;
     }
 
     public static Setting<Boolean> boltEnabled() {
@@ -62,5 +68,9 @@ public final class SettingsProxy {
 
     public static Setting<Path> storeInternalLogPath() {
         return GraphDatabaseSettings.store_internal_log_path;
+    }
+
+    private SettingsProxy() {
+        throw new UnsupportedOperationException();
     }
 }
