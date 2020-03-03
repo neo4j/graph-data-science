@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo.ocd;
 
 import com.carrotsearch.hppc.LongSet;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.ocd.LocallyMinimalNeighborhoods;
 import org.neo4j.graphalgo.impl.ocd.LocallyMinimalNeighborhoodsStreamConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

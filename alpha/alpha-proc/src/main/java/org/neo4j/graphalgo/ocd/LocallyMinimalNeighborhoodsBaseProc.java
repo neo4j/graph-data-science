@@ -22,15 +22,15 @@ package org.neo4j.graphalgo.ocd;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
-import org.neo4j.graphalgo.Projection;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.ocd.LocallyMinimalNeighborhoods;
 import org.neo4j.graphalgo.impl.ocd.LocallyMinimalNeighborhoodsBaseConfig;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.logging.Log;
 
 public abstract class LocallyMinimalNeighborhoodsBaseProc<CONFIG extends LocallyMinimalNeighborhoodsBaseConfig>
@@ -42,13 +42,13 @@ public abstract class LocallyMinimalNeighborhoodsBaseProc<CONFIG extends Locally
 
     @Override
     protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        graphCreateConfig.relationshipProjection().projections().entrySet().stream()
-            .filter(entry -> entry.getValue().projection() != Projection.UNDIRECTED)
+        graphCreateConfig.relationshipProjections().projections().entrySet().stream()
+            .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
             .forEach(entry -> {
                 throw new IllegalArgumentException(String.format(
                     "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses projection `%s`",
                     entry.getKey().name,
-                    entry.getValue().projection()
+                    entry.getValue().orientation()
                 ));
             });
     }

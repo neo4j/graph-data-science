@@ -83,7 +83,7 @@ public class LocallyMinimalNeighborhoodsStreamProcTest extends BaseProcTest {
 
     @Test
     void streamLMNWithMembers() {
-        String q = "CALL gds.alpha.lmn.stream({nodeProjection: \"*\", relationshipProjection: {`*`: {type: \"*\", projection: \"UNDIRECTED\"}}})" +
+        String q = "CALL gds.alpha.lmn.stream({nodeProjection: \"*\", relationshipProjection: {`*`: {type: \"*\", orientation: \"UNDIRECTED\"}}})" +
                    " YIELD nodeId, communityId, conductance" +
                    " RETURN gds.util.asNode(nodeId).name as node, gds.util.asNode(communityId).name as community, conductance";
 
@@ -98,6 +98,7 @@ public class LocallyMinimalNeighborhoodsStreamProcTest extends BaseProcTest {
                 conductance
             );
             actualRowDescriptions.add(actual);
+            System.out.println(actual);
         });
         Set<String> expectedRowDescriptions = new HashSet<>(Arrays.asList(("node b community a conductance 0.75\n" +
                                                              "node c community a conductance 0.75\n" +
@@ -119,7 +120,7 @@ public class LocallyMinimalNeighborhoodsStreamProcTest extends BaseProcTest {
 
     @Test
     void streamLMNOnlyCenters() {
-        String q = "CALL gds.alpha.lmn.stream({nodeProjection: \"*\", relationshipProjection: {`*`: {type: \"*\", projection: \"UNDIRECTED\"}}, includeMembers: false})" +
+        String q = "CALL gds.alpha.lmn.stream({nodeProjection: \"*\", relationshipProjection: {`*`: {type: \"*\", orientation: \"UNDIRECTED\"}}, includeMembers: false})" +
                    " YIELD nodeId, communityId, conductance" +
                    " RETURN gds.util.asNode(nodeId).name as node, gds.util.asNode(communityId).name as community, conductance";
 
@@ -134,7 +135,6 @@ public class LocallyMinimalNeighborhoodsStreamProcTest extends BaseProcTest {
                 conductance
             );
             actualRowDescriptions.add(actual);
-            System.out.println(actual);
         });
         Set<String> expectedRowDescriptions = new HashSet<>(Arrays.asList(("node a community a conductance 0.666666\n" +
                                                                            "node e community e conductance 0.333333\n" +

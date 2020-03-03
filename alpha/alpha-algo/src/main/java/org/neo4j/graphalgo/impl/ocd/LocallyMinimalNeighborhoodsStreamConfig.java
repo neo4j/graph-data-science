@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.impl.ocd;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 
 import java.util.Optional;
 
