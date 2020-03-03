@@ -81,10 +81,12 @@ public interface GraphCreateConfig extends BaseConfig {
     }
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
-        if (config.containsKey(NODE_QUERY_KEY) || config.containsKey(RELATIONSHIP_QUERY_KEY)) {
+        if (config.containsKey(NODE_QUERY_KEY) && config.containsKey(RELATIONSHIP_QUERY_KEY)) {
             return GraphCreateFromCypherConfig.fromProcedureConfig(username, config);
-        } else {
+        } else if (config.containsKey(NODE_PROJECTIONS_KEY) && config.containsKey(RELATIONSHIP_PROJECTIONS_KEY)) {
             return GraphCreateFromStoreConfig.fromProcedureConfig(username, config);
+        } else {
+            throw new IllegalArgumentException("Missing information for implicit graph creation: node / relationship projections or queries.");
         }
     }
 }
