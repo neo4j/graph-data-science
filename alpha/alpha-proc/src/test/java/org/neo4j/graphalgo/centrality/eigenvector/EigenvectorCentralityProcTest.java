@@ -299,12 +299,11 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Graph Creation: {0}")
     @MethodSource("gdsCyphers")
     void testWriteAllDefaults(String desc, GdsCypher.ModeBuildStage queryBuilder) {
-        String eigenvectorWriteQuery = queryBuilder.writeMode().yields("writeMillis", "write", "writeProperty");
+        String eigenvectorWriteQuery = queryBuilder.writeMode().yields("writeMillis", "writeProperty");
 
         runQueryWithRowConsumer(
             eigenvectorWriteQuery,
             row -> {
-                assertTrue(row.getBoolean("write"));
                 assertEquals("eigenvector", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
