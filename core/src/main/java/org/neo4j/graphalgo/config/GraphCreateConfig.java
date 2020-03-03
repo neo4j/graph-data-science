@@ -34,16 +34,16 @@ public interface GraphCreateConfig extends BaseConfig {
 
     String IMPLICIT_GRAPH_NAME = "";
 
-    String KEY_NODE_PROJECTIONS = "nodeProjection";
-    String KEY_RELATIONSHIP_PROJECTIONS = "relationshipProjection";
+    String NODE_PROJECTIONS_KEY = "nodeProjection";
+    String RELATIONSHIP_PROJECTIONS_KEY = "relationshipProjection";
 
     @Configuration.Parameter
     String graphName();
 
-    @Configuration.Key(KEY_NODE_PROJECTIONS)
+    @Configuration.Key(NODE_PROJECTIONS_KEY)
     NodeProjections nodeProjections();
 
-    @Configuration.Key(KEY_RELATIONSHIP_PROJECTIONS)
+    @Configuration.Key(RELATIONSHIP_PROJECTIONS_KEY)
     RelationshipProjections relationshipProjections();
 
     @Value.Default
