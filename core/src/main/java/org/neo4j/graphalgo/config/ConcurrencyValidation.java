@@ -59,9 +59,11 @@ public interface ConcurrencyValidation {
                 throw new IllegalArgumentException(String.format(
                     "The configured concurrency value is too high. " +
                     "The maximum allowed concurrency value is %d but %d was configured. " +
-                    "Please see the documentation for how to increase the limitation.",
+                    "Please see the documentation (System Requirements section) for an explanation of concurrency limitations for different editions of Neo4j Graph Data Science. " +
+                    "Higher than concurrency %d is only available under the Neo4j Graph Data Science Edition license.",
                     CONCURRENCY_LIMITATION,
-                    requestedConcurrency
+                    requestedConcurrency,
+                    CONCURRENCY_LIMITATION
                 ));
             }
         }
