@@ -53,7 +53,6 @@ public final class ConcurrencyMonitor {
         set(State.UNLIMITED);
     }
 
-    // TODO move it all to concurrency package
     public void setLimited() {
         set(State.LIMITED);
     }
