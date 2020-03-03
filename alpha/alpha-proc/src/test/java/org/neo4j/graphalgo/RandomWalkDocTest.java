@@ -77,6 +77,7 @@ public class RandomWalkDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (home:Page {name: 'Home'})" +
                        " CALL gds.alpha.randomWalk.stream({" +
+                       "   nodeProjection: '*', " +
                        "   relationshipProjection: {" +
                        "     LINKS: {" +
                        "       type: 'LINKS'," +

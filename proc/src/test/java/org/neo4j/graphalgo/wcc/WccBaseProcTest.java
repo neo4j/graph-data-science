@@ -143,7 +143,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
 
     @Test
     void testFailSeedingAndConsecutiveIds() {
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfigMap(
             "consecutiveIds", true,
             "seedProperty", "seed"
         )));
@@ -162,7 +162,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
 
     @Test
     void testFailThresholdWithoutRelationshipWeight() {
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfigMap(
             "threshold", 3.14
         )));
 

@@ -91,7 +91,7 @@ public class OverlapDocTest extends BaseProcTest {
             " MATCH (book:Book)-[:HAS_GENRE]->(genre) " +
             " WITH {item:id(genre), categories: collect(id(book))} AS userData " +
             " WITH collect(userData) AS data " +
-            " CALL gds.alpha.similarity.overlap.stream({data: data}) " +
+            " CALL gds.alpha.similarity.overlap.stream({nodeProjection: '*', relationshipProjection: '*', data: data}) " +
             " YIELD item1, item2, count1, count2, intersection, similarity " +
             " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, " +
             "        count1, count2, intersection, similarity " +
@@ -120,6 +120,8 @@ public class OverlapDocTest extends BaseProcTest {
             " WITH {item:id(genre), categories: collect(id(book))} as userData " +
             " WITH collect(userData) as data " +
             " CALL gds.alpha.similarity.overlap.stream({ " +
+            "   nodeProjection: '*', " +
+            "   relationshipProjection: '*', " +
             "   data: data, " +
             "   similarityCutoff: 0.75 " +
             " }) " +
@@ -149,6 +151,8 @@ public class OverlapDocTest extends BaseProcTest {
             " WITH {item:id(genre), categories: collect(id(book))} as userData " +
             " WITH collect(userData) as data " +
             " CALL gds.alpha.similarity.overlap.stream({ " +
+            "  nodeProjection: '*', " +
+            "  relationshipProjection: '*', " +
             "  data: data, " +
             "  topK: 2 " +
             " }) " +
@@ -179,6 +183,8 @@ public class OverlapDocTest extends BaseProcTest {
             " WITH {item:id(genre), categories: collect(id(book))} as userData " +
             " WITH collect(userData) as data " +
             " CALL gds.alpha.similarity.overlap.write({ " +
+            "  nodeProjection: '*', " +
+            "  relationshipProjection: '*', " +
             "  data: data, " +
             "  topK: 2, " +
             "  similarityCutoff: 0.5, " +
@@ -222,6 +228,8 @@ public class OverlapDocTest extends BaseProcTest {
             " WITH data, " +
             "      [value in data WHERE value.name IN [\"Fantasy\", \"Classics\"] | value.item ] AS sourceIds " +
             " CALL gds.alpha.similarity.overlap.stream({ " +
+            "  nodeProjection: '*', " +
+            "  relationshipProjection: '*', " +
             "  data: data, " +
             "  sourceIds: sourceIds " +
             " }) " +

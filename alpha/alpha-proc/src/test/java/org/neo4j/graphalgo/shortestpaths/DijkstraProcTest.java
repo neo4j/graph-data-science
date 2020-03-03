@@ -70,7 +70,7 @@ class DijkstraProcTest extends BaseProcTest {
         PathConsumer consumer = mock(PathConsumer.class);
         runQueryWithRowConsumer(
             "MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-            "CALL gds.alpha.shortestPath.stream({startNode: start, endNode: end}) " +
+            "CALL gds.alpha.shortestPath.stream({nodeProjection: '*', relationshipProjection: '*', startNode: start, endNode: end}) " +
             "YIELD nodeId, cost RETURN nodeId, cost",
             row -> consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"))
         );
@@ -83,7 +83,7 @@ class DijkstraProcTest extends BaseProcTest {
     void noWeightWrite() {
         runQueryWithRowConsumer(
             "MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-            "CALL gds.alpha.shortestPath.write({startNode: start, endNode: end}) " +
+            "CALL gds.alpha.shortestPath.write({nodeProjection: '*', relationshipProjection: '*', startNode: start, endNode: end}) " +
             "YIELD createMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
             "RETURN createMillis, evalMillis, writeMillis, nodeCount, totalCost",
             row -> {
@@ -114,7 +114,14 @@ class DijkstraProcTest extends BaseProcTest {
         PathConsumer consumer = mock(PathConsumer.class);
         runQueryWithRowConsumer(
             "MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-            "CALL gds.alpha.shortestPath.stream({startNode: start, endNode: end, relationshipWeightProperty: 'cost', relationshipProperties: 'cost'}) " +
+            "CALL gds.alpha.shortestPath.stream({" +
+            "  nodeProjection: '*', " +
+            "  relationshipProjection: '*', " +
+            "  startNode: start, " +
+            "  endNode: end, " +
+            "  relationshipWeightProperty: 'cost', " +
+            "  relationshipProperties: 'cost'" +
+            "}) " +
             "YIELD nodeId, cost RETURN nodeId, cost",
             row -> consumer.accept((Long) row.getNumber("nodeId"), (Double) row.getNumber("cost"))
         );
@@ -129,7 +136,15 @@ class DijkstraProcTest extends BaseProcTest {
     void testDijkstra() {
         runQueryWithRowConsumer(
             "MATCH (start:Node {type:'start'}), (end:Node {type:'end'}) " +
-            "CALL gds.alpha.shortestPath.write({startNode: start, endNode: end, relationshipWeightProperty: 'cost', writeProperty:'cost', relationshipProperties: 'cost'}) " +
+            "CALL gds.alpha.shortestPath.write({" +
+            "  nodeProjection: '*', " +
+            "  relationshipProjection: '*'," +
+            "  startNode: start, " +
+            "  endNode: end, " +
+            "  relationshipWeightProperty: 'cost', " +
+            "  writeProperty:'cost', " +
+            "  relationshipProperties: 'cost'" +
+            "}) " +
             "YIELD createMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
             "RETURN createMillis, evalMillis, writeMillis, nodeCount, totalCost",
             row -> {

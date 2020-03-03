@@ -74,7 +74,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void additionalKeyForImplicitLoading() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.pageRank.stream({maxIterations: 1337, nodeProjection: '*', some: 'key'})")
+            () -> runQuery("CALL gds.pageRank.stream({maxIterations: 1337, nodeProjection: '*', relationshipProjection: '*', some: 'key'})")
         );
 
         assertThat(

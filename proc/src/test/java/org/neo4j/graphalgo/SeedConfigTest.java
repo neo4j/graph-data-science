@@ -78,7 +78,8 @@ public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESU
                 "A", MapUtil.map(
                     "properties", nodeProperties
                 )
-            )
+            ),
+            "relationshipProjection", "*"
         );
 
         Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
@@ -114,8 +115,9 @@ public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESU
                 configMap
             ));
 
+            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
             assertMissingProperty(error, () -> proc.compute(
-                configMap,
+                implicitConfigMap,
                 Collections.emptyMap()
             ));
         });
