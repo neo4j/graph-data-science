@@ -26,9 +26,7 @@ import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.ast.Table;
 import org.asciidoctor.extension.Treeprocessor;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,19 +34,21 @@ public class AppendixAProcedureListingProcessor extends Treeprocessor {
 
     private static final String PROCEDURE_LISTING_ROLE = "procedure-listing";
 
-    private final Collection<String> procedures;
+    private final List<String> procedures;
 
     public AppendixAProcedureListingProcessor() {
-        procedures = new HashSet<>();
+        // Use `List` instead of `Set` because we have procedures and functions that have the same name and namespace,
+        // i.e. `gds.graph.exists`
+        procedures = new LinkedList<>();
     }
 
     @Override
     public Document process(Document document) {
-        fill(document);
+        extractProcedures(document);
         return document;
     }
 
-    private void fill(StructuralNode document) {
+    private void extractProcedures(StructuralNode document) {
 
         List<Table> tables = findProcedureListings(document);
 
@@ -62,19 +62,16 @@ public class AppendixAProcedureListingProcessor extends Treeprocessor {
     }
 
     private String getProcedureName(Cell cell) {
-        return Arrays
-            .stream(cell.getContent().toString().split("<[^>]*>|\\[\"|\"\\]"))
-            .filter(it -> !it.isEmpty())
-            .findFirst().orElse("");
+        return cell.getContent().toString().replaceAll("<[^>]*>|\\[\"|\"]", "");
     }
 
     private Cell getProcedureListingCell(Row row) {
         List<Cell> cells = row.getCells();
         Cell cell;
-        if (cells.size() > 1) { // This is needed to handle the row span formatting.
+        if (cells.size() == 2) {
             cell = cells.get(1);
         } else {
-            cell = cells.get(0);
+            cell = cells.get(0); // This is needed to handle the row span formatting.
         }
         return cell;
     }
@@ -90,7 +87,7 @@ public class AppendixAProcedureListingProcessor extends Treeprocessor {
             .collect(Collectors.toList());
     }
 
-    Collection<String> procedures() {
+    List<String> procedures() {
         return procedures;
     }
 }

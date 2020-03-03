@@ -35,16 +35,16 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AppendixAProcedureListingTest extends BaseProcTest {
@@ -94,20 +94,27 @@ class AppendixAProcedureListingTest extends BaseProcTest {
         assertTrue(file.exists() && file.canRead());
         asciidoctor.loadFile(file, Collections.emptyMap());
 
-        List<String> registeredProcedures = runQuery("CALL gds.list()", result -> {
-            List<String> procedures = new ArrayList<>();
-            while(result.hasNext()) {
-                Map<String, Object> next = result.next();
-                String name = next.get("name").toString();
-                procedures.add(name);
-            }
-            return procedures;
+        List<String> registeredProcedures = new LinkedList<>();
+        runQueryWithRowConsumer("CALL gds.list() YIELD name", row -> {
+            registeredProcedures.add(row.getString("name"));
         });
 
-        Collection<String> documentedProcedures = procedureListingProcessor.procedures();
+        List<String> documentedProcedures = procedureListingProcessor.procedures();
         registeredProcedures.add("gds.list");
-        registeredProcedures.removeAll(documentedProcedures);
-        assertThat(registeredProcedures, is(empty()));
+
+        List<String> registeredProceduresCopy = new ArrayList<>(registeredProcedures);
+        registeredProceduresCopy.removeAll(documentedProcedures);
+        assertThat(registeredProceduresCopy, is(empty()));
+
+        List<String> documentedProceduresCopy = new ArrayList<>(documentedProcedures);
+        documentedProceduresCopy.removeAll(registeredProcedures);
+        assertThat(documentedProceduresCopy, is(empty()));
+
+        registeredProcedures.sort(String::compareTo);
+        documentedProcedures.sort(String::compareTo);
+        assertEquals(registeredProcedures, documentedProcedures);
+
+        assertEquals(registeredProcedures.size(), documentedProcedures.size());
     }
 
 }
