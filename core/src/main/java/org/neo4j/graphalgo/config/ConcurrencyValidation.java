@@ -27,7 +27,7 @@ import org.neo4j.kernel.configuration.Settings;
 public interface ConcurrencyValidation {
 
     Setting<Boolean> CORE_LIMITATION_SETTING = Settings.setting(
-        "gds.concurrency.unlimited",
+        "gds.enterprise.licensed",
         Settings.BOOLEAN,
         "false"
     );
