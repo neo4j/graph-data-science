@@ -41,12 +41,18 @@ See https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuratio
 [[system-requirements-cpu]]
 == CPU
 
-The library uses multiple CPUs for data loading, processing, and writing back results.
+The library uses multiple CPUs for graph projections, algorithm computation, and results writing.
+Configuring the library to make best use of the available cores in your system is important to achieve maximum performance.
+To find details on how to configure the concurrency of the GDS library, see <<algorithms-syntax-configuration-options>>.
 
-[NOTE]
-====
-Up to 4 CPUs will be used when running the library on Neo4j Community Edition.
-All CPUs will be used when running on Neo4j Enterprise Edition.
-====
+The concurrency of the library is limited depending on the license under which the library is being used:
 
-Most of the algorithms in the library run in parallel, by splitting up the nodes and assigning them to different threads that run part of the algorithm for that node.
+* Neo4j Community Edition
+** The maximum concurrency in the library is 4.
+
+* Neo4j Enterprise Edition
+** The maximum concurrency in the library is 4.
+
+* Neo4j Graph Data Science Edition
+** The concurrency in the library is unlimited.
+   To register for a license, please contact Neo4j at https://neo4j.com/contact-us/?ref=graph-analytics.

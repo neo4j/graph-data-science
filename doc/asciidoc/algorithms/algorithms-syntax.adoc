@@ -44,6 +44,8 @@ CALL gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
 
 The detailed sections in this chapter include concrete syntax overviews and examples.
 
+
+[[algorithms-syntax-configuration-options]]
 == Configuration options
 
 All algorithms allow adjustment of their runtime characteristics through a set of configuration parameters.
