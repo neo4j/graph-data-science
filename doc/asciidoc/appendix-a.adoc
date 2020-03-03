@@ -24,9 +24,9 @@ The following table lists all production-quality graph operations in the GDS lib
 |===
 |Operation | Procedure
 |Create Graph |<<catalog-graph-create, gds.graph.create>>
-|Create Graph |<<catalog-graph-create, gds.graph.create.estimate>>
+|Create Graph Estimation | <<catalog-graph-create, gds.graph.create.estimate>>
 |Create Graph using Cypher | <<catalog-graph-create, gds.graph.create.cypher>>
-|Create Graph using Cypher | <<catalog-graph-create, gds.graph.create.cypher.estimate>>
+|Create Graph using Cypher Estimation | <<catalog-graph-create, gds.graph.create.cypher.estimate>>
 |Check if a named graph exists | <<catalog-graph-exists, gds.graph.exists>>
 |List graphs| <<catalog-graph-list, gds.graph.list>>
 |Remove a named graph from memory | <<catalog-graph-drop, gds.graph.drop>>
