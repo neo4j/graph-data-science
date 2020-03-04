@@ -164,12 +164,12 @@ final class ShortestPathsProcTest extends BaseProcTest {
                                    "            relationshipWeightProperty: 'cost', " +
                                    "            writeProperty: 'sp'" +
                                    "        })" +
-                                   " YIELD nodeCount, createMillis, evalMillis, writeMillis" +
-                                   " RETURN nodeCount, createMillis, evalMillis, writeMillis";
+                                   " YIELD nodeCount, createMillis, computeMillis, writeMillis" +
+                                   " RETURN nodeCount, createMillis, computeMillis, writeMillis";
 
         runQueryWithRowConsumer(matchCypher, row -> {
             System.out.println("createMillis = " + row.getNumber("createMillis").longValue());
-            System.out.println("evalMillis = " + row.getNumber("evalMillis").longValue());
+            System.out.println("computeMillis = " + row.getNumber("computeMillis").longValue());
             long writeMillis = row.getNumber("writeMillis").longValue();
             System.out.println("writeMillis = " + writeMillis);
             System.out.println("nodeCount = " + row.getNumber("nodeCount").longValue());

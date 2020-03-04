@@ -235,13 +235,13 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
     public static class KspResult {
 
         public final long createMillis;
-        public final long evalMillis;
+        public final long computeMillis;
         public final long writeMillis;
         public final long resultCount;
 
-        public KspResult(long createMillis, long evalMillis, long writeMillis, long resultCount) {
+        public KspResult(long createMillis, long computeMillis, long writeMillis, long resultCount) {
             this.createMillis = createMillis;
-            this.evalMillis = evalMillis;
+            this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.resultCount = resultCount;
         }

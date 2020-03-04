@@ -186,14 +186,14 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
     public static class DijkstraResult {
 
         public final long createMillis;
-        public final long evalMillis;
+        public final long computeMillis;
         public final long writeMillis;
         public final long nodeCount;
         public final double totalCost;
 
-        public DijkstraResult(long createMillis, long evalMillis, long writeMillis, long nodeCount, double totalCost) {
+        public DijkstraResult(long createMillis, long computeMillis, long writeMillis, long nodeCount, double totalCost) {
             this.createMillis = createMillis;
-            this.evalMillis = evalMillis;
+            this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.nodeCount = nodeCount;
             this.totalCost = totalCost;

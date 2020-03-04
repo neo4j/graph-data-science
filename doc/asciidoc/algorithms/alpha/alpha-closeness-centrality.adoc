@@ -100,12 +100,12 @@ YIELD nodes, createMillis, computeMillis, writeMillis
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type | Description
-| nodes         | int  | The number of nodes considered.
-| createMillis  | int  | Milliseconds for loading data.
-| evalMillis    | int  | Milliseconds for running the algorithm.
-| writeMillis   | int  | Milliseconds for writing result data back.
-| writeProperty | string  | The property name written back to.
+| Name           | Type | Description
+| nodes          | int  | The number of nodes considered.
+| createMillis   | int  | Milliseconds for loading data.
+| computeMillis | int  | Milliseconds for running the algorithm.
+| writeMillis    | int  | Milliseconds for writing result data back.
+| writeProperty  | string  | The property name written back to.
 |===
 
 

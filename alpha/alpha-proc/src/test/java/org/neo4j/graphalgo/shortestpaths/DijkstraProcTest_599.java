@@ -82,7 +82,7 @@ class DijkstraProcTest_599 extends BaseProcTest {
             "  relationshipWeightProperty: 'WEIGHT', " +
             "  relationshipProperties: 'WEIGHT'" +
             "}) " +
-            "YIELD nodeCount, totalCost, createMillis, evalMillis, writeMillis " +
+            "YIELD nodeCount, totalCost, createMillis, computeMillis, writeMillis " +
             "RETURN totalCost";
 
         double totalCost = runQuery(totalCostCommand, result -> result
