@@ -103,7 +103,7 @@ YIELD nodes, createMillis, computeMillis, writeMillis
 | Name           | Type | Description
 | nodes          | int  | The number of nodes considered.
 | createMillis   | int  | Milliseconds for loading data.
-| computeMillis | int  | Milliseconds for running the algorithm.
+| computeMillis  | int  | Milliseconds for running the algorithm.
 | writeMillis    | int  | Milliseconds for writing result data back.
 | writeProperty  | string  | The property name written back to.
 |===

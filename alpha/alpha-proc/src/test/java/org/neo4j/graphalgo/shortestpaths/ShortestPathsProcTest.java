@@ -138,14 +138,8 @@ final class ShortestPathsProcTest extends BaseProcTest {
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
         runQueryWithRowConsumer(cypher, row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
-            System.out.printf(
-                "%d:%.1f, ",
-                nodeId,
-                distance
-            );
         });
 
         System.out.println();
@@ -168,11 +162,7 @@ final class ShortestPathsProcTest extends BaseProcTest {
                                    " RETURN nodeCount, createMillis, computeMillis, writeMillis";
 
         runQueryWithRowConsumer(matchCypher, row -> {
-            System.out.println("createMillis = " + row.getNumber("createMillis").longValue());
-            System.out.println("computeMillis = " + row.getNumber("computeMillis").longValue());
             long writeMillis = row.getNumber("writeMillis").longValue();
-            System.out.println("writeMillis = " + writeMillis);
-            System.out.println("nodeCount = " + row.getNumber("nodeCount").longValue());
             assertNotEquals(-1L, writeMillis);
         });
 
@@ -201,11 +191,6 @@ final class ShortestPathsProcTest extends BaseProcTest {
         runQueryWithRowConsumer(cypher, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
-            System.out.printf(
-                "%d:%.1f, ",
-                nodeId,
-                distance
-            );
             mock.test(nodeId, distance);
         });
 
