@@ -21,7 +21,7 @@ There are three supported execution modes:
 Finally, an execution mode may be <<memory-estimation, estimated>> by appending the command with `estimate`.
 
 [NOTE]
-Only the production-quality tier guarantees availability of all execution modes.
+Only the production-quality tier guarantees availability of all execution modes and estimation procedures.
 
 Including all of the above mentioned elements leads to the following syntax outlines:
 
@@ -55,39 +55,39 @@ Some of these parameters are algorithm specific, however, many of them are share
 To learn more about algorithm specific parameters and to find out if an algorithm supports a certain parameter, please consult the algorithm specific documentation page.
 
 .List of the most commonly accepted configuration parameters
-concurrency - INTEGER::
+concurrency - Integer::
 Controls the parallelism with which the algorithm is executed.
 By default this value is set to the minimum between 4 and the number of available processors.
-In the _Neo4j Community Edition_ this parameter cannot exceed 4.
+Only in _Neo4j Graph Data Science Edition_ may this parameter exceed 4.
 
-relationshipTypes - LIST OF STRING::
+relationshipTypes - String[]::
 If the graph, on which the algorithm is run, was loaded with multiple relationship types, this parameter can be used to select only a subset of the loaded types.
 The algorithm will then only consider relationships with the selected types.
 
-nodeWeightProperty - STRING::
+nodeWeightProperty - String::
 In algorithms that support node weights this parameter defines the node property that contains the weights.
 
-relationshipWeightProperty - STRING::
+relationshipWeightProperty - String::
 In algorithms that support relationship weights this parameter defines the relationship property that contains the weights.
 
-maxIterations - INTEGER::
+maxIterations - Integer::
 For iterative algorithms this parameter controls the maximum number of iterations.
 
-tolerance - FLOAT::
+tolerance - Float::
 Many iterative algorithms accept the tolerance parameter.
 It controls the minimum delta between two iterations.
 If the delta is less than the tolerance value, the algorithm is considered converged and stops.
 
-seedProperty - STRING::
+seedProperty - String::
 Some algorithms can be calculated incrementally.
 This means that results from a previous execution can be taken into account, even though the graph has changed.
 The `seedProperty` parameter defines the node property that contains the seed value.
 Seeding can speed up computation and write times.
 
-writeProperty - STRING::
-In `write` mode this parameter sets the name of the node property to which results are written.
+writeProperty - String::
+In `write` mode this parameter sets the name of the node (or relationship) property to which results are written.
 If the property already exists, existing values will be overwritten.
 
-writeConcurrency - INTEGER::
+writeConcurrency - Integer::
 In `write` mode this parameter controls the parallelism of write operations.
 The Default is `concurrency`
