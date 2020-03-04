@@ -41,9 +41,9 @@ See https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuratio
 [[system-requirements-cpu]]
 == CPU
 
-The library uses multiple CPUs for graph projections, algorithm computation, and results writing.
-Configuring the library to make best use of the available cores in your system is important to achieve maximum performance.
-To find details on how to configure the concurrency of the GDS library, see <<algorithms-syntax-configuration-options>>.
+The library uses multiple CPU cores for graph projections, algorithm computation, and results writing.
+Configuring the library to make best use of the available CPU cores in your system is important to achieve maximum performance.
+The Graph Data Science library concurrency can be configured per algorithm execution, see <<algorithms-syntax-configuration-options>>
 
 The concurrency of the library is limited depending on the license under which the library is being used:
 
