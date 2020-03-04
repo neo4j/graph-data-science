@@ -43,6 +43,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -225,7 +226,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
         );
         assertThat(
             illegalArgumentException.getMessage(),
-            is("Value for `similarityCutoff` must be within [0,00, 1,00].")
+            is(String.format(Locale.ENGLISH, "Value for `similarityCutoff` must be within [%.2f, %.2f].", 0D, 1D))
         );
     }
 

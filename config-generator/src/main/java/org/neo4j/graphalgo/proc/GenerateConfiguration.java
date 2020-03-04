@@ -297,10 +297,10 @@ final class GenerateConfiguration {
                 CypherMapWrapper.class,
                 definition.configKey(),
                 codeBlock,
-                range.min(),
-                range.max(),
-                range.minInclusive(),
-                range.maxInclusive()
+                elementUtils.getConstantExpression(range.min()),
+                elementUtils.getConstantExpression(range.max()),
+                elementUtils.getConstantExpression(range.minInclusive()),
+                elementUtils.getConstantExpression(range.maxInclusive())
             );
         }
 
@@ -314,10 +314,10 @@ final class GenerateConfiguration {
                 CypherMapWrapper.class,
                 definition.configKey(),
                 codeBlock,
-                range.min(),
-                range.max(),
-                range.minInclusive(),
-                range.maxInclusive()
+                elementUtils.getConstantExpression(range.min()),
+                elementUtils.getConstantExpression(range.max()),
+                elementUtils.getConstantExpression(range.minInclusive()),
+                elementUtils.getConstantExpression(range.maxInclusive())
             );
         }
 

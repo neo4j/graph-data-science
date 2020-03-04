@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -265,7 +266,13 @@ public final class CypherMapWrapper {
         boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
 
         if (!meetsLowerBound || !meetsUpperBound) {
-            throw outOfRangeError(key, String.format("%.2f", min), String.format("%.2f", max), minInclusive, maxInclusive);
+            throw outOfRangeError(
+                key,
+                String.format(Locale.ENGLISH, "%.2f", min),
+                String.format(Locale.ENGLISH, "%.2f", max),
+                minInclusive,
+                maxInclusive
+            );
         }
 
         return value;

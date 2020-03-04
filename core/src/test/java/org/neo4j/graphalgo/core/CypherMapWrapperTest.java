@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.compat.MapUtil;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -77,7 +78,9 @@ class CypherMapWrapperTest {
             () -> CypherMapWrapper.validateDoubleRange("value", value, min, max, minInclusive, maxInclusive)
         );
 
-        assertEquals(String.format("Value for `value` must be within %s%.2f, %.2f%s.",
+        assertEquals(String.format(
+            Locale.ENGLISH,
+            "Value for `value` must be within %s%.2f, %.2f%s.",
             minInclusive ? "[" : "(",
             min,
             max,
@@ -99,7 +102,9 @@ class CypherMapWrapperTest {
             () -> CypherMapWrapper.validateIntegerRange("value", value, min, max, minInclusive, maxInclusive)
         );
 
-        assertEquals(String.format("Value for `value` must be within %s%d, %d%s.",
+        assertEquals(String.format(
+            Locale.ENGLISH,
+            "Value for `value` must be within %s%d, %d%s.",
             minInclusive ? "[" : "(",
             min,
             max,
