@@ -7,7 +7,7 @@
 This chapter explains how to create a graph using a Cypher projection.
 --
 
-If the <<native-projection>> is not expressive enough to describe the in-memory graph, we can instead use Cypher queries to select nodes and relationships.
+If the <<native-projection, Native projection>> is not expressive enough to describe the in-memory graph, we can instead use Cypher queries to select nodes and relationships.
 One benefit of using Cypher queries is the possibility to form the graph from data that exists only at query time.
 A common use case is the reduction of paths into single relationships between the start and end node of the path.
 
@@ -20,8 +20,8 @@ RETURN id(p1) AS source, id(p2) AS target, count(a) AS weight
 
 Cypher projections are especially useful during the development phase.
 Their flexibility is convenient when exploring data and algorithms, and designing a workflow.
-However, creating a graph from a Cypher projection can be significantly slower than creating it directly from the store.
-For production, it is recommended to adapt the domain model in a way that it can take advantage of the loading speed of native projections.
+However, creating a graph from a Cypher projection can be significantly slower than creating it directly from the Neo4j store files.
+For production, it is recommended to adapt the domain model in a way that it can take advantage of the loading speed of <<native-projection, native projections>>.
 
 This section includes:
 
@@ -48,7 +48,7 @@ CALL gds.graph.create.cypher(
 ----
 
 .Parameters
-[opts="header",cols="1m,1m,1m"]
+[opts="header",cols="1,1,1"]
 |===
 | Name              | Optional | Description
 | graphName         | no       | The name under which the graph is stored in the catalog.
@@ -61,10 +61,10 @@ CALL gds.graph.create.cypher(
 [opts="header",cols="1,1,1,4"]
 |===
 | Name                   | Type    | Default        | Description
+| readConcurrency        | Integer | 4              | The number of concurrent threads used for creating the graph.
 | nodeProperties         | Map     | empty map      | Mappings between the RETURN items and node properties in the graph projection.
 | relationshipProperties | Map     | empty map      | Mappings between the RETURN items and relationship properties in the graph projection.
 | parameters             | Map     | empty map      | A map of user-defined query parameters that are passed into the node and relationship query.
-| concurrency            | Integer | 4              | The number of concurrent threads used for creating the graph.
 |===
 
 
@@ -77,7 +77,7 @@ Each row in the query result represents a node in the projected graph.
 The query result must contain a column called `id`.
 The value in that column is used to uniquely identify the node.
 
-.Minimal example of a node query used for Cypher projection.
+.Simple example of a node query used for Cypher projection.
 [source,cypher]
 ----
 MATCH (n) RETURN id(n) AS id
@@ -91,18 +91,18 @@ The values in those columns represent the source node id and the target node id 
 The values are used to connect the relationships to the nodes selected by the node query.
 If either the source or the target value can not be mapped to a node, the relationship is not projected.
 
-.Minimal example of a relationship query used for Cypher projection.
+.Simple example of a relationship query used for Cypher projection.
 [source,cypher]
 ----
 MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target
 ----
 
-Using both example queries in a Cypher projection, we can project the whole Neo4j database into an in-memory graph and store it in the catalog:
+Using both example queries in a Cypher projection, we can project the whole Neo4j graph into an in-memory graph and store it in the catalog:
 
 [source,cypher]
 ----
 CALL gds.graph.create.cypher(
-    'myCypherGraph',
+    'my-cypher-graph',
     'MATCH (n) RETURN id(n) AS id',
     'MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target'
 )
@@ -112,7 +112,7 @@ CALL gds.graph.create.cypher(
 [NOTE]
 ====
 Cypher projections allow creating graphs from arbitrary query results, regardless of whether these map to actual identifiers in the Neo4j graph.
-Executing an algorithm on such a graph in `write` mode may lead to unexpected changes in the Neo4j database.
+*Executing an algorithm on such a graph in `write` mode may lead to unexpected changes in the Neo4j database.*
 ====
 
 
@@ -134,18 +134,18 @@ The following Cypher projection loads multiple node and relationship properties:
 [source,cypher]
 ----
 CALL gds.graph.create.cypher(
-    'myCypherGraph',
+    'my-cypher-graph',
     'MATCH (n:City) RETURN id(n) AS id, n.stateId AS community, n.population AS population',
     'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, coalesce(r.condition, 1.0) AS quality'
 )
 ----
 
-The projected properties can be referred to by any algorithm that uses properties as input, for example, Label Propagation.
+The projected properties can be referred to by any algorithm that uses properties as input, for example, <<algorithms-label-propagation, Label Propagation>>.
 
 [source,cypher]
 ----
 CALL gds.labelPropagation.stream(
-    'myCypherGraph', {
+    'my-cypher-graph', {
         seedProperty: 'community',
         relationshipWeightProperty: 'quality'
     }
@@ -156,7 +156,7 @@ CALL gds.labelPropagation.stream(
 [[cypher-projection-relationship-types]]
 == Relationship types
 
-The store graph projection supports loading multiple relationship types which can be filtered in each algorithm execution.
+The native projection supports loading multiple relationship types which can be filtered in an individual algorithm execution.
 The Cypher projection can achieve the same feature by returning the relationship type in the query.
 If the `type` column is present in the query result, we use the values in that column to distinguish relationship types.
 
@@ -166,7 +166,7 @@ For the following example, let's assume `City` nodes to be connected by either `
 [source,cypher]
 ----
 CALL gds.graph.create.cypher(
-    'myCypherGraph',
+    'my-cypher-graph',
     'MATCH (n:City) RETURN id(n) AS id',
     'MATCH (n:City)-[r:ROAD|RAIL]->(m:City) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
 )
@@ -179,7 +179,7 @@ This allows us to apply a relationship filter during algorithm execution:
 [source,cypher]
 ----
 CALL gds.labelPropagation.stream(
-    'myCypherGraph', {
+    'my-cypher-graph', {
         relationshipTypes: ['ROAD']
     }
 )
@@ -219,7 +219,7 @@ The syntax is identical to the property mappings used in the native projection.
 [source,cypher]
 ----
 CALL gds.graph.create.cypher(
-    'myCypherGraph',
+    'my-cypher-graph',
     'MATCH (n:City) RETURN id(n) AS id, n.stateId AS community, n.population AS population',
     'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, r.condition AS quality',
     {
@@ -254,7 +254,7 @@ In the following example we supply a list of strings to limit the cities we want
 [source,cypher]
 ----
 CALL gds.graph.create.cypher(
-    'myCypherGraph',
+    'my-cypher-graph',
     'MATCH (n:City) WHERE n.name IN $cities RETURN id(n) AS id',
     'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target',
     {

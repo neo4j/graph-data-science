@@ -7,14 +7,17 @@ Graph projections are stored entirely in-memory using compressed data structures
 
 The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
 Using that name, a created graph can be used many times in the analytical workflow.
-Named graphs can be created using either a <<native-projection>> or a <<cypher-projection>>.
+Named graphs can be created using either a <<native-projection, Native projection>> or a <<cypher-projection, Cypher projection>>.
 After usage, named graphs can be removed from the catalog to free up main memory.
 
 Graphs can also be created when running an algorithm without placing them in the catalog.
 We refer to such graphs as <<anonymous-graph, Anonymous graphs>>.
 
+[NOTE]
+====
 The graph catalog exists as long as the Neo4j instance is running.
 When Neo4j is restarted, graphs stored in the catalog are lost and need to be re-created.
+====
 
 This chapter explains the available graph catalog operations.
 
@@ -22,18 +25,18 @@ This chapter explains the available graph catalog operations.
 [opts=header,cols="1m,1"]
 |===
 | Name                                              | Description
-| <<catalog-graph-create, gds.graph.create>>        | Creates a graph in the catalog using a <<native-projection>>.
-| <<catalog-graph-create, gds.graph.create.cypher>> | Creates a graph in the catalog using a <<cypher-projection>>.
-| <<catalog-graph-list, gds.graph.list>>            | Prints information about a specific graph or all graphs that are currently stored in the catalog.
-| <<catalog-graph-exists, gds.graph.exists>>        | Checks if a specific graph is stored in the catalog.
-| <<catalog-graph-drop, gds.graph.drop>>            | Removes a specific graph from the catalog.
+| <<catalog-graph-create, gds.graph.create>>        | Creates a graph in the catalog using a <<native-projection, Native projection>>.
+| <<catalog-graph-create, gds.graph.create.cypher>> | Creates a graph in the catalog using a <<cypher-projection, Cypher projection>>.
+| <<catalog-graph-list, gds.graph.list>>            | Prints information about graphs that are currently stored in the catalog.
+| <<catalog-graph-exists, gds.graph.exists>>        | Checks if a named graph is stored in the catalog.
+| <<catalog-graph-drop, gds.graph.drop>>            | Removes a named graph from the catalog.
 |===
 
 [NOTE]
-----
-Creating, using, listing, and dropping named graphs are user-related management operations.
+====
+Creating, using, listing, and dropping named graphs are management operations bound to a Neo4j user.
 Graphs created by a different Neo4j user are not accessible at any time.
-----
+====
 
 
 [[catalog-graph-create]]
@@ -45,28 +48,30 @@ This allows multiple algorithms to use the same graph without having to re-creat
 
 There are two variants of projecting a graph from the Neo4j database into main memory:
 
-* <<native-projection>>
+* <<native-projection, Native projection>>
 ** Provides the best performance by reading from the Neo4j store files.
    Recommended to be used during both the development and the production phase.
-* <<cypher-projection>>
+* <<cypher-projection, Cypher projection>>
 ** The more flexible, expressive approach with lesser focus on performance.
    Recommended to be primarily used during the development phase.
 
 In this section, we will give brief examples on how to create a graph using either variant.
-For detailed information about the configuration of each variant, we prefer to the specific sections.
+For detailed information about the configuration of each variant, we refer to the dedicated sections.
 
-In the following two examples we show how to create a graph that contains `Person` nodes and `LIKES` relationships.
+In the following two examples we show how to create a graph called `my-native-graph` that contains `Person` nodes and `LIKES` relationships.
 
 .Create a graph using a native projection:
 [source,cypher]
 ----
 CALL gds.graph.create(
-    'my-store-graph',
+    'my-native-graph',
     'Person',
     'LIKES'
 )
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
+
+We can also use Cypher to select the nodes and relationships to be projected into the in-memory graph.
 
 .Create a graph using a Cypher projection:
 [source,cypher]
@@ -84,7 +89,7 @@ After creating the graphs in the catalog, we can refer to them in algorithms by 
 .Run Page Rank on one of our created graphs:
 [source,cypher]
 ----
-CALL gds.algo.pageRank.stream('my-store-graph') YIELD nodeId, score;
+CALL gds.algo.pageRank.stream('my-native-graph') YIELD nodeId, score;
 ----
 
 
@@ -100,7 +105,7 @@ CALL gds.graph.list()
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
-.List information about a specific graph in the catalog:
+.List information about a named graph in the catalog:
 [source,cypher]
 ----
 CALL gds.graph.list('my-cypher-graph')
