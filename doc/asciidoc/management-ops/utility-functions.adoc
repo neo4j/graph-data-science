@@ -10,6 +10,8 @@ This section describes the utility functions and shows their usage in concrete e
 | gds.version         | Return the version of the installed Neo4j Graph Data Science library.
 |===
 
+[role=query-example]
+--
 .Usage:
 [source, cypher]
 ----
@@ -22,6 +24,7 @@ RETURN gds.version() as version
 | version
 | "0.9.2"
 |===
+--
 
 == Numeric Functions
 
@@ -50,6 +53,8 @@ RETURN gds.version() as version
 
 === Examples
 
+[role=query-example]
+--
 .Example for gds.util.IsFinite:
 [source, cypher]
 ----
@@ -65,7 +70,10 @@ RETURN gds.util.isFinite(value) as isFinite
 | false
 | false
 |===
+--
 
+[role=query-example]
+--
 .Example for gds.util.isInfinite():
 [source, cypher]
 ----
@@ -81,6 +89,7 @@ RETURN gds.util.isInfinite(value) as isInfinite
 | true
 | true
 |===
+--
 
 The utility function `gds.util.NaN` can be used as an default value for input parameters, as shown in the examples of <<[[algorithms-similarity-cosine-procedure-sample]], cosine similarity>>.
 A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering streamed results, as for instance seen in the examples of <<algorithm-all-pairs-shortest-path-sample, `gds.alpha.allShortestPaths`>>.
@@ -111,7 +120,7 @@ A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering
 Consider the graph created by the following Cypher statement:
 
 .Example graph:
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CREATE  (nAlice:User {name: 'Alice'})
 CREATE  (nBridget:User {name: 'Bridget'})
@@ -120,37 +129,41 @@ CREATE  (nAlice)-[:LINK]->(nBridget)
 CREATE  (nBridget)-[:LINK]->(nCharles)
 ----
 
-
+[role=query-example]
+--
 .Example for gds.util.asNode:
 [source, cypher]
 ----
 MATCH (u:User{name: 'Alice'})
 WITH id(u) as nodeId
-RETURN gds.util.asNode(nodeId) as node
+RETURN gds.util.asNode(nodeId).name as node
 ----
 
 .Results
 [opts="header",cols="1"]
 |===
 | node
-| Node[0]{name:"Alice"}
+| "Alice"
 |===
+--
 
-
+[role=query-example]
+--
 .Example for gds.util.asNodes:
 [source, cypher]
 ----
 MATCH (u:User)
 WHERE NOT u.name = 'Charles'
 WITH collect(id(u)) as nodeIds
-RETURN gds.util.asNodes(nodeIds) as nodes
+RETURN [x in gds.util.asNodes(nodeIds)| x.name] as nodes
 ----
 
 .Results
 [opts="header",cols="1"]
 |===
 | nodes
-| [Node[0]{name:"Alice"},Node[1]{name:"Bridget"}]
+| [Alice, Bridget]
 |===
+--
 
 As many algorithms streaming mode only return the node id, `gds.util.asNode` and `gds.util.asNodes` can be used to retrieve the whole node from the neo4j database.
