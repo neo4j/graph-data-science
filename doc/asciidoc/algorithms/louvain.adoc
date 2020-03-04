@@ -87,7 +87,7 @@ include::common-configuration.adoc[]
 [source, cypher]
 ----
 CALL gds.louvain.stream(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodeId, communityId, communityIds
+YIELD nodeId, communityId, intermediateCommunityIds
 ----
 
 include::common-parameters.adoc[]
@@ -110,10 +110,10 @@ include::common-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name         | Type      | Description
-| nodeId       | Integer   | Node ID.
-| communityId  | Integer   | The community ID of the final level.
-| communityIds | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
+| Name                      | Type      | Description
+| nodeId                    | Integer   | Node ID.
+| communityId               | Integer   | The community ID of the final level.
+| intermediateCommunityIds  | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
 |===
 
 [[algorithms-louvain-examples]]
@@ -184,15 +184,15 @@ In the following examples we will demonstrate using the Louvain algorithm on thi
 [source, cypher]
 ----
 CALL gds.louvain.stream('myGraph')
-YIELD nodeId, communityId, communityIds
-RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
+YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds
 ORDER BY name ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| name      | communityId   | communityIds
+| name      | communityId   | intermediateCommunityIds
 | "Alice"   | 2             | null
 | "Bridget" | 2             | null
 | "Charles" | 2             | null
@@ -247,15 +247,15 @@ The Louvain algorithm can also run on weighted graphs, taking the given relation
 [source, cypher]
 ----
 CALL gds.louvain.stream('myGraph', { relationshipWeightProperty: 'weight' })
-YIELD nodeId, communityId, communityIds
-RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
+YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds
 ORDER BY name ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| name      | communityId   | communityIds
+| name      | communityId   | intermediateCommunityIds
 | "Alice"   | 3             | null
 | "Bridget" | 2             | null
 | "Charles" | 2             | null
@@ -282,15 +282,15 @@ The algorithm will try to keep the seeded community IDs.
 [source, cypher]
 ----
 CALL gds.louvain.stream('myGraph', { seedProperty: 'seed' })
-YIELD nodeId, communityId, communityIds
-RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
+YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds
 ORDER BY name ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| name      | communityId | communityIds
+| name      | communityId | intermediateCommunityIds
 | "Alice"   | 42          | null
 | "Bridget" | 42          | null
 | "Charles" | 42          | null
@@ -378,15 +378,15 @@ CALL gds.louvain.stream({
         }
     },
     includeIntermediateCommunities: true
-}) YIELD nodeId, communityId, communityIds
-RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds
+}) YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds
 ORDER BY name ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| name  | communityId | communityIds
+| name  | communityId | intermediateCommunityIds
 | "a"   | 14          | [3, 14]
 | "b"   | 14          | [3, 14]
 | "c"   | 14          | [14, 14]

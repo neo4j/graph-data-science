@@ -52,13 +52,13 @@ class LouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
         @Language("Cypher") String query = queryBuilder
             .algo("louvain")
             .streamMode()
-            .yields("nodeId", "communityId", "communityIds");
+            .yields("nodeId", "communityId", "intermediateCommunityIds");
 
         List<Long> actualCommunities = new ArrayList<>();
         runQueryWithRowConsumer(query, row -> {
             int id = row.getNumber("nodeId").intValue();
             long community = row.getNumber("communityId").longValue();
-            assertNull(row.get("communityIds"));
+            assertNull(row.get("intermediateCommunityIds"));
             actualCommunities.add(id, community);
         });
         assertCommunities(actualCommunities, RESULT);
@@ -71,10 +71,10 @@ class LouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
             .algo("louvain")
             .streamMode()
             .addParameter("includeIntermediateCommunities", true)
-            .yields("nodeId", "communityId", "communityIds");
+            .yields("nodeId", "communityId", "intermediateCommunityIds");
 
         runQueryWithRowConsumer(query, row -> {
-            Object maybeList = row.get("communityIds");
+            Object maybeList = row.get("intermediateCommunityIds");
             assertTrue(maybeList instanceof List);
             List<Long> communities = (List<Long>) maybeList;
             assertEquals(2, communities.size());

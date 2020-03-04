@@ -33,7 +33,7 @@
 | `levels`                 | `ranLevels`
 | `nodeId`                 | `nodeId` footnote:louvain-yield-stream[Only for `stream` mode]
 | `community`              | `communityId` footnote:louvain-yield-stream[]
-| `communities`            | `communityIds` footnote:louvain-yield-stream[]
+| `communities`            | `intermediateCommunityIds` footnote:louvain-yield-stream[]
 | `modularity`             | `modularity` footnote:louvain-yield-write[Only for `write` mode]
 | `modularities`           | `modularities` footnote:louvain-yield-write[]
 | `write`                  | -
@@ -60,7 +60,7 @@ YIELD nodeId, community, communities
 [source, cypher]
 ----
 CALL gds.louvain.stream('myGraph')
-YIELD nodeId, communityId, communityIds
+YIELD nodeId, communityId, intermediateCommunityIds
 ----
 2+|Streaming over named graph using additional properties - `maxLevels` and `maxIterations`:
 |

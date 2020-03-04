@@ -147,8 +147,8 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     .explicitCreation("unweightedGraph")
                     .algo("louvain")
                     .streamMode()
-                    .yields("nodeId", "communityId", "communityIds")
-                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds")
+                    .yields("nodeId", "communityId", "intermediateCommunityIds")
+                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
                     .concat(" ORDER BY name ASC"),
                 "explicit graph created without weights"
             ),
@@ -158,8 +158,8 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     .explicitCreation("weightedLouvainGraph")
                     .algo("louvain")
                     .streamMode()
-                    .yields("nodeId", "communityId", "communityIds")
-                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds")
+                    .yields("nodeId", "communityId", "intermediateCommunityIds")
+                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
                     .concat(" ORDER BY name ASC"),
                 "explicit graph created with weights"
             ),
@@ -183,8 +183,8 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     )
                     .algo("louvain")
                     .streamMode()
-                    .yields("nodeId", "communityId", "communityIds")
-                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds")
+                    .yields("nodeId", "communityId", "intermediateCommunityIds")
+                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
                     .concat(" ORDER BY name ASC"),
                 "implicit graph created without weights"
             ),
@@ -209,8 +209,8 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     )
                     .algo("louvain")
                     .streamMode()
-                    .yields("nodeId", "communityId", "communityIds")
-                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds")
+                    .yields("nodeId", "communityId", "intermediateCommunityIds")
+                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
                     .concat(" ORDER BY name ASC"),
                 "implicit graph created with weights"
             )
@@ -226,8 +226,8 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     .algo("louvain")
                     .streamMode()
                     .addParameter("relationshipWeightProperty", "weight")
-                    .yields("nodeId", "communityId", "communityIds")
-                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds")
+                    .yields("nodeId", "communityId", "intermediateCommunityIds")
+                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
                     .concat(" ORDER BY name ASC"),
                 "explicit graph"
             ),
@@ -253,8 +253,8 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
                     .algo("louvain")
                     .streamMode()
                     .addParameter("relationshipWeightProperty", "weight")
-                    .yields("nodeId", "communityId", "communityIds")
-                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, communityIds")
+                    .yields("nodeId", "communityId", "intermediateCommunityIds")
+                    .concat(" RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds")
                     .concat(" ORDER BY name ASC"),
                 "implicit graph"
             )
@@ -266,7 +266,7 @@ class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamCon
         Object computedCommunityId = row.get("communityId");
 
         assertEquals(expectedResult.get(computedName), computedCommunityId);
-        assertNull(row.get("communityIds"));
+        assertNull(row.get("intermediateCommunityIds"));
     }
 
     @Override

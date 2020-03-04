@@ -112,12 +112,12 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
     public static final class StreamResult {
         public final long nodeId;
         public final long communityId;
-        public final List<Long> communityIds;
+        public final List<Long> intermediateCommunityIds;
 
-        StreamResult(long nodeId, @Nullable long[] communityIds, long communityId) {
+        StreamResult(long nodeId, @Nullable long[] intermediateCommunityIds, long communityId) {
             this.nodeId = nodeId;
-            this.communityIds = communityIds == null ? null : Arrays
-                .stream(communityIds)
+            this.intermediateCommunityIds = intermediateCommunityIds == null ? null : Arrays
+                .stream(intermediateCommunityIds)
                 .boxed()
                 .collect(Collectors.toList());
             this.communityId = communityId;
