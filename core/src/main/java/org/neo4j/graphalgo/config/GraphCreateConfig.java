@@ -85,7 +85,13 @@ public interface GraphCreateConfig extends BaseConfig {
         } else if (config.containsKey(NODE_PROJECTION_KEY) && config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
             return GraphCreateFromStoreConfig.fromProcedureConfig(username, config);
         } else {
-            throw new IllegalArgumentException("Missing information for implicit graph creation: node / relationship projections or queries.");
+            throw new IllegalArgumentException(String.format(
+                "Missing information for implicit graph creation. Specify either `%s` and `%s` or `%s` and `%s`",
+                NODE_PROJECTION_KEY,
+                RELATIONSHIP_PROJECTION_KEY,
+                NODE_QUERY_KEY,
+                RELATIONSHIP_QUERY_KEY
+            ));
         }
     }
 }
