@@ -10,7 +10,7 @@ All algorithms are exposed as Neo4j procedures.
 They can be called directly from Cypher using Neo4j Browser, `cypher-shell`, or from your client code using a Neo4j Driver in the language of your choice.
 
 For a detailed guide on the syntax to run algorithms, please see the <<algorithms-syntax, Syntax overview>> section.
-In short, there are three main execution modes to consider: `stream`, `write`, and `stats`, which we cover in this chapter.
+In short, the main execution modes to consider are `stream`, `write`, and `stats`, which we cover in this chapter.
 
 The execution of any algorithm can be canceled by terminating the Cypher transaction that is executing the procedure call.
 For more on how transactions are used, see <<transaction-handling, Transaction Handling>>.
@@ -42,11 +42,10 @@ The `write` mode can be very useful for use cases where the algorithm results wo
 In order for the results from a `write` mode computation to be used in another algorithm, a new graph must be created from the Neo4j database with the updated graph.
 
 
-[[running-algos-write]]
+[[running-algos-stats]]
 == Stats
 
-The `stats` mode returns statistical results for the algorithm computation.
-These may include counts or a percentile distribution for the algorithm results.
-The same results can be acquired from the `write` mode of the procedure, but an algorithm in `stats` mode makes no modifications to the underlying Neo4j graph.
+The `stats` mode returns statistical results for the algorithm computation like counts or a percentile distribution.
+The same results can be acquired from the `write` mode of the procedure, but an algorithm running in `stats` mode makes no modifications to the underlying Neo4j graph.
 
 
