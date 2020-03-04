@@ -152,19 +152,19 @@ class PearsonProcTest extends BaseProcTest {
         try (
             Result result1 = runQueryWithoutClosing(
                 STATEMENT_STREAM,
-                map("config", anonymousGraphConfigMap("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
+                map("config", anonymousGraphConfig("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
             );
             Result result2 = runQueryWithoutClosing(
                 STATEMENT_STREAM,
-                map("config", anonymousGraphConfigMap("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
+                map("config", anonymousGraphConfig("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
             );
             Result result4 = runQueryWithoutClosing(
                 STATEMENT_STREAM,
-                map("config", anonymousGraphConfigMap("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
+                map("config", anonymousGraphConfig("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
             );
             Result result8 = runQueryWithoutClosing(
                 STATEMENT_STREAM,
-                map("config", anonymousGraphConfigMap("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
+                map("config", anonymousGraphConfig("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
             )
         ) {
             int count = 0;
@@ -187,19 +187,19 @@ class PearsonProcTest extends BaseProcTest {
         try (
             Result result1 = runQueryWithoutClosing(
                 STATEMENT_STREAM,
-                map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0)
+                map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0)
             );
             Result result2 = runQueryWithoutClosing(
                 STATEMENT_STREAM,
-                map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0)
+                map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0)
             );
             Result result4 = runQueryWithoutClosing(
                 STATEMENT_STREAM,
-                map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0)
+                map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0)
             );
             Result result8 = runQueryWithoutClosing(
                 STATEMENT_STREAM,
-                map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0)
+                map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0)
             )
         ) {
             int count = 0;
@@ -217,7 +217,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void topNpearsonStreamTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("top", 2, "topK", 0), "missingValue", 0);
+        Map<String, Object> params = map("config", anonymousGraphConfig("top", 2, "topK", 0), "missingValue", 0);
 
         runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assert01(results.next());
@@ -228,7 +228,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void pearsonStreamTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("concurrency", 1, "topK", 0), "missingValue", 0);
+        Map<String, Object> params = map("config", anonymousGraphConfig("concurrency", 1, "topK", 0), "missingValue", 0);
 
         runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
@@ -244,7 +244,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void pearsonStreamSourceTargetIdsTest() {
-        Map<String, Object> config = anonymousGraphConfigMap(
+        Map<String, Object> config = anonymousGraphConfig(
             "concurrency", 1,
             "sourceIds", Collections.singletonList(0L),
             "targetIds", Collections.singletonList(1L)
@@ -262,7 +262,7 @@ class PearsonProcTest extends BaseProcTest {
     void pearsonSkipStreamTest() {
         Map<String, Object> params = map(
             "config",
-            anonymousGraphConfigMap("concurrency", 1, "skipValue", Double.NaN, "topK", 0),
+            anonymousGraphConfig("concurrency", 1, "skipValue", Double.NaN, "topK", 0),
             "missingValue",
             Double.NaN
         );
@@ -284,7 +284,7 @@ class PearsonProcTest extends BaseProcTest {
         String query = "MATCH (p:Person)-[r:LIKES]->(i) RETURN id(p) AS item, id(i) AS category, r.stars AS weight";
         Map<String, Object> params = map(
             "input",
-            anonymousGraphConfigMap("concurrency", 1, "graph", "cypher", "skipValue", 0.0, "data", query, "topK", 0)
+            anonymousGraphConfig("concurrency", 1, "graph", "cypher", "skipValue", 0.0, "data", query, "topK", 0)
         );
 
         runQueryWithResultConsumer(STATEMENT_CYPHER_STREAM, params, results -> {
@@ -301,7 +301,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void topKPearsonStreamTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("concurrency", 1, "topK", 1), "missingValue", 0);
+        Map<String, Object> params = map("config", anonymousGraphConfig("concurrency", 1, "topK", 1), "missingValue", 0);
 
         runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
@@ -315,7 +315,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void topKPearsonSourceTargetIdStreamTest() {
-        Map<String, Object> config = anonymousGraphConfigMap(
+        Map<String, Object> config = anonymousGraphConfig(
             "concurrency", 1,
             "topK", 1,
             "sourceIds", Collections.singletonList(0L)
@@ -355,7 +355,7 @@ class PearsonProcTest extends BaseProcTest {
     void topK4PearsonStreamTest() {
         Map<String, Object> params = map(
             "config",
-            anonymousGraphConfigMap("topK", 4, "concurrency", 4, "similarityCutoff", -0.1),
+            anonymousGraphConfig("topK", 4, "concurrency", 4, "similarityCutoff", -0.1),
             "missingValue",
             0
         );
@@ -371,7 +371,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void topK3PearsonStreamTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("concurrency", 3, "topK", 3), "missingValue", 0);
+        Map<String, Object> params = map("config", anonymousGraphConfig("concurrency", 3, "topK", 3), "missingValue", 0);
 
         runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertSameSource(results, 3, 0L);
@@ -384,7 +384,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void simplePearsonTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("topK", 0));
+        Map<String, Object> params = map("config", anonymousGraphConfig("topK", 0));
 
         Map<String, Object> row = runQuery(STATEMENT, params, Result::next);
         assertEquals(0.86, (double) row.get("p25"), 0.01);
@@ -400,7 +400,7 @@ class PearsonProcTest extends BaseProcTest {
     void simplePearsonFromEmbeddingTest() {
         runQuery(STORE_EMBEDDING_STATEMENT);
 
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("topK", 0));
+        Map<String, Object> params = map("config", anonymousGraphConfig("topK", 0));
         Map<String, Object> row = runQuery(EMBEDDING_STATEMENT, params, Result::next);
 
         assertEquals(0.86, (double) row.get("p25"), 0.01);
@@ -414,7 +414,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void simplePearsonWriteTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("write", true, "similarityCutoff", 0.1, "topK", 0));
+        Map<String, Object> params = map("config", anonymousGraphConfig("write", true, "similarityCutoff", 0.1, "topK", 0));
 
         runQuery(STATEMENT, params);
 
@@ -465,7 +465,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void dontComputeComputationsByDefault() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap(
+        Map<String, Object> params = map("config", anonymousGraphConfig(
             "write", true,
             "similarityCutoff", 0.1
         ));
@@ -476,7 +476,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void numberOfComputations() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap(
+        Map<String, Object> params = map("config", anonymousGraphConfig(
             "write", true,
             "showComputations", true,
             "similarityCutoff", 0.1

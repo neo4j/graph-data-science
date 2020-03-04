@@ -141,10 +141,10 @@ class EuclideanProcTest extends BaseProcTest {
         int size = 333;
         buildRandomDB(size);
         try(
-            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0));
-            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0));
-            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0));
-            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "concurrency", 8, "topK", 0), "missingValue", 0))
+            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0));
+            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0));
+            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0));
+            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 8, "topK", 0), "missingValue", 0))
         ) {
             int count = 0;
             while (result1.hasNext()) {
@@ -165,10 +165,10 @@ class EuclideanProcTest extends BaseProcTest {
         buildRandomDB(size);
 
         try(
-            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0));
-            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0));
-            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0));
-            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0))
+            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0));
+            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0));
+            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0));
+            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0))
         ) {
             int count = 0;
             while (result1.hasNext()) {
@@ -185,7 +185,7 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void topNeuclideanStreamTest() {
-        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("top", 2, "topK", 0), "missingValue", 0),
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", anonymousGraphConfig("top", 2, "topK", 0), "missingValue", 0),
             results -> {
                 assert02(results.next());
                 assert13(results.next());
@@ -209,7 +209,7 @@ class EuclideanProcTest extends BaseProcTest {
         // c2 - d3: sqrt(16) = 4
         // System.out.println(runQuery(query).resultAsString());
 
-        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("concurrency", 1, "topK", 0), "missingValue", 0),
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", anonymousGraphConfig("concurrency", 1, "topK", 0), "missingValue", 0),
             results -> {
                 assertTrue(results.hasNext());
                 assert01(results.next());
@@ -225,7 +225,7 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void euclideanSourceTargetIdsStreamTest() {
-        Map<String, Object> config = anonymousGraphConfigMap(
+        Map<String, Object> config = anonymousGraphConfig(
             "concurrency", 1,
             "sourceIds", Collections.singletonList(0L),
             "targetIds", Collections.singletonList(1L)
@@ -259,7 +259,7 @@ class EuclideanProcTest extends BaseProcTest {
                        "RETURN id(p) AS item, id(i) AS category, coalesce(r.stars, 0) AS weight";
 
         Map<String, Object> params = map(
-            "config", anonymousGraphConfigMap("concurrency", 1, "graph", "cypher", "skipValue", Double.NaN, "data", query, "topK", 0)
+            "config", anonymousGraphConfig("concurrency", 1, "graph", "cypher", "skipValue", Double.NaN, "data", query, "topK", 0)
         );
         runQueryWithResultConsumer(STATEMENT_CYPHER_STREAM, params,
             results -> {
@@ -279,7 +279,7 @@ class EuclideanProcTest extends BaseProcTest {
     void eucideanSkipStreamTest() {
         runQueryWithResultConsumer(
             STATEMENT_STREAM,
-            map("config", anonymousGraphConfigMap("concurrency", 1, "skipValue", Double.NaN, "topK", 0), "missingValue", Double.NaN),
+            map("config", anonymousGraphConfig("concurrency", 1, "skipValue", Double.NaN, "topK", 0), "missingValue", Double.NaN),
             results -> {
                 assertTrue(results.hasNext());
                 assert01Skip(results.next());
@@ -292,7 +292,7 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void topKEuclideanStreamTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("concurrency", 1, "topK", 1), "missingValue", 0);
+        Map<String, Object> params = map("config", anonymousGraphConfig("concurrency", 1, "topK", 1), "missingValue", 0);
 
         runQueryWithResultConsumer(STATEMENT_STREAM, params,
             results -> {
@@ -308,7 +308,7 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void topKEuclideanSourceTargetIdStreamTest() {
-        Map<String, Object> config = anonymousGraphConfigMap(
+        Map<String, Object> config = anonymousGraphConfig(
             "concurrency", 1,
             "topK", 1,
             "sourceIds", Collections.singletonList(0L)
@@ -347,7 +347,7 @@ class EuclideanProcTest extends BaseProcTest {
     void topK4euclideanStreamTest() {
         Map<String, Object> params = map(
             "config",
-            anonymousGraphConfigMap("topK", 4, "concurrency", 4, "similarityCutoff", -0.1),
+            anonymousGraphConfig("topK", 4, "concurrency", 4, "similarityCutoff", -0.1),
             "missingValue",
             0
         );
@@ -368,7 +368,7 @@ class EuclideanProcTest extends BaseProcTest {
         // b1 - c2: sqrt(26) = 5.1
         // b1 - d3: sqrt(10) =  3.2
         // c2 - d3: sqrt(16) = 4
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("concurrency", 3, "topK", 3), "missingValue", 0);
+        Map<String, Object> params = map("config", anonymousGraphConfig("concurrency", 3, "topK", 3), "missingValue", 0);
 
         runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertSameSource(results, 3, 0L);
@@ -381,7 +381,7 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void simpleEuclideanTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap(), "missingValue", 0);
+        Map<String, Object> params = map("config", anonymousGraphConfig(), "missingValue", 0);
 
         Map<String, Object> row = runQuery(STATEMENT, params, Result::next);
         assertEquals((double) row.get("p25"), 3.16, 0.01);
@@ -396,7 +396,7 @@ class EuclideanProcTest extends BaseProcTest {
     void simpleEuclideanFromEmbeddingTest() {
         runQuery(STORE_EMBEDDING_STATEMENT);
 
-        Map<String, Object> params = map("config", anonymousGraphConfigMap());
+        Map<String, Object> params = map("config", anonymousGraphConfig());
 
         Map<String, Object> row = runQuery(EMBEDDING_STATEMENT, params, Result::next);
         assertEquals((double) row.get("p25"), 3.16, 0.01);
@@ -411,7 +411,7 @@ class EuclideanProcTest extends BaseProcTest {
     void simpleEuclideanWriteTest() {
         Map<String, Object> params = map(
             "config",
-            anonymousGraphConfigMap("write", true, "similarityCutoff", 4.0, "concurrency", 1, "topK", 0),
+            anonymousGraphConfig("write", true, "similarityCutoff", 4.0, "concurrency", 1, "topK", 0),
             "missingValue",
             0
         );
@@ -473,7 +473,7 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void dontComputeComputationsByDefault() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap(
+        Map<String, Object> params = map("config", anonymousGraphConfig(
             "write", true,
             "similarityCutoff", 0.1
         ));
@@ -484,7 +484,7 @@ class EuclideanProcTest extends BaseProcTest {
 
     @Test
     void numberOfComputations() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap(
+        Map<String, Object> params = map("config", anonymousGraphConfig(
             "write", true,
             "showComputations", true,
             "similarityCutoff", 0.1

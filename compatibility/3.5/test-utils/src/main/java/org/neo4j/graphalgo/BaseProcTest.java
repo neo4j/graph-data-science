@@ -69,7 +69,7 @@ public class BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    protected static Map<String, Object> anonymousGraphConfigMap(Object... objects) {
+    protected static Map<String, Object> anonymousGraphConfig(Object... objects) {
         Map<String, Object> baseMap = map(objects);
         if (!baseMap.containsKey(NODE_PROJECTION_KEY) && !baseMap.containsKey(NODE_QUERY_KEY)) {
             baseMap.put(NODE_PROJECTION_KEY, PROJECT_ALL.name);

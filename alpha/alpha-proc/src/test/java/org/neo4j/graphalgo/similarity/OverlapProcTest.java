@@ -117,10 +117,10 @@ class OverlapProcTest extends BaseProcTest {
         int size = 333;
         buildRandomDB(size);
         try(
-            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1 ,"concurrency", 1, "topK", 0)));
-            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1 ,"concurrency", 2, "topK", 0)));
-            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1 ,"concurrency", 4, "topK", 0)));
-            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1 ,"concurrency", 8, "topK", 0)))
+            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1 ,"concurrency", 1, "topK", 0)));
+            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1 ,"concurrency", 2, "topK", 0)));
+            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1 ,"concurrency", 4, "topK", 0)));
+            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1 ,"concurrency", 8, "topK", 0)))
         ) {
             int count = 0;
             while (result1.hasNext()) {
@@ -140,10 +140,10 @@ class OverlapProcTest extends BaseProcTest {
         int size = 333;
         buildRandomDB(size);
         try(
-            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1,"topK", 1, "concurrency", 1)));
-            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1,"topK", 1, "concurrency", 2)));
-            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1,"topK", 1, "concurrency", 4)));
-            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("similarityCutoff", -0.1,"topK", 1, "concurrency", 8)))
+            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1,"topK", 1, "concurrency", 1)));
+            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1,"topK", 1, "concurrency", 2)));
+            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1,"topK", 1, "concurrency", 4)));
+            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1,"topK", 1, "concurrency", 8)))
         ) {
             int count = 0;
             while (result1.hasNext()) {
@@ -161,7 +161,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void topNoverlapStreamTest() {
-        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("top", 2)), results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", anonymousGraphConfig("top", 2)), results -> {
             assert10(results.next());
             assert20(results.next());
             assertFalse(results.hasNext());
@@ -170,7 +170,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void overlapStreamTest() {
-        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", anonymousGraphConfigMap("concurrency", 1)), results -> {
+        runQueryWithResultConsumer(STATEMENT_STREAM, map("config", anonymousGraphConfig("concurrency", 1)), results -> {
             assertTrue(results.hasNext());
             assert10(results.next());
             assert20(results.next());
@@ -187,7 +187,7 @@ class OverlapProcTest extends BaseProcTest {
 //                "targetIds", Collections.singletonList(0L)
 //        );
 
-        Map<String, Object> config = anonymousGraphConfigMap(
+        Map<String, Object> config = anonymousGraphConfig(
             "concurrency", 1,
             "sourceIds", Collections.singletonList(1L)
         );
@@ -203,7 +203,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void topKoverlapStreamTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("concurrency", 1, "topK", 1));
+        Map<String, Object> params = map("config", anonymousGraphConfig("concurrency", 1, "topK", 1));
 
         runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertTrue(results.hasNext());
@@ -215,7 +215,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void topKoverlapSourceTargetIdsStreamTest() {
-        Map<String, Object> config = anonymousGraphConfigMap(
+        Map<String, Object> config = anonymousGraphConfig(
             "concurrency", 1,
             "topK", 1,
             "sourceIds", Collections.singletonList(1L)
@@ -246,7 +246,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void topK4overlapStreamTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("topK", 4, "concurrency", 4, "similarityCutoff", -0.1));
+        Map<String, Object> params = map("config", anonymousGraphConfig("topK", 4, "concurrency", 4, "similarityCutoff", -0.1));
 
         runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertSameSource(results, 0, 0L);
@@ -258,7 +258,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void topK3overlapStreamTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("concurrency", 3, "topK", 3));
+        Map<String, Object> params = map("config", anonymousGraphConfig("concurrency", 3, "topK", 3));
 
         runQueryWithResultConsumer(STATEMENT_STREAM, params, results -> {
             assertSameSource(results, 0, 0L);
@@ -270,7 +270,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void simpleoverlapTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("similarityCutoff", 0.0));
+        Map<String, Object> params = map("config", anonymousGraphConfig("similarityCutoff", 0.0));
 
         Map<String, Object> row = runQuery(STATEMENT, params, Result::next);
         assertEquals((double) row.get("p25"), 1.0, 0.01);
@@ -285,7 +285,7 @@ class OverlapProcTest extends BaseProcTest {
     void simpleoverlapFromEmbeddingTest() {
         runQuery(STORE_EMBEDDING_STATEMENT);
 
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("similarityCutoff", 0.0));
+        Map<String, Object> params = map("config", anonymousGraphConfig("similarityCutoff", 0.0));
 
         Map<String, Object> row = runQuery(EMBEDDING_STATEMENT, params, Result::next);
         assertEquals((double) row.get("p25"), 1.0, 0.01);
@@ -305,7 +305,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void simpleoverlapWriteTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap("write", true, "similarityCutoff", 0.1));
+        Map<String, Object> params = map("config", anonymousGraphConfig("write", true, "similarityCutoff", 0.1));
 
         runQuery(STATEMENT, params);
 
@@ -332,7 +332,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void dontComputeComputationsByDefault() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap(
+        Map<String, Object> params = map("config", anonymousGraphConfig(
             "write", true,
             "similarityCutoff", 0.1
         ));
@@ -343,7 +343,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void numberOfComputations() {
-        Map<String, Object> params = map("config", anonymousGraphConfigMap(
+        Map<String, Object> params = map("config", anonymousGraphConfig(
             "write", true,
             "showComputations", true,
             "similarityCutoff", 0.1
