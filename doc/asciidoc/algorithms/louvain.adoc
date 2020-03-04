@@ -19,7 +19,7 @@ This topic includes:
 
 [[algorithms-louvain-intro]]
 == Introduction
-The Louvain method for community detection is an algorithm for detecting communities in networks.
+The Louvain method is an algorithm to detect communities in large networks.
 It maximizes a modularity score for each community, where the modularity quantifies the quality of an assignment of nodes to communities.
 This means evaluating how much more densely connected the nodes within a community are, compared to how connected they would be in a random network.
 
@@ -72,11 +72,11 @@ include::common-configuration.adoc[]
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | writeMillis           | Integer   | Milliseconds for writing result data back.
 | postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
-| nodePropertiesWritten | Integer   | The number of nodes considered.
+| nodePropertiesWritten | Integer   | The number of node properties written.
 | communityCount        | Integer   | The number of communities found.
 | ranLevels             | Integer   | The number of supersteps the algorithm actually ran.
 | modularity            | Float     | The final modularity score.
-| modularities          | Integer[] | The final modularity scores for each level.
+| modularities          | Integer[] | The modularity scores for each level.
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
@@ -302,7 +302,7 @@ ORDER BY name ASC
 --
 
 Using the seeded graph, we see that the community around `Alice` keeps its initial community ID of `42`.
-The other community is assigned a new community ID, which is guaranteed to be larger than the largest community ID.
+The other community is assigned a new community ID, which is guaranteed to be larger than the largest seeded community ID.
 
 
 [[algorithms-louvain-examples-stream-intermediate]]

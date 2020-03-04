@@ -45,13 +45,13 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [source, cypher]
 ----
 CALL gds.wcc.write(
-  graphName: string,
-  configuration: map
+  graphName: String|Map,
+  configuration: Map
 )
 YIELD
   // general write return columns
-  componentCount: integer,
-  componentDistribution: map
+  componentCount: Integer,
+  componentDistribution: Map
 ----
 
 include::common-parameters.adoc[]
@@ -90,8 +90,8 @@ include::common-configuration.adoc[]
 [source, cypher]
 ----
 CALL gds.wcc.stream(
-  graphName: string,
-  configuration: map
+  graphName: String|Map,
+  configuration: Map
 )
 YIELD
   // general stream return columns
