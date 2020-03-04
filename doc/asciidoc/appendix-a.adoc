@@ -23,13 +23,14 @@ The following table lists all production-quality graph operations in the GDS lib
 [opts=header,cols="1, 1"]
 |===
 |Operation | Procedure
-|Create Graph |<<catalog-graph-create, gds.graph.create>>
-|Create Graph Estimation | <<catalog-graph-create, gds.graph.create.estimate>>
-|Create Graph using Cypher | <<catalog-graph-create, gds.graph.create.cypher>>
-|Create Graph using Cypher Estimation | <<catalog-graph-create, gds.graph.create.cypher.estimate>>
-|Check if a named graph exists | <<catalog-graph-exists, gds.graph.exists>>
-|List graphs| <<catalog-graph-list, gds.graph.list>>
-|Remove a named graph from memory | <<catalog-graph-drop, gds.graph.drop>>
+.4+<.^|<<catalog-graph-create, Create Graph>>
+| `gds.graph.create`
+| `gds.graph.create.estimate`
+| `gds.graph.create.cypher`
+| `gds.graph.create.cypher.estimate`
+|<<catalog-graph-exists, Check if a named graph exists>> | `gds.graph.exists`
+|<<catalog-graph-list, List graphs>> | `gds.graph.list`
+|<<catalog-graph-drop, Remove a named graph from memory>> | `gds.graph.drop`
 |===
 
 [[production-quality-tier]]
