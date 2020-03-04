@@ -21,19 +21,19 @@ endif::[]
 
 [abstract]
 --
-This is the manual for Neo4j Graph Data Science Library version {docs-version}.
+This is the manual for Neo4j Graph Data Science library version {docs-version}.
 --
 
 The manual covers the following areas:
 
-* <<introduction>> -- An introduction to Neo4j Graph Data Science library.
+* <<introduction>> -- An introduction to the Neo4j Graph Data Science library.
 * <<installation>> -- Instructions for how to install and use the Neo4j Graph Data Science library.
 * <<common-usage>> -- General usage patterns and recommendations for getting the most out of the Neo4j Graph Data Science library.
-* <<management-ops>> -- A detailed guide to the graph catalog and utility procedures included in the GDS library.
+* <<management-ops>> -- A detailed guide to the graph catalog and utility procedures included in the Neo4j Graph Data Science library.
 * <<algorithms>> -- A detailed guide to each of the algorithms in their respective categories, including use-cases and examples.
 * <<production-deployment>> -- This chapter explains advanced details with regards to common Neo4j components.
-* <<appendix-a>> -- Reference of all procedures contained in the GDS library.
-* <<appendix-b>> -- Additional resources - migration guide, books, etc - to help using the GDS library.
+* <<appendix-a>> -- Reference of all procedures contained in the Neo4j Graph Data Science library.
+* <<appendix-b>> -- Additional resources - migration guide, books, etc - to help using the Neo4j Graph Data Science library.
 
 
 For further reading resources, we recommend studying the free Graph Algorithms book.
