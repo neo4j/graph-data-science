@@ -247,9 +247,7 @@ CALL algo.memrec(
 CALL gds.nodeSimilarity.write.estimate(
   {
     nodeProjection: 'MyLabel',
-    relationshipProjection: 'MY_RELATIONSHIP_TYPE'
-  },
-  {
+    relationshipProjection: 'MY_RELATIONSHIP_TYPE',
     writeRelationshipType: 'MY_WRITE_REL_TYPE',
     writeProperty: 'myWriteProperty'
   }

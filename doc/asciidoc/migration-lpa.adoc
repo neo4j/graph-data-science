@@ -239,9 +239,7 @@ CALL algo.memrec(
 CALL gds.labelPropagation.write.estimate(
   {
     nodeProjection: 'MyLabel',
-    relationshipProjection: 'MY_RELATIONSHIP_TYPE'
-  },
-  {
+    relationshipProjection: 'MY_RELATIONSHIP_TYPE',
     writeProperty: 'myWriteProperty',
     relationshipWeightProperty: 'myRelationshipWeightProperty',
     nodeWeightProperty: 'myNodeWeightProperty'
