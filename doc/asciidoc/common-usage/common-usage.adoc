@@ -25,7 +25,6 @@ The more detail on each individual operation, see the corresponding section:
 1. <<graph-catalog-ops>>
 2. <<creating-graphs>>
 3. <<running-algos>>
-4. <<running-algos-write>>
 
 
 In this chapter, we will go through these aspects and guide you towards the most useful operations.
