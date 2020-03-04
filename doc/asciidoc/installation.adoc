@@ -47,7 +47,7 @@ This configuration entry is necessary because the GDS library accesses low-level
 
 === Verifying installation
 
-To verify your installation, the library version can be printed by calling the `gds.version()` function:
+To verify your installation, the library version can be printed by entering into the browser in Neo4j Desktop and calling the `gds.version()` function:
 
 [source, cypher]
 ----
