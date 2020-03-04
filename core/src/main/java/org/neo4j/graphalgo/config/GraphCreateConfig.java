@@ -29,21 +29,20 @@ import org.neo4j.graphalgo.core.ProcedureConstants;
 
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 public interface GraphCreateConfig extends BaseConfig {
 
     String IMPLICIT_GRAPH_NAME = "";
 
-    String NODE_PROJECTIONS_KEY = "nodeProjection";
-    String RELATIONSHIP_PROJECTIONS_KEY = "relationshipProjection";
-
     @Configuration.Parameter
     String graphName();
 
-    @Configuration.Key(NODE_PROJECTIONS_KEY)
+    @Configuration.Key(NODE_PROJECTION_KEY)
     NodeProjections nodeProjections();
 
-    @Configuration.Key(RELATIONSHIP_PROJECTIONS_KEY)
+    @Configuration.Key(RELATIONSHIP_PROJECTION_KEY)
     RelationshipProjections relationshipProjections();
 
     @Value.Default
@@ -83,7 +82,7 @@ public interface GraphCreateConfig extends BaseConfig {
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
         if (config.containsKey(NODE_QUERY_KEY) && config.containsKey(RELATIONSHIP_QUERY_KEY)) {
             return GraphCreateFromCypherConfig.fromProcedureConfig(username, config);
-        } else if (config.containsKey(NODE_PROJECTIONS_KEY) && config.containsKey(RELATIONSHIP_PROJECTIONS_KEY)) {
+        } else if (config.containsKey(NODE_PROJECTION_KEY) && config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
             return GraphCreateFromStoreConfig.fromProcedureConfig(username, config);
         } else {
             throw new IllegalArgumentException("Missing information for implicit graph creation: node / relationship projections or queries.");

@@ -39,8 +39,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
-import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
-import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 @ValueClass
 @Configuration("GraphCreateFromCypherConfigImpl")
@@ -59,14 +57,14 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     @Override
     @Value.Default
-    @Configuration.Key(NODE_PROJECTIONS_KEY)
+    @Configuration.Key(NODE_PROJECTION_KEY)
     default NodeProjections nodeProjections() {
         return NodeProjections.of();
     }
 
     @Override
     @Value.Default
-    @Configuration.Key(RELATIONSHIP_PROJECTIONS_KEY)
+    @Configuration.Key(RELATIONSHIP_PROJECTION_KEY)
     default RelationshipProjections relationshipProjections() {
         return RelationshipProjections.of();
     }
