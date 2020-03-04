@@ -11,6 +11,8 @@ For that reason the Neo4j Graph Algorithm library comes with a set of built-in g
 The generator stores the resulting graph in the <<graph-catalog-ops, graph catalog>>.
 That graph can be used as input for any algorithm in the library.
 
+include::beta-note.adoc[tag=beta-note]
+
 [NOTE]
 ====
 It is currently not possible to persist these graphs in Neo4j.
