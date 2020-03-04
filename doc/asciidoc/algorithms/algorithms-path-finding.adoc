@@ -6,7 +6,7 @@
 This chapter provides explanations and examples for each of the path finding algorithms in the Neo4j Graph Data Science library.
 --
 
-Path finding algorithms find the shortest path between two or more nodes or evaluate the availability and quality of routes.
+Path finding algorithms find the shortest path between two or more nodes or evaluate the availability and quality of paths.
 The Neo4j GDS library includes the following path finding algorithms, grouped by quality tier:
 
 * Alpha
