@@ -1,4 +1,4 @@
 ext {
     gdsGroup = 'org.neo4j.gds'
-    gdsVersion = '0.9.2'
+    gdsVersion = '0.9.3'
 }
