@@ -27,9 +27,9 @@ dbms.security.procedures.unrestricted=gds.*
 This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 
 
-== Neo4j Server / Desktop
+== Neo4j Server
 
-If we are using a standalone Neo4j Server or Neo4j Desktop, the library will need to be installed and configured manually.
+If you are using a standalone Neo4j Server, the library will need to be installed and configured manually.
 
 1. Download `neo4j-graph-data-science-[version]-standalone.jar` from the https://neo4j.com/download-center/[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
 
