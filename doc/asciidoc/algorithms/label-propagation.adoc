@@ -34,7 +34,7 @@ The algorithm works as follows:
 * Every node is initialized with a unique community label (an identifier).
 * These labels propagate through the network.
 * At every iteration of propagation, each node updates its label to the one that the maximum numbers of its neighbours belongs to.
-  Ties are broken uniformly and randomly.
+  Ties are broken arbitrarily but deterministically.
 * LPA reaches convergence when each node has the majority label of its neighbours.
 * LPA stops if either convergence or the user-defined maximum number of iterations is achieved.
 
@@ -63,7 +63,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [source, cypher]
 ----
 CALL gds.labelPropagation.write(graphNameOrConfig: String|Map, configuration: Map})
-YIELD nodes, ranIterations, didConverge, createMillis, computeMillis, writeMillis
+YIELD nodePropertiesWritten, ranIterations, didConverge, createMillis, computeMillis, writeMillis
 ----
 
 include::common-parameters.adoc[]
@@ -90,7 +90,7 @@ include::common-configuration.adoc[]
 | writeMillis           | Integer | Milliseconds for writing result data back.
 | postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
 
-| nodes                 | Integer | The number of nodes considered.
+| nodePropertiesWritten | Integer | The number of node properties written.
 | communityCount        | Integer | The number of communities found.
 | ranIterations         | Integer | The number of iterations that were executed.
 | didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.

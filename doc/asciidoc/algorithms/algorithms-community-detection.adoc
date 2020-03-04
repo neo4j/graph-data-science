@@ -6,7 +6,7 @@
 This chapter provides explanations and examples for each of the community detection algorithms in the Neo4j Graph Data Science library.
 --
 
-Community detection algorithms are used to evaluate how a group of nodes is clustered or partitioned, as well as its tendency to strengthen or break apart.
+Community detection algorithms are used to evaluate how a group of nodes is clustered or partitioned, as well as their tendency to strengthen or break apart.
 The Neo4j GDS library includes the following community detection algorithms, grouped by quality tier:
 
 * Production-quality
