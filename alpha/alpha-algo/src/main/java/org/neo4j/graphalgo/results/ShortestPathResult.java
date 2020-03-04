@@ -22,20 +22,20 @@ package org.neo4j.graphalgo.results;
 public class ShortestPathResult {
 
     public final long createMillis;
-    public final long evalMillis;
+    public final long computeMillis;
     public final long writeMillis;
     public final long nodeCount;
     public final String targetProperty;
 
     public ShortestPathResult(
         long createMillis,
-        long evalMillis,
+        long computeMillis,
         long writeMillis,
         long nodeCount,
         String targetProperty
     ) {
         this.createMillis = createMillis;
-        this.evalMillis = evalMillis;
+        this.computeMillis = computeMillis;
         this.writeMillis = writeMillis;
         this.nodeCount = nodeCount;
         this.targetProperty = targetProperty;

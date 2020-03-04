@@ -84,13 +84,13 @@ class DijkstraProcTest extends BaseProcTest {
         runQueryWithRowConsumer(
             "MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
             "CALL gds.alpha.shortestPath.write({nodeProjection: '*', relationshipProjection: '*', startNode: start, endNode: end}) " +
-            "YIELD createMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
-            "RETURN createMillis, evalMillis, writeMillis, nodeCount, totalCost",
+            "YIELD createMillis, computeMillis, writeMillis, nodeCount, totalCost\n" +
+            "RETURN createMillis, computeMillis, writeMillis, nodeCount, totalCost",
             row -> {
                 assertEquals(1.0, (Double) row.getNumber("totalCost"), 0.01);
                 assertEquals(2L, row.getNumber("nodeCount"));
                 assertNotEquals(-1L, row.getNumber("createMillis"));
-                assertNotEquals(-1L, row.getNumber("evalMillis"));
+                assertNotEquals(-1L, row.getNumber("computeMillis"));
                 assertNotEquals(-1L, row.getNumber("writeMillis"));
             });
 
@@ -145,13 +145,13 @@ class DijkstraProcTest extends BaseProcTest {
             "  writeProperty:'cost', " +
             "  relationshipProperties: 'cost'" +
             "}) " +
-            "YIELD createMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
-            "RETURN createMillis, evalMillis, writeMillis, nodeCount, totalCost",
+            "YIELD createMillis, computeMillis, writeMillis, nodeCount, totalCost\n" +
+            "RETURN createMillis, computeMillis, writeMillis, nodeCount, totalCost",
             row -> {
                 assertEquals(3.0, (Double) row.getNumber("totalCost"), 10E2);
                 assertEquals(4L, row.getNumber("nodeCount"));
                 assertNotEquals(-1L, row.getNumber("createMillis"));
-                assertNotEquals(-1L, row.getNumber("evalMillis"));
+                assertNotEquals(-1L, row.getNumber("computeMillis"));
                 assertNotEquals(-1L, row.getNumber("writeMillis"));
             });
 
