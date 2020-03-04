@@ -1,11 +1,11 @@
 [[product-algos]]
 = Production-quality algorithms
 
-. <<migration-lpa, Label Propagation>>
-. <<migration-louvain, Louvain>>
-. <<migration-node-sim, Node Similarity>>
-. <<migration-page-rank, PageRank>>
-. <<migration-wcc, Weakly Connected Components>>
+* <<migration-lpa, Label Propagation>>
+* <<migration-louvain, Louvain>>
+* <<migration-node-sim, Node Similarity>>
+* <<migration-page-rank, PageRank>>
+* <<migration-wcc, Weakly Connected Components>>
 
 include::migration-lpa.adoc[leveloffset=+1]
 

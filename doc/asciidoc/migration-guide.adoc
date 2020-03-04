@@ -54,22 +54,21 @@ We assume that most of the mentioned operations and concepts can be understood w
 Thus we are intentionally brief in the examples and comparisons.
 Please see the dedicated chapters in this manual for details on all the features in the Graph Data Science library.
 
-
-== Syntax
+== Syntax Changes
 
 In this section we will focus on side-by-side examples of operations using the syntax of the Graph Algorithms library and Graph Data Science library, respectively.
 
 This section is divided into the following sub-sections:
 
-. <<migration-algos-common, Common Changes>>
-. <<graph-ops, Graph Operations>>
-. <<product-algos, Production-quality algorithms>>
+* <<migration-algos-common, Common Changes>>
+* <<graph-ops, Graph Operations>>
+* <<product-algos, Production-quality algorithms>>
 
-include::migration-algos-common.adoc[leveloffset=+2]
+include::migration-algos-common.adoc[leveloffset=+1]
 
-include::migration-graph-ops.adoc[leveloffset=+2]
+include::migration-graph-ops.adoc[leveloffset=+1]
 
-include::migration-product-algos.adoc[leveloffset=+2]
+include::migration-product-algos.adoc[leveloffset=+1]
 
 //include::migration-beta-algos.adoc[leveloffset=+2]
 
