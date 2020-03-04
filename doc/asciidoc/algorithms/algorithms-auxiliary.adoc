@@ -6,7 +6,7 @@
 This chapter provides explanations and examples for auxiliary procedures in the Neo4j Graph Data Science library.
 --
 
-The following procedures can be used to improve your workflow:
+The following procedures can be incorporated into your workflow:
 
 * Beta
 ** <<graph-generation, Graph Generation>>
