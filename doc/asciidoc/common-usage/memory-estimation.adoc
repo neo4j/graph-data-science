@@ -98,8 +98,8 @@ To achieve this, use the following configuration options:
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type      | Default           | Optional  | Description
-| nodeCount         | Long      | 0                 | yes       | The number of nodes in a fictive graph.
-| relationshipCount | Long      | 0                 | yes       | The number of relationships in a fictive graph.
+| nodeCount         | Integer   | 0                 | yes       | The number of nodes in a fictive graph.
+| relationshipCount | Integer   | 0                 | yes       | The number of relationships in a fictive graph.
 |===
 
 When estimating a fictive graph, syntactically valid `nodeProjection` and `relationshipProjection` must be specified.
