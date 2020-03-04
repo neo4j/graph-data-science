@@ -1,0 +1,36 @@
+[[migration-graph-remove]]
+= Graph removal
+
+.Changes in the YIELD fields
+[opts=header,cols="1,1"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+| `name`              | `graphName`
+| `nodes`             | `nodeCount`
+| `relationships`     | `relationshipCount`
+| `exists`            | -
+| `removed`           | -
+| `type`              | -
+| `direction`         | -
+| -                 | `nodeProjection`
+| -                 | `relationshipProjection`
+| -                 | `nodeQuery` footnote:remove-cypher[Field will be `null` unless a Cypher projection was used]
+| -                 | `relationshipQuery` footnote:remove-cypher[]
+| -                 | `degreeDistribution`
+|===
+
+.Removing a named graph:
+[opts=header,cols="1a,1a"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+|
+[source, cypher]
+----
+CALL algo.graph.remove('myGraph')
+----
+|
+[source, cypher]
+----
+CALL gds.graph.drop('myGraph')
+----
+|===

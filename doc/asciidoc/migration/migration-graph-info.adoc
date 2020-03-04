@@ -1,0 +1,63 @@
+[[migration-graph-info]]
+= Graph info
+
+.Changes in the YIELD fields
+[opts=header,cols="1,1"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+| `name`              | `graphName`
+| `nodes`             | `nodeCount`
+| `relationships`     | `relationshipCount`
+| `exists`            | -
+| `removed`           | -
+| `type`              | -
+| `direction`         | -
+| -                 | `nodeProjection`
+| -                 | `relationshipProjection`
+| -                 | `nodeQuery` footnote:info-cypher[Field will be `null` unless a Cypher projection was used]
+| -                 | `relationshipQuery` footnote:info-cypher[]
+| -                 | `degreeDistribution` footnote:[Graph statistics map, i.e. min, max, percentiles, etc.]
+| `min, max, mean, p50, p75, p90, p95, p99, p999` footnote:info-degreeDistribution[Inlined into `degreeDistribution`]              | -
+|===
+
+.Viewing information about a specific named graph:
+[opts=header,cols="1a,1a"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+2+| View information for a Named graph:
+|
+[source, cypher]
+----
+CALL algo.graph.info('myGraph')
+----
+|
+[source, cypher]
+----
+CALL gds.graph.list('myGraph')
+----
+2+| Check graph existence:
+|
+[source, cypher]
+----
+CALL algo.graph.info('myGraph') YIELD exists
+----
+|
+[source, cypher]
+----
+CALL gds.graph.exists('myGraph') YIELD exists
+----
+2+| View graph statistics:
+|
+[source, cypher]
+----
+CALL algo.graph.info('myGraph', true)
+YIELD min, max, mean, p50
+----
+|
+[source, cypher]
+----
+CALL gds.graph.list('myGraph')
+YIELD degreeDistribution as dd
+RETURN dd.min, dd.max, dd.mean, dd.p50
+----
+|===

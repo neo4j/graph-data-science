@@ -1,0 +1,70 @@
+[[migration-cypher-queries]]
+= Graph creation - Cypher Queries
+
+.Loading a named graph using Cypher queries:
+[opts=header,cols="1a,1a"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+2+| Basic Cypher queries, defining source and target:
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target',
+  {
+    graph: 'cypher'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create.cypher(
+  'myGraph',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target'
+)
+----
+2+| With concurrency property and Cypher query with relationship property:
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN
+     id(s) AS source,
+     id(t) AS target,
+     r.myProperty AS weight',
+  {
+    concurrency: 4,
+    graph: 'cypher'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create.cypher(
+  'myGraph',
+  'MATCH (n:MyLabel)
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN
+     id(s) AS source,
+     id(t) AS target,
+     r.myProperty AS weight',
+  {
+    readConcurrency: 4
+  }
+)
+----
+|===
