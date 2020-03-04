@@ -144,7 +144,7 @@ class CosineDocTest extends BaseProcTest {
                        " OPTIONAL MATCH (p)-[likes:LIKES]->(c)" +
                        " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) AS data" +
-                       " CALL gds.alpha.similarity.cosine.stream({data: data, topK: 0})" +
+                       " CALL gds.alpha.similarity.cosine.stream({nodeProjection: '*', relationshipProjection: '*', data: data, topK: 0})" +
                        " YIELD item1, item2, count1, count2, similarity" +
                        " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
                        "    ORDER BY similarity DESC";
@@ -177,6 +177,8 @@ class CosineDocTest extends BaseProcTest {
                        " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) AS data" +
                        " CALL gds.alpha.similarity.cosine.stream({" +
+                       "    nodeProjection: '*', " +
+                       "    relationshipProjection: '*', " +
                        "    data: data," +
                        "    similarityCutoff: 0.0," +
                        "    topK: 0" +
@@ -210,6 +212,8 @@ class CosineDocTest extends BaseProcTest {
                        " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) AS data" +
                        " CALL gds.alpha.similarity.cosine.stream({" +
+                       "    nodeProjection: '*', " +
+                       "    relationshipProjection: '*', " +
                        "    data: data, " +
                        "    similarityCutoff: 0.0," +
                        "    topK: 1" +
@@ -240,6 +244,8 @@ class CosineDocTest extends BaseProcTest {
                        " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.cosine.write({" +
+                       "    nodeProjection: '*', " +
+                       "    relationshipProjection: '*', " +
                        "    data: data," +
                        "    topK: 1, " +
                        "    similarityCutoff: 0.1," +
@@ -282,6 +288,8 @@ class CosineDocTest extends BaseProcTest {
                        " WITH personCuisines," +
                        "      [value in personCuisines WHERE value.name IN [\"Praveena\", \"Arya\"] | value.item ] AS sourceIds" +
                        " CALL gds.alpha.similarity.cosine.stream({" +
+                       "  nodeProjection: '*', " +
+                       "  relationshipProjection: '*', " +
                        "  data: personCuisines, " +
                        "  sourceIds: sourceIds, " +
                        "  topK: 1" +
@@ -319,6 +327,8 @@ class CosineDocTest extends BaseProcTest {
                        " WITH {item:id(c), weights: c.embedding} AS userData" +
                        " WITH collect(userData) AS data" +
                        " CALL gds.alpha.similarity.cosine.stream({" +
+                       "  nodeProjection: '*', " +
+                       "  relationshipProjection: '*', " +
                        "  data: data," +
                        "  skipValue: null" +
                        " })" +
@@ -361,6 +371,8 @@ class CosineDocTest extends BaseProcTest {
         String query = " WITH 'MATCH (person:Person)-[likes:LIKES]->(c)" +
                        "       RETURN id(person) AS item, id(c) AS category, likes.score AS weight' AS query" +
                        " CALL gds.alpha.similarity.cosine.write({" +
+                       "  nodeProjection: '*', " +
+                       "  relationshipProjection: '*', " +
                        "  data: query," +
                        "  graph: 'cypher'," +
                        "  topK: 1," +

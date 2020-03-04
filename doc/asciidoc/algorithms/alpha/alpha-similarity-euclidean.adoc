@@ -213,6 +213,8 @@ include::alpha-similarity.adoc[tag=weighted-note]
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
  WITH collect(userData) as data
  CALL gds.alpha.similarity.euclidean.stream({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: data,
   topK: 0
  })
@@ -254,6 +256,8 @@ We can filter those results out using the `gds.util.isFinite` function.
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
  WITH collect(userData) as data
  CALL gds.alpha.similarity.euclidean.stream({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: data,
   topK: 0
  })
@@ -291,6 +295,8 @@ If so, we can filter those out by passing in the `similarityCutoff` parameter.
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
  WITH collect(userData) as data
  CALL gds.alpha.similarity.euclidean.stream({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: data,
   similarityCutoff: 4.0,
   topK: 0
@@ -322,6 +328,8 @@ We can do that by passing in the `topK` parameter.
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
  WITH collect(userData) as data
  CALL gds.alpha.similarity.euclidean.stream({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: data,
   topK: 1
  })
@@ -353,6 +361,8 @@ For example, the person most similar to Arya is Karin, but the person most simil
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
  WITH collect(userData) as data
  CALL gds.alpha.similarity.euclidean.write({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: data,
   topK: 1,
   write:true
@@ -405,6 +415,8 @@ We could use this technique to compute the similarity of a subset of items to al
  WITH personCuisines,
       [value in personCuisines WHERE value.name IN ["Praveena", "Arya"] | value.item ] AS sourceIds
  CALL gds.alpha.similarity.euclidean.stream({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: personCuisines,
   sourceIds: sourceIds,
   topK: 1
@@ -450,6 +462,8 @@ For cases where no values should be skipped, skipping can be disabled by setting
  WITH {item:id(c), weights: c.embedding} as userData
  WITH collect(userData) as data
  CALL gds.alpha.similarity.euclidean.stream({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: data,
   skipValue: null
  })
@@ -470,6 +484,8 @@ include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
  WITH "MATCH (person:Person)-[likes:LIKES]->(c)
        RETURN id(person) AS item, id(c) AS category, likes.score AS weight" AS query
  CALL gds.alpha.similarity.euclidean.write({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: query,
   graph: 'cypher',
   topK: 1,

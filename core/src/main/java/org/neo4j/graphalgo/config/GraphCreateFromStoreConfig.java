@@ -42,12 +42,12 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     String RELATIONSHIP_PROJECTION_KEY = "relationshipProjection";
 
     @Override
-    @Key(KEY_NODE_PROJECTIONS)
+    @Key(NODE_PROJECTION_KEY)
     @ConvertWith("org.neo4j.graphalgo.AbstractNodeProjections#fromObject")
     NodeProjections nodeProjections();
 
     @Override
-    @Key(KEY_RELATIONSHIP_PROJECTIONS)
+    @Key(RELATIONSHIP_PROJECTION_KEY)
     @ConvertWith("org.neo4j.graphalgo.AbstractRelationshipProjections#fromObject")
     RelationshipProjections relationshipProjections();
 

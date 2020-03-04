@@ -228,6 +228,8 @@ OPTIONAL MATCH (p)-[rated:RATED]->(m)
 WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
 WITH collect(userData) as data
 CALL gds.alpha.similarity.pearson.stream({
+ nodeProjection: '*',
+ relationshipProjection: '*',
  data: data,
  topK: 0
 })
@@ -268,6 +270,8 @@ OPTIONAL MATCH (p)-[rated:RATED]->(m)
 WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
 WITH collect(userData) as data
 CALL gds.alpha.similarity.pearson.stream({
+ nodeProjection: '*',
+ relationshipProjection: '*',
  data: data,
  similarityCutoff: 0.1,
  topK: 0
@@ -300,6 +304,8 @@ OPTIONAL MATCH (p)-[rated:RATED]->(m)
 WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
 WITH collect(userData) as data
 CALL gds.alpha.similarity.pearson.stream({
+ nodeProjection: '*',
+ relationshipProjection: '*',
  data: data,
  topK:1,
  similarityCutoff: 0.0
@@ -332,6 +338,8 @@ OPTIONAL MATCH (p)-[rated:RATED]->(m)
 WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
 WITH collect(userData) as data
 CALL gds.alpha.similarity.pearson.write({
+ nodeProjection: '*',
+ relationshipProjection: '*',
  data: data,
  topK: 1,
  similarityCutoff: 0.1,
@@ -383,6 +391,8 @@ WITH collect(userData) as personCuisines
 WITH personCuisines,
      [value in personCuisines WHERE value.name IN ["Praveena", "Arya"] | value.item ] AS sourceIds
 CALL gds.alpha.similarity.pearson.stream({
+ nodeProjection: '*',
+ relationshipProjection: '*',
  data: personCuisines,
  sourceIds: sourceIds,
  topK: 1
@@ -425,6 +435,8 @@ MATCH (m:Movie)
 WITH {item:id(m), weights: m.embedding} as userData
 WITH collect(userData) as data
 CALL gds.alpha.similarity.pearson.stream({
+ nodeProjection: '*',
+ relationshipProjection: '*',
  data: data,
  skipValue: null
 })
@@ -461,6 +473,8 @@ include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
 WITH "MATCH (person:Person)-[rated:RATED]->(c)
       RETURN id(person) AS item, id(c) AS category, rated.score AS weight" AS query
 CALL gds.alpha.similarity.pearson({
+ nodeProjection: '*',
+ relationshipProjection: '*',
  data: query,
  graph: 'cypher',
  topK: 1,

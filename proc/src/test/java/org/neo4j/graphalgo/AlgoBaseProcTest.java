@@ -22,6 +22,9 @@ package org.neo4j.graphalgo;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -59,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.BaseProcTest.anonymousGraphConfig;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.compat.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
@@ -98,6 +102,10 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
+    }
+
+    default CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper mapWrapper) {
+        return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper.toMap())));
     }
 
     default void applyOnProcedure(Consumer<? super AlgoBaseProc<?, RESULT, CONFIG>> func) {
@@ -204,8 +212,9 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                 configMap
             );
 
+            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraph = proc.compute(
-                configMap,
+                implicitConfigMap,
                 Collections.emptyMap()
             );
 
@@ -268,7 +277,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         applyOnProcedure((proc) -> {
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
-                    Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+                    Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
 
                     try {
                         Stream<?> result = (Stream) method.invoke(proc, configMap, Collections.emptyMap());
@@ -292,12 +301,9 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
                     String missingLabel = "___THIS_LABEL_SHOULD_NOT_EXIST___";
-                    Map<String, Object> tempConfig = MapUtil.map(
-                        "nodeProjection",
-                        Collections.singletonList(missingLabel)
-                    );
+                    Map<String, Object> tempConfig = MapUtil.map(NODE_PROJECTION_KEY, Collections.singletonList(missingLabel));
 
-                    Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
+                    Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(tempConfig)).toMap();
 
                     Exception ex = assertThrows(
                         Exception.class,
@@ -321,7 +327,10 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         ConcurrencyMonitor.instance().setLimited();
         applyOnProcedure((proc) ->
             getWriteAndStreamProcedures(proc).forEach(method -> {
-                Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 10))).toMap();
+                Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map(
+                    "concurrency",
+                    10
+                ))).toMap();
 
                 InvocationTargetException ex = assertThrows(
                     InvocationTargetException.class,
@@ -338,7 +347,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         ConcurrencyMonitor.instance().setUnlimited();
         applyOnProcedure((proc) ->
             getWriteAndStreamProcedures(proc).forEach(method -> {
-                Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 78))).toMap();
+                Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 78))).toMap();
 
                 assertDoesNotThrow(() -> method.invoke(proc, configMap, Collections.emptyMap()));
             })
@@ -351,12 +360,9 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
                     String missingRelType = "___THIS_REL_TYPE_SHOULD_NOT_EXIST___";
-                    Map<String, Object> tempConfig = MapUtil.map(
-                        "relationshipProjection",
-                        Collections.singletonList(missingRelType)
-                    );
+                    Map<String, Object> tempConfig = MapUtil.map(RELATIONSHIP_PROJECTION_KEY, Collections.singletonList(missingRelType));
 
-                    Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
+                    Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(tempConfig)).toMap();
 
                     Exception ex = assertThrows(
                         Exception.class,
@@ -409,6 +415,43 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         );
 
         assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
+    }
+
+    static Stream<Arguments> failingConfigurationMaps() {
+        return Stream.of(
+            Arguments.of(MapUtil.map()),
+            Arguments.of(MapUtil.map(NODE_PROJECTION_KEY, PROJECT_ALL.name)),
+            Arguments.of(MapUtil.map(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name)),
+            Arguments.of(MapUtil.map(NODE_QUERY_KEY, ALL_NODES_QUERY)),
+            Arguments.of(MapUtil.map(RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
+            Arguments.of(MapUtil.map(NODE_PROJECTION_KEY, PROJECT_ALL.name, RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
+            Arguments.of(MapUtil.map(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name, NODE_QUERY_KEY, ALL_NODES_QUERY))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("failingConfigurationMaps")
+    default void failOnImplicitLoadingWithoutProjectionsOrQueries(Map<String, Object> configurationMap) {
+        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(configurationMap)).toMap();
+
+        applyOnProcedure((proc) -> {
+            IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> proc.compute(
+                    config,
+                    Collections.emptyMap()
+                )
+            );
+            assertTrue(ex.getMessage().contains("Missing information") && ex
+                .getMessage()
+                .contains(String.format(
+                    "`%s` and `%s` or `%s` and `%s`",
+                    NODE_PROJECTION_KEY,
+                    RELATIONSHIP_PROJECTION_KEY,
+                    NODE_QUERY_KEY,
+                    RELATIONSHIP_QUERY_KEY
+                )));
+        });
     }
 
     @Test

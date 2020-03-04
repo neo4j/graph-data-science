@@ -95,6 +95,8 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         final String cypher =
                 "MATCH(n:Node {name:'s'}) " +
                 "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({" +
+                "   nodeProjection: '*', " +
+                "   relationshipProjection: '*', " +
                 "   relationshipProperties: 'cost', " +
                 "   startNode: n, " +
                 "   delta: 3.0," +
@@ -118,6 +120,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         final String cypher =
             "MATCH(n:Node {name: 's'}) " +
             "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({" +
+            "   nodeProjection: '*', " +
             "   relationshipProjection: {" +
             "       TYPE: {" +
             "         type: 'TYPE'," +
@@ -147,6 +150,7 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         final String cypher =
             "MATCH(n:Node {name: 's'}) " +
             "WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({" +
+            "   nodeProjection: '*', " +
             "   relationshipProjection: {" +
             "       TYPE: {" +
             "         type: 'TYPE'," +
@@ -174,6 +178,8 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         final String cypher =
             "MATCH(n:Node {name:'s'}) " +
             "WITH n CALL gds.alpha.shortestPath.deltaStepping.write({" +
+            "   nodeProjection: '*'," +
+            "   relationshipProjection: '*'," +
             "   relationshipProperties: 'cost', " +
             "   startNode: n, " +
             "   delta: 3.0," +

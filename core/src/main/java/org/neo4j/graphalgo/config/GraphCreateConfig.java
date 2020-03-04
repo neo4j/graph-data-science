@@ -29,21 +29,20 @@ import org.neo4j.graphalgo.core.ProcedureConstants;
 
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 public interface GraphCreateConfig extends BaseConfig {
 
     String IMPLICIT_GRAPH_NAME = "";
 
-    String KEY_NODE_PROJECTIONS = "nodeProjection";
-    String KEY_RELATIONSHIP_PROJECTIONS = "relationshipProjection";
-
     @Configuration.Parameter
     String graphName();
 
-    @Configuration.Key(KEY_NODE_PROJECTIONS)
+    @Configuration.Key(NODE_PROJECTION_KEY)
     NodeProjections nodeProjections();
 
-    @Configuration.Key(KEY_RELATIONSHIP_PROJECTIONS)
+    @Configuration.Key(RELATIONSHIP_PROJECTION_KEY)
     RelationshipProjections relationshipProjections();
 
     @Value.Default
@@ -81,10 +80,18 @@ public interface GraphCreateConfig extends BaseConfig {
     }
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
-        if (config.containsKey(NODE_QUERY_KEY) || config.containsKey(RELATIONSHIP_QUERY_KEY)) {
+        if (config.containsKey(NODE_QUERY_KEY) && config.containsKey(RELATIONSHIP_QUERY_KEY)) {
             return GraphCreateFromCypherConfig.fromProcedureConfig(username, config);
-        } else {
+        } else if (config.containsKey(NODE_PROJECTION_KEY) && config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
             return GraphCreateFromStoreConfig.fromProcedureConfig(username, config);
+        } else {
+            throw new IllegalArgumentException(String.format(
+                "Missing information for implicit graph creation. Specify either `%s` and `%s` or `%s` and `%s`",
+                NODE_PROJECTION_KEY,
+                RELATIONSHIP_PROJECTION_KEY,
+                NODE_QUERY_KEY,
+                RELATIONSHIP_QUERY_KEY
+            ));
         }
     }
 }

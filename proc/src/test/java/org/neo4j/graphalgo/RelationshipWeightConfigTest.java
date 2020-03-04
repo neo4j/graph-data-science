@@ -52,10 +52,13 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
@@ -117,7 +120,8 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
         List<String> relationshipProperties = Arrays.asList("a");
         Map<String, Object> tempConfig = map(
             "relationshipWeightProperty", "foo",
-            "relationshipProjection", map(
+            NODE_PROJECTION_KEY, PROJECT_ALL.name,
+            RELATIONSHIP_PROJECTION_KEY, map(
                 "A", map(
                     "properties", relationshipProperties
                 )
@@ -160,8 +164,9 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
                 configMap
             ));
 
+            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
             assertMissingProperty(error, () -> proc.compute(
-                configMap,
+                implicitConfigMap,
                 Collections.emptyMap()
             ));
         });
@@ -251,7 +256,8 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
         runQuery(graphDb(), CREATE_QUERY);
 
         CypherMapWrapper weightConfig = CypherMapWrapper.create(map(
-            "relationshipProjection", "*",
+            NODE_PROJECTION_KEY, PROJECT_ALL.name,
+            RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name,
             "relationshipProperties", "weight1"
         ));
         CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);

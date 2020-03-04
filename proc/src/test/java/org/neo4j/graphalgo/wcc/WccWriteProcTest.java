@@ -148,6 +148,7 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
         String query = GdsCypher.call()
             .withAnyLabel()
             .withNodeProperty("seedId")
+            .withAnyRelationshipType()
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
@@ -161,6 +162,7 @@ class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
     void testWriteWithSeedAndSameWriteProperty() {
         String query = GdsCypher.call()
             .withAnyLabel()
+            .withAnyRelationshipType()
             .withNodeProperty("seedId")
             .algo("wcc")
             .writeMode()

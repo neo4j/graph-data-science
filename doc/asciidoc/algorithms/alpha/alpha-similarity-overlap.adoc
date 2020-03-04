@@ -123,7 +123,7 @@ O(A,B) = 2 / min(3,4)
  MATCH (book:Book)-[:HAS_GENRE]->(genre)
  WITH {item:id(genre), categories: collect(id(book))} as userData
  WITH collect(userData) as data
- CALL gds.alpha.similarity.overlap.stream({data: data})
+ CALL gds.alpha.similarity.overlap.stream({nodeProjection: '*', relationshipProjection: '*', data: data})
  YIELD item1, item2, count1, count2, intersection, similarity
  RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to,
         count1, count2, intersection, similarity
@@ -155,6 +155,8 @@ The others are less obvious; Dystopia probably isn't a subgenre of Fantasy, but 
  WITH {item:id(genre), categories: collect(id(book))} as userData
  WITH collect(userData) as data
  CALL gds.alpha.similarity.overlap.stream({
+   nodeProjection: '*',
+   relationshipProjection: '*',
    data: data,
    similarityCutoff: 0.75
  })
@@ -187,6 +189,8 @@ We can do that by passing in the `topK` parameter.
  WITH {item:id(genre), categories: collect(id(book))} as userData
  WITH collect(userData) as data
  CALL gds.alpha.similarity.overlap.stream({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: data,
   topK: 2
  })
@@ -216,6 +220,8 @@ We can do that by passing in the `topK` parameter.
  WITH {item:id(genre), categories: collect(id(book))} as userData
  WITH collect(userData) as data
  CALL gds.alpha.similarity.overlap.write({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: data,
   topK: 2,
   similarityCutoff: 0.5,
@@ -271,6 +277,8 @@ We could use this technique to compute the similarity of a subset of items to al
  WITH data,
       [value in data WHERE value.name IN ["Fantasy", "Classics"] | value.item ] AS sourceIds
  CALL gds.alpha.similarity.overlap.stream({
+  nodeProjection: '*',
+  relationshipProjection: '*',
   data: data,
   sourceIds: sourceIds
  })

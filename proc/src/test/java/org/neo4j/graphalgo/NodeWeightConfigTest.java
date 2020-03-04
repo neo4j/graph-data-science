@@ -100,7 +100,8 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
                 "A", MapUtil.map(
                     "properties", Arrays.asList("a")
                 )
-            )
+            ),
+            "relationshipProjection", "*"
         );
 
         Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
@@ -138,8 +139,9 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
                 configMap
             ));
 
+            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
             assertMissingProperty(error, () -> proc.compute(
-                configMap,
+                implicitConfigMap,
                 Collections.emptyMap()
             ));
         });

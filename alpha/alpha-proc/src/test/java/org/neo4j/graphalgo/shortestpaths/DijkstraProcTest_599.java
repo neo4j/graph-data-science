@@ -73,10 +73,17 @@ class DijkstraProcTest_599 extends BaseProcTest {
     @Test
     void test599() {
         String totalCostCommand =
-            "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
-            "CALL gds.alpha.shortestPath.write({startNode: startNode, endNode: endNode, relationshipWeightProperty: 'WEIGHT', relationshipProperties: 'WEIGHT'})\n" +
-            "YIELD nodeCount, totalCost, createMillis, evalMillis, writeMillis\n" +
-            "RETURN totalCost\n";
+            "MATCH (startNode {VID: 1}), (endNode {VID: 4}) " +
+            "CALL gds.alpha.shortestPath.write({" +
+            "  nodeProjection: '*', " +
+            "  relationshipProjection: '*', " +
+            "  startNode: startNode, " +
+            "  endNode: endNode, " +
+            "  relationshipWeightProperty: 'WEIGHT', " +
+            "  relationshipProperties: 'WEIGHT'" +
+            "}) " +
+            "YIELD nodeCount, totalCost, createMillis, evalMillis, writeMillis " +
+            "RETURN totalCost";
 
         double totalCost = runQuery(totalCostCommand, result -> result
             .<Double>columnAs("totalCost")
@@ -88,11 +95,18 @@ class DijkstraProcTest_599 extends BaseProcTest {
         assertEquals(4.0, totalCost, 1e-4);
 
         String pathCommand =
-            "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
-            "CALL gds.alpha.shortestPath.stream({startNode: startNode, endNode: endNode, relationshipWeightProperty: 'WEIGHT', relationshipProperties: 'WEIGHT'})\n" +
-            "YIELD nodeId, cost\n" +
-            "MATCH (n1) WHERE id(n1) = nodeId\n" +
-            "RETURN n1.VID AS id, cost AS weight\n";
+            "MATCH (startNode {VID: 1}), (endNode {VID: 4}) " +
+            "CALL gds.alpha.shortestPath.stream({" +
+            "  nodeProjection: '*', " +
+            "  relationshipProjection: '*', " +
+            "  startNode: startNode, " +
+            "  endNode: endNode, " +
+            "  relationshipWeightProperty: 'WEIGHT', " +
+            "  relationshipProperties: 'WEIGHT'" +
+            "}) " +
+            "YIELD nodeId, cost " +
+            "MATCH (n1) WHERE id(n1) = nodeId " +
+            "RETURN n1.VID AS id, cost AS weight ";
 
         List<Matcher<Number>> expectedList = Arrays.asList(
             is(1L), is(0.0),

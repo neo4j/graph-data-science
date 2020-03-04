@@ -59,14 +59,14 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     @Override
     @Value.Default
-    @Configuration.Key(KEY_NODE_PROJECTIONS)
+    @Configuration.Key(NODE_PROJECTION_KEY)
     default NodeProjections nodeProjections() {
         return NodeProjections.of();
     }
 
     @Override
     @Value.Default
-    @Configuration.Key(KEY_RELATIONSHIP_PROJECTIONS)
+    @Configuration.Key(RELATIONSHIP_PROJECTION_KEY)
     default RelationshipProjections relationshipProjections() {
         return RelationshipProjections.of();
     }
