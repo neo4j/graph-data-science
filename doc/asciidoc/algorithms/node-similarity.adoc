@@ -126,12 +126,12 @@ include::common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name             | Type    | Default | Optional | Description
-| similarityCutoff | Float   | 1E-42   | yes      | Lower limit for the similarity score to be present in the result.
+| similarityCutoff | Float   | 1E-42   | yes      | Lower limit for the similarity score to be present in the result. . Values must be between 0 and 1.
 | degreeCutoff     | Integer | 1       | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| topK             | Integer | 10      | yes      | Limit on the number of scores per node. The K largest results are returned.
-| bottomK          | Integer | 10      | yes      | Limit on the number of scores per node. The K smallest results are returned.
-| topN             | Integer | 0       | yes      | Global limit on the number of scores computed. The N largest total results are returned.
-| bottomN          | Integer | 0       | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
+| topK             | Integer | 10      | yes      | Limit on the number of scores per node. The K largest results are returned. This value cannot be lower than 1.
+| bottomK          | Integer | 10      | yes      | Limit on the number of scores per node. The K smallest results are returned. This value cannot be lower than 1.
+| topN             | Integer | 0       | yes      | Global limit on the number of scores computed. The N largest total results are returned. This value cannot be negative, a value of 0 means no global limit.
+| bottomN          | Integer | 0       | yes      | Global limit on the number of scores computed. The N smallest total results are returned. This value cannot be negative, a value of 0 means no global limit.
 |===
 
 .Results
