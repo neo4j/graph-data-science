@@ -2,6 +2,6 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name              | Type          | Default   | Optional | Description
-| graphNameOrConfig | String or Map | null      | no       | Either the name of a graph stored in the catalog or a graph projection config.
-| configuration     | Map           | {}        | yes      | Configuration for algorithm-specifics and/or graph filtering.
+| graphNameOrConfig | String or Map | null      | no       | Either the name of a graph stored in the catalog or a Map configuring the graph creation and algorithm execution.
+| configuration     | Map           | {}        | yes      | Configuration for algorithm-specifics and/or graph filtering. Must be empty if graphNameOrConfig is a Map.
 |===
