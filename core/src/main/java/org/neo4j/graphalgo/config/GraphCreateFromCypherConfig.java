@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 @ValueClass
 @Configuration("GraphCreateFromCypherConfigImpl")

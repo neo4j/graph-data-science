@@ -62,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.BaseProcTest.anonymousGraphConfig;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.compat.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
@@ -99,20 +100,12 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     void assertResultEquals(RESULT result1, RESULT result2);
 
-    default CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper mapWrapper) {
-        CypherMapWrapper implicitMapWrapper = mapWrapper;
-        if (!mapWrapper.containsKey(NODE_PROJECTION_KEY) && !mapWrapper.containsKey(NODE_QUERY_KEY)) {
-            implicitMapWrapper = implicitMapWrapper.withString(NODE_PROJECTION_KEY, PROJECT_ALL.name);
-        }
-        if (!mapWrapper.containsKey(RELATIONSHIP_PROJECTION_KEY) && !mapWrapper.containsKey(RELATIONSHIP_QUERY_KEY)) {
-            implicitMapWrapper = implicitMapWrapper.withString(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name);
-        }
-
-        return createMinimalConfig(implicitMapWrapper);
-    }
-
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
+    }
+
+    default CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper mapWrapper) {
+        return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper.toMap())));
     }
 
     default void applyOnProcedure(Consumer<? super AlgoBaseProc<?, RESULT, CONFIG>> func) {
@@ -451,7 +444,13 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             );
             assertTrue(ex.getMessage().contains("Missing information") && ex
                 .getMessage()
-                .contains("projections or queries"));
+                .contains(String.format(
+                    "`%s` and `%s` or `%s` and `%s`",
+                    NODE_PROJECTION_KEY,
+                    RELATIONSHIP_PROJECTION_KEY,
+                    NODE_QUERY_KEY,
+                    RELATIONSHIP_QUERY_KEY
+                )));
         });
     }
 

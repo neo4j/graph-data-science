@@ -70,7 +70,10 @@ public class BaseProcTest {
     }
 
     protected static Map<String, Object> anonymousGraphConfig(Object... objects) {
-        Map<String, Object> baseMap = map(objects);
+        return anonymousGraphConfig(map(objects));
+    }
+
+    protected static Map<String, Object> anonymousGraphConfig(Map<String, Object> baseMap) {
         if (!baseMap.containsKey(NODE_PROJECTION_KEY) && !baseMap.containsKey(NODE_QUERY_KEY)) {
             baseMap.put(NODE_PROJECTION_KEY, PROJECT_ALL.name);
         }
