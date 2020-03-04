@@ -94,7 +94,6 @@ A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering
 | Name                | Description
 | gds.util.asNode     | Return the node object for the given node id or null if none exists.
 | gds.util.asNodes    | Return the node objects for the given node ids or an empty list if none exists.
-| gds.util.asPath     | Return a path object for the provided node ids and weights.
 |===
 
 === Syntax
@@ -105,9 +104,6 @@ A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering
 | Name                                                                                      | Parameters
 | gds.util.asNode(nodeId: NUMBER)                                                           | nodeId of a node in the neo4j-graph
 | gds.util.asNodes(nodeIds: NUMBER[])                                                       | list of nodeIds of nodes in the neo4j-graph
-.3+| gds.util.asPath(nodeIds: NUMBER[], weights: NUMBER[], cumulativeWeights: BOOL)         | nodeIds: nodeIds representing neo4j nodes
-                                                                                            | weights: weights for the relationships between the nodes
-                                                                                            | cumulativeWeights: whether the given weights are cumulative. This means the weights also contain a base value e.g. one more value than node-ids
 |===
 
 === Examples
@@ -158,37 +154,3 @@ RETURN gds.util.asNodes(nodeIds) as nodes
 |===
 
 As many algorithms streaming mode only return the node id, `gds.util.asNode` and `gds.util.asNodes` can be used to retrieve the whole node from the neo4j database.
-
-.Example for gds.util.asPath:
-[source, cypher]
-----
-MATCH (u1)->(u2)->(u3)
-WITH collect(id(u1), id(u2), id(u3)) as nodeIds
-RETURN gds.util.asPath(nodeIds) as path
-----
-
-.Results
-[opts="header",cols="1"]
-|===
-| path
-| (0)-[-1:NEXT]->(1)-[-2:NEXT]->(2)
-|===
-
-// TODO: uncomment example if we know how to access the relationship properties of a path
-//.Example for gds.util.asPath:
-//[source, cypher]
-//----
-//MATCH (u1)->(u2)->(u3)
-//WITH collect(id(u1), id(u2), id(u3)) as nodeIds, [2, 4] as weights
-//RETURN gds.util.asPath(nodeIds, weights, true) as path
-//----
-
-//.Results
-//[opts="header",cols="1"]
-//|===
-//| nodes
-//| [Node[0]{name:"Alice"},Node[1]{name:"Bridget"}]
-//|===
-
-// TODO: add examples with real algo calls
-

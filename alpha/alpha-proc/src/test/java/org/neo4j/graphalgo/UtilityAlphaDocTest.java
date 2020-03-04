@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -35,7 +34,7 @@ class UtilityAlphaDocTest extends BaseProcTest {
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphCreateProc.class);
-        registerFunctions(GetNodeFunc.class, IsFiniteFunc.class, AsPathFunc.class);
+        registerFunctions(GetNodeFunc.class, IsFiniteFunc.class);
 
         String dbQuery =
             "CREATE (nAlice:User {name: 'Alice'}) " +
@@ -92,39 +91,6 @@ class UtilityAlphaDocTest extends BaseProcTest {
                           "| true       |\n" +
                           "+------------+\n" +
                           "3 rows\n";
-
-        assertEquals(expected, runQuery(query, Result::resultAsString));
-    }
-
-    @Test
-    void shouldReturnPath() {
-        String query = " MATCH (u1)-->(u2)-->(u3)" +
-                       " WITH [id(u1), id(u2), id(u3)] as nodeIds" +
-                       " RETURN gds.util.asPath(nodeIds) as path" ;
-
-        String expected = "+-----------------------------------+\n" +
-                          "| path                              |\n" +
-                          "+-----------------------------------+\n" +
-                          "| (0)-[-1:NEXT]->(1)-[-2:NEXT]->(2) |\n" +
-                          "+-----------------------------------+\n" +
-                          "1 row\n";
-
-        assertEquals(expected, runQuery(query, Result::resultAsString));
-    }
-
-    @Disabled
-    @Test
-    void shouldReturnPathWithWeights() {
-        String query = " MATCH (u1)->(u2)->(u3)\n" +
-                       " WITH collect(id(u1), id(u2), id(u3)) as nodeIds, [2, 4] as weights\n" +
-                       " RETURN gds.util.asPath(nodeIds, weights, true) as path" ;
-
-        String expected = "+-----------------------------------+\n" +
-                          "| path                              |\n" +
-                          "+-----------------------------------+\n" +
-                          "| (0)-[-1:NEXT]->(1)-[-2:NEXT]->(2) |\n" +
-                          "+-----------------------------------+\n" +
-                          "1 row\n";
 
         assertEquals(expected, runQuery(query, Result::resultAsString));
     }
