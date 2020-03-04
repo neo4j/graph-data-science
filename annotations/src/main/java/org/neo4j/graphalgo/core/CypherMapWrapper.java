@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -249,6 +250,34 @@ public final class CypherMapWrapper {
         return value;
     }
 
+    public static int validateIntegerRange(String key, int value, int min, int max, boolean minInclusive, boolean maxInclusive) {
+        boolean meetsLowerBound = minInclusive ? value >= min : value > min;
+        boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
+
+        if (!meetsLowerBound || !meetsUpperBound) {
+            throw outOfRangeError(key, Integer.toString(min), Integer.toString(max), minInclusive, maxInclusive);
+        }
+
+        return value;
+    }
+
+    public static double validateDoubleRange(String key, double value, double min, double max, boolean minInclusive, boolean maxInclusive) {
+        boolean meetsLowerBound = minInclusive ? value >= min : value > min;
+        boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
+
+        if (!meetsLowerBound || !meetsUpperBound) {
+            throw outOfRangeError(
+                key,
+                String.format(Locale.ENGLISH, "%.2f", min),
+                String.format(Locale.ENGLISH, "%.2f", max),
+                minInclusive,
+                maxInclusive
+            );
+        }
+
+        return value;
+    }
+
     static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
         if (canHardCastToDouble(expectedType, value)) {
             return expectedType.cast(((Number) value).doubleValue());
@@ -280,6 +309,23 @@ public final class CypherMapWrapper {
             "`%s` can not be null or blank, but it was `%s`",
             key,
             value
+        ));
+    }
+
+    private static IllegalArgumentException outOfRangeError(
+        String key,
+        String min,
+        String max,
+        boolean minInclusive,
+        boolean maxInclusive
+    ) {
+        return new IllegalArgumentException(String.format(
+            "Value for `%s` must be within %s%s, %s%s.",
+            key,
+            minInclusive ? "[" : "(",
+            min,
+            max,
+            maxInclusive ? "]" : ")"
         ));
     }
 

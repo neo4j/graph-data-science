@@ -43,6 +43,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -179,7 +180,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
     @ParameterizedTest(name = "parameter: {0}, value: {1}")
     @CsvSource(value = {"topN, -2", "bottomN, -2", "topK, -2", "bottomK, -2", "topK, 0", "bottomK, 0"})
     void shouldThrowForInvalidTopsAndBottoms(String parameter, long value) {
-        String message = String.format("Invalid value for %s: must be a positive integer", parameter);
+        String message = String.format("Value for `%s` must be within", parameter);
         CypherMapWrapper input = baseUserInput().withNumber(parameter, value);
 
         IllegalArgumentException illegalArgumentException = assertThrows(
@@ -211,7 +212,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
             IllegalArgumentException.class,
             () -> config(input)
         );
-        assertThat(illegalArgumentException.getMessage(), is("Must set degree cutoff to 1 or greater"));
+        assertThat(illegalArgumentException.getMessage(), is(String.format("Value for `degreeCutoff` must be within [1, %d].", Integer.MAX_VALUE)));
     }
 
     @ParameterizedTest
@@ -225,7 +226,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
         );
         assertThat(
             illegalArgumentException.getMessage(),
-            is("Must set similarity cutoff to a value in [0, 1] (inclusive).")
+            is(String.format(Locale.ENGLISH, "Value for `similarityCutoff` must be within [%.2f, %.2f].", 0D, 1D))
         );
     }
 

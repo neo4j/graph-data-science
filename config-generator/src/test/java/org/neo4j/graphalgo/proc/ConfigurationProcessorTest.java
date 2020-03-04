@@ -65,7 +65,8 @@ class ConfigurationProcessorTest {
         "ConvertingParameters",
         "CollectingKeys",
         "ToMap",
-        "Validation"
+        "Validation",
+        "RangeValidation"
     })
     void positiveTest(String className) {
         assertAbout(javaSource())

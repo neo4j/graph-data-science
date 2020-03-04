@@ -287,6 +287,40 @@ final class GenerateConfiguration {
             }
         }
 
+        if (definition.member().validatesIntegerRange()) {
+            Configuration.IntegerRange range = definition
+                .member()
+                .method()
+                .getAnnotation(Configuration.IntegerRange.class);
+            codeBlock = CodeBlock.of(
+                "$T.validateIntegerRange($S, $L, $L, $L, $L, $L)",
+                CypherMapWrapper.class,
+                definition.configKey(),
+                codeBlock,
+                elementUtils.getConstantExpression(range.min()),
+                elementUtils.getConstantExpression(range.max()),
+                elementUtils.getConstantExpression(range.minInclusive()),
+                elementUtils.getConstantExpression(range.maxInclusive())
+            );
+        }
+
+        if (definition.member().validatesDoubleRange()) {
+            Configuration.DoubleRange range = definition
+                .member()
+                .method()
+                .getAnnotation(Configuration.DoubleRange.class);
+            codeBlock = CodeBlock.of(
+                "$T.validateDoubleRange($S, $L, $L, $L, $L, $L)",
+                CypherMapWrapper.class,
+                definition.configKey(),
+                codeBlock,
+                elementUtils.getConstantExpression(range.min()),
+                elementUtils.getConstantExpression(range.max()),
+                elementUtils.getConstantExpression(range.minInclusive()),
+                elementUtils.getConstantExpression(range.maxInclusive())
+            );
+        }
+
         constructor.addStatement("this.$N = $L", definition.fieldName(), codeBlock);
     }
 

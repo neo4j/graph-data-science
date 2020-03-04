@@ -23,6 +23,7 @@ import com.google.common.collect.Streams;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.CollectKeys;
 import org.neo4j.graphalgo.annotation.Configuration.ToMap;
 import org.neo4j.graphalgo.annotation.Configuration.Ignore;
@@ -168,6 +169,9 @@ final class ConfigParser {
             memberBuilder.toMap(true);
         }
 
+        memberBuilder.validatesIntegerRange(isAnnotationPresent(method, Configuration.IntegerRange.class));
+        memberBuilder.validatesDoubleRange(isAnnotationPresent(method, Configuration.DoubleRange.class));
+
         if (isAnnotationPresent(method, Value.Check.class)) {
             if (method.getReturnType().getKind() == TypeKind.VOID) {
                 memberBuilder.validates(true);
@@ -230,6 +234,12 @@ final class ConfigParser {
         public boolean toMap() {
             return false;
         }
+
+        @Value.Default
+        public boolean validatesIntegerRange() { return false; }
+
+        @Value.Default
+        public boolean validatesDoubleRange() { return false; }
 
         @Value.Default
         public boolean validates() {
