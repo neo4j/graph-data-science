@@ -25,10 +25,10 @@ For production, it is recommended to adapt the domain model in a way that it can
 
 This section includes:
 
-* <<cypher-projection-syntax>>
-* <<cypher-projection-query-constraints>>
-* <<cypher-projection-relationship-types>>
-* <<cypher-projection-relationship-aggregation>>
+* <<cypher-projection-syntax, Syntax>>
+* <<cypher-projection-query-constraints, Cypher query constraints>>
+* <<cypher-projection-relationship-types, Relationship types>>
+* <<cypher-projection-relationship-aggregation, Relationship aggregation>>
 
 
 [[cypher-projection-syntax]]
