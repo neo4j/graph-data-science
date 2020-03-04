@@ -91,7 +91,7 @@ RETURN gds.util.isInfinite(value) as isInfinite
 |===
 --
 
-The utility function `gds.util.NaN` can be used as an default value for input parameters, as shown in the examples of <<[[algorithms-similarity-cosine-procedure-sample]], cosine similarity>>.
+The utility function `gds.util.NaN` can be used as an default value for input parameters, as shown in the examples of <<algorithms-similarity-cosine-procedure-sample, cosine similarity>>.
 A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering streamed results, as for instance seen in the examples of <<algorithm-all-pairs-shortest-path-sample, `gds.alpha.allShortestPaths`>>.
 
 == Node and Path Functions
