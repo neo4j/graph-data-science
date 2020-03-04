@@ -43,41 +43,41 @@ The following table lists all production-quality procedures in the GDS library:
 [opts=header,cols="1, 1"]
 |===
 | Algorithm | Procedure
-.6+<.^|<<algorithms-label-propagation, Label Propagation>>
-| `<<algorithms-label-propagation-syntax, gds.labelPropagation.write>>`
-| `<<algorithms-label-propagation-syntax, gds.labelPropagation.write.estimate>>`
-| `<<algorithms-label-propagation-syntax, gds.labelPropagation.stream>>`
-| `<<algorithms-label-propagation-syntax, gds.labelPropagation.stream.estimate>>`
-| `<<algorithms-label-propagation-syntax, gds.labelPropagation.stats>>`
-| `<<algorithms-label-propagation-syntax, gds.labelPropagation.stats.estimate>>`
-.6+<.^|<<algorithms-louvain, Louvain>>
-| `<<algorithms-louvain-syntax, gds.louvain.write>>`
-| `<<algorithms-louvain-syntax, gds.louvain.write.estimate>>`
-| `<<algorithms-louvain-syntax, gds.louvain.stream>>`
-| `<<algorithms-louvain-syntax, gds.louvain.stream.estimate>>`
-| `<<algorithms-louvain-syntax, gds.louvain.stats>>`
-| `<<algorithms-louvain-syntax, gds.louvain.stats.estimate>>`
-.6+<.^|<<algorithms-node-similarity, Node Similarity>>
-| `<<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write>>`
-| `<<algorithms-node-similarity-examples-write, gds.nodeSimilarity.write.estimate>>`
-| `<<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream>>`
-| `<<algorithms-node-similarity-examples-stream, gds.nodeSimilarity.stream.estimate>>`
-| `<<algorithms-node-similarity, gds.nodeSimilarity.stats>>`
-| `<<algorithms-node-similarity, gds.nodeSimilarity.stats.estimate>>`
-.6+<.^|<<algorithms-pagerank, PageRank>>
-| `<<algorithms-pagerank-syntax, gds.pageRank.write>>`
-| `<<algorithms-pagerank-syntax, gds.pageRank.write.estimate>>`
-| `<<algorithms-pagerank-syntax, gds.pageRank.stream>>`
-| `<<algorithms-pagerank-syntax, gds.pageRank.stream.estimate>>`
-| `<<algorithms-pagerank-syntax, gds.pageRank.stats>>`
-| `<<algorithms-pagerank-syntax, gds.pageRank.stats.estimate>>`
-.6+<.^|<<algorithms-wcc, Weakly Connected Components>>
-| `<<algorithms-wcc-syntax, gds.wcc.write>>`
-| `<<algorithms-wcc-syntax, gds.wcc.write.estimate>>`
-| `<<algorithms-wcc-syntax-stream, gds.wcc.stream>>`
-| `<<algorithms-wcc-syntax-stream, gds.wcc.stream.estimate>>`
-| `<<algorithms-wcc-syntax, gds.wcc.stats>>`
-| `<<algorithms-wcc-syntax, gds.wcc.stats.estimate>>`
+.6+<.^|<<algorithms-label-propagation-syntax, Label Propagation>>
+| `gds.labelPropagation.write`
+| `gds.labelPropagation.write.estimate`
+| `gds.labelPropagation.stream`
+| `gds.labelPropagation.stream.estimate`
+| `gds.labelPropagation.stats`
+| `gds.labelPropagation.stats.estimate`
+.6+<.^|<<algorithms-louvain-syntax, Louvain>>
+| `gds.louvain.write`
+| `gds.louvain.write.estimate`
+| `gds.louvain.stream`
+| `gds.louvain.stream.estimate`
+| `gds.louvain.stats`
+| `gds.louvain.stats.estimate`
+.6+<.^|<<algorithms-node-similarity-syntax, Node Similarity>>
+| `gds.nodeSimilarity.write`
+| `gds.nodeSimilarity.write.estimate`
+| `gds.nodeSimilarity.stream`
+| `gds.nodeSimilarity.stream.estimate`
+| `gds.nodeSimilarity.stats`
+| `gds.nodeSimilarity.stats.estimate`
+.6+<.^|<<algorithms-pagerank-syntax, PageRank>>
+| `gds.pageRank.write`
+| `gds.pageRank.write.estimate`
+| `gds.pageRank.stream`
+| `gds.pageRank.stream.estimate`
+| `gds.pageRank.stats`
+| `gds.pageRank.stats.estimate`
+.6+<.^|<<algorithms-wcc-syntax, Weakly Connected Components>>
+| `gds.wcc.write`
+| `gds.wcc.write.estimate`
+| `gds.wcc.stream`
+| `gds.wcc.stream.estimate`
+| `gds.wcc.stats`
+| `gds.wcc.stats.estimate`
 |===
 
 [[beta-tier]]
