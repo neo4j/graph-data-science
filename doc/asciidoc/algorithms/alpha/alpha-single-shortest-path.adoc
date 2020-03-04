@@ -56,21 +56,21 @@ YIELD nodeCount, loadDuration, evalDuration, writeDuration
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default  | Optional | Description
-| startNode         | node    | null     | no       | The start node
-| relationshipWeightProperty    | string  | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| delta             | float   | null     | yes      | The grade of concurrency to use.
-| writeProperty     | string  | 'sssp'   | yes      | The property name written back to the node sequence of the node in the path. The property contains the cost it takes to get from the start node to the specific node.
+| Name                       | Type    | Default  | Optional | Description
+| startNode                  | Node    | null     | no       | The start node
+| relationshipWeightProperty | String  | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| delta                      | Float   | null     | yes      | The grade of concurrency to use.
+| writeProperty              | String  | 'sssp'   | yes      | The property name written back to the node sequence of the node in the path. The property contains the cost it takes to get from the start node to the specific node.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type  | Description
-| nodeCount     | int   | The number of nodes considered
-| loadDuration  | int   | Milliseconds for loading data
-| evalDuration  | int   | Milliseconds for running the algorithm
-| writeDuration | int   | Milliseconds for writing result data back
+| Name          | Type    | Description
+| nodeCount     | Integer | The number of nodes considered
+| loadDuration  | Integer | Milliseconds for loading data
+| evalDuration  | Integer | Milliseconds for running the algorithm
+| writeDuration | Integer | Milliseconds for writing result data back
 |===
 
 
@@ -84,18 +84,18 @@ YIELD nodeId, distance
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type   | Default  | Optional | Description
-| startNode         | node   | null     | no       | The start node
-| relationshipWeightProperty    | string | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| delta             | float  | null     | yes      | The grade of concurrency to use.
+| Name                       | Type   | Default  | Optional | Description
+| startNode                  | Node   | null     | no       | The start node
+| relationshipWeightProperty | String | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| delta                      | Float  | null     | yes      | The grade of concurrency to use.
 |===
 
 .Results
 [opts="header"]
 |===
-| Name      | Type | Description
-| nodeId    | int  | Node ID
-| distance  | int  | The cost it takes to get from the start node to the specific node
+| Name      | Type    | Description
+| nodeId    | Integer | Node ID
+| distance  | Integer | The cost it takes to get from the start node to the specific node.
 |===
 
 

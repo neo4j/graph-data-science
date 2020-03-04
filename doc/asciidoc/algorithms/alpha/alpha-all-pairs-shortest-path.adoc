@@ -57,9 +57,9 @@ YIELD startNodeId, targetNodeId, distance
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                          | Type    | Default                | Optional | Description
-| relationshipWeightProperty    | string  | null                   | yes      | The name of the relationship property that represents weight. If null, treats the graph as unweighted. Must be numeric.
-| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| relationshipWeightProperty    | String  | null                   | yes      | The name of the relationship property that represents weight. If null, treats the graph as unweighted. Must be numeric.
+| concurrency                   | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency               | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 
 
