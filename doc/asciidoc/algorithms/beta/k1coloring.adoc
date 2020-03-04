@@ -47,8 +47,8 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [source, cypher]
 ----
 CALL gds.beta.k1coloring.write(graphName: String, {
-  writeProperty: String
-  // additional configuration
+  writeProperty: String,
+  configuration: Map
 })
 YIELD nodes, colorCount, ranIterations, didConverge, writeProperty, createMillis, computeMillis, writeMillis
 ----
@@ -59,28 +59,28 @@ include::../common-parameters.adoc[]
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                   | Type    | Default                | Optional | Description
-| nodeProjection         | string  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
-| relationshipProjection | string  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
-| concurrency            | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency        | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| maxIterations          | int     | 20                     | yes      | The maximum number of iterations of K1 Coloring to run.
-| writeProperty          | string  | n/a                    | no       | The node property that stores the color.
+| nodeProjection         | String  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
+| relationshipProjection | String  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
+| concurrency            | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency        | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency       | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| maxIterations          | Integer | 20                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| writeProperty          | String  | n/a                    | no       | The node property that stores the color.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name          | Type    | Description
-| nodes         | int     | The number of nodes considered.
-| ranIterations | int     | The actual number of iterations the algorithm ran.
-| didConverge   | boolean | An indicator of whether the algorithm found a correct coloring.
-| colorCount    | int     | The number of colors used.
-| write         | boolean | Specifies if the result was written back as a node property.
-| createMillis  | int     | Milliseconds for loading data.
-| computeMillis | int     | Milliseconds for running the algorithm.
-| writeMillis   | int     | Milliseconds for writing result data back to Neo4j.
-| configuration | map     | The configuration used for running the algorithm.
+| nodes         | Integer | The number of nodes considered.
+| ranIterations | Integer | The actual number of iterations the algorithm ran.
+| didConverge   | Boolean | An indicator of whether the algorithm found a correct coloring.
+| colorCount    | Integer | The number of colors used.
+| write         | Boolean | Specifies if the result was written back as a node property.
+| createMillis  | Integer | Milliseconds for loading data.
+| computeMillis | Integer | Milliseconds for running the algorithm.
+| writeMillis   | Integer | Milliseconds for writing result data back to Neo4j.
+| configuration | Map     | The configuration used for running the algorithm.
 |===
 
 [[algorithms-k1coloring-syntax-stream]]
@@ -97,27 +97,27 @@ YIELD nodeId, color
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name          | Type    | Default | Optional | Description
-| graphName     | string  | null    | yes      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the configuration map must contain configuration for creating a graph.
-| configuration | map     | {}      | yes      | Additional configuration, see below.
+| graphName     | String  | null    | yes      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the configuration map must contain configuration for creating a graph.
+| configuration | Map     | {}      | yes      | Additional configuration, see below.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                   | Type    | Default                | Optional | Description
-| nodeProjection         | string  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
-| relationshipProjection | string  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
-| concurrency            | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency        | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| maxIterations          | int     | 20                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| nodeProjection         | String  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
+| relationshipProjection | String  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
+| concurrency            | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency        | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| maxIterations          | Integer | 20                     | yes      | The maximum number of iterations of K1 Coloring to run.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name          | Type    | Description
-| nodeId        | int     | The ID of the Node
-| color         | int     | The color of the Node
+| nodeId        | Integer | The ID of the Node
+| color         | Integer | The color of the Node
 |===
 
 
