@@ -7,14 +7,15 @@ dependencies {
     annotationProcessor project(':config-generator')
 
     compileOnly project(':proc')
-    compile project(':alpha-algo')
+
+    api(project(':alpha-algo'))
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     compileOnly group: 'org.neo4j',      name: 'neo4j',             version: ver.'neo4j'
 
-    testCompile project(':test-utils')
-    testCompile project(':proc')
+    testImplementation project(':test-utils')
+    testImplementation project(':proc')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 }

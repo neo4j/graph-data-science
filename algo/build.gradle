@@ -10,15 +10,17 @@ dependencies {
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
 
-    compile project(":annotations")
-    compile project(':algo-common')
+    api(project(':algo-common'))
 
-    compile group: 'org.jctools', name: 'jctools-core', version: ver.'jctools-core'
+    implementation(
+        project(":annotations"),
+        [group: 'org.jctools', name: 'jctools-core', version: ver.'jctools-core']
+    )
 
     compileOnly group: 'org.jetbrains',          name: 'annotations',        version: ver.'jetbrains-annotations'
     compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
 
-    testCompile project(':test-utils')
+    testImplementation project(':test-utils')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 }

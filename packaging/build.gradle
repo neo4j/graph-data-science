@@ -5,8 +5,8 @@ description = 'Neo4j Graph Data Science :: Packaging'
 group = 'com.neo4j.gds'
 
 dependencies {
-    compile project(path: ':proc')
-    compile project(path: ':alpha-proc')
+    implementation project(path: ':proc')
+    implementation project(path: ':alpha-proc')
 }
 
 task licenseFile {
@@ -14,8 +14,8 @@ task licenseFile {
 }
 
 shadowJar {
-    baseName = "neo4j-graph-data-science"
-    classifier = "standalone"
+    archiveBaseName.set("neo4j-graph-data-science")
+    archiveClassifier.set("standalone")
     exclude 'META-INF/versions/**/*'
     from licenseFile
     from generateLicensesFiles
@@ -47,10 +47,10 @@ task versionsJson {
 
 task distZip(type: Zip) {
     description 'Create a ZIP archive of the main distribution JAR.'
-    baseName = shadowJar.baseName
-    classifier = shadowJar.classifier
+    archiveBaseName = shadowJar.archiveBaseName
+    archiveClassifier = shadowJar.archiveClassifier
     from shadowJar
-    destinationDir file(distributionDir)
+    destinationDirectory.set(file(distributionDir))
 }
 
 ci.finalizedBy shadowCopy, versionsJson, distZip

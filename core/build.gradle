@@ -14,13 +14,17 @@ dependencies {
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
     compileOnly         group: 'org.neo4j',                name: 'neo4j',              version: ver.'neo4j'
 
-    compile project(":annotations")
-    compile project(':cypher-printer')
-    compile project(':neo4j-adapter')
-    compile project(":neo4j-collections")
-    compile group: 'com.carrotsearch',           name: 'hppc',               version: ver.'hppc'
+    api(
+        project(":annotations"),
+        project(':cypher-printer'),
+        project(':neo4j-adapter'),
+        [group: 'com.carrotsearch',           name: 'hppc',               version: ver.'hppc']
+    )
 
-    testCompile project(':test-utils')
+    implementation project(":neo4j-collections")
+
+    testImplementation project(':test-utils')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    testCompileOnly         group: 'org.neo4j',                name: 'neo4j',              version: ver.'neo4j'
 }

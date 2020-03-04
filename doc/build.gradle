@@ -33,12 +33,12 @@ plugins {
 description = 'Neo4j Graph Data Science :: Docs'
 
 dependencies {
-    compile group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.asciidoctorj
-    compile project(':test-utils')
-    testCompile project(':proc')
-    testCompile project(':alpha-proc')
+    implementation group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.asciidoctorj
+    implementation project(':test-utils')
+    testImplementation project(':proc')
+    testImplementation project(':alpha-proc')
 
-    testCompile group: 'org.reflections',  name: 'reflections',       version: '0.9.11'
+    testImplementation group: 'org.reflections',  name: 'reflections',       version: '0.9.11'
 }
 
 apply plugin: 'ch.kk7.spawn'
@@ -287,16 +287,16 @@ html {
 
 task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
     description 'Package HTML for distribution, including sitemap.'
-    baseName docsArtifactsName
-    extension 'tar.gz'
-    version versions.gdsManual
+    archiveBaseName.set(docsArtifactsName)
+    archiveExtension.set('tar.gz')
+    archiveVersion.set(versions.gdsManual.toString())
     compression = Compression.GZIP
     from { html }
     from { sitemap }
     // The 'into' path will end up being the URL scheme for the HTML pages on the website.
     // It must follow Docs team's layout of `(neo4j.com/docs/)$publication/$version`
-    into "graph-data-science/$version"
-    destinationDir file("$distributionDir/documentation")
+    into "graph-data-science/$archiveVersion"
+    destinationDirectory.set(file("$distributionDir/documentation"))
 }
 
 task pdf {
@@ -352,9 +352,9 @@ task copyAsciidoc(type: Copy) {
 }
 
 task asciidocJar(type: Jar) {
-    baseName 'user-guide'
+    archiveBaseName.set('user-guide')
     classifier 'asciidoc'
-    destinationDir file("$buildDir/distributions")
+    destinationDirectory.set(file("$buildDir/distributions"))
     from copyAsciidoc
 }
 
