@@ -272,9 +272,7 @@ CALL algo.memrec(
 CALL gds.louvain.write.estimate(
   {
     nodeProjection: 'MyLabel',
-    relationshipProjection: 'MY_RELATIONSHIP_TYPE'
-  },
-  {
+    relationshipProjection: 'MY_RELATIONSHIP_TYPE',
     writeProperty: 'myWriteProperty',
     relationshipWeightProperty: 'myWeightProperty'
   }
