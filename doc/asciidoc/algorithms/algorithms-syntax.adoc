@@ -85,7 +85,7 @@ The `seedProperty` parameter defines the node property that contains the seed va
 Seeding can speed up computation and write times.
 
 writeProperty - String::
-In `write` mode this parameter sets the name of the node (or relationship) property to which results are written.
+In `write` mode this parameter sets the name of the node or relationship property to which results are written.
 If the property already exists, existing values will be overwritten.
 
 writeConcurrency - Integer::

@@ -46,10 +46,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL gds.beta.k1coloring.write(graphName: String, {
-  writeProperty: String,
-  configuration: Map
-})
+CALL gds.beta.k1coloring.write(graphName: String, configuration: Map)
 YIELD nodes, colorCount, ranIterations, didConverge, writeProperty, createMillis, computeMillis, writeMillis
 ----
 
