@@ -1,0 +1,29 @@
+For memory estimation on a named graph the configuration for creating that graph is used.
+For the anonymous graph, configuration is used as for <<native-projection>> or <<cypher-projection>>.
+The graph estimation on an anonymous graph is based on the configuration pertaining to anonymous creation or so-called fictive estimation controlled by the options in the table below.
+
+.Configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name              | Type    | Default | Optional | Description
+| nodeCount         | Integer | -1      | yes      | The number of nodes in a fictive graph.
+| relationshipCount | Integer | -1      | yes      | The number of relationships in a fictive graph.
+|===
+
+Setting the `nodeCount` and `relationshipCount` parameters results in fictive graph estimation which allows a memory estimation without loading the graph.
+Additionally algorithm specific parameters can also be provided as config which influence the estimation of memory usage specific to the algorithm.
+
+.Memory estimation results.
+[opts="header",cols="1,1,4"]
+|===
+| Name              | Type          | Description
+| nodeCount         | Integer       | Node count of the graph used in the estimation.
+| relationshipCount | Integer       | Relationship count of the graph used in the estimation.
+| requiredMemory    | Integer       | Human readable version for required memory.
+| bytesMin          | Integer       | Minimum number of bytes to be consumed.
+| bytesMax          | Integer       | Maximum number of bytes to be consumed.
+| heapPercentageMin | Float         | The minimum percentage of the configured max heap (-Xmx) to be consumed.
+| heapPercentageMax | Float         | The maximum percentage of the configured max heap (-Xmx) to be consumed.
+| treeView          | Map           | Human readable version of memory estimation.
+| mapView           | Map           | Detailed information on memory consumption.
+|===

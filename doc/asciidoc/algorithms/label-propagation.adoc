@@ -59,16 +59,38 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-label-propagation-syntax]]
 == Syntax
 
-.The following will run the algorithm and write back results:
+=== Write mode
+
+.Run Label Propagation in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.labelPropagation.write(graphNameOrConfig: String|Map, configuration: Map})
-YIELD nodePropertiesWritten, ranIterations, didConverge, createMillis, computeMillis, writeMillis
+CALL gds.labelPropagation.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general write return columns
+  ranIterations: Integer,
+  didConverge: Boolean
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run Label Propagation in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.labelPropagation.write(configuration: Map)
+YIELD
+  // general write return columns
+  ranIterations: Integer,
+  didConverge: Boolean
+----
+
+include::common-parameters-named-graph.adoc[]
+
+include::common-configuration-named-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -100,16 +122,39 @@ include::common-configuration.adoc[]
 
 |===
 
-.The following will run the algorithm and stream back results:
+
+=== Stream mode
+
+The following will run the algorithm and stream back results:
+
+.Run Label Propagation in stream mode on a graph stored in the catalog.
 [source,cypher]
 ----
-CALL gds.labelPropagation.stream(graphNameOrConfig: String|Map, configuration: Map})
-YIELD nodeId, communityId
+CALL gds.labelPropagation.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+    nodeId: Integer,
+    communityId: Integer
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run Label Propagation in stream mode on an anonymous graph.
+[source,cypher]
+----
+CALL gds.labelPropagation.stream(configuration: Map)
+YIELD
+    nodeId: Integer,
+    communityId: Integer
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1,1,4"]
@@ -129,14 +174,39 @@ include::common-configuration.adoc[]
 | communityId | Integer | Community ID
 |===
 
-.The following will run the algorithm and returns the result in form of statistical and measurement values:
+
+=== Stats mode
+
+The following will run the algorithm and returns the result in form of statistical and measurement values:
+
+.Run Label Propagation in stats mode on an named graph.
 [source, cypher]
 ----
-CALL gds.labelPropagation.stats(graphNameOrConfig: String|Map, configuration: Map)
-YIELD ranIterations, didConverge, createMillis, computeMillis
+CALL gds.labelPropagation.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
+
+.Run Label Propagation in stats mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.labelPropagation.stats(configuration: Map)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer
+----
+
+include::common-parameters-anonymous-graph.adoc[]
 
 The configuration is the same as for the `write` mode.
 
@@ -154,42 +224,32 @@ The configuration is the same as for the `write` mode.
 | configuration         | Map     | The configuration used for running the algorithm.
 |===
 
-.The following will estimate the memory requirements for running the algorithm:
-[source,cypher]
-----
-CALL gds.labelPropagation.<mode>.estimate(graphNameOrConfig: String|Map, configuration: Map})
-YIELD nodes, relationships, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, requiredMemory, mapView
-----
 
+=== Estimate mode
+
+The following will estimate the memory requirements for running the algorithm.
 The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
 
-include::common-parameters.adoc[]
+.Run Label Propagation in estimate mode on an named graph.
+[source,cypher]
+----
+CALL gds.labelPropagation.<mode>.estimate(
+  graphName: String,
+  configuration: Map
+)
+----
 
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default  | Optional | Description
-| nodeCount         | Integer | 0        | yes      | The number of nodes in a fictive graph.
-| relationshipCount | Integer | 0        | yes      | The number of relationships in a fictive graph.
-|===
+include::common-parameters-named-graph.adoc[]
 
-Setting the `nodeCount` and `relationshipCount` parameters allows a memory estimation without loading the graph.
-For explicitly loaded graphs, the config-map needs to contain the graph name in the `graph` key.
-Additionally algorithm specific parameters can also be provided as config.
+.Run Label Propagation in estimate mode on an named graph.
+[source,cypher]
+----
+CALL gds.labelPropagation.<mode>.estimate(configuration: Map)
+----
 
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name              | Type    | Description
-| requiredMemory    | String  | The required memory in human readable format.
-| bytesMin          | Integer | The minimum number of bytes required.
-| bytesMax          | Integer | The maximum number of bytes required.
-| heapPercentageMin | Float   | The minimum percentage of the configured maximum heap required.
-| heapPercentageMax | Float   | The maximum percentage of the configured maximum heap required.
-| mapView           | Map     | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
-| nodes             | Integer | The number of nodes in the graph.
-| relationships     | Integer | The number of relationships in the graph.
-|===
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-estimate-mode.adoc[]
 
 [[algorithms-label-propagation-examples]]
 == Examples
