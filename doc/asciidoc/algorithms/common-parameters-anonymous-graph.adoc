@@ -1,0 +1,6 @@
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name              | Type          | Default   | Optional | Description
+| configuration     | Map           | null      | no       | Configuration for anonymous graph creation and algorithm-specifics.
+|===

@@ -62,16 +62,36 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-pagerank-syntax]]
 == Syntax
 
-.The following will run the algorithm and write back results:
+.Run PageRank in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.pageRank.write(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodes, createMillis, computeMillis, writeMillis, configuration
+CALL gds.pageRank.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general write return columns
+  ranIterations: Integer,
+  didConverge: Boolean
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run PageRank in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.pageRank.write(configuration: Map)
+YIELD
+  // general write return columns
+  ranIterations: Integer,
+  didConverge: Boolean
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -87,24 +107,44 @@ include::common-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| ranIterations | Integer | The number of iterations run.
-| createMillis  | Integer | Milliseconds for creating the graph.
-| computeMillis | Integer | Milliseconds for running the algorithm.
-| writeMillis   | Integer | Milliseconds for writing result data back.
-| configuration | Map     | The configuration used for running the algorithm.
+| Name                   | Type    | Description
+| ranIterations          | Integer | The number of iterations run.
+| didConverge            | Boolean | Indicates if the algorithm converged.
+| createMillis           | Integer | Milliseconds for creating the graph.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| writeMillis            | Integer | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer | The number of properties that were written to Neo4j.
+| configuration          | Map     | The configuration used for running the algorithm.
 |===
 
-.The following will run the algorithm and stream results:
+.Run PageRank in stream mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.pageRank.stream(graphNameOrConfig: String|Map, configuration: Map)
-YIELD node, score
+CALL gds.pageRank.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  score: Float
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run PageRank in stream mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.pageRank.stream(configuration: Map)
+YIELD
+  nodeId: Integer,
+  score: Float
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -124,32 +164,63 @@ include::common-configuration.adoc[]
 | score   | Float   | Page Rank
 |===
 
-.The following will run the algorithm and returns the result in form of statistical and measurement values:
+.Run PageRank in stats mode on an named graph.
 [source, cypher]
 ----
-CALL gds.pageRank.stats(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodes, relationships, ranIterations, didConverge, createMillis, computeMillis, writeMillis
+CALL gds.pageRank.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
+
+.Run PageRank in stats mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.pageRank.stats(configuration: Map)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer
+----
+
+include::common-parameters-anonymous-graph.adoc[]
 
 The configuration is the same as for the `write` mode.
 
-.The following will estimate the memory requirements for running the algorithm:
-[source, cypher]
-----
-CALL gds.pageRank.<mode>.estimate(graphNameOrConfig: String|Map, configuration: Map})
-YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory, mapView
-----
-
-include::common-parameters.adoc[]
-
 The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
 
-If the estimation should be based on an existing graph, the `graphNameOrConfig` should be set to the name of that graph.
-Then the memory of the graph is estimated using the original configuration for creating the existing graph.
-Otherwise, the graph estimation is based on the configuration pertaining to anonymous loading or so-called fictive estimation controlled by the options in the table below.
-For the anonymous case, configuration is used as for <<native-projection>> or <<cypher-projection>>.
+.Run PageRank in estimate mode on an named graph.
+[source, cypher]
+----
+CALL gds.pageRank.<mode>.estimate(
+  graphName: String,
+  configuration: Map
+)
+----
+
+include::common-parameters-named-graph.adoc[]
+
+.Run PageRank in estimate mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.pageRank.<mode>.estimate(configuration: Map)
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-estimate-results.adoc[]
+
+For memory estimation on a named graph the configuration for creating that graph is used.
+For the anonymous graph, configuration is used as for <<native-projection>> or <<cypher-projection>>.
+The graph estimation on an anonymous graph is based on the configuration pertaining to anonymous creation or so-called fictive estimation controlled by the options in the table below.
 
 .Configuration
 [opts="header",cols="1,1,1m,1,4"]
