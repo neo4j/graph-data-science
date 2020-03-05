@@ -65,20 +65,40 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-node-similarity-syntax]]
 == Syntax
 
-.The following describes the API for running the algorithm and writing the similarity scores back to Neo4j:
+.Run Node Similarity in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.write(graphName: String, {
+CALL gds.nodeSimilarity.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general write return columns
+  nodesCompared: Integer,
+  relationshipsWritten: Integer,
   writeRelationshipType: String,
   writeProperty: String
-  // additional configuration
-})
-YIELD nodesCompared, relationshipsWritten, writeRelationshipType, writeProperty
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run Node Similarity in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.nodeSimilarity.write(configuration: Map)
+YIELD
+  // general write return columns
+  nodesCompared: Integer,
+  relationshipsWritten: Integer,
+  writeRelationshipType: String,
+  writeProperty: String
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -109,18 +129,35 @@ include::common-configuration.adoc[]
 |===
 
 [[algorithms-node-similarity-syntax-stream]]
-.The following describes the API for running the algorithm and streaming node pairs and their Jaccard similarity:
+.Run Node Similarity in stream mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.stream(graphName: String, {
-  // configuration
-})
-YIELD node1, node2, similarity
+CALL gds.nodeSimilarity.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  node1: Integer,
+  node2: Integer,
+  similarity: Float
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run Node Similarity in stream mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream(configuration: Map)
+YIELD
+  node1: Integer,
+  node2: Integer,
+  similarity: Float
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
