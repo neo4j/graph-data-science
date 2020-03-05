@@ -78,7 +78,6 @@ include::common-configuration-anonymous-graph.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                       | Type    | Default | Optional  | Description
-| writeProperty              | String  | n/a     | no        | The node property to which the component ID is written to.
 | relationshipWeightProperty | String  | null    | yes       | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
 | defaultValue               | Float   | null    | yes       | The default value of the relationship weight in case it is missing or invalid.
 | seedProperty               | String  | n/a     | yes       | Used to set the initial component for a node. The property value needs to be a number.

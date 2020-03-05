@@ -111,7 +111,6 @@ include::common-configuration-anonymous-graph.adoc[]
 | topN                   | Integer | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned. This value cannot be negative, a value of 0 means no global limit.
 | bottomN                | Integer | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned. This value cannot be negative, a value of 0 means no global limit.
 | writeRelationshipType  | String  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
-| writeProperty          | String  | n/a                    | no       | The relationship property that stores the similarity score.
 |===
 
 .Results

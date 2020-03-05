@@ -104,7 +104,6 @@ include::common-configuration-anonymous-graph.adoc[]
 | maxIterations              | Integer | 20        | yes      | The maximum number of iterations of Page Rank to run.
 | tolerance                  | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable and the algorithm returns.
 | relationshipWeightProperty | String  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| writeProperty              | String  | n/a       | no       | The property name written back to.
 |===
 
 .Results

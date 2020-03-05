@@ -100,7 +100,6 @@ include::common-configuration-named-graph.adoc[]
 | nodeWeightProperty         | String  | null    | yes      | The name of the node property that represents weight.
 | relationshipWeightProperty | String  | null    | yes      | The name of the relationship property that represents weight.
 | seedProperty               | String  | n/a     | yes      | Used to define initial set of labels (must be a number).
-| writeProperty              | String  | n/a     | no       | The node property to which the community ID is written to.
 |===
 
 .Results
