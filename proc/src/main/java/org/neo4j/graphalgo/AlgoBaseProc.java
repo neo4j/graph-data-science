@@ -26,15 +26,23 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.NodeWeightConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
-import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.mutate.NodePropertyAccessor;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -43,13 +51,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.NodeWeightConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
@@ -182,32 +183,39 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     protected Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
+        return createGraph(getOrCreateGraphStore(configAndName), configAndName.getOne());
+    }
+
+    private GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
 
-        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
-            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
-            : Optional.empty();
-
         GraphStoreWithConfig graphCandidate;
-        List<String> relationshipTypes;
 
         if (maybeGraphName.isPresent()) {
             graphCandidate = GraphStoreCatalog.get(getUsername(), maybeGraphName.get());
-            relationshipTypes = config.relationshipTypes();
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
             GraphStore graphStore = loader.build(createConfig.getGraphImpl()).build().graphStore();
 
             graphCandidate = ImmutableGraphStoreWithConfig.of(graphStore, createConfig);
-            relationshipTypes = config.relationshipTypes();
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
 
         validateConfig(graphCandidate.config(), config);
-        return graphCandidate.graphStore().getGraph(relationshipTypes, weightProperty);
+        return graphCandidate.graphStore();
+    }
+
+    private Graph createGraph(GraphStore graphStore, CONFIG config) {
+        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
+            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
+            : Optional.empty();
+
+        List<String> relationshipTypes = config.relationshipTypes();
+
+        return graphStore.getGraph(relationshipTypes, weightProperty);
     }
 
     private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
@@ -274,16 +282,19 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
 
+        GraphStore graphStore;
         Graph graph;
 
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
-            graph = createGraph(input);
+            graphStore = getOrCreateGraphStore(input);
+            graph = createGraph(graphStore, config);
         }
 
         if (graph.isEmpty()) {
             return builder
                 .isGraphEmpty(true)
                 .graph(graph)
+                .graphStore(graphStore)
                 .config(config)
                 .tracker(tracker)
                 .computeMillis(0)
@@ -314,6 +325,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
         return builder
             .graph(graph)
+            .graphStore(graphStore)
             .tracker(AllocationTracker.EMPTY)
             .algorithm(algo)
             .result(result)
@@ -326,6 +338,17 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     ) {
         throw new UnsupportedOperationException(
             "Write procedures needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
+    }
+
+    protected NodePropertyAccessor nodePropertyAccessor(
+        ComputationResult<A, RESULT, CONFIG> computationResult
+    ) {
+        throw new UnsupportedOperationException(
+            "Mutate procedures needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyAccessor");
+    }
+
+    protected interface WriteOrMutate<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> {
+        void apply(AbstractResultBuilder<?> writeBuilder, ComputationResult<A, RESULT, CONFIG> computationResult);
     }
 
     protected void writeNodeProperties(
@@ -362,6 +385,29 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         }
     }
 
+    protected void mutateNodeProperties(
+        AbstractResultBuilder<?> writeBuilder,
+        ComputationResult<A, RESULT, CONFIG> computationResult
+    ) {
+        NodePropertyAccessor nodePropertyAccessor = nodePropertyAccessor(computationResult);
+
+        CONFIG config = computationResult.config();
+        if (!(config instanceof WriteConfig)) {
+            throw new IllegalArgumentException(String.format(
+                "Can only write results if the config implements %s.",
+                WriteConfig.class
+            ));
+        }
+
+        WriteConfig writeConfig = (WriteConfig) config;
+        try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
+            log.debug("Updating graph store");
+            GraphStore graphStore = computationResult.graphStore();
+            graphStore.addNodeProperty(writeConfig.writeProperty(), nodePropertyAccessor::getValue);
+            writeBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
+        }
+    }
+
     protected Stream<MemoryEstimateResult> computeEstimate(
         Object graphNameOrConfig,
         Map<String, Object> configuration
@@ -394,6 +440,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         RESULT result();
 
         Graph graph();
+
+        GraphStore graphStore();
 
         AllocationTracker tracker();
 

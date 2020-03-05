@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -103,11 +104,15 @@ public final class GraphStore {
         AllocationTracker tracker
     ) {
         this.nodes = nodes;
-        this.nodeProperties = nodeProperties;
+        this.nodeProperties = new HashMap<>(nodeProperties);
         this.relationships = relationships;
         this.relationshipProperties = relationshipProperties;
         this.createdGraphs = new HashSet<>();
         this.tracker = tracker;
+    }
+
+    public void addNodeProperty(String propertyKey, NodeProperties nodeProperties) {
+        this.nodeProperties.putIfAbsent(propertyKey, nodeProperties);
     }
 
     public Graph getGraph(String... relationshipTypes) {

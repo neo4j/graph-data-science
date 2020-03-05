@@ -71,13 +71,15 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.pageRank.stream.estimate`
 | `gds.pageRank.stats`
 | `gds.pageRank.stats.estimate`
-.6+<.^|<<algorithms-wcc-syntax, Weakly Connected Components>>
+.8+<.^|<<algorithms-wcc-syntax, Weakly Connected Components>>
 | `gds.wcc.write`
 | `gds.wcc.write.estimate`
 | `gds.wcc.stream`
 | `gds.wcc.stream.estimate`
 | `gds.wcc.stats`
 | `gds.wcc.stats.estimate`
+| `gds.wcc.mutate`
+| `gds.wcc.mutate.estimate`
 |===
 
 [[beta-tier]]

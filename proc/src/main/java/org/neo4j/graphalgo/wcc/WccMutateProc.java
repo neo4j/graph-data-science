@@ -19,11 +19,10 @@
  */
 package org.neo4j.graphalgo.wcc;
 
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.mutate.NodePropertyAccessor;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -48,7 +47,17 @@ public class WccMutateProc extends WccBaseProc<WccWriteConfig> {
             graphNameOrConfig,
             configuration
         );
-        return write(computationResult);
+
+        return mutate(computationResult);
+    }
+
+    @Procedure(value = "gds.wcc.mutate.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> mutateEstimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
@@ -62,28 +71,8 @@ public class WccMutateProc extends WccBaseProc<WccWriteConfig> {
     }
 
     @Override
-    protected PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
-        ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult
-    ) {
-        WccWriteConfig config = computationResult.config();
-
-        boolean consecutiveIds = config.consecutiveIds();
-        boolean isIncremental = config.isIncremental();
-        boolean seedPropertyEqualsWriteProperty = config.writeProperty().equalsIgnoreCase(config.seedProperty());
-
-        PropertyTranslator<DisjointSetStruct> propertyTranslator;
-        if (seedPropertyEqualsWriteProperty && !consecutiveIds) {
-            NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
-            propertyTranslator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, DisjointSetStruct::setIdOf);
-        } else if (consecutiveIds && !isIncremental) {
-            propertyTranslator = new ConsecutivePropertyTranslator(
-                computationResult.result(),
-                computationResult.tracker()
-            );
-        } else {
-            propertyTranslator = (PropertyTranslator.OfLong<DisjointSetStruct>) DisjointSetStruct::setIdOf;
-        }
-
-        return propertyTranslator;
+    protected NodePropertyAccessor nodePropertyAccessor(ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult) {
+        DisjointSetStruct dss = computationResult.result();
+        return nodeId -> dss.setIdOf(nodeId);
     }
 }

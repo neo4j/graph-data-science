@@ -55,12 +55,12 @@ class WccMutateProcTest extends WccBaseProcTest<WccWriteConfig> implements Graph
             ", (b {componentId: 0})" +
             ", (c {componentId: 0})" +
             ", (d {componentId: 0})" +
-            ", (e {componentId: 1})" +
-            ", (f {componentId: 1})" +
-            ", (g {componentId: 1})" +
-            ", (h {componentId: 2})" +
-            ", (i {componentId: 2})" +
-            ", (j {componentId: 3})" +
+            ", (e {componentId: 0})" +
+            ", (f {componentId: 0})" +
+            ", (g {componentId: 0})" +
+            ", (h {componentId: 7})" +
+            ", (i {componentId: 7})" +
+            ", (j {componentId: 9})" +
             // {A, B, C, D}
             ", (a)-[{w: 1.0d}]->(b)" +
             ", (b)-[{w: 1.0d}]->(c)" +

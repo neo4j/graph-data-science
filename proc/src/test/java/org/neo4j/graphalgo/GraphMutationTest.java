@@ -29,7 +29,11 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public interface GraphMutationTest<CONFIG extends WriteConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
@@ -42,13 +46,20 @@ public interface GraphMutationTest<CONFIG extends WriteConfig & AlgoBaseConfig, 
             graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
         );
 
-        applyOnProcedure((proc) -> {
-            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            proc.compute(loadedGraphName, configMap);
-        });
+        applyOnProcedure(procedure ->
+            getProcedureMethods(procedure)
+                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+                .forEach(mutateMethod -> {
+                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+                    try {
+                        mutateMethod.invoke(procedure, loadedGraphName, config);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                })
+        );
 
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, loadedGraphName).getGraph();
-
         TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 

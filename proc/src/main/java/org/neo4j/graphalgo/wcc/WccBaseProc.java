@@ -44,8 +44,21 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
         return new WccFactory<>();
     }
 
-    protected Stream<WriteResult> write(
-        ComputationResult<Wcc, DisjointSetStruct, CONFIG> computeResult
+    protected Stream<WriteResult> write(ComputationResult<Wcc, DisjointSetStruct, CONFIG> computeResult) {
+        return writeOrMutate(computeResult,
+            (writeBuilder, computationResult) -> super.writeNodeProperties(writeBuilder, computationResult)
+        );
+    }
+
+    protected Stream<WriteResult> mutate(ComputationResult<Wcc, DisjointSetStruct, CONFIG> computeResult) {
+        return writeOrMutate(computeResult,
+            (writeBuilder, computationResult) -> super.mutateNodeProperties(writeBuilder, computationResult)
+        );
+    }
+
+    private Stream<WriteResult> writeOrMutate(
+        ComputationResult<Wcc, DisjointSetStruct, CONFIG> computeResult,
+        WriteOrMutate<Wcc, DisjointSetStruct, CONFIG> op
     ) {
         CONFIG config = computeResult.config();
 
@@ -67,7 +80,7 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
             builder.withConfig(config);
 
             if (shouldWrite(config)) {
-                writeNodeProperties(builder, computeResult);
+                op.apply(builder, computeResult);
                 graph.releaseProperties();
             }
 
