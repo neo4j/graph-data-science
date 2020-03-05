@@ -15,7 +15,7 @@ This section describes the utility functions and shows their usage in concrete e
 .Usage:
 [source, cypher]
 ----
-RETURN gds.version() as version
+RETURN gds.version() AS version
 ----
 
 .Results
@@ -58,8 +58,8 @@ RETURN gds.version() as version
 .Example for gds.util.IsFinite:
 [source, cypher]
 ----
-UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] as value
-RETURN gds.util.isFinite(value) as isFinite
+UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] AS value
+RETURN gds.util.isFinite(value) AS isFinite
 ----
 
 .Results
@@ -77,8 +77,8 @@ RETURN gds.util.isFinite(value) as isFinite
 .Example for gds.util.isInfinite():
 [source, cypher]
 ----
-UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] as value
-RETURN gds.util.isInfinite(value) as isInfinite
+UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] AS value
+RETURN gds.util.isInfinite(value) AS isInfinite
 ----
 
 .Results
@@ -135,8 +135,8 @@ CREATE  (nBridget)-[:LINK]->(nCharles)
 [source, cypher]
 ----
 MATCH (u:User{name: 'Alice'})
-WITH id(u) as nodeId
-RETURN gds.util.asNode(nodeId).name as node
+WITH id(u) AS nodeId
+RETURN gds.util.asNode(nodeId).name AS node
 ----
 
 .Results
@@ -154,8 +154,8 @@ RETURN gds.util.asNode(nodeId).name as node
 ----
 MATCH (u:User)
 WHERE NOT u.name = 'Charles'
-WITH collect(id(u)) as nodeIds
-RETURN [x in gds.util.asNodes(nodeIds)| x.name] as nodes
+WITH collect(id(u)) AS nodeIds
+RETURN [x in gds.util.asNodes(nodeIds)| x.name] AS nodes
 ----
 
 .Results

@@ -354,8 +354,8 @@ include::../../management-ops/cypher-projection.adoc[tag=explanation]
 [source, cypher]
 ----
 CALL gds.alpha.betweenness.write({
-  nodeQuery: 'MATCH (p:User) RETURN id(p) as id',
-  relationshipQuery: 'MATCH (p1:User)-[:MANAGE]->(p2:User) RETURN id(p1) as source, id(p2) as target'
+  nodeQuery: 'MATCH (p:User) RETURN id(p) AS id',
+  relationshipQuery: 'MATCH (p1:User)-[:MANAGE]->(p2:User) RETURN id(p1) AS source, id(p2) AS target'
 }) YIELD nodes, minCentrality, maxCentrality, sumCentrality
 ----
 

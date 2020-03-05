@@ -97,10 +97,10 @@ If we do not specify any of the options for early termination, the whole graph i
 [source, cypher]
 ----
 MATCH (a:Node{tag:'a'})
-WITH id(a) as startNode
+WITH id(a) AS startNode
 CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] as tags
+UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
 ORDER BY tags
 ----
@@ -125,10 +125,10 @@ If specifying d and e as target nodes, not all nodes at distance 1 will be visit
 [source, cypher]
 ----
 MATCH (a:Node{tag:'a'}), (d:Node{tag:'d'}), (e:Node{tag:'e'})
-WITH id(a) as startNode, [id(d), id(e)] as targetNodes
+WITH id(a) AS startNode, [id(d), id(e)] AS targetNodes
 CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode, targetNodes: targetNodes})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] as tags
+UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
 ORDER BY tags
 ----
@@ -150,10 +150,10 @@ ORDER BY tags
 [source, cypher]
 ----
 MATCH (a:Node{tag:'a'})
-WITH id(a) as startNode
+WITH id(a) AS startNode
 CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode, maxDepth: 1})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] as tags
+UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
 ORDER BY tags
 ----
@@ -176,10 +176,10 @@ In the above case, nodes d and e were not visited since they are at distance 2 f
 [source, cypher]
 ----
 MATCH (a:Node{tag:'a'})
-WITH id(a) as startNode
+WITH id(a) AS startNode
 CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode, maxCost: 10, relationshipWeightProperty: 'cost'})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] as tags
+UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
 ORDER BY tags
 ----

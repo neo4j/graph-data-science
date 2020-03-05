@@ -225,8 +225,8 @@ include::../../management-ops/cypher-projection.adoc[tag=explanation]
 [source, cypher]
 ----
 CALL gds.alpha.eigenvector.write({
-  nodeQuery: 'MATCH (p:Page) RETURN id(p) as id',
-  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page) RETURN id(p1) as source, id(p2) as target',
+  nodeQuery: 'MATCH (p:Page) RETURN id(p) AS id',
+  relationshipQuery: 'MATCH (p1:Page)-[:LINKS]->(p2:Page) RETURN id(p1) AS source, id(p2) AS target',
   maxIterations: 5
 })
 YIELD nodes, iterations, dampingFactor, writeProperty

@@ -96,10 +96,10 @@ In the following examples we will demonstrate using the Breadth First Search alg
 [source, cypher]
 ----
 MATCH (a:Node{tag:'a'})
-WITH id(a) as startNode
+WITH id(a) AS startNode
 CALL gds.alpha.bfs.stream('myGraph', {startNode: startNode})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] as tags
+UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
 ORDER BY tags
 ----
@@ -124,10 +124,10 @@ Since none of the options for early termination are specified, the whole graph i
 [source, cypher]
 ----
 MATCH (a:Node{tag:'a'}), (d:Node{tag:'d'}), (e:Node{tag:'e'})
-WITH id(a) as startNode, [id(d), id(e)] as targetNodes
+WITH id(a) AS startNode, [id(d), id(e)] AS targetNodes
 CALL gds.alpha.bfs.stream('myGraph', {startNode: startNode, targetNodes: targetNodes})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] as tags
+UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
 ORDER BY tags
 ----
@@ -149,10 +149,10 @@ ORDER BY tags
 [source, cypher]
 ----
 MATCH (a:Node{tag:'a'})
-WITH id(a) as startNode
+WITH id(a) AS startNode
 CALL gds.alpha.bfs.stream('myGraph', {startNode: startNode, maxDepth: 1})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] as tags
+UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
 ORDER BY tags
 ----
@@ -175,10 +175,10 @@ In the above example, nodes d and e were not visited since they are at distance 
 [source, cypher]
 ----
 MATCH (a:Node{tag:'a'})
-WITH id(a) as startNode
+WITH id(a) AS startNode
 CALL gds.alpha.bfs.stream('myGraph', {startNode: startNode, maxCost: 10, relationshipWeightProperty: 'cost'})
 YIELD path
-UNWIND [ n in nodes(path) | n.tag ] as tags
+UNWIND [ n in nodes(path) | n.tag ] AS tags
 RETURN tags
 ORDER BY tags
 ----

@@ -199,8 +199,8 @@ include::../../management-ops/cypher-projection.adoc[tag=explanation]
 ----
 MATCH (start:Loc {name: 'A'})
 CALL gds.alpha.shortestPath.deltaStepping.write({
-  nodeQuery:'MATCH(n:Loc) WHERE not n.name = "c" RETURN id(n) as id',
-  relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) as source, id(m) as target, r.cost as weight',
+  nodeQuery:'MATCH(n:Loc) WHERE not n.name = "c" RETURN id(n) AS id',
+  relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) AS source, id(m) AS target, r.cost AS weight',
   startNode: start,
   relationshipWeightProperty: 'weight',
   delta: 3.0,

@@ -293,8 +293,8 @@ include::../../management-ops/cypher-projection.adoc[tag=explanation]
 [source, cypher]
 ----
 CALL gds.alpha.degree.write({
-  nodeQuery: 'MATCH (u:User) RETURN id(u) as id',
-  relationshipQuery: 'MATCH (u1:User)<-[:FOLLOWS]-(u2:User) RETURN id(u1) as source, id(u2) as target',
+  nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
+  relationshipQuery: 'MATCH (u1:User)<-[:FOLLOWS]-(u2:User) RETURN id(u1) AS source, id(u2) AS target',
   writeProperty: 'followers'
 })
 ----
@@ -305,8 +305,8 @@ Note, that if we want to find the number of users that a user is following rathe
 [source, cypher]
 ----
 CALL gds.alpha.degree.write({
-  nodeQuery: 'MATCH (u:User) RETURN id(u) as id',
-  relationshipQuery: 'MATCH (u1:User)-[:FOLLOWS]->(u2:User) RETURN id(u1) as source, id(u2) as target',
+  nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
+  relationshipQuery: 'MATCH (u1:User)-[:FOLLOWS]->(u2:User) RETURN id(u1) AS source, id(u2) AS target',
   writeProperty: 'followers'
 })
 ----

@@ -166,8 +166,8 @@ The corresponding k-Nearest Neighbors Graph can then be used as part of recommen
 [source, cypher]
 ----
  MATCH (p:Person)-[:LIKES]->(cuisine)
- WITH {item:id(p), categories: collect(id(cuisine))} as userData
- WITH collect(userData) as data
+ WITH {item:id(p), categories: collect(id(cuisine))} AS userData
+ WITH collect(userData) AS data
  CALL gds.alpha.ml.ann.stream({
    nodeProjection: '*',
    relationshipProjection: '*',
@@ -208,8 +208,8 @@ We'd probably want to filter those out, which we can do by passing in the `simil
 [source, cypher]
 ----
  MATCH (p:Person)-[:LIKES]->(cuisine)
- WITH {item:id(p), categories: collect(id(cuisine))} as userData
- WITH collect(userData) as data
+ WITH {item:id(p), categories: collect(id(cuisine))} AS userData
+ WITH collect(userData) AS data
  CALL gds.alpha.ml.ann.write({
   nodeProjection: '*',
   relationshipProjection: '*',

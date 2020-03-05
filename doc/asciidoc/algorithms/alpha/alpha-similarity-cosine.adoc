@@ -361,7 +361,7 @@ CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
- WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
  With collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({nodeProjection: '*', relationshipProjection: '*', data: data})
  YIELD item1, item2, count1, count2, similarity
@@ -398,7 +398,7 @@ We'd probably want to filter those out, which we can do by passing in the `simil
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
- WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({
    nodeProjection: '*',
@@ -434,7 +434,7 @@ We can do that by passing in the `topK` parameter.
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
- WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({
    nodeProjection: '*',
@@ -468,8 +468,8 @@ For example, the person most similar to Zhen is Michael, but the person most sim
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
- WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
- WITH collect(userData) as data
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
+ WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.write({
    nodeProjection: '*',
    relationshipProjection: '*',
@@ -522,8 +522,8 @@ We could use this technique to compute the similarity of a subset of items to al
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
- WITH {item:id(p), name: p.name, weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData
- WITH collect(userData) as personCuisines
+ WITH {item:id(p), name: p.name, weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
+ WITH collect(userData) AS personCuisines
  WITH personCuisines,
       [value in personCuisines WHERE value.name IN ["Praveena", "Arya"] | value.item ] AS sourceIds
  CALL gds.alpha.similarity.cosine.stream({
@@ -570,8 +570,8 @@ CREATE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31
 [source, cypher]
 ----
  MATCH (c:Cuisine)
- WITH {item:id(c), weights: c.embedding} as userData
- WITH collect(userData) as data
+ WITH {item:id(c), weights: c.embedding} AS userData
+ WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({
   nodeProjection: '*',
   relationshipProjection: '*',

@@ -232,7 +232,7 @@ In the following examples we will demonstrate using the Louvain algorithm on thi
 ----
 CALL gds.louvain.stream('myGraph')
 YIELD nodeId, communityId, intermediateCommunityIds
-RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
 ORDER BY name ASC
 ----
 
@@ -295,7 +295,7 @@ The Louvain algorithm can also run on weighted graphs, taking the given relation
 ----
 CALL gds.louvain.stream('myGraph', { relationshipWeightProperty: 'weight' })
 YIELD nodeId, communityId, intermediateCommunityIds
-RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
 ORDER BY name ASC
 ----
 
@@ -330,7 +330,7 @@ The algorithm will try to keep the seeded community IDs.
 ----
 CALL gds.louvain.stream('myGraph', { seedProperty: 'seed' })
 YIELD nodeId, communityId, intermediateCommunityIds
-RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
 ORDER BY name ASC
 ----
 
@@ -426,7 +426,7 @@ CALL gds.louvain.stream({
     },
     includeIntermediateCommunities: true
 }) YIELD nodeId, communityId, intermediateCommunityIds
-RETURN gds.util.asNode(nodeId).name as name, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
 ORDER BY name ASC
 ----
 

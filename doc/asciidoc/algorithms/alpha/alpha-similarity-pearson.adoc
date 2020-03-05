@@ -225,8 +225,8 @@ MERGE (karin)-[:RATED {score: 9}]->(gruffalo)
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
-WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
-WITH collect(userData) as data
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS data
 CALL gds.alpha.similarity.pearson.stream({
  nodeProjection: '*',
  relationshipProjection: '*',
@@ -267,8 +267,8 @@ We'd probably want to filter those out, which we can do by passing in the `simil
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
-WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
-WITH collect(userData) as data
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS data
 CALL gds.alpha.similarity.pearson.stream({
  nodeProjection: '*',
  relationshipProjection: '*',
@@ -301,8 +301,8 @@ We can do that by passing in the `topK` parameter.
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
-WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
-WITH collect(userData) as data
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS data
 CALL gds.alpha.similarity.pearson.stream({
  nodeProjection: '*',
  relationshipProjection: '*',
@@ -335,8 +335,8 @@ For example, the person most similar to Arya is Karin, but the person most simil
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
-WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
-WITH collect(userData) as data
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS data
 CALL gds.alpha.similarity.pearson.write({
  nodeProjection: '*',
  relationshipProjection: '*',
@@ -386,8 +386,8 @@ We could use this technique to compute the similarity of a subset of items to al
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
-WITH {item:id(p), name: p.name, weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData
-WITH collect(userData) as personCuisines
+WITH {item:id(p), name: p.name, weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS personCuisines
 WITH personCuisines,
      [value in personCuisines WHERE value.name IN ["Praveena", "Arya"] | value.item ] AS sourceIds
 CALL gds.alpha.similarity.pearson.stream({
@@ -432,8 +432,8 @@ MERGE (jerry:Movie {name:'Jerry Maguire'})      SET jerry.embedding = [0.47, 0.9
 [source, cypher]
 ----
 MATCH (m:Movie)
-WITH {item:id(m), weights: m.embedding} as userData
-WITH collect(userData) as data
+WITH {item:id(m), weights: m.embedding} AS userData
+WITH collect(userData) AS data
 CALL gds.alpha.similarity.pearson.stream({
  nodeProjection: '*',
  relationshipProjection: '*',
