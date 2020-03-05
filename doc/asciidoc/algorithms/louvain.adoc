@@ -40,6 +40,9 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-louvain-syntax]]
 == Syntax
 
+
+=== Write mode
+
 .Run Louvain in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
@@ -104,6 +107,8 @@ include::common-configuration-anonymous-graph.adoc[]
 
 
 [[algorithms-louvain-syntax-stream]]
+=== Stream mode
+
 .Run Louvain in stream mode on a graph stored in the catalog.
 [source, cypher]
 ----

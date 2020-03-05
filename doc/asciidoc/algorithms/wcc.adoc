@@ -41,7 +41,8 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-wcc-syntax]]
 == Syntax
 
-.The following describes the API for running the algorithm and writing results back to Neo4j:
+
+== Write mode
 
 .Run WCC in write mode on a graph stored in the catalog.
 [source, cypher]
@@ -100,7 +101,9 @@ include::common-configuration-anonymous-graph.adoc[]
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===
 
+
 [[algorithms-wcc-syntax-stream]]
+== Stream mode
 
 .Run WCC in stream mode on a graph stored in the catalog.
 [source, cypher]
