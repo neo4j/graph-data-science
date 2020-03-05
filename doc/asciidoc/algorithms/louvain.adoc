@@ -40,16 +40,38 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-louvain-syntax]]
 == Syntax
 
-.The following describes the API for running the algorithm and writing results back to Neo4j:
+.Run Louvain in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.louvain.write(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodePropertiesWritten, communityCount, modularity, createMillis, computeMillis, writeMillis
+CALL gds.louvain.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general write return columns
+  nodePropertiesWritten: Integer,
+  communityCount: Integer,
+  modularity: Float
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run Louvain in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.louvain.write(configuration: Map)
+YIELD
+  // general write return columns
+  nodePropertiesWritten: Integer,
+  communityCount: Integer,
+  modularity: Float
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -83,16 +105,36 @@ include::common-configuration.adoc[]
 
 
 [[algorithms-louvain-syntax-stream]]
-.The following describes the API for running the algorithm and stream results:
+.Run Louvain in stream mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.louvain.stream(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodeId, communityId, intermediateCommunityIds
+CALL gds.louvain.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  communityId: Integer,
+  intermediateCommunityIds: Integer[]
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run Louvain in stream mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.louvain.stream(configuration: Map)
+YIELD
+  nodeId: Integer,
+  communityId: Integer,
+  intermediateCommunityIds: Integer[]
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -105,7 +147,6 @@ include::common-configuration.adoc[]
 | tolerance                      | Float    | 0.0001  | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | includeIntermediateCommunities | Boolean  | false   | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
 |===
-
 
 .Results
 [opts="header",cols="1,1,6"]
