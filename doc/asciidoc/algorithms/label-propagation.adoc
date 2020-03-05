@@ -138,6 +138,8 @@ YIELD
     communityId: Integer
 ----
 
+:entity: node
+:result: community ID
 include::common-parameters-named-graph.adoc[]
 
 include::common-configuration-named-graph.adoc[]
@@ -175,8 +177,6 @@ include::common-configuration-anonymous-graph.adoc[]
 
 
 === Stats mode
-
-The following will run the algorithm and returns the result in form of statistical and measurement values:
 
 .Run Label Propagation in stats mode on an named graph.
 [source, cypher]
