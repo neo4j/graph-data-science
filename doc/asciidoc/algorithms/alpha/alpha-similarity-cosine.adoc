@@ -87,7 +87,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                  | Type            | Default                | Optional | Description
-| data                  | List or String  | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
+| data                  | String[]        | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
 | top                   | Integer         | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
 | topK                  | Integer         | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | similarityCutoff      | Integer         | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
@@ -101,8 +101,8 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | writeBatchSize        | Integer         | 10000                  | yes      | The batch size to use when storing results.
 | writeRelationshipType | String          | SIMILAR                | yes      | The relationship type to use when storing results.
 | writeProperty         | String          | score                  | yes      | The property to use when storing results.
-| sourceIds             | List of Integer | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
-| targetIds             | List of Integer | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| sourceIds             | Integer[]       | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| targetIds             | Integer[]       | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 |===
 
 .Results
@@ -161,7 +161,7 @@ YIELD item1, item2, count1, count2, intersection, similarity
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type               | Default                | Optional | Description
-| data             | List of String     | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
+| data             | String[]           | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
 | top              | Integer            | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
 | topK             | Integer            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | similarityCutoff | Integer            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
@@ -170,8 +170,8 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | concurrency      | Integer            | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency  | Integer            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | graph            | String             | dense                  | yes      | The graph type ('dense' or 'cypher').
-| sourceIds        | List of Integer    | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
-| targetIds        | List of Integer    | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| sourceIds        | Integer[]          | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| targetIds        | Integer[]          | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 |===
 
 .Results
