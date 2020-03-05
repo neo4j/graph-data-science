@@ -65,6 +65,9 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-node-similarity-syntax]]
 == Syntax
 
+
+=== Write mode
+
 .Run Node Similarity in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
@@ -127,7 +130,10 @@ include::common-configuration-anonymous-graph.adoc[]
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
 
+
 [[algorithms-node-similarity-syntax-stream]]
+=== Stream mode
+
 .Run Node Similarity in stream mode on a graph stored in the catalog.
 [source, cypher]
 ----
