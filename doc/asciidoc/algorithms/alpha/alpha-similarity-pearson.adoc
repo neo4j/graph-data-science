@@ -597,5 +597,5 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | count1        | Integer   | The size of the `targets` list of one node.
 | count2        | Integer   | The size of the `targets` list of other node.
 | intersection  | Integer   | The number of intersecting values in the two nodes `targets` lists.
-| similarity    | Integer   | The cosine similarity of the two nodes.
+| similarity    | Integer   | The pearson similarity of the two nodes.
 |===
