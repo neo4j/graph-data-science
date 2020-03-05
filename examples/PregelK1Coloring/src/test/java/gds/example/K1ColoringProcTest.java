@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gds.training;
+package gds.example;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,7 +83,7 @@ final class K1ColoringProcTest extends BaseProcTest {
 
         );
 
-        String query = "CALL gds.beta.k1coloring.pregel({" +
+        String query = "CALL gds.example.k1coloring.pregel({" +
                 "  nodeProjection: '*'," +
                 "  relationshipProjection: '*'," +
                 "  maxIterations: 5 " +

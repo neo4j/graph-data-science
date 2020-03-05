@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gds.training;
+package gds.example;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
@@ -38,11 +38,10 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class K1ColoringProc extends AlgoBaseProc<K1ColoringAlgorithm, HugeDoubleArray, K1ColoringPregelConfig> {
-    static final String DESCRIPTION = "The K-1 Coloring algorithm assigns a color to every node in the graph.";
-
+    private static final String DESCRIPTION = "The K-1 Coloring algorithm assigns a color to every node in the graph.";
 
     @Description(DESCRIPTION)
-    @Procedure(value = "gds.beta.k1coloring.pregel")
+    @Procedure(value = "gds.example.k1coloring.pregel")
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
