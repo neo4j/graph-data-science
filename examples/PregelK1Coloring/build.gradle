@@ -9,18 +9,18 @@ targetCompatibility = 1.8
 
 dependencies {
     // We depend on the proc artifact of the GDS library
-    implementation 'org.neo4j.gds:proc:0.9.3'
+    implementation 'org.neo4j.gds:proc:1.0.0'
 
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
     compileOnly 'org.neo4j:neo4j:3.5.15'
 
     // We need an annotation processor for our K1 configuration
-    annotationProcessor 'org.neo4j.gds:config-generator:0.9.3'
+    annotationProcessor 'org.neo4j.gds:config-generator:1.0.0'
     compileOnly         'org.jetbrains:annotations:18.0.0'
 
     // Depend on some test helpers for GDS
-    testImplementation 'org.neo4j.gds:test-utils:0.9.3'
+    testImplementation 'org.neo4j.gds:test-utils:1.0.0'
 
     // Use JUnit Jupiter API for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
