@@ -19,10 +19,25 @@
  */
 package org.neo4j.graphalgo.impl.ocd;
 
-import org.neo4j.graphalgo.api.Graph;
-
-import java.util.List;
-
-public interface AffiliationInitializer {
-    CommunityAffiliations initialize(Graph graph);
+public interface LossFunction {
+    /**
+     * Evaluate loss at current parameter values.
+     * @return current loss.
+     */
+    double loss();
+    /**
+     * Evaluate gradient of loss at current parameter values.
+     * @return gradient of loss.
+     */
+    SparseVector gradient();
+    /**
+     * Get current value of parameters.
+     * @return the current value of parameters.
+     */
+    SparseVector parameters();
+    /**
+     * Update parameters by adding {@param increment} to current parameter values.
+     * @param increment
+     */
+    void update(SparseVector increment);
 }

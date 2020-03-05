@@ -19,9 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.ocd;
 
-import java.util.List;
-
-public interface GradientOptimizer {
-    boolean isRunning();
-    void update(List<SparseVector> state, List<SparseVector> gradients);
+public class AffiliationOptimizer {
+    boolean update(CommunityAffiliations communityAffiliations) {
+        return false;
+    }
 }

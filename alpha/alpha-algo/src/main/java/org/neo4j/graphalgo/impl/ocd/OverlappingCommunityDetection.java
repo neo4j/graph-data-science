@@ -29,26 +29,17 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunityDetection, OverlappingCommunityDetection> {
-    private final List<SparseVector> affiliationVectors;
-    private final Graph graph;
-    private final GradientOptimizer optimizer;
+    private final CommunityAffiliations communityAffiliations;
+    private final AffiliationOptimizer optimizer;
 
-    OverlappingCommunityDetection(Graph graph, AffiliationInitializer initializer, GradientOptimizer optimizer) {
-        affiliationVectors = initializer.initialize(graph);
-        this.graph = graph;
+    OverlappingCommunityDetection(Graph graph, AffiliationInitializer initializer, AffiliationOptimizer optimizer) {
+        this.communityAffiliations = initializer.initialize(graph);
         this.optimizer = optimizer;
-    }
-
-    OverlappingCommunityDetection defaultOverlappingCommunityDetection(Graph graph) {
-        double learningRate = 0.001;
-        double tolerance = 0.00001;
-        return new OverlappingCommunityDetection(graph, null, new GradientDescent(learningRate, tolerance));
     }
 
     @Override
     public OverlappingCommunityDetection compute() {
-        while (optimizer.isRunning()) {
-            optimizer.update(affiliationVectors, gradients());
+        while (optimizer.update(communityAffiliations)) {
         }
         return this;
     }
@@ -61,56 +52,5 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
     @Override
     public void release() {
 
-    }
-
-    public SparseVector affiliationSum() {
-        return SparseVector.sum(affiliationVectors);
-    }
-
-    public double loss() {
-        // 2*sum_U sum_V<U (log(1-exp(-vU.vV)) +vU.vV) + sum_U vU.vU - affSum.affSum
-        SparseVector affiliationSum = affiliationSum();
-        double[] loss = new double[1];
-        loss[0] = -affiliationSum.l2();
-        for (int nodeU = 0; nodeU < affiliationVectors.size(); nodeU++) {
-            graph.forEachRelationship(nodeU, (src, trg) -> {
-                SparseVector affiliationVector = affiliationVectors.get((int) src);
-                loss[0] += affiliationVector.l2();
-                SparseVector neighborAffiliationVector = affiliationVectors.get((int) trg);
-                if (src < trg) {
-                    return true;
-                }
-                double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector);
-                loss[0] += 2*(Math.log(1 - Math.exp(-affiliationInnerProduct)) + affiliationInnerProduct);
-                return true;
-            });
-        }
-        return loss[0];
-    }
-
-    public SparseVector gradient(int nodeU, SparseVector negatedAffiliationSum) {
-        SparseVector minusFU = affiliationVectors.get(nodeU).negate();
-        List<SparseVector> gradientTerms = new LinkedList<>();
-        graph.forEachRelationship(nodeU, (src, trg) -> {
-            gradientTerms.add(weightedNeighbor(minusFU, affiliationVectors.get((int) trg)));
-            return true;
-        });
-        gradientTerms.add(affiliationVectors.get(nodeU));
-        gradientTerms.add(negatedAffiliationSum);
-        return SparseVector.sum(gradientTerms);
-    }
-
-    public List<SparseVector> gradients() {
-        SparseVector negatedAffiliationSum = affiliationSum().negate();
-        return IntStream
-            .of(affiliationVectors.size())
-            .mapToObj((int nodeU) -> gradient(nodeU, negatedAffiliationSum))
-            .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    public SparseVector weightedNeighbor(SparseVector vU, SparseVector vV) {
-        double innerProduct = vU.innerProduct(vV);
-        double expProduct = Math.exp(innerProduct);
-        return vV.multiply(1 / (1 - expProduct));
     }
 }
