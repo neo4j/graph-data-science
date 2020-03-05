@@ -57,11 +57,11 @@ To learn more about algorithm specific parameters and to find out if an algorith
 .List of the most commonly accepted configuration parameters
 concurrency - Integer::
 Controls the parallelism with which the algorithm is executed.
-By default this value is set to the minimum between 4 and the number of available processors.
-Only in _Neo4j Graph Data Science Edition_ may this parameter exceed 4.
+By default this value is set to 4.
+For more details on the concurrency settings and limitations please see <<system-requirements-cpu>> of the System Requirements.
 
 relationshipTypes - String[]::
-If the graph, on which the algorithm is run, was loaded with multiple relationship types, this parameter can be used to select only a subset of the loaded types.
+If the graph, on which the algorithm is run, was created with multiple relationship type projections, this parameter can be used to select only a subset of the projected types.
 The algorithm will then only consider relationships with the selected types.
 
 nodeWeightProperty - String::
