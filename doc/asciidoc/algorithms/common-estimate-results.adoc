@@ -1,0 +1,14 @@
+.Memory estimation results.
+[opts="header",cols="1,1,4"]
+|===
+| Name              | Type          | Description
+| nodeCount         | Integer       | Node count of the graph used in the estimation.
+| relationshipCount | Integer       | Relationship count of the graph used in the estimation.
+| requiredMemory    | Integer       | Human readable version for required memory.
+| bytesMin          | Integer       | Minimum number of bytes to be consumed.
+| bytesMax          | Integer       | Maximum number of bytes to be consumed.
+| heapPercentageMin | Float         | The minimum percentage of the configured max heap (-Xmx) to be consumed.
+| heapPercentageMax | Float         | The maximum percentage of the configured max heap (-Xmx) to be consumed.
+| treeView          | Map           | Human readable version of memory estimation.
+| mapView           | Map           | Detailed information on memory consumption.
+|===

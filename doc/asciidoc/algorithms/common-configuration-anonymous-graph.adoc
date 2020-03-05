@@ -1,0 +1,14 @@
+.General configuration for algorithm execution on an anonymous graph.
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                   | Type                    | Default                | Optional | Description
+| nodeProjection         | String, String[] or Map | null                   | yes      | The node projection used for anonymous graph creation via a Native projection.
+| relationshipProjection | String, String[] or Map | null                   | yes      | The relationship projection used for anonymous graph creation a Native projection.
+| nodeQuery              | String                  | null                   | yes      | The Cypher query used to select the nodes for anonymous graph creation via a Cypher projection.
+| relationshipQuery      | String                  | null                   | yes      | The Cypher query used to select the relationships for anonymous graph creation via a Cypher projection.
+| nodeProperties         | String, String[] or Map | null                   | yes      | The node properties to project during anonymous graph creation.
+| relationshipProperties | String, String[] or Map | null                   | yes      | The relationship properties to project during anonymous graph creation.
+| concurrency            | Integer                 | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency        | Integer                 | value of 'concurrency' | yes      | The number of concurrent threads used for creating the graph.
+| writeConcurrency       | Integer                 | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result (applicable in WRITE mode).
+|===
