@@ -6,7 +6,8 @@
 This chapter provides explanations and examples for auxiliary procedures in the Neo4j Graph Data Science library.
 --
 
-The following procedures can be incorporated into your workflow:
+Auxiliary procedures are extra tools that can be useful in your workflow. +
+The Neo4j GDS library includes the following auxiliary procedures, grouped by quality tier:
 
 * Beta
 ** <<graph-generation, Graph Generation>>
