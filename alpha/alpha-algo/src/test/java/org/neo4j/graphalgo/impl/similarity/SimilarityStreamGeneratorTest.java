@@ -21,8 +21,6 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.results.SimilarityResult;
 
@@ -58,11 +56,10 @@ class SimilarityStreamGeneratorTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2, 8})
     void allPairs(int concurrency) {
-        ProcedureConfiguration configuration = getProcedureConfiguration(concurrency);
 
         SimilarityStreamGenerator<CategoricalInput> generator = new SimilarityStreamGenerator<>(
                 terminationFlag(),
-                configuration,
+                concurrency,
                 DECODER,
                 ALL_PAIRS_COMPUTER);
 
@@ -84,11 +81,10 @@ class SimilarityStreamGeneratorTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2, 8})
     void allPairsTopK(int concurrency) {
-        ProcedureConfiguration configuration = getProcedureConfiguration(concurrency);
 
         SimilarityStreamGenerator<CategoricalInput> generator = new SimilarityStreamGenerator<>(
                 terminationFlag(),
-                configuration,
+                concurrency,
                 DECODER,
                 ALL_PAIRS_COMPUTER);
 
@@ -110,11 +106,10 @@ class SimilarityStreamGeneratorTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2, 8})
     void sourceSpecifiedTargetSpecified(int concurrency) {
-        ProcedureConfiguration configuration = getProcedureConfiguration(concurrency);
 
         SimilarityStreamGenerator<CategoricalInput> generator = new SimilarityStreamGenerator<>(
                 terminationFlag(),
-                configuration,
+                concurrency,
                 DECODER,
                 COMPUTER);
 
@@ -137,11 +132,9 @@ class SimilarityStreamGeneratorTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2, 8})
     void sourceSpecifiedTargetSpecifiedTopK(int concurrency) {
-        ProcedureConfiguration configuration = getProcedureConfiguration(concurrency);
-
         SimilarityStreamGenerator<CategoricalInput> generator = new SimilarityStreamGenerator<>(
                 terminationFlag(),
-                configuration,
+                concurrency,
                 DECODER,
                 COMPUTER);
 
@@ -164,11 +157,9 @@ class SimilarityStreamGeneratorTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2, 8})
     void sourceSpecifiedTargetNotSpecified(int concurrency) {
-        ProcedureConfiguration configuration = getProcedureConfiguration(concurrency);
-
         SimilarityStreamGenerator<CategoricalInput> generator = new SimilarityStreamGenerator<>(
                 terminationFlag(),
-                configuration,
+                concurrency,
                 DECODER,
                 COMPUTER);
 
@@ -203,11 +194,9 @@ class SimilarityStreamGeneratorTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2, 8})
     void sourceSpecifiedTargetNotSpecifiedTopK(int concurrency) {
-        ProcedureConfiguration configuration = getProcedureConfiguration(concurrency);
-
         SimilarityStreamGenerator<CategoricalInput> generator = new SimilarityStreamGenerator<>(
                 terminationFlag(),
-                configuration,
+                concurrency,
                 DECODER,
                 COMPUTER);
 
@@ -238,11 +227,9 @@ class SimilarityStreamGeneratorTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2, 8})
     void sourceNotSpecifiedTargetSpecified(int concurrency) {
-        ProcedureConfiguration configuration = getProcedureConfiguration(concurrency);
-
         SimilarityStreamGenerator<CategoricalInput> generator = new SimilarityStreamGenerator<>(
                 terminationFlag(),
-                configuration,
+                concurrency,
                 DECODER,
                 COMPUTER);
 
@@ -274,11 +261,9 @@ class SimilarityStreamGeneratorTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2, 8})
     void sourceNotSpecifiedTargetSpecifiedTopK(int concurrency) {
-        ProcedureConfiguration configuration = getProcedureConfiguration(concurrency);
-
         SimilarityStreamGenerator<CategoricalInput> generator = new SimilarityStreamGenerator<>(
                 terminationFlag(),
-                configuration,
+                concurrency,
                 DECODER,
                 COMPUTER);
 
@@ -307,11 +292,9 @@ class SimilarityStreamGeneratorTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2, 8})
     void sourceTargetOverlap(int concurrency) {
-        ProcedureConfiguration configuration = getProcedureConfiguration(concurrency);
-
         SimilarityStreamGenerator<CategoricalInput> generator = new SimilarityStreamGenerator<>(
                 terminationFlag(),
-                configuration,
+                concurrency,
                 DECODER,
                 COMPUTER);
 
@@ -340,11 +323,9 @@ class SimilarityStreamGeneratorTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2, 8})
     void sourceTargetOverlapTopK(int concurrency) {
-        ProcedureConfiguration configuration = getProcedureConfiguration(concurrency);
-
         SimilarityStreamGenerator<CategoricalInput> generator = new SimilarityStreamGenerator<>(
                 terminationFlag(),
-                configuration,
+                concurrency,
                 DECODER,
                 COMPUTER);
 
@@ -365,10 +346,6 @@ class SimilarityStreamGeneratorTest {
         assertThat(rows, hasItems(similarityResult(5, 6, false, false)));
         assertThat(rows, hasItems(similarityResult(6, 7, false, false)));
         assertThat(rows, hasItems(similarityResult(7, 6, false, false)));
-    }
-
-    private ProcedureConfiguration getProcedureConfiguration(int concurrency) {
-        return ProcedureConfiguration.create(MapUtil.map("concurrency", concurrency), "");
     }
 
     private TerminationFlag terminationFlag() {

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -43,10 +42,6 @@ public class SimilarityStreamGenerator<T> {
     private final Supplier<RleDecoder> decoderFactory;
     private final SimilarityComputer<T> computer;
     private final int concurrency;
-
-    public SimilarityStreamGenerator(TerminationFlag terminationFlag, ProcedureConfiguration configuration, Supplier<RleDecoder> decoderFactory, SimilarityComputer<T> computer) {
-        this(terminationFlag, configuration.concurrency(), decoderFactory, computer);
-    }
 
     public SimilarityStreamGenerator(TerminationFlag terminationFlag, int concurrency, Supplier<RleDecoder> decoderFactory, SimilarityComputer<T> computer) {
         this.terminationFlag = terminationFlag;

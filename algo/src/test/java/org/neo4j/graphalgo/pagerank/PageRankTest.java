@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -55,7 +54,10 @@ final class PageRankTest extends AlgoTestBase {
     private static final Label LABEL = Label.label("Label1");
     private static final String RELATIONSHIP_TYPE = "TYPE1";
 
-    private static PageRank.Config DEFAULT_CONFIG = new PageRank.Config(40, 0.85, PageRank.DEFAULT_TOLERANCE);
+    static ImmutablePageRankStreamConfig.Builder defaultConfigBuilder() {
+        return ImmutablePageRankStreamConfig.builder()
+            .maxIterations(40);
+    }
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -151,7 +153,7 @@ final class PageRankTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                .create(graph, defaultConfigBuilder().build().toOldConfig(), LongStream.empty())
                 .compute()
                 .result();
 
@@ -200,7 +202,7 @@ final class PageRankTest extends AlgoTestBase {
                     .graph(factoryType)
             );
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                    .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                    .create(graph, defaultConfigBuilder().build().toOldConfig(), LongStream.empty())
                     .compute()
                     .result();
         } else {
@@ -213,7 +215,7 @@ final class PageRankTest extends AlgoTestBase {
                 .graph(factoryType);
 
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                    .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                    .create(graph, defaultConfigBuilder().build().toOldConfig(), LongStream.empty())
                     .compute()
                     .result();
         }
@@ -259,7 +261,7 @@ final class PageRankTest extends AlgoTestBase {
             .create(
                 graph,
                 LongStream.range(0L, graph.nodeCount()),
-                DEFAULT_CONFIG,
+                defaultConfigBuilder().build().toOldConfig(),
                 1,
                 null,
                 1,
@@ -293,11 +295,11 @@ final class PageRankTest extends AlgoTestBase {
     private void assertMemoryEstimation(final long nodeCount, final int concurrency) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
 
-        final LabsPageRankFactory pageRank = new LabsPageRankFactory(DEFAULT_CONFIG);
+        final PageRankFactory pageRank = new PageRankFactory(PageRankAlgorithmType.NON_WEIGHTED);
 
         long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
         final MemoryRange actual = pageRank
-            .memoryEstimation(ProcedureConfiguration.empty())
+            .memoryEstimation(defaultConfigBuilder().build())
             .estimate(dimensions, concurrency)
             .memoryUsage();
         final MemoryRange expected = MemoryRange.of(
