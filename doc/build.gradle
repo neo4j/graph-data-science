@@ -44,7 +44,7 @@ dependencies {
 apply plugin: 'ch.kk7.spawn'
 
 ext {
-    versionParts = "1.0.0-SNAPSHOT".split('-')
+    versionParts = version.split('-')
     versions = [
         'gdsManual' : versionParts[0].split('\\.')[0..1].join('.'),
     ]
