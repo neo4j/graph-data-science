@@ -92,6 +92,8 @@ YIELD
   didConverge: Boolean
 ----
 
+:entity: node
+:result: score
 include::common-parameters-anonymous-graph.adoc[]
 
 include::common-configuration-anonymous-graph.adoc[]

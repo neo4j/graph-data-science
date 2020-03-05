@@ -99,6 +99,8 @@ YIELD
   writeProperty: String
 ----
 
+:entity: relationship
+:result: similarity score
 include::common-parameters-anonymous-graph.adoc[]
 
 include::common-configuration-anonymous-graph.adoc[]
