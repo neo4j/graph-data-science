@@ -107,7 +107,7 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
 
         TriangleBaseProc<A, RESULT, CONFIG> proc = newInstance();
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> proc.validateGraphCreateConfig(graphCreateFromStoreConfig, newConfig()));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> proc.validateConfigs(graphCreateFromStoreConfig, newConfig()));
 
         assertThat(ex.getMessage(), containsString("Projection for `TYPE` uses orientation `NATURAL`"));
     }

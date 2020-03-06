@@ -21,6 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.ExceptionUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -30,15 +31,16 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public interface GraphMutationTest<CONFIG extends WriteConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     @Test
-    default void testGraphMutation() {
+    default void testMutateNodeProperties() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
         GraphStoreCatalog.set(
@@ -53,6 +55,46 @@ public interface GraphMutationTest<CONFIG extends WriteConfig & AlgoBaseConfig, 
                     Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     try {
                         mutateMethod.invoke(procedure, loadedGraphName, config);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                })
+        );
+
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, loadedGraphName).getGraph();
+        TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), mutatedGraph);
+    }
+
+    @Test
+    default void testMutateFailsOnExistingNodeProperty() {
+        String loadedGraphName = "loadedGraph";
+        GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
+        GraphStoreCatalog.set(
+            graphCreateConfig,
+            graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
+        );
+
+        applyOnProcedure(procedure ->
+            getProcedureMethods(procedure)
+                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+                .forEach(mutateMethod -> {
+                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+                    try {
+                        // write first time
+                        mutateMethod.invoke(procedure, loadedGraphName, config);
+                        // write second time using same `writeProperty`
+                        InvocationTargetException ex = assertThrows(
+                            InvocationTargetException.class,
+                            () -> mutateMethod.invoke(procedure, loadedGraphName, config)
+                        );
+
+                        String expectedMessage = String.format(
+                            "Node property `%s` already exists in the in-memory graph.",
+                            config.get("writeProperty").toString()
+                        );
+                        Throwable expectedException = ExceptionUtil.rootCause(ex);
+                        assertEquals(IllegalArgumentException.class, expectedException.getClass());
+                        assertEquals(expectedMessage, expectedException.getMessage());
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }

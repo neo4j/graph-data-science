@@ -111,6 +111,10 @@ public final class GraphStore {
         this.tracker = tracker;
     }
 
+    public boolean hasNodeProperty(String propertyKey) {
+        return nodeProperties.containsKey(propertyKey);
+    }
+
     public void addNodeProperty(String propertyKey, NodeProperties nodeProperties) {
         this.nodeProperties.putIfAbsent(propertyKey, nodeProperties);
     }

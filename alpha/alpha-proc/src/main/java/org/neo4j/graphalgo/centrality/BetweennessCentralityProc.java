@@ -144,7 +144,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
     }
 
     @Override
-    protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig, BetweennessCentralityConfig config) {
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, BetweennessCentralityConfig config) {
         config.validate(graphCreateConfig);
     }
 

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
@@ -203,7 +204,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
 
-        validateConfig(graphCandidate.config(), config);
+        validate(graphCandidate, config);
         return graphCandidate.graphStore();
     }
 
@@ -217,7 +218,10 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         return graphStore.getGraph(relationshipTypes, weightProperty);
     }
 
-    private void validateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
+    private void validate(GraphStoreWithConfig graphStoreWithConfig, CONFIG config) {
+        GraphStore graphStore = graphStoreWithConfig.graphStore();
+        GraphCreateConfig graphCreateConfig = graphStoreWithConfig.config();
+
         if (graphCreateConfig instanceof GraphCreateFromCypherConfig) {
             return;
         }
@@ -257,10 +261,20 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             }
         }
 
-        validateGraphCreateConfig(graphCreateConfig, config);
+        if (config instanceof MutateConfig) {
+            String writeProperty = ((MutateConfig) config).writeProperty();
+            if (writeProperty != null && graphStore.hasNodeProperty(writeProperty)) {
+                throw new IllegalArgumentException(String.format(
+                    "Node property `%s` already exists in the in-memory graph.",
+                    writeProperty
+                ));
+            }
+        }
+
+        validateConfigs(graphCreateConfig, config);
     }
 
-    protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) { }
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) { }
 
     protected ComputationResult<A, RESULT, CONFIG> compute(
         Object graphNameOrConfig,
@@ -393,7 +407,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         WriteConfig writeConfig = (WriteConfig) config;
         RESULT result = computationResult.result();
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
-            log.debug("Updating graph store");
+            log.debug("Updating in-memory graph store");
             GraphStore graphStore = computationResult.graphStore();
             graphStore.addNodeProperty(
                 writeConfig.writeProperty(),
