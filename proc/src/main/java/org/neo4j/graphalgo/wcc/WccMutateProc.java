@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo.wcc;
 
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.mutate.NodePropertyAccessor;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -29,13 +26,12 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class WccMutateProc extends WccBaseProc<WccWriteConfig> {
+public class WccMutateProc extends WccWriteProc {
 
     @Procedure(value = "gds.wcc.mutate", mode = WRITE)
     @Description(WCC_DESCRIPTION)
@@ -58,21 +54,5 @@ public class WccMutateProc extends WccBaseProc<WccWriteConfig> {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Override
-    protected WccWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    ) {
-        return WccWriteConfig.of(username, graphName, maybeImplicitCreate, config);
-    }
-
-    @Override
-    protected NodePropertyAccessor nodePropertyAccessor(ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult) {
-        DisjointSetStruct dss = computationResult.result();
-        return nodeId -> dss.setIdOf(nodeId);
     }
 }

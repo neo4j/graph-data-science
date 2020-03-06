@@ -22,14 +22,11 @@ package org.neo4j.graphalgo.core.write;
 import com.carrotsearch.hppc.IntDoubleMap;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 
-import java.util.concurrent.atomic.AtomicIntegerArray;
+public final class Translators {
 
-public class Translators {
+    private Translators() {}
 
     public static final PropertyTranslator.OfDouble<AtomicDoubleArray> ATOMIC_DOUBLE_ARRAY_TRANSLATOR =
-        (data, nodeId) -> data.get((int) nodeId);
-
-    public static final PropertyTranslator.OfInt<AtomicIntegerArray> ATOMIC_INTEGER_ARRAY_TRANSLATOR =
         (data, nodeId) -> data.get((int) nodeId);
 
     public static final PropertyTranslator.OfDouble<double[]> DOUBLE_ARRAY_TRANSLATOR =
@@ -40,7 +37,4 @@ public class Translators {
 
     public static final PropertyTranslator.OfDouble<IntDoubleMap> INT_DOUBLE_MAP_TRANSLATOR =
         (data, nodeId) -> data.get((int) nodeId);
-
-    public static final PropertyTranslator.OfOptionalInt<int[]> OPTIONAL_INT_ARRAY_TRANSLATOR =
-        (data, nodeId) -> data[(int) nodeId];
 }

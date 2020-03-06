@@ -42,7 +42,6 @@ import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
-import org.neo4j.graphalgo.core.mutate.NodePropertyAccessor;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -340,13 +339,6 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             "Write procedures needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
     }
 
-    protected NodePropertyAccessor nodePropertyAccessor(
-        ComputationResult<A, RESULT, CONFIG> computationResult
-    ) {
-        throw new UnsupportedOperationException(
-            "Mutate procedures needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyAccessor");
-    }
-
     protected interface WriteOrMutate<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> {
         void apply(AbstractResultBuilder<?> writeBuilder, ComputationResult<A, RESULT, CONFIG> computationResult);
     }
@@ -389,7 +381,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         AbstractResultBuilder<?> writeBuilder,
         ComputationResult<A, RESULT, CONFIG> computationResult
     ) {
-        NodePropertyAccessor nodePropertyAccessor = nodePropertyAccessor(computationResult);
+        PropertyTranslator<RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
 
         CONFIG config = computationResult.config();
         if (!(config instanceof WriteConfig)) {
@@ -398,12 +390,15 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 WriteConfig.class
             ));
         }
-
         WriteConfig writeConfig = (WriteConfig) config;
+        RESULT result = computationResult.result();
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
             log.debug("Updating graph store");
             GraphStore graphStore = computationResult.graphStore();
-            graphStore.addNodeProperty(writeConfig.writeProperty(), nodePropertyAccessor::getValue);
+            graphStore.addNodeProperty(
+                writeConfig.writeProperty(),
+                nodeId -> resultPropertyTranslator.toDouble(result, nodeId)
+            );
             writeBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
         }
     }
