@@ -17,25 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.ocd;
+package org.neo4j.graphalgo.impl.ocd.lhs;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.impl.ocd.LocallyMinimalNeighborhoodsWriteConfigImpl;
 
 import java.util.Optional;
 
 @ValueClass
-@Configuration("LocallyMinimalNeighborhoodsStreamConfigImpl")
-public interface LocallyMinimalNeighborhoodsStreamConfig extends LocallyMinimalNeighborhoodsBaseConfig {
-    static LocallyMinimalNeighborhoodsStreamConfig of(
+@Configuration("LocallyMinimalNeighborhoodsWriteConfigImpl")
+public interface LocallyMinimalNeighborhoodsWriteConfig extends LocallyMinimalNeighborhoodsBaseConfig, WriteConfig {
+    static LocallyMinimalNeighborhoodsWriteConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new LocallyMinimalNeighborhoodsStreamConfigImpl(
+        return new LocallyMinimalNeighborhoodsWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

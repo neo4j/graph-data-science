@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.ocd.LocallyMinimalNeighborhoods;
-import org.neo4j.graphalgo.impl.ocd.LocallyMinimalNeighborhoodsBaseConfig;
+import org.neo4j.graphalgo.impl.ocd.lhs.LocallyMinimalNeighborhoods;
+import org.neo4j.graphalgo.impl.ocd.lhs.LocallyMinimalNeighborhoodsBaseConfig;
 import org.neo4j.logging.Log;
 
 public abstract class LocallyMinimalNeighborhoodsBaseProc<CONFIG extends LocallyMinimalNeighborhoodsBaseConfig>
