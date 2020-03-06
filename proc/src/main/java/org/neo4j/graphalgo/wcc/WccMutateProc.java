@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.wcc;
 
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -26,14 +28,14 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
 public class WccMutateProc extends WccWriteProc {
 
-    @Procedure(value = "gds.wcc.mutate", mode = WRITE)
+    @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)
     public Stream<WriteResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -54,5 +56,15 @@ public class WccMutateProc extends WccWriteProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
+    }
+
+    @Override
+    protected WccMutateConfig newConfig(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return WccMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 }

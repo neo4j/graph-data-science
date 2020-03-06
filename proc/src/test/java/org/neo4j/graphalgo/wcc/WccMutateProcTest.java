@@ -36,8 +36,8 @@ class WccMutateProcTest extends WccBaseProcTest<WccWriteConfig> implements Graph
     }
 
     @Override
-    public WccWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return WccWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+    public WccMutateConfig createConfig(CypherMapWrapper mapWrapper) {
+        return WccMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override

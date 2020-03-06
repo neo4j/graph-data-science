@@ -46,13 +46,13 @@ public abstract class WccBaseProc<CONFIG extends WccBaseConfig> extends AlgoBase
 
     protected Stream<WriteResult> write(ComputationResult<Wcc, DisjointSetStruct, CONFIG> computeResult) {
         return writeOrMutate(computeResult,
-            (writeBuilder, computationResult) -> super.writeNodeProperties(writeBuilder, computationResult)
+            (writeBuilder, computationResult) -> writeNodeProperties(writeBuilder, computationResult)
         );
     }
 
     protected Stream<WriteResult> mutate(ComputationResult<Wcc, DisjointSetStruct, CONFIG> computeResult) {
         return writeOrMutate(computeResult,
-            (writeBuilder, computationResult) -> super.mutateNodeProperties(writeBuilder, computationResult)
+            (writeBuilder, computationResult) -> mutateNodeProperties(writeBuilder, computationResult)
         );
     }
 
