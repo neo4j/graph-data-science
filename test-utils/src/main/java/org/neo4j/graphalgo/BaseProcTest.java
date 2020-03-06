@@ -51,7 +51,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
 
@@ -62,6 +68,20 @@ public class BaseProcTest {
     @AfterAll
     static void clearLoadedGraphs() {
         GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    protected static Map<String, Object> anonymousGraphConfig(Object... objects) {
+        return anonymousGraphConfig(map(objects));
+    }
+
+    protected static Map<String, Object> anonymousGraphConfig(Map<String, Object> baseMap) {
+        if (!baseMap.containsKey(NODE_PROJECTION_KEY) && !baseMap.containsKey(NODE_QUERY_KEY)) {
+            baseMap.put(NODE_PROJECTION_KEY, PROJECT_ALL.name);
+        }
+        if (!baseMap.containsKey(RELATIONSHIP_PROJECTION_KEY) && !baseMap.containsKey(RELATIONSHIP_QUERY_KEY)) {
+            baseMap.put(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name);
+        }
+        return baseMap;
     }
 
     protected void registerFunctions(Class<?>... functionClasses) throws Exception {

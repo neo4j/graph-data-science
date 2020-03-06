@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.procedure.UserFunction;
 import org.reflections.Reflections;
@@ -66,7 +65,7 @@ class AppendixAProcedureListingTest extends BaseProcTest {
             .forEach(procedureClass -> {
                 try {
                     registerProcedures(procedureClass);
-                } catch (KernelException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
@@ -79,7 +78,7 @@ class AppendixAProcedureListingTest extends BaseProcTest {
             .forEach(functionClass -> {
                 try {
                     registerFunctions(functionClass);
-                } catch (KernelException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
