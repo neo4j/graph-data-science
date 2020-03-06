@@ -69,6 +69,9 @@ public class LocallyMinimalNeighborhoods extends Algorithm<LocallyMinimalNeighbo
         this.tracker = tracker;
         this.concurrency = concurrency;
         this.includeMembers = includeMembers;
+        if (graph.nodeCount() > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("LocallyMinimalNeighborhoods only supports graphs with 2^32-1 nodes.");
+        }
     }
 
     @Override

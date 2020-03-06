@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 public class SparseVector {
     private final int[] indices;
@@ -34,7 +35,7 @@ public class SparseVector {
     }
 
     @NotNull
-    private static SparseVector getSparseVectorFromLists(LinkedList<Integer> indices, LinkedList<Double> values) {
+    public static SparseVector getSparseVectorFromLists(List<Integer> indices, List<Double> values) {
         int[] indicesArray = new int[indices.size()];
         double[] valuesArray = new double[indices.size()];
         int i = 0;

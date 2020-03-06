@@ -21,16 +21,39 @@ package org.neo4j.graphalgo.impl.ocd;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.logging.Log;
+
+import java.util.concurrent.ExecutorService;
 
 public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunityDetection, CommunityAffiliations> {
     private static final double TOLERANCE = 0.00001;
 
     private final Graph graph;
     private final AffiliationInitializer initializer;
+    private final KernelTransaction transaction;
+    private ExecutorService executorService;
+    private final AllocationTracker tracker;
+    private final Log log;
 
-    OverlappingCommunityDetection(Graph graph, AffiliationInitializer initializer) {
+    OverlappingCommunityDetection(
+        Graph graph,
+        AffiliationInitializer initializer,
+        KernelTransaction transaction,
+        ExecutorService executorService,
+        AllocationTracker tracker,
+        Log log
+    ) {
         this.graph = graph;
         this.initializer = initializer;
+        this.transaction = transaction;
+        this.executorService = executorService;
+        this.tracker = tracker;
+        this.log = log;
+        if (graph.nodeCount() > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Overlapping community detection only supports graphs with 2^32-1 nodes.");
+        }
     }
 
     @Override
