@@ -39,19 +39,19 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
         return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
     }
 
-    protected Stream<WriteResult> write(ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
+    Stream<WriteResult> write(ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
         return writeOrMutate(computeResult,
             (writeBuilder, computationResult) -> writeNodeProperties(writeBuilder, computationResult)
         );
     }
 
-    protected Stream<WriteResult> mutate(ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
+    Stream<WriteResult> mutate(ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
         return writeOrMutate(computeResult,
             (writeBuilder, computationResult) -> mutateNodeProperties(writeBuilder, computationResult)
         );
     }
 
-    protected Stream<WriteResult> writeOrMutate(
+    private Stream<WriteResult> writeOrMutate(
         ComputationResult<PageRank, PageRank, CONFIG> computeResult,
         WriteOrMutate<PageRank, PageRank, CONFIG> op
     ) {
