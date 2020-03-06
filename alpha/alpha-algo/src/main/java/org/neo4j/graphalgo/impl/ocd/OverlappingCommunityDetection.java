@@ -21,36 +21,34 @@ package org.neo4j.graphalgo.impl.ocd;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.logging.Log;
 
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunityDetection, CommunityAffiliations> {
     private static final double TOLERANCE = 0.00001;
 
-    private final Graph graph;
-    private final AffiliationInitializer initializer;
-    private final KernelTransaction transaction;
+    private Graph graph;
+    private AffiliationInitializer initializer;
     private ExecutorService executorService;
-    private final AllocationTracker tracker;
     private final Log log;
+    private final int gradientConcurrency;
 
     public OverlappingCommunityDetection(
         Graph graph,
         AffiliationInitializer initializer,
-        KernelTransaction transaction,
         ExecutorService executorService,
-        AllocationTracker tracker,
-        Log log
+        Log log,
+        int gradientConcurrency
     ) {
         this.graph = graph;
         this.initializer = initializer;
-        this.transaction = transaction;
         this.executorService = executorService;
-        this.tracker = tracker;
         this.log = log;
+        this.gradientConcurrency = gradientConcurrency;
         if (graph.nodeCount() > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Overlapping community detection only supports graphs with 2^32-1 nodes.");
         }
@@ -60,26 +58,27 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
     public CommunityAffiliations compute() {
         CommunityAffiliations communityAffiliations = initializer.initialize(graph);
         double oldGain = communityAffiliations.gain();
+        System.out.println(String.format("Iteration 0: Gain is %s.", oldGain));
         double newGain;
+        int iteration = 0;
         while ((newGain = update(communityAffiliations)) > oldGain + TOLERANCE) {
             oldGain = newGain;
+            iteration++;
+            System.out.println(String.format("Iteration %d: Gain is %s.", iteration, oldGain));
         }
         return communityAffiliations;
     }
 
 
     double update(CommunityAffiliations communityAffiliations) {
-        BacktrackingLineSearch lineSearch = new BacktrackingLineSearch();
-        for (int nodeU = 0; nodeU < communityAffiliations.nodeCount(); nodeU++) {
-            GainFunction blockLoss = communityAffiliations.blockGain(nodeU);
-            SparseVector gradient = blockLoss.gradient();
-            double learningRate = lineSearch.search(
-                blockLoss,
-                communityAffiliations.nodeAffiliations(nodeU),
-                gradient
-            );
-            communityAffiliations.updateNodeAffiliations(nodeU, gradient.multiply(learningRate));
-        }
+        AtomicInteger queue = new AtomicInteger(0);
+        // create tasks
+        final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
+            gradientConcurrency,
+            () -> new GradientStepTask(queue, communityAffiliations)
+        );
+        // run
+        ParallelUtil.run(tasks, executorService);
         return communityAffiliations.gain();
     }
 
@@ -90,6 +89,36 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
 
     @Override
     public void release() {
+        graph = null;
+        executorService = null;
+        initializer = null;
 
+    }
+
+    class GradientStepTask implements Runnable {
+        private final AtomicInteger queue;
+        private final CommunityAffiliations communityAffiliations;
+        private final BacktrackingLineSearch lineSearch;
+
+        GradientStepTask(AtomicInteger queue, CommunityAffiliations communityAffiliations) {
+            this.queue = queue;
+            this.communityAffiliations = communityAffiliations;
+            this.lineSearch = new BacktrackingLineSearch();
+        }
+
+        @Override
+        public void run() {
+            int nodeU;
+            while ((nodeU = queue.getAndIncrement()) < graph.nodeCount() && running()) {
+                GainFunction blockLoss = communityAffiliations.blockGain(nodeU);
+                SparseVector gradient = blockLoss.gradient();
+                double learningRate = lineSearch.search(
+                    blockLoss,
+                    communityAffiliations.nodeAffiliations(nodeU),
+                    gradient
+                );
+                communityAffiliations.updateNodeAffiliations(nodeU, gradient.multiply(learningRate));
+            }
+        }
     }
 }

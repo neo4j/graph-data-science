@@ -42,7 +42,7 @@ public class CommunityAffiliations {
         return new AffiliationBlockGain(this, graph, nodeId);
     }
 
-    SparseVector affiliationSum() {
+    synchronized SparseVector affiliationSum() {
         return this.affiliationSum;
     }
 
@@ -50,9 +50,11 @@ public class CommunityAffiliations {
         return affiliationVectors.get(nodeId);
     }
 
-    void updateNodeAffiliations(int nodeU, SparseVector increment) {
-        affiliationVectors.set(nodeU, affiliationVectors.get(nodeU).add(increment));
-        affiliationSum = affiliationSum.add(increment);
+    synchronized void updateNodeAffiliations(int nodeU, SparseVector increment) {
+        SparseVector newVector = affiliationVectors.get(nodeU).addAndProject(increment);
+        SparseVector diff = newVector.add(affiliationVectors.get(nodeU).multiply(-1D));
+        affiliationVectors.set(nodeU, newVector);
+        affiliationSum = affiliationSum.add(diff);
     }
 
     public double gain() {
