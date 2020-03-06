@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.io.layout.DatabaseFile;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -26,7 +27,6 @@ import org.neo4j.kernel.impl.store.RelationshipStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 public final class RelationshipStoreScanner extends AbstractStorePageCacheScanner<RelationshipRecord> {
 
@@ -48,13 +48,13 @@ public final class RelationshipStoreScanner extends AbstractStorePageCacheScanne
 
         @Override
         public AbstractStorePageCacheScanner<RelationshipRecord> newScanner(
-                final GraphDatabaseAPI api,
+                final GraphDatabaseService api,
                 final int prefetchSize) {
             return new RelationshipStoreScanner(prefetchSize, api);
         }
     };
 
-    private RelationshipStoreScanner(final int prefetchSize, final GraphDatabaseAPI api) {
+    private RelationshipStoreScanner(final int prefetchSize, final GraphDatabaseService api) {
         super(prefetchSize, api, RELATIONSHIP_ACCESS);
     }
 

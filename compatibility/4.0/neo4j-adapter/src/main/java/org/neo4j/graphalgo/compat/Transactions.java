@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.exceptions.Status;
@@ -27,6 +28,18 @@ public class Transactions {
 
     public static RuntimeException transactionTerminated() {
         return new TransactionTerminatedException(Status.Transaction.Terminated);
+    }
+
+    public static void commit(Transaction transaction) {
+        transaction.commit();
+    }
+
+    public static void fail(Transaction transaction) {
+        transaction.rollback();
+    }
+
+    public static void close(Transaction transaction) {
+        transaction.close();
     }
 
     public static Status markedAsFailed() {

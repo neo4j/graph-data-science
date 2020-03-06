@@ -28,7 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class ComputationTestUtil {
 
@@ -42,9 +43,9 @@ final class ComputationTestUtil {
             HugeDoubleArray computedValues,
             final long... values) {
         Map<Long, Long> expectedValues = new HashMap<>();
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             for (int i = 0; i < values.length; i++) {
-                expectedValues.put(db.findNode(nodeLabel, idProperty, i).getId(), values[i]);
+                expectedValues.put(findNode(db, tx, nodeLabel, idProperty, i).getId(), values[i]);
             }
         });
         expectedValues.forEach((idProp, expectedValue) -> {
@@ -66,9 +67,9 @@ final class ComputationTestUtil {
             double delta,
             final double... values) {
         Map<Long, Double> expectedValues = new HashMap<>();
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             for (int i = 0; i < values.length; i++) {
-                expectedValues.put(db.findNode(nodeLabel, idProperty, i).getId(), values[i]);
+                expectedValues.put(findNode(db, tx, nodeLabel, idProperty, i).getId(), values[i]);
             }
         });
 

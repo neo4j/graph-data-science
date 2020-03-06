@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -46,6 +45,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 /**
  * Betweenness Centrality Algorithms
@@ -74,7 +74,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
         return computationResult.algorithm().resultStream();
     }
 
-    @Procedure(value = "gds.alpha.betweenness.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.betweenness.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<BetweennessCentralityProcResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,

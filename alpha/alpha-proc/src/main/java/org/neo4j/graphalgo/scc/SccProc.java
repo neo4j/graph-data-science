@@ -38,7 +38,6 @@ import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -48,6 +47,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig> {
 
@@ -55,7 +55,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         "The SCC algorithm finds sets of connected nodes in an directed graph, " +
         "where all nodes in the same set form a connected component.";
 
-    @Procedure(value = "gds.alpha.scc.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.scc.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<SccResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,

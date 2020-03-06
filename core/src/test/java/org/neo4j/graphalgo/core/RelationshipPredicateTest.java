@@ -27,13 +27,15 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.Label;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 /**
  *
@@ -58,16 +60,16 @@ class RelationshipPredicateTest {
     private static long nodeB;
     private static long nodeC;
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setupGraph() {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(db, DB_CYPHER);
-        runInTransaction(db, () -> {
-            nodeA = db.findNode(LABEL, "name", "a").getId();
-            nodeB = db.findNode(LABEL, "name", "b").getId();
-            nodeC = db.findNode(LABEL, "name", "c").getId();
+        runInTransaction(db,tx -> {
+            nodeA = findNode(db, tx, LABEL, "name", "a").getId();
+            nodeB = findNode(db, tx, LABEL, "name", "b").getId();
+            nodeC = findNode(db, tx, LABEL, "name", "c").getId();
         });
     }
 

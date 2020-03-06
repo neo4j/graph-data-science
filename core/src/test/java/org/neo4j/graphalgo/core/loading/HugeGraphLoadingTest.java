@@ -29,23 +29,24 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class HugeGraphLoadingTest {
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setup() {
@@ -80,9 +81,9 @@ final class HugeGraphLoadingTest {
         // something larger than one batch
         int nodeCount = 60_000;
         Label label = Label.label("Foo");
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             for (int j = 0; j < nodeCount; j++) {
-                Node node = db.createNode(label);
+                Node node = createNode(db, tx, label);
                 node.setProperty("bar", node.getId());
             }
         });
@@ -120,9 +121,9 @@ final class HugeGraphLoadingTest {
         final int pages = 10;
         int nodeCount = recordsPerPage * pages;
 
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             for (int i = 0; i < nodeCount; i++) {
-                db.createNode();
+                createNode(db, tx);
             }
         });
 
@@ -142,13 +143,13 @@ final class HugeGraphLoadingTest {
         int nodeCount = 1_000;
         int parallelEdgeCount = 10;
 
-        runInTransaction(db, () -> {
-            Node n0 = db.createNode();
-            Node n1 = db.createNode();
+        runInTransaction(db, tx -> {
+            Node n0 = createNode(db, tx);
+            Node n1 = createNode(db, tx);
             Node last = null;
 
             for (int i = 0; i < nodeCount; i++) {
-                last = db.createNode();
+                last = createNode(db, tx);
             }
 
             n0.createRelationshipTo(n1, fooRelType).setProperty("weight", 1.0);

@@ -36,13 +36,14 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 /**
  * A->B; A->C; B->C;
  *
  *
- *     OutD:   InD: BothD:
+ * OutD:   InD: BothD:
  * A:     2      0      2
  * B:     1      1      2
  * C:     0      2      2
@@ -50,25 +51,25 @@ import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 class DegreesTest extends AlgoTestBase {
 
     private static final String UNI_DIRECTIONAL =
-            "CREATE" +
-            "  (a:Node {name:'a'})" +
-            ", (b:Node {name:'b'})" +
-            ", (c:Node {name:'c'})" + // shuffled
-            ", (a)-[:TYPE]->(b)" +
-            ", (a)-[:TYPE]->(c)" +
-            ", (b)-[:TYPE]->(c)";
+        "CREATE" +
+        "  (a:Node {name:'a'})" +
+        ", (b:Node {name:'b'})" +
+        ", (c:Node {name:'c'})" + // shuffled
+        ", (a)-[:TYPE]->(b)" +
+        ", (a)-[:TYPE]->(c)" +
+        ", (b)-[:TYPE]->(c)";
 
     private static final String BI_DIRECTIONAL =
-            "CREATE" +
-            "  (a:Node {name:'a'})" +
-            ", (b:Node {name:'b'})" +
-            ", (c:Node {name:'c'})" + // shuffled
-            ", (a)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(a)" +
-            ", (a)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(a)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(b)";
+        "CREATE" +
+        "  (a:Node {name:'a'})" +
+        ", (b:Node {name:'b'})" +
+        ", (c:Node {name:'c'})" + // shuffled
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(a)" +
+        ", (a)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(a)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(b)";
 
     @BeforeEach
     void setupGraphDb() {
@@ -169,6 +170,6 @@ class DegreesTest extends AlgoTestBase {
     }
 
     private long nodeId(String name) {
-        return runInTransaction(db, () -> graph.toMappedNodeId(db.findNodes(Label.label("Node"), "name", name).next().getId()));
+        return applyInTransaction(db, tx -> findNode(db, tx, Label.label("Node"), "name", name).getId());
     }
 }

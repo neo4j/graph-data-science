@@ -41,19 +41,20 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class GraphCreateProc extends CatalogProc {
 
     private static final String NO_GRAPH_NAME = "";
     private static final String DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
 
-    @Procedure(name = "gds.graph.create", mode = Mode.READ)
+    @Procedure(name = "gds.graph.create", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphCreateResult> create(
         @Name(value = "graphName") String graphName,
@@ -83,7 +84,7 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.graph.create.estimate", mode = Mode.READ)
+    @Procedure(name = "gds.graph.create.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> createEstimate(
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,
@@ -102,7 +103,7 @@ public class GraphCreateProc extends CatalogProc {
         return estimateGraph(config, NativeFactory.class);
     }
 
-    @Procedure(name = "gds.graph.create.cypher", mode = Mode.READ)
+    @Procedure(name = "gds.graph.create.cypher", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphCreateResult> create(
         @Name(value = "graphName") String graphName,
@@ -132,7 +133,7 @@ public class GraphCreateProc extends CatalogProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.graph.create.cypher.estimate", mode = Mode.READ)
+    @Procedure(name = "gds.graph.create.cypher.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> createCypherEstimate(
         @Name(value = "nodeQuery") String nodeQuery,

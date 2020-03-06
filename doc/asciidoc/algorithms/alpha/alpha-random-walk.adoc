@@ -81,24 +81,24 @@ YIELD startNodeId, nodeIds, path
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default                | Optional | Description
-| start             | object  | null                   | yes      | Starting points: null - whole graph, "Label" - nodes with that label, node-id - that node, list of node-ids - these nodes.
-| steps             | int     | 10                     | yes      | Length of paths returned, in case of error only path of lenght 1 is returned.
-| walks             | int     | 1                      | yes      | Number of paths returned.
-| mode              | string  | random                 | yes      | Strategy for choosing the next relationship, modes: random and node2vec.
-| inOut             | float   | 1.0                    | yes      | Parameter for node2vec.
-| return            | float   | 1.0                    | yes      | Parameter for node2vec.
-| path              | boolean | false                  | yes      | If the more expensive operation of creating a path from node-ids should be performed and returned in results.
-| concurrency       | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| start             | Object  | null                   | yes      | Starting points: null - whole graph, "Label" - nodes with that label, node-id - that node, list of node-ids - these nodes.
+| steps             | Integer | 10                     | yes      | Length of paths returned, in case of error only path of lenght 1 is returned.
+| walks             | Integer | 1                      | yes      | Number of paths returned.
+| mode              | String  | random                 | yes      | Strategy for choosing the next relationship, modes: random and node2vec.
+| inOut             | Float   | 1.0                    | yes      | Parameter for node2vec.
+| return            | Float   | 1.0                    | yes      | Parameter for node2vec.
+| path              | Boolean | false                  | yes      | If the more expensive operation of creating a path from node-ids should be performed and returned in results.
+| concurrency       | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency   | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 
 .Results
 [opts="header"]
 |===
-| Name        | Type         | Description
-| startNodeId | long         | Node ID starting the path.
-| nodeIds     | list of long | List of Node ID forming a path.
-| path        | Path         | Optional Path (with virtual relationships).
+| Name        | Type      | Description
+| startNodeId | Integer   | Node ID starting the path.
+| nodeIds     | Integer[] | List of Node ID forming a path.
+| path        | Path      | Optional Path (with virtual relationships).
 |===
 
 

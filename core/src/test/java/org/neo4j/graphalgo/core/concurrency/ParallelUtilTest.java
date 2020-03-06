@@ -68,7 +68,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
-import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 
@@ -191,7 +191,7 @@ final class ParallelUtilTest {
         when(batches.batchIterables(anyInt())).thenReturn(asList(ints));
         long currentThreadId = Thread.currentThread().getId();
         Runnable task = () -> assertEquals(Thread.currentThread().getId(), currentThreadId);
-        HugeParallelGraphImporter importer = mock(HugeParallelGraphImporter.class);
+        @SuppressWarnings("unchecked") HugeParallelGraphImporter<Runnable> importer = mock(HugeParallelGraphImporter.class);
         when(importer.newImporter(anyLong(), any())).thenReturn(task);
 
         ParallelUtil.readParallel(

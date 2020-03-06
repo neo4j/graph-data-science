@@ -7,11 +7,11 @@ This chapter explains how to create an anonymous graph for a single algorithm ex
 --
 
 The typical workflow when using the GDS library is to <<catalog-graph-create, create a graph>> and store it in the catalog.
-This is useful to minimize reads from Neo4j and to run an algorithm with various settings or several algorithms on the same graph.
+This is useful to minimize reads from Neo4j and to run an algorithm with various settings or several algorithms on the same graph projection.
 
 However, if you want to quickly run a single algorithm, it can be convenient to use an _anonymous projection_.
 The syntax is similar to the ordinary syntax for `gds.graph.create`, described <<catalog-graph-create, here>>.
-It differs however in that relationshipProjections cannot have more than one property.
+It differs however in that relationship projections cannot have more than one property.
 Moreover, the `nodeProjection` and `relationshipProjection` arguments are named and placed in the configuration map of the algorithm:
 
 .Anonymous native projection syntax
@@ -19,26 +19,42 @@ Moreover, the `nodeProjection` and `relationshipProjection` arguments are named 
 ----
 CALL gds.<algo>.<mode>(
   {
-    nodeProjection: <nodeProj>,
-    relationshipProjection: <relProj>,
-    nodeProperties: <nodeProp>,
-    relationshipProperties: <relProp>
+    nodeProjection: String, List or Map,
+    relationshipProjection: String, List or Map,
+    nodeProperties: String, List or Map,
+    relationshipProperties: String, List or Map,
     // algorithm and other create configuration
   }
 )
 ----
 
-The above syntax can be an alternative to the calls below:
+The following examples demonstrates creating an anonymous graph from `Person` nodes and `KNOWS` relationships.
+
+[source, cypher]
+----
+CALL gds.<algo>.<mode>(
+  {
+    nodeProjection: 'Person',
+    relationshipProjection: 'KNOWS',
+    nodeProperties: 'age',
+    relationshipProperties: 'weight',
+    // algorithm and other create configuration
+  }
+)
+----
+
+The above example can be an alternative to the calls below:
+
 [source, cypher]
 ----
 CALL gds.graph.create(
   {
     'new-graph-name',
-    <nodeProj>,
-    <relProj>,
+    'Person',
+    'KNOWS',
     {
-      nodeProperties: <nodeProps>,
-      relationshipProperties: <relProps>
+      nodeProperties: 'age',
+      relationshipProperties: 'weight'
       // other create configuration
     }
   }
@@ -57,9 +73,11 @@ Similarly for <<cypher-projection, Cypher projection>>, the explicit creation wi
 .Anonymous cypher projection syntax
 [source, cypher]
 ----
-CALL gds.<algo>.<mode>({
-  nodeQuery: <nodeQ>,
-  relationshipQuery: <relQ>,
-  // algorithm and other create configuration
-})
+CALL gds.<algo>.<mode>(
+  {
+    nodeQuery: String,
+    relationshipQuery: String,
+    // algorithm and other create configuration
+  }
+)
 ----

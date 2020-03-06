@@ -35,6 +35,7 @@ public class TopKConsumer<T> implements Function<T, Integer> {
     private T minValue;
     private T maxValue;
 
+    @SuppressWarnings("unchecked")
     public TopKConsumer(int topK, Comparator<T> comparator) {
         this.topK = topK;
         heap = (T[]) new Object[topK];
@@ -60,7 +61,7 @@ public class TopKConsumer<T> implements Function<T, Integer> {
         Comparator<SimilarityResult> comparator = topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         topK = Math.abs(topK);
 
-        TopKConsumer<SimilarityResult>[] results = new TopKConsumer[length];
+        @SuppressWarnings({"rawtypes", "unchecked"}) TopKConsumer<SimilarityResult>[] results = new TopKConsumer[length];
         for (int i = 0; i < results.length; i++) results[i] = new TopKConsumer<>(topK, comparator);
         return results;
     }

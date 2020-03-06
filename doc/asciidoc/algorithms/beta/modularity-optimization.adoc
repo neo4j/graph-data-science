@@ -39,7 +39,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL gds.beta.modularityOptimization.write(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.beta.modularityOptimization.write(graphName: String|Map, configuration: Map})
 YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, writeMillis
 ----
 
@@ -51,34 +51,34 @@ include::../common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                           | Type    | Default     | Optional | Description
-| weightProperty                 | STRING  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
-| seedProperty                   | STRING  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| writeProperty                  | STRING  | n/a         | yes      | The property name written back the ID of the partition particular node belongs to.
-| maxIterations                  | INTEGER | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
-| tolerance                      | FLOAT   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| weightProperty                 | String  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
+| seedProperty                   | String  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| writeProperty                  | String  | n/a         | yes      | The property name written back the ID of the partition particular node belongs to.
+| maxIterations                  | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
+| tolerance                      | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type      | Description
-| createMillis          | INTEGER   | Milliseconds for loading data.
-| computeMillis         | INTEGER   | Milliseconds for running the algorithm.
-| writeMillis           | INTEGER   | Milliseconds for writing result data back.
-| postProcessingMillis  | INTEGER   | Milliseconds for computing percentiles and community count.
-| nodes                 | INTEGER   | The number of nodes considered.
+| createMillis          | Integer   | Milliseconds for loading data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| writeMillis           | Integer   | Milliseconds for writing result data back.
+| postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
+| nodes                 | Integer   | The number of nodes considered.
 | didConverge           | Boolean   | True if the algorithm did converge to a stable modularity score within the provided number of maximum iterations.
-| ranIterations         | INTEGER   | The number of iterations run.
-| modularity            | FLOAT     | The final modularity score.
-| communityCount        | INTEGER   | The number of communities found.
-| communityDistribution | MAP       | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
-| configuration         | MAP       | The configuration used for running the algorithm.
+| ranIterations         | Integer   | The number of iterations run.
+| modularity            | Float     | The final modularity score.
+| communityCount        | Integer   | The number of communities found.
+| communityDistribution | Map       | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+| configuration         | Map       | The configuration used for running the algorithm.
 |===
 
 .The following will run the algorithm and stream back results:
 [source, cypher]
 ----
-CALL gds.modularityOptimization.stream(graphNameOrConfig: STRING|MAP, configuration: MAP})
+CALL gds.modularityOptimization.stream(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodeId, communityId
 ----
 
@@ -90,18 +90,18 @@ include::../common-configuration.adoc[]
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                       | Type    | Default                | Optional | Description
-| maxIterations              | INTEGER | 10                     | yes      | The maximum number of iterations to run.
-| tolerance                  | FLOAT   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
-| relationshipWeightProperty | STRING  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
-| seedProperty               | STRING  | n/a                    | yes      | Used to define initial set of labels (must be a number).
+| maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
+| tolerance                  | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
+| seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
 |===
 
 .Results
 [opts="header"]
 |===
 | Name        | Type    | Description
-| nodeId      | INTEGER | Node ID
-| communityId | INTEGER | Community ID
+| nodeId      | Integer | Node ID
+| communityId | Integer | Community ID
 |===
 
 

@@ -40,7 +40,6 @@ import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphdb.Path;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -52,6 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 /**
  * Yen's K shortest paths algorithm. Computes multiple shortest
@@ -114,9 +114,9 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
             Path path = null;
             if (returnPath) {
                 if (config.relationshipWeightProperty() != null) {
-                    path = WalkPath.toPath(api, nodeIds, costs);
+                    path = WalkPath.toPath(api, transaction, nodeIds, costs);
                 } else {
-                    path = WalkPath.toPath(api, nodeIds);
+                    path = WalkPath.toPath(api, transaction, nodeIds);
                 }
             }
 
@@ -131,7 +131,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
         return super.processInput(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.alpha.kShortestPaths.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.kShortestPaths.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<KspResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,

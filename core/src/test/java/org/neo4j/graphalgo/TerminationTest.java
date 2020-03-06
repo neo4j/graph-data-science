@@ -22,16 +22,14 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.compat.Transactions;
+import org.neo4j.graphalgo.compat.KernelTransactionsProxy;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.api.KernelTransactions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.compat.Transactions.transactionFailureException;
@@ -65,24 +63,21 @@ class TerminationTest extends BaseProcTest {
     // terminate a transaction by its id
     private void terminateTransaction(long txId) {
         kernelTransactions.activeTransactions()
-                .stream()
-                .filter(thx -> thx.lastTransactionIdWhenStarted() == txId)
-                .forEach(thx -> {
-                    System.out.println("terminating transaction " + txId);
-                    thx.markForTermination(Transactions.markedAsFailed());
-                });
+            .stream()
+            .filter(thx -> KernelTransactionsProxy.lastTransactionIdWhenStarted(thx) == txId)
+            .forEach(thx -> {
+                System.out.println("terminating transaction " + txId);
+                KernelTransactionsProxy.markForTermination(thx);
+            });
     }
 
     // get map of currently running queries and its IDs
     private Map<String, Long> getQueryTransactionIds() {
-        final HashMap<String, Long> map = new HashMap<>();
-        kernelTransactions.activeTransactions()
-                .forEach(kth -> {
-                    final String query = kth.executingQueries()
-                            .map(ExecutingQuery::queryText)
-                            .collect(Collectors.joining(", "));
-                    map.put(query, kth.lastTransactionIdWhenStarted());
-                });
+        Map<String, Long> map = new HashMap<>();
+        kernelTransactions.activeTransactions().forEach(kth -> {
+            String query = KernelTransactionsProxy.executingQueryTexts(kth, ", ");
+            map.put(query, KernelTransactionsProxy.lastTransactionIdWhenStarted(kth));
+        });
         return map;
     }
 

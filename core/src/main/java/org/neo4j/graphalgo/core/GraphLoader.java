@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
@@ -39,7 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.graphalgo.compat.ExceptionUtil.throwIfUnchecked;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
 @ValueClass
 public interface GraphLoader {
@@ -70,8 +69,6 @@ public interface GraphLoader {
 
     GraphCreateConfig createConfig();
 
-    KernelTransaction kernelTransaction();
-
     default Graph graph(Class<? extends GraphStoreFactory> factoryType) {
         return load(factoryType);
     }
@@ -100,7 +97,7 @@ public interface GraphLoader {
             GraphStoreFactory factory;
 
             if (CypherFactory.class.isAssignableFrom(factoryType)) {
-                factory = new CypherFactory(api(), setup, kernelTransaction());
+                factory = new CypherFactory(api(), setup);
             } else {
                 factory = new NativeFactory(api(), setup);
             }

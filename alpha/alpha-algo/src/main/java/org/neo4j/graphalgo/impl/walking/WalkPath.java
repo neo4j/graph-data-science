@@ -19,21 +19,22 @@
  */
 package org.neo4j.graphalgo.impl.walking;
 
-
-import org.neo4j.graphalgo.results.VirtualRelationship;
+import org.neo4j.graphalgo.compat.PathProxy;
+import org.neo4j.graphalgo.compat.VirtualRelationship;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
-public class WalkPath implements Path {
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
+
+public class WalkPath extends PathProxy {
     public static final Path EMPTY = new WalkPath(0);
     private static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
@@ -47,13 +48,13 @@ public class WalkPath implements Path {
         this.size = size;
     }
 
-    public static Path toPath(GraphDatabaseAPI api, long[] nodes) {
+    public static Path toPath(GraphDatabaseService api, KernelTransaction tx, long[] nodes) {
         if (nodes.length == 0) return EMPTY;
         WalkPath result = new WalkPath(nodes.length);
-        Node node = api.getNodeById(nodes[0]);
+        Node node = getNodeById(api, tx, nodes[0]);
         result.addNode(node);
         for (int i = 1; i < nodes.length; i++) {
-            Node nextNode = api.getNodeById(nodes[i]);
+            Node nextNode = getNodeById(api, tx, nodes[i]);
             result.addRelationship(new VirtualRelationship(node, nextNode, NEXT));
             result.addNode(nextNode);
             node = nextNode;
@@ -61,13 +62,13 @@ public class WalkPath implements Path {
         return result;
     }
 
-    public static Path toPath(GraphDatabaseAPI api, long[] nodes, double[] costs) {
+    public static Path toPath(GraphDatabaseService api, KernelTransaction tx, long[] nodes, double[] costs) {
         if (nodes.length == 0) return EMPTY;
         WalkPath result = new WalkPath(nodes.length);
-        Node node = api.getNodeById(nodes[0]);
+        Node node = getNodeById(api, tx, nodes[0]);
         result.addNode(node);
         for (int i = 1; i < nodes.length; i++) {
-            Node nextNode = api.getNodeById(nodes[i]);
+            Node nextNode = getNodeById(api, tx, nodes[i]);
             VirtualRelationship relationship = new VirtualRelationship(node, nextNode, NEXT);
             relationship.setProperty("cost", costs[i-1]);
             result.addRelationship(relationship);
@@ -135,19 +136,23 @@ public class WalkPath implements Path {
     }
 
     @Override
-    public Iterator<PropertyContainer> iterator() {
-        return new Iterator<PropertyContainer>() {
+    public PropertyIterator toIterator() {
+        return new PropertyIterator() {
             int i = 0;
+
             @Override
             public boolean hasNext() {
                 return i < 2 * size;
             }
 
             @Override
-            public PropertyContainer next() {
-                PropertyContainer pc = i % 2 == 0 ? nodes.get(i / 2) : relationships.get(i / 2);
-                i++;
-                return pc;
+            public PropertyResult next(PropertyConsumer consumer) {
+                int i = this.i++;
+                if (i % 2 == 0) {
+                    return consumer.returnNode(nodes.get(i / 2));
+                } else {
+                    return consumer.returnRelationship(relationships.get(i / 2));
+                }
             }
         };
     }

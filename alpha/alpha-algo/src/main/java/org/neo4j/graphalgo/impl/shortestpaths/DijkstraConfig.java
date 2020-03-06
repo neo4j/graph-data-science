@@ -33,6 +33,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("DijkstraConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface DijkstraConfig extends AlgoBaseConfig, RelationshipWeightConfig, WriteConfig {
 
     String WRITE_PROPERTY_DEFAULT_VALUE = "sssp";

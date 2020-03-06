@@ -65,20 +65,45 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-node-similarity-syntax]]
 == Syntax
 
-.The following describes the API for running the algorithm and writing the similarity scores back to Neo4j:
+
+=== Write mode
+
+.Run Node Similarity in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.write(graphName: String, {
+CALL gds.nodeSimilarity.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general write return columns
+  nodesCompared: Integer,
+  relationshipsWritten: Integer,
   writeRelationshipType: String,
   writeProperty: String
-  // additional configuration
-})
-YIELD nodesCompared, relationshipsWritten, writeRelationshipType, writeProperty
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run Node Similarity in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.nodeSimilarity.write(configuration: Map)
+YIELD
+  // general write return columns
+  nodesCompared: Integer,
+  relationshipsWritten: Integer,
+  writeRelationshipType: String,
+  writeProperty: String
+----
+
+:entity: relationship
+:result: similarity score
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -91,7 +116,6 @@ include::common-configuration.adoc[]
 | topN                   | Integer | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned. This value cannot be negative, a value of 0 means no global limit.
 | bottomN                | Integer | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned. This value cannot be negative, a value of 0 means no global limit.
 | writeRelationshipType  | String  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
-| writeProperty          | String  | n/a                    | no       | The relationship property that stores the similarity score.
 |===
 
 .Results
@@ -108,30 +132,50 @@ include::common-configuration.adoc[]
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
 
+
 [[algorithms-node-similarity-syntax-stream]]
-.The following describes the API for running the algorithm and streaming node pairs and their Jaccard similarity:
+=== Stream mode
+
+.Run Node Similarity in stream mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.stream(graphName: String, {
-  // configuration
-})
-YIELD node1, node2, similarity
+CALL gds.nodeSimilarity.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  node1: Integer,
+  node2: Integer,
+  similarity: Float
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run Node Similarity in stream mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream(configuration: Map)
+YIELD
+  node1: Integer,
+  node2: Integer,
+  similarity: Float
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name             | Type    | Default | Optional | Description
-| similarityCutoff | Float   | 1E-42   | yes      | Lower limit for the similarity score to be present in the result.
+| similarityCutoff | Float   | 1E-42   | yes      | Lower limit for the similarity score to be present in the result. . Values must be between 0 and 1.
 | degreeCutoff     | Integer | 1       | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| topK             | Integer | 10      | yes      | Limit on the number of scores per node. The K largest results are returned.
-| bottomK          | Integer | 10      | yes      | Limit on the number of scores per node. The K smallest results are returned.
-| topN             | Integer | 0       | yes      | Global limit on the number of scores computed. The N largest total results are returned.
-| bottomN          | Integer | 0       | yes      | Global limit on the number of scores computed. The N smallest total results are returned.
+| topK             | Integer | 10      | yes      | Limit on the number of scores per node. The K largest results are returned. This value cannot be lower than 1.
+| bottomK          | Integer | 10      | yes      | Limit on the number of scores per node. The K smallest results are returned. This value cannot be lower than 1.
+| topN             | Integer | 0       | yes      | Global limit on the number of scores computed. The N largest total results are returned. This value cannot be negative, a value of 0 means no global limit.
+| bottomN          | Integer | 0       | yes      | Global limit on the number of scores computed. The N smallest total results are returned. This value cannot be negative, a value of 0 means no global limit.
 |===
 
 .Results

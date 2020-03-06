@@ -29,7 +29,7 @@ However, setting a minimum page cache size is still important while creating in-
 * For <<cypher-projection, Cypher projections>>, a higher page cache is required depending on the query complexity.
 
 However, if it is required to write algorithm results back to Neo4j, the write performance is highly depended on store fragmentation as well as the number of properties and relationships to write.
-We recommend starting with a page cache size of roughly `~250MB * writeConcurrency` and evaluate write performance and adapt accordingly.
+We recommend starting with a page cache size of roughly `250MB * writeConcurrency` and evaluate write performance and adapt accordingly.
 Ideally, if the <<memory-estimation, memory estimation>> feature has been used to find a good heap size, the remaining memory can be used for page cache and OS.
 
 [NOTE]
@@ -42,10 +42,10 @@ See https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuratio
 == CPU
 
 The library uses multiple CPU cores for graph projections, algorithm computation, and results writing.
-Configuring the library to make best use of the available CPU cores in your system is important to achieve maximum performance.
-The Graph Data Science library concurrency can be configured per algorithm execution, see <<algorithms-syntax-configuration-options>>
+Configuring the workloads to make best use of the available CPU cores in your system is important to achieve maximum performance.
+The concurrency used for the stages of projection, computation and writing is configured per algorithm execution, see <<algorithms-syntax-configuration-options>>
 
-The concurrency of the library is limited depending on the license under which the library is being used:
+The maximum concurrency that can be used is limited depending on the license under which the library is being used:
 
 * Neo4j Community Edition
 ** The maximum concurrency in the library is 4.

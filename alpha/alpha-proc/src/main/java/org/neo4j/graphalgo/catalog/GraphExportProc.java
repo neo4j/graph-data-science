@@ -26,16 +26,17 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.NeoExport;
 import org.neo4j.graphalgo.core.utils.export.NeoExportConfig;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class GraphExportProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.graph.export", mode = Mode.READ)
+    @Procedure(name = "gds.alpha.graph.export", mode = READ)
     @Description("Exports a named graph into a new Neo4j database.")
     public Stream<GraphExportResult> create(
         @Name(value = "graphName") String graphName,

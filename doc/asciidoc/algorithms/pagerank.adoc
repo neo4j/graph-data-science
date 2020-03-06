@@ -6,9 +6,10 @@
 This section describes the Page Rank algorithm in the Neo4j Graph Data Science library.
 --
 
-Page Rank is an algorithm that measures the *transitive* influence or connectivity of nodes.
+Page Rank is an algorithm that measures the influence or importance of nodes in a directed graph.
 
-It can be computed by either iteratively distributing one node's rank (originally based on degree) over its neighbours or by randomly traversing the graph and counting the frequency of hitting each node during these walks.
+It is computed by either iteratively distributing each node's score (originally based on degree) over its neighbours.
+Theoretically this is equivalent traversing the graph in a random fashion and counting the frequency of hitting each node during these walks.
 
 This section includes:
 
@@ -25,10 +26,10 @@ This section includes:
 [[algorithms-pagerank-intro]]
 == Introduction
 
-The Page Rank algorithm measures the importance of each node within the graph, based on the number and quality of incoming relationships.
-The underlying assumption is that pages of importance are more likely to receive a higher volume of links from other pages.
+The Page Rank algorithm measures the importance of each node within the graph, based on the number incoming relationships and the importance of the corresponding source nodes.
+The underlying assumption roughly speaking is that a page is only as important as the pages that link to it.
 
-Page Rank is defined in the original Google paper as follows:
+Page Rank is defined in the original Google paper as a function that solves the following equation:
 
 ----
 PR(A) = (1-d) + d (PR(T1)/C(T1) + ... + PR(Tn)/C(Tn))
@@ -40,6 +41,8 @@ where,
 * `d` is a damping factor which can be set between 0 and 1.
   It is usually set to 0.85.
 * `C(A)` is defined as the number of links going out of page `A`.
+
+This equation is used to iteratively update a candidate solution and arrive at an approximate solution to the same equation.
 
 
 For more information on this algorithm, see:
@@ -59,16 +62,41 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-pagerank-syntax]]
 == Syntax
 
-.The following will run the algorithm and write back results:
+
+=== Write mode
+
+.Run PageRank in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.pageRank.write(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodes, createMillis, computeMillis, writeMillis, configuration
+CALL gds.pageRank.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general write return columns
+  ranIterations: Integer,
+  didConverge: Boolean
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run PageRank in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.pageRank.write(configuration: Map)
+YIELD
+  // general write return columns
+  ranIterations: Integer,
+  didConverge: Boolean
+----
+
+:entity: node
+:result: score
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -76,32 +104,54 @@ include::common-configuration.adoc[]
 | Name                       | Type    | Default   | Optional | Description
 | dampingFactor              | Float   | 0.85      | yes      | The damping factor of the Page Rank calculation.
 | maxIterations              | Integer | 20        | yes      | The maximum number of iterations of Page Rank to run.
-| tolerance                  | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
+| tolerance                  | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable and the algorithm returns.
 | relationshipWeightProperty | String  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| writeProperty              | String  | n/a       | no       | The property name written back to.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| ranIterations | Integer | The number of iterations run.
-| createMillis  | Integer | Milliseconds for creating the graph.
-| computeMillis | Integer | Milliseconds for running the algorithm.
-| writeMillis   | Integer | Milliseconds for writing result data back.
-| configuration | Map     | The configuration used for running the algorithm.
+| Name                   | Type    | Description
+| ranIterations          | Integer | The number of iterations run.
+| didConverge            | Boolean | Indicates if the algorithm converged.
+| createMillis           | Integer | Milliseconds for creating the graph.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| writeMillis            | Integer | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer | The number of properties that were written to Neo4j.
+| configuration          | Map     | The configuration used for running the algorithm.
 |===
 
-.The following will run the algorithm and stream results:
+
+=== Stream mode
+
+.Run PageRank in stream mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.pageRank.stream(graphNameOrConfig: String|Map, configuration: Map)
-YIELD node, score
+CALL gds.pageRank.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  score: Float
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run PageRank in stream mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.pageRank.stream(configuration: Map)
+YIELD
+  nodeId: Integer,
+  score: Float
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -109,7 +159,7 @@ include::common-configuration.adoc[]
 | Name                       | Type    | Default   | Optional | Description
 | dampingFactor              | Float   | 0.85      | yes      | The damping factor of the Page Rank calculation.
 | maxIterations              | Integer | 20        | yes      | The maximum number of iterations of Page Rank to run.
-| tolerance                  | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
+| tolerance                  | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable and the algorithm returns.
 | relationshipWeightProperty | String  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 |===
 
@@ -121,39 +171,68 @@ include::common-configuration.adoc[]
 | score   | Float   | Page Rank
 |===
 
-.The following will run the algorithm and returns the result in form of statistical and measurement values:
+
+=== Stats mode
+
+.Run PageRank in stats mode on an named graph.
 [source, cypher]
 ----
-CALL gds.pageRank.stats(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodes, relationships, ranIterations, didConverge, createMillis, computeMillis, writeMillis
+CALL gds.pageRank.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
+
+.Run PageRank in stats mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.pageRank.stats(configuration: Map)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer
+----
+
+include::common-parameters-anonymous-graph.adoc[]
 
 The configuration is the same as for the `write` mode.
 
-.The following will estimate the memory requirements for running the algorithm:
-[source, cypher]
-----
-CALL gds.pageRank.<mode>.estimate(graphNameOrConfig: String|Map, configuration: Map})
-YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory, mapView
-----
-
-include::common-parameters.adoc[]
-
 The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
 
-.Configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name              | Type    | Default | Optional | Description
-| nodeCount         | Integer | 0       | yes      | The number of nodes in a fictive graph.
-| relationshipCount | Integer | 0       | yes      | The number of relationships in a fictive graph.
-|===
 
-Setting the `nodeCount` and `relationshipCount` parameters allows a memory estimation without loading the graph.
-For explicitly loaded graphs, the config-map needs to contain the graph name in the `graph` key.
-Additionally algorithm specific parameters can also be provided as config.
+=== Estimate mode
+
+The following will estimate the memory requirements for running the algorithm.
+The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
+
+.Run PageRank in estimate mode on an named graph.
+[source, cypher]
+----
+CALL gds.pageRank.<mode>.estimate(
+  graphName: String,
+  configuration: Map
+)
+----
+
+include::common-parameters-named-graph.adoc[]
+
+.Run PageRank in estimate mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.pageRank.<mode>.estimate(configuration: Map)
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-estimate-mode.adoc[]
 
 [[algorithms-pagerank-examples]]
 == Examples

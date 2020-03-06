@@ -36,10 +36,11 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
 
-    @Procedure(value = "gds.wcc.stream", mode = READ)
+    @Procedure(value = "gds.wcc.stream", mode = WRITE)
     @Description(WCC_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

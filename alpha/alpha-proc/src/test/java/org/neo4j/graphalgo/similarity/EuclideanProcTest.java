@@ -34,6 +34,8 @@ import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class EuclideanProcTest extends BaseProcTest {
@@ -140,23 +142,28 @@ class EuclideanProcTest extends BaseProcTest {
     void euclideanSingleMultiThreadComparison() {
         int size = 333;
         buildRandomDB(size);
-        try(
-            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0));
-            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0));
-            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0));
-            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 8, "topK", 0), "missingValue", 0))
-        ) {
-            int count = 0;
-            while (result1.hasNext()) {
-                Map<String, Object> row1 = result1.next();
-                assertEquals(row1, result2.next(), row1.toString());
-                assertEquals(row1, result4.next(), row1.toString());
-                assertEquals(row1, result8.next(), row1.toString());
-                count++;
+
+        int count = applyInTransaction(db, tx -> {
+            try(
+                Result result1 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0));
+                Result result2 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0));
+                Result result4 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0));
+                Result result8 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 8, "topK", 0), "missingValue", 0))
+            ) {
+                int cnt = 0;
+                while (result1.hasNext()) {
+                    Map<String, Object> row1 = result1.next();
+                    assertEquals(row1, result2.next(), row1.toString());
+                    assertEquals(row1, result4.next(), row1.toString());
+                    assertEquals(row1, result8.next(), row1.toString());
+                    cnt++;
+                }
+                return cnt;
             }
-            int people = size / 10;
-            assertEquals((people * people - people) / 2, count);
-        }
+        });
+
+        int people = size / 10;
+        assertEquals((people * people - people) / 2, count);
     }
 
     @Test
@@ -164,23 +171,27 @@ class EuclideanProcTest extends BaseProcTest {
         int size = 333;
         buildRandomDB(size);
 
-        try(
-            Result result1 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0));
-            Result result2 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0));
-            Result result4 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0));
-            Result result8 = runQueryWithoutClosing(STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0))
-        ) {
-            int count = 0;
-            while (result1.hasNext()) {
-                Map<String, Object> row1 = result1.next();
-                assertEquals(row1, result2.next(), row1.toString());
-                assertEquals(row1, result4.next(), row1.toString());
-                assertEquals(row1, result8.next(), row1.toString());
-                count++;
+        int count = applyInTransaction(db, tx -> {
+            try(
+                Result result1 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0));
+                Result result2 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0));
+                Result result4 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0));
+                Result result8 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0))
+            ) {
+                int cnt = 0;
+                while (result1.hasNext()) {
+                    Map<String, Object> row1 = result1.next();
+                    assertEquals(row1, result2.next(), row1.toString());
+                    assertEquals(row1, result4.next(), row1.toString());
+                    assertEquals(row1, result8.next(), row1.toString());
+                    cnt++;
+                }
+                return cnt;
             }
-            int people = size / 10;
-            assertEquals(people, count);
-        }
+        });
+
+        int people = size / 10;
+        assertEquals(people, count);
     }
 
     @Test

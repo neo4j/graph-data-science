@@ -26,7 +26,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.io.File;
 
@@ -53,7 +52,7 @@ class GraphExportProcTest extends BaseProcTest {
     File tempDir;
 
     @BeforeEach
-    void setup() throws KernelException {
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphCreateProc.class, GraphExportProc.class);
         runQuery(DB_CYPHER);

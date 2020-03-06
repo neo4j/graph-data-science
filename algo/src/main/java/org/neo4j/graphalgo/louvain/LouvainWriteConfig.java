@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("LouvainWriteConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface LouvainWriteConfig extends LouvainBaseConfig, WriteConfig {
 
     static LouvainWriteConfig of(

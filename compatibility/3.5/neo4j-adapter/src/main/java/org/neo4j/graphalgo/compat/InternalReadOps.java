@@ -19,26 +19,25 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.impl.store.id.IdGenerator;
 import org.neo4j.kernel.impl.store.id.IdGeneratorFactory;
 import org.neo4j.kernel.impl.store.id.IdType;
 import org.neo4j.kernel.impl.util.UnsatisfiedDependencyException;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.OptionalLong;
 
 public final class InternalReadOps {
 
-    public static long getHighestPossibleNodeCount(org.neo4j.internal.kernel.api.Read read, GraphDatabaseAPI api) {
+    public static long getHighestPossibleNodeCount(org.neo4j.internal.kernel.api.Read read, GraphDatabaseService api) {
         return countByIdGenerator(api, IdType.NODE).orElseGet(read::nodesGetCount);
     }
 
-    private static OptionalLong countByIdGenerator(GraphDatabaseAPI api, IdType idType) {
+    private static OptionalLong countByIdGenerator(GraphDatabaseService api, IdType idType) {
         if (api != null) {
             try {
-                IdGeneratorFactory idGeneratorFactory = api
-                        .getDependencyResolver()
-                        .resolveDependency(IdGeneratorFactory.class);
+                IdGeneratorFactory idGeneratorFactory =
+                    GraphDatabaseApiProxy.resolveDependency(api, IdGeneratorFactory.class);
                 if (idGeneratorFactory != null) {
                     final IdGenerator idGenerator = idGeneratorFactory.get(idType);
                     if (idGenerator != null) {

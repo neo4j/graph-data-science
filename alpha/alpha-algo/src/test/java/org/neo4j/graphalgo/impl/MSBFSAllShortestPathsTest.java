@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -32,7 +33,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Matchers.anyDouble;
@@ -64,16 +64,17 @@ class MSBFSAllShortestPathsTest {
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private static GraphDatabaseAPI DB;
+    private static GraphDbApi DB;
 
     @BeforeAll
     static void setup() {
         DB = TestDatabaseCreator.createTestDatabase();
         GraphBuilder.create(DB)
-                .setLabel(LABEL)
-                .setRelationship(RELATIONSHIP)
-                .newGridBuilder()
-                .createGrid(width, height);
+            .setLabel(LABEL)
+            .setRelationship(RELATIONSHIP)
+            .newGridBuilder()
+            .createGrid(width, height)
+            .close();
     }
 
     @AfterAll

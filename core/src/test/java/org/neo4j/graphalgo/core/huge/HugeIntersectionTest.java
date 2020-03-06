@@ -36,7 +36,8 @@ import java.util.PrimitiveIterator;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 
 final class HugeIntersectionTest {
 
@@ -54,17 +55,17 @@ final class HugeIntersectionTest {
         db = TestDatabaseCreator.createTestDatabase();
         Random random = new Random(0L);
         long[] neoStarts = new long[2];
-        long[] neoTargets = runInTransaction(db, () -> {
-            Node start1 = db.createNode();
-            Node start2 = db.createNode();
-            Node start3 = db.createNode();
+        long[] neoTargets = applyInTransaction(db, tx -> {
+            Node start1 = createNode(db, tx);
+            Node start2 = createNode(db, tx);
+            Node start3 = createNode(db, tx);
             neoStarts[0] = start1.getId();
             neoStarts[1] = start2.getId();
             start1.createRelationshipTo(start2, TYPE);
             long[] targets = new long[DEGREE];
             int some = 0;
             for (int i = 0; i < DEGREE; i++) {
-                Node target = db.createNode();
+                Node target = createNode(db, tx);
                 start1.createRelationshipTo(target, TYPE);
                 start3.createRelationshipTo(target, TYPE);
                 if (random.nextBoolean()) {

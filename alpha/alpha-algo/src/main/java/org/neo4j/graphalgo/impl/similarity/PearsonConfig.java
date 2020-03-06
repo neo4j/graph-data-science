@@ -24,5 +24,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 
 @ValueClass
 @Configuration("PearsonConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface PearsonConfig extends SimilarityConfig {
 }

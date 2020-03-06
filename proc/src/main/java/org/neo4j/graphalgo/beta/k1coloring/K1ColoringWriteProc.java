@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,11 +34,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfig> {
     private static final String COLOR_COUNT_FIELD_NAME = "colorCount";
 
-    @Procedure(name = "gds.beta.k1coloring.write", mode = Mode.WRITE)
+    @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,

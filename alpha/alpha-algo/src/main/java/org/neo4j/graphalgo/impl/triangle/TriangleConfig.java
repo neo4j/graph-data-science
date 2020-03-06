@@ -31,6 +31,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("TriangleConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface TriangleConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     static TriangleConfig of(

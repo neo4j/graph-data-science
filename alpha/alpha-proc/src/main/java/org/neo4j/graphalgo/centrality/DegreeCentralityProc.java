@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -41,12 +40,13 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeCentrality, DegreeCentralityConfig> {
 
     private static final String DESCRIPTION = "Degree centrality measures the number of incoming and outgoing relationships from a node.";
 
-    @Procedure(value = "gds.alpha.degree.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.degree.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<CentralityScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -32,6 +32,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("ClosenessCentralityConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface ClosenessCentralityConfig extends
     AlgoBaseConfig,
     WriteConfig

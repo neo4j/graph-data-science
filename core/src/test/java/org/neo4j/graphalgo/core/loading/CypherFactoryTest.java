@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -43,12 +44,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestGraphLoader.addSuffix;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 class CypherFactoryTest {
 
@@ -57,7 +58,7 @@ class CypherFactoryTest {
                                             "CREATE (n {id: id})-[:REL {prop: id % 10}]->(n)";
     private static final String SKIP_LIMIT = "WITH * SKIP $skip LIMIT $limit";
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     private static int id1;
     private static int id2;
@@ -90,8 +91,7 @@ class CypherFactoryTest {
         String nodes = "MATCH (n) RETURN id(n) AS id, n.partition AS partition, n.foo AS foo";
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
 
-        Graph graph = runInTransaction(
-            db, () -> new CypherLoaderBuilder().api(db)
+        Graph graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
                 .nodeQuery(nodes)
                 .relationshipQuery(rels)
                 .addNodeProperty(PropertyMapping.of("partition", 0.0))
@@ -99,8 +99,7 @@ class CypherFactoryTest {
                 .addRelationshipProperty(PropertyMapping.of("weight", 0))
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
-                .load(CypherFactory.class)
-        );
+                .load(CypherFactory.class));
 
         long node1 = graph.toMappedNodeId(id1);
         long node2 = graph.toMappedNodeId(id2);
@@ -142,13 +141,15 @@ class CypherFactoryTest {
 
         IllegalArgumentException readOnlyException = assertThrows(
             IllegalArgumentException.class,
-            () -> runInTransaction(db, () -> {
-                new CypherLoaderBuilder().api(db)
+            () -> {
+                GraphLoader build = new CypherLoaderBuilder()
+                    .api(db)
                     .nodeQuery(nodes)
                     .relationshipQuery(relationships)
-                    .build()
+                    .build();
+                build
                     .load(CypherFactory.class);
-            })
+            }
         );
 
         assertTrue(readOnlyException.getMessage().contains("Query must be read only"));
@@ -326,7 +327,7 @@ class CypherFactoryTest {
             .parameters(MapUtil.map("nodeProp", 42, "relProp", 21))
             .build();
 
-        Graph graph = runInTransaction(db, () -> loader.load(CypherFactory.class));
+        Graph graph = applyInTransaction(db, tx -> loader.load(CypherFactory.class));
 
         assertGraphEquals(fromGdl("(a { nodeProp: 42 })-[{ w: 21 }]->(a)"), graph);
     }
@@ -347,7 +348,7 @@ class CypherFactoryTest {
             builder.executorService(Pools.createDefaultSingleThreadPool());
         }
 
-        Graph graph = runInTransaction(db, () -> builder.build().load(CypherFactory.class));
+        Graph graph = applyInTransaction(db, tx -> builder.build().load(CypherFactory.class));
 
         assertEquals(COUNT, graph.nodeCount());
         AtomicInteger relCount = new AtomicInteger();

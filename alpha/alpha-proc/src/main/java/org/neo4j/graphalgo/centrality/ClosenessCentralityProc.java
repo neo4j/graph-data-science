@@ -38,7 +38,6 @@ import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -47,6 +46,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality, MSClosenessCentrality, ClosenessCentralityConfig> {
 
@@ -77,7 +77,7 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
         return algorithm.resultStream();
     }
 
-    @Procedure(value = "gds.alpha.closeness.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.closeness.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<CentralityScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,

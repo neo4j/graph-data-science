@@ -32,8 +32,8 @@ import static org.neo4j.configuration.SettingImpl.newBuilder;
 
 public final class SettingsProxy {
 
-    private SettingsProxy() {
-        throw new UnsupportedOperationException();
+    public static Setting<Boolean> unlimitedCores() {
+        return ConcurrencyControllerSettings.unlimitedCores;
     }
 
     public static Setting<Boolean> boltEnabled() {
@@ -62,5 +62,9 @@ public final class SettingsProxy {
 
     public static Setting<Path> storeInternalLogPath() {
         return GraphDatabaseSettings.store_internal_log_path;
+    }
+
+    private SettingsProxy() {
+        throw new UnsupportedOperationException();
     }
 }

@@ -28,6 +28,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("PageRankStreamConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface PageRankStreamConfig extends PageRankBaseConfig {
 
     static PageRankStreamConfig of(

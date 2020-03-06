@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.LongUnaryOperator;
@@ -53,7 +54,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 
 final class MultiSourceBFSTest extends AlgoTestBase {
 
@@ -314,12 +314,11 @@ final class MultiSourceBFSTest extends AlgoTestBase {
     private void withGrid(
             Consumer<? super GraphBuilder<?>> build,
             Consumer<? super Graph> block) {
-        runInTransaction(db, () -> {
-            DefaultBuilder graphBuilder = GraphBuilder.create(db)
-                    .setLabel("Foo")
-                    .setRelationship("BAR");
-            build.accept(graphBuilder);
-        });
+        DefaultBuilder graphBuilder = GraphBuilder.create(db)
+            .setLabel("Foo")
+            .setRelationship("BAR");
+        build.accept(graphBuilder);
+        graphBuilder.close();
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .build()
@@ -347,7 +346,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
 
     private static final class FakeListIterator implements BfsSources {
 
-        private List<?> longs;
+        private final List<?> longs;
 
         private FakeListIterator(List<Long> longs) {
             longs.sort(Long::compareTo);
@@ -375,6 +374,11 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         @Override
         public boolean equals(final Object obj) {
             return obj instanceof FakeListIterator && longs.equals(((FakeListIterator) obj).longs);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(longs);
         }
 
         @Override

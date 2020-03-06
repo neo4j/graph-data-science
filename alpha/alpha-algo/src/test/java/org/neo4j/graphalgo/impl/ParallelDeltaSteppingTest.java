@@ -27,10 +27,10 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.graphbuilder.GridBuilder;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.Executors;
 
@@ -48,7 +48,7 @@ class ParallelDeltaSteppingTest {
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private static GraphDatabaseAPI db;
+    private static GraphDbApi db;
     private static GridBuilder gridBuilder;
     private static Graph graph;
     private static double[] reference;
@@ -67,6 +67,7 @@ class ParallelDeltaSteppingTest {
                     .forEachRelInTx(rel -> {
                         rel.setProperty(PROPERTY, Math.random() * 5); // (0-5)
                     });
+            gridBuilder.close();
 
             rootNodeId = gridBuilder.getLineNodes()
                     .get(0)

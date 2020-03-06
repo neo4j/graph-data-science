@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -34,10 +33,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPropagationWriteConfig> {
 
-    @Procedure(value = "gds.labelPropagation.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.labelPropagation.write", mode = WRITE)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,

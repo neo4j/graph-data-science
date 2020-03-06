@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -44,6 +43,8 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 
 /**         5     5      5
@@ -96,9 +97,9 @@ final class ShortestPathsProcTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ShortestPathsProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
-        QueryRunner.runInTransaction(db, () -> {
-            startNode = db.findNode(Label.label("Node"), "name", "s").getId();
-            endNode = db.findNode(Label.label("Node"), "name", "x").getId();
+        runInTransaction(db, tx -> {
+            startNode = findNode(db, tx, Label.label("Node"), "name", "s").getId();
+            endNode = findNode(db, tx, Label.label("Node"), "name", "x").getId();
         });
 
         String graphCreateQuery = GdsCypher.call()
@@ -137,7 +138,7 @@ final class ShortestPathsProcTest extends BaseProcTest {
                               "}) " +
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
-        runQueryWithRowConsumer(cypher, row -> {
+        runQueryWithRowConsumer(cypher, (tx, row) -> {
             double distance = row.getNumber("distance").doubleValue();
             consumer.accept(distance);
         });

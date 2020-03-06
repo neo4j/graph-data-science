@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 @ValueClass
 @Configuration("GraphCreateFromStoreConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
 
     String NODE_PROJECTION_KEY = "nodeProjection";

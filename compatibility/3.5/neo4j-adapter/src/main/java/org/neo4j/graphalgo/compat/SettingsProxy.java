@@ -27,12 +27,17 @@ import org.neo4j.kernel.configuration.Settings;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public final class SettingsProxy {
 
-    private SettingsProxy() {
-        throw new UnsupportedOperationException();
+    private static final Setting<Boolean> CORE_LIMITATION = Settings.setting(
+        "gds.enterprise.licensed",
+        Settings.BOOLEAN,
+        "false"
+    );
+
+    public static Setting<Boolean> unlimitedCores() {
+        return CORE_LIMITATION;
     }
 
     public static Setting<Boolean> boltEnabled() {
@@ -66,5 +71,9 @@ public final class SettingsProxy {
             logs -> logs.toPath().resolve("debug.log"),
             Settings.PATH.andThen(File::toPath)
         );
+    }
+
+    private SettingsProxy() {
+        throw new UnsupportedOperationException();
     }
 }

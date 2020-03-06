@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
@@ -34,6 +33,8 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.expectNodeById;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class TriangleProcTest extends TriangleBaseProcTest<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
 
@@ -59,9 +60,9 @@ class TriangleProcTest extends TriangleBaseProcTest<TriangleStream, Stream<Trian
         super.setup();
         idToName = new String[9];
 
-        QueryRunner.runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             for (int i = 0; i < 9; i++) {
-                final String name = (String) db.getNodeById(i).getProperty("name");
+                final String name = (String) expectNodeById(db, tx, i).getProperty("name");
                 idToName[i] = name;
             }
         });

@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("PageRankWriteConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface PageRankWriteConfig extends PageRankBaseConfig, WriteConfig {
 
     static PageRankWriteConfig of(

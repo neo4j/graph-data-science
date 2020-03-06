@@ -45,7 +45,9 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class WeightedDegreeCentralityTest extends AlgoTestBase {
 
@@ -126,31 +128,29 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, double[]> expected = new HashMap<>();
 
-        runInTransaction(db, () -> {
-            expected.put(db.findNode(label, "name", "a").getId(), new double[]{});
-            expected.put(db.findNode(label, "name", "b").getId(), new double[]{2.0});
-            expected.put(db.findNode(label, "name", "c").getId(), new double[]{2.0});
-            expected.put(db.findNode(label, "name", "d").getId(), new double[]{5.0, 2.0});
-            expected.put(db.findNode(label, "name", "e").getId(), new double[]{2.0, 7.0, 1.0});
-            expected.put(db.findNode(label, "name", "f").getId(), new double[]{2.0, 2.0});
-            expected.put(db.findNode(label, "name", "g").getId(), new double[]{});
-            expected.put(db.findNode(label, "name", "h").getId(), new double[]{});
-            expected.put(db.findNode(label, "name", "i").getId(), new double[]{});
-            expected.put(db.findNode(label, "name", "j").getId(), new double[]{});
+        runInTransaction(db, tx -> {
+            expected.put(findNode(db, tx, label, "name", "a").getId(), new double[]{});
+            expected.put(findNode(db, tx, label, "name", "b").getId(), new double[]{2.0});
+            expected.put(findNode(db, tx, label, "name", "c").getId(), new double[]{2.0});
+            expected.put(findNode(db, tx, label, "name", "d").getId(), new double[]{5.0, 2.0});
+            expected.put(findNode(db, tx, label, "name", "e").getId(), new double[]{2.0, 7.0, 1.0});
+            expected.put(findNode(db, tx, label, "name", "f").getId(), new double[]{2.0, 2.0});
+            expected.put(findNode(db, tx, label, "name", "g").getId(), new double[]{});
+            expected.put(findNode(db, tx, label, "name", "h").getId(), new double[]{});
+            expected.put(findNode(db, tx, label, "name", "i").getId(), new double[]{});
+            expected.put(findNode(db, tx, label, "name", "j").getId(), new double[]{});
         });
 
         final Graph graph;
         if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(
-                db,
-                () -> new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
-                    .relationshipQuery(
-                        "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-                    .build()
-                    .graph(graphStoreFactory)
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
+                .api(db)
+                .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
+                .relationshipQuery(
+                    "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
+                .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+                .build()
+                .graph(graphStoreFactory)
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -214,24 +214,22 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, () -> {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "b").getId(), 2.0);
-            expected.put(db.findNode(label, "name", "c").getId(), 2.0);
-            expected.put(db.findNode(label, "name", "d").getId(), 7.0);
-            expected.put(db.findNode(label, "name", "e").getId(), 10.0);
-            expected.put(db.findNode(label, "name", "f").getId(), 4.0);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.0);
+        runInTransaction(db, tx -> {
+            expected.put(findNode(db, tx, label, "name", "a").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "b").getId(), 2.0);
+            expected.put(findNode(db, tx, label, "name", "c").getId(), 2.0);
+            expected.put(findNode(db, tx, label, "name", "d").getId(), 7.0);
+            expected.put(findNode(db, tx, label, "name", "e").getId(), 10.0);
+            expected.put(findNode(db, tx, label, "name", "f").getId(), 4.0);
+            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.0);
         });
 
         final Graph graph;
         if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(
-                db,
-                () -> new CypherLoaderBuilder()
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                     .relationshipQuery(
@@ -274,24 +272,23 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, () -> {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "b").getId(), 2.0);
-            expected.put(db.findNode(label, "name", "c").getId(), 2.0);
-            expected.put(db.findNode(label, "name", "d").getId(), 4.0);
-            expected.put(db.findNode(label, "name", "e").getId(), 6.0);
-            expected.put(db.findNode(label, "name", "f").getId(), 4.0);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.0);
+        runInTransaction(db, tx -> {
+            expected.put(findNode(db, tx, label, "name", "a").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "b").getId(), 2.0);
+            expected.put(findNode(db, tx, label, "name", "c").getId(), 2.0);
+            expected.put(findNode(db, tx, label, "name", "d").getId(), 4.0);
+            expected.put(findNode(db, tx, label, "name", "e").getId(), 6.0);
+            expected.put(findNode(db, tx, label, "name", "f").getId(), 4.0);
+            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.0);
         });
 
         final Graph graph;
 
         if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(
-                db, () -> new CypherLoaderBuilder()
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                     .relationshipQuery(
@@ -334,23 +331,22 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, () -> {
-            expected.put(db.findNode(label, "name", "a").getId(), 5.0);
-            expected.put(db.findNode(label, "name", "b").getId(), 8.0);
-            expected.put(db.findNode(label, "name", "c").getId(), 2.0);
-            expected.put(db.findNode(label, "name", "d").getId(), 7.0);
-            expected.put(db.findNode(label, "name", "e").getId(), 2.0);
-            expected.put(db.findNode(label, "name", "f").getId(), 1.0);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.0);
+        runInTransaction(db, tx -> {
+            expected.put(findNode(db, tx, label, "name", "a").getId(), 5.0);
+            expected.put(findNode(db, tx, label, "name", "b").getId(), 8.0);
+            expected.put(findNode(db, tx, label, "name", "c").getId(), 2.0);
+            expected.put(findNode(db, tx, label, "name", "d").getId(), 7.0);
+            expected.put(findNode(db, tx, label, "name", "e").getId(), 2.0);
+            expected.put(findNode(db, tx, label, "name", "f").getId(), 1.0);
+            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.0);
+            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.0);
         });
 
         Graph graph;
         if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(
-                db, () -> new CypherLoaderBuilder()
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                     .relationshipQuery(

@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("NodeSimilarityWriteConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface NodeSimilarityWriteConfig extends NodeSimilarityBaseConfig, WriteConfig {
 
     static NodeSimilarityWriteConfig of(

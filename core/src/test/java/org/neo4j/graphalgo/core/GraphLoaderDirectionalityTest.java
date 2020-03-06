@@ -28,14 +28,14 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.GraphHelper.assertRelationships;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 class GraphLoaderDirectionalityTest {
 
@@ -61,7 +61,7 @@ class GraphLoaderDirectionalityTest {
         "MATCH (n)<--(m) " +
         "RETURN id(n) AS source, id(m) AS target";
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setUp() {
@@ -270,10 +270,7 @@ class GraphLoaderDirectionalityTest {
                 .globalAggregation(aggregation)
                 .build();
         }
-        return runInTransaction(
-            db,
-            () -> graphLoader.load(graphImpl)
-        );
+        return applyInTransaction(db, tx -> graphLoader.load(graphImpl));
     }
 
 }

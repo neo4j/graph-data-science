@@ -86,46 +86,46 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                    | Type           | Default                | Optional | Description
-| `data`                  | list or string | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
-| `top`                   | int            | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
-| `topK`                  | int            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
-| `similarityCutoff`      | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
-| `degreeCutoff`          | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `skipValue`             | double         | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
-| `concurrency`           | int            | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| `readConcurrency`       | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| `writeConcurrency`      | int            | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| `graph`                 | string         | dense                  | yes      | The graph type ('dense' or 'cypher').
-| `write`                 | boolean        | false                  | yes      | Indicates whether results should be stored.
-| `writeBatchSize`        | int            | 10000                  | yes      | The batch size to use when storing results.
-| `writeRelationshipType` | string         | SIMILAR                | yes      | The relationship type to use when storing results.
-| `writeProperty`         | string         | score                  | yes      | The property to use when storing results.
-| `sourceIds`             | long[]         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
-| `targetIds`             | long[]         | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| Name                  | Type            | Default                | Optional | Description
+| data                  | String[]        | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
+| top                   | Integer         | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| topK                  | Integer         | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| similarityCutoff      | Integer         | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
+| degreeCutoff          | Integer         | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| skipValue             | Float           | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| concurrency           | Integer         | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency       | Integer         | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency      | Integer         | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| graph                 | String          | dense                  | yes      | The graph type ('dense' or 'cypher').
+| write                 | Boolean         | false                  | yes      | Indicates whether results should be stored.
+| writeBatchSize        | Integer         | 10000                  | yes      | The batch size to use when storing results.
+| writeRelationshipType | String          | SIMILAR                | yes      | The relationship type to use when storing results.
+| writeProperty         | String          | score                  | yes      | The property to use when storing results.
+| sourceIds             | Integer[]       | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| targetIds             | Integer[]       | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type    | Description
-| `nodes`                 | int     | The number of nodes passed in.
-| `similarityPairs`       | int     | The number of pairs of similar nodes computed.
-| `write`                 | boolean | Indicates whether results were stored.
-| `writeRelationshipType` | string  | The relationship type used when storing results.
-| `writeProperty`         | string  | The property used when storing results.
-| `min`                   | double  | The minimum similarity score computed.
-| `max`                   | double  | The maximum similarity score computed.
-| `mean`                  | double  | The mean of similarities scores computed.
-| `stdDev`                | double  | The standard deviation of similarities scores computed.
-| `p25`                   | double  | The 25 percentile of similarities scores computed.
-| `p50`                   | double  | The 50 percentile of similarities scores computed.
-| `p75`                   | double  | The 75 percentile of similarities scores computed.
-| `p90`                   | double  | The 90 percentile of similarities scores computed.
-| `p95`                   | double  | The 95 percentile of similarities scores computed.
-| `p99`                   | double  | The 99 percentile of similarities scores computed.
-| `p999`                  | double  | The 99.9 percentile of similarities scores computed.
-| `p100`                  | double  | The 100 percentile of similarities scores computed.
+| nodes                 | Integer | The number of nodes passed in.
+| similarityPairs       | Integer | The number of pairs of similar nodes computed.
+| write                 | Boolean | Indicates whether results were stored.
+| writeRelationshipType | String  | The relationship type used when storing results.
+| writeProperty         | String  | The property used when storing results.
+| min                   | Float   | The minimum similarity score computed.
+| max                   | Float   | The maximum similarity score computed.
+| mean                  | Float   | The mean of similarities scores computed.
+| stdDev                | Float   | The standard deviation of similarities scores computed.
+| p25                   | Float   | The 25 percentile of similarities scores computed.
+| p50                   | Float   | The 50 percentile of similarities scores computed.
+| p75                   | Float   | The 75 percentile of similarities scores computed.
+| p90                   | Float   | The 90 percentile of similarities scores computed.
+| p95                   | Float   | The 95 percentile of similarities scores computed.
+| p99                   | Float   | The 99 percentile of similarities scores computed.
+| p999                  | Float   | The 99.9 percentile of similarities scores computed.
+| p100                  | Float   | The 100 percentile of similarities scores computed.
 |===
 
 .The following will run the algorithm on a graph in the catalog and stream results:
@@ -160,30 +160,30 @@ YIELD item1, item2, count1, count2, intersection, similarity
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name               | Type           | Default                | Optional | Description
-| `data`             | list or string | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
-| `top`              | int            | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
-| `topK`             | int            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
-| `similarityCutoff` | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
-| `degreeCutoff`     | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `skipValue`        | double         | null                   | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
-| `concurrency`      | int            | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| `readConcurrency`  | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| `graph`            | string         | dense                  | yes      | The graph type ('dense' or 'cypher').
-| `sourceIds`        | long[]         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
-| `targetIds`        | long[]         | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| Name             | Type               | Default                | Optional | Description
+| data             | String[]           | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
+| top              | Integer            | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| topK             | Integer            | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| similarityCutoff | Integer            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
+| degreeCutoff     | Integer            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| skipValue        | Float              | null                   | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| concurrency      | Integer            | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency  | Integer            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| graph            | String             | dense                  | yes      | The graph type ('dense' or 'cypher').
+| sourceIds        | Integer[]          | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| targetIds        | Integer[]          | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name         | Type | Description
-| `item1`      | int  | The ID of one node in the similarity pair.
-| `item2`      | int  | The ID of other node in the similarity pair.
-| `count1`       | int  | The size of the `targets` list of one node.
-| `count2`       | int  | The size of the `targets` list of other node.
-| `intersection` | int  | The number of intersecting values in the two nodes `targets` lists.
-| `similarity`   | int  | The cosine similarity of the two nodes.
+| Name         | Type       | Description
+| item1        | Integer    | The ID of one node in the similarity pair.
+| item2        | Integer    | The ID of other node in the similarity pair.
+| count1       | Integer    | The size of the `targets` list of one node.
+| count2       | Integer    | The size of the `targets` list of other node.
+| intersection | Integer    | The number of intersecting values in the two nodes `targets` lists.
+| similarity   | Integer    | The cosine similarity of the two nodes.
 |===
 
 

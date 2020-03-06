@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -29,8 +30,12 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 
 public class ListProc {
+
+    @Context
+    public KernelTransaction transaction;
 
     private static final String QUERY =
             " CALL dbms.procedures() " +
@@ -52,7 +57,9 @@ public class ListProc {
     @Procedure("gds.list")
     @Description(DESCRIPTION)
     public Stream<ListResult> list(@Name(value = "name", defaultValue = "") String name) {
-        return db.execute(QUERY, singletonMap("name", name)).stream().map(ListResult::new);
+        return runQueryWithoutClosingTheResult(db, transaction, QUERY, singletonMap("name", name))
+            .stream()
+            .map(ListResult::new);
     }
 
     public static class ListResult {

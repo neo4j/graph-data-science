@@ -1,0 +1,10 @@
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                   | Type        | Default                | Optional | Description
+| nodeLabels             | String[]    | ['*']                  | yes      | Filter the named graph using the given node labels.
+| relationshipTypes      | String[]    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+| concurrency            | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'writeConcurrency'.
+| writeConcurrency       | Integer     | value of 'concurrency' | yes      | WRITE mode only: The number of concurrent threads used for writing the result.
+| writeProperty          | String      | n/a                    | no       | WRITE mode only: The {entity} property to which the {result} is written to.
+|===

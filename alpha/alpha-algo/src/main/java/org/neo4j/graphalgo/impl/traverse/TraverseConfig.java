@@ -34,6 +34,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("TraverseConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface TraverseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     long startNode();

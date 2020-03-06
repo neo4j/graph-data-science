@@ -79,7 +79,7 @@ public class PrimitiveIntCollections {
          * This method returns {@code true} so that it can be used in short-hand conditionals
          * (TODO what are they called?), like:
          * <pre>
-         * @Override
+         * {@literal @}Override
          * protected boolean fetchNext()
          * {
          *     return source.hasNext() ? next( source.next() ) : false;
@@ -262,7 +262,7 @@ public class PrimitiveIntCollections {
      * @throws IllegalStateException for the first encountered duplicate.
      */
     public static Set<Integer> toSet(PrimitiveIntIterator iterator) {
-        return mapToSet(iterator, Integer::new);
+        return mapToSet(iterator, Integer::valueOf);
     }
 
     public static <T> Set<T> mapToSet(PrimitiveIntIterator iterator, IntFunction<T> map) {

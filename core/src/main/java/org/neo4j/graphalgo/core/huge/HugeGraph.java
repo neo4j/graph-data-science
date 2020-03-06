@@ -492,6 +492,7 @@ public class HugeGraph implements Graph {
     }
 
     @ValueClass
+    @SuppressWarnings("immutables:subtype")
     public interface PropertyCSR extends CSR {
         double defaultPropertyValue();
     }

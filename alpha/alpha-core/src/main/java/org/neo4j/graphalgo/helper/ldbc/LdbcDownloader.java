@@ -24,11 +24,9 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
-import org.neo4j.graphalgo.compat.SettingsProxy;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphalgo.compat.EmbeddedDatabaseCreator;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.io.ByteUnit;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -60,11 +58,11 @@ public final class LdbcDownloader {
         FILES.put("Yelp", new S3Location("https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.datasets/yelp.photo.db.tgz"));
     }
 
-    public static synchronized GraphDatabaseAPI openDb() throws IOException {
+    public static synchronized GraphDbApi openDb() throws IOException {
         return openDb("L01");
     }
 
-    public static synchronized GraphDatabaseAPI openDb(String graphId) throws IOException {
+    public static synchronized GraphDbApi openDb(String graphId) throws IOException {
         String pageCacheSize = "2G";
         String[] graphParts = graphId.split(":");
         if (graphParts.length > 1) {
@@ -74,7 +72,7 @@ public final class LdbcDownloader {
         return openDbWithCache(graphParts[0].trim(), pageCacheSize);
     }
 
-    private static GraphDatabaseAPI openDbWithCache(String graphId, String pageCacheSize) throws IOException {
+    private static GraphDbApi openDbWithCache(String graphId, String pageCacheSize) throws IOException {
         S3Location location = FILES.get(graphId);
         if (location != null) {
             return openDb(graphId, location, pageCacheSize);
@@ -86,7 +84,7 @@ public final class LdbcDownloader {
         throw new IllegalArgumentException("Unknown graph: " + graphId);
     }
 
-    private static GraphDatabaseAPI openDb(String id, S3Location location, String pageCacheSize) throws IOException {
+    private static GraphDbApi openDb(String id, S3Location location, String pageCacheSize) throws IOException {
         Path graphDir = tempDirFor("org.neo4j", "ldbc", id);
         Path graphDbDir = graphDir.resolve("graph.db");
         if (Files.isDirectory(graphDbDir)) {
@@ -101,14 +99,8 @@ public final class LdbcDownloader {
         return openDb(id, location, pageCacheSize);
     }
 
-    private static GraphDatabaseAPI openDb(Path dbLocation, final String pageCache) {
-        GraphDatabaseService db = new GraphDatabaseFactory()
-                .newEmbeddedDatabaseBuilder(dbLocation.toFile())
-                .setConfig(SettingsProxy.pagecacheMemory(), pageCache)
-                .setConfig(SettingsProxy.allowUpgrade(), "true")
-                .setConfig(SettingsProxy.udc(), "false")
-                .newGraphDatabase();
-        return (GraphDatabaseAPI) db;
+    private static GraphDbApi openDb(Path dbLocation, final String pageCache) {
+        return EmbeddedDatabaseCreator.createEmbeddedDatabase(dbLocation, pageCache);
     }
 
     private static void unzipFile(Path zippedDb, S3Location location)

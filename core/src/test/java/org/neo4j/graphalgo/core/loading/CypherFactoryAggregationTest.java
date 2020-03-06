@@ -28,15 +28,15 @@ import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 class CypherFactoryAggregationTest {
 
@@ -46,7 +46,7 @@ class CypherFactoryAggregationTest {
                                            "CREATE (n2)-[:REL {weight: 10}]->(n1) " +
                                            "RETURN id(n1) AS id1, id(n2) AS id2";
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     private static int id1;
     private static int id2;
@@ -70,14 +70,12 @@ class CypherFactoryAggregationTest {
         String nodes = "MATCH (n) RETURN id(n) AS id";
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
-        Graph graph = runInTransaction(
-            db, () -> new CypherLoaderBuilder().api(db)
+        Graph graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
                 .nodeQuery(nodes)
                 .relationshipQuery(rels)
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
-                .load(CypherFactory.class)
-        );
+                .load(CypherFactory.class));
 
         assertEquals(2, graph.nodeCount());
         assertEquals(1, graph.degree(graph.toMappedNodeId(id1)));
@@ -89,15 +87,13 @@ class CypherFactoryAggregationTest {
         String nodes = "MATCH (n) RETURN id(n) AS id";
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
-        Graph graph = runInTransaction(
-            db, () -> new CypherLoaderBuilder().api(db)
+        Graph graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
                 .nodeQuery(nodes)
                 .relationshipQuery(rels)
                 .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
-                .load(CypherFactory.class)
-        );
+                .load(CypherFactory.class));
 
         double[] weights = collectTargetProperties(graph, graph.toMappedNodeId(id1));
         assertEquals(1, weights.length);
@@ -113,15 +109,13 @@ class CypherFactoryAggregationTest {
         String nodes = "MATCH (n) RETURN id(n) AS id";
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
-        Graph graph = runInTransaction(
-            db, () -> new CypherLoaderBuilder().api(db)
+        Graph graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
                 .nodeQuery(nodes)
                 .relationshipQuery(rels)
                 .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                 .globalAggregation(aggregation)
                 .build()
-                .load(CypherFactory.class)
-        );
+                .load(CypherFactory.class));
 
         double[] weights = collectTargetProperties(graph, graph.toMappedNodeId(id1));
         assertArrayEquals(new double[]{expectedWeight}, weights);

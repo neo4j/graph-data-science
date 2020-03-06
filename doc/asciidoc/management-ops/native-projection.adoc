@@ -10,18 +10,18 @@ This section explains native projections in the Neo4j Graph Data Science library
 
 A native projection allows us to project a graph from Neo4j into an in-memory graph.
 The projected graph can be specified in terms of node labels, relationship types and properties.
-Node labels and node properties are projected using <<native-projection-syntax-node-projections>>.
-Relationship types and relationship properties are projected using <<native-projection-syntax-relationship-projections>>.
+Node labels and node properties are projected using <<native-projection-syntax-node-projections, Node projections>>.
+Relationship types and relationship properties are projected using <<native-projection-syntax-relationship-projections, Relationship projections>>.
 
 The main benefit of native projections is their performance.
-In contrast, a <<cypher-projection>> is more flexible from the declaration point of view, but less performant.
+In contrast, a <<cypher-projection, Cypher projection>> is more flexible from the declaration point of view, but less performant.
 In most cases it is possible to structure your Neo4j graph model in a way that enables native projections to be used.
 
 This section includes:
 
-* <<native-projection-syntax>>
-* <<native-projection-syntax-node-projections>>
-* <<native-projection-syntax-relationship-projections>>
+* <<native-projection-syntax, Syntax>>
+* <<native-projection-syntax-node-projections, Node projections>>
+* <<native-projection-syntax-relationship-projections, Relationship projections>>
 
 
 [[native-projection-syntax]]
@@ -55,7 +55,8 @@ CALL gds.graph.create(
 |===
 | Name                   | Type                  | Default        | Description
 | readConcurrency        | Integer               | 4              | The number of concurrent threads used for creating the graph.
-| nodeProperties         | String, List or Map   | empty map      |
+| nodeProperties         | String, List or Map   | empty map      | Node properties to load for all node projections.
+| relationshipProperties | String, List or Map   | empty map      | Relationship properties to load for all relationship projections.
 |===
 
 
@@ -313,18 +314,18 @@ CALL gds.graph.create(
     {
         ROAD: {
             type: 'ROAD',
-            projection: 'NATURAL'
+            orientation: 'NATURAL'
         },
         RAIL: {
             type: 'RAIL',
-            projection: 'NATURAL'
+            orientation: 'NATURAL'
         }
     }
 )
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
-In the above example, we are using the same relationship type as in the Neo4j database as well as the default `projection`.
+In the above example, we are using the same relationship type as in the Neo4j database as well as the default `orientation`.
 In that case we can use the following syntactic sugar, similar to node projections.
 
 [source,cypher]
@@ -439,7 +440,7 @@ The following map-like syntax shows the general way of defining relationship pro
 {
     <relationship-type-1>: {
         type: <neo4j-type>,
-        projection: <projection-type>,
+        orientation: <orientation-type>,
         aggregation: <aggregation-type>,
         properties: {
             <property-key-1>: {

@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -39,10 +38,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseProc<ModularityOptimizationWriteConfig> {
 
-    @Procedure(name = "gds.beta.modularityOptimization.write", mode = Mode.WRITE)
+    @Procedure(name = "gds.beta.modularityOptimization.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,

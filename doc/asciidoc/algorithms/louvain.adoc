@@ -19,7 +19,7 @@ This topic includes:
 
 [[algorithms-louvain-intro]]
 == Introduction
-The Louvain method for community detection is an algorithm for detecting communities in networks.
+The Louvain method is an algorithm to detect communities in large networks.
 It maximizes a modularity score for each community, where the modularity quantifies the quality of an assignment of nodes to communities.
 This means evaluating how much more densely connected the nodes within a community are, compared to how connected they would be in a random network.
 
@@ -40,16 +40,43 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-louvain-syntax]]
 == Syntax
 
-.The following describes the API for running the algorithm and writing results back to Neo4j:
+
+=== Write mode
+
+.Run Louvain in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.louvain.write(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodePropertiesWritten, communityCount, modularity, createMillis, computeMillis, writeMillis
+CALL gds.louvain.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general write return columns
+  nodePropertiesWritten: Integer,
+  communityCount: Integer,
+  modularity: Float
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run Louvain in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.louvain.write(configuration: Map)
+YIELD
+  // general write return columns
+  nodePropertiesWritten: Integer,
+  communityCount: Integer,
+  modularity: Float
+----
+
+:entity: node
+:result: community ID
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -57,7 +84,6 @@ include::common-configuration.adoc[]
 | Name                           | Type    | Default     | Optional | Description
 | relationshipWeightProperty     | String  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
 | seedProperty                   | String  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| writeProperty                  | String  | n/a         | yes      | The property name written back the ID of the partition particular node belongs to.
 | maxLevels                      | Integer | 10          | yes      | The maximum number of levels in which the graph is clustered and then condensed.
 | maxIterations                  | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
 | tolerance                      | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
@@ -72,27 +98,49 @@ include::common-configuration.adoc[]
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | writeMillis           | Integer   | Milliseconds for writing result data back.
 | postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
-| nodePropertiesWritten | Integer   | The number of nodes considered.
+| nodePropertiesWritten | Integer   | The number of node properties written.
 | communityCount        | Integer   | The number of communities found.
 | ranLevels             | Integer   | The number of supersteps the algorithm actually ran.
 | modularity            | Float     | The final modularity score.
-| modularities          | Integer[] | The final modularity scores for each level.
+| modularities          | Integer[] | The modularity scores for each level.
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
 
 
 [[algorithms-louvain-syntax-stream]]
-.The following describes the API for running the algorithm and stream results:
+=== Stream mode
+
+.Run Louvain in stream mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.louvain.stream(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodeId, communityId, intermediateCommunityIds
+CALL gds.louvain.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  communityId: Integer,
+  intermediateCommunityIds: Integer[]
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run Louvain in stream mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.louvain.stream(configuration: Map)
+YIELD
+  nodeId: Integer,
+  communityId: Integer,
+  intermediateCommunityIds: Integer[]
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -105,7 +153,6 @@ include::common-configuration.adoc[]
 | tolerance                      | Float    | 0.0001  | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | includeIntermediateCommunities | Boolean  | false   | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
 |===
-
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -302,7 +349,7 @@ ORDER BY name ASC
 --
 
 Using the seeded graph, we see that the community around `Alice` keeps its initial community ID of `42`.
-The other community is assigned a new community ID, which is guaranteed to be larger than the largest community ID.
+The other community is assigned a new community ID, which is guaranteed to be larger than the largest seeded community ID.
 
 
 [[algorithms-louvain-examples-stream-intermediate]]

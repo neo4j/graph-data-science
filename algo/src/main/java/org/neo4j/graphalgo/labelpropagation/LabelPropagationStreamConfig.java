@@ -28,6 +28,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("LabelPropagationStreamConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface LabelPropagationStreamConfig extends LabelPropagationBaseConfig {
 
     static LabelPropagationStreamConfig of(

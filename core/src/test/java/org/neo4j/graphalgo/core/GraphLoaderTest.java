@@ -31,8 +31,8 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
@@ -51,7 +51,7 @@ class GraphLoaderTest {
         ", (n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)" +
         ", (n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3)";
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setup() {

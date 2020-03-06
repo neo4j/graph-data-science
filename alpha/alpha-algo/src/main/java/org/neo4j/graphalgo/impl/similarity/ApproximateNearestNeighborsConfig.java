@@ -30,6 +30,7 @@ import java.util.Map;
 
 @ValueClass
 @Configuration("ApproximateNearestNeighborsConfigImpl")
+@SuppressWarnings({"immutables:subtype", "immutables:from"})
 public interface ApproximateNearestNeighborsConfig extends SimilarityConfig, IterationsConfig {
 
     @Configuration.ConvertWith("similarityAlgorithm")

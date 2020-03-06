@@ -78,7 +78,7 @@ class YensKSharedPrefixMaxDepthProcTest extends BaseProcTest {
             .yields("path");
 
         final String cypher = String.format(
-            "MATCH (from:Node{name:{from}}), (to:Node{name:{to}}) %s RETURN path",
+            "MATCH (from:Node{name:$from}), (to:Node{name:$to}) %s RETURN path",
             algoCall
         );
 

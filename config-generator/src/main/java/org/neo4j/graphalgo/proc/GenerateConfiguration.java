@@ -604,6 +604,7 @@ final class GenerateConfiguration {
         switch (configMembers.size()) {
             case 0:
                 builder.addStatement("return $T.emptyMap()", Collections.class);
+                break;
             case 1:
                 ConfigParser.Member singleConfigMember = configMembers.iterator().next();
                 String parameter = singleConfigMember.lookupKey();
@@ -613,6 +614,7 @@ final class GenerateConfiguration {
                     parameter,
                     getMapValueCode(singleConfigMember)
                 );
+                break;
             default:
                 builder.addStatement("$T<$T, Object> map = new $T<>()", Map.class, String.class, LinkedHashMap.class);
                 configMembers.forEach(configMember -> builder.addStatement(
@@ -621,6 +623,7 @@ final class GenerateConfiguration {
                     getMapValueCode(configMember)
                 ));
                 builder.addStatement("return map");
+                break;
         }
     }
 

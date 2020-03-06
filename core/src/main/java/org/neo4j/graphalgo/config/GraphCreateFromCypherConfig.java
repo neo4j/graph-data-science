@@ -44,6 +44,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 
 @ValueClass
 @Configuration("GraphCreateFromCypherConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     String NODE_QUERY_KEY = "nodeQuery";

@@ -35,6 +35,7 @@ import java.util.function.BiConsumer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.procedureCallContext;
 
 final class AbstractCommunityResultBuilderTest {
 
@@ -46,7 +47,7 @@ final class AbstractCommunityResultBuilderTest {
     void countCommunitySizesOverHugeCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder(
             42,
-            new ProcedureCallContext(new String[]{"communityCount", "communityDistribution"}, false),
+            procedureCallContext("communityCount", "communityDistribution"),
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
                 assertTrue(maybeHistogram.isPresent());
@@ -69,7 +70,7 @@ final class AbstractCommunityResultBuilderTest {
     void countCommunitySizesOverPresizedHugeCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder(
             42,
-            new ProcedureCallContext(new String[]{"communityCount", "communityDistribution"}, false),
+            procedureCallContext("communityCount", "communityDistribution"),
             (maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
             assertTrue(maybeHistogram.isPresent());
@@ -92,7 +93,7 @@ final class AbstractCommunityResultBuilderTest {
     void countCommunitySizesOverIntegerCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder(
             42,
-            new ProcedureCallContext(new String[]{"communityCount", "communityDistribution"}, false),
+            procedureCallContext("communityCount", "communityDistribution"),
             (maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
             assertTrue(maybeHistogram.isPresent());
@@ -114,7 +115,7 @@ final class AbstractCommunityResultBuilderTest {
     void countCommunitySizesOverLongCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder(
             42,
-            new ProcedureCallContext(new String[]{"communityCount", "communityDistribution"}, false),
+            procedureCallContext("communityCount", "communityDistribution"),
             (maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
             assertTrue(maybeHistogram.isPresent());
@@ -137,7 +138,7 @@ final class AbstractCommunityResultBuilderTest {
     void doNotGenerateCommunityCountOrHistogram() {
         AbstractCommunityResultBuilder<Void> builder = builder(
             42,
-            new ProcedureCallContext(new String[]{}, false),
+            procedureCallContext(),
             (maybeCommunityCount, maybeHistogram) -> {
             assertFalse(maybeCommunityCount.isPresent());
             assertFalse(maybeHistogram.isPresent());
@@ -151,7 +152,7 @@ final class AbstractCommunityResultBuilderTest {
     void doNotGenerateHistogram() {
         AbstractCommunityResultBuilder<Void> builder = builder(
             42,
-            new ProcedureCallContext(new String[]{"communityCount"}, false),
+            procedureCallContext("communityCount"),
             (maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
             assertFalse(maybeHistogram.isPresent());

@@ -25,13 +25,14 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllRelationships;
 
 /**
  * Graph:
@@ -99,7 +100,7 @@ class YensKShortestPathsProcTest extends BaseProcTest {
          * 10 rels from source graph already in db
          * + 29 rels from 9 paths
          */
-        long actual = QueryRunner.runInTransaction(db, () -> db.getAllRelationships().stream().count());
+        long actual = applyInTransaction(db, tx -> getAllRelationships(db, tx).stream().count());
         assertEquals(39, actual);
 
         Map<String, Double> combinations = new HashMap<>();

@@ -41,28 +41,46 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-wcc-syntax]]
 == Syntax
 
-.The following describes the API for running the algorithm and writing results back to Neo4j:
+
+== Write mode
+
+.Run WCC in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
 CALL gds.wcc.write(
-  graphName: string,
-  configuration: map
+  graphName: String,
+  configuration: Map
 )
 YIELD
   // general write return columns
-  componentCount: integer,
-  componentDistribution: map
+  componentCount: Integer,
+  componentDistribution: Map
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run WCC in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.wcc.write(configuration: Map)
+YIELD
+  // general write return columns
+  componentCount: Integer,
+  componentDistribution: Map
+----
+
+:entity: node
+:result: component ID
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                       | Type    | Default | Optional  | Description
-| writeProperty              | String  | n/a     | no        | The node property to which the component ID is written to.
 | relationshipWeightProperty | String  | null    | yes       | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
 | defaultValue               | Float   | null    | yes       | The default value of the relationship weight in case it is missing or invalid.
 | seedProperty               | String  | n/a     | yes       | Used to set the initial component for a node. The property value needs to be a number.
@@ -71,7 +89,7 @@ include::common-configuration.adoc[]
 |===
 
 .Results
-[opts="header",cols="1m,1,6"]
+[opts="header",cols="1,1,6"]
 |===
 | Name                          | Type    | Description
 | createMillis                  | Integer | Milliseconds for loading data.
@@ -85,26 +103,41 @@ include::common-configuration.adoc[]
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===
 
+
 [[algorithms-wcc-syntax-stream]]
-.The following describes the API for running the algorithm and stream results:
+== Stream mode
+
+.Run WCC in stream mode on a graph stored in the catalog.
 [source, cypher]
 ----
 CALL gds.wcc.stream(
-  graphName: string,
-  configuration: map
+  graphName: String,
+  configuration: Map
 )
 YIELD
-  // general stream return columns
-  nodeId: int,
-  componentId: int
+  nodeId: Integer,
+  componentId: Integer
 ----
 
-include::common-parameters.adoc[]
+include::common-parameters-named-graph.adoc[]
 
-include::common-configuration.adoc[]
+include::common-configuration-named-graph.adoc[]
+
+.Run WCC in stream mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.wcc.stream(configuration: Map)
+YIELD
+  nodeId: Integer,
+  componentId: Integer
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
-[opts="header",cols="1m,1,1,1,4"]
+[opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                       | Type    | Default | Optional | Description
 | relationshipWeightProperty | String  | null    | yes      | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
@@ -115,7 +148,7 @@ include::common-configuration.adoc[]
 |===
 
 .Results
-[opts="header",cols="1m,1,6"]
+[opts="header",cols="1,1,6"]
 |===
 | Name        | Type    | Description
 | nodeId      | Integer | The Neo4j node ID.

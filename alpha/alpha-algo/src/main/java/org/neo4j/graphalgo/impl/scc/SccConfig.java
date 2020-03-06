@@ -32,6 +32,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("SccConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface SccConfig extends AlgoBaseConfig, WriteConfig {
 
     @Value.Default

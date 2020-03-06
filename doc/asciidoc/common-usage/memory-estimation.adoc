@@ -33,7 +33,7 @@ To make this process easier every algorithm supports the `.estimate` mode, which
 .Syntax
 [source, cypher]
 ----
-CALL gds.<ALGO>.<MODE>.estimate(graphNameOrConfig: String|Map, configuration: Map})
+CALL gds.<ALGO>.<MODE>.estimate(graphNameOrConfig: String|Map, configuration: Map)
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
 ----
 
@@ -41,8 +41,8 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, 
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type          | Default   | Optional  | Description
-| graphNameOrConfig | string or map | -         | no        | The name of the projected graph or the algorithm configuration in case of implicit loading.
-| configuration     | map           | {}        | yes       | If the first parameter is the name of a projected graph, this parameter is the algorithm config, otherwise it needs to be null or an empty map.
+| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or the algorithm configuration in case of implicit loading.
+| configuration     | Map           | {}        | yes       | If the first parameter is the name of a projected graph, this parameter is the algorithm config, otherwise it needs to be null or an empty map.
 |===
 
 The configuration parameter accepts the same configuration parameters as the estimated algorithm.
@@ -82,9 +82,9 @@ The `nodeProjection` and `relationshipProjection` parameters follow the same syn
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                   | Type                  | Default   | Optional  | Description
-| nodeProjection         | string or list or map | -         | no        | The node projection to estimate for.
-| relationshipProjection | string or list or map | -         | no        | The relationship projection to estimate for.
-| configuration          | map                   | {}        | yes       | Additional configuration, such as concurrency.
+| nodeProjection         | String or List or Map | -         | no        | The node projection to estimate for.
+| relationshipProjection | String or List or Map | -         | no        | The relationship projection to estimate for.
+| configuration          | Map                   | {}        | yes       | Additional configuration, such as concurrency.
 |===
 
 The result of running `gds.graph.create.estimate` has the same form as the algorithm memory estimation results above.
@@ -98,8 +98,8 @@ To achieve this, use the following configuration options:
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type      | Default           | Optional  | Description
-| nodeCount         | int       | 0                 | yes       | The number of nodes in a fictive graph.
-| relationshipCount | int       | 0                 | yes       | The number of relationships in a fictive graph.
+| nodeCount         | Integer   | 0                 | yes       | The number of nodes in a fictive graph.
+| relationshipCount | Integer   | 0                 | yes       | The number of relationships in a fictive graph.
 |===
 
 When estimating a fictive graph, syntactically valid `nodeProjection` and `relationshipProjection` must be specified.
@@ -139,7 +139,7 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, 
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type   | Default   | Optional  | Description
-| nodeQuery         | string | -         | no        | The node query to estimate for.
-| relationshipQuery | string | -         | no        | The relationship query to estimate for.
-| configuration     | map    | {}        | yes       | Additional configuration, such as concurrency.
+| nodeQuery         | String | -         | no        | The node query to estimate for.
+| relationshipQuery | String | -         | no        | The relationship query to estimate for.
+| configuration     | Map    | {}        | yes       | Additional configuration, such as concurrency.
 |===

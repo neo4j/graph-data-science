@@ -21,18 +21,19 @@ package org.neo4j.graphalgo.catalog;
 
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class GraphDropProc extends CatalogProc {
 
     private static final String DESCRIPTION = "Drops a named graph from the catalog and frees up the resources it occupies.";
 
-    @Procedure(name = "gds.graph.drop", mode = Mode.READ)
+    @Procedure(name = "gds.graph.drop", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphInfo> drop(@Name(value = "graphName") String graphName) {
         validateGraphName(graphName);

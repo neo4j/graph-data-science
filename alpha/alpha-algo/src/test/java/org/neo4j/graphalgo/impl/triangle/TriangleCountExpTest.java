@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -37,7 +38,6 @@ import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
@@ -52,20 +52,21 @@ class TriangleCountExpTest {
 
     private static long centerId;
 
-    private static GraphDatabaseAPI DB;
+    private static GraphDbApi DB;
 
     @BeforeAll
     static void setup() {
         DB = TestDatabaseCreator.createTestDatabase();
-        final RelationshipType type = RelationshipType.withName(RELATIONSHIP);
-        final DefaultBuilder builder = GraphBuilder.create(DB)
-                .setLabel(LABEL)
-                .setRelationship(RELATIONSHIP)
-                .newDefaultBuilder();
-        final Node center = builder.createNode();
+        RelationshipType type = RelationshipType.withName(RELATIONSHIP);
+        DefaultBuilder builder = GraphBuilder.create(DB)
+            .setLabel(LABEL)
+            .setRelationship(RELATIONSHIP)
+            .newDefaultBuilder();
+        Node center = builder.createNode();
         builder.newRingBuilder()
-                .createRing((int) TRIANGLE_COUNT)
-                .forEachNodeInTx(node -> center.createRelationshipTo(node, type));
+            .createRing((int) TRIANGLE_COUNT)
+            .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
+            .close();
         centerId = center.getId();
     }
 

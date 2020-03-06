@@ -23,19 +23,20 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class GraphListProc extends CatalogProc {
 
     private static final String NO_VALUE = "__NO_VALUE";
     private static final String DESCRIPTION = "Lists information about named graphs stored in the catalog.";
 
-    @Procedure(name = "gds.graph.list", mode = Mode.READ)
+    @Procedure(name = "gds.graph.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
         Stream<Map.Entry<GraphCreateConfig, Graph>> graphEntries = GraphStoreCatalog

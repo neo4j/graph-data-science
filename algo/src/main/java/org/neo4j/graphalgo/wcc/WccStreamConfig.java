@@ -28,6 +28,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("WccStreamConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface WccStreamConfig extends WccBaseConfig {
 
     static WccStreamConfig of(

@@ -27,18 +27,18 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.compat.TransactionWrapper;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.ImmutableGraphLoader;
+import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -64,7 +64,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.BaseProcTest.anonymousGraphConfig;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.compat.ExceptionUtil.rootCause;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -109,21 +110,21 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     }
 
     default void applyOnProcedure(Consumer<? super AlgoBaseProc<?, RESULT, CONFIG>> func) {
-        new TransactionWrapper(graphDb()).accept((tx -> {
+        try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(graphDb())) {
             AlgoBaseProc<?, RESULT, CONFIG> proc;
             try {
-                proc = getProcedureClazz().newInstance();
+                proc = getProcedureClazz().getDeclaredConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException("Could not instantiate Procedure Class " + getProcedureClazz().getSimpleName());
             }
 
-            proc.transaction = tx;
+            proc.transaction = transactions.ktx();
             proc.api = graphDb();
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
 
             func.accept(proc);
-        }));
+        }
     }
 
     @Test
@@ -154,7 +155,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             assertEquals(expectedNodeProjections, actual.nodeProjections());
             assertEquals(expectedRelationshipProjections, actual.relationshipProjections());
             assertEquals(IMPLICIT_GRAPH_NAME, actual.graphName());
-            assertEquals(TEST_USERNAME, actual.username());;
+            assertEquals(TEST_USERNAME, actual.username());
         });
     }
 
@@ -280,7 +281,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                     Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
 
                     try {
-                        Stream<?> result = (Stream) method.invoke(proc, configMap, Collections.emptyMap());
+                        Stream<?> result = (Stream<?>) method.invoke(proc, configMap, Collections.emptyMap());
 
                         if (getProcedureMethodName(method).endsWith("stream")) {
                             assertEquals(0, result.count(), "Stream result should be empty.");
@@ -502,13 +503,13 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     @NotNull
     default GraphLoader graphLoader(GraphDatabaseAPI db, GraphCreateConfig graphCreateConfig) {
-        return QueryRunner.runWithKernelTransaction(db, kernelTransaction ->  ImmutableGraphLoader
+        return ImmutableGraphLoader
             .builder()
             .api(db)
-            .kernelTransaction(kernelTransaction)
             .username("")
             .log(new TestLog())
-            .createConfig(graphCreateConfig).build());
+            .createConfig(graphCreateConfig)
+            .build();
     }
 
 }

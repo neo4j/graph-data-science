@@ -46,7 +46,9 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class PageRankTest extends AlgoTestBase {
 
@@ -111,22 +113,22 @@ final class PageRankTest extends AlgoTestBase {
     void testOnOutgoingRelationships(Class<? extends GraphStoreFactory> factoryType) {
         final Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, () -> {
-            expected.put(db.findNode(LABEL, "name", "a").getId(), 0.243007);
-            expected.put(db.findNode(LABEL, "name", "b").getId(), 1.9183995);
-            expected.put(db.findNode(LABEL, "name", "c").getId(), 1.7806315);
-            expected.put(db.findNode(LABEL, "name", "d").getId(), 0.21885);
-            expected.put(db.findNode(LABEL, "name", "e").getId(), 0.243007);
-            expected.put(db.findNode(LABEL, "name", "f").getId(), 0.21885);
-            expected.put(db.findNode(LABEL, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(LABEL, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(LABEL, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(LABEL, "name", "j").getId(), 0.15);
+        runInTransaction(db, tx -> {
+            expected.put(findNode(db, tx, LABEL, "name", "a").getId(), 0.243007);
+            expected.put(findNode(db, tx, LABEL, "name", "b").getId(), 1.9183995);
+            expected.put(findNode(db, tx, LABEL, "name", "c").getId(), 1.7806315);
+            expected.put(findNode(db, tx, LABEL, "name", "d").getId(), 0.21885);
+            expected.put(findNode(db, tx, LABEL, "name", "e").getId(), 0.243007);
+            expected.put(findNode(db, tx, LABEL, "name", "f").getId(), 0.21885);
+            expected.put(findNode(db, tx, LABEL, "name", "g").getId(), 0.15);
+            expected.put(findNode(db, tx, LABEL, "name", "h").getId(), 0.15);
+            expected.put(findNode(db, tx, LABEL, "name", "i").getId(), 0.15);
+            expected.put(findNode(db, tx, LABEL, "name", "j").getId(), 0.15);
         });
 
         final Graph graph;
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(db, () ->
+            graph = applyInTransaction(db, tx ->
                 new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery(String.format("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
@@ -168,23 +170,23 @@ final class PageRankTest extends AlgoTestBase {
     void testOnIncomingRelationships(Class<? extends GraphStoreFactory> factoryType) {
         final Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, () -> {
-            expected.put(db.findNode(LABEL, "name", "a").getId(), 0.15);
-            expected.put(db.findNode(LABEL, "name", "b").getId(), 0.3386727);
-            expected.put(db.findNode(LABEL, "name", "c").getId(), 0.2219679);
-            expected.put(db.findNode(LABEL, "name", "d").getId(), 0.3494679);
-            expected.put(db.findNode(LABEL, "name", "e").getId(), 2.5463981);
-            expected.put(db.findNode(LABEL, "name", "f").getId(), 2.3858317);
-            expected.put(db.findNode(LABEL, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(LABEL, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(LABEL, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(LABEL, "name", "j").getId(), 0.15);
+        runInTransaction(db, tx -> {
+            expected.put(findNode(db, tx, LABEL, "name", "a").getId(), 0.15);
+            expected.put(findNode(db, tx, LABEL, "name", "b").getId(), 0.3386727);
+            expected.put(findNode(db, tx, LABEL, "name", "c").getId(), 0.2219679);
+            expected.put(findNode(db, tx, LABEL, "name", "d").getId(), 0.3494679);
+            expected.put(findNode(db, tx, LABEL, "name", "e").getId(), 2.5463981);
+            expected.put(findNode(db, tx, LABEL, "name", "f").getId(), 2.3858317);
+            expected.put(findNode(db, tx, LABEL, "name", "g").getId(), 0.15);
+            expected.put(findNode(db, tx, LABEL, "name", "h").getId(), 0.15);
+            expected.put(findNode(db, tx, LABEL, "name", "i").getId(), 0.15);
+            expected.put(findNode(db, tx, LABEL, "name", "j").getId(), 0.15);
         });
 
         final Graph graph;
         final CentralityResult rankResult;
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(db, () ->
+            graph = applyInTransaction(db, tx ->
                 new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery(String.format("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
@@ -231,7 +233,7 @@ final class PageRankTest extends AlgoTestBase {
     void correctPartitionBoundariesForAllNodes(Class<? extends GraphStoreFactory> factoryType) {
         final Graph graph;
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
-            graph = runInTransaction(db, () -> new CypherLoaderBuilder()
+            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(String.format("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
                 .relationshipQuery(String.format(

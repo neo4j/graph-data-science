@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Relationship;
@@ -37,13 +38,15 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class HugeGraphWeightTest {
 
     public static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setup() {
@@ -88,9 +91,9 @@ final class HugeGraphWeightTest {
     private void mkDb(int nodes, int relsPerNode) {
         long[] nodeIds = new long[nodes];
 
-        runInTransaction(db, () -> {
+        runInTransaction(db, tx -> {
             for (int i = 0; i < nodes; i++) {
-                nodeIds[i] = db.createNode().getId();
+                nodeIds[i] = createNode(db, tx).getId();
             }
             int pageSize = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF);
             for (int i = 0; i < nodes; i += pageSize) {
@@ -104,9 +107,8 @@ final class HugeGraphWeightTest {
                         }
                         long targetId = nodeIds[i + targetIndex];
                         int propertyValue = ((int) sourceId << 16) | (int) targetId & 0xFFFF;
-                        Relationship relationship = db
-                                .getNodeById(sourceId)
-                                .createRelationshipTo(db.getNodeById(targetId), TYPE);
+                        Relationship relationship = getNodeById(db, tx, sourceId)
+                            .createRelationshipTo(getNodeById(db, tx, targetId), TYPE);
                         relationship.setProperty("weight", propertyValue);
                     }
                 }

@@ -26,6 +26,17 @@ abstract class CatalogProc extends BaseProc {
     private static final String DEGREE_DISTRIBUTION_FIELD_NAME = "degreeDistribution";
 
     boolean computeHistogram() {
+        if (callContext == null) {
+            // treat an absent callContext as YIELD <*>.
+            // It is only null if we've been called as a DBMS procedure.
+            // We are not DBMS procedure so
+            //   This Should Never Happen™
+            // unless we have specified `mode=DBMS` on the @Procedure,
+            // but setting either this or WRITE is the only way to
+            // make sure that we're not being optimized away.
+            // tl;dr: callContext could be null now
+            return true;
+        }
         return callContext.outputFields().anyMatch(DEGREE_DISTRIBUTION_FIELD_NAME::equals);
     }
 

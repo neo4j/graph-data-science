@@ -27,6 +27,7 @@ public final class StatementConstantsProxy {
     public static final int NO_SUCH_RELATIONSHIP_TYPE = StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
     public static final int NO_SUCH_LABEL = StatementConstants.NO_SUCH_LABEL;
     public static final int NO_SUCH_PROPERTY_KEY = StatementConstants.NO_SUCH_PROPERTY_KEY;
+    public static final int ANY_LABEL = TokenConstants.ANY_LABEL;
     public static final int ANY_RELATIONSHIP_TYPE = TokenConstants.ANY_RELATIONSHIP_TYPE;
 
     private StatementConstantsProxy() {

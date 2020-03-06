@@ -20,13 +20,12 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.compat.StatementApi;
+import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Value;
 
@@ -77,7 +76,7 @@ public final class NodePropertyExporter extends StatementApi {
     }
 
     public interface WriteConsumer {
-        void accept(Write ops, long value) throws KernelException;
+        void accept(Write ops, long value) throws Exception;
     }
 
     private NodePropertyExporter(
@@ -258,7 +257,7 @@ public final class NodePropertyExporter extends StatementApi {
             T data,
             PropertyTranslator<T> trans,
             Write ops,
-            long nodeId) throws KernelException {
+            long nodeId) throws Exception {
         final Value prop = trans.toProperty(propertyId, data, nodeId);
         if (prop != null) {
             ops.nodeSetProperty(
@@ -278,7 +277,7 @@ public final class NodePropertyExporter extends StatementApi {
             U data2,
             PropertyTranslator<U> translator2,
             Write ops,
-            long nodeId) throws KernelException {
+            long nodeId) throws Exception {
         final long originalNodeId = toOriginalId.applyAsLong(nodeId);
         Value prop1 = translator1.toProperty(propertyId1, data1, nodeId);
         if (prop1 != null) {

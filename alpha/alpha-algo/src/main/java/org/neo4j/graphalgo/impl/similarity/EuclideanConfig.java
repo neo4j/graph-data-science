@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 
 @ValueClass
 @Configuration("EuclideanConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface EuclideanConfig extends SimilarityConfig {
 
     @Value.Derived

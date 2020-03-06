@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -44,13 +45,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.QueryRunner.runInTransaction;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllNodes;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllRelationships;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
 import static org.neo4j.graphalgo.core.Aggregation.MAX;
 import static org.neo4j.graphalgo.core.Aggregation.MIN;
@@ -70,7 +73,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         ", (n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)" +
         ", (n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3)";
 
-    private GraphDatabaseAPI db;
+    private GraphDbApi db;
 
     @BeforeEach
     void setup() {
@@ -601,14 +604,13 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         Graph unionGraph = graphStore.getUnion();
 
         long[] expectedCounts = new long[4];
-        runInTransaction(db, () -> {
-            expectedCounts[0] = db.getAllNodes().stream().count();
-            expectedCounts[1] = db.getAllRelationships().stream().count();
+        runInTransaction(db, tx -> {
+            expectedCounts[0] = getAllNodes(db, tx).stream().count();
+            expectedCounts[1] = getAllRelationships(db, tx).stream().count();
             // The graphs share the node mapping, so we expect the node count for a subgraph
             // to be equal to the node Count for the entire Neo4j graph
-            expectedCounts[2] = db.getAllNodes().stream().count();
-            expectedCounts[3] = db
-                .getAllRelationships()
+            expectedCounts[2] = getAllNodes(db, tx).stream().count();
+            expectedCounts[3] = getAllRelationships(db, tx)
                 .stream()
                 .filter(r -> r.isType(RelationshipType.withName("REL1")))
                 .count();
