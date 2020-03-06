@@ -64,13 +64,15 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.nodeSimilarity.stream.estimate`
 | `gds.nodeSimilarity.stats`
 | `gds.nodeSimilarity.stats.estimate`
-.6+<.^|<<algorithms-pagerank-syntax, PageRank>>
+.8+<.^|<<algorithms-pagerank-syntax, PageRank>>
 | `gds.pageRank.write`
 | `gds.pageRank.write.estimate`
 | `gds.pageRank.stream`
 | `gds.pageRank.stream.estimate`
 | `gds.pageRank.stats`
 | `gds.pageRank.stats.estimate`
+| `gds.pageRank.mutate`
+| `gds.pageRank.mutate.estimate`
 .8+<.^|<<algorithms-wcc-syntax, Weakly Connected Components>>
 | `gds.wcc.write`
 | `gds.wcc.write.estimate`

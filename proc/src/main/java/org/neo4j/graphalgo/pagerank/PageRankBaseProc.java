@@ -40,6 +40,21 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
     }
 
     protected Stream<WriteResult> write(ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
+        return writeOrMutate(computeResult,
+            (writeBuilder, computationResult) -> writeNodeProperties(writeBuilder, computationResult)
+        );
+    }
+
+    protected Stream<WriteResult> mutate(ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
+        return writeOrMutate(computeResult,
+            (writeBuilder, computationResult) -> mutateNodeProperties(writeBuilder, computationResult)
+        );
+    }
+
+    protected Stream<WriteResult> writeOrMutate(
+        ComputationResult<PageRank, PageRank, CONFIG> computeResult,
+        WriteOrMutate<PageRank, PageRank, CONFIG> op
+    ) {
         CONFIG config = computeResult.config();
         PageRankWriteConfig writeConfig = ImmutablePageRankWriteConfig.builder()
             .writeProperty("stats does not support a write property")
@@ -70,7 +85,7 @@ abstract class PageRankBaseProc<CONFIG extends PageRankBaseConfig> extends AlgoB
             builder.withConfig(config);
 
             if (shouldWrite(config) && !writeConfig.writeProperty().isEmpty()) {
-                writeNodeProperties(builder, computeResult);
+                op.apply(builder, computeResult);
                 graph.releaseProperties();
             }
 
