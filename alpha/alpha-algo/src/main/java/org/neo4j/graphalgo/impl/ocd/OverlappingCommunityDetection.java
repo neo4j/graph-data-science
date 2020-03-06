@@ -22,26 +22,42 @@ package org.neo4j.graphalgo.impl.ocd;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunityDetection, CommunityAffiliations> {
+    private static final double TOLERANCE = 0.00001;
 
-public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunityDetection, OverlappingCommunityDetection> {
-    private final CommunityAffiliations communityAffiliations;
-    private final AffiliationOptimizer optimizer;
+    private final Graph graph;
+    private final AffiliationInitializer initializer;
 
-    OverlappingCommunityDetection(Graph graph, AffiliationInitializer initializer, AffiliationOptimizer optimizer) {
-        this.communityAffiliations = initializer.initialize(graph);
-        this.optimizer = optimizer;
+    OverlappingCommunityDetection(Graph graph, AffiliationInitializer initializer) {
+        this.graph = graph;
+        this.initializer = initializer;
     }
 
     @Override
-    public OverlappingCommunityDetection compute() {
-        while (optimizer.update(communityAffiliations)) {
+    public CommunityAffiliations compute() {
+        CommunityAffiliations communityAffiliations = initializer.initialize(graph);
+        double oldGain = communityAffiliations.gain();
+        double newGain;
+        while ((newGain = update(communityAffiliations)) > oldGain + TOLERANCE) {
+            oldGain = newGain;
         }
-        return this;
+        return communityAffiliations;
+    }
+
+
+    double update(CommunityAffiliations communityAffiliations) {
+        BacktrackingLineSearch lineSearch = new BacktrackingLineSearch();
+        for (int nodeU = 0; nodeU < communityAffiliations.nodeCount(); nodeU++) {
+            GainFunction blockLoss = communityAffiliations.blockGain(nodeU);
+            SparseVector gradient = blockLoss.gradient();
+            double learningRate = lineSearch.search(
+                blockLoss,
+                communityAffiliations.nodeAffiliations(nodeU),
+                gradient
+            );
+            communityAffiliations.updateNodeAffiliations(nodeU, gradient.multiply(learningRate));
+        }
+        return communityAffiliations.gain();
     }
 
     @Override

@@ -24,12 +24,12 @@ import org.neo4j.graphalgo.api.Graph;
 import java.util.LinkedList;
 import java.util.List;
 
-public class AffiliationBlockLoss implements LossFunction {
+public class AffiliationBlockGain implements GainFunction {
     private final int nodeU;
     private final CommunityAffiliations communityAffiliations;
     private final Graph graph;
 
-    public AffiliationBlockLoss(
+    public AffiliationBlockGain(
         CommunityAffiliations communityAffiliations,
         Graph graph,
         int nodeU
@@ -40,23 +40,17 @@ public class AffiliationBlockLoss implements LossFunction {
     }
 
     @Override
-    public double loss() {
+    public double gain(SparseVector affiliationVector) {
         // 2*sum_U sum_V<U (log(1-exp(-vU.vV)) +vU.vV) + sum_U vU.vU - affSum.affSum
         double[] loss = new double[1];
         loss[0] = -communityAffiliations.affiliationSum().l2();
-        for (int nodeU = 0; nodeU < graph.nodeCount(); nodeU++) {
-            graph.forEachRelationship(nodeU, (src, trg) -> {
-                SparseVector affiliationVector = communityAffiliations.nodeAffiliations((int) src);
-                loss[0] += affiliationVector.l2();
-                SparseVector neighborAffiliationVector = communityAffiliations.nodeAffiliations((int) trg);
-                if (src < trg) {
-                    return true;
-                }
-                double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector);
-                loss[0] += 2*(Math.log(1 - Math.exp(-affiliationInnerProduct)) + affiliationInnerProduct);
-                return true;
-            });
-        }
+        graph.forEachRelationship(nodeU, (src, trg) -> {
+            loss[0] += affiliationVector.l2();
+            SparseVector neighborAffiliationVector = communityAffiliations.nodeAffiliations((int) trg);
+            double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector);
+            loss[0] += Math.log(1 - Math.exp(-affiliationInnerProduct)) + affiliationInnerProduct;
+            return true;
+        });
         return loss[0];
     }
 

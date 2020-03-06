@@ -34,8 +34,8 @@ public class CommunityAffiliations {
         this.affiliationSum = SparseVector.sum(affiliationVectors);
     }
 
-    LossFunction blockLoss(int nodeId) {
-        return new AffiliationBlockLoss(this, graph, nodeId);
+    GainFunction blockGain(int nodeId) {
+        return new AffiliationBlockGain(this, graph, nodeId);
     }
 
     SparseVector affiliationSum() {
@@ -49,5 +49,31 @@ public class CommunityAffiliations {
     void updateNodeAffiliations(int nodeU, SparseVector increment) {
         affiliationVectors.set(nodeU, affiliationVectors.get(nodeU).add(increment));
         affiliationSum = affiliationSum.add(increment);
+    }
+
+
+
+    public double gain() {
+        // 2*sum_U sum_V<U (log(1-exp(-vU.vV)) +vU.vV) + sum_U vU.vU - affSum.affSum
+        double[] gain = new double[1];
+        gain[0] = -affiliationSum.l2();
+        for (int nodeU = 0; nodeU < graph.nodeCount(); nodeU++) {
+            graph.forEachRelationship(nodeU, (src, trg) -> {
+                SparseVector affiliationVector = nodeAffiliations((int) src);
+                gain[0] += affiliationVector.l2();
+                SparseVector neighborAffiliationVector = nodeAffiliations((int) trg);
+                if (src < trg) {
+                    return true;
+                }
+                double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector);
+                gain[0] += 2*(Math.log(1 - Math.exp(-affiliationInnerProduct)) + affiliationInnerProduct);
+                return true;
+            });
+        }
+        return gain[0];
+    }
+
+    long nodeCount() {
+        return graph.nodeCount();
     }
 }

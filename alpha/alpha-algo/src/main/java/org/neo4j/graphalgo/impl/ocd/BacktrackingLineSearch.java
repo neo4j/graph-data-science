@@ -19,25 +19,18 @@
  */
 package org.neo4j.graphalgo.impl.ocd;
 
-public interface LossFunction {
-    /**
-     * Evaluate loss at current parameter values.
-     * @return current loss.
-     */
-    double loss();
-    /**
-     * Evaluate gradient of loss at current parameter values.
-     * @return gradient of loss.
-     */
-    SparseVector gradient();
-    /**
-     * Get current value of parameters.
-     * @return the current value of parameters.
-     */
-    SparseVector parameters();
-    /**
-     * Update parameters by adding {@param increment} to current parameter values.
-     * @param increment
-     */
-    void update(SparseVector increment);
+public class BacktrackingLineSearch {
+    private static final double C = 0.5;
+    private static final double TAU = 0.5;
+    private static final double LR = 10;
+
+    public double search(GainFunction gain, SparseVector point, SparseVector gradient) {
+        double gradientL2 = gradient.l2();
+        double lossAtPoint = gain.gain(point);
+        double lr = LR;
+        while (gain.gain(point.add(gradient.multiply(lr))) > lossAtPoint + (C * lr * gradientL2)) {
+            lr *= TAU;
+        }
+        return lr;
+    }
 }
