@@ -98,7 +98,6 @@ public class LocallyMinimalNeighborhoodsStreamProcTest extends BaseProcTest {
                 conductance
             );
             actualRowDescriptions.add(actual);
-            System.out.println(actual);
         });
         Set<String> expectedRowDescriptions = new HashSet<>(Arrays.asList(("node b community a conductance 0.75\n" +
                                                              "node c community a conductance 0.75\n" +

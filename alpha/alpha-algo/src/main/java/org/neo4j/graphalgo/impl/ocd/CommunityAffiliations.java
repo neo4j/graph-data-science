@@ -21,14 +21,18 @@ package org.neo4j.graphalgo.impl.ocd;
 
 import org.neo4j.graphalgo.api.Graph;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 public class CommunityAffiliations {
+    private final long totalDoubleEdgeCount;
     private final List<SparseVector> affiliationVectors;
     private final Graph graph;
     private SparseVector affiliationSum;
 
-    CommunityAffiliations(List<SparseVector> affiliationVectors, Graph graph) {
+    CommunityAffiliations(long totalDoubleEdgeCount, List<SparseVector> affiliationVectors, Graph graph) {
+        this.totalDoubleEdgeCount = totalDoubleEdgeCount;
         this.affiliationVectors = affiliationVectors;
         this.graph = graph;
         this.affiliationSum = SparseVector.sum(affiliationVectors);
@@ -42,7 +46,7 @@ public class CommunityAffiliations {
         return this.affiliationSum;
     }
 
-    SparseVector nodeAffiliations(int nodeId) {
+    public SparseVector nodeAffiliations(int nodeId) {
         return affiliationVectors.get(nodeId);
     }
 
@@ -50,8 +54,6 @@ public class CommunityAffiliations {
         affiliationVectors.set(nodeU, affiliationVectors.get(nodeU).add(increment));
         affiliationSum = affiliationSum.add(increment);
     }
-
-
 
     public double gain() {
         // 2*sum_U sum_V<U (log(1-exp(-vU.vV)) +vU.vV) + sum_U vU.vU - affSum.affSum
@@ -73,7 +75,18 @@ public class CommunityAffiliations {
         return gain[0];
     }
 
-    long nodeCount() {
+    public long nodeCount() {
         return graph.nodeCount();
+    }
+
+    private double getEpsilon() {
+        return BigDecimal
+            .valueOf(totalDoubleEdgeCount)
+            .divide(BigDecimal.valueOf(graph.nodeCount() * (graph.nodeCount() - 1)), 12, RoundingMode.FLOOR)
+            .doubleValue();
+    }
+
+    public double getDelta() {
+        return Math.sqrt(-Math.log(1 - getEpsilon()));
     }
 }

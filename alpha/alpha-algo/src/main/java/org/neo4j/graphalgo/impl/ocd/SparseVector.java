@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.impl.ocd;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -163,4 +165,23 @@ public class SparseVector {
         return indices.length;
     }
 
+    public List<Integer> exceeding(double delta) {
+        List<Integer> exceedingIndices = new LinkedList<>();
+        for (int pos = 0; pos < dim(); pos++) {
+            if (values[pos] > delta) {
+                exceedingIndices.add(indices[pos]);
+            }
+        }
+        return exceedingIndices;
+    }
+
+    public List<Double> exceedingScores(double delta) {
+        List<Double> scores = new LinkedList<>();
+        for (double value : values) {
+            if (value > delta) {
+                scores.add(value);
+            }
+        }
+        return scores;
+    }
 }

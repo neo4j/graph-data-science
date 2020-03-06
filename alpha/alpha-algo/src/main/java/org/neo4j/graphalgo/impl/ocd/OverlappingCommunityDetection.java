@@ -37,7 +37,7 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
     private final AllocationTracker tracker;
     private final Log log;
 
-    OverlappingCommunityDetection(
+    public OverlappingCommunityDetection(
         Graph graph,
         AffiliationInitializer initializer,
         KernelTransaction transaction,

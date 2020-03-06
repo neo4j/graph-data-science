@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.ocd.lhs.LocallyMinimalNeighborhoods;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.logging.Log;
 
@@ -42,7 +43,7 @@ public class ConductanceAffiliationInitializer implements AffiliationInitializer
     private final int concurrency;
     private final TerminationFlag terminationFlag;
 
-    ConductanceAffiliationInitializer(
+    public ConductanceAffiliationInitializer(
         KernelTransaction transaction,
         ExecutorService executorService,
         AllocationTracker tracker,
@@ -70,25 +71,37 @@ public class ConductanceAffiliationInitializer implements AffiliationInitializer
         );
         LocallyMinimalNeighborhoods.Result neighborhoodCommunityResult = locallyMinimalNeighborhoods.compute();
         List<SparseVector> affiliationVectors = new ArrayList<>((int) graph.nodeCount());
+        for (int i = 0; i < graph.nodeCount(); i++) {
+            affiliationVectors.add(null);
+        }
         AtomicLong queue = new AtomicLong(0);
+        AtomicLong totalDoubleEdgeCount = new AtomicLong(0);
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new AffiliationTask(queue, affiliationVectors, neighborhoodCommunityResult.neighborhoodCenters, graph)
+            () -> new AffiliationTask(queue, totalDoubleEdgeCount, affiliationVectors, neighborhoodCommunityResult.neighborhoodCenters, graph)
         );
         // run
         ParallelUtil.run(tasks, executorService);
-        return new CommunityAffiliations(affiliationVectors, graph);
+        return new CommunityAffiliations(totalDoubleEdgeCount.get(), affiliationVectors, graph);
     }
 
     class AffiliationTask implements Runnable {
         private final AtomicLong queue;
+        private final AtomicLong totalDoubleEdgeCount;
         private final List<SparseVector> affiliationVectors;
         private final ConcurrentSkipListSet<Long> centers;
         private final Graph graph;
 
-        AffiliationTask(AtomicLong queue, List<SparseVector> affiliationVectors, ConcurrentSkipListSet<Long> centers, Graph graph) {
+        AffiliationTask(
+            AtomicLong queue,
+            AtomicLong totalDoubleEdgeCount,
+            List<SparseVector> affiliationVectors,
+            ConcurrentSkipListSet<Long> centers,
+            Graph graph
+        ) {
             this.queue = queue;
+            this.totalDoubleEdgeCount = totalDoubleEdgeCount;
             this.affiliationVectors = affiliationVectors;
             this.centers = centers;
             this.graph = graph;
@@ -98,9 +111,14 @@ public class ConductanceAffiliationInitializer implements AffiliationInitializer
         public void run() {
             long nodeId;
             while ((nodeId = queue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
+                totalDoubleEdgeCount.addAndGet(graph.degree(nodeId));
                 List<Integer> indices = new LinkedList<>();
                 List<Double> values = new LinkedList<>();
-                graph.forEachRelationship(nodeId, (src, trg) -> {
+                if (centers.contains(nodeId)) {
+                    indices.add((int)nodeId);
+                    values.add(1D);
+                }
+                graph.concurrentCopy().forEachRelationship(nodeId, (src, trg) -> {
                     if (centers.contains(trg)) {
                         indices.add((int)trg);
                         values.add(1D);
