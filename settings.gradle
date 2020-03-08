@@ -32,6 +32,16 @@ def registerSubModules(File file) {
     moduleDirectories.stream()
             .filter { moduleDir -> moduleDir != new File("./") && moduleDir != new File("./public") }
             .filter { moduleDir ->
+                def parent = moduleDir.getParentFile();
+                while (parent != null) {
+                    if (parent.getName() == "examples") {
+                        return false;
+                    }
+                    parent = parent.getParentFile();
+                }
+                return true;
+            }
+            .filter { moduleDir ->
                 if (compatibilityModules.contains(moduleDir.getName())) {
                     moduleDir.getParentFile().name == neo4jMajorVersion
                 } else {
