@@ -215,7 +215,7 @@ public class SparseVector {
 
     SparseVector addAndProject(SparseVector increment) {
         SparseVector newVector = add(increment);
-        for (int pos = 0; pos < dim(); pos++) {
+        for (int pos = 0; pos < newVector.dim(); pos++) {
             if (newVector.values[pos] < 0) {
                 newVector.values[pos] = 0;
             }
