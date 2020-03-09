@@ -53,7 +53,7 @@ public class CommunityAffiliations {
 
     synchronized void updateNodeAffiliations(int nodeU, SparseVector increment) {
         SparseVector newVector = affiliationVectors.get(nodeU).addAndProject(increment);
-        SparseVector diff = newVector.add(affiliationVectors.get(nodeU).multiply(-1D));
+        SparseVector diff = newVector.subtract(affiliationVectors.get(nodeU));
         affiliationVectors.set(nodeU, newVector);
         affiliationSum = affiliationSum.add(diff);
     }
