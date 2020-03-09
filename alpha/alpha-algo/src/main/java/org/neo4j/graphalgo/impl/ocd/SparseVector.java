@@ -119,9 +119,9 @@ public class SparseVector {
         int otherPosition = 0;
         LinkedList<Integer> indices = new LinkedList<>();
         LinkedList<Double> values = new LinkedList<>();
-        while (position < dim() && otherPosition < other.dim()) {
-            int index = this.indices[position];
-            int otherIndex = other.indices[otherPosition];
+        while (position < dim() || otherPosition < other.dim()) {
+            int index = position < dim() ? this.indices[position] : Integer.MAX_VALUE;
+            int otherIndex = otherPosition < other.dim() ? other.indices[otherPosition] : Integer.MAX_VALUE;
             if (index == otherIndex) {
                 indices.add(index);
                 values.add(this.values[position] + other.values[otherPosition]);
@@ -133,7 +133,7 @@ public class SparseVector {
                 position++;
             } else {
                 indices.add(otherIndex);
-                values.add(other.values[position]);
+                values.add(other.values[otherPosition]);
                 otherPosition++;
             }
         }
