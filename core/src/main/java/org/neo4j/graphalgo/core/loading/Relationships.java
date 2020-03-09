@@ -20,11 +20,14 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 
 public class Relationships {
     private final long relationshipCount;
+
+    private final Orientation orientation;
     private final AdjacencyList adjacencyList;
     private final AdjacencyOffsets adjacencyOffsets;
     private final @Nullable AdjacencyList properties;
@@ -32,12 +35,14 @@ public class Relationships {
 
     public Relationships(
         long relationshipCount,
+        Orientation orientation,
         AdjacencyList adjacencyList,
         AdjacencyOffsets adjacencyOffsets,
         @Nullable AdjacencyList properties,
         @Nullable AdjacencyOffsets propertyOffsets
     ) {
         this.relationshipCount = relationshipCount;
+        this.orientation = orientation;
         this.adjacencyList = adjacencyList;
         this.adjacencyOffsets = adjacencyOffsets;
         this.properties = properties;
@@ -46,6 +51,10 @@ public class Relationships {
 
     public long relationshipCount() { return relationshipCount; }
 
+    public Orientation orientation() {
+        return orientation;
+    }
+
     public AdjacencyList adjacencyList() { return adjacencyList; }
 
     public AdjacencyOffsets adjacencyOffsets() { return adjacencyOffsets; }
@@ -53,4 +62,8 @@ public class Relationships {
     public @Nullable AdjacencyList properties() { return properties; }
 
     public @Nullable AdjacencyOffsets propertyOffsets() { return propertyOffsets; }
+
+    public boolean hasProperties() {
+        return properties != null;
+    }
 }

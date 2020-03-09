@@ -24,12 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.GraphGenerator;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
@@ -47,7 +47,7 @@ class IntersectingTriangleCountTest {
         long[] inputs = new long[]{1, 2};
         IdMap idMap = createIdMap(inputs);
 
-        GraphGenerator.RelImporter importer = new GraphGenerator.RelImporter(
+        HugeGraphUtil.RelationshipsBuilder importer = new HugeGraphUtil.RelationshipsBuilder(
             idMap,
             Orientation.NATURAL,
             false,
@@ -59,7 +59,7 @@ class IntersectingTriangleCountTest {
         importer.add(1, 2);
         importer.add(2, 1);
 
-        Graph graph = importer.buildGraph();
+        Graph graph = HugeGraphUtil.create(idMap, importer.build(), AllocationTracker.EMPTY);
         IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         triangleCount.compute();
 
@@ -76,7 +76,7 @@ class IntersectingTriangleCountTest {
         long[] inputs = new long[]{1, 2};
         IdMap idMap = createIdMap(inputs);
 
-        GraphGenerator.RelImporter importer = new GraphGenerator.RelImporter(
+        HugeGraphUtil.RelationshipsBuilder builder = new HugeGraphUtil.RelationshipsBuilder(
             idMap,
             Orientation.NATURAL,
             false,
@@ -84,7 +84,7 @@ class IntersectingTriangleCountTest {
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
-        Graph graph = importer.buildGraph();
+        Graph graph = HugeGraphUtil.create(idMap, builder.build(), AllocationTracker.EMPTY);
 
         IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         triangleCount.compute();
@@ -102,7 +102,7 @@ class IntersectingTriangleCountTest {
         long[] inputs = new long[]{1, 2, 3};
         IdMap idMap = createIdMap(inputs);
 
-        GraphGenerator.RelImporter importer = new GraphGenerator.RelImporter(
+        HugeGraphUtil.RelationshipsBuilder builder = new HugeGraphUtil.RelationshipsBuilder(
             idMap,
             Orientation.NATURAL,
             false,
@@ -111,14 +111,14 @@ class IntersectingTriangleCountTest {
             AllocationTracker.EMPTY
         );
 
-        importer.add(1, 2);
-        importer.add(2, 1);
-        importer.add(2, 3);
-        importer.add(3, 2);
-        importer.add(3, 1);
-        importer.add(1, 3);
+        builder.add(1, 2);
+        builder.add(2, 1);
+        builder.add(2, 3);
+        builder.add(3, 2);
+        builder.add(3, 1);
+        builder.add(1, 3);
 
-        Graph graph = importer.buildGraph();
+        Graph graph = HugeGraphUtil.create(idMap, builder.build(), AllocationTracker.EMPTY);
         IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         triangleCount.compute();
 

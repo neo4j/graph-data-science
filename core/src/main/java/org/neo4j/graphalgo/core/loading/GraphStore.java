@@ -183,13 +183,9 @@ public final class GraphStore {
         List<Graph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> HugeGraph.create(
-                tracker,
-                nodes,
-                nodeProperties,
-                relTypeAndCSR.getValue(),
-                maybeRelationshipProperty.map(propertyKey -> relationshipProperties
+                nodes, nodeProperties, relTypeAndCSR.getValue(), maybeRelationshipProperty.map(propertyKey -> relationshipProperties
                     .get(relTypeAndCSR.getKey())
-                    .get(propertyKey))
+                    .get(propertyKey)), tracker
             ))
             .collect(Collectors.toList());
 

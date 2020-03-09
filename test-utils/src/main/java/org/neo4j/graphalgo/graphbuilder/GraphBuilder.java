@@ -33,7 +33,7 @@ import java.util.Random;
 import java.util.function.Consumer;
 
 /**
- * The GraphBuilder intends to ease the creation
+ * The RelationshipsBuilder intends to ease the creation
  * of test graphs with well known properties
  */
 public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoCloseable {

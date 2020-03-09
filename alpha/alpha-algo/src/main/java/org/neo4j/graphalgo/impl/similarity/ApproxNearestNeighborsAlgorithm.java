@@ -26,17 +26,17 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.ImmutableCSR;
-import org.neo4j.graphalgo.core.loading.GraphGenerator;
 import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.loading.Relationships;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphalgo.results.SimilarityResult;
@@ -530,8 +530,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
     @ValueClass
     public interface RelationshipImporter {
-        GraphGenerator.RelImporter outImporter();
-        GraphGenerator.RelImporter inImporter();
+        HugeGraphUtil.RelationshipsBuilder outImporter();
+        HugeGraphUtil.RelationshipsBuilder inImporter();
 
         default void consume(AnnTopKConsumer[] topKConsumers) {
             for (AnnTopKConsumer consumer : topKConsumers) {
@@ -551,8 +551,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         default GraphStore buildGraphStore(IdMap idMap, AllocationTracker tracker) {
-            Relationships outRelationships = outImporter().buildGraph().relationships();
-            Relationships inRelationships = inImporter().buildGraph().relationships();
+            Relationships outRelationships = outImporter().build();
+            Relationships inRelationships = inImporter().build();
 
             Map<String, HugeGraph.CSR> topology = new HashMap<>();
             topology.put(ANN_OUT_GRAPH, ImmutableCSR.of(
@@ -578,7 +578,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {
-            GraphGenerator.RelImporter outImporter = new GraphGenerator.RelImporter(
+            HugeGraphUtil.RelationshipsBuilder outImporter = new HugeGraphUtil.RelationshipsBuilder(
                 idMap,
                 Orientation.NATURAL,
                 false,
@@ -587,7 +587,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 tracker
             );
 
-            GraphGenerator.RelImporter inImporter = new GraphGenerator.RelImporter(
+            HugeGraphUtil.RelationshipsBuilder inImporter = new HugeGraphUtil.RelationshipsBuilder(
                 idMap,
                 Orientation.REVERSE,
                 false,

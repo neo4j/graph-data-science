@@ -103,14 +103,13 @@ public class HugeGraph implements Graph {
     private final boolean hasRelationshipProperty;
 
     public static HugeGraph create(
-        AllocationTracker tracker,
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
         CSR relationships,
-        Optional<PropertyCSR> maybeRelationshipProperties
+        Optional<PropertyCSR> maybeRelationshipProperties,
+        AllocationTracker tracker
     ) {
         return new HugeGraph(
-            tracker,
             nodes,
             nodeProperties,
             relationships.elementCount(),
@@ -120,12 +119,12 @@ public class HugeGraph implements Graph {
             maybeRelationshipProperties.map(PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
             maybeRelationshipProperties.map(PropertyCSR::list).orElse(null),
             maybeRelationshipProperties.map(PropertyCSR::offsets).orElse(null),
-            relationships.orientation()
+            relationships.orientation(),
+            tracker
         );
     }
 
     public HugeGraph(
-        AllocationTracker tracker,
         IdMap idMapping,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
@@ -135,7 +134,8 @@ public class HugeGraph implements Graph {
         double defaultPropertyValue,
         @Nullable AdjacencyList properties,
         @Nullable AdjacencyOffsets propertyOffsets,
-        Orientation orientation
+        Orientation orientation,
+        AllocationTracker tracker
     ) {
         this.idMapping = idMapping;
         this.tracker = tracker;
@@ -276,7 +276,6 @@ public class HugeGraph implements Graph {
     @Override
     public HugeGraph concurrentCopy() {
         return new HugeGraph(
-            tracker,
             idMapping,
             nodeProperties,
             relationshipCount,
@@ -286,7 +285,8 @@ public class HugeGraph implements Graph {
             defaultPropertyValue,
             properties,
             propertyOffsets,
-            orientation
+            orientation,
+            tracker
         );
     }
 
@@ -395,7 +395,7 @@ public class HugeGraph implements Graph {
     }
 
     public Relationships relationships() {
-        return new Relationships(relationshipCount, adjacencyList, adjacencyOffsets, properties, propertyOffsets);
+        return new Relationships(relationshipCount, orientation, adjacencyList, adjacencyOffsets, properties, propertyOffsets);
     }
 
     @Override

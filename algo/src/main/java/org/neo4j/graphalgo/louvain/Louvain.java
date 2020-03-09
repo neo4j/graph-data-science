@@ -25,8 +25,9 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimization;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.GraphGenerator;
+import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -161,7 +162,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
     }
 
     private Graph summarizeGraph(Graph workingGraph, ModularityOptimization modularityOptimization, long maxCommunityId) {
-        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
+        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             maxCommunityId,
             executorService,
             tracker
@@ -170,29 +171,33 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         assertRunning();
 
         workingGraph.forEachNode((nodeId) -> {
-            nodeImporter.addNode(modularityOptimization.getCommunityId(nodeId));
+            idMapBuilder.addNode(modularityOptimization.getCommunityId(nodeId));
             return true;
         });
 
         assertRunning();
 
-        GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
-            nodeImporter,
-            rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL,
+        Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+        IdMap idMap = idMapBuilder.build();
+        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+            idMap,
+            orientation,
             true,
-            Aggregation.SUM
+            Aggregation.SUM,
+            executorService,
+            tracker
         );
 
         workingGraph.forEachNode((nodeId) -> {
             long communityId = modularityOptimization.getCommunityId(nodeId);
             workingGraph.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
-                relImporter.add(communityId, modularityOptimization.getCommunityId(target), property);
+                relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
                 return true;
             });
             return true;
         });
 
-        return relImporter.buildGraph();
+        return HugeGraphUtil.create(idMap, relationshipsBuilder.build(), tracker);
     }
 
     private boolean hasConverged() {

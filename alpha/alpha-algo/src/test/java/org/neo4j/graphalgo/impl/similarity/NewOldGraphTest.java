@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.loading.GraphGenerator;
+import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -87,14 +87,14 @@ class NewOldGraphTest {
     }
 
     private static IdMap idMap(int numberOfNodes) {
-        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
+        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             numberOfNodes,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
         for (int i = 0; i < numberOfNodes; i++) {
-            nodeImporter.addNode(i);
+            idMapBuilder.addNode(i);
         }
-        return nodeImporter.idMap();
+        return idMapBuilder.build();
     }
 }
