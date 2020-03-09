@@ -60,7 +60,7 @@ public class SparseVector {
     public double innerProduct(SparseVector other) {
         int position = 0;
         int otherPosition = 0;
-        int result = 0;
+        double result = 0;
         while (position < dim() && otherPosition < other.dim()) {
             int index = indices[position];
             int otherIndex = other.indices[otherPosition];
