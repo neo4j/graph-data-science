@@ -24,62 +24,68 @@ import org.neo4j.graphalgo.api.Graph;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.neo4j.graphalgo.impl.ocd.CommunityAffiliations.LAMBDA;
+
 public class AffiliationBlockGain implements GainFunction {
     private final int nodeU;
     private final CommunityAffiliations communityAffiliations;
     private final Graph graph;
+    private final double deltaSquared;
 
     public AffiliationBlockGain(
         CommunityAffiliations communityAffiliations,
         Graph graph,
-        int nodeU
+        int nodeU,
+        double delta
     ) {
         this.nodeU = nodeU;
         this.graph = graph;
         this.communityAffiliations = communityAffiliations;
+        this.deltaSquared = delta * delta;
     }
 
     @Override
-    public double gain(SparseVector affiliationVector) {
-        // 2*sum_U sum_V<U (log(1-exp(-vU.vV)) +vU.vV) + sum_U vU.vU - affSum.affSum
-        double[] loss = new double[1];
-        loss[0] = -communityAffiliations.affiliationSum().l2();
+    public double gain() {
+        return gain(SparseVector.zero());
+    }
+
+    @Override
+    public double gain(SparseVector increment) {
+        // sum_V->U [ log(1 - exp(-A.Fv)) + A.Fv ] - A.affSum + A.Fu
+        double[] gain = new double[1];
+        SparseVector affiliationVector = communityAffiliations.nodeAffiliations(nodeU).add(increment);
+        SparseVector affiliationSum = communityAffiliations.affiliationSum().add(increment);
+        gain[0] = -affiliationVector.innerProduct(affiliationSum) - graph.nodeCount() * deltaSquared;
+        gain[0] += affiliationVector.l2() + deltaSquared;
         graph.forEachRelationship(nodeU, (src, trg) -> {
-            loss[0] += affiliationVector.l2();
             SparseVector neighborAffiliationVector = communityAffiliations.nodeAffiliations((int) trg);
-            double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector);
-            loss[0] += Math.log(1 - Math.exp(-affiliationInnerProduct)) + affiliationInnerProduct;
+            double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector) + deltaSquared;
+            if (affiliationInnerProduct < 0) {
+                gain[0] = Double.NEGATIVE_INFINITY;
+                return false;
+            }
+            gain[0] += Math.log(1 - Math.exp(-affiliationInnerProduct)) + affiliationInnerProduct;
             return true;
         });
-        return loss[0];
+        double penalty = -LAMBDA * affiliationVector.l1();
+        return gain[0] + penalty;
     }
 
     @Override
     public SparseVector gradient() {
-        SparseVector minusFU = communityAffiliations.nodeAffiliations(nodeU).negate();
+        SparseVector Fu = communityAffiliations.nodeAffiliations(nodeU);
         List<SparseVector> gradientTerms = new LinkedList<>();
         graph.forEachRelationship(nodeU, (src, trg) -> {
-            gradientTerms.add(weightedNeighbor(minusFU, communityAffiliations.nodeAffiliations((int) trg)));
+            gradientTerms.add(weightedNeighbor(Fu, communityAffiliations.nodeAffiliations((int) trg)));
             return true;
         });
         gradientTerms.add(communityAffiliations.nodeAffiliations(nodeU));
         gradientTerms.add(communityAffiliations.affiliationSum().negate());
-        return SparseVector.sum(gradientTerms);
-    }
-
-    @Override
-    public SparseVector parameters() {
-        return communityAffiliations.nodeAffiliations(nodeU);
-    }
-
-    @Override
-    public void update(SparseVector increment) {
-        communityAffiliations.updateNodeAffiliations(nodeU, increment);
-
+        return SparseVector.sum(gradientTerms).add(Fu.l1Gradient().multiply(-LAMBDA));
     }
 
     private SparseVector weightedNeighbor(SparseVector vU, SparseVector vV) {
-        double innerProduct = vU.innerProduct(vV);
+        double innerProduct = - vU.innerProduct(vV) - deltaSquared;
         double expProduct = Math.exp(innerProduct);
         return vV.multiply(1 / (1 - expProduct));
     }

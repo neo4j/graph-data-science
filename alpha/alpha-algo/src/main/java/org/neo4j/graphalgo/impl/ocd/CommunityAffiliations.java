@@ -30,6 +30,7 @@ public class CommunityAffiliations {
     private final List<SparseVector> affiliationVectors;
     private final Graph graph;
     private SparseVector affiliationSum;
+    static final double LAMBDA = 0.1;
 
     CommunityAffiliations(long totalDoubleEdgeCount, List<SparseVector> affiliationVectors, Graph graph) {
         this.totalDoubleEdgeCount = totalDoubleEdgeCount;
@@ -38,8 +39,8 @@ public class CommunityAffiliations {
         this.affiliationSum = SparseVector.sum(affiliationVectors);
     }
 
-    GainFunction blockGain(int nodeId) {
-        return new AffiliationBlockGain(this, graph, nodeId);
+    GainFunction blockGain(int nodeId, double delta) {
+        return new AffiliationBlockGain(this, graph, nodeId, delta);
     }
 
     synchronized SparseVector affiliationSum() {
@@ -57,24 +58,30 @@ public class CommunityAffiliations {
         affiliationSum = affiliationSum.add(diff);
     }
 
-    public double gain() {
+    double gain() {
         // 2*sum_U sum_V<U (log(1-exp(-vU.vV)) +vU.vV) + sum_U vU.vU - affSum.affSum
+        double delta = getDelta();
+        double deltaSquared = delta * delta;
+        double totalDeltaSquared = (graph.nodeCount() * delta) * (graph.nodeCount() * delta);
         double[] gain = new double[1];
-        gain[0] = -affiliationSum.l2();
+        gain[0] = -affiliationSum.l2() - totalDeltaSquared;
+        double[] l1Penalty = new double[1];
+        l1Penalty[0] = 0;
         for (int nodeU = 0; nodeU < graph.nodeCount(); nodeU++) {
+            SparseVector affiliationVector = nodeAffiliations(nodeU);
+            l1Penalty[0] += affiliationVector.l1();
+            gain[0] += affiliationVector.l2() + deltaSquared;
             graph.forEachRelationship(nodeU, (src, trg) -> {
-                SparseVector affiliationVector = nodeAffiliations((int) src);
-                gain[0] += affiliationVector.l2();
-                SparseVector neighborAffiliationVector = nodeAffiliations((int) trg);
                 if (src < trg) {
                     return true;
                 }
-                double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector);
+                SparseVector neighborAffiliationVector = nodeAffiliations((int) trg);
+                double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector) + deltaSquared;
                 gain[0] += 2*(Math.log(1 - Math.exp(-affiliationInnerProduct)) + affiliationInnerProduct);
                 return true;
             });
         }
-        return gain[0];
+        return gain[0] - LAMBDA * l1Penalty[0];
     }
 
     public long nodeCount() {

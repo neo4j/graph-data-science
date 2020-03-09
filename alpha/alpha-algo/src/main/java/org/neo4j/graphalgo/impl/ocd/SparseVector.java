@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.impl.ocd;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,6 +53,9 @@ public class SparseVector {
         return new SparseVector(indicesArray, valuesArray);
     }
 
+    public static SparseVector zero() {
+        return getSparseVectorFromLists(Collections.emptyList(), Collections.emptyList());
+    }
 
     public double innerProduct(SparseVector other) {
         int position = 0;
@@ -84,6 +89,31 @@ public class SparseVector {
         return multiply(-1D);
     }
 
+    public SparseVector subtract(SparseVector other) {
+        int position = 0;
+        int otherPosition = 0;
+        LinkedList<Integer> indices = new LinkedList<>();
+        LinkedList<Double> values = new LinkedList<>();
+        while (position < dim() || otherPosition < other.dim()) {
+            int index = position < dim() ? this.indices[position] : Integer.MAX_VALUE;
+            int otherIndex = otherPosition < other.dim() ? other.indices[otherPosition] : Integer.MAX_VALUE;
+            if (index == otherIndex) {
+                indices.add(index);
+                values.add(this.values[position] - other.values[otherPosition]);
+                position++;
+                otherPosition++;
+            } else if (index < otherIndex) {
+                indices.add(index);
+                values.add(this.values[position]);
+                position++;
+            } else {
+                indices.add(otherIndex);
+                values.add(-other.values[otherPosition]);
+                otherPosition++;
+            }
+        }
+        return getSparseVectorFromLists(indices, values);
+    }
     public SparseVector add(SparseVector other) {
         int position = 0;
         int otherPosition = 0;
@@ -191,5 +221,13 @@ public class SparseVector {
             }
         }
         return newVector;
+    }
+
+    SparseVector l1Gradient() {
+        double[] newValues = Arrays.copyOf(values, values.length);
+        for (int i = 0; i < dim(); i++) {
+            newValues[i] = 1D;
+        }
+        return new SparseVector(indices, newValues);
     }
 }

@@ -21,24 +21,19 @@ package org.neo4j.graphalgo.impl.ocd;
 
 public interface GainFunction {
     /**
-     * Evaluate gain at {@param input} value.
-     * @param input the value at which to evaluate the gain.
+     * Evaluate gain at current parameter values incremented with {@param increment}.
+     * @param increment the value at which to evaluate the gain.
      * @return
      */
-    double gain(SparseVector input);
+    double gain(SparseVector increment);
+    /**
+     * Evaluate gain at current parameter values.
+     * @return
+     */
+    double gain();
     /**
      * Evaluate gradient of gain at current parameter values.
      * @return gradient of gain.
      */
     SparseVector gradient();
-    /**
-     * Get current value of parameters.
-     * @return the current value of parameters.
-     */
-    SparseVector parameters();
-    /**
-     * Update parameters by adding {@param increment} to current parameter values.
-     * @param increment
-     */
-    void update(SparseVector increment);
 }

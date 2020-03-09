@@ -110,10 +110,10 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
         public void run() {
             int nodeU;
             while ((nodeU = queue.getAndIncrement()) < graph.nodeCount() && running()) {
-                GainFunction blockLoss = communityAffiliations.blockGain(nodeU);
-                SparseVector gradient = blockLoss.gradient();
+                GainFunction blockGain = communityAffiliations.blockGain(nodeU, delta);
+                SparseVector gradient = blockGain.gradient();
                 double learningRate = lineSearch.search(
-                    blockLoss,
+                    blockGain,
                     communityAffiliations.nodeAffiliations(nodeU),
                     gradient
                 );
