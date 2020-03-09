@@ -30,10 +30,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphdb.Result;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -42,7 +42,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -103,7 +105,8 @@ class GraphListProcTest extends BaseProcTest {
                     "p95", 1L,
                     "p99", 1L,
                     "p999", 1L
-                )
+                ),
+                "createdTime", isA(String.class)
             )
         ));
     }
@@ -146,7 +149,8 @@ class GraphListProcTest extends BaseProcTest {
                     "p95", 1L,
                     "p99", 1L,
                     "p999", 1L
-                )
+                ),
+                "createdTime", isA(String.class)
             )
         ));
     }
@@ -337,6 +341,26 @@ class GraphListProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer("alice", listQuery, resultRow -> Assertions.assertEquals("aliceGraph", resultRow.getString("name")));
         runQueryWithRowConsumer("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
+    }
+
+    @Test
+    void shouldHaveCreatedTimeField() {
+        String loadQuery = "CALL gds.graph.create($name, '*', '*')";
+
+        runQuery("alice", loadQuery, map("name", "aliceGraph"));
+        runQuery("bob", loadQuery, map("name", "bobGraph"));
+
+        String listQuery = "CALL gds.graph.list()";
+
+        AtomicReference<Object> timeCreated = new AtomicReference<>();
+        runQueryWithRowConsumer("alice", listQuery, resultRow -> timeCreated.set(resultRow.get("createdTime")));
+        runQueryWithRowConsumer("alice", listQuery, resultRow -> assertEquals(timeCreated.get(), resultRow.get("createdTime")));
+
+        AtomicReference<Object> timeCreatedBob = new AtomicReference<>();
+        runQueryWithRowConsumer("bob", listQuery, resultRow -> timeCreatedBob.set(resultRow.get("createdTime")));
+        runQueryWithRowConsumer("bob", listQuery, resultRow -> assertEquals(timeCreatedBob.get(), resultRow.get("createdTime")));
+
+        assertNotEquals(timeCreated.get(), timeCreatedBob.get());
     }
 
     @ParameterizedTest

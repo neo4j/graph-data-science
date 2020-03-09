@@ -35,6 +35,7 @@ import java.util.Map;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.hamcrest.core.Is.isA;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class GraphDropProcTest extends BaseProcTest {
@@ -105,7 +106,8 @@ class GraphDropProcTest extends BaseProcTest {
                         "p95", 1L,
                         "p99", 1L,
                         "p999", 1L
-                    )
+                    ),
+                    "createdTime", isA(String.class)
                 )
             )
         );

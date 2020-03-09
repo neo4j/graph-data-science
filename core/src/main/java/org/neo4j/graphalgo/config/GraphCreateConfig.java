@@ -27,6 +27,9 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 
+import java.time.LocalDateTime;
+
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
@@ -77,6 +80,12 @@ public interface GraphCreateConfig extends BaseConfig {
     @Configuration.Key(ProcedureConstants.RELCOUNT_KEY)
     default long relationshipCount() {
         return -1;
+    }
+
+    @Value.Derived
+    @Value.Auxiliary
+    default String createdTime() {
+        return ISO_LOCAL_DATE_TIME.format(LocalDateTime.now());
     }
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
