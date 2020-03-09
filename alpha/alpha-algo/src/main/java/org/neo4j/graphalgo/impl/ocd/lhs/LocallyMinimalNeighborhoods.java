@@ -38,6 +38,8 @@ import org.neo4j.logging.Log;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -195,17 +197,48 @@ public class LocallyMinimalNeighborhoods extends Algorithm<LocallyMinimalNeighbo
             this.conductances = conductances;
         }
 
+        private Set<Long> neighborhood(long nodeId) {
+            Set<Long> neighbors = new HashSet<>();
+            neighbors.add(nodeId);
+            graph.concurrentCopy().forEachRelationship(nodeId, (s, t) -> {
+                neighbors.add(t);
+                return true;
+            });
+            return neighbors;
+        }
+
         @Override
         public void run() {
             long nodeId;
             while ((nodeId = queue.getAndIncrement()) < graph.nodeCount() && running()) {
                 double conductance = conductances.get(nodeId);
-                double[] minimumConductance = { conductance };
+                int[] optimumCount = { 1 };
                 graph.concurrentCopy().forEachRelationship(nodeId, (s, t) -> {
-                    minimumConductance[0] = Math.min(minimumConductance[0], conductances.get(t));
+                    double neighborConductance = conductances.get(t);
+                    if (neighborConductance < conductance) {
+                        optimumCount[0] = 0;
+                        return false;
+                    }
+                    if (neighborConductance == conductance) {
+                        optimumCount[0] += 1;
+                    }
                     return true;
                 });
-                if (conductance <= minimumConductance[0]) {
+                if (optimumCount[0] >= 1) {
+                    if (optimumCount[0] > 1) {
+                        // only add if neighborhood is unique and center id is minimal
+                        Set<Long> neighborhood = neighborhood(nodeId);
+                        boolean[] foundFavoredNeighbor = { false };
+                        graph.concurrentCopy().forEachRelationship(nodeId, (s, t) -> {
+                            if (t < s && neighborhood(t).equals(neighborhood)) {
+                                foundFavoredNeighbor[0] = true;
+                            }
+                            return true;
+                        });
+                        if (foundFavoredNeighbor[0]) {
+                            continue;
+                        }
+                    }
                     long originalNodeId = graph.toOriginalNodeId(nodeId);
                     neighborhoodCenters.add(originalNodeId);
                     if (includeMembers) {

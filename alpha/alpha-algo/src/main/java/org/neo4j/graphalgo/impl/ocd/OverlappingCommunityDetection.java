@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunityDetection, CommunityAffiliations> {
     private static final double TOLERANCE = 0.00001;
-    private static final int MAX_ITERATIONS = 20;
+    private static final int MAX_ITERATIONS = 100;
 
     private Graph graph;
     private AffiliationInitializer initializer;

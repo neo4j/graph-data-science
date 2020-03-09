@@ -81,8 +81,8 @@ public class OverlappingCommunityDetectionStreamProcTest extends BaseProcTest {
     @Test
     void stream() {
         String q = "CALL gds.alpha.ocd.stream({nodeProjection: \"*\", relationshipProjection: {`*`: {type: \"*\", orientation: \"UNDIRECTED\"}}, concurrency: 1})" +
-                   " YIELD nodeId, communityIds, scores";
-//                   " RETURN gds.util.asNode(nodeId).name as node, [gds.util.asNodes(communityIds)] as community, conductance";
+                   " YIELD nodeId, communityIds, scores" +
+                   " RETURN nodeId, gds.util.asNode(nodeId).name as node, communityIds, scores";
 
         Set<String> actualRowDescriptions = new HashSet<>();
 
