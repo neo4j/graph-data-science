@@ -30,12 +30,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunityDetection, CommunityAffiliations> {
     private static final double TOLERANCE = 0.00001;
+    private static final int MAX_ITERATIONS = 20;
 
     private Graph graph;
     private AffiliationInitializer initializer;
     private ExecutorService executorService;
     private final Log log;
     private final int gradientConcurrency;
+    private double delta;
 
     public OverlappingCommunityDetection(
         Graph graph,
@@ -54,23 +56,27 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
         }
     }
 
+    private void printState(int iteration, CommunityAffiliations communityAffiliations) {
+        double totalGain = communityAffiliations.gain();
+        System.out.println(String.format("Iteration: %s, Total gain: %s. ", iteration, totalGain));
+    }
+
     @Override
     public CommunityAffiliations compute() {
         CommunityAffiliations communityAffiliations = initializer.initialize(graph);
+        delta = communityAffiliations.getDelta();
         double oldGain = communityAffiliations.gain();
-        System.out.println(String.format("Iteration 0: Gain is %s.", oldGain));
         double newGain;
         int iteration = 0;
-        while ((newGain = update(communityAffiliations)) > oldGain + TOLERANCE) {
+        printState(iteration, communityAffiliations);
+        while (Math.abs((newGain = update(communityAffiliations, iteration + 1)) - oldGain) > TOLERANCE && iteration < MAX_ITERATIONS) {
             oldGain = newGain;
             iteration++;
-            System.out.println(String.format("Iteration %d: Gain is %s.", iteration, oldGain));
         }
         return communityAffiliations;
     }
 
-
-    double update(CommunityAffiliations communityAffiliations) {
+    double update(CommunityAffiliations communityAffiliations, int iteration) {
         AtomicInteger queue = new AtomicInteger(0);
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
@@ -79,7 +85,9 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
         );
         // run
         ParallelUtil.run(tasks, executorService);
-        return communityAffiliations.gain();
+        double newGain = communityAffiliations.gain();
+        printState(iteration, communityAffiliations);
+        return newGain;
     }
 
     @Override

@@ -26,5 +26,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 @ValueClass
 @Configuration("OverlappingCommunityDetectionBaseConfigImpl")
 public interface OverlappingCommunityDetectionBaseConfig extends AlgoBaseConfig {
-
+    default int gradientConcurrency() {
+        return -1;
+    }
 }

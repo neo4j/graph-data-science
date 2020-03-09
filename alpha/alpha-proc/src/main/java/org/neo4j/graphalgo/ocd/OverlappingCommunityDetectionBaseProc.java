@@ -48,15 +48,14 @@ abstract class OverlappingCommunityDetectionBaseProc<CONFIG extends OverlappingC
                     Pools.DEFAULT,
                     tracker,
                     log,
-                    config.concurrency()
+                    configuration.concurrency()
                 );
                 return new OverlappingCommunityDetection(
                     graph,
                     initializer,
-                    transaction,
                     Pools.DEFAULT,
-                    tracker,
-                    log
+                    log,
+                    configuration.gradientConcurrency() == -1 ? configuration.concurrency() : configuration.gradientConcurrency()
                 )
                     .withProgressLogger(ProgressLogger.wrap(log, "OverlappingCommunityDetection"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction));
