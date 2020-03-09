@@ -125,14 +125,13 @@ public class LinkPredictionFunc extends BaseProc {
         return relationshipType == null ? node.getDegree(direction) : node.getDegree(relationshipType, direction);
     }
 
-    @Nullable
-    private RelationshipType getRelationshipType(@Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+    private RelationshipType getRelationshipType(Map<String, Object> config) {
         return config.getOrDefault(RELATIONSHIP_QUERY_KEY, null) == null
             ? null
             : RelationshipType.withName((String) config.get(RELATIONSHIP_QUERY_KEY));
     }
 
-    private Direction getDirection(@Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+    private Direction getDirection(Map<String, Object> config) {
         return Directions.fromString((String) config.getOrDefault(DIRECTION_KEY, Direction.BOTH.name()));
     }
 

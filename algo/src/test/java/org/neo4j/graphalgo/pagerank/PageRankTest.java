@@ -53,6 +53,7 @@ final class PageRankTest extends AlgoTestBase {
 
     private static final Label LABEL = Label.label("Label1");
     private static final String RELATIONSHIP_TYPE = "TYPE1";
+    private static final PageRank.Config DEFAULT_CONFIG = defaultConfigBuilder().build().toOldConfig();
 
     static ImmutablePageRankStreamConfig.Builder defaultConfigBuilder() {
         return ImmutablePageRankStreamConfig.builder()
@@ -153,7 +154,7 @@ final class PageRankTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                .create(graph, defaultConfigBuilder().build().toOldConfig(), LongStream.empty())
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
                 .compute()
                 .result();
 
@@ -202,7 +203,7 @@ final class PageRankTest extends AlgoTestBase {
                     .graph(factoryType)
             );
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                    .create(graph, defaultConfigBuilder().build().toOldConfig(), LongStream.empty())
+                    .create(graph, DEFAULT_CONFIG, LongStream.empty())
                     .compute()
                     .result();
         } else {
@@ -215,7 +216,7 @@ final class PageRankTest extends AlgoTestBase {
                 .graph(factoryType);
 
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                    .create(graph, defaultConfigBuilder().build().toOldConfig(), LongStream.empty())
+                    .create(graph, DEFAULT_CONFIG, LongStream.empty())
                     .compute()
                     .result();
         }
@@ -261,7 +262,7 @@ final class PageRankTest extends AlgoTestBase {
             .create(
                 graph,
                 LongStream.range(0L, graph.nodeCount()),
-                defaultConfigBuilder().build().toOldConfig(),
+                DEFAULT_CONFIG,
                 1,
                 null,
                 1,
