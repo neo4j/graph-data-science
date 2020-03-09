@@ -109,10 +109,11 @@ YIELD graphName, nodeCount, relationshipCount;
 [source,cypher]
 ----
 CALL gds.graph.list('my-cypher-graph')
-YIELD graphName, nodeQuery, relationshipQuery, nodeCount, relationshipCount;
+YIELD graphName, nodeQuery, relationshipQuery, nodeCount, relationshipCount, createdTime;
 ----
 
 The information contains basic statistics about the graph, e.g., the node and relationship count.
+The result field `createdTime` indicates when the graph was created in memory.
 The procedure can also compute information about degree distributions, i.e., the number of relationships per node.
 To skip computing the distribution values, use the `YIELD` subclause and omit the `degreeDistribution` column.
 
