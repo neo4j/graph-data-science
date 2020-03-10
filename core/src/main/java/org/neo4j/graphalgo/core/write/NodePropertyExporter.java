@@ -19,12 +19,13 @@
  */
 package org.neo4j.graphalgo.core.write;
 
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.utils.StatementApi;
-import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Value;
@@ -97,6 +98,23 @@ public final class NodePropertyExporter extends StatementApi {
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.propertiesWritten = new LongAdder();
+    }
+
+    @ValueClass
+    interface NodePropertyDescription<T> {
+        String propertyKey();
+
+        T data();
+
+        PropertyTranslator<T> translator();
+    }
+
+    public <T> void write(NodePropertyDescription<T> propertyDescription) {
+        write(propertyDescription.propertyKey(), propertyDescription.data(), propertyDescription.translator());
+    }
+
+    public void write(Iterable<NodePropertyDescription<?>> propertyDescriptions) {
+        propertyDescriptions.forEach(this::write);
     }
 
     public <T> void write(

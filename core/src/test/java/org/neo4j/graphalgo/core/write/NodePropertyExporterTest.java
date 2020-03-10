@@ -32,6 +32,8 @@ import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -93,6 +95,47 @@ class NodePropertyExporterTest {
                 "(a { prop1: 1, newProp1: 23 })" +
                 "(b { prop1: 2, newProp1: 42 })" +
                 "(c { prop1: 3, newProp1: 84 })" +
+                "(a)-->(b)" +
+                "(a)-->(c)" +
+                "(b)-->(c)" +
+                "(b)-->(c)"),
+            updatedGraph
+        );
+    }
+
+    @Test
+    void exportMultipleNodeProperties() {
+        Graph graph = new StoreLoaderBuilder().api(DB)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addNodeProperty("newProp1", "prop1", 42.0, Aggregation.NONE)
+            .addNodeProperty("newProp2", "prop2", 42.0, Aggregation.NONE)
+            .build()
+            .graph(NativeFactory.class);
+
+        NodePropertyExporter exporter = NodePropertyExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE).build();
+
+        List<NodePropertyExporter.NodePropertyDescription<?>> nodePropertyDescriptions = Arrays.asList(
+            ImmutableNodePropertyDescription.of("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR),
+            ImmutableNodePropertyDescription.of("newProp2", new double[]{123D, 142D, 184D}, Translators.DOUBLE_ARRAY_TRANSLATOR)
+        );
+
+        exporter.write(nodePropertyDescriptions);
+
+        Graph updatedGraph = new StoreLoaderBuilder().api(DB)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addNodeProperty("prop1", "prop1", 42.0, Aggregation.NONE)
+            .addNodeProperty("newProp1", "newProp1", 42.0, Aggregation.NONE)
+            .addNodeProperty("newProp2", "newProp2", 42.0, Aggregation.NONE)
+            .build()
+            .graph(NativeFactory.class);
+
+        assertGraphEquals(
+            fromGdl(
+                "(a { prop1: 1, newProp1: 23, newProp2: 123.0d })" +
+                "(b { prop1: 2, newProp1: 42, newProp2: 142.0d })" +
+                "(c { prop1: 3, newProp1: 84, newProp2: 184.0d })" +
                 "(a)-->(b)" +
                 "(a)-->(c)" +
                 "(b)-->(c)" +
