@@ -85,10 +85,10 @@ public final class GraphStore {
             .collect(Collectors.toMap(property -> property, graph::nodeProperties));
 
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = Collections.emptyMap();
-        if (relationshipProperty.isPresent() && graph.hasRelationshipProperty()) {
+        if (relationships.hasProperties() && relationshipProperty.isPresent()) {
             relationshipProperties = singletonMap(
                 relationshipType,
-                singletonMap(relationshipProperty.get(), relationships.properties())
+                singletonMap(relationshipProperty.get(), relationships.properties().get())
             );
         }
 

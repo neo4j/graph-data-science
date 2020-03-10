@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
@@ -70,13 +69,13 @@ public final class HugeGraphUtil {
     }
 
     public static HugeGraph create(IdMap idMap, HugeGraph.Relationships relationships, AllocationTracker tracker) {
-        HugeGraph.TopologyCSR topologyCSR = relationships.topology();
-
-        Optional<HugeGraph.PropertyCSR> maybePropertyCSR = relationships.hasProperties()
-            ? Optional.of(relationships.properties())
-            : Optional.empty();
-
-        return HugeGraph.create(idMap, Collections.emptyMap(), topologyCSR, maybePropertyCSR, tracker);
+        return HugeGraph.create(
+            idMap,
+            Collections.emptyMap(),
+            relationships.topology(),
+            relationships.properties(),
+            tracker
+        );
     }
 
     public static class IdMapBuilder {

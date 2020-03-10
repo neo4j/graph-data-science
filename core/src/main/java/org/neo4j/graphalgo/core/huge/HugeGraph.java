@@ -492,10 +492,10 @@ public class HugeGraph implements Graph {
 
         TopologyCSR topology();
 
-        @Nullable PropertyCSR properties();
+        Optional<PropertyCSR> properties();
 
         default boolean hasProperties() {
-            return properties() != null;
+            return properties().isPresent();
         }
 
         static Relationships of(
@@ -508,17 +508,17 @@ public class HugeGraph implements Graph {
             double defaultPropertyValue
         ) {
             TopologyCSR topologyCSR = ImmutableTopologyCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
-            PropertyCSR propertyCSR = null;
-            if (properties != null && propertyOffsets != null) {
-                propertyCSR = ImmutablePropertyCSR.of(
+
+            Optional<PropertyCSR> maybePropertyCSR = properties != null && propertyOffsets != null
+                ? Optional.of(ImmutablePropertyCSR.of(
                     properties,
                     propertyOffsets,
                     relationshipCount,
                     orientation,
                     defaultPropertyValue
-                );
-            }
-            return ImmutableRelationships.of(topologyCSR, propertyCSR);
+                )) : Optional.empty();
+
+            return ImmutableRelationships.of(topologyCSR, maybePropertyCSR);
         }
     }
 
