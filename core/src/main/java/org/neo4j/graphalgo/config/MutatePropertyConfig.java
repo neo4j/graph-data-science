@@ -17,17 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.neo4j.graphalgo.config;
 
-package org.neo4j.graphalgo.spanningtree;
-
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
-
-public interface SpanningTreeBaseConfig extends
-    AlgoBaseConfig,
-    WritePropertyConfig,
-    RelationshipWeightConfig
-{
-    long startNodeId();
-}
+// Marker interface for mutate procedures
+public interface MutatePropertyConfig extends WritePropertyConfig { }

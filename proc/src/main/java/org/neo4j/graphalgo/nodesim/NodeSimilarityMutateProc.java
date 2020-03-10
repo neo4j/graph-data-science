@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -98,34 +97,7 @@ public class NodeSimilarityMutateProc extends NodeSimilarityBaseProc<NodeSimilar
 
         NodeSimilarityResult result = computationResult.result();
         SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
-
-        HugeGraph.Relationships resultRelationships;
-
-        if (similarityGraphResult.isTopKGraph()) {
-            TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();
-            Graph baseGraph = topKGraph.baseGraph();
-
-            HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = new HugeGraphUtil.RelationshipsBuilder(
-                baseGraph,
-                Orientation.NATURAL,
-                true,
-                Aggregation.NONE,
-                Pools.DEFAULT,
-                computationResult.tracker()
-            );
-
-            for (long nodeId = 0; nodeId < baseGraph.nodeCount(); nodeId++) {
-                topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
-                    relationshipsBuilder.addFromInternal(sourceNodeId, targetNodeId, property);
-                    return true;
-                });
-            }
-
-            resultRelationships = relationshipsBuilder.build();
-        } else {
-            HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
-            resultRelationships = similarityGraph.relationships();
-        }
+        HugeGraph.Relationships resultRelationships = getRelationships(computationResult, similarityGraphResult);
 
         WriteResultBuilder resultBuilder = new WriteResultBuilder();
         resultBuilder
@@ -135,15 +107,48 @@ public class NodeSimilarityMutateProc extends NodeSimilarityBaseProc<NodeSimilar
         resultBuilder.withComputeMillis(computationResult.computeMillis());
         resultBuilder.withConfig(config);
 
-        if (resultRelationships.topology().elementCount() > 0) {
-            String writeRelationshipType = config.writeRelationshipType();
-            String writeProperty = config.writeProperty();
+        String writeRelationshipType = config.writeRelationshipType();
+        String writeProperty = config.writeProperty();
 
-            computationResult
-                .graphStore()
-                .addRelationships(writeRelationshipType, Optional.of(writeProperty), resultRelationships);
-        }
+        computationResult
+            .graphStore()
+            .addRelationshipType(writeRelationshipType, Optional.of(writeProperty), resultRelationships);
+
         return Stream.of(resultBuilder.build());
+    }
+
+    private HugeGraph.Relationships getRelationships(
+        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult,
+        SimilarityGraphResult similarityGraphResult
+    ) {
+        HugeGraph.Relationships resultRelationships;
+
+        if (similarityGraphResult.isTopKGraph()) {
+            TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();
+
+            HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = new HugeGraphUtil.RelationshipsBuilder(
+                topKGraph,
+                Orientation.NATURAL,
+                true,
+                Aggregation.NONE,
+                Pools.DEFAULT,
+                computationResult.tracker()
+            );
+
+            topKGraph.forEachNode(nodeId -> {
+                topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
+                    relationshipsBuilder.addFromInternal(sourceNodeId, targetNodeId, property);
+                    return true;
+                });
+                return true;
+            });
+
+            resultRelationships = relationshipsBuilder.build();
+        } else {
+            HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
+            resultRelationships = similarityGraph.relationships();
+        }
+        return resultRelationships;
     }
 
     public static class WriteResult {

@@ -119,12 +119,12 @@ public final class GraphStore {
         this.nodeProperties.putIfAbsent(propertyKey, nodeProperties);
     }
 
-    public boolean hasRelationships(String relationshipType) {
+    public boolean hasRelationshipType(String relationshipType) {
         return relationships.containsKey(relationshipType);
     }
 
-    public void addRelationships(String relationshipType, Optional<String> relationshipProperty, HugeGraph.Relationships relationships) {
-        if (!hasRelationships(relationshipType)) {
+    public void addRelationshipType(String relationshipType, Optional<String> relationshipProperty, HugeGraph.Relationships relationships) {
+        if (!hasRelationshipType(relationshipType)) {
             this.relationships.put(relationshipType, relationships.topology());
 
             if (relationshipProperty.isPresent() && relationships.hasProperties()) {

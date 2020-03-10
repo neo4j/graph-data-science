@@ -22,14 +22,14 @@ package org.neo4j.graphalgo.wcc;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.MutateConfig;
+import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("WccMutateConfigImpl")
-public interface WccMutateConfig extends WccWriteConfig, MutateConfig {
+public interface WccMutateConfig extends WccWriteConfig, MutatePropertyConfig {
 
     static WccMutateConfig of(
         String username,
@@ -44,5 +44,4 @@ public interface WccMutateConfig extends WccWriteConfig, MutateConfig {
             userInput
         );
     }
-
 }

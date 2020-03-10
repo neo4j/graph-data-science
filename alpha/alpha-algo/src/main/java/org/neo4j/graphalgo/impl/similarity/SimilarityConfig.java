@@ -23,13 +23,13 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public interface SimilarityConfig extends AlgoBaseConfig, WriteConfig {
+public interface SimilarityConfig extends AlgoBaseConfig, WritePropertyConfig {
 
     int TOP_K_DEFAULT = 3;
 

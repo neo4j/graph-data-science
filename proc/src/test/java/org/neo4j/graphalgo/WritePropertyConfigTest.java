@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.Result;
 
@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public interface WriteConfigTest<CONFIG extends WriteConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
+public interface WritePropertyConfigTest<CONFIG extends WritePropertyConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     @Test
     default void testMissingWritePropertyFails() {

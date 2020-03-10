@@ -19,17 +19,5 @@
  */
 package org.neo4j.graphalgo.config;
 
-import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
-
-public interface WriteConfig extends AlgoBaseConfig {
-
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
-    String writeProperty();
-
-    @Value.Default
-    default int writeConcurrency() {
-        return concurrency();
-    }
-
-}
+// Marker interface for mutate procedures
+public interface MutateRelationshipTypeConfig extends WriteRelationshipTypeConfig { }

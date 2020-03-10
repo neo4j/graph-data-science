@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.centrality.eigenvector;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.SourceNodesConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
 
 import java.util.Optional;
 
@@ -38,7 +38,7 @@ public interface EigenvectorCentralityConfig extends
     AlgoBaseConfig,
     IterationsConfig,
     SourceNodesConfig,
-    WriteConfig,
+    WritePropertyConfig,
     RelationshipWeightConfig {
 
     @Value.Default

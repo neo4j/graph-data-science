@@ -28,7 +28,7 @@ import java.util.function.LongPredicate;
 
 public abstract class FilterGraph implements Graph {
 
-    protected final Graph graph;
+    private final Graph graph;
 
     public FilterGraph(Graph graph) {
         this.graph = graph;

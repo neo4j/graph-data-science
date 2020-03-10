@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public interface GraphMutationTest<CONFIG extends WriteConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
+public interface GraphMutationTest<CONFIG extends WritePropertyConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     @Test
     default void testGraphMutation() {
@@ -66,7 +66,7 @@ public interface GraphMutationTest<CONFIG extends WriteConfig & AlgoBaseConfig, 
     }
 
     @Test
-    default void testMutateFailsOnExistingNodeProperty() {
+    default void testMutateFailsOnExistingToken() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
         GraphStoreCatalog.set(
@@ -88,13 +88,10 @@ public interface GraphMutationTest<CONFIG extends WriteConfig & AlgoBaseConfig, 
                             () -> mutateMethod.invoke(procedure, loadedGraphName, config)
                         );
 
-                        String expectedMessage = String.format(
-                            "Node property `%s` already exists in the in-memory graph.",
-                            config.get("writeProperty").toString()
-                        );
+
                         Throwable expectedException = ExceptionUtil.rootCause(ex);
                         assertEquals(IllegalArgumentException.class, expectedException.getClass());
-                        assertEquals(expectedMessage, expectedException.getMessage());
+                        assertEquals(failOnExistingTokenMessage(), expectedException.getMessage());
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
@@ -106,4 +103,6 @@ public interface GraphMutationTest<CONFIG extends WriteConfig & AlgoBaseConfig, 
     }
 
     String expectedMutatedGraph();
+
+    String failOnExistingTokenMessage();
 }

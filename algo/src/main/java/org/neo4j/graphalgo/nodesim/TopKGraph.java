@@ -33,10 +33,6 @@ public class TopKGraph extends FilterGraph {
         this.topKMap = topKMap;
     }
 
-    public Graph baseGraph() {
-        return graph;
-    }
-
     @Override
     public int degree(long nodeId) {
         TopKMap.TopKList topKList = topKMap.get(nodeId);

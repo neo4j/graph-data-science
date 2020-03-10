@@ -23,14 +23,14 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("LouvainWriteConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface LouvainWriteConfig extends LouvainBaseConfig, WriteConfig {
+public interface LouvainWriteConfig extends LouvainBaseConfig, WritePropertyConfig {
 
     static LouvainWriteConfig of(
         String username,

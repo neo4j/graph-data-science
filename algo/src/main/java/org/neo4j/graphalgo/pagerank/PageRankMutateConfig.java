@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.pagerank;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.MutateConfig;
+import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -30,7 +30,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("PageRankMutateConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface PageRankMutateConfig extends PageRankWriteConfig, MutateConfig {
+public interface PageRankMutateConfig extends PageRankWriteConfig, MutatePropertyConfig {
 
     static PageRankMutateConfig of(
         String username,

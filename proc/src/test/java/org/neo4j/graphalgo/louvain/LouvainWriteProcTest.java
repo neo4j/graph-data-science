@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.WriteConfigTest;
+import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -44,7 +44,7 @@ import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 
 class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> implements
-    WriteConfigTest<LouvainWriteConfig, Louvain> {
+    WritePropertyConfigTest<LouvainWriteConfig, Louvain> {
 
     @Override
     public Class<? extends AlgoBaseProc<?, Louvain, LouvainWriteConfig>> getProcedureClazz() {

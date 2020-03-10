@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.WriteConfigTest;
+import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPropagationWriteConfig> implements
-    WriteConfigTest<LabelPropagationWriteConfig, LabelPropagation> {
+    WritePropertyConfigTest<LabelPropagationWriteConfig, LabelPropagation> {
 
     @Override
     public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationWriteConfig>> getProcedureClazz() {

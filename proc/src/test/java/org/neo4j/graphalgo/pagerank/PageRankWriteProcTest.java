@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
-import org.neo4j.graphalgo.WriteConfigTest;
+import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> implements
-    WriteConfigTest<PageRankWriteConfig, PageRank> {
+    WritePropertyConfigTest<PageRankWriteConfig, PageRank> {
 
     @Override
     public Class<? extends AlgoBaseProc<?, PageRank, PageRankWriteConfig>> getProcedureClazz() {

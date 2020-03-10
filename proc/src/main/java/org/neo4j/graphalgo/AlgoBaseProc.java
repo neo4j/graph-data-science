@@ -29,11 +29,12 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.MutateConfig;
+import org.neo4j.graphalgo.config.MutatePropertyConfig;
+import org.neo4j.graphalgo.config.MutateRelationshipTypeConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -261,12 +262,22 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             }
         }
 
-        if (config instanceof MutateConfig) {
-            String writeProperty = ((MutateConfig) config).writeProperty();
+        if (config instanceof MutatePropertyConfig) {
+            String writeProperty = ((MutatePropertyConfig) config).writeProperty();
             if (writeProperty != null && graphStore.hasNodeProperty(writeProperty)) {
                 throw new IllegalArgumentException(String.format(
                     "Node property `%s` already exists in the in-memory graph.",
                     writeProperty
+                ));
+            }
+        }
+
+        if (config instanceof MutateRelationshipTypeConfig) {
+            String writeRelationshipType = ((MutateRelationshipTypeConfig) config).writeRelationshipType();
+            if (writeRelationshipType != null && graphStore.hasRelationshipType(writeRelationshipType)) {
+                throw new IllegalArgumentException(String.format(
+                    "Relationship type `%s` already exists in the in-memory graph.",
+                    writeRelationshipType
                 ));
             }
         }
@@ -364,14 +375,14 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         PropertyTranslator<RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
 
         CONFIG config = computationResult.config();
-        if (!(config instanceof WriteConfig)) {
+        if (!(config instanceof WritePropertyConfig)) {
             throw new IllegalArgumentException(String.format(
                 "Can only write results if the config implements %s.",
-                WriteConfig.class
+                WritePropertyConfig.class
             ));
         }
 
-        WriteConfig writeConfig = (WriteConfig) config;
+        WritePropertyConfig writePropertyConfig = (WritePropertyConfig) config;
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
             log.debug("Writing results");
 
@@ -379,11 +390,11 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
             NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
                 .withLog(log)
-                .parallel(Pools.DEFAULT, writeConfig.writeConcurrency())
+                .parallel(Pools.DEFAULT, writePropertyConfig.writeConcurrency())
                 .build();
 
             exporter.write(
-                writeConfig.writeProperty(),
+                writePropertyConfig.writeProperty(),
                 computationResult.result(),
                 resultPropertyTranslator
             );
@@ -398,19 +409,19 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         PropertyTranslator<RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
 
         CONFIG config = computationResult.config();
-        if (!(config instanceof WriteConfig)) {
+        if (!(config instanceof WritePropertyConfig)) {
             throw new IllegalArgumentException(String.format(
                 "Can only write results if the config implements %s.",
-                WriteConfig.class
+                WritePropertyConfig.class
             ));
         }
-        WriteConfig writeConfig = (WriteConfig) config;
+        WritePropertyConfig writePropertyConfig = (WritePropertyConfig) config;
         RESULT result = computationResult.result();
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
             log.debug("Updating in-memory graph store");
             GraphStore graphStore = computationResult.graphStore();
             graphStore.addNodeProperty(
-                writeConfig.writeProperty(),
+                writePropertyConfig.writeProperty(),
                 nodeId -> resultPropertyTranslator.toDouble(result, nodeId)
             );
             writeBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
@@ -433,7 +444,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     protected boolean shouldWrite(CONFIG config) {
-        return config instanceof WriteConfig;
+        return config instanceof WritePropertyConfig;
     }
 
     @ValueClass

@@ -26,14 +26,14 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphdb.Node;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("ShortestPathDeltaSteppingConfigImpl")
-public interface ShortestPathDeltaSteppingConfig extends BaseConfig, RelationshipWeightConfig, WriteConfig {
+public interface ShortestPathDeltaSteppingConfig extends BaseConfig, RelationshipWeightConfig, WritePropertyConfig {
 
     String DEFAULT_TARGET_PROPERTY = "sssp";
 

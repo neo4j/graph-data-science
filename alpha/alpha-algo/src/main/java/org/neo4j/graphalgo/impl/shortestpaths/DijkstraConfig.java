@@ -22,11 +22,11 @@ package org.neo4j.graphalgo.impl.shortestpaths;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphdb.Node;
 
 import java.util.Optional;
@@ -34,7 +34,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("DijkstraConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface DijkstraConfig extends AlgoBaseConfig, RelationshipWeightConfig, WriteConfig {
+public interface DijkstraConfig extends AlgoBaseConfig, RelationshipWeightConfig, WritePropertyConfig {
 
     String WRITE_PROPERTY_DEFAULT_VALUE = "sssp";
 

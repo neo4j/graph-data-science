@@ -23,9 +23,9 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 
-public interface BaseBetweennessCentralityConfig extends WriteConfig {
+public interface BaseBetweennessCentralityConfig extends WritePropertyConfig {
 
     @Value.Default
     default String writeProperty() {

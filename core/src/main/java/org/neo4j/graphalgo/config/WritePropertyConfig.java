@@ -17,32 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.wcc;
+package org.neo4j.graphalgo.config;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Optional;
+public interface WritePropertyConfig extends AlgoBaseConfig {
 
-@ValueClass
-@Configuration("WccWriteConfigImpl")
-@SuppressWarnings("immutables:subtype")
-public interface WccWriteConfig extends WccBaseConfig, WritePropertyConfig {
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    String writeProperty();
 
-    static WccWriteConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new WccWriteConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            userInput
-        );
+    @Value.Default
+    default int writeConcurrency() {
+        return concurrency();
     }
+
 }

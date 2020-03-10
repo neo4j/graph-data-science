@@ -54,11 +54,6 @@ class NodeSimilarityMutateProcTest
     }
 
     @Override
-    public void testMutateFailsOnExistingNodeProperty() {
-
-    }
-
-    @Override
     public String expectedMutatedGraph() {
         return String.format(
             "  (a)" +
@@ -85,6 +80,14 @@ class NodeSimilarityMutateProcTest
             , 1 / 3.0
             , 2 / 3.0
             , 1 / 3.0
+        );
+    }
+
+    @Override
+    public String failOnExistingTokenMessage() {
+        return String.format(
+            "Relationship type `%s` already exists in the in-memory graph.",
+            WRITE_RELATIONSHIP_TYPE
         );
     }
 }

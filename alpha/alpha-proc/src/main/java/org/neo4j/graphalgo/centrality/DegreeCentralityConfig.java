@@ -25,11 +25,11 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 
 @Configuration("DegreeCentralityConfigImpl")
 @ValueClass
-public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeightConfig, WriteConfig {
+public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeightConfig, WritePropertyConfig {
 
     String DEFAULT_SCORE_PROPERTY = "degree";
 

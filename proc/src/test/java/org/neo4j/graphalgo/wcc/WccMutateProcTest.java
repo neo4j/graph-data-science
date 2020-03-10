@@ -72,4 +72,11 @@ class WccMutateProcTest extends WccBaseProcTest<WccWriteConfig> implements Graph
             // {H, I}
             ", (h)-[{w: 1.0d}]->(i)";
     }
-}
+
+    @Override
+    public String failOnExistingTokenMessage() {
+        return String.format(
+            "Node property `%s` already exists in the in-memory graph.",
+            WRITE_PROPERTY
+        );
+    }}
