@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -136,7 +137,7 @@ public final class HugeGraphUtil {
         private final RelationshipImporter relationshipImporter;
         private final RelationshipImporter.Imports imports;
         private final RelationshipsBatchBuffer relationshipBuffer;
-        private final IdMap idMap;
+        private final IdMapping idMapping;
         private final Orientation orientation;
         private final boolean loadRelationshipProperty;
         private final ExecutorService executorService;
@@ -144,7 +145,7 @@ public final class HugeGraphUtil {
         private long importedRelationships = 0;
 
         public RelationshipsBuilder(
-            IdMap idMap,
+            IdMapping idMapping,
             Orientation orientation,
             boolean loadRelationshipProperty,
             Aggregation aggregation,
@@ -154,9 +155,9 @@ public final class HugeGraphUtil {
             this.orientation = orientation;
             this.loadRelationshipProperty = loadRelationshipProperty;
             this.executorService = executorService;
-            this.idMap = idMap;
+            this.idMapping = idMapping;
 
-            ImportSizing importSizing = ImportSizing.of(1, idMap.nodeCount());
+            ImportSizing importSizing = ImportSizing.of(1, idMapping.nodeCount());
             int pageSize = importSizing.pageSize();
             int numberOfPages = importSizing.numberOfPages();
 
@@ -180,15 +181,15 @@ public final class HugeGraphUtil {
 
             this.relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);
             this.imports = relationshipImporter.imports(orientation, loadRelationshipProperty);
-            this.relationshipBuffer = new RelationshipsBatchBuffer(idMap, -1, ParallelUtil.DEFAULT_BATCH_SIZE);
+            this.relationshipBuffer = new RelationshipsBatchBuffer(idMapping, -1, ParallelUtil.DEFAULT_BATCH_SIZE);
         }
 
         public void add(long source, long target) {
-            addFromInternal(idMap.toMappedNodeId(source), idMap.toMappedNodeId(target));
+            addFromInternal(idMapping.toMappedNodeId(source), idMapping.toMappedNodeId(target));
         }
 
         public void add(long source, long target, double relationshipPropertyValue) {
-            addFromInternal(idMap.toMappedNodeId(source), idMap.toMappedNodeId(target), relationshipPropertyValue);
+            addFromInternal(idMapping.toMappedNodeId(source), idMapping.toMappedNodeId(target), relationshipPropertyValue);
         }
 
         public <T extends Relationship> void add(Stream<T> relationshipStream) {

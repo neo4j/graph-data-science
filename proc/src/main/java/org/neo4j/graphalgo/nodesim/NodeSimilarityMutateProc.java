@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -96,16 +97,16 @@ public class NodeSimilarityMutateProc extends NodeSimilarityBaseProc<NodeSimilar
         }
 
         NodeSimilarityResult result = computationResult.result();
-        NodeSimilarity algorithm = computationResult.algorithm();
         SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
 
         HugeGraph.Relationships resultRelationships;
+
         if (similarityGraphResult.isTopKGraph()) {
             TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();
-            HugeGraph baseGraph = (HugeGraph) topKGraph.baseGraph();
+            Graph baseGraph = topKGraph.baseGraph();
 
             HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = new HugeGraphUtil.RelationshipsBuilder(
-                baseGraph.idMapping(),
+                baseGraph,
                 Orientation.NATURAL,
                 true,
                 Aggregation.NONE,
