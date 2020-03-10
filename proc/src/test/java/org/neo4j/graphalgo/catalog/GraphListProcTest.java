@@ -30,11 +30,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphdb.Result;
 
+import java.time.temporal.TemporalAccessor;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -352,13 +355,13 @@ class GraphListProcTest extends BaseProcTest {
 
         String listQuery = "CALL gds.graph.list()";
 
-        AtomicReference<Object> timeCreated = new AtomicReference<>();
-        runQueryWithRowConsumer("alice", listQuery, resultRow -> timeCreated.set(resultRow.get("createdTime")));
-        runQueryWithRowConsumer("alice", listQuery, resultRow -> assertEquals(timeCreated.get(), resultRow.get("createdTime")));
+        AtomicReference<String> timeCreated = new AtomicReference<>();
+        runQueryWithRowConsumer("alice", listQuery, resultRow -> timeCreated.set(formatCreatedTime(resultRow)));
+        runQueryWithRowConsumer("alice", listQuery, resultRow -> assertEquals(timeCreated.get(), formatCreatedTime(resultRow)));
 
-        AtomicReference<Object> timeCreatedBob = new AtomicReference<>();
-        runQueryWithRowConsumer("bob", listQuery, resultRow -> timeCreatedBob.set(resultRow.get("createdTime")));
-        runQueryWithRowConsumer("bob", listQuery, resultRow -> assertEquals(timeCreatedBob.get(), resultRow.get("createdTime")));
+        AtomicReference<String> timeCreatedBob = new AtomicReference<>();
+        runQueryWithRowConsumer("bob", listQuery, resultRow -> timeCreatedBob.set(formatCreatedTime(resultRow)));
+        runQueryWithRowConsumer("bob", listQuery, resultRow -> assertEquals(timeCreatedBob.get(), formatCreatedTime(resultRow)));
 
         assertNotEquals(timeCreated.get(), timeCreatedBob.get());
     }
@@ -379,5 +382,9 @@ class GraphListProcTest extends BaseProcTest {
     @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})
     void failsOnInvalidGraphNameTypeDueToObjectSignature(String graphName) {
         assertError(String.format("CALL gds.graph.list(%s)", graphName), "Type mismatch: expected String but was");
+    }
+
+    private String formatCreatedTime(Result.ResultRow resultRow) {
+        return ISO_LOCAL_DATE_TIME.format((TemporalAccessor) resultRow.get("createdTime"));
     }
 }

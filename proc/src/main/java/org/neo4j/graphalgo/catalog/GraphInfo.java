@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -44,7 +45,7 @@ public class GraphInfo {
     public final long nodeCount;
     public final long relationshipCount;
     public final Map<String, Object> degreeDistribution;
-    public final String createdTime;
+    public final LocalDateTime createdTime;
 
     GraphInfo(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
         this.graphName = config.graphName();
