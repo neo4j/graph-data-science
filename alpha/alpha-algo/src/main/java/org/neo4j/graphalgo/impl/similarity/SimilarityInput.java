@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,11 +53,6 @@ public interface SimilarityInput {
 
     static long[] extractInputIds(SimilarityInput[] inputs, int concurrency) {
         return parallelStream(Arrays.stream(inputs),  concurrency, stream -> stream.mapToLong(SimilarityInput::getId).toArray());
-    }
-
-    static int[] indexesFor(long[] inputIds, ProcedureConfiguration configuration, String key) {
-        List<Long> sourceIds = configuration.get(key, Collections.emptyList());
-        return indexesFor(inputIds, sourceIds, key);
     }
 
     static int[] indexesFor(long[] inputIds, List<Long> sourceIds, String key) {

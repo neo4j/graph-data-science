@@ -19,8 +19,9 @@
  */
 package org.neo4j.graphalgo.linkprediction;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -30,6 +31,9 @@ import org.neo4j.procedure.UserFunction;
 
 import java.util.Map;
 import java.util.Set;
+
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.DIRECTION_KEY;
 
 public class LinkPredictionFunc extends BaseProc {
 
@@ -43,9 +47,8 @@ public class LinkPredictionFunc extends BaseProc {
             throw new RuntimeException("Nodes must not be null");
         }
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-        RelationshipType relationshipType = configuration.getRelationship();
-        Direction direction = configuration.getDirection(Direction.BOTH);
+        RelationshipType relationshipType = getRelationshipType(config);
+        Direction direction = getDirection(config);
 
         Set<Node> neighbors = new NeighborsFinder().findCommonNeighbors(node1, node2, relationshipType, direction);
         return neighbors.stream().mapToDouble(nb -> 1.0 / Math.log(degree(nb, relationshipType, direction))).sum();
@@ -61,9 +64,8 @@ public class LinkPredictionFunc extends BaseProc {
             throw new RuntimeException("Nodes must not be null");
         }
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-        RelationshipType relationshipType = configuration.getRelationship();
-        Direction direction = configuration.getDirection(Direction.BOTH);
+        RelationshipType relationshipType = getRelationshipType(config);
+        Direction direction = getDirection(config);
 
         Set<Node> neighbors = new NeighborsFinder().findCommonNeighbors(node1, node2, relationshipType, direction);
         return neighbors.stream().mapToDouble(nb -> 1.0 / degree(nb, relationshipType, direction)).sum();
@@ -77,9 +79,8 @@ public class LinkPredictionFunc extends BaseProc {
             throw new RuntimeException("Nodes must not be null");
         }
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-        RelationshipType relationshipType = configuration.getRelationship();
-        Direction direction = configuration.getDirection(Direction.BOTH);
+        RelationshipType relationshipType = getRelationshipType(config);
+        Direction direction = getDirection(config);
 
         Set<Node> neighbors = new NeighborsFinder().findCommonNeighbors(node1, node2, relationshipType, direction);
         return neighbors.size();
@@ -93,9 +94,8 @@ public class LinkPredictionFunc extends BaseProc {
             throw new RuntimeException("Nodes must not be null");
         }
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-        RelationshipType relationshipType = configuration.getRelationship();
-        Direction direction = configuration.getDirection(Direction.BOTH);
+        RelationshipType relationshipType = getRelationshipType(config);
+        Direction direction = getDirection(config);
 
         return degree(node1, relationshipType, direction) * degree(node2, relationshipType, direction);
     }
@@ -104,9 +104,8 @@ public class LinkPredictionFunc extends BaseProc {
     @Description("Given two nodes, calculate Total Neighbors")
     public double totalNeighbors(@Name("node1") Node node1, @Name("node2") Node node2,
                                          @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
-        RelationshipType relationshipType = configuration.getRelationship();
-        Direction direction = configuration.getDirection(Direction.BOTH);
+        RelationshipType relationshipType = getRelationshipType(config);
+        Direction direction = getDirection(config);
 
         NeighborsFinder neighborsFinder = new NeighborsFinder();
         return neighborsFinder.findNeighbors(node1, node2, relationshipType, direction).size();
@@ -125,5 +124,16 @@ public class LinkPredictionFunc extends BaseProc {
     private int degree(Node node, RelationshipType relationshipType, Direction direction) {
         return relationshipType == null ? node.getDegree(direction) : node.getDegree(relationshipType, direction);
     }
+
+    private RelationshipType getRelationshipType(Map<String, Object> config) {
+        return config.getOrDefault(RELATIONSHIP_QUERY_KEY, null) == null
+            ? null
+            : RelationshipType.withName((String) config.get(RELATIONSHIP_QUERY_KEY));
+    }
+
+    private Direction getDirection(Map<String, Object> config) {
+        return Directions.fromString((String) config.getOrDefault(DIRECTION_KEY, Direction.BOTH.name()));
+    }
+
 
 }
