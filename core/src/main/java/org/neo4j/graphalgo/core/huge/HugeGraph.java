@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -395,7 +394,15 @@ public class HugeGraph implements Graph {
     }
 
     public Relationships relationships() {
-        return new Relationships(relationshipCount, orientation, adjacencyList, adjacencyOffsets, properties, propertyOffsets);
+        return Relationships.of(
+            relationshipCount,
+            orientation,
+            adjacencyList,
+            adjacencyOffsets,
+            properties,
+            propertyOffsets,
+            defaultPropertyValue
+        );
     }
 
     @Override
@@ -477,6 +484,41 @@ public class HugeGraph implements Graph {
                 return false;
             }
             return true;
+        }
+    }
+
+    @ValueClass
+    public interface Relationships {
+
+        CSR topology();
+
+        @Nullable PropertyCSR properties();
+
+        default boolean hasProperties() {
+            return properties() != null;
+        }
+
+        static Relationships of(
+            long relationshipCount,
+            Orientation orientation,
+            AdjacencyList adjacencyList,
+            AdjacencyOffsets adjacencyOffsets,
+            @Nullable AdjacencyList properties,
+            @Nullable AdjacencyOffsets propertyOffsets,
+            double defaultPropertyValue
+        ) {
+            CSR topologyCSR = ImmutableCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
+            PropertyCSR propertyCSR = null;
+            if (properties != null && propertyOffsets != null) {
+                propertyCSR = ImmutablePropertyCSR.of(
+                    properties,
+                    propertyOffsets,
+                    relationshipCount,
+                    orientation,
+                    defaultPropertyValue
+                );
+            }
+            return ImmutableRelationships.of(topologyCSR, propertyCSR);
         }
     }
 

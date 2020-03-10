@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.ImmutableCSR;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
@@ -36,7 +35,6 @@ import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
-import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphalgo.results.SimilarityResult;
@@ -551,22 +549,12 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         default GraphStore buildGraphStore(IdMap idMap, AllocationTracker tracker) {
-            Relationships outRelationships = outImporter().build();
-            Relationships inRelationships = inImporter().build();
+            HugeGraph.Relationships outRelationships = outImporter().build();
+            HugeGraph.Relationships inRelationships = inImporter().build();
 
             Map<String, HugeGraph.CSR> topology = new HashMap<>();
-            topology.put(ANN_OUT_GRAPH, ImmutableCSR.of(
-                outRelationships.adjacencyList(),
-                outRelationships.adjacencyOffsets(),
-                outRelationships.relationshipCount(),
-                Orientation.NATURAL
-            ));
-            topology.put(ANN_IN_GRAPH, ImmutableCSR.of(
-                inRelationships.adjacencyList(),
-                inRelationships.adjacencyOffsets(),
-                inRelationships.relationshipCount(),
-                Orientation.REVERSE
-            ));
+            topology.put(ANN_OUT_GRAPH, outRelationships.topology());
+            topology.put(ANN_IN_GRAPH, inRelationships.topology());
 
             return GraphStore.of(
                 idMap,

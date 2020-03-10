@@ -23,8 +23,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.ImmutableCSR;
-import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
@@ -79,12 +77,9 @@ public final class GraphStore {
         Optional<String> relationshipProperty,
         AllocationTracker tracker
     ) {
-        Relationships relationships = graph.relationships();
+        HugeGraph.Relationships relationships = graph.relationships();
 
-        Map<String, HugeGraph.CSR> topology = singletonMap(
-            relationshipType,
-            ImmutableCSR.of(relationships.adjacencyList(), relationships.adjacencyOffsets(), graph.relationshipCount(), graph.orientation())
-        );
+        Map<String, HugeGraph.CSR> topology = singletonMap(relationshipType, relationships.topology());
 
         Map<String, NodeProperties> nodeProperties = graph.availableNodeProperties().stream()
             .collect(Collectors.toMap(property -> property, graph::nodeProperties));
@@ -93,16 +88,7 @@ public final class GraphStore {
         if (relationshipProperty.isPresent() && graph.hasRelationshipProperty()) {
             relationshipProperties = singletonMap(
                 relationshipType,
-                singletonMap(
-                    relationshipProperty.get(),
-                    ImmutablePropertyCSR.of(
-                        relationships.properties(),
-                        relationships.propertyOffsets(),
-                        graph.relationshipCount(),
-                        graph.orientation(),
-                        graph.defaultRelationshipProperty()
-                    )
-                )
+                singletonMap(relationshipProperty.get(), relationships.properties())
             );
         }
 

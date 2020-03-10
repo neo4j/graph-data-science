@@ -24,8 +24,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.ImmutableCSR;
-import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -71,28 +69,11 @@ public final class HugeGraphUtil {
         );
     }
 
-    public static HugeGraph create(
-        IdMap idMap,
-        Relationships relationships,
-        AllocationTracker tracker
-    ) {
-
-        HugeGraph.CSR topology = ImmutableCSR.of(
-            relationships.adjacencyList(),
-            relationships.adjacencyOffsets(),
-            relationships.relationshipCount(),
-            relationships.orientation()
-        );
+    public static HugeGraph create(IdMap idMap, HugeGraph.Relationships relationships, AllocationTracker tracker) {
+        HugeGraph.CSR topology = relationships.topology();
 
         Optional<HugeGraph.PropertyCSR> properties = relationships.hasProperties()
-            ? Optional.of(
-            ImmutablePropertyCSR.of(
-                relationships.properties(),
-                relationships.propertyOffsets(),
-                relationships.relationshipCount(),
-                relationships.orientation(),
-                Double.NaN
-            ))
+            ? Optional.of(relationships.properties())
             : Optional.empty();
 
         return HugeGraph.create(idMap, Collections.emptyMap(), topology, properties, tracker);
@@ -243,17 +224,18 @@ public final class HugeGraphUtil {
             addFromInternal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
         }
 
-        public Relationships build() {
+        public HugeGraph.Relationships build() {
             flushBuffer();
 
             ParallelUtil.run(relationshipImporter.flushTasks(), executorService);
-            return new Relationships(
+            return HugeGraph.Relationships.of(
                 importedRelationships,
                 orientation,
                 relationshipsBuilder.adjacencyList(),
                 relationshipsBuilder.globalAdjacencyOffsets(),
                 loadRelationshipProperty ? relationshipsBuilder.properties() : null,
-                loadRelationshipProperty ? relationshipsBuilder.globalPropertyOffsets() : null
+                loadRelationshipProperty ? relationshipsBuilder.globalPropertyOffsets() : null,
+                Double.NaN
             );
         }
 
