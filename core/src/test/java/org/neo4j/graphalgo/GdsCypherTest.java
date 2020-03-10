@@ -477,6 +477,9 @@ class GdsCypherTest {
             case STREAM:
                 nextBuilder = builder.streamMode();
                 break;
+            case MUTATE:
+                nextBuilder = builder.mutateMode();
+                break;
             default:
                 throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
         }
@@ -530,6 +533,9 @@ class GdsCypherTest {
                 break;
             case STREAM:
                 nextBuilder = builder.streamEstimation();
+                break;
+            case MUTATE:
+                nextBuilder = builder.mutateEstimation();
                 break;
             default:
                 throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
@@ -757,6 +763,8 @@ class GdsCypherTest {
                 return "stats";
             case STREAM:
                 return "stream";
+            case MUTATE:
+                return "mutate";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
         }

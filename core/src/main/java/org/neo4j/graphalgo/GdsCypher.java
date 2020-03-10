@@ -326,6 +326,10 @@ public abstract class GdsCypher {
             return estimationMode(ExecutionModes.WRITE);
         }
 
+        default ParametersBuildStage mutateEstimation() {
+            return estimationMode(ExecutionModes.MUTATE);
+        }
+
         default ParametersBuildStage statsEstimation() {
             return estimationMode(ExecutionModes.STATS);
         }
