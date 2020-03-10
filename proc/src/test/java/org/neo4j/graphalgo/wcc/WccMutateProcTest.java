@@ -93,7 +93,7 @@ class WccMutateProcTest extends WccBaseProcTest<WccWriteConfig> implements Graph
             .call()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .algo("wcc")
+            .algo("gds", "beta", "wcc")
             .mutateMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields(

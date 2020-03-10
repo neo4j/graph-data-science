@@ -57,33 +57,27 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.louvain.stream.estimate`
 | `gds.louvain.stats`
 | `gds.louvain.stats.estimate`
-.8+<.^|<<algorithms-node-similarity-syntax, Node Similarity>>
+.6+<.^|<<algorithms-node-similarity-syntax, Node Similarity>>
 | `gds.nodeSimilarity.write`
 | `gds.nodeSimilarity.write.estimate`
 | `gds.nodeSimilarity.stream`
 | `gds.nodeSimilarity.stream.estimate`
 | `gds.nodeSimilarity.stats`
 | `gds.nodeSimilarity.stats.estimate`
-| `gds.nodeSimilarity.mutate`
-| `gds.nodeSimilarity.mutate.estimate`
-.8+<.^|<<algorithms-pagerank-syntax, PageRank>>
+.6+<.^|<<algorithms-pagerank-syntax, PageRank>>
 | `gds.pageRank.write`
 | `gds.pageRank.write.estimate`
 | `gds.pageRank.stream`
 | `gds.pageRank.stream.estimate`
 | `gds.pageRank.stats`
 | `gds.pageRank.stats.estimate`
-| `gds.pageRank.mutate`
-| `gds.pageRank.mutate.estimate`
-.8+<.^|<<algorithms-wcc-syntax, Weakly Connected Components>>
+.6+<.^|<<algorithms-wcc-syntax, Weakly Connected Components>>
 | `gds.wcc.write`
 | `gds.wcc.write.estimate`
 | `gds.wcc.stream`
 | `gds.wcc.stream.estimate`
 | `gds.wcc.stats`
 | `gds.wcc.stats.estimate`
-| `gds.wcc.mutate`
-| `gds.wcc.mutate.estimate`
 |===
 
 [[beta-tier]]
@@ -115,6 +109,15 @@ The following table lists all beta procedures in the GDS library:
 | `gds.beta.modularityOptimization.stream.estimate`
 | `gds.beta.modularityOptimization.write`
 | `gds.beta.modularityOptimization.write.estimate`
+.2+<.^|<<algorithms-node-similarity-syntax, Node Similarity>>
+| `gds.beta.nodeSimilarity.mutate`
+| `gds.beta.nodeSimilarity.mutate.estimate`
+.2+<.^|<<algorithms-pagerank-syntax, PageRank>>
+| `gds.beta.pageRank.mutate`
+| `gds.beta.pageRank.mutate.estimate`
+.2+<.^|<<algorithms-wcc-syntax, Weakly Connected Components>>
+| `gds.beta.wcc.mutate`
+| `gds.beta.wcc.mutate.estimate`
 |===
 
 [[alpha-tier]]

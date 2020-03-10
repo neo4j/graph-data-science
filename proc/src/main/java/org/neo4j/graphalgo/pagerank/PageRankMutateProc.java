@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class PageRankMutateProc extends PageRankWriteProc {
 
-    @Procedure(value = "gds.pageRank.mutate", mode = WRITE)
+    @Procedure(value = "gds.beta.pageRank.mutate", mode = WRITE)
     @Description(PAGE_RANK_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -48,7 +48,7 @@ public class PageRankMutateProc extends PageRankWriteProc {
         return mutate(computationResult);
     }
 
-    @Procedure(value = "gds.pageRank.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.beta.pageRank.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

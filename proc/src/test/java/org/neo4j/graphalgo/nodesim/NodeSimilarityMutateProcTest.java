@@ -104,7 +104,7 @@ class NodeSimilarityMutateProcTest
         String query = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .algo("nodeSimilarity")
+            .algo("gds", "beta", "nodeSimilarity")
             .mutateMode()
             .addParameter("similarityCutoff", 0.0)
             .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)

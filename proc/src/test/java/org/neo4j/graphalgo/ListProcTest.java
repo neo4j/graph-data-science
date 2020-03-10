@@ -36,8 +36,14 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphDropProc;
 import org.neo4j.graphalgo.catalog.GraphExistsProc;
 import org.neo4j.graphalgo.catalog.GraphListProc;
+import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
+import org.neo4j.graphalgo.nodesim.NodeSimilarityStatsProc;
+import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
+import org.neo4j.graphalgo.nodesim.NodeSimilarityWriteProc;
+import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
+import org.neo4j.graphalgo.wcc.WccMutateProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 
@@ -63,6 +69,12 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.modularityOptimization.stream.estimate",
         "gds.beta.modularityOptimization.write",
         "gds.beta.modularityOptimization.write.estimate",
+        "gds.beta.nodeSimilarity.mutate",
+        "gds.beta.nodeSimilarity.mutate.estimate",
+        "gds.beta.pageRank.mutate",
+        "gds.beta.pageRank.mutate.estimate",
+        "gds.beta.wcc.mutate",
+        "gds.beta.wcc.mutate.estimate",
 
         "gds.graph.create",
         "gds.graph.create.cypher",
@@ -86,6 +98,13 @@ class ListProcTest extends BaseProcTest {
         "gds.louvain.write",
         "gds.louvain.write.estimate",
 
+        "gds.nodeSimilarity.stats",
+        "gds.nodeSimilarity.stats.estimate",
+        "gds.nodeSimilarity.stream",
+        "gds.nodeSimilarity.stream.estimate",
+        "gds.nodeSimilarity.write",
+        "gds.nodeSimilarity.write.estimate",
+
         "gds.pageRank.stats",
         "gds.pageRank.stats.estimate",
         "gds.pageRank.stream",
@@ -108,6 +127,8 @@ class ListProcTest extends BaseProcTest {
     );
 
     private static final List<String> PAGE_RANK = asList(
+        "gds.beta.pageRank.mutate",
+        "gds.beta.pageRank.mutate.estimate",
         "gds.pageRank.stats",
         "gds.pageRank.stats.estimate",
         "gds.pageRank.stream",
@@ -136,10 +157,16 @@ class ListProcTest extends BaseProcTest {
             LouvainStreamProc.class,
             ModularityOptimizationWriteProc.class,
             ModularityOptimizationStreamProc.class,
+            NodeSimilarityWriteProc.class,
+            NodeSimilarityStreamProc.class,
+            NodeSimilarityMutateProc.class,
+            NodeSimilarityStatsProc.class,
             PageRankWriteProc.class,
             PageRankStreamProc.class,
+            PageRankMutateProc.class,
             WccWriteProc.class,
-            WccStreamProc.class
+            WccStreamProc.class,
+            WccMutateProc.class
         );
         registerFunctions(
             GetNodeFunc.class,
