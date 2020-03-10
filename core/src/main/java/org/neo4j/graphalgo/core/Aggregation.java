@@ -78,4 +78,17 @@ public enum Aggregation {
         }
     }
 
+    public static Aggregation parse(Object object) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof String) {
+            return lookup(((String) object).toUpperCase());
+        }
+        if (object instanceof Aggregation) {
+            return (Aggregation) object;
+        }
+        return null;
+    }
+
 }

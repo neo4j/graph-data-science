@@ -106,12 +106,15 @@ public final class GraphGenerateProc extends BaseProc {
 
     RandomGraphGenerator initializeGraphGenerator(long nodeCount, long averageDegree, RandomGraphGeneratorConfig config) {
         return new RandomGraphGenerator(
-                nodeCount,
-                averageDegree,
-                config.relationshipDistribution(),
-                config.relationshipSeed(),
-                getRelationshipPropertyProducer(config.relationshipProperty()),
-                AllocationTracker.EMPTY
+            nodeCount,
+            averageDegree,
+            config.relationshipDistribution(),
+            config.relationshipSeed(),
+            getRelationshipPropertyProducer(config.relationshipProperty()),
+            AllocationTracker.EMPTY,
+            config.aggregation(),
+            config.orientation(),
+            config.selfLoops()
         );
     }
 

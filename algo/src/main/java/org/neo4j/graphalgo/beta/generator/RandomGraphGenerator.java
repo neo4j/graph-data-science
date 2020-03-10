@@ -40,6 +40,9 @@ public final class RandomGraphGenerator {
     private final long averageDegree;
     private final Random random;
     private final RelationshipDistribution relationshipDistribution;
+    private final Aggregation aggregation;
+    private final Orientation orientation;
+    private final boolean selfLoops;
     private final Optional<RelationshipPropertyProducer> maybePropertyProducer;
 
     public static Graph generate(int nodeCount, int averageDegree) {
@@ -57,7 +60,10 @@ public final class RandomGraphGenerator {
             distribution,
             seed,
             Optional.empty(),
-            AllocationTracker.EMPTY
+            AllocationTracker.EMPTY,
+            Aggregation.NONE,
+            Orientation.NATURAL,
+            false
         ).generate();
     }
 
@@ -67,13 +73,19 @@ public final class RandomGraphGenerator {
         RelationshipDistribution relationshipDistribution,
         @Nullable Long seed,
         Optional<RelationshipPropertyProducer> maybePropertyProducer,
-        AllocationTracker allocationTracker
+        AllocationTracker allocationTracker,
+        Aggregation aggregation,
+        Orientation orientation,
+        boolean selfLoops
     ) {
         this.relationshipDistribution = relationshipDistribution;
         this.maybePropertyProducer = maybePropertyProducer;
         this.allocationTracker = allocationTracker;
         this.nodeCount = nodeCount;
         this.averageDegree = averageDegree;
+        this.aggregation = aggregation;
+        this.orientation = orientation;
+        this.selfLoops = selfLoops;
         this.random = new Random();
         if (seed != null) {
             this.random.setSeed(seed);
@@ -87,14 +99,12 @@ public final class RandomGraphGenerator {
         Optional<RelationshipPropertyProducer> maybePropertyProducer,
         AllocationTracker allocationTracker
     ) {
-        this(nodeCount, averageDegree, relationshipDistribution, null, maybePropertyProducer, allocationTracker);
+        this(nodeCount, averageDegree, relationshipDistribution, null, maybePropertyProducer, allocationTracker,
+            Aggregation.NONE, Orientation.NATURAL, false
+        );
     }
 
     public HugeGraph generate() {
-        return generate(Orientation.NATURAL);
-    }
-
-    public HugeGraph generate(Orientation orientation) {
         HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             nodeCount,
             Pools.DEFAULT,
@@ -108,7 +118,7 @@ public final class RandomGraphGenerator {
             idMap,
             orientation,
             maybePropertyProducer.isPresent(),
-            Aggregation.NONE,
+            aggregation,
             Pools.DEFAULT,
             allocationTracker
         );
@@ -151,7 +161,11 @@ public final class RandomGraphGenerator {
             degree = degreeProducer.applyAsLong(nodeId);
 
             for (int j = 0; j < degree; j++) {
-                targetId = relationshipProducer.applyAsLong(nodeId);
+                if (selfLoops) {
+                    targetId = relationshipProducer.applyAsLong(nodeId);
+                } else {
+                    while ((targetId = relationshipProducer.applyAsLong(nodeId)) == nodeId) {}
+                }
                 assert (targetId < nodeCount);
                 property = relationshipPropertyProducer.getPropertyValue(nodeId, targetId, random);
                 relationshipsImporter.addFromInternal(nodeId, targetId, property);

@@ -42,4 +42,17 @@ public enum Orientation {
                 availableProjections));
         }
     }
+
+    public static Orientation parse(Object object) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof String) {
+            return of(((String) object).toUpperCase());
+        }
+        if (object instanceof Orientation) {
+            return (Orientation) object;
+        }
+        return null;
+    }
 }

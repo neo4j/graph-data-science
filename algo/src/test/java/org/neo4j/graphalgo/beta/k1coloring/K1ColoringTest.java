@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -130,7 +131,10 @@ class K1ColoringTest extends AlgoTestBase {
             RelationshipDistribution.POWER_LAW,
             seed,
             Optional.empty(),
-            AllocationTracker.EMPTY
+            AllocationTracker.EMPTY,
+            Aggregation.NONE,
+            Orientation.NATURAL,
+            false
         );
 
         RandomGraphGenerator inGenerator = new RandomGraphGenerator(
@@ -139,11 +143,14 @@ class K1ColoringTest extends AlgoTestBase {
             RelationshipDistribution.POWER_LAW,
             seed,
             Optional.empty(),
-            AllocationTracker.EMPTY
+            AllocationTracker.EMPTY,
+            Aggregation.NONE,
+            Orientation.REVERSE,
+            false
         );
 
-        Graph naturalGraph = outGenerator.generate(Orientation.NATURAL);
-        Graph reverseGraph = inGenerator.generate(Orientation.REVERSE);
+        Graph naturalGraph = outGenerator.generate();
+        Graph reverseGraph = inGenerator.generate();
         Graph graph = UnionGraph.of(Arrays.asList(naturalGraph, reverseGraph));
 
         K1Coloring k1Coloring = new K1Coloring(

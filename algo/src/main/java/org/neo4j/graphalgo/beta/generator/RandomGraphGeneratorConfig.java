@@ -22,8 +22,10 @@ package org.neo4j.graphalgo.beta.generator;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.BaseConfig;
 
@@ -52,6 +54,23 @@ public interface RandomGraphGeneratorConfig extends BaseConfig {
 
     @Configuration.Parameter
     long averageDegree();
+
+    @Value.Default
+    @Configuration.ConvertWith("org.neo4j.graphalgo.core.Aggregation#parse")
+    default Aggregation aggregation() {
+        return Aggregation.NONE;
+    }
+
+    @Value.Default
+    @Configuration.ConvertWith("org.neo4j.graphalgo.Orientation#parse")
+    default Orientation orientation() {
+        return Orientation.NATURAL;
+    }
+
+    @Value.Default
+    default boolean selfLoops() {
+        return false;
+    }
 
     @Value.Default
     @Configuration.ConvertWith("org.neo4j.graphalgo.beta.generator.RelationshipDistribution#parse")
