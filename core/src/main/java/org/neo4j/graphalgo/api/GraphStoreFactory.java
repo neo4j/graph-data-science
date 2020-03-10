@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.ImmutableCSR;
+import org.neo4j.graphalgo.core.huge.ImmutableTopologyCSR;
 import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
 import org.neo4j.graphalgo.core.loading.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -114,7 +114,7 @@ public abstract class GraphStoreFactory implements Assessable {
         GraphDimensions dimensions
     ) {
         int relTypeCount = dimensions.relationshipProjectionMappings().numberOfMappings();
-        Map<String, HugeGraph.CSR> relationships = new HashMap<>(relTypeCount);
+        Map<String, HugeGraph.TopologyCSR> relationships = new HashMap<>(relTypeCount);
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
 
         relationshipImportResult.builders().forEach((relationshipProjectionMapping, relationshipsBuilder) -> {
@@ -122,12 +122,15 @@ public abstract class GraphStoreFactory implements Assessable {
             AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets();
             long relationshipCount = relationshipImportResult.counts().getOrDefault(relationshipProjectionMapping, 0L);
 
-            relationships.put(relationshipProjectionMapping.elementIdentifier(), ImmutableCSR.of(
-                adjacencyList,
-                adjacencyOffsets,
-                relationshipCount,
-                relationshipProjectionMapping.orientation()
-            ));
+            relationships.put(
+                relationshipProjectionMapping.elementIdentifier(),
+                ImmutableTopologyCSR.of(
+                    adjacencyList,
+                    adjacencyOffsets,
+                    relationshipCount,
+                    relationshipProjectionMapping.orientation()
+                )
+            );
 
             if (dimensions.relationshipProperties().hasMappings()) {
                 Map<String, HugeGraph.PropertyCSR> propertyMap = dimensions

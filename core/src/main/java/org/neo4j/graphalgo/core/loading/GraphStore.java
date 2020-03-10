@@ -23,8 +23,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.ImmutableCSR;
-import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
@@ -49,7 +47,7 @@ public final class GraphStore {
 
     private final Map<String, NodeProperties> nodeProperties;
 
-    private final Map<String, HugeGraph.CSR> relationships;
+    private final Map<String, HugeGraph.TopologyCSR> relationships;
 
     private final Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties;
 
@@ -60,7 +58,7 @@ public final class GraphStore {
     public static GraphStore of(
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        Map<String, HugeGraph.CSR> relationships,
+        Map<String, HugeGraph.TopologyCSR> relationships,
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
     ) {
@@ -79,30 +77,18 @@ public final class GraphStore {
         Optional<String> relationshipProperty,
         AllocationTracker tracker
     ) {
-        Relationships relationships = graph.relationships();
+        HugeGraph.Relationships relationships = graph.relationships();
 
-        Map<String, HugeGraph.CSR> topology = singletonMap(
-            relationshipType,
-            ImmutableCSR.of(relationships.adjacencyList(), relationships.adjacencyOffsets(), graph.relationshipCount(), graph.orientation())
-        );
+        Map<String, HugeGraph.TopologyCSR> topology = singletonMap(relationshipType, relationships.topology());
 
         Map<String, NodeProperties> nodeProperties = graph.availableNodeProperties().stream()
             .collect(Collectors.toMap(property -> property, graph::nodeProperties));
 
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = Collections.emptyMap();
-        if (relationshipProperty.isPresent() && graph.hasRelationshipProperty()) {
+        if (relationships.hasProperties() && relationshipProperty.isPresent()) {
             relationshipProperties = singletonMap(
                 relationshipType,
-                singletonMap(
-                    relationshipProperty.get(),
-                    ImmutablePropertyCSR.of(
-                        relationships.properties(),
-                        relationships.propertyOffsets(),
-                        graph.relationshipCount(),
-                        graph.orientation(),
-                        graph.defaultRelationshipProperty()
-                    )
-                )
+                singletonMap(relationshipProperty.get(), relationships.properties().get())
             );
         }
 
@@ -112,7 +98,7 @@ public final class GraphStore {
     private GraphStore(
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        Map<String, HugeGraph.CSR> relationships,
+        Map<String, HugeGraph.TopologyCSR> relationships,
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
     ) {
@@ -165,7 +151,7 @@ public final class GraphStore {
 
     public long relationshipCount() {
         return relationships.values().stream()
-            .mapToLong(HugeGraph.CSR::elementCount)
+            .mapToLong(HugeGraph.TopologyCSR::elementCount)
             .sum();
     }
 
@@ -183,13 +169,9 @@ public final class GraphStore {
         List<Graph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> HugeGraph.create(
-                tracker,
-                nodes,
-                nodeProperties,
-                relTypeAndCSR.getValue(),
-                maybeRelationshipProperty.map(propertyKey -> relationshipProperties
+                nodes, nodeProperties, relTypeAndCSR.getValue(), maybeRelationshipProperty.map(propertyKey -> relationshipProperties
                     .get(relTypeAndCSR.getKey())
-                    .get(propertyKey))
+                    .get(propertyKey)), tracker
             ))
             .collect(Collectors.toList());
 

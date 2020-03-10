@@ -22,54 +22,35 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.ImmutableCSR;
-import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
-public final class GraphGenerator {
+public final class HugeGraphUtil {
 
-    private GraphGenerator() {}
+    private HugeGraphUtil() {}
 
-    public static NodeImporter createNodeImporter(
+    public static IdMapBuilder idMapBuilder(
         long maxOriginalId,
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
-        return new NodeImporter(
+        return new IdMapBuilder(
             maxOriginalId,
             executorService,
             tracker
         );
     }
 
-    public static RelImporter createRelImporter(
-        NodeImporter nodeImporter,
-        Orientation orientation,
-        boolean loadRelationshipProperty,
-        Aggregation aggregation
-    ) {
-        return createRelImporter(
-            nodeImporter.idMap(),
-            orientation,
-            loadRelationshipProperty,
-            aggregation,
-            nodeImporter.executorService,
-            nodeImporter.tracker
-        );
-    }
-
-    public static RelImporter createRelImporter(
+    public static RelationshipsBuilder createRelImporter(
         IdMap idMap,
         Orientation orientation,
         boolean loadRelationshipProperty,
@@ -77,7 +58,7 @@ public final class GraphGenerator {
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
-        return new RelImporter(
+        return new RelationshipsBuilder(
             idMap,
             orientation,
             loadRelationshipProperty,
@@ -87,7 +68,17 @@ public final class GraphGenerator {
         );
     }
 
-    public static class NodeImporter {
+    public static HugeGraph create(IdMap idMap, HugeGraph.Relationships relationships, AllocationTracker tracker) {
+        return HugeGraph.create(
+            idMap,
+            Collections.emptyMap(),
+            relationships.topology(),
+            relationships.properties(),
+            tracker
+        );
+    }
+
+    public static class IdMapBuilder {
 
         final AllocationTracker tracker;
         final ExecutorService executorService;
@@ -98,7 +89,7 @@ public final class GraphGenerator {
         private long nextAvailableId;
         private IdMap idMap;
 
-        NodeImporter(
+        IdMapBuilder(
             long maxOriginalId,
             ExecutorService executorService,
             AllocationTracker tracker
@@ -122,7 +113,7 @@ public final class GraphGenerator {
             }
         }
 
-        public IdMap idMap() {
+        public IdMap build() {
             if (idMap == null) {
                 SparseNodeMapping originalToInternal = originalToInternalBuilder.build();
 
@@ -138,10 +129,10 @@ public final class GraphGenerator {
         }
     }
 
-    public static class RelImporter {
+    public static class RelationshipsBuilder {
 
         static final int DUMMY_PROPERTY_ID = -2;
-        private final RelationshipsBuilder relationshipsBuilder;
+        private final org.neo4j.graphalgo.core.loading.RelationshipsBuilder relationshipsBuilder;
         private final RelationshipImporter relationshipImporter;
         private final RelationshipImporter.Imports imports;
         private final RelationshipsBatchBuffer relationshipBuffer;
@@ -149,11 +140,10 @@ public final class GraphGenerator {
         private final Orientation orientation;
         private final boolean loadRelationshipProperty;
         private final ExecutorService executorService;
-        private final AllocationTracker tracker;
 
         private long importedRelationships = 0;
 
-        public RelImporter(
+        public RelationshipsBuilder(
             IdMap idMap,
             Orientation orientation,
             boolean loadRelationshipProperty,
@@ -161,11 +151,10 @@ public final class GraphGenerator {
             ExecutorService executorService,
             AllocationTracker tracker
         ) {
+            this.orientation = orientation;
             this.loadRelationshipProperty = loadRelationshipProperty;
             this.executorService = executorService;
-            this.tracker = tracker;
             this.idMap = idMap;
-            this.orientation = orientation;
 
             ImportSizing importSizing = ImportSizing.of(1, idMap.nodeCount());
             int pageSize = importSizing.pageSize();
@@ -173,7 +162,7 @@ public final class GraphGenerator {
 
             int[] propertyKeyIds = loadRelationshipProperty ? new int[]{DUMMY_PROPERTY_ID} : new int[0];
 
-            this.relationshipsBuilder = new RelationshipsBuilder(
+            this.relationshipsBuilder = new org.neo4j.graphalgo.core.loading.RelationshipsBuilder(
                 new Aggregation[]{aggregation},
                 tracker,
                 loadRelationshipProperty ? 1 : 0
@@ -234,29 +223,19 @@ public final class GraphGenerator {
             addFromInternal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
         }
 
-        public HugeGraph buildGraph() {
+        public HugeGraph.Relationships build() {
             flushBuffer();
 
-            Relationships relationships = buildRelationships();
-            HugeGraph.CSR topology = ImmutableCSR.of(
-                relationships.adjacencyList(),
-                relationships.adjacencyOffsets(),
-                relationships.relationshipCount(),
-                orientation
+            ParallelUtil.run(relationshipImporter.flushTasks(), executorService);
+            return HugeGraph.Relationships.of(
+                importedRelationships,
+                orientation,
+                relationshipsBuilder.adjacencyList(),
+                relationshipsBuilder.globalAdjacencyOffsets(),
+                loadRelationshipProperty ? relationshipsBuilder.properties() : null,
+                loadRelationshipProperty ? relationshipsBuilder.globalPropertyOffsets() : null,
+                Double.NaN
             );
-
-            Optional<HugeGraph.PropertyCSR> properties = loadRelationshipProperty
-                ? Optional.of(
-                ImmutablePropertyCSR.of(
-                    relationships.properties(),
-                    relationships.propertyOffsets(),
-                    relationships.relationshipCount(),
-                    orientation,
-                    Double.NaN
-                ))
-                : Optional.empty();
-
-           return HugeGraph.create(tracker, idMap, Collections.emptyMap(), topology, properties);
         }
 
         private void flushBuffer() {
@@ -265,17 +244,6 @@ public final class GraphGenerator {
             long newImportedInOut = imports.importRelationships(relationshipBuffer, propertyReader);
             importedRelationships += RawValues.getHead(newImportedInOut);
             relationshipBuffer.reset();
-        }
-
-        private Relationships buildRelationships() {
-            ParallelUtil.run(relationshipImporter.flushTasks(), executorService);
-            return new Relationships(
-                importedRelationships,
-                relationshipsBuilder.adjacencyList(),
-                relationshipsBuilder.globalAdjacencyOffsets(),
-                loadRelationshipProperty ? relationshipsBuilder.properties() : null,
-                loadRelationshipProperty ? relationshipsBuilder.globalPropertyOffsets() : null
-            );
         }
     }
 

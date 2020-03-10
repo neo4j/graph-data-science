@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -103,29 +102,28 @@ public class HugeGraph implements Graph {
     private final boolean hasRelationshipProperty;
 
     public static HugeGraph create(
-        AllocationTracker tracker,
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        CSR relationships,
-        Optional<PropertyCSR> maybeRelationshipProperties
+        TopologyCSR topologyCSR,
+        Optional<PropertyCSR> maybePropertyCSR,
+        AllocationTracker tracker
     ) {
         return new HugeGraph(
-            tracker,
             nodes,
             nodeProperties,
-            relationships.elementCount(),
-            relationships.list(),
-            relationships.offsets(),
-            maybeRelationshipProperties.isPresent(),
-            maybeRelationshipProperties.map(PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
-            maybeRelationshipProperties.map(PropertyCSR::list).orElse(null),
-            maybeRelationshipProperties.map(PropertyCSR::offsets).orElse(null),
-            relationships.orientation()
+            topologyCSR.elementCount(),
+            topologyCSR.list(),
+            topologyCSR.offsets(),
+            maybePropertyCSR.isPresent(),
+            maybePropertyCSR.map(PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
+            maybePropertyCSR.map(PropertyCSR::list).orElse(null),
+            maybePropertyCSR.map(PropertyCSR::offsets).orElse(null),
+            topologyCSR.orientation(),
+            tracker
         );
     }
 
     public HugeGraph(
-        AllocationTracker tracker,
         IdMap idMapping,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
@@ -135,7 +133,8 @@ public class HugeGraph implements Graph {
         double defaultPropertyValue,
         @Nullable AdjacencyList properties,
         @Nullable AdjacencyOffsets propertyOffsets,
-        Orientation orientation
+        Orientation orientation,
+        AllocationTracker tracker
     ) {
         this.idMapping = idMapping;
         this.tracker = tracker;
@@ -276,7 +275,6 @@ public class HugeGraph implements Graph {
     @Override
     public HugeGraph concurrentCopy() {
         return new HugeGraph(
-            tracker,
             idMapping,
             nodeProperties,
             relationshipCount,
@@ -286,7 +284,8 @@ public class HugeGraph implements Graph {
             defaultPropertyValue,
             properties,
             propertyOffsets,
-            orientation
+            orientation,
+            tracker
         );
     }
 
@@ -395,7 +394,15 @@ public class HugeGraph implements Graph {
     }
 
     public Relationships relationships() {
-        return new Relationships(relationshipCount, adjacencyList, adjacencyOffsets, properties, propertyOffsets);
+        return Relationships.of(
+            relationshipCount,
+            orientation,
+            adjacencyList,
+            adjacencyOffsets,
+            properties,
+            propertyOffsets,
+            defaultPropertyValue
+        );
     }
 
     @Override
@@ -481,7 +488,42 @@ public class HugeGraph implements Graph {
     }
 
     @ValueClass
-    public interface CSR {
+    public interface Relationships {
+
+        TopologyCSR topology();
+
+        Optional<PropertyCSR> properties();
+
+        default boolean hasProperties() {
+            return properties().isPresent();
+        }
+
+        static Relationships of(
+            long relationshipCount,
+            Orientation orientation,
+            AdjacencyList adjacencyList,
+            AdjacencyOffsets adjacencyOffsets,
+            @Nullable AdjacencyList properties,
+            @Nullable AdjacencyOffsets propertyOffsets,
+            double defaultPropertyValue
+        ) {
+            TopologyCSR topologyCSR = ImmutableTopologyCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
+
+            Optional<PropertyCSR> maybePropertyCSR = properties != null && propertyOffsets != null
+                ? Optional.of(ImmutablePropertyCSR.of(
+                    properties,
+                    propertyOffsets,
+                    relationshipCount,
+                    orientation,
+                    defaultPropertyValue
+                )) : Optional.empty();
+
+            return ImmutableRelationships.of(topologyCSR, maybePropertyCSR);
+        }
+    }
+
+    @ValueClass
+    public interface TopologyCSR {
         AdjacencyList list();
 
         AdjacencyOffsets offsets();
@@ -493,7 +535,7 @@ public class HugeGraph implements Graph {
 
     @ValueClass
     @SuppressWarnings("immutables:subtype")
-    public interface PropertyCSR extends CSR {
+    public interface PropertyCSR extends TopologyCSR {
         double defaultPropertyValue();
     }
 }

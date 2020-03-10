@@ -23,9 +23,10 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.GraphGenerator;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
+import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Optional;
@@ -94,23 +95,30 @@ public final class RandomGraphGenerator {
     }
 
     public HugeGraph generate(Orientation orientation) {
-        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
+        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             nodeCount,
             Pools.DEFAULT,
             allocationTracker
         );
 
-        generateNodes(nodeImporter);
+        generateNodes(idMapBuilder);
 
-        GraphGenerator.RelImporter relationshipsImporter = GraphGenerator.createRelImporter(
-            nodeImporter,
+        IdMap idMap = idMapBuilder.build();
+        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+            idMap,
             orientation,
             maybePropertyProducer.isPresent(),
-            Aggregation.NONE
+            Aggregation.NONE,
+            Pools.DEFAULT,
+            allocationTracker
         );
 
-        generateRelationships(relationshipsImporter);
-        return relationshipsImporter.buildGraph();
+        generateRelationships(relationshipsBuilder);
+        return HugeGraphUtil.create(
+            idMap,
+            relationshipsBuilder.build(),
+            allocationTracker
+        );
     }
 
     public RelationshipDistribution getRelationshipDistribution() {
@@ -121,17 +129,13 @@ public final class RandomGraphGenerator {
         return maybePropertyProducer;
     }
 
-    public boolean shouldGenerateRelationshipProperty() {
-        return maybePropertyProducer.isPresent();
-    }
-
-    private void generateNodes(GraphGenerator.NodeImporter nodeImporter) {
+    private void generateNodes(HugeGraphUtil.IdMapBuilder idMapBuilder) {
         for (long i = 0; i < nodeCount; i++) {
-            nodeImporter.addNode(i);
+            idMapBuilder.addNode(i);
         }
     }
 
-    private void generateRelationships(GraphGenerator.RelImporter relationshipsImporter) {
+    private void generateRelationships(HugeGraphUtil.RelationshipsBuilder relationshipsImporter) {
         LongUnaryOperator degreeProducer = relationshipDistribution.degreeProducer(nodeCount, averageDegree, random);
         LongUnaryOperator relationshipProducer = relationshipDistribution.relationshipProducer(
             nodeCount,

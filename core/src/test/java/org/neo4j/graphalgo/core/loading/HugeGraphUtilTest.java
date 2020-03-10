@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-class GraphGeneratorTest {
+class HugeGraphUtilTest {
 
     private static final String EXPECTED_WITH_AGGREGATION =
         "(a)-[{w: 0.0}]->(b)-[{w: 2.0}]->(c)-[{w: 4.0}]->(d)-[{w: 6.0}]->(a)";
@@ -72,27 +72,33 @@ class GraphGeneratorTest {
     @MethodSource("validProjections")
     void unweighted(Orientation orientation) {
         int nodeCount = 4;
-        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
+        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             nodeCount,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
         for (int i = 0; i < nodeCount; i++) {
-            nodeImporter.addNode(i);
+            idMapBuilder.addNode(i);
         }
 
-        GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
-            nodeImporter,
+        IdMap idMap = idMapBuilder.build();
+        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+            idMap,
             orientation,
             false,
-            Aggregation.SUM
+            Aggregation.SUM,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
         );
 
         for (int i = 0; i < nodeCount; i++) {
-            relImporter.add(i, (i + 1) % nodeCount);
+            relationshipsBuilder.add(i, (i + 1) % nodeCount);
         }
-        Graph graph = relImporter.buildGraph();
+        Graph graph = HugeGraphUtil.create(
+            idMap,
+            relationshipsBuilder.build(), AllocationTracker.EMPTY
+        );
         assertGraphEquals(expectedUnweighted(orientation), graph);
         assertEquals(nodeCount, graph.relationshipCount());
     }
@@ -126,27 +132,30 @@ class GraphGeneratorTest {
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
         int nodeCount = 4;
 
-        GraphGenerator.NodeImporter nodeImporter = GraphGenerator.createNodeImporter(
+        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             nodeCount,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
         for (int i = 0; i < nodeCount; i++) {
-            nodeImporter.addNode(i);
+            idMapBuilder.addNode(i);
         }
 
-        GraphGenerator.RelImporter relImporter = GraphGenerator.createRelImporter(
-            nodeImporter,
+        IdMap idMap = idMapBuilder.build();
+        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+            idMap,
             orientation,
             true,
-            aggregation
+            aggregation,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
         );
 
         for (int i = 0; i < nodeCount; i++) {
-            relImporter.add(i, (i + 1) % nodeCount, i);
-            relImporter.add(i, (i + 1) % nodeCount, i);
+            relationshipsBuilder.add(i, (i + 1) % nodeCount, i);
+            relationshipsBuilder.add(i, (i + 1) % nodeCount, i);
         }
-        return relImporter.buildGraph();
+        return HugeGraphUtil.create(idMap, relationshipsBuilder.build(), AllocationTracker.EMPTY);
     }
 }
