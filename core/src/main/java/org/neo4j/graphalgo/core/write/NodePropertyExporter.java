@@ -31,11 +31,14 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.Collectors;
 
 public final class NodePropertyExporter extends StatementApi {
 
@@ -52,6 +55,36 @@ public final class NodePropertyExporter extends StatementApi {
 
     public static Builder of(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
         return new Builder(db, idMapping, terminationFlag);
+    }
+
+    @ValueClass
+    public interface NodeProperty<T> {
+        String propertyKey();
+
+        T data();
+
+        PropertyTranslator<T> translator();
+
+        default ResolvedNodeProperty resolveWith(int propertyToken) {
+            if (propertyToken == -1) {
+                throw new IllegalStateException("No write property token id is set.");
+            }
+            return ResolvedNodeProperty.of((NodeProperty<Object>) this, propertyToken);
+        }
+    }
+
+    @ValueClass
+    interface ResolvedNodeProperty extends NodeProperty<Object> {
+        int propertyToken();
+
+        static ResolvedNodeProperty of(NodeProperty<Object> nodeProperty, int propertyToken) {
+            return ImmutableResolvedNodeProperty.of(
+                nodeProperty.propertyKey(),
+                nodeProperty.data(),
+                nodeProperty.translator(),
+                propertyToken
+            );
+        }
     }
 
     public static class Builder extends ExporterBuilder<NodePropertyExporter> {
@@ -100,59 +133,25 @@ public final class NodePropertyExporter extends StatementApi {
         this.propertiesWritten = new LongAdder();
     }
 
-    @ValueClass
-    interface NodePropertyDescription<T> {
-        String propertyKey();
-
-        T data();
-
-        PropertyTranslator<T> translator();
+    public <T> void write(String property, T data, PropertyTranslator<T> translator) {
+        write(ImmutableNodeProperty.of(property, data, translator));
     }
 
-    public <T> void write(NodePropertyDescription<T> propertyDescription) {
-        write(propertyDescription.propertyKey(), propertyDescription.data(), propertyDescription.translator());
+    public <T> void write(NodeProperty<T> nodeProperty) {
+        write(Collections.singletonList(nodeProperty));
     }
 
-    public void write(Iterable<NodePropertyDescription<?>> propertyDescriptions) {
-        propertyDescriptions.forEach(this::write);
+    public void write(Collection<NodeProperty<?>> nodeProperties) {
+        writeInternal(nodeProperties.stream()
+            .map(desc -> desc.resolveWith(getOrCreatePropertyToken(desc.propertyKey())))
+            .collect(Collectors.toList()));
     }
 
-    public <T> void write(
-        String property,
-        T data,
-        PropertyTranslator<T> translator
-    ) {
-        final int propertyId = getOrCreatePropertyToken(property);
-        if (propertyId == -1) {
-            throw new IllegalStateException("no write property id is set");
-        }
+    private void writeInternal(List<ResolvedNodeProperty> nodeProperties) {
         if (ParallelUtil.canRunInParallel(executorService)) {
-            writeParallel(propertyId, data, translator);
+            writeParallel(nodeProperties);
         } else {
-            writeSequential(propertyId, data, translator);
-        }
-    }
-
-    public <T, U> void write(
-        String property1,
-        T data1,
-        PropertyTranslator<T> translator1,
-        String property2,
-        U data2,
-        PropertyTranslator<U> translator2
-    ) {
-        final int propertyId1 = getOrCreatePropertyToken(property1);
-        if (propertyId1 == -1) {
-            throw new IllegalStateException("no write property id is set");
-        }
-        final int propertyId2 = getOrCreatePropertyToken(property2);
-        if (propertyId2 == -1) {
-            throw new IllegalStateException("no write property id is set");
-        }
-        if (ParallelUtil.canRunInParallel(executorService)) {
-            writeParallel(propertyId1, data1, translator1, propertyId2, data2, translator2);
-        } else {
-            writeSequential(propertyId1, data1, translator1, propertyId2, data2, translator2);
+            writeSequential(nodeProperties);
         }
     }
 
@@ -160,60 +159,12 @@ public final class NodePropertyExporter extends StatementApi {
         return propertiesWritten.longValue();
     }
 
-    private <T> void writeSequential(
-        int propertyId,
-        T data,
-        PropertyTranslator<T> translator
-    ) {
-        writeSequential((ops, offset) -> doWrite(propertyId, data, translator, ops, offset));
+    private void writeSequential(List<ResolvedNodeProperty> nodeProperties) {
+        writeSequential((ops, nodeId) -> doWrite(nodeProperties, ops, nodeId));
     }
 
-    private <T, U> void writeSequential(
-        int propertyId1,
-        T data1,
-        PropertyTranslator<T> translator1,
-        int propertyId2,
-        U data2,
-        PropertyTranslator<U> translator2
-    ) {
-        writeSequential((ops, nodeId) -> doWrite(
-            propertyId1,
-            data1,
-            translator1,
-            propertyId2,
-            data2,
-            translator2,
-            ops,
-            nodeId
-        ));
-    }
-
-    private <T> void writeParallel(
-        int propertyId,
-        T data,
-        PropertyTranslator<T> translator
-    ) {
-        writeParallel((ops, offset) -> doWrite(propertyId, data, translator, ops, offset));
-    }
-
-    private <T, U> void writeParallel(
-        int propertyId1,
-        T data1,
-        PropertyTranslator<T> translator1,
-        int propertyId2,
-        U data2,
-        PropertyTranslator<U> translator2
-    ) {
-        writeParallel((ops, nodeId) -> doWrite(
-            propertyId1,
-            data1,
-            translator1,
-            propertyId2,
-            data2,
-            translator2,
-            ops,
-            nodeId
-        ));
+    private void writeParallel(Iterable<ResolvedNodeProperty> nodeProperties) {
+        writeParallel((ops, offset) -> doWrite(nodeProperties, ops, offset));
     }
 
     private void writeSequential(WriteConsumer writer) {
@@ -285,44 +236,18 @@ public final class NodePropertyExporter extends StatementApi {
         );
     }
 
-    private <T> void doWrite(
-        int propertyId,
-        T data,
-        PropertyTranslator<T> trans,
-        Write ops,
-        long nodeId
-    ) throws Exception {
-        final Value prop = trans.toProperty(propertyId, data, nodeId);
-        if (prop != null) {
-            ops.nodeSetProperty(
-                toOriginalId.applyAsLong(nodeId),
-                propertyId,
-                prop
-            );
-            propertiesWritten.increment();
-        }
-    }
-
-    private <T, U> void doWrite(
-        int propertyId1,
-        T data1,
-        PropertyTranslator<T> translator1,
-        int propertyId2,
-        U data2,
-        PropertyTranslator<U> translator2,
-        Write ops,
-        long nodeId
-    ) throws Exception {
-        final long originalNodeId = toOriginalId.applyAsLong(nodeId);
-        Value prop1 = translator1.toProperty(propertyId1, data1, nodeId);
-        if (prop1 != null) {
-            ops.nodeSetProperty(originalNodeId, propertyId1, prop1);
-            propertiesWritten.increment();
-        }
-        Value prop2 = translator2.toProperty(propertyId2, data2, nodeId);
-        if (prop2 != null) {
-            ops.nodeSetProperty(originalNodeId, propertyId2, prop2);
-            propertiesWritten.increment();
+    private void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
+        for (ResolvedNodeProperty nodeProperty : nodeProperties) {
+            int propertyId = nodeProperty.propertyToken();
+            final Value prop = nodeProperty.translator().toProperty(propertyId, nodeProperty.data(), nodeId);
+            if (prop != null) {
+                ops.nodeSetProperty(
+                    toOriginalId.applyAsLong(nodeId),
+                    propertyId,
+                    prop
+                );
+                propertiesWritten.increment();
+            }
         }
     }
 }

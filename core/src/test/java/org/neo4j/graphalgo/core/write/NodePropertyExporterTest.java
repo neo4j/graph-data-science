@@ -115,12 +115,12 @@ class NodePropertyExporterTest {
 
         NodePropertyExporter exporter = NodePropertyExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE).build();
 
-        List<NodePropertyExporter.NodePropertyDescription<?>> nodePropertyDescriptions = Arrays.asList(
-            ImmutableNodePropertyDescription.of("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR),
-            ImmutableNodePropertyDescription.of("newProp2", new double[]{123D, 142D, 184D}, Translators.DOUBLE_ARRAY_TRANSLATOR)
+        List<NodePropertyExporter.NodeProperty<?>> nodeProperties = Arrays.asList(
+            ImmutableNodeProperty.of("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR),
+            ImmutableNodeProperty.of("newProp2", new double[]{123D, 142D, 184D}, Translators.DOUBLE_ARRAY_TRANSLATOR)
         );
 
-        exporter.write(nodePropertyDescriptions);
+        exporter.write(nodeProperties);
 
         Graph updatedGraph = new StoreLoaderBuilder().api(DB)
             .loadAnyLabel()
