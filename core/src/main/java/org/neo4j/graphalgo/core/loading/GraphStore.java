@@ -24,6 +24,7 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
@@ -45,6 +46,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABELS;
 
 public final class GraphStore {
 
@@ -193,19 +195,23 @@ public final class GraphStore {
     }
 
     public Graph getGraph(String... relationshipTypes) {
-        return getGraph(Arrays.asList(relationshipTypes), Optional.empty());
+        return getGraph(ALL_NODE_LABELS, Arrays.asList(relationshipTypes), Optional.empty(), 1);
     }
 
     public Graph getGraph(String relationshipType, Optional<String> relationshipProperty) {
-        return getGraph(singletonList(relationshipType), relationshipProperty);
+        return getGraph(ALL_NODE_LABELS, singletonList(relationshipType), relationshipProperty, 1);
     }
 
-    public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    public Graph getGraph(List<String> nodeLabels, List<String> relationshipTypes, Optional<String> maybeRelationshipProperty, int concurrency) {
         validateInput(relationshipTypes, maybeRelationshipProperty);
-        return createGraph(relationshipTypes, maybeRelationshipProperty);
+        return createGraph(nodeLabels, relationshipTypes, maybeRelationshipProperty, concurrency);
     }
 
     public Graph getUnion() {
+        return getUnion(ALL_NODE_LABELS);
+    }
+
+    public Graph getUnion(List<String> nodeLabels) {
         return UnionGraph.of(relationships
             .keySet()
             .stream()
@@ -215,9 +221,9 @@ public final class GraphStore {
                         .get(relationshipType)
                         .keySet()
                         .stream()
-                        .map(propertyKey -> createGraph(relationshipType, Optional.of(propertyKey)));
+                        .map(propertyKey -> createGraph(nodeLabels, relationshipType, Optional.of(propertyKey)));
                 } else {
-                    return Stream.of(createGraph(relationshipType, Optional.empty()));
+                    return Stream.of(createGraph(nodeLabels, relationshipType, Optional.empty()));
                 }
             })
             .collect(Collectors.toList()));
@@ -231,11 +237,11 @@ public final class GraphStore {
         return nodes.nodeCount();
     }
 
-    private Graph createGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
-        return createGraph(singletonList(relationshipType), maybeRelationshipProperty);
+    private Graph createGraph(List<String> nodeLabels, String relationshipType, Optional<String> maybeRelationshipProperty) {
+        return createGraph(nodeLabels, singletonList(relationshipType), maybeRelationshipProperty, 1);
     }
 
-    private Graph createGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    private Graph createGraph(List<String> nodeLabels, List<String> relationshipTypes, Optional<String> maybeRelationshipProperty, int concurrency) {
         boolean loadAllRelationships = relationshipTypes.contains(PROJECT_ALL.name);
 
         List<Graph> filteredGraphs = relationships.entrySet().stream()

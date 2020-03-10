@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 
+import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABELS;
+
 @ValueClass
 public interface GraphStoreWithConfig {
     GraphStore graphStore();
@@ -30,6 +32,6 @@ public interface GraphStoreWithConfig {
     GraphCreateConfig config();
 
     default Graph getGraph() {
-        return graphStore().getUnion();
+        return graphStore().getUnion(ALL_NODE_LABELS);
     }
 }

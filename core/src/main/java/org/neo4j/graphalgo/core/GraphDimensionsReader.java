@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
-import org.neo4j.graphalgo.NodeProjection;
+import org.eclipse.collections.impl.block.factory.Functions;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -38,6 +38,7 @@ import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -63,18 +64,24 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         Read dataRead = transaction.dataRead();
 
         NodeLabelIds nodeLabelIds = new NodeLabelIds();
+        Map<Long, String> labelMapping = new HashMap<>();
         if (readTokens) {
-            setup.nodeProjections()
-                .explicitProjections()
+             labelMapping = setup.nodeProjections()
+                .projections()
+                .entrySet()
                 .stream()
-                .map(NodeProjection::label)
-                .map(tokenRead::nodeLabel)
-                .forEach(nodeLabelIds.ids::add);
+                .filter(entry -> !entry.getValue().projectAll())
+                 .collect(Collectors.toMap(
+                     entry -> (long)tokenRead.nodeLabel(entry.getValue().label()),
+                     entry -> entry.getKey().name
+                 ));
+
+            labelMapping.keySet().stream().mapToInt(Long::intValue).forEach(nodeLabelIds.ids::add);
         }
 
         RelationshipProjectionMappings.Builder mappingsBuilder = new RelationshipProjectionMappings.Builder();
         if (readTokens) {
-            setup.relationshipProjections().projections().entrySet().stream()
+            setup.relationshipProjections().projections().entrySet()
                 .forEach(e -> {
                     String elementIdentifier = e.getKey().name;
                     RelationshipProjection relationshipProjection = e.getValue();
@@ -121,6 +128,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .maxRelCount(maxRelCount)
                 .relationshipCounts(relationshipCounts)
                 .nodeLabelIds(nodeLabelIds.longSet())
+                .labelMapping(labelMapping)
                 .nodeProperties(nodeProperties)
                 .relationshipProjectionMappings(relationshipProjectionMappings)
                 .relationshipProperties(relProperties)

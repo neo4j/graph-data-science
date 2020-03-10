@@ -19,56 +19,88 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongSet;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
+
+    public static final int LABEL_NOT_FOUND = -2;
+    public static final int EMPTY_LABEL = -1;
 
     private final LongSet nodeLabelIds;
     private final NodeStore nodeStore;
+    private final Map<String, BitSet> labelBitSets;
+    private final Map<Long, String> labelMapping;
+
 
     // property ids, consecutive
     private final long[] properties;
 
-    public NodesBatchBuffer(final NodeStore store, final LongSet labels, int capacity, boolean readProperty) {
+    public NodesBatchBuffer(
+        final NodeStore store,
+        final LongSet labels,
+        final Map<Long, String> labelMapping,
+        int capacity,
+        boolean readProperty
+    ) {
         super(capacity);
         this.nodeLabelIds = labels;
         this.nodeStore = store;
+        this.labelBitSets = nodeLabelIds.isEmpty() ? null : new HashMap<>(labelMapping.keySet().size());
+        this.labelMapping = labelMapping;
         this.properties = readProperty ? new long[capacity] : null;
     }
 
     @Override
     public void offer(final NodeRecord record) {
-        if (hasCorrectLabel(record)) {
-            add(record.getId(), record.getNextProp());
+        long labelId = hasCorrectLabel(record);
+        if (labelId != LABEL_NOT_FOUND) {
+            add(record.getId(), record.getNextProp(), labelId);
         }
     }
 
-    public void add(long nodeId, long propertiesIndex) {
+    public void add(long nodeId, long propertiesIndex, long labelId) {
         int len = length++;
         buffer[len] = nodeId;
         if (properties != null) {
             properties[len] = propertiesIndex;
         }
+
+        if (labelBitSets != null && labelId != EMPTY_LABEL) {
+            if (labelMapping.containsKey(labelId)) {
+                if (!labelBitSets.containsKey(labelMapping.get(labelId))) {
+                    labelBitSets.put(labelMapping.get(labelId), new BitSet(capacity()));
+                }
+                labelBitSets.get(labelMapping.get(labelId)).set(len);
+            }
+        }
     }
 
     // TODO: something label scan store
-    private boolean hasCorrectLabel(final NodeRecord record) {
+    private long hasCorrectLabel(final NodeRecord record) {
         if (nodeLabelIds.isEmpty()) {
-            return true;
+            return EMPTY_LABEL;
         }
         final long[] labels = NodeLabelsField.get(record, nodeStore);
         for (long l : labels) {
             if (nodeLabelIds.contains(l)) {
-                return true;
+                return l;
             }
         }
-        return false;
+        return LABEL_NOT_FOUND;
     }
 
     long[] properties() {
-        return properties;
+        return this.properties;
+    }
+
+    Map<String, BitSet> labelBitSets() {
+        return this.labelBitSets;
     }
 }

@@ -133,16 +133,16 @@ class IntersectingTriangleCountTest {
 
     private IdMap createIdMap(long[] inputs) {
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(inputs.length, AllocationTracker.EMPTY);
-        NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
+        NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null, null);
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), inputs.length, false);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), null, inputs.length, false);
 
         long maxNodeId = 0L;
         for (long input : inputs) {
             if (input > maxNodeId) {
                 maxNodeId = input;
             }
-            buffer.add(input, -1);
+            buffer.add(input, -1, NodesBatchBuffer.EMPTY_LABEL);
             if (buffer.isFull()) {
                 nodeImporter.importNodes(buffer, null);
                 buffer.reset();
@@ -150,7 +150,7 @@ class IntersectingTriangleCountTest {
         }
         nodeImporter.importNodes(buffer, null);
 
-        return IdMapBuilder.build(idMapBuilder, maxNodeId, 1, AllocationTracker.EMPTY);
+        return IdMapBuilder.build(idMapBuilder, null, maxNodeId, 1, AllocationTracker.EMPTY);
     }
 
 }

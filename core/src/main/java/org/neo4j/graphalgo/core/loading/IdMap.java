@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
@@ -27,9 +28,11 @@ import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.LongPredicate;
 
 /**
@@ -44,11 +47,13 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
             .rangePerGraphDimension(
                     "Mapping from Neo4j identifiers to internal identifiers",
                     (dimensions, concurrency) -> SparseNodeMapping.memoryEstimation(dimensions.highestNeoId(), dimensions.nodeCount()))
+        // TODO memory estimation for labelInformation
             .build();
 
     private long nodeCount;
     private HugeLongArray graphIds;
     private SparseNodeMapping nodeToGraphIds;
+    private final Map<String, BitSet> labelInformation;
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
@@ -57,10 +62,11 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
     /**
      * initialize the map with pre-built sub arrays
      */
-    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, long nodeCount) {
-        this.nodeCount = nodeCount;
+    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, Map<String, BitSet> labelInformation, long nodeCount) {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
+        this.labelInformation = labelInformation;
+        this.nodeCount = nodeCount;
     }
 
     @Override
@@ -104,6 +110,31 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
                 nodeCount(),
                 batchSize,
                 IdIterable::new);
+    }
+
+    public IdMap withFilteredLabels(Iterable<String> labelIds, int concurrency) {
+        if (labelIds == null) {
+            return this;
+        }
+
+        BitSet combinedBitSet = BitSet.newInstance();
+        labelIds.forEach(label -> combinedBitSet.union(labelInformation.get(label)));
+        long nodeId = -1L;
+        long cursor = 0L;
+        long newNodeCount = combinedBitSet.cardinality();
+        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, AllocationTracker.EMPTY);
+        while((nodeId = combinedBitSet.nextSetBit(nodeId+1)) != -1) {
+            newGraphIds.set(cursor, nodeId);
+            cursor++;
+        }
+        return IdMapBuilder.build(
+            newGraphIds,
+            null,
+            newNodeCount,
+            nodeToGraphIds.getCapacity(),
+            concurrency,
+            AllocationTracker.EMPTY
+        );
     }
 
     public static final class IdIterable implements PrimitiveLongIterable {

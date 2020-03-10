@@ -19,16 +19,22 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.BitSetBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public final class IdMapBuilder {
-    private static IdMap build(
+    public static IdMap build(
             HugeLongArray graphIds,
+            Map<String, BitSet> labelInformation,
             long nodeCount,
             long highestNodeId,
             int concurrency,
@@ -55,15 +61,28 @@ public final class IdMapBuilder {
         );
 
         SparseNodeMapping nodeToGraphIds = nodeMappingBuilder.build();
-        return new IdMap(graphIds, nodeToGraphIds, nodeCount);
+        return new IdMap(graphIds, nodeToGraphIds, labelInformation, nodeCount);
     }
 
     public static IdMap build(
             HugeLongArrayBuilder idMapBuilder,
+            Map<String, BitSetBuilder> labelInformationBuilders,
             long highestNodeId,
             int concurrency,
             AllocationTracker tracker) {
-        return build(idMapBuilder.build(), idMapBuilder.size(), highestNodeId, concurrency, tracker);
+        Map<String, BitSet> labelInformation = labelInformationBuilders == null
+            ? null
+            : labelInformationBuilders
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, value -> value.getValue().build()));
+        return build(idMapBuilder.build(),
+            labelInformation,
+            idMapBuilder.size(),
+            highestNodeId,
+            concurrency,
+            tracker
+        );
     }
 
 

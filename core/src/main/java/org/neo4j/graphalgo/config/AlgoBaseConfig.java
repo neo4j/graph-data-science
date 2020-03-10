@@ -29,6 +29,7 @@ import java.util.Optional;
 public interface AlgoBaseConfig extends BaseConfig {
 
     int DEFAULT_CONCURRENCY = 4;
+    public List<String> ALL_NODE_LABELS = Collections.singletonList("*");
 
     @Value.Default
     default int concurrency() {
@@ -41,6 +42,11 @@ public interface AlgoBaseConfig extends BaseConfig {
     @Value.Default
     default List<String> relationshipTypes() {
         return Collections.singletonList("*");
+    }
+
+    @Value.Default
+    default List<String> nodeLabels() {
+        return ALL_NODE_LABELS;
     }
 
     @Configuration.Parameter

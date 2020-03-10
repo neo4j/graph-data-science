@@ -32,6 +32,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 final class NodesScanner extends StatementAction implements RecordScanner {
 
@@ -39,6 +40,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             GraphDatabaseAPI api,
             AbstractStorePageCacheScanner<NodeRecord> scanner,
             LongSet labels,
+            Map<Long, String> labelMapping,
             ImportProgress progress,
             NodeImporter importer,
             TerminationFlag terminationFlag) {
@@ -46,6 +48,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                 api,
                 scanner,
                 labels,
+                labelMapping,
                 progress,
                 importer,
                 terminationFlag);
@@ -55,6 +58,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         private final GraphDatabaseAPI api;
         private final AbstractStorePageCacheScanner<NodeRecord> scanner;
         private final LongSet labels;
+        private final Map<Long, String> labelMapping;
         private final ImportProgress progress;
         private final NodeImporter importer;
         private final TerminationFlag terminationFlag;
@@ -63,12 +67,14 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                 GraphDatabaseAPI api,
                 AbstractStorePageCacheScanner<NodeRecord> scanner,
                 LongSet labels,
+                Map<Long, String> labelMapping,
                 ImportProgress progress,
                 NodeImporter importer, 
                 TerminationFlag terminationFlag) {
             this.api = api;
             this.scanner = scanner;
             this.labels = labels;
+            this.labelMapping = labelMapping;
             this.progress = progress;
             this.importer = importer;
             this.terminationFlag = terminationFlag;
@@ -81,6 +87,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                     terminationFlag,
                     scanner,
                     labels,
+                    labelMapping,
                     index,
                     progress,
                     importer
@@ -98,6 +105,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private final NodeStore nodeStore;
     private final AbstractStorePageCacheScanner<NodeRecord> scanner;
     private final LongSet labels;
+    private final Map<Long, String> labelMapping;
     private final int scannerIndex;
     private final ImportProgress progress;
     private final NodeImporter importer;
@@ -109,6 +117,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             TerminationFlag terminationFlag,
             AbstractStorePageCacheScanner<NodeRecord> scanner,
             LongSet labels,
+            Map<Long, String> labelMapping,
             int threadIndex,
             ImportProgress progress,
             NodeImporter importer) {
@@ -117,6 +126,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         this.nodeStore = (NodeStore) scanner.store();
         this.scanner = scanner;
         this.labels = labels;
+        this.labelMapping = labelMapping;
         this.scannerIndex = threadIndex;
         this.progress = progress;
         this.importer = importer;
@@ -135,6 +145,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             NodesBatchBuffer batches = new NodesBatchBuffer(
                 nodeStore,
                 labels,
+                labelMapping,
                 cursor.bulkSize(),
                 importer.readsProperties()
             );

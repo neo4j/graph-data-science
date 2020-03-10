@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
+import org.neo4j.graphalgo.core.utils.BitSetBuilder;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -39,11 +41,17 @@ public class NodeImporter {
     }
 
     private final HugeLongArrayBuilder idMapBuilder;
+    private final Map<String, BitSetBuilder> labelInformationBuilders;
     private final IntObjectMap<NodePropertiesBuilder> buildersByPropertyId;
     private final Collection<NodePropertiesBuilder> nodePropertyBuilders;
 
-    public NodeImporter(HugeLongArrayBuilder idMapBuilder, Collection<NodePropertiesBuilder> nodePropertyBuilders) {
+    public NodeImporter(
+        HugeLongArrayBuilder idMapBuilder,
+        Map<String, BitSetBuilder> labelInformationBuilders,
+        Collection<NodePropertiesBuilder> nodePropertyBuilders
+    ) {
         this.idMapBuilder = idMapBuilder;
+        this.labelInformationBuilders = labelInformationBuilders;
         this.buildersByPropertyId = mapBuildersByPropertyId(nodePropertyBuilders);
         this.nodePropertyBuilders = nodePropertyBuilders;
     }
@@ -62,6 +70,10 @@ public class NodeImporter {
                 readCypherProperty(propertiesReference, internalId, cypherNodeProperties));
     }
 
+    public long nodeCount() {
+        return idMapBuilder.length();
+    }
+
     public long importNodes(NodesBatchBuffer buffer, PropertyReader reader) {
         int batchLength = buffer.length();
         if (batchLength == 0) {
@@ -77,6 +89,12 @@ public class NodeImporter {
 
         long[] batch = buffer.batch();
         long[] properties = buffer.properties();
+        Map<String, BitSet> labelInformation = buffer.labelBitSets();
+        if (labelInformation != null) {
+            labelInformation
+                .keySet()
+                .forEach(labelId -> labelInformationBuilders.get(labelId).bulkAdd(labelInformation.get(labelId)));
+        }
         int batchOffset = 0;
         while (adder.nextBuffer()) {
             int length = adder.length;

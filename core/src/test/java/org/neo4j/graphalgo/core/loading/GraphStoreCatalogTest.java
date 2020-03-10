@@ -46,6 +46,7 @@ import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABELS;
 
 class GraphStoreCatalogTest {
 
@@ -84,7 +85,7 @@ class GraphStoreCatalogTest {
 
         GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
-        Graph filteredGraph = GraphStoreCatalog.get("", "myGraph").graphStore().getGraph(relTypes, relProperty);
+        Graph filteredGraph = GraphStoreCatalog.get("", "myGraph").graphStore().getGraph(ALL_NODE_LABELS, relTypes, relProperty);
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
     }

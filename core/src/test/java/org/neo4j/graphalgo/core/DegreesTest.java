@@ -38,6 +38,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
+import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABELS;
 
 /**
  * A->B; A->C; B->C;
@@ -165,7 +166,7 @@ class DegreesTest extends AlgoTestBase {
         } else if (orientation == Orientation.UNDIRECTED) {
             graph = graphStore.getGraph("TYPE_UNDIRECTED");
         } else if (orientation == null) { // BOTH case
-            graph = graphStore.getGraph(Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty());
+            graph = graphStore.getGraph(ALL_NODE_LABELS, Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty());
         }
     }
 

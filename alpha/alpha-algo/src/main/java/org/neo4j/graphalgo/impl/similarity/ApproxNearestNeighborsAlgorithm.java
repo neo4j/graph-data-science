@@ -261,16 +261,16 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
     private IdsAndProperties buildNodes(INPUT[] inputs) {
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(inputs.length, AllocationTracker.EMPTY);
-        NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null);
+        NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null, null);
         long maxNodeId = 0L;
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), inputs.length, false);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), null, inputs.length, false);
 
         for (INPUT input : inputs) {
             if (input.getId() > maxNodeId) {
                 maxNodeId = input.getId();
             }
-            buffer.add(input.getId(), -1);
+            buffer.add(input.getId(), -1, NodesBatchBuffer.EMPTY_LABEL);
             if (buffer.isFull()) {
                 nodeImporter.importNodes(buffer, null);
                 buffer.reset();
@@ -278,7 +278,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
         nodeImporter.importNodes(buffer, null);
 
-        IdMap idMap = IdMapBuilder.build(idMapBuilder, maxNodeId, 1, AllocationTracker.EMPTY);
+        IdMap idMap = IdMapBuilder.build(idMapBuilder, null, maxNodeId, 1, AllocationTracker.EMPTY);
         return new IdsAndProperties(idMap, Collections.emptyMap());
     }
 

@@ -52,6 +52,9 @@ public interface GraphDimensions {
     @Nullable
     LongSet nodeLabelIds();
 
+    @Nullable
+    Map<Long, String> labelMapping();
+
     @Value.Default
     default ResolvedPropertyMappings nodeProperties() {
         return ResolvedPropertyMappings.empty();

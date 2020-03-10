@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.utils.BitSetBuilder;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
@@ -34,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.StreamSupport;
 
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, IdsAndProperties> {
@@ -45,6 +47,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     private Map<String, NodePropertiesBuilder> builders;
     private HugeLongArrayBuilder idMapBuilder;
+    private Map<String, BitSetBuilder> labelInformationBuilders;
 
     ScanningNodesImporter(
             GraphDatabaseAPI api,
@@ -68,13 +71,20 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             ImportSizing sizing,
             AbstractStorePageCacheScanner<NodeRecord> scanner) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
+
+        labelInformationBuilders = new HashMap<>(dimensions.labelMapping().values().size());
+        dimensions.labelMapping().values().forEach(identifier -> labelInformationBuilders.put(
+                identifier,
+                BitSetBuilder.of(nodeCount, tracker)
+            ));
         builders = propertyBuilders(nodeCount);
         return NodesScanner.of(
                 api,
                 scanner,
                 dimensions.nodeLabelIds(),
+                dimensions.labelMapping(),
                 progress,
-                new NodeImporter(idMapBuilder, builders.values()),
+                new NodeImporter(idMapBuilder, labelInformationBuilders, builders.values()),
                 terminationFlag
         );
     }
@@ -83,6 +93,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     IdsAndProperties build() {
         IdMap hugeIdMap = IdMapBuilder.build(
                 idMapBuilder,
+                labelInformationBuilders,
                 dimensions.highestNeoId(),
                 concurrency,
                 tracker);

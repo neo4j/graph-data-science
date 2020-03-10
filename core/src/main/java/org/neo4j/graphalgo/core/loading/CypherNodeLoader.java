@@ -80,7 +80,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     private void initImporter(PropertyMappings nodeProperties) {
         nodePropertyBuilders = nodeProperties(nodeProperties);
         builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());
-        importer = new NodeImporter(builder, nodePropertyBuilders.values());
+        importer = new NodeImporter(builder, null, nodePropertyBuilders.values());
     }
 
     @Override
@@ -106,7 +106,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             initializedFromResult = true;
         }
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), bufferSize, true);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), null, bufferSize, true);
         NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
         result.accept(visitor);
         visitor.flush();
@@ -122,7 +122,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     @Override
     LoadResult result() {
-        IdMap idMap = IdMapBuilder.build(builder, maxNodeId, setup.concurrency(), setup.tracker());
+        IdMap idMap = IdMapBuilder.build(builder, null, maxNodeId, setup.concurrency(), setup.tracker());
         Map<String, NodeProperties> nodeProperties = nodePropertyBuilders.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
 

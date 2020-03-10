@@ -43,6 +43,7 @@ import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABELS;
 
 final class HugeGraphLoadingTest {
 
@@ -204,7 +205,7 @@ final class HugeGraphLoadingTest {
         Graph undirected = graphStore.getGraph("TYPE_UNDIRECTED");
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), undirected);
 
-        Graph both = graphStore.getGraph(Arrays.asList("TYPE_NATURAL", "TYPE_REVERSE"), Optional.empty());
+        Graph both = graphStore.getGraph(ALL_NODE_LABELS, Arrays.asList("TYPE_NATURAL", "TYPE_REVERSE"), Optional.empty());
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), both);
 
         Graph union = graphStore.getUnion();
