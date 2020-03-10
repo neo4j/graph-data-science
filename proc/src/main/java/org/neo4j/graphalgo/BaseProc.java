@@ -33,6 +33,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
+import java.util.Collection;
 import java.util.function.Supplier;
 
 public abstract class BaseProc {
@@ -86,7 +87,11 @@ public abstract class BaseProc {
     }
 
     protected void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
-        cypherConfig.withoutAny(config.configKeys()).requireEmpty();
+        validateConfig(cypherConfig, config.configKeys());
+    }
+
+    void validateConfig(CypherMapWrapper cypherConfig, Collection<String> allowedKeys) {
+        cypherConfig.requireOnlyKeysFrom(allowedKeys);
     }
 
     protected void validateGraphName(String username, String graphName) {

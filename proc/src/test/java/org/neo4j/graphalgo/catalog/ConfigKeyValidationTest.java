@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
+import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,7 +37,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(GraphCreateProc.class, PageRankStreamProc.class);
+        registerProcedures(GraphCreateProc.class, PageRankStreamProc.class, PageRankWriteProc.class);
     }
 
     @AfterEach
@@ -53,7 +54,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
 
         assertThat(
             exception,
-            rootCause(IllegalArgumentException.class, "Unexpected configuration key(s): [maxIterations]")
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: maxIterations")
         );
     }
 
@@ -66,7 +67,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
 
         assertThat(
             exception,
-            rootCause(IllegalArgumentException.class, "Unexpected configuration key(s): [nodeProjection]")
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: nodeProjection")
         );
     }
 
@@ -79,7 +80,46 @@ class ConfigKeyValidationTest extends BaseProcTest {
 
         assertThat(
             exception,
-            rootCause(IllegalArgumentException.class, "Unexpected configuration key(s): [some]")
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: some")
+        );
+    }
+
+    @Test
+    void misspelledProjectionKeyWithSuggestion() {
+        QueryExecutionException exception = Assertions.assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.pageRank.write({nodeProjections: '*', relationshipProjection: '*'})")
+        );
+
+        assertThat(
+            exception,
+            rootCause(IllegalArgumentException.class, "Missing information for implicit graph creation. No value specified for the mandatory configuration parameter `nodeProjection` (A similar parameter exists: [nodeProjections])")
+        );
+    }
+
+    @Test
+    void misspelledRequiredKeyWithSuggestion() {
+        QueryExecutionException exception = Assertions.assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.pageRank.write({wirteProperty: 'foo', nodeProjection: '*', relationshipProjection: '*'})")
+        );
+
+        assertThat(
+            exception,
+            rootCause(IllegalArgumentException.class, "No value specified for the mandatory configuration parameter `writeProperty` (A similar parameter exists: [wirteProperty])")
+        );
+    }
+
+    @Test
+    void misspelledOptionalKeyWithSuggestion() {
+        QueryExecutionException exception = Assertions.assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.pageRank.stream({maxiterations: 1337, nodeProjection: '*', relationshipProjection: '*'})")
+        );
+
+        assertThat(
+            exception,
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: maxiterations (Did you mean [maxIterations]?)")
         );
     }
 }

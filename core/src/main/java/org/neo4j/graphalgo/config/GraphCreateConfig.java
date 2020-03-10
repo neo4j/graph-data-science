@@ -88,18 +88,17 @@ public interface GraphCreateConfig extends BaseConfig {
     }
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
-        if (config.containsKey(NODE_QUERY_KEY) && config.containsKey(RELATIONSHIP_QUERY_KEY)) {
-            return GraphCreateFromCypherConfig.fromProcedureConfig(username, config);
-        } else if (config.containsKey(NODE_PROJECTION_KEY) && config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
+        CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(
+            NODE_PROJECTION_KEY,
+            RELATIONSHIP_PROJECTION_KEY,
+            NODE_QUERY_KEY,
+            RELATIONSHIP_QUERY_KEY,
+            "Missing information for implicit graph creation."
+        );
+        if (result == CypherMapWrapper.PairResult.FIRST_PAIR) {
             return GraphCreateFromStoreConfig.fromProcedureConfig(username, config);
         } else {
-            throw new IllegalArgumentException(String.format(
-                "Missing information for implicit graph creation. Specify either `%s` and `%s` or `%s` and `%s`",
-                NODE_PROJECTION_KEY,
-                RELATIONSHIP_PROJECTION_KEY,
-                NODE_QUERY_KEY,
-                RELATIONSHIP_QUERY_KEY
-            ));
+            return GraphCreateFromCypherConfig.fromProcedureConfig(username, config);
         }
     }
 }

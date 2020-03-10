@@ -36,6 +36,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -178,7 +179,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
         );
         assertThat(
             illegalArgumentException.getMessage(),
-            is(String.format("No value specified for the mandatory configuration parameter `%s`", parameter))
+            startsWith(String.format("No value specified for the mandatory configuration parameter `%s`", parameter))
         );
     }
 

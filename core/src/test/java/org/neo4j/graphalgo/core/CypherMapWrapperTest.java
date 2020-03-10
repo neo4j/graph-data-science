@@ -24,21 +24,25 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.compat.MapUtil;
 
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class CypherMapWrapperTest {
 
     @Test
     void testCastingFromNumberToDouble() {
-        Map<String, Object> numberPrimitives = MapUtil.map(
+        Map<String, Object> numberPrimitives = map(
             "integer", 42,
             "long", 1337L,
             "float", 1337.42f
@@ -51,7 +55,7 @@ class CypherMapWrapperTest {
 
     @Test
     void shouldFailOnLossyCasts() {
-        Map<String, Object> numberPrimitives = MapUtil.map(
+        Map<String, Object> numberPrimitives = map(
             "double", 1337.42D
         );
         CypherMapWrapper primitivesWrapper = CypherMapWrapper.create(numberPrimitives);
@@ -72,7 +76,13 @@ class CypherMapWrapperTest {
 
     @ParameterizedTest
     @MethodSource("negativeRangeValidationParameters")
-    void shouldThrowForInvalidDoubleRange(double value, double min, double max, boolean minInclusive, boolean maxInclusive) {
+    void shouldThrowForInvalidDoubleRange(
+        double value,
+        double min,
+        double max,
+        boolean minInclusive,
+        boolean maxInclusive
+    ) {
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
             () -> CypherMapWrapper.validateDoubleRange("value", value, min, max, minInclusive, maxInclusive)
@@ -91,7 +101,10 @@ class CypherMapWrapperTest {
     @ParameterizedTest
     @MethodSource("positiveRangeValidationParameters")
     void shouldValidateIntegerRange(int value, int min, int max, boolean minInclusive, boolean maxInclusive) {
-        assertEquals(value, CypherMapWrapper.validateIntegerRange("value", value, min, max, minInclusive, maxInclusive));
+        assertEquals(
+            value,
+            CypherMapWrapper.validateIntegerRange("value", value, min, max, minInclusive, maxInclusive)
+        );
     }
 
     @ParameterizedTest
@@ -110,6 +123,147 @@ class CypherMapWrapperTest {
             max,
             maxInclusive ? "]" : ")"
         ), ex.getMessage());
+    }
+
+    static Stream<Arguments> requiredParams() {
+        return Stream.of(
+            arguments(
+                map("foo", 42, "bar", -42),
+                "A similar parameter exists: [foo]"
+            ),
+            arguments(
+                map("foo", 42, "bar", -42, "foi", 1337),
+                "Similar parameters exist: [foi, foo]"
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("requiredParams")
+    void testRequireWithSuggestions(Map<String, Object> map, String expectedMessage) {
+        CypherMapWrapper config = CypherMapWrapper.create(map);
+
+        IllegalArgumentException error = assertThrows(
+            IllegalArgumentException.class,
+            () -> config.requireLong("fou")
+        );
+        assertEquals(
+            String.format("No value specified for the mandatory configuration parameter `fou` (%s)", expectedMessage),
+            error.getMessage()
+        );
+    }
+
+    static Stream<Arguments> unexpectedParams() {
+        return Stream.of(
+            arguments(
+                map("fou", 42),
+                singleton("foo"),
+                "key: fou (Did you mean [foo]?)"
+            ),
+            arguments(
+                map("fou", 42, "foi", 1337),
+                singleton("foo"),
+                "keys: foi (Did you mean [foo]?), fou (Did you mean [foo]?)"
+            ),
+            arguments(
+                map("fou", 42),
+                asList("foo", "foa"),
+                "key: fou (Did you mean one of [foa, foo]?)"
+            ),
+            arguments(
+                map("fou", 42, "foi", 1337),
+                asList("foo", "foa"),
+                "keys: foi (Did you mean one of [foa, foo]?), fou (Did you mean one of [foa, foo]?)"
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("unexpectedParams")
+    void testUnexpectedKeyWithSuggestion(Map<String, Object> map, Collection<String> keys, String expectedMessage) {
+        CypherMapWrapper config = CypherMapWrapper.create(map);
+
+        IllegalArgumentException error = assertThrows(
+            IllegalArgumentException.class,
+            () -> config.requireOnlyKeysFrom(keys)
+        );
+        assertEquals(
+            String.format("Unexpected configuration %s", expectedMessage),
+            error.getMessage()
+        );
+    }
+
+    static Stream<Arguments> mutextParams() {
+        return Stream.of(
+            arguments(
+                map("aaa", 42, "bbb", 1337, "xxx", 42),
+                "Invalid key: [xxx]. This key cannot be used together with `aaa` and `bbb`."
+            ),
+            arguments(
+                map("aaa", 42, "bbb", 1337, "xxx", 42, "yyy", 1337),
+                "Invalid keys: [xxx, yyy]. Those keys cannot be used together with `aaa` and `bbb`."
+            ),
+            arguments(
+                map("aaa", 42, "xxx", 42, "yyy", 1337),
+                "Invalid key: [aaa]. This key cannot be used together with `xxx` and `yyy`."
+            ),
+            arguments(
+                map("aaa", 42, "bb", 42),
+                "Test: No value specified for the mandatory configuration parameter `bbb` (A similar parameter exists: [bb])"
+            ),
+            arguments(
+                map("aaa", 42, "bb", 42, "bbbb", 42),
+                "Test: No value specified for the mandatory configuration parameter `bbb` (Similar parameters exist: [bbbb, bb])"
+            ),
+            arguments(
+                map("aaa", 42, "bb", 42, "bbbb", 42, "xx", 1337),
+                "Test: No value specified for the mandatory configuration parameter `bbb` (Similar parameters exist: [bbbb, bb])"
+            ),
+            arguments(
+                map("aaa", 42, "bb", 42, "bbbb", 42, "xxx", 1337),
+                "Test: Specify either `aaa` and `bbb` or `xxx` and `yyy`."
+            ),
+            arguments(
+                map("xxx", 42, "yy", 42),
+                "Test: No value specified for the mandatory configuration parameter `yyy` (A similar parameter exists: [yy])"
+            ),
+            arguments(
+                map("xxx", 42, "yy", 42, "yyyy", 42),
+                "Test: No value specified for the mandatory configuration parameter `yyy` (Similar parameters exist: [yyyy, yy])"
+            ),
+            arguments(
+                map("xxx", 42, "yy", 42, "yyyy", 42, "aa", 1337),
+                "Test: No value specified for the mandatory configuration parameter `yyy` (Similar parameters exist: [yyyy, yy])"
+            ),
+            arguments(
+                map("xxx", 42, "yy", 42, "yyyy", 42, "aaa", 1337),
+                "Test: Specify either `aaa` and `bbb` or `xxx` and `yyy`."
+            ),
+            arguments(
+                map(),
+                "Test: Specify either `aaa` and `bbb` or `xxx` and `yyy`."
+            ),
+            arguments(
+                map("eee", 42, "fff", 1337),
+                "Test: Specify either `aaa` and `bbb` or `xxx` and `yyy`."
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("mutextParams")
+    void testMutexPairsConflictWithSecondPair(Map<String, Object> map, String expectedMessage) {
+        CypherMapWrapper config = CypherMapWrapper.create(map);
+
+        IllegalArgumentException error = assertThrows(
+            IllegalArgumentException.class,
+            () -> config.verifyMutuallyExclusivePairs(
+                "aaa", "bbb",
+                "xxx", "yyy",
+                "Test:"
+            )
+        );
+        assertEquals(expectedMessage, error.getMessage());
     }
 
     static Stream<Arguments> positiveRangeValidationParameters() {

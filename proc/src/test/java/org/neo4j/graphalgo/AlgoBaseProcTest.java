@@ -418,21 +418,29 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
     }
 
+    String FAIL_ANY_CONFIG = String.format(
+        "`%s` and `%s` or `%s` and `%s`",
+        NODE_PROJECTION_KEY,
+        RELATIONSHIP_PROJECTION_KEY,
+        NODE_QUERY_KEY,
+        RELATIONSHIP_QUERY_KEY
+    );
+    // No value specified for the mandatory configuration parameter `relationshipProjection`
     static Stream<Arguments> failingConfigurationMaps() {
         return Stream.of(
-            Arguments.of(MapUtil.map()),
-            Arguments.of(MapUtil.map(NODE_PROJECTION_KEY, PROJECT_ALL.name)),
-            Arguments.of(MapUtil.map(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name)),
-            Arguments.of(MapUtil.map(NODE_QUERY_KEY, ALL_NODES_QUERY)),
-            Arguments.of(MapUtil.map(RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
-            Arguments.of(MapUtil.map(NODE_PROJECTION_KEY, PROJECT_ALL.name, RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
-            Arguments.of(MapUtil.map(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name, NODE_QUERY_KEY, ALL_NODES_QUERY))
+            Arguments.of(FAIL_ANY_CONFIG, MapUtil.map()),
+            Arguments.of("No value specified for the mandatory configuration parameter `relationshipProjection`", MapUtil.map(NODE_PROJECTION_KEY, PROJECT_ALL.name)),
+            Arguments.of("No value specified for the mandatory configuration parameter `nodeProjection`", MapUtil.map(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name)),
+            Arguments.of("No value specified for the mandatory configuration parameter `relationshipQuery`", MapUtil.map(NODE_QUERY_KEY, ALL_NODES_QUERY)),
+            Arguments.of("No value specified for the mandatory configuration parameter `nodeQuery`", MapUtil.map(RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
+            Arguments.of(FAIL_ANY_CONFIG, MapUtil.map(NODE_PROJECTION_KEY, PROJECT_ALL.name, RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
+            Arguments.of(FAIL_ANY_CONFIG, MapUtil.map(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name, NODE_QUERY_KEY, ALL_NODES_QUERY))
         );
     }
 
     @ParameterizedTest
     @MethodSource("failingConfigurationMaps")
-    default void failOnImplicitLoadingWithoutProjectionsOrQueries(Map<String, Object> configurationMap) {
+    default void failOnImplicitLoadingWithoutProjectionsOrQueries(String expectedMessage, Map<String, Object> configurationMap) {
         Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(configurationMap)).toMap();
 
         applyOnProcedure((proc) -> {
@@ -443,15 +451,15 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
                     Collections.emptyMap()
                 )
             );
-            assertTrue(ex.getMessage().contains("Missing information") && ex
-                .getMessage()
-                .contains(String.format(
-                    "`%s` and `%s` or `%s` and `%s`",
-                    NODE_PROJECTION_KEY,
-                    RELATIONSHIP_PROJECTION_KEY,
-                    NODE_QUERY_KEY,
-                    RELATIONSHIP_QUERY_KEY
-                )));
+            String message = ex.getMessage();
+            assertTrue(
+                message.contains("Missing information"),
+                String.format("Does not start with 'Missing information': %s", message)
+            );
+            assertTrue(
+                message.contains(expectedMessage),
+                String.format("Does not contain '%s': %s", expectedMessage, message)
+            );
         });
     }
 

@@ -53,6 +53,7 @@ import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,14 +78,17 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
     public final CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
         Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
+        Collection<String> allowedKeys = new HashSet<>();
         if (!graphName.isPresent()) {
             // we should do implicit loading
             GraphCreateConfig createConfig = GraphCreateConfig.createImplicit(getUsername(), config);
             maybeImplicitCreate = Optional.of(createConfig);
-            config = config.withoutAny(createConfig.configKeys());
+            allowedKeys.addAll(createConfig.configKeys());
+            config = config.withoutAny(allowedKeys);
         }
         CONFIG algoConfig = newConfig(getUsername(), graphName, maybeImplicitCreate, config);
-        validateConfig(config, algoConfig);
+        allowedKeys.addAll(algoConfig.configKeys());
+        validateConfig(config, allowedKeys);
         return algoConfig;
     }
 

@@ -22,21 +22,29 @@ package org.neo4j.graphalgo.core;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static org.neo4j.graphalgo.core.StringSimilarity.jaroWinkler;
 
 /**
  * Wrapper around configuration options map
  */
 public final class CypherMapWrapper {
+
+    private static final double REQUIRED_SIMILARITY = 0.8;
 
     private final Map<String, Object> config;
 
@@ -205,13 +213,41 @@ public final class CypherMapWrapper {
         return typedValue(key, expectedType, config.get(key));
     }
 
-    public void requireEmpty() {
-        if (!isEmpty()) {
+    public void requireOnlyKeysFrom(Collection<String> allowedKeys) {
+        Collection<String> keys = new HashSet<>(config.keySet());
+        keys.removeAll(allowedKeys);
+        if (keys.isEmpty()) {
+            return;
+        }
+        List<String> suggestions = keys.stream()
+            .map(invalid -> {
+                List<String> candidates = similarStrings(invalid, allowedKeys);
+                if (candidates.isEmpty()) {
+                    return invalid;
+                }
+                if (candidates.size() == 1) {
+                    return String.format("%s (Did you mean [%s]?)", invalid, candidates.get(0));
+                }
+                return String.format("%s (Did you mean one of [%s]?)", invalid, String.join(", ", candidates));
+            })
+            .collect(Collectors.toList());
+
+        if (suggestions.size() == 1) {
             throw new IllegalArgumentException(String.format(
-                "Unexpected configuration key(s): %s",
-                config.keySet()
+                "Unexpected configuration key: %s",
+                suggestions.get(0)
             ));
         }
+
+        StringJoiner joiner = new StringJoiner(", ");
+        for (String suggestion : suggestions) {
+            joiner.add(suggestion);
+        }
+
+        throw new IllegalArgumentException(String.format(
+            "Unexpected configuration keys: %s",
+            joiner
+        ));
     }
 
     @SuppressWarnings("unchecked")
@@ -238,7 +274,7 @@ public final class CypherMapWrapper {
 
     public static <T> T failOnNull(String key, T value) {
         if (value == null) {
-            throw missingValueFor(key);
+            throw missingValueFor(key, Collections.emptySet());
         }
         return value;
     }
@@ -250,7 +286,14 @@ public final class CypherMapWrapper {
         return value;
     }
 
-    public static int validateIntegerRange(String key, int value, int min, int max, boolean minInclusive, boolean maxInclusive) {
+    public static int validateIntegerRange(
+        String key,
+        int value,
+        int min,
+        int max,
+        boolean minInclusive,
+        boolean maxInclusive
+    ) {
         boolean meetsLowerBound = minInclusive ? value >= min : value > min;
         boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
 
@@ -261,7 +304,14 @@ public final class CypherMapWrapper {
         return value;
     }
 
-    public static double validateDoubleRange(String key, double value, double min, double max, boolean minInclusive, boolean maxInclusive) {
+    public static double validateDoubleRange(
+        String key,
+        double value,
+        double min,
+        double max,
+        boolean minInclusive,
+        boolean maxInclusive
+    ) {
         boolean meetsLowerBound = minInclusive ? value >= min : value > min;
         boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
 
@@ -297,11 +347,186 @@ public final class CypherMapWrapper {
         return Double.class.isAssignableFrom(expectedType) && Number.class.isInstance(value);
     }
 
-    private static IllegalArgumentException missingValueFor(String key) {
-        return new IllegalArgumentException(String.format(
-            "No value specified for the mandatory configuration parameter `%s`",
-            key
-        ));
+    private IllegalArgumentException missingValueFor(String key) {
+        return missingValueFor(key, config.keySet());
+    }
+
+    private static IllegalArgumentException missingValueFor(String key, Collection<String> candidates) {
+        return new IllegalArgumentException(missingValueForMessage(key, candidates));
+    }
+
+    private static String missingValueForMessage(String key, Collection<String> candidates) {
+        List<String> suggestions = similarStrings(key, candidates);
+        return missingValueMessage(key, suggestions);
+    }
+
+    private static String missingValueMessage(String key, List<String> suggestions) {
+        if (suggestions.isEmpty()) {
+            return String.format(
+                "No value specified for the mandatory configuration parameter `%s`",
+                key
+            );
+        }
+        if (suggestions.size() == 1) {
+            return String.format(
+                "No value specified for the mandatory configuration parameter `%s` (A similar parameter exists: [%s])",
+                key,
+                suggestions.get(0)
+            );
+        }
+        return String.format(
+            "No value specified for the mandatory configuration parameter `%s` (Similar parameters exist: [%s])",
+            key,
+            String.join(", ", suggestions)
+        );
+    }
+
+    public enum PairResult {
+        FIRST_PAIR,
+        SECOND_PAIR,
+    }
+
+    /**
+     * Verifies that only one of two mutually exclusive pairs of configuration keys is present.
+     *
+     * More precisely, the following condition is checked:
+     *  {@code (firstPairKeyOne AND firstPairKeyTwo) XOR (secondPairKeyOne AND secondPairKeyTwo)}
+     * If the condition is verified, the return value will identify which one of the pairs is present.
+     *
+     * In the error case where the condition is violated, an {@link IllegalArgumentException} is thrown.
+     * The message of that exception depends on which keys are present, possible mis-spelled, or absent.
+     */
+    public PairResult verifyMutuallyExclusivePairs(
+        String firstPairKeyOne,
+        String firstPairKeyTwo,
+        String secondPairKeyOne,
+        String secondPairKeyTwo,
+        String errorPrefix
+    ) throws IllegalArgumentException {
+        return checkMutuallyExclusivePairs(
+            firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo, errorPrefix, PairResult.FIRST_PAIR
+        );
+    }
+
+    private PairResult checkMutuallyExclusivePairs(
+        String firstPairKeyOne,
+        String firstPairKeyTwo,
+        String secondPairKeyOne,
+        String secondPairKeyTwo,
+        String errorPrefix,
+        PairResult possibleResult
+    ) throws IllegalArgumentException {
+        if (config.containsKey(firstPairKeyOne) && config.containsKey(firstPairKeyTwo)) {
+            boolean secondOneExists = config.containsKey(secondPairKeyOne);
+            boolean secondTwoExists = config.containsKey(secondPairKeyTwo);
+            if (secondOneExists && secondTwoExists) {
+                throw new IllegalArgumentException(String.format(
+                    "Invalid keys: [%s, %s]. Those keys cannot be used together with `%s` and `%s`.",
+                    secondPairKeyOne,
+                    secondPairKeyTwo,
+                    firstPairKeyOne,
+                    firstPairKeyTwo
+                ));
+            } else if (secondOneExists || secondTwoExists) {
+                throw new IllegalArgumentException(String.format(
+                    "Invalid key: [%s]. This key cannot be used together with `%s` and `%s`.",
+                    secondOneExists ? secondPairKeyOne : secondPairKeyTwo,
+                    firstPairKeyOne,
+                    firstPairKeyTwo
+                ));
+            }
+            return possibleResult;
+        }
+
+        if (possibleResult == PairResult.FIRST_PAIR) {
+            // check if the second pair exists while the first is missing
+            return checkMutuallyExclusivePairs(
+                secondPairKeyOne,
+                secondPairKeyTwo,
+                firstPairKeyOne,
+                firstPairKeyTwo,
+                errorPrefix,
+                PairResult.SECOND_PAIR
+            );
+        }
+
+        // we're in the second call right now, so first and second are swapped
+        String message = missingMutuallyExclusivePairMessage(secondPairKeyOne, secondPairKeyTwo, firstPairKeyOne, firstPairKeyTwo);
+        throw new IllegalArgumentException(String.format("%s %s", errorPrefix, message));
+    }
+
+    private String missingMutuallyExclusivePairMessage(
+        String firstPairKeyOne,
+        String firstPairKeyTwo,
+        String secondPairKeyOne,
+        String secondPairKeyTwo
+    ) {
+        StringWithValue firstMessage = missingMutuallyExclusivePairs(firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo);
+        StringWithValue secondMessage = missingMutuallyExclusivePairs(secondPairKeyOne, secondPairKeyTwo, firstPairKeyOne, firstPairKeyTwo);
+
+        if (firstMessage != null) {
+            // only return if the second message does not have a competitive score
+            if (secondMessage == null || secondMessage.value < firstMessage.value) {
+                return firstMessage.string;
+            }
+        }
+        if (secondMessage != null) {
+            // only return if the first message does not have a competitive score
+            if (firstMessage == null || firstMessage.value < secondMessage.value) {
+                return secondMessage.string;
+            }
+        }
+
+        // either pairs have the same possibility score, we don't know which one we should use
+        return String.format(
+            "Specify either `%s` and `%s` or `%s` and `%s`.",
+            firstPairKeyOne,
+            firstPairKeyTwo,
+            secondPairKeyOne,
+            secondPairKeyTwo
+        );
+    }
+
+    private @Nullable StringWithValue missingMutuallyExclusivePairs(
+        String keyOne,
+        String keyTwo,
+        String... forbiddenSuggestions
+    ) {
+        Collection<String> missingAndCandidates = new ArrayList<>();
+        Collection<String> missingWithoutCandidates = new ArrayList<>();
+        boolean hasAtLastOneKey = false;
+        for (String key : asList(keyOne, keyTwo)) {
+            if (config.containsKey(key)) {
+                hasAtLastOneKey = true;
+            } else {
+                List<String> candidates = similarStrings(key, config.keySet());
+                candidates.removeAll(asList(forbiddenSuggestions));
+                String message = missingValueMessage(key, candidates);
+                (candidates.isEmpty()
+                    ? missingWithoutCandidates
+                    : missingAndCandidates
+                ).add(message);
+            }
+        }
+        // if one of the keys matches, we give it a full score,
+        //   meaning "this is probably a pair that should be used"
+        // if one of the keys is mis-spelled, we give it a half score,
+        //   meaning "this could be that pair, but it might me something else"
+        // If none of the keys are present or mis-spelled, we give it a zero score,
+        //   meaning "This is not pair you are looking for" *waves hand*
+        double score = hasAtLastOneKey ? 1.0 : !missingAndCandidates.isEmpty() ? 0.5 : 0.0;
+        if (!missingAndCandidates.isEmpty()) {
+            missingAndCandidates.addAll(missingWithoutCandidates);
+            String message = String.join(". ", missingAndCandidates);
+            return new StringWithValue(message, score);
+        }
+        if (hasAtLastOneKey && !missingWithoutCandidates.isEmpty()) {
+            String message = String.join(". ", missingWithoutCandidates);
+            return new StringWithValue(message, score);
+        }
+        // null here means, that there are no valid keys, but also no good error message
+        // so it might be that this pair is not relevant for the error reporting
+        return null;
     }
 
     private static IllegalArgumentException blankValueFor(String key, @Nullable String value) {
@@ -327,6 +552,15 @@ public final class CypherMapWrapper {
             max,
             maxInclusive ? "]" : ")"
         ));
+    }
+
+    private static List<String> similarStrings(CharSequence value, Collection<String> candidates) {
+        return candidates.stream()
+            .map(candidate -> new StringWithValue(candidate, jaroWinkler(value, candidate)))
+            .filter(candidate -> candidate.value > REQUIRED_SIMILARITY)
+            .sorted()
+            .map(candidate -> candidate.string)
+            .collect(Collectors.toList());
     }
 
     // FACTORIES
@@ -383,5 +617,21 @@ public final class CypherMapWrapper {
         Map<String, Object> newMap = new HashMap<>(config);
         newMap.keySet().removeAll(keys);
         return new CypherMapWrapper(newMap);
+    }
+
+    private static final class StringWithValue implements Comparable<StringWithValue> {
+        private final String string;
+        private final double value;
+
+        private StringWithValue(String string, double value) {
+            this.string = string;
+            this.value = value;
+        }
+
+        @Override
+        public int compareTo(CypherMapWrapper.StringWithValue other) {
+            int result = Double.compare(other.value, this.value);
+            return (result != 0) ? result : this.string.compareTo(other.string);
+        }
     }
 }
