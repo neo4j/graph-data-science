@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -36,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class CypherMapWrapperTest {
 
@@ -283,5 +283,13 @@ class CypherMapWrapperTest {
             Arguments.of(21, 42, 84, true, false),
             Arguments.of(85, 42, 84, false, true)
         );
+    }
+
+    private static Map<String, Object> map(Object... objects) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (int i = 0; i < objects.length; ) {
+            map.put((String) objects[i++], objects[i++]);
+        }
+        return map;
     }
 }
