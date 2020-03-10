@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public interface GraphMutationTest<CONFIG extends WriteConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     @Test
-    default void testMutateNodeProperties() {
+    default void testGraphMutation() {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
         GraphStoreCatalog.set(

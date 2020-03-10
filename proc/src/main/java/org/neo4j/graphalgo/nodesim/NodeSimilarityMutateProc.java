@@ -20,12 +20,15 @@
 package org.neo4j.graphalgo.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -40,11 +43,11 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilarityWriteConfig> {
+public class NodeSimilarityMutateProc extends NodeSimilarityBaseProc<NodeSimilarityWriteConfig> {
 
-    @Procedure(name = "gds.nodeSimilarity.write", mode = WRITE)
+    @Procedure(name = "gds.nodeSimilarity.mutate", mode = WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<WriteResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -52,12 +55,12 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
             graphNameOrConfig,
             configuration
         );
-        return write(result);
+        return mutate(result);
     }
 
-    @Procedure(value = "gds.nodeSimilarity.write.estimate", mode = READ)
+    @Procedure(value = "gds.nodeSimilarity.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateWrite(
+    public Stream<MemoryEstimateResult> estimateMutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -65,16 +68,16 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
     }
 
     @Override
-    protected NodeSimilarityWriteConfig newConfig(
+    protected NodeSimilarityMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return NodeSimilarityWriteConfig.of(username, graphName, maybeImplicitCreate, userInput);
+        return NodeSimilarityMutateConfig.of(username, graphName, maybeImplicitCreate, userInput);
     }
 
-    private Stream<WriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
+    private Stream<WriteResult> mutate(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
         NodeSimilarityWriteConfig config = computationResult.config();
 
         if (computationResult.isGraphEmpty()) {
@@ -95,7 +98,33 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
         NodeSimilarityResult result = computationResult.result();
         NodeSimilarity algorithm = computationResult.algorithm();
         SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
-        Graph similarityGraph = similarityGraphResult.similarityGraph();
+
+        HugeGraph.Relationships resultRelationships;
+        if (similarityGraphResult.isTopKGraph()) {
+            TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();
+            HugeGraph baseGraph = (HugeGraph) topKGraph.baseGraph();
+
+            HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = new HugeGraphUtil.RelationshipsBuilder(
+                baseGraph.idMapping(),
+                Orientation.NATURAL,
+                true,
+                Aggregation.NONE,
+                Pools.DEFAULT,
+                computationResult.tracker()
+            );
+
+            for (long nodeId = 0; nodeId < baseGraph.nodeCount(); nodeId++) {
+                topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
+                    relationshipsBuilder.addFromInternal(sourceNodeId, targetNodeId, property);
+                    return true;
+                });
+            }
+
+            resultRelationships = relationshipsBuilder.build();
+        } else {
+            HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
+            resultRelationships = similarityGraph.relationships();
+        }
 
         WriteResultBuilder resultBuilder = new WriteResultBuilder();
         resultBuilder
@@ -105,38 +134,13 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
         resultBuilder.withComputeMillis(computationResult.computeMillis());
         resultBuilder.withConfig(config);
 
-        boolean shouldComputeHistogram = callContext
-            .outputFields()
-            .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
-        if (similarityGraph.relationshipCount() > 0) {
+        if (resultRelationships.topology().elementCount() > 0) {
             String writeRelationshipType = config.writeRelationshipType();
             String writeProperty = config.writeProperty();
 
-            runWithExceptionLogging(
-                "NodeSimilarity write-back failed",
-                () -> {
-                    try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                        RelationshipExporter exporter = RelationshipExporter
-                            .of(api, similarityGraph, algorithm.getTerminationFlag())
-                            .withLog(log)
-                            .build();
-                        if (shouldComputeHistogram) {
-                            DoubleHistogram histogram = new DoubleHistogram(5);
-                            exporter.write(
-                                writeRelationshipType,
-                                writeProperty,
-                                (node1, node2, similarity) -> {
-                                    histogram.recordValue(similarity);
-                                    return true;
-                                }
-                            );
-                            resultBuilder.withHistogram(histogram);
-                        } else {
-                            exporter.write(writeRelationshipType, writeProperty);
-                        }
-                    }
-                }
-            );
+            computationResult
+                .graphStore()
+                .addRelationships(writeRelationshipType, Optional.of(writeProperty), resultRelationships);
         }
         return Stream.of(resultBuilder.build());
     }

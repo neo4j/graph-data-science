@@ -57,13 +57,15 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.louvain.stream.estimate`
 | `gds.louvain.stats`
 | `gds.louvain.stats.estimate`
-.6+<.^|<<algorithms-node-similarity-syntax, Node Similarity>>
+.8+<.^|<<algorithms-node-similarity-syntax, Node Similarity>>
 | `gds.nodeSimilarity.write`
 | `gds.nodeSimilarity.write.estimate`
 | `gds.nodeSimilarity.stream`
 | `gds.nodeSimilarity.stream.estimate`
 | `gds.nodeSimilarity.stats`
 | `gds.nodeSimilarity.stats.estimate`
+| `gds.nodeSimilarity.mutate`
+| `gds.nodeSimilarity.mutate.estimate`
 .8+<.^|<<algorithms-pagerank-syntax, PageRank>>
 | `gds.pageRank.write`
 | `gds.pageRank.write.estimate`

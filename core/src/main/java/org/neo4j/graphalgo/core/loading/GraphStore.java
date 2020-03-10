@@ -119,6 +119,27 @@ public final class GraphStore {
         this.nodeProperties.putIfAbsent(propertyKey, nodeProperties);
     }
 
+    public boolean hasRelationships(String relationshipType) {
+        return relationships.containsKey(relationshipType);
+    }
+
+    public void addRelationships(String relationshipType, Optional<String> relationshipProperty, HugeGraph.Relationships relationships) {
+        if (!hasRelationships(relationshipType)) {
+            this.relationships.put(relationshipType, relationships.topology());
+
+            if (relationshipProperty.isPresent() && relationships.hasProperties()) {
+                HugeGraph.PropertyCSR propertyCSR = relationships.properties().get();
+                this.relationshipProperties.compute(relationshipType, (relType, propertyMap) -> {
+                    if (propertyMap == null) {
+                        return Collections.singletonMap(relationshipProperty.get(), propertyCSR);
+                    }
+                    propertyMap.putIfAbsent(relationshipProperty.get(), propertyCSR);
+                    return propertyMap;
+                });
+            }
+        }
+    }
+
     public Graph getGraph(String... relationshipTypes) {
         return getGraph(Arrays.asList(relationshipTypes), Optional.empty());
     }

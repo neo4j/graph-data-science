@@ -120,6 +120,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
     public SimilarityGraphResult computeToGraph() {
         Graph similarityGraph;
+        boolean isTopKGraph = false;
+
         if (config.hasTopK() && !config.hasTopN()) {
             progressLogger.log("NodeSimilarity#computeToGraph");
 
@@ -128,12 +130,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             TopKMap topKMap = config.isParallel()
                 ? computeTopKMapParallel()
                 : computeTopKMap();
+
+            isTopKGraph = true;
             similarityGraph = new TopKGraph(graph, topKMap);
         } else {
             Stream<SimilarityResult> similarities = computeToStream();
             similarityGraph = new SimilarityGraphBuilder(graph, executorService, tracker).build(similarities);
         }
-        return new SimilarityGraphResult(similarityGraph, nodesToCompare);
+        return new SimilarityGraphResult(similarityGraph, nodesToCompare, isTopKGraph);
     }
 
     private void prepare() {

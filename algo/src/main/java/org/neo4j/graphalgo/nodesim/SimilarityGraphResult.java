@@ -24,10 +24,12 @@ import org.neo4j.graphalgo.api.Graph;
 public class SimilarityGraphResult {
     private final Graph similarityGraph;
     private final long comparedNodes;
+    private final boolean isTopKGraph;
 
-    SimilarityGraphResult(Graph similarityGraph, long comparedNodes) {
+    SimilarityGraphResult(Graph similarityGraph, long comparedNodes, boolean isTopKGraph) {
         this.similarityGraph = similarityGraph;
         this.comparedNodes = comparedNodes;
+        this.isTopKGraph = isTopKGraph;
     }
 
     public Graph similarityGraph() {
@@ -36,5 +38,9 @@ public class SimilarityGraphResult {
 
     public long comparedNodes() {
         return comparedNodes;
+    }
+
+    public boolean isTopKGraph() {
+        return isTopKGraph;
     }
 }
