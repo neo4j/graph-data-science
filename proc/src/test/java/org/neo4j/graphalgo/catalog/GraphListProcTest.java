@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 
+import java.time.LocalDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.Collections;
 import java.util.List;
@@ -109,7 +110,7 @@ class GraphListProcTest extends BaseProcTest {
                     "p99", 1L,
                     "p999", 1L
                 ),
-                "createdTime", isA(String.class)
+                "createdTime", isA(LocalDateTime.class)
             )
         ));
     }
@@ -153,7 +154,7 @@ class GraphListProcTest extends BaseProcTest {
                     "p99", 1L,
                     "p999", 1L
                 ),
-                "createdTime", isA(String.class)
+                "createdTime", isA(LocalDateTime.class)
             )
         ));
     }

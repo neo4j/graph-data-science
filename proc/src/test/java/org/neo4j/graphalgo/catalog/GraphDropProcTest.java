@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -107,7 +108,7 @@ class GraphDropProcTest extends BaseProcTest {
                         "p99", 1L,
                         "p999", 1L
                     ),
-                    "createdTime", isA(String.class)
+                    "createdTime", isA(LocalDateTime.class)
                 )
             )
         );
