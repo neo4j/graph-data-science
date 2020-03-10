@@ -47,6 +47,12 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
         return new NodeSimilarityFactory<>();
     }
 
+    boolean shouldComputeHistogram() {
+        return callContext
+            .outputFields()
+            .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
+    }
+
     DoubleHistogram computeHistogram(Graph similarityGraph) {
         DoubleHistogram histogram = new DoubleHistogram(5);
         similarityGraph.forEachNode(nodeId -> {
@@ -58,5 +64,4 @@ public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseCo
         });
         return histogram;
     }
-
 }

@@ -101,10 +101,7 @@ public class NodeSimilarityStatsProc extends NodeSimilarityBaseProc<NodeSimilari
         resultBuilder.withComputeMillis(computationResult.computeMillis());
         resultBuilder.withConfig(config);
 
-        boolean shouldComputeHistogram = callContext
-            .outputFields()
-            .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
-        if (shouldComputeHistogram) {
+        if (shouldComputeHistogram()) {
             try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
                 resultBuilder.withHistogram(computeHistogram(similarityGraph));
             }

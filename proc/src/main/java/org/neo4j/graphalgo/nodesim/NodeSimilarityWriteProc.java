@@ -105,9 +105,6 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
         resultBuilder.withComputeMillis(computationResult.computeMillis());
         resultBuilder.withConfig(config);
 
-        boolean shouldComputeHistogram = callContext
-            .outputFields()
-            .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
         if (similarityGraph.relationshipCount() > 0) {
             String writeRelationshipType = config.writeRelationshipType();
             String writeProperty = config.writeProperty();
@@ -120,7 +117,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
                             .of(api, similarityGraph, algorithm.getTerminationFlag())
                             .withLog(log)
                             .build();
-                        if (shouldComputeHistogram) {
+                        if (shouldComputeHistogram()) {
                             DoubleHistogram histogram = new DoubleHistogram(5);
                             exporter.write(
                                 writeRelationshipType,
