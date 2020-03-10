@@ -22,10 +22,14 @@ package org.neo4j.graphalgo.core.write;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDbApi;
-import org.neo4j.graphalgo.core.huge.DirectIdMapping;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.huge.DirectIdMapping;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import java.util.concurrent.ExecutorService;
@@ -34,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 
 class NodePropertyExporterTest {
@@ -43,21 +49,56 @@ class NodePropertyExporterTest {
     @BeforeAll
     static void setup() {
         DB = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
-        runQuery(DB, "CREATE " +
-                     "(n1:Node1 {prop1: 1})," +
-                     "(n2:Node2 {prop2: 2})," +
-                     "(n3:Node3 {prop3: 3})" +
-                     "CREATE " +
-                     "(n1)-[:REL1 {prop1: 1}]->(n2)," +
-                     "(n1)-[:REL2 {prop2: 2}]->(n3)," +
-                     "(n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)," +
-                     "(n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3);"
+        runQuery(
+            DB,
+            "CREATE " +
+            "  (n1:Node {prop1: 1, prop2: 42})" +
+            ", (n2:Node {prop1: 2, prop2: 42})" +
+            ", (n3:Node {prop1: 3, prop2: 42})" +
+            ", (n1)-[:REL]->(n2)" +
+            ", (n1)-[:REL]->(n3)" +
+            ", (n2)-[:REL]->(n3)" +
+            ", (n2)-[:REL]->(n3)"
         );
     }
 
     @AfterAll
     static void tearDown() {
         if (DB != null) DB.shutdown();
+    }
+
+    @Test
+    void exportSingleNodeProperty() {
+        Graph graph = new StoreLoaderBuilder().api(DB)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addNodeProperty("newProp1", "prop1", 42.0, Aggregation.NONE)
+            .build()
+            .graph(NativeFactory.class);
+
+        NodePropertyExporter exporter = NodePropertyExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE).build();
+
+        exporter.write("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR);
+
+        Graph updatedGraph = new StoreLoaderBuilder().api(DB)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addNodeProperty("prop1", "prop1", 42.0, Aggregation.NONE)
+            .addNodeProperty("newProp1", "newProp1", 42.0, Aggregation.NONE)
+            .build()
+            .graph(NativeFactory.class);
+
+        assertGraphEquals(
+            fromGdl(
+                "(a { prop1: 1, newProp1: 23 })" +
+                "(b { prop1: 2, newProp1: 42 })" +
+                "(c { prop1: 3, newProp1: 84 })" +
+                "(a)-->(b)" +
+                "(a)-->(c)" +
+                "(b)-->(c)" +
+                "(b)-->(c)"),
+            updatedGraph
+        );
     }
 
     @Test
