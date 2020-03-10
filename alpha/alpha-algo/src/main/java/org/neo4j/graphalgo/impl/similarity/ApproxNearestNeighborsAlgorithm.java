@@ -552,7 +552,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             HugeGraph.Relationships outRelationships = outImporter().build();
             HugeGraph.Relationships inRelationships = inImporter().build();
 
-            Map<String, HugeGraph.CSR> topology = new HashMap<>();
+            Map<String, HugeGraph.TopologyCSR> topology = new HashMap<>();
             topology.put(ANN_OUT_GRAPH, outRelationships.topology());
             topology.put(ANN_IN_GRAPH, inRelationships.topology());
 

@@ -104,21 +104,21 @@ public class HugeGraph implements Graph {
     public static HugeGraph create(
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        CSR relationships,
-        Optional<PropertyCSR> maybeRelationshipProperties,
+        TopologyCSR topologyCSR,
+        Optional<PropertyCSR> maybePropertyCSR,
         AllocationTracker tracker
     ) {
         return new HugeGraph(
             nodes,
             nodeProperties,
-            relationships.elementCount(),
-            relationships.list(),
-            relationships.offsets(),
-            maybeRelationshipProperties.isPresent(),
-            maybeRelationshipProperties.map(PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
-            maybeRelationshipProperties.map(PropertyCSR::list).orElse(null),
-            maybeRelationshipProperties.map(PropertyCSR::offsets).orElse(null),
-            relationships.orientation(),
+            topologyCSR.elementCount(),
+            topologyCSR.list(),
+            topologyCSR.offsets(),
+            maybePropertyCSR.isPresent(),
+            maybePropertyCSR.map(PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
+            maybePropertyCSR.map(PropertyCSR::list).orElse(null),
+            maybePropertyCSR.map(PropertyCSR::offsets).orElse(null),
+            topologyCSR.orientation(),
             tracker
         );
     }
@@ -490,7 +490,7 @@ public class HugeGraph implements Graph {
     @ValueClass
     public interface Relationships {
 
-        CSR topology();
+        TopologyCSR topology();
 
         @Nullable PropertyCSR properties();
 
@@ -507,7 +507,7 @@ public class HugeGraph implements Graph {
             @Nullable AdjacencyOffsets propertyOffsets,
             double defaultPropertyValue
         ) {
-            CSR topologyCSR = ImmutableCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
+            TopologyCSR topologyCSR = ImmutableTopologyCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
             PropertyCSR propertyCSR = null;
             if (properties != null && propertyOffsets != null) {
                 propertyCSR = ImmutablePropertyCSR.of(
@@ -523,7 +523,7 @@ public class HugeGraph implements Graph {
     }
 
     @ValueClass
-    public interface CSR {
+    public interface TopologyCSR {
         AdjacencyList list();
 
         AdjacencyOffsets offsets();
@@ -535,7 +535,7 @@ public class HugeGraph implements Graph {
 
     @ValueClass
     @SuppressWarnings("immutables:subtype")
-    public interface PropertyCSR extends CSR {
+    public interface PropertyCSR extends TopologyCSR {
         double defaultPropertyValue();
     }
 }

@@ -47,7 +47,7 @@ public final class GraphStore {
 
     private final Map<String, NodeProperties> nodeProperties;
 
-    private final Map<String, HugeGraph.CSR> relationships;
+    private final Map<String, HugeGraph.TopologyCSR> relationships;
 
     private final Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties;
 
@@ -58,7 +58,7 @@ public final class GraphStore {
     public static GraphStore of(
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        Map<String, HugeGraph.CSR> relationships,
+        Map<String, HugeGraph.TopologyCSR> relationships,
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
     ) {
@@ -79,7 +79,7 @@ public final class GraphStore {
     ) {
         HugeGraph.Relationships relationships = graph.relationships();
 
-        Map<String, HugeGraph.CSR> topology = singletonMap(relationshipType, relationships.topology());
+        Map<String, HugeGraph.TopologyCSR> topology = singletonMap(relationshipType, relationships.topology());
 
         Map<String, NodeProperties> nodeProperties = graph.availableNodeProperties().stream()
             .collect(Collectors.toMap(property -> property, graph::nodeProperties));
@@ -98,7 +98,7 @@ public final class GraphStore {
     private GraphStore(
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        Map<String, HugeGraph.CSR> relationships,
+        Map<String, HugeGraph.TopologyCSR> relationships,
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
     ) {
@@ -151,7 +151,7 @@ public final class GraphStore {
 
     public long relationshipCount() {
         return relationships.values().stream()
-            .mapToLong(HugeGraph.CSR::elementCount)
+            .mapToLong(HugeGraph.TopologyCSR::elementCount)
             .sum();
     }
 

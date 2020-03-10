@@ -70,13 +70,13 @@ public final class HugeGraphUtil {
     }
 
     public static HugeGraph create(IdMap idMap, HugeGraph.Relationships relationships, AllocationTracker tracker) {
-        HugeGraph.CSR topology = relationships.topology();
+        HugeGraph.TopologyCSR topologyCSR = relationships.topology();
 
-        Optional<HugeGraph.PropertyCSR> properties = relationships.hasProperties()
+        Optional<HugeGraph.PropertyCSR> maybePropertyCSR = relationships.hasProperties()
             ? Optional.of(relationships.properties())
             : Optional.empty();
 
-        return HugeGraph.create(idMap, Collections.emptyMap(), topology, properties, tracker);
+        return HugeGraph.create(idMap, Collections.emptyMap(), topologyCSR, maybePropertyCSR, tracker);
     }
 
     public static class IdMapBuilder {
