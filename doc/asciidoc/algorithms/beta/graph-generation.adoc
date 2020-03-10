@@ -56,6 +56,9 @@ YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegre
 | relationshipDistribution  | String    | UNIFORM  | yes      | The probability distribution method used to connect generated nodes. For more information see <<graph-generation-distribution>>.
 | relationshipSeed          | Integer   | null     | yes      | The seed used for generating relationships.
 | relationshipProperty      | Map       | {}       | yes      | Describes the method used to generate a relationship property. By default no relationship property is generated. For more information see <<graph-generation-relationship-property>>.
+| aggregation               | String    | NONE     | yes      | The relationship aggregation method cf. <<native-projection-syntax-relationship-projections, Native Projection.>>.
+| orientation               | String    | NATURAL  | yes      | The method of orienting edges. Allowed values are NATURAL, REVERSE and UNDIRECTED.
+| selfLoops                 | Boolean   | false    | yes      | Whether to allow relationships with identical source and target node.
 |===
 
 .Results
