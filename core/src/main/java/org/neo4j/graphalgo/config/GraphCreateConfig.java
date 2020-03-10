@@ -83,7 +83,7 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Value.Derived
     @Value.Auxiliary
-    default LocalDateTime createdTime() {
+    default LocalDateTime creationTime() {
         return LocalDateTime.now();
     }
 

@@ -110,7 +110,7 @@ class GraphListProcTest extends BaseProcTest {
                     "p99", 1L,
                     "p999", 1L
                 ),
-                "createdTime", isA(LocalDateTime.class)
+                "creationTime", isA(LocalDateTime.class)
             )
         ));
     }
@@ -154,7 +154,7 @@ class GraphListProcTest extends BaseProcTest {
                     "p99", 1L,
                     "p999", 1L
                 ),
-                "createdTime", isA(LocalDateTime.class)
+                "creationTime", isA(LocalDateTime.class)
             )
         ));
     }
@@ -348,7 +348,7 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldHaveCreatedTimeField() {
+    void shouldHaveCreationTimeField() {
         String loadQuery = "CALL gds.graph.create($name, '*', '*')";
 
         runQuery("alice", loadQuery, map("name", "aliceGraph"));
@@ -356,15 +356,15 @@ class GraphListProcTest extends BaseProcTest {
 
         String listQuery = "CALL gds.graph.list()";
 
-        AtomicReference<String> timeCreated = new AtomicReference<>();
-        runQueryWithRowConsumer("alice", listQuery, resultRow -> timeCreated.set(formatCreatedTime(resultRow)));
-        runQueryWithRowConsumer("alice", listQuery, resultRow -> assertEquals(timeCreated.get(), formatCreatedTime(resultRow)));
+        AtomicReference<String> creationTimeAlice = new AtomicReference<>();
+        runQueryWithRowConsumer("alice", listQuery, resultRow -> creationTimeAlice.set(formatCreationTime(resultRow)));
+        runQueryWithRowConsumer("alice", listQuery, resultRow -> assertEquals(creationTimeAlice.get(), formatCreationTime(resultRow)));
 
-        AtomicReference<String> timeCreatedBob = new AtomicReference<>();
-        runQueryWithRowConsumer("bob", listQuery, resultRow -> timeCreatedBob.set(formatCreatedTime(resultRow)));
-        runQueryWithRowConsumer("bob", listQuery, resultRow -> assertEquals(timeCreatedBob.get(), formatCreatedTime(resultRow)));
+        AtomicReference<String> creationTimeBob = new AtomicReference<>();
+        runQueryWithRowConsumer("bob", listQuery, resultRow -> creationTimeBob.set(formatCreationTime(resultRow)));
+        runQueryWithRowConsumer("bob", listQuery, resultRow -> assertEquals(creationTimeBob.get(), formatCreationTime(resultRow)));
 
-        assertNotEquals(timeCreated.get(), timeCreatedBob.get());
+        assertNotEquals(creationTimeAlice.get(), creationTimeBob.get());
     }
 
     @ParameterizedTest
@@ -385,7 +385,7 @@ class GraphListProcTest extends BaseProcTest {
         assertError(String.format("CALL gds.graph.list(%s)", graphName), "Type mismatch: expected String but was");
     }
 
-    private String formatCreatedTime(Result.ResultRow resultRow) {
-        return ISO_LOCAL_DATE_TIME.format((TemporalAccessor) resultRow.get("createdTime"));
+    private String formatCreationTime(Result.ResultRow resultRow) {
+        return ISO_LOCAL_DATE_TIME.format((TemporalAccessor) resultRow.get("creationTime"));
     }
 }

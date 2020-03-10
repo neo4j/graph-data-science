@@ -45,13 +45,13 @@ public class GraphInfo {
     public final long nodeCount;
     public final long relationshipCount;
     public final Map<String, Object> degreeDistribution;
-    public final LocalDateTime createdTime;
+    public final LocalDateTime creationTime;
 
     GraphInfo(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
         this.graphName = config.graphName();
         this.nodeProjection = config.nodeProjections().toObject();
         this.relationshipProjection = config.relationshipProjections().toObject();
-        this.createdTime = config.createdTime();
+        this.creationTime = config.creationTime();
         this.nodeQuery = config instanceof GraphCreateFromCypherConfig
             ? ((GraphCreateFromCypherConfig) config).nodeQuery()
             : null;
