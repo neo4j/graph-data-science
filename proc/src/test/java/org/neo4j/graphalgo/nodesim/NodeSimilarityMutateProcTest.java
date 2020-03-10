@@ -19,11 +19,19 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Map;
 import java.util.Optional;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NodeSimilarityMutateProcTest
     extends NodeSimilarityBaseProcTest<NodeSimilarityWriteConfig>
@@ -89,5 +97,59 @@ class NodeSimilarityMutateProcTest
             "Relationship type `%s` already exists in the in-memory graph.",
             WRITE_RELATIONSHIP_TYPE
         );
+    }
+
+    @Test
+    void testMutateYields() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("nodeSimilarity")
+            .mutateMode()
+            .addParameter("similarityCutoff", 0.0)
+            .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .yields(
+                "computeMillis",
+                "createMillis",
+                "nodesCompared ",
+                "relationshipsWritten",
+                "writeMillis",
+                "similarityDistribution",
+                "postProcessingMillis",
+                "configuration"
+            );
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(3, row.getNumber("nodesCompared").longValue());
+            assertEquals(6, row.getNumber("relationshipsWritten").longValue());
+            assertUserInput(row, "writeRelationshipType", WRITE_RELATIONSHIP_TYPE);
+            assertUserInput(row, "writeProperty", WRITE_PROPERTY);
+            assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
+            assertThat("Missing createMillis", -1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat("Missing writeMillis", -1L, equalTo(row.getNumber("writeMillis").longValue()));
+
+            Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");
+            assertThat("Missing min", -1.0, lessThan(distribution.get("min")));
+            assertThat("Missing max", -1.0, lessThan(distribution.get("max")));
+            assertThat("Missing mean", -1.0, lessThan(distribution.get("mean")));
+            assertThat("Missing stdDev", -1.0, lessThan(distribution.get("stdDev")));
+            assertThat("Missing p1", -1.0, lessThan(distribution.get("p1")));
+            assertThat("Missing p5", -1.0, lessThan(distribution.get("p5")));
+            assertThat("Missing p10", -1.0, lessThan(distribution.get("p10")));
+            assertThat("Missing p25", -1.0, lessThan(distribution.get("p25")));
+            assertThat("Missing p50", -1.0, lessThan(distribution.get("p50")));
+            assertThat("Missing p75", -1.0, lessThan(distribution.get("p75")));
+            assertThat("Missing p90", -1.0, lessThan(distribution.get("p90")));
+            assertThat("Missing p95", -1.0, lessThan(distribution.get("p95")));
+            assertThat("Missing p99", -1.0, lessThan(distribution.get("p99")));
+            assertThat("Missing p100", -1.0, lessThan(distribution.get("p100")));
+
+            assertThat(
+                "Missing postProcessingMillis",
+                -1L,
+                equalTo(row.getNumber("postProcessingMillis").longValue())
+            );
+        });
     }
 }

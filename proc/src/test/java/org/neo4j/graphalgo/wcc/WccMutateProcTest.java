@@ -19,12 +19,18 @@
  */
 package org.neo4j.graphalgo.wcc;
 
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class WccMutateProcTest extends WccBaseProcTest<WccWriteConfig> implements GraphMutationTest<WccWriteConfig, DisjointSetStruct> {
 
@@ -79,4 +85,60 @@ class WccMutateProcTest extends WccBaseProcTest<WccWriteConfig> implements Graph
             "Node property `%s` already exists in the in-memory graph.",
             WRITE_PROPERTY
         );
-    }}
+    }
+
+    @Test
+    void testMutateYields() {
+        String query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("wcc")
+            .mutateMode()
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .yields(
+                "nodePropertiesWritten",
+                "createMillis",
+                "computeMillis",
+                "writeMillis",
+                "postProcessingMillis",
+                "componentCount",
+                "componentDistribution",
+                "configuration"
+            );
+
+        runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertUserInput(row, "writeProperty", WRITE_PROPERTY);
+                assertUserInput(row, "seedProperty", null);
+                assertUserInput(row, "relationshipWeightProperty", null);
+
+                assertEquals(10L, row.getNumber("nodePropertiesWritten"));
+
+                assertNotEquals(-1L, row.getNumber("createMillis"));
+                assertNotEquals(-1L, row.getNumber("computeMillis"));
+                assertNotEquals(-1L, row.getNumber("writeMillis"));
+                assertNotEquals(-1L, row.getNumber("postProcessingMillis"));
+
+                assertEquals(3L, row.getNumber("componentCount"));
+                assertUserInput(row, "threshold", 0D);
+                assertUserInput(row, "consecutiveIds", false);
+
+                assertEquals(MapUtil.map(
+                    "p99", 7L,
+                    "min", 1L,
+                    "max", 7L,
+                    "mean", 3.3333333333333335D,
+                    "p90", 7L,
+                    "p50", 2L,
+                    "p999", 7L,
+                    "p95", 7L,
+                    "p75", 2L
+                ), row.get("componentDistribution"));
+            }
+        );
+    }
+}
+
+

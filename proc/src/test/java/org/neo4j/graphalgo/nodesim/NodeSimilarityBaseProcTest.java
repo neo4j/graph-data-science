@@ -80,6 +80,32 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
         ", (b)-[:LIKES]->(i2)" +
         ", (c)-[:LIKES]->(i3)";
 
+    @BeforeEach
+    void setup() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(
+            NodeSimilarityWriteProc.class,
+            NodeSimilarityStreamProc.class,
+            NodeSimilarityStatsProc.class,
+            NodeSimilarityMutateProc.class,
+            GraphCreateProc.class
+        );
+        runQuery(DB_CYPHER);
+
+        TestSupport.allDirectedProjections().forEach(orientation -> {
+            String name = "myGraph" + orientation.name();
+            String createQuery = GdsCypher.call()
+                .withAnyLabel()
+                .withRelationshipType(
+                    "LIKES",
+                    RelationshipProjection.builder().type("LIKES").orientation(orientation).build()
+                )
+                .graphCreate(name)
+                .yields();
+            runQuery(createQuery);
+        });
+    }
+
     static Stream<Arguments> allGraphVariations() {
         return graphVariationForProjection(NATURAL).map(args -> arguments(args.get()[0], args.get()[2]));
     }
@@ -110,26 +136,6 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
                 "implicit graph - " + orientation
             )
         );
-    }
-
-    @BeforeEach
-    void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(NodeSimilarityWriteProc.class, NodeSimilarityStreamProc.class, NodeSimilarityStatsProc.class, GraphCreateProc.class);
-        runQuery(DB_CYPHER);
-
-        TestSupport.allDirectedProjections().forEach(orientation -> {
-            String name = "myGraph" + orientation.name();
-            String createQuery = GdsCypher.call()
-                .withAnyLabel()
-                .withRelationshipType(
-                    "LIKES",
-                    RelationshipProjection.builder().type("LIKES").orientation(orientation).build()
-                )
-                .graphCreate(name)
-                .yields();
-            runQuery(createQuery);
-        });
     }
 
     @AfterEach

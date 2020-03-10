@@ -70,7 +70,7 @@ public abstract class GdsCypher {
     }
 
     public enum ExecutionModes implements ExecutionMode {
-        WRITE, STATS, STREAM
+        WRITE, STATS, STREAM, MUTATE
     }
 
     @SuppressWarnings("unused")
@@ -308,6 +308,10 @@ public abstract class GdsCypher {
 
         default ParametersBuildStage writeMode() {
             return executionMode(ExecutionModes.WRITE);
+        }
+
+        default ParametersBuildStage mutateMode() {
+            return executionMode(ExecutionModes.MUTATE);
         }
 
         default ParametersBuildStage statsMode() {

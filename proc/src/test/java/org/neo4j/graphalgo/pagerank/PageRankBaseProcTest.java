@@ -119,7 +119,12 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
             ", (u)-[:TYPE3 {weight: 1.0}]->(w)" +
             ", (v)-[:TYPE3 {weight: 1.0}]->(w)";
 
-        registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
+        registerProcedures(
+            PageRankStreamProc.class,
+            PageRankWriteProc.class,
+            PageRankMutateProc.class,
+            GraphCreateProc.class
+        );
         runQuery(cypher);
 
         runQuery("CALL gds.graph.create(" +

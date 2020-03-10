@@ -20,12 +20,17 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Collections;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class PageRankMutateProcTest extends PageRankBaseProcTest<PageRankWriteConfig> implements GraphMutationTest<PageRankWriteConfig, PageRank> {
 
@@ -54,8 +59,9 @@ class PageRankMutateProcTest extends PageRankBaseProcTest<PageRankWriteConfig> i
         ", (f)-[:TYPE1]->(e)";
 
     @BeforeEach
-    void setupGraph() {
-        db = TestDatabaseCreator.createTestDatabase();
+    void setupGraph() throws Exception {
+        super.setupGraph();
+        runQuery(db, "MATCH (n) DETACH DELETE n", Collections.emptyMap());
         runQuery(DB_CYPHER);
     }
 
@@ -107,5 +113,39 @@ class PageRankMutateProcTest extends PageRankBaseProcTest<PageRankWriteConfig> i
             return mapWrapper.withString("writeProperty", WRITE_PROPERTY);
         }
         return mapWrapper;
+    }
+
+    @Test
+    void testMutateYields() {
+        String query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("pageRank")
+            .mutateMode()
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .yields(
+                "nodePropertiesWritten",
+                "createMillis",
+                "computeMillis",
+                "writeMillis",
+                "didConverge",
+                "ranIterations",
+                "configuration"
+            );
+
+        runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertEquals(10L, row.getNumber("nodePropertiesWritten"));
+
+                assertNotEquals(-1L, row.getNumber("createMillis"));
+                assertNotEquals(-1L, row.getNumber("computeMillis"));
+                assertNotEquals(-1L, row.getNumber("writeMillis"));
+
+                assertEquals(false, row.get("didConverge"));
+                assertEquals(20L, row.get("ranIterations"));
+            }
+        );
     }
 }
