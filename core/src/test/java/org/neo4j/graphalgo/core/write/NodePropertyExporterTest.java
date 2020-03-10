@@ -73,8 +73,8 @@ class NodePropertyExporterTest {
     private void transactionTerminationTest(ExecutorService executorService) {
         TerminationFlag terminationFlag = () -> false;
         NodePropertyExporter exporter = NodePropertyExporter.of(DB, new DirectIdMapping(3), terminationFlag)
-                .parallel(executorService, 4)
-                .build();
+            .parallel(executorService, 4)
+            .build();
 
         assertTransactionTermination(() -> exporter.write("foo", 42.0, new DoublePropertyTranslator()));
 

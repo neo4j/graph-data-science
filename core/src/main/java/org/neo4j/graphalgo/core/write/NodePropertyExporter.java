@@ -71,7 +71,8 @@ public final class NodePropertyExporter extends StatementApi {
                 terminationFlag,
                 progressLogger,
                 writeConcurrency,
-                executorService);
+                executorService
+            );
         }
     }
 
@@ -80,13 +81,14 @@ public final class NodePropertyExporter extends StatementApi {
     }
 
     private NodePropertyExporter(
-            GraphDatabaseAPI db,
-            long nodeCount,
-            LongUnaryOperator toOriginalId,
-            TerminationFlag terminationFlag,
-            ProgressLogger log,
-            int concurrency,
-            ExecutorService executorService) {
+        GraphDatabaseAPI db,
+        long nodeCount,
+        LongUnaryOperator toOriginalId,
+        TerminationFlag terminationFlag,
+        ProgressLogger log,
+        int concurrency,
+        ExecutorService executorService
+    ) {
         super(db);
         this.nodeCount = nodeCount;
         this.toOriginalId = toOriginalId;
@@ -98,9 +100,10 @@ public final class NodePropertyExporter extends StatementApi {
     }
 
     public <T> void write(
-            String property,
-            T data,
-            PropertyTranslator<T> translator) {
+        String property,
+        T data,
+        PropertyTranslator<T> translator
+    ) {
         final int propertyId = getOrCreatePropertyToken(property);
         if (propertyId == -1) {
             throw new IllegalStateException("no write property id is set");
@@ -113,12 +116,13 @@ public final class NodePropertyExporter extends StatementApi {
     }
 
     public <T, U> void write(
-            String property1,
-            T data1,
-            PropertyTranslator<T> translator1,
-            String property2,
-            U data2,
-            PropertyTranslator<U> translator2) {
+        String property1,
+        T data1,
+        PropertyTranslator<T> translator1,
+        String property2,
+        U data2,
+        PropertyTranslator<U> translator2
+    ) {
         final int propertyId1 = getOrCreatePropertyToken(property1);
         if (propertyId1 == -1) {
             throw new IllegalStateException("no write property id is set");
@@ -139,53 +143,59 @@ public final class NodePropertyExporter extends StatementApi {
     }
 
     private <T> void writeSequential(
-            int propertyId,
-            T data,
-            PropertyTranslator<T> translator) {
+        int propertyId,
+        T data,
+        PropertyTranslator<T> translator
+    ) {
         writeSequential((ops, offset) -> doWrite(propertyId, data, translator, ops, offset));
     }
 
     private <T, U> void writeSequential(
-            int propertyId1,
-            T data1,
-            PropertyTranslator<T> translator1,
-            int propertyId2,
-            U data2,
-            PropertyTranslator<U> translator2) {
-        writeSequential((ops, offset) -> doWrite(
-                propertyId1,
-                data1,
-                translator1,
-                propertyId2,
-                data2,
-                translator2,
-                ops,
-                offset));
+        int propertyId1,
+        T data1,
+        PropertyTranslator<T> translator1,
+        int propertyId2,
+        U data2,
+        PropertyTranslator<U> translator2
+    ) {
+        writeSequential((ops, nodeId) -> doWrite(
+            propertyId1,
+            data1,
+            translator1,
+            propertyId2,
+            data2,
+            translator2,
+            ops,
+            nodeId
+        ));
     }
 
     private <T> void writeParallel(
-            int propertyId,
-            T data,
-            PropertyTranslator<T> translator) {
+        int propertyId,
+        T data,
+        PropertyTranslator<T> translator
+    ) {
         writeParallel((ops, offset) -> doWrite(propertyId, data, translator, ops, offset));
     }
 
     private <T, U> void writeParallel(
-            int propertyId1,
-            T data1,
-            PropertyTranslator<T> translator1,
-            int propertyId2,
-            U data2,
-            PropertyTranslator<U> translator2) {
-        writeParallel((ops, offset) -> doWrite(
-                propertyId1,
-                data1,
-                translator1,
-                propertyId2,
-                data2,
-                translator2,
-                ops,
-                offset));
+        int propertyId1,
+        T data1,
+        PropertyTranslator<T> translator1,
+        int propertyId2,
+        U data2,
+        PropertyTranslator<U> translator2
+    ) {
+        writeParallel((ops, nodeId) -> doWrite(
+            propertyId1,
+            data1,
+            translator1,
+            propertyId2,
+            data2,
+            translator2,
+            ops,
+            nodeId
+        ));
     }
 
     private void writeSequential(WriteConsumer writer) {
@@ -202,82 +212,89 @@ public final class NodePropertyExporter extends StatementApi {
                 }
             }
             progressLogger.logProgress(
-                    nodeCount,
-                    nodeCount);
+                nodeCount,
+                nodeCount
+            );
         });
     }
 
     private void writeParallel(WriteConsumer writer) {
         final long batchSize = ParallelUtil.adjustedBatchSize(
-                nodeCount,
-                concurrency,
-                MIN_BATCH_SIZE,
-                MAX_BATCH_SIZE);
+            nodeCount,
+            concurrency,
+            MIN_BATCH_SIZE,
+            MAX_BATCH_SIZE
+        );
         final AtomicLong progress = new AtomicLong(0L);
         final Collection<Runnable> runnables = LazyBatchCollection.of(
-                nodeCount,
-                batchSize,
-                (start, len) -> () -> {
-                    acceptInTransaction(stmt -> {
-                        terminationFlag.assertRunning();
-                        long end = start + len;
-                        Write ops = stmt.dataWrite();
-                        for (long currentNode = start; currentNode < end; currentNode++) {
-                            writer.accept(ops, currentNode);
+            nodeCount,
+            batchSize,
+            (start, len) -> () -> {
+                acceptInTransaction(stmt -> {
+                    terminationFlag.assertRunning();
+                    long end = start + len;
+                    Write ops = stmt.dataWrite();
+                    for (long currentNode = start; currentNode < end; currentNode++) {
+                        writer.accept(ops, currentNode);
 
-                            // Only log every 10_000 written nodes
-                            if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
-                                long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
-                                progressLogger.logProgress(
-                                        currentProgress,
-                                        nodeCount);
-                                terminationFlag.assertRunning();
-                            }
+                        // Only log every 10_000 written nodes
+                        if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
+                            long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
+                            progressLogger.logProgress(
+                                currentProgress,
+                                nodeCount
+                            );
+                            terminationFlag.assertRunning();
                         }
+                    }
 
-                        // log progress for the last batch of written nodes
-                        progressLogger.logProgress(
-                                progress.addAndGet((end - start + 1) % TerminationFlag.RUN_CHECK_NODE_COUNT),
-                                nodeCount);
-                    });
+                    // log progress for the last batch of written nodes
+                    progressLogger.logProgress(
+                        progress.addAndGet((end - start + 1) % TerminationFlag.RUN_CHECK_NODE_COUNT),
+                        nodeCount
+                    );
                 });
+            }
+        );
         ParallelUtil.runWithConcurrency(
-                concurrency,
-                runnables,
-                Integer.MAX_VALUE,
-                10L,
-                TimeUnit.MICROSECONDS,
-                terminationFlag,
-                executorService
+            concurrency,
+            runnables,
+            Integer.MAX_VALUE,
+            10L,
+            TimeUnit.MICROSECONDS,
+            terminationFlag,
+            executorService
         );
     }
 
     private <T> void doWrite(
-            int propertyId,
-            T data,
-            PropertyTranslator<T> trans,
-            Write ops,
-            long nodeId) throws Exception {
+        int propertyId,
+        T data,
+        PropertyTranslator<T> trans,
+        Write ops,
+        long nodeId
+    ) throws Exception {
         final Value prop = trans.toProperty(propertyId, data, nodeId);
         if (prop != null) {
             ops.nodeSetProperty(
-                    toOriginalId.applyAsLong(nodeId),
-                    propertyId,
-                    prop
+                toOriginalId.applyAsLong(nodeId),
+                propertyId,
+                prop
             );
             propertiesWritten.increment();
         }
     }
 
     private <T, U> void doWrite(
-            int propertyId1,
-            T data1,
-            PropertyTranslator<T> translator1,
-            int propertyId2,
-            U data2,
-            PropertyTranslator<U> translator2,
-            Write ops,
-            long nodeId) throws Exception {
+        int propertyId1,
+        T data1,
+        PropertyTranslator<T> translator1,
+        int propertyId2,
+        U data2,
+        PropertyTranslator<U> translator2,
+        Write ops,
+        long nodeId
+    ) throws Exception {
         final long originalNodeId = toOriginalId.applyAsLong(nodeId);
         Value prop1 = translator1.toProperty(propertyId1, data1, nodeId);
         if (prop1 != null) {
