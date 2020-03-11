@@ -38,11 +38,10 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
 public class NodeSimilarityMutateProc extends NodeSimilarityWriteProc {
 
-    @Procedure(name = "gds.beta.nodeSimilarity.mutate", mode = WRITE)
+    @Procedure(name = "gds.beta.nodeSimilarity.mutate", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<WriteResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,

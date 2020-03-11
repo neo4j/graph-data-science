@@ -31,11 +31,10 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
 public class PageRankMutateProc extends PageRankWriteProc {
 
-    @Procedure(value = "gds.beta.pageRank.mutate", mode = WRITE)
+    @Procedure(value = "gds.beta.pageRank.mutate", mode = READ)
     @Description(PAGE_RANK_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
