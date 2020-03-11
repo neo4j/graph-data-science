@@ -64,10 +64,12 @@ public class LabelPropagationWriteProc extends LabelPropagationBaseProc<LabelPro
 
         LabelPropagationWriteConfig config = computationResult.config();
 
-        boolean writePropertyEqualsSeedProperty = config.writeProperty().equals(config.seedProperty());
-        NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
+        boolean writePropertyEqualsSeedProperty = config.seedProperty() != null && config
+            .writeProperty()
+            .equals(config.seedProperty());
 
         if (writePropertyEqualsSeedProperty) {
+            NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
             return new PropertyTranslator.OfLongIfChanged<>(
                 seedProperties,
                 (data, nodeId) -> data.labels().get(nodeId)

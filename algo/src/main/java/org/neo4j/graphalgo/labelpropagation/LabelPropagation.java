@@ -24,9 +24,9 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
@@ -69,17 +69,24 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         this.tracker = tracker;
         this.batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
 
-        NodeProperties seedProperty = graph.nodeProperties(config.seedProperty());
-        if (seedProperty == null) {
+        NodeProperties seedProperty;
+        String seedPropertyKey = config.seedProperty();
+        if (seedPropertyKey != null && graph.availableNodeProperties().contains(seedPropertyKey)) {
+            seedProperty = graph.nodeProperties(seedPropertyKey);
+        } else {
             seedProperty = new NullPropertyMap(0.0);
         }
         this.nodeProperties = seedProperty;
 
-        NodeProperties nodeWeightProperty = graph.nodeProperties(config.nodeWeightProperty());
-        if (nodeWeightProperty == null) {
+        NodeProperties nodeWeightProperty;
+        String nodeWeightPropertyKey = config.nodeWeightProperty();
+        if (nodeWeightPropertyKey != null && graph.availableNodeProperties().contains(nodeWeightPropertyKey)) {
+            nodeWeightProperty = graph.nodeProperties(nodeWeightPropertyKey);
+        } else {
             nodeWeightProperty = new NullPropertyMap(1.0);
         }
         this.nodeWeights = nodeWeightProperty;
+
         maxLabelId = nodeProperties.getMaxPropertyValue().orElse(NO_SUCH_LABEL);
     }
 
