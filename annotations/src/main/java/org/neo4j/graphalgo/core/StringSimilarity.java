@@ -59,10 +59,10 @@ public final class StringSimilarity {
                 continue;
             }
 
-            for (int j = 0; j < len2; j++) {
+            for (int j = minBound; j <= maxBound; j++) {
                 char ch2 = s2.charAt(j);
 
-                if (minBound <= j && j <= maxBound && ch1 == ch2 && !consumed2[j]) {
+                if (ch1 == ch2 && !consumed2[j]) {
                     consumed2[j] = true;
                     numberOfMatches += 1;
 
