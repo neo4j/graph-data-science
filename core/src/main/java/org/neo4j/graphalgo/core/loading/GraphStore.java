@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -104,7 +105,7 @@ public final class GraphStore {
         AllocationTracker tracker
     ) {
         this.nodes = nodes;
-        this.nodeProperties = new HashMap<>(nodeProperties);
+        this.nodeProperties = new ConcurrentHashMap<>(nodeProperties);
         this.relationships = relationships;
         this.relationshipProperties = relationshipProperties;
         this.createdGraphs = new HashSet<>();
@@ -123,19 +124,15 @@ public final class GraphStore {
         return relationships.containsKey(relationshipType);
     }
 
-    public void addRelationshipType(String relationshipType, Optional<String> relationshipProperty, HugeGraph.Relationships relationships) {
+    public synchronized void addRelationshipType(String relationshipType, Optional<String> relationshipProperty, HugeGraph.Relationships relationships) {
         if (!hasRelationshipType(relationshipType)) {
             this.relationships.put(relationshipType, relationships.topology());
 
             if (relationshipProperty.isPresent() && relationships.hasProperties()) {
                 HugeGraph.PropertyCSR propertyCSR = relationships.properties().get();
-                this.relationshipProperties.compute(relationshipType, (relType, propertyMap) -> {
-                    if (propertyMap == null) {
-                        return Collections.singletonMap(relationshipProperty.get(), propertyCSR);
-                    }
-                    propertyMap.putIfAbsent(relationshipProperty.get(), propertyCSR);
-                    return propertyMap;
-                });
+                this.relationshipProperties
+                    .computeIfAbsent(relationshipType, ignore -> new HashMap<>())
+                    .putIfAbsent(relationshipProperty.get(), propertyCSR);
             }
         }
     }
