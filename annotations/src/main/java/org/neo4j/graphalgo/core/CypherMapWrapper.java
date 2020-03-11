@@ -239,14 +239,9 @@ public final class CypherMapWrapper {
             ));
         }
 
-        StringJoiner joiner = new StringJoiner(", ");
-        for (String suggestion : suggestions) {
-            joiner.add(suggestion);
-        }
-
         throw new IllegalArgumentException(String.format(
             "Unexpected configuration keys: %s",
-            joiner
+            String.join(", ", suggestions)
         ));
     }
 
