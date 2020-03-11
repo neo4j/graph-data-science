@@ -35,6 +35,7 @@ import org.neo4j.kernel.impl.factory.DatabaseInfo;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.StoreId;
 
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +53,10 @@ public final class GraphDbApi implements GraphDatabaseAPI {
 
     public void shutdown() {
         dbms.shutdown();
+    }
+
+    public Path dbHome() {
+        return api.databaseLayout().getNeo4jLayout().homeDirectory().toPath();
     }
 
     // delegate methods
