@@ -68,7 +68,7 @@ public interface RandomGraphGeneratorConfig extends BaseConfig {
     }
 
     @Value.Default
-    default boolean selfLoops() {
+    default boolean allowSelfLoops() {
         return false;
     }
 
@@ -98,4 +98,21 @@ public interface RandomGraphGeneratorConfig extends BaseConfig {
         return new RandomGraphGeneratorConfigImpl(graphName, nodeCount, averageDegree, username, config);
     }
 
+    enum AllowSelfLoops {
+        YES(true), NO(false);
+        boolean value;
+
+        AllowSelfLoops(boolean value) {
+            this.value = value;
+        }
+
+        static AllowSelfLoops of(boolean value) {
+            if (value) {
+                return YES;
+            }
+            else {
+                return NO;
+            }
+        }
+    }
 }

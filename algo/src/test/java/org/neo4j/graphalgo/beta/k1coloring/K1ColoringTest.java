@@ -42,6 +42,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.AllowSelfLoops;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -131,10 +132,7 @@ class K1ColoringTest extends AlgoTestBase {
             RelationshipDistribution.POWER_LAW,
             seed,
             Optional.empty(),
-            AllocationTracker.EMPTY,
-            Aggregation.NONE,
-            Orientation.NATURAL,
-            false
+            AllocationTracker.EMPTY
         );
 
         RandomGraphGenerator inGenerator = new RandomGraphGenerator(
@@ -143,10 +141,7 @@ class K1ColoringTest extends AlgoTestBase {
             RelationshipDistribution.POWER_LAW,
             seed,
             Optional.empty(),
-            AllocationTracker.EMPTY,
-            Aggregation.NONE,
-            Orientation.REVERSE,
-            false
+            Aggregation.NONE, Orientation.REVERSE, AllowSelfLoops.NO, AllocationTracker.EMPTY
         );
 
         Graph naturalGraph = outGenerator.generate();

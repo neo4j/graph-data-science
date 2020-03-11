@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.AllowSelfLoops;
 
 import java.util.Map;
 import java.util.Optional;
@@ -111,10 +112,7 @@ public final class GraphGenerateProc extends BaseProc {
             config.relationshipDistribution(),
             config.relationshipSeed(),
             getRelationshipPropertyProducer(config.relationshipProperty()),
-            AllocationTracker.EMPTY,
-            config.aggregation(),
-            config.orientation(),
-            config.selfLoops()
+            config.aggregation(), config.orientation(), AllowSelfLoops.of(config.allowSelfLoops()), AllocationTracker.EMPTY
         );
     }
 

@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.AllowSelfLoops;
 
 import java.util.Optional;
 import java.util.Random;
@@ -42,7 +43,7 @@ public final class RandomGraphGenerator {
     private final RelationshipDistribution relationshipDistribution;
     private final Aggregation aggregation;
     private final Orientation orientation;
-    private final boolean selfLoops;
+    private final AllowSelfLoops allowSelfLoops;
     private final Optional<RelationshipPropertyProducer> maybePropertyProducer;
 
     public static Graph generate(int nodeCount, int averageDegree) {
@@ -60,10 +61,7 @@ public final class RandomGraphGenerator {
             distribution,
             seed,
             Optional.empty(),
-            AllocationTracker.EMPTY,
-            Aggregation.NONE,
-            Orientation.NATURAL,
-            false
+            Aggregation.NONE, Orientation.NATURAL, AllowSelfLoops.NO, AllocationTracker.EMPTY
         ).generate();
     }
 
@@ -73,10 +71,10 @@ public final class RandomGraphGenerator {
         RelationshipDistribution relationshipDistribution,
         @Nullable Long seed,
         Optional<RelationshipPropertyProducer> maybePropertyProducer,
-        AllocationTracker allocationTracker,
         Aggregation aggregation,
         Orientation orientation,
-        boolean selfLoops
+        AllowSelfLoops allowSelfLoops,
+        AllocationTracker allocationTracker
     ) {
         this.relationshipDistribution = relationshipDistribution;
         this.maybePropertyProducer = maybePropertyProducer;
@@ -85,7 +83,7 @@ public final class RandomGraphGenerator {
         this.averageDegree = averageDegree;
         this.aggregation = aggregation;
         this.orientation = orientation;
-        this.selfLoops = selfLoops;
+        this.allowSelfLoops = allowSelfLoops;
         this.random = new Random();
         if (seed != null) {
             this.random.setSeed(seed);
@@ -96,12 +94,26 @@ public final class RandomGraphGenerator {
         long nodeCount,
         long averageDegree,
         RelationshipDistribution relationshipDistribution,
+        Long seed,
         Optional<RelationshipPropertyProducer> maybePropertyProducer,
         AllocationTracker allocationTracker
     ) {
-        this(nodeCount, averageDegree, relationshipDistribution, null, maybePropertyProducer, allocationTracker,
-            Aggregation.NONE, Orientation.NATURAL, false
+        this(nodeCount, averageDegree, relationshipDistribution, seed, maybePropertyProducer,
+            Aggregation.NONE,
+            Orientation.NATURAL,
+            AllowSelfLoops.NO,
+            allocationTracker
         );
+    }
+
+    public RandomGraphGenerator(
+        long nodeCount,
+        long averageDegree,
+        RelationshipDistribution relationshipDistribution,
+        Optional<RelationshipPropertyProducer> maybePropertyProducer,
+        AllocationTracker allocationTracker
+    ) {
+        this(nodeCount, averageDegree, relationshipDistribution, null, maybePropertyProducer, allocationTracker);
     }
 
     public HugeGraph generate() {
@@ -161,7 +173,7 @@ public final class RandomGraphGenerator {
             degree = degreeProducer.applyAsLong(nodeId);
 
             for (int j = 0; j < degree; j++) {
-                if (selfLoops) {
+                if (allowSelfLoops.value) {
                     targetId = relationshipProducer.applyAsLong(nodeId);
                 } else {
                     while ((targetId = relationshipProducer.applyAsLong(nodeId)) == nodeId) {}

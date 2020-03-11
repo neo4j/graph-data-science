@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.AllowSelfLoops;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +43,8 @@ class RandomGraphGeneratorTest {
             nbrNodes,
             avgDeg,
             RelationshipDistribution.UNIFORM,
-            null,
             Optional.empty(),
-            AllocationTracker.EMPTY,
-            Aggregation.NONE,
-            Orientation.NATURAL,
-            false
+            AllocationTracker.EMPTY
         );
         HugeGraph graph = randomGraphGenerator.generate();
 
@@ -89,7 +86,7 @@ class RandomGraphGeneratorTest {
     void shouldNotGenerateSelfLoops() {
         int nbrNodes = 1000;
         long avgDeg = 5L;
-        boolean selfLoop = false;
+        AllowSelfLoops allowSelfLoops = AllowSelfLoops.NO;
 
         RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
             nbrNodes,
@@ -97,10 +94,7 @@ class RandomGraphGeneratorTest {
             RelationshipDistribution.POWER_LAW,
             null,
             Optional.empty(),
-            AllocationTracker.EMPTY,
-            Aggregation.NONE,
-            Orientation.UNDIRECTED,
-            selfLoop
+            Aggregation.NONE, Orientation.UNDIRECTED, allowSelfLoops, AllocationTracker.EMPTY
         );
         HugeGraph graph = randomGraphGenerator.generate();
 
@@ -204,10 +198,7 @@ class RandomGraphGeneratorTest {
             RelationshipDistribution.UNIFORM,
             seed,
             Optional.empty(),
-            AllocationTracker.EMPTY,
-            Aggregation.NONE,
-            Orientation.NATURAL,
-            false
+            AllocationTracker.EMPTY
         );
 
         RandomGraphGenerator otherRandomGenerator = new RandomGraphGenerator(
@@ -216,10 +207,7 @@ class RandomGraphGeneratorTest {
             RelationshipDistribution.UNIFORM,
             seed,
             Optional.empty(),
-            AllocationTracker.EMPTY,
-            Aggregation.NONE,
-            Orientation.NATURAL,
-            false
+            AllocationTracker.EMPTY
         );
 
         HugeGraph graph1 = randomGraphGenerator.generate();

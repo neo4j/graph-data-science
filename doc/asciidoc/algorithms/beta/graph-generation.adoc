@@ -58,7 +58,7 @@ YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegre
 | relationshipProperty      | Map       | {}       | yes      | Describes the method used to generate a relationship property. By default no relationship property is generated. For more information see <<graph-generation-relationship-property>>.
 | aggregation               | String    | NONE     | yes      | The relationship aggregation method cf. <<native-projection-syntax-relationship-projections, Native Projection.>>.
 | orientation               | String    | NATURAL  | yes      | The method of orienting edges. Allowed values are NATURAL, REVERSE and UNDIRECTED.
-| selfLoops                 | Boolean   | false    | yes      | Whether to allow relationships with identical source and target node.
+| allowSelfLoops            | Boolean   | false    | yes      | Whether to allow relationships with identical source and target node.
 |===
 
 .Results
