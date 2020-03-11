@@ -61,7 +61,10 @@ public final class RandomGraphGenerator {
             distribution,
             seed,
             Optional.empty(),
-            Aggregation.NONE, Orientation.NATURAL, AllowSelfLoops.NO, AllocationTracker.EMPTY
+            Aggregation.NONE,
+            Orientation.NATURAL,
+            AllowSelfLoops.NO,
+            AllocationTracker.EMPTY
         ).generate();
     }
 

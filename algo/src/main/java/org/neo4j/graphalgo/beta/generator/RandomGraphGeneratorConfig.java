@@ -107,12 +107,7 @@ public interface RandomGraphGeneratorConfig extends BaseConfig {
         }
 
         static AllowSelfLoops of(boolean value) {
-            if (value) {
-                return YES;
-            }
-            else {
-                return NO;
-            }
+            return value ? YES : NO;
         }
     }
 }
