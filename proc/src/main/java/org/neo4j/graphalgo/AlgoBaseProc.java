@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
-import org.neo4j.graphalgo.config.MutateRelationshipTypeConfig;
+import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
@@ -272,8 +272,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             }
         }
 
-        if (config instanceof MutateRelationshipTypeConfig) {
-            String writeRelationshipType = ((MutateRelationshipTypeConfig) config).writeRelationshipType();
+        if (config instanceof MutateRelationshipConfig) {
+            String writeRelationshipType = ((MutateRelationshipConfig) config).writeRelationshipType();
             if (writeRelationshipType != null && graphStore.hasRelationshipType(writeRelationshipType)) {
                 throw new IllegalArgumentException(String.format(
                     "Relationship type `%s` already exists in the in-memory graph.",

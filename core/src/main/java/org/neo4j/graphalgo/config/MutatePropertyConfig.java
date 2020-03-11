@@ -19,5 +19,7 @@
  */
 package org.neo4j.graphalgo.config;
 
-// Marker interface for mutate procedures
+/**
+ * Marker interface for mutate procedures
+ */
 public interface MutatePropertyConfig extends WritePropertyConfig { }

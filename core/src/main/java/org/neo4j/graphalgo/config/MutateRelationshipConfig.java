@@ -19,10 +19,7 @@
  */
 package org.neo4j.graphalgo.config;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-
-public interface WriteRelationshipTypeConfig extends WritePropertyConfig {
-
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
-    String writeRelationshipType();
-}
+/**
+ * Marker interface for mutate procedures
+ */
+public interface MutateRelationshipConfig extends WriteRelationshipConfig { }

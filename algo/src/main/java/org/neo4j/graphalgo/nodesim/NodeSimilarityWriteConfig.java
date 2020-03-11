@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.nodesim;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WriteRelationshipTypeConfig;
+import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -30,7 +30,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("NodeSimilarityWriteConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface NodeSimilarityWriteConfig extends NodeSimilarityBaseConfig, WriteRelationshipTypeConfig {
+public interface NodeSimilarityWriteConfig extends NodeSimilarityBaseConfig, WriteRelationshipConfig {
 
     static NodeSimilarityWriteConfig of(
         String username,
