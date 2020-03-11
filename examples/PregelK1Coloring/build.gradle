@@ -14,7 +14,7 @@ dependencies {
 
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
-    compileOnly 'org.neo4j:neo4j:3.5.15'
+    compileOnly 'org.neo4j:neo4j:3.5.16'
 
     // We need an annotation processor for our K1 configuration
     annotationProcessor 'org.neo4j.gds:config-generator:1.0.0'
