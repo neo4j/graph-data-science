@@ -116,7 +116,6 @@ abstract class SimilarityProc
                 -1,
                 writeRelationshipType,
                 writeProperty,
-                false,
                 new DoubleHistogram(5)
             )
         );
@@ -134,17 +133,13 @@ abstract class SimilarityProc
             similarityPairs.getAndIncrement();
         };
 
-        if (config.write()) {
-            SimilarityExporter similarityExporter = new SimilarityExporter(
-                api,
-                config.writeRelationshipType(),
-                config.writeProperty(),
-                terminationFlag
-            );
-            similarityExporter.export(algoResult.stream().peek(recorder), config.writeBatchSize());
-        } else {
-            algoResult.stream().forEach(recorder);
-        }
+        SimilarityExporter similarityExporter = new SimilarityExporter(
+            api,
+            config.writeRelationshipType(),
+            config.writeProperty(),
+            terminationFlag
+        );
+        similarityExporter.export(algoResult.stream().peek(recorder), config.writeBatchSize());
 
         return Stream.of(SimilaritySummaryResult.from(
             algoResult.nodes(),
@@ -154,7 +149,6 @@ abstract class SimilarityProc
             algoResult.computations().map(Computations::count).orElse(-1L),
             config.writeRelationshipType(),
             config.writeProperty(),
-            config.write(),
             histogram
         ));
     }

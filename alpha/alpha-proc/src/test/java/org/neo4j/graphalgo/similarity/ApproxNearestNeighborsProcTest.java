@@ -156,7 +156,7 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
 
         Map<String, Object> config = map(
             "config",
-            anonymousGraphConfig("algorithm", "jaccard", "similarityCutoff", 0.1, "randomSeed", 42L, "write", true)
+            anonymousGraphConfig("algorithm", "jaccard", "similarityCutoff", 0.1, "randomSeed", 42L)
         );
 
         String query =

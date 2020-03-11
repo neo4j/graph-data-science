@@ -127,10 +127,4 @@ public interface SimilarityConfig extends AlgoBaseConfig, WriteConfig {
     default long writeBatchSize() {
         return 10_000L;
     }
-
-    @Value.Default
-    default boolean write() {
-        return false;
-    }
-
 }

@@ -21,8 +21,6 @@ package org.neo4j.graphalgo.results;
 
 import org.HdrHistogram.DoubleHistogram;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 public class ApproxSimilaritySummaryResult {
 
     public final long nodes;
@@ -96,7 +94,6 @@ public class ApproxSimilaritySummaryResult {
             long computations,
             String writeRelationshipType,
             String writeProperty,
-            boolean write,
             long iterations,
             DoubleHistogram histogram) {
         return new ApproxSimilaritySummaryResult(

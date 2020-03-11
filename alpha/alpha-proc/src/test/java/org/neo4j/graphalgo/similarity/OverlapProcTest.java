@@ -338,7 +338,7 @@ class OverlapProcTest extends BaseProcTest {
 
     @Test
     void simpleoverlapWriteTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfig("write", true, "similarityCutoff", 0.1));
+        Map<String, Object> params = map("config", anonymousGraphConfig("similarityCutoff", 0.1));
 
         runQuery(STATEMENT, params);
 
@@ -366,7 +366,6 @@ class OverlapProcTest extends BaseProcTest {
     @Test
     void dontComputeComputationsByDefault() {
         Map<String, Object> params = map("config", anonymousGraphConfig(
-            "write", true,
             "similarityCutoff", 0.1
         ));
 
@@ -377,7 +376,6 @@ class OverlapProcTest extends BaseProcTest {
     @Test
     void numberOfComputations() {
         Map<String, Object> params = map("config", anonymousGraphConfig(
-            "write", true,
             "showComputations", true,
             "similarityCutoff", 0.1
         ));

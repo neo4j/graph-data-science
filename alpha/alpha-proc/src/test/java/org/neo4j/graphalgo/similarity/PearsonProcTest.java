@@ -426,7 +426,7 @@ class PearsonProcTest extends BaseProcTest {
 
     @Test
     void simplePearsonWriteTest() {
-        Map<String, Object> params = map("config", anonymousGraphConfig("write", true, "similarityCutoff", 0.1, "topK", 0));
+        Map<String, Object> params = map("config", anonymousGraphConfig("similarityCutoff", 0.1, "topK", 0));
 
         runQuery(STATEMENT, params);
 
@@ -478,7 +478,6 @@ class PearsonProcTest extends BaseProcTest {
     @Test
     void dontComputeComputationsByDefault() {
         Map<String, Object> params = map("config", anonymousGraphConfig(
-            "write", true,
             "similarityCutoff", 0.1
         ));
 
@@ -489,7 +488,6 @@ class PearsonProcTest extends BaseProcTest {
     @Test
     void numberOfComputations() {
         Map<String, Object> params = map("config", anonymousGraphConfig(
-            "write", true,
             "showComputations", true,
             "similarityCutoff", 0.1
         ));

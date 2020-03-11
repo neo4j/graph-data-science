@@ -30,7 +30,6 @@ public class SimilaritySummaryResult {
     public final long targetNodes;
     public final long similarityPairs;
     public final long computations;
-    public final boolean write;
     public final String writeRelationshipType;
     public final String writeProperty;
     public final double min;
@@ -47,17 +46,17 @@ public class SimilaritySummaryResult {
     public final double p100;
 
     public SimilaritySummaryResult(
-            long nodes, long sourceNodes, long targetNodes, long similarityPairs,
-            long computations, boolean write, String writeRelationshipType, String writeProperty,
-            double min, double max, double mean, double stdDev,
-            double p25, double p50, double p75, double p90, double p95,
-            double p99, double p999, double p100) {
+        long nodes, long sourceNodes, long targetNodes, long similarityPairs,
+        long computations, String writeRelationshipType, String writeProperty,
+        double min, double max, double mean, double stdDev,
+        double p25, double p50, double p75, double p90, double p95,
+        double p99, double p999, double p100
+    ) {
         this.nodes = nodes;
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
         this.similarityPairs = similarityPairs;
         this.computations = computations;
-        this.write = write;
         this.writeRelationshipType = writeRelationshipType;
         this.writeProperty = writeProperty;
         this.min = min;
@@ -82,7 +81,6 @@ public class SimilaritySummaryResult {
             long computations,
             String writeRelationshipType,
             String writeProperty,
-            boolean write,
             DoubleHistogram histogram) {
         long sourceNodes = sourceIdsLength == 0 ? length : sourceIdsLength;
         long targetNodes = targetIdsLength == 0 ? length : targetIdsLength;
@@ -93,7 +91,6 @@ public class SimilaritySummaryResult {
                 targetNodes,
                 similarityPairs.get(),
                 computations,
-                write,
                 writeRelationshipType,
                 writeProperty,
                 histogram.getMinValue(),

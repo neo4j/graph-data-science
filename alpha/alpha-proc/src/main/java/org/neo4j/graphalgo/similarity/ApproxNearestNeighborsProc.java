@@ -161,7 +161,6 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
                 result.computations().map(Computations::count).orElse(-1L),
                 config.writeRelationshipType(),
                 config.writeProperty(),
-                config.write(),
                 algorithm.iterations(),
                 new DoubleHistogram(5)
             )
@@ -180,17 +179,13 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
             similarityPairs.getAndIncrement();
         };
 
-        if (config.write()) {
-            SimilarityExporter similarityExporter = new SimilarityExporter(
-                api,
-                config.writeRelationshipType(),
-                config.writeProperty(),
-                algorithm.getTerminationFlag()
-            );
-            similarityExporter.export(algoResult.stream().peek(recorder), config.writeBatchSize());
-        } else {
-            algoResult.stream().forEach(recorder);
-        }
+        SimilarityExporter similarityExporter = new SimilarityExporter(
+            api,
+            config.writeRelationshipType(),
+            config.writeProperty(),
+            algorithm.getTerminationFlag()
+        );
+        similarityExporter.export(algoResult.stream().peek(recorder), config.writeBatchSize());
 
         return Stream.of(
             ApproxSimilaritySummaryResult.from(
@@ -199,7 +194,6 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
                 algoResult.computations().map(Computations::count).orElse(-1L),
                 config.writeRelationshipType(),
                 config.writeProperty(),
-                config.write(),
                 algorithm.iterations(),
                 histogram
             )

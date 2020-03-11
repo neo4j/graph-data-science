@@ -422,7 +422,7 @@ class EuclideanProcTest extends BaseProcTest {
     void simpleEuclideanWriteTest() {
         Map<String, Object> params = map(
             "config",
-            anonymousGraphConfig("write", true, "similarityCutoff", 4.0, "concurrency", 1, "topK", 0),
+            anonymousGraphConfig("similarityCutoff", 4.0, "concurrency", 1, "topK", 0),
             "missingValue",
             0
         );
@@ -485,7 +485,6 @@ class EuclideanProcTest extends BaseProcTest {
     @Test
     void dontComputeComputationsByDefault() {
         Map<String, Object> params = map("config", anonymousGraphConfig(
-            "write", true,
             "similarityCutoff", 0.1
         ));
 
@@ -496,7 +495,6 @@ class EuclideanProcTest extends BaseProcTest {
     @Test
     void numberOfComputations() {
         Map<String, Object> params = map("config", anonymousGraphConfig(
-            "write", true,
             "showComputations", true,
             "similarityCutoff", 0.1
         ));
