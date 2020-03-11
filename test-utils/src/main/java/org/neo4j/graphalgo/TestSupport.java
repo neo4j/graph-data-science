@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
@@ -69,55 +68,8 @@ public final class TestSupport {
         return Stream.of(NativeFactory.class, CypherFactory.class);
     }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.TestSupport#allTypesWithoutCypher")
-    public @interface AllGraphTypesWithoutCypherTest {}
-
-    public static Stream<Class<? extends GraphStoreFactory>> allTypesWithoutCypher() {
-        return Stream.of(NativeFactory.class);
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.TestSupport#allGraphNames")
-    public @interface AllGraphNamesTest {}
-
-    public static Stream<String> allGraphNames() {
-        return Stream.of("huge");
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @ParameterizedTest(name = "parallel: {0}, graph: {1}")
-    @MethodSource({"org.neo4j.graphalgo.TestSupport#singleAndMultiThreadedGraphNames"})
-    public @interface SingleAndMultiThreadedAllGraphNames {}
-
-    public static Stream<Arguments> singleAndMultiThreadedGraphNames() {
-        return crossArguments(toArguments(() -> Stream.of(true, false)), toArguments(TestSupport::allGraphNames));
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @ParameterizedTest(name = "loader: {0}, nodes: {1}, relationships: {2}")
-    @MethodSource({"org.neo4j.graphalgo.TestSupport#allLoadersEntireGraphTest"})
-    public @interface AllLoadersEntireGraphTest {}
-
-    public static Stream<Arguments> allLoadersEntireGraphTest() {
-        return Stream.of(
-            Arguments.of("huge", null, null),
-            Arguments.of("cypher", "MATCH (n) RETURN id(n) AS id", "MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target")
-        );
-    }
-
-    public static Stream<String> allDirectionsNames() {
-        return Arrays.stream(Direction.values()).map(Direction::name);
-    }
-
     public static Stream<Orientation> allDirectedProjections() {
         return Stream.of(NATURAL, REVERSE);
-    }
-
-    public static Stream<Arguments> allGraphNamesAndDirections() {
-        return crossArguments(toArguments(TestSupport::allGraphNames), toArguments(TestSupport::allDirectionsNames));
     }
 
     public static <T> Supplier<Stream<Arguments>> toArguments(Supplier<Stream<T>> fn) {
