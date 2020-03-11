@@ -26,15 +26,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.WriteConfigTest;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -45,9 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
-import static org.neo4j.graphalgo.core.ProcedureConstants.GRAPH_IMPL_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
 class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> implements
     WriteConfigTest<LouvainWriteConfig, Louvain> {
@@ -204,18 +198,6 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
             return mapWrapper.withString("writeProperty", "writeProperty");
         }
         return mapWrapper;
-    }
-
-    @AllGraphNamesTest
-    void testOverwritingDefaults(String graphImpl) {
-        Map<String, Object> config = MapUtil.map(
-            GRAPH_IMPL_KEY, graphImpl,
-            "includeIntermediateCommunities", true,
-            "maxLevels", 42,
-            "maxIterations", 42,
-            TOLERANCE_KEY, 0.42,
-            SEED_PROPERTY_KEY, "foobar"
-        );
     }
 
     private void assertWriteResult(List<List<Long>> expectedCommunities, String writeProperty) {
