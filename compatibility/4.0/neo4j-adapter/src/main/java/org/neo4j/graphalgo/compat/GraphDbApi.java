@@ -55,7 +55,7 @@ public final class GraphDbApi implements GraphDatabaseAPI {
         dbms.shutdown();
     }
 
-    public Path dbHome() {
+    public Path dbHome(Path workingDir) {
         return api.databaseLayout().getNeo4jLayout().homeDirectory().toPath();
     }
 
