@@ -187,6 +187,16 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         return createGraph(getOrCreateGraphStore(configAndName), configAndName.getOne());
     }
 
+    private Graph createGraph(GraphStore graphStore, CONFIG config) {
+        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
+            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
+            : Optional.empty();
+
+        List<String> relationshipTypes = config.relationshipTypes();
+
+        return graphStore.getGraph(relationshipTypes, weightProperty);
+    }
+
     private GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
@@ -207,16 +217,6 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
         validate(graphCandidate, config);
         return graphCandidate.graphStore();
-    }
-
-    private Graph createGraph(GraphStore graphStore, CONFIG config) {
-        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
-            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
-            : Optional.empty();
-
-        List<String> relationshipTypes = config.relationshipTypes();
-
-        return graphStore.getGraph(relationshipTypes, weightProperty);
     }
 
     private void validate(GraphStoreWithConfig graphStoreWithConfig, CONFIG config) {
@@ -409,19 +409,19 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
         PropertyTranslator<RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
 
         CONFIG config = computationResult.config();
-        if (!(config instanceof WritePropertyConfig)) {
+        if (!(config instanceof MutatePropertyConfig)) {
             throw new IllegalArgumentException(String.format(
-                "Can only write results if the config implements %s.",
-                WritePropertyConfig.class
+                "Can only mutate results if the config implements %s.",
+                MutatePropertyConfig.class
             ));
         }
-        WritePropertyConfig writePropertyConfig = (WritePropertyConfig) config;
+        MutatePropertyConfig mutatePropertyConfig = (MutatePropertyConfig) config;
         RESULT result = computationResult.result();
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
             log.debug("Updating in-memory graph store");
             GraphStore graphStore = computationResult.graphStore();
             graphStore.addNodeProperty(
-                writePropertyConfig.writeProperty(),
+                mutatePropertyConfig.writeProperty(),
                 nodeId -> resultPropertyTranslator.toDouble(result, nodeId)
             );
             writeBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
