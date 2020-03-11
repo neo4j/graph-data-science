@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -398,18 +397,29 @@ public final class CypherMapWrapper {
         String secondPairKeyTwo,
         String errorPrefix
     ) throws IllegalArgumentException {
-        return checkMutuallyExclusivePairs(
-            firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo, errorPrefix, PairResult.FIRST_PAIR
+        boolean isValidFirstPair = checkMutuallyExclusivePairs(
+            firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo
         );
+        if (isValidFirstPair) {
+            return PairResult.FIRST_PAIR;
+        }
+
+        boolean isValidSecondPair = checkMutuallyExclusivePairs(
+            secondPairKeyOne, secondPairKeyTwo, firstPairKeyOne, firstPairKeyTwo
+        );
+        if (isValidSecondPair) {
+            return PairResult.SECOND_PAIR;
+        }
+
+        String message = missingMutuallyExclusivePairMessage(firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo);
+        throw new IllegalArgumentException(String.format("%s %s", errorPrefix, message));
     }
 
-    private PairResult checkMutuallyExclusivePairs(
+    private boolean checkMutuallyExclusivePairs(
         String firstPairKeyOne,
         String firstPairKeyTwo,
         String secondPairKeyOne,
-        String secondPairKeyTwo,
-        String errorPrefix,
-        PairResult possibleResult
+        String secondPairKeyTwo
     ) throws IllegalArgumentException {
         if (config.containsKey(firstPairKeyOne) && config.containsKey(firstPairKeyTwo)) {
             boolean secondOneExists = config.containsKey(secondPairKeyOne);
@@ -430,24 +440,9 @@ public final class CypherMapWrapper {
                     firstPairKeyTwo
                 ));
             }
-            return possibleResult;
+            return true;
         }
-
-        if (possibleResult == PairResult.FIRST_PAIR) {
-            // check if the second pair exists while the first is missing
-            return checkMutuallyExclusivePairs(
-                secondPairKeyOne,
-                secondPairKeyTwo,
-                firstPairKeyOne,
-                firstPairKeyTwo,
-                errorPrefix,
-                PairResult.SECOND_PAIR
-            );
-        }
-
-        // we're in the second call right now, so first and second are swapped
-        String message = missingMutuallyExclusivePairMessage(secondPairKeyOne, secondPairKeyTwo, firstPairKeyOne, firstPairKeyTwo);
-        throw new IllegalArgumentException(String.format("%s %s", errorPrefix, message));
+        return false;
     }
 
     private String missingMutuallyExclusivePairMessage(
