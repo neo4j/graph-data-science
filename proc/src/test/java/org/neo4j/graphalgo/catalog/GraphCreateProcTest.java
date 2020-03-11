@@ -1149,6 +1149,44 @@ class GraphCreateProcTest extends BaseProcTest {
         );
     }
 
+    @Test
+    void silentlyDropRelsWithUnloadedNodesForCypherCreation() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(db, GraphCreateProc.class);
+        runQuery(DB_CYPHER_ESTIMATE, emptyMap());
+
+        String query = "CALL gds.graph.create.cypher(" +
+                       "'g', " +
+                       "'MATCH (n:A) Return id(n) as id', " +
+                       "'MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target'," +
+                       "{throwOnUnresolvedRelationships: false})" +
+                       "YIELD nodeCount, relationshipCount";
+
+        runQueryWithRowConsumer(query, resultRow -> {
+            assertEquals(resultRow.getNumber("nodeCount"), 6L);
+            assertEquals(resultRow.getNumber("relationshipCount"), 5L);
+        });
+    }
+
+    @Test
+    void silentlyDropRelsWithUnloadedNodes() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(db, GraphCreateProc.class);
+        runQuery(DB_CYPHER_ESTIMATE, emptyMap());
+
+        String query = GdsCypher.call()
+            .withNodeLabel("A")
+            .withAnyRelationshipType()
+            .graphCreate("'g'")
+            .addParameter("throwOnUnresolvedRelationships", false)
+            .yields("nodeCount", "relationshipCount");
+
+        runQueryWithRowConsumer(query, resultRow -> {
+            assertEquals(resultRow.getNumber("nodeCount"), 6L);
+            assertEquals(resultRow.getNumber("relationshipCount"), 5L);
+        });
+    }
+
     // Failure cases
 
     @ParameterizedTest(name = "projections: {0}")

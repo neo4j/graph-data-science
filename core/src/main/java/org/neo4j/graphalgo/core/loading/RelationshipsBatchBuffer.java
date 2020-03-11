@@ -28,8 +28,6 @@ import static org.neo4j.graphalgo.utils.ExceptionUtil.validateNodeIsLoaded;
 
 public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRecord> {
 
-    public static final int SOURCE_ID_OFFSET = 0;
-    public static final int TARGET_ID_OFFSET = 1;
     public static final int RELATIONSHIP_REFERENCE_OFFSET = 2;
     public static final int PROPERTIES_REFERENCE_OFFSET = 3;
     public static final int BATCH_ENTRY_SIZE = 4;
@@ -37,16 +35,31 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
 
     private final IdMapping idMap;
     private final int type;
+    private boolean throwOnUnMappedNodeIds;
 
     private final long[] sortCopy;
     private final int[] histogram;
 
-   public RelationshipsBatchBuffer(final IdMapping idMap, final int type, int capacity) {
+    public RelationshipsBatchBuffer(
+        final IdMapping idMap,
+        final int type,
+        int capacity
+    ) {
+        this(idMap, type, capacity, true);
+    }
+
+    public RelationshipsBatchBuffer(
+        final IdMapping idMap,
+        final int type,
+        int capacity,
+        boolean throwOnUnMappedNodeIds
+    ) {
         // For relationships: the buffer is divided into 4-long blocks
         // for each rel: source, target, rel-id, prop-id
         super(Math.multiplyExact(4, capacity));
         this.idMap = idMap;
         this.type = type;
+        this.throwOnUnMappedNodeIds = throwOnUnMappedNodeIds;
         sortCopy = RadixSort.newCopy(buffer);
         histogram = RadixSort.newHistogram(capacity);
     }
@@ -60,11 +73,11 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
                 if (target != -1L) {
                     add(source, target, record.getId(), record.getNextProp());
                 }
-                else {
+                else if (throwOnUnMappedNodeIds) {
                     validateNodeIsLoaded(source, record.getSecondNode(), "target");
                 }
             }
-            else {
+            else if (throwOnUnMappedNodeIds){
                 validateNodeIsLoaded(source, record.getFirstNode(), "source");
             }
         }

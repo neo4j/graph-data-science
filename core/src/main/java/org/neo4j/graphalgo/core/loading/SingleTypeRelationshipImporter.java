@@ -55,11 +55,18 @@ final class SingleTypeRelationshipImporter {
         private final RelationshipProjectionMapping mapping;
         private final RelationshipImporter importer;
         private final LongAdder relationshipCounter;
+        private boolean throwOnUnresolvedRelationships;
 
-        Builder(RelationshipProjectionMapping mapping, RelationshipImporter importer, LongAdder relationshipCounter) {
+        Builder(
+            RelationshipProjectionMapping mapping,
+            RelationshipImporter importer,
+            LongAdder relationshipCounter,
+            boolean throwOnUnresolvedRelationships
+        ) {
             this.mapping = mapping;
             this.importer = importer;
             this.relationshipCounter = relationshipCounter;
+            this.throwOnUnresolvedRelationships = throwOnUnresolvedRelationships;
         }
 
         RelationshipProjectionMapping mapping() {
@@ -87,12 +94,12 @@ final class SingleTypeRelationshipImporter {
             }
 
             SingleTypeRelationshipImporter withBuffer(IdMapping idMap, int bulkSize, RelationshipImporter.PropertyReader propertyReader) {
-                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, mapping.typeId(), bulkSize);
+                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, mapping.typeId(), bulkSize, throwOnUnresolvedRelationships);
                 return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
             }
 
             SingleTypeRelationshipImporter withBuffer(IdMapping idMap, int bulkSize, Read read, CursorFactory cursors) {
-                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, mapping.typeId(), bulkSize);
+                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, mapping.typeId(), bulkSize, throwOnUnresolvedRelationships);
                 RelationshipImporter.PropertyReader propertyReader = importer.storeBackedPropertiesReader(cursors, read);
                 return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
             }

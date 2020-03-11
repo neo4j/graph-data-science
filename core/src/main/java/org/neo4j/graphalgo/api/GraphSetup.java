@@ -83,6 +83,10 @@ public class GraphSetup {
         return createConfig.readConcurrency();
     }
 
+    public boolean throwOnUnresolvedRelationships() {
+        return createConfig.throwOnUnresolvedRelationships();
+    }
+
     public @NotNull String relationshipType() {
         return createConfig.relationshipProjections().typeFilter();
     }

@@ -46,16 +46,20 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders;
     private final Map<RelationshipProjectionMapping, LongAdder> allRelationshipCounters;
 
+    private boolean throwOnUnresolvedRelationships;
+
     ScanningRelationshipsImporter(
-            GraphSetup setup,
-            GraphDatabaseAPI api,
-            GraphDimensions dimensions,
-            ImportProgress progress,
-            AllocationTracker tracker,
-            IdMapping idMap,
-            Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders,
-            ExecutorService threadPool,
-            int concurrency) {
+        GraphSetup setup,
+        GraphDatabaseAPI api,
+        GraphDimensions dimensions,
+        ImportProgress progress,
+        AllocationTracker tracker,
+        IdMapping idMap,
+        Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders,
+        ExecutorService threadPool,
+        int concurrency,
+        boolean throwOnUnresolvedRelationships
+    ) {
         super(
                 RelationshipStoreScanner.RELATIONSHIP_ACCESS,
                 "Relationship",
@@ -68,6 +72,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         this.tracker = tracker;
         this.idMap = idMap;
         this.allBuilders = allBuilders;
+        this.throwOnUnresolvedRelationships = throwOnUnresolvedRelationships;
         this.allRelationshipCounters = new HashMap<>();
     }
 
@@ -124,7 +129,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         );
 
         RelationshipImporter importer = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
-        return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter);
+        return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter, throwOnUnresolvedRelationships);
     }
 
     @Override

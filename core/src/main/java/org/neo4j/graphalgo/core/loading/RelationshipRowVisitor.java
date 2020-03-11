@@ -61,6 +61,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long sourceId = -1, targetId = -1;
     private long rows = 0;
     private long relationshipCount;
+    private boolean throwOnUnMappedNodeIds;
 
     RelationshipRowVisitor(
         IdMap idMap,
@@ -68,7 +69,8 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         ObjectIntHashMap<String> propertyKeyIdsByName,
         ObjectDoubleHashMap<String> propertyDefaultValueByName,
         int bufferSize,
-        boolean isAnyRelTypeQuery
+        boolean isAnyRelTypeQuery,
+        boolean throwOnUnMappedNodeIds
     ) {
         this.idMap = idMap;
         this.propertyKeyIdsByName = propertyKeyIdsByName;
@@ -84,6 +86,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         this.localPropertiesBuffers = new HashMap<>();
         this.localRelationshipIds = new ObjectIntHashMap<>();
         this.isAnyRelTypeQuery = isAnyRelTypeQuery;
+        this.throwOnUnMappedNodeIds = throwOnUnMappedNodeIds;
     }
 
     public long rows() {
@@ -136,6 +139,11 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private boolean visit(Result.ResultRow row, String relationshipType) {
 
         readSourceId(row);
+        readTargetId(row);
+
+        if (!throwOnUnMappedNodeIds && sourceId == -1 || targetId == -1) {
+            return true;
+        }
 
         SingleTypeRelationshipImporter importer = localImporters.get(relationshipType);
 
@@ -179,7 +187,9 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         long neoTargetId = row.getNumber(TARGET_COLUMN).longValue();
         if (neoTargetId != lastNeoTargetId) {
             targetId = idMap.toMappedNodeId(neoTargetId);
-            validateNodeIsLoaded(targetId, neoTargetId, "target");
+            if (throwOnUnMappedNodeIds) {
+                validateNodeIsLoaded(targetId, neoTargetId, "target");
+            }
             lastNeoTargetId = neoTargetId;
         }
     }
@@ -188,7 +198,9 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         long neoSourceId = row.getNumber(SOURCE_COLUMN).longValue();
         if (neoSourceId != lastNeoSourceId) {
             sourceId = idMap.toMappedNodeId(neoSourceId);
-            validateNodeIsLoaded(sourceId, neoSourceId, "source");
+            if (throwOnUnMappedNodeIds) {
+                validateNodeIsLoaded(sourceId, neoSourceId, "source");
+            }
             lastNeoSourceId = neoSourceId;
         }
     }

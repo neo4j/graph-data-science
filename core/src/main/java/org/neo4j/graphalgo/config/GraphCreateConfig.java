@@ -87,6 +87,12 @@ public interface GraphCreateConfig extends BaseConfig {
         return LocalDateTime.now();
     }
 
+    @Value.Default
+    @Value.Parameter(false)
+    default boolean throwOnUnresolvedRelationships() {
+        return true;
+    }
+
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
         CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(
             NODE_PROJECTION_KEY,
