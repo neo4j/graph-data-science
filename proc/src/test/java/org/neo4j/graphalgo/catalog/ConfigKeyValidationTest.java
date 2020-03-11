@@ -93,7 +93,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
 
         assertThat(
             exception,
-            rootCause(IllegalArgumentException.class, "Missing information for implicit graph creation. No value specified for the mandatory configuration parameter `nodeProjection` (A similar parameter exists: [nodeProjections])")
+            rootCause(IllegalArgumentException.class, "Missing information for implicit graph creation. No value specified for the mandatory configuration parameter `nodeProjection` (a similar parameter exists: [nodeProjections])")
         );
     }
 
@@ -106,7 +106,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
 
         assertThat(
             exception,
-            rootCause(IllegalArgumentException.class, "No value specified for the mandatory configuration parameter `writeProperty` (A similar parameter exists: [wirteProperty])")
+            rootCause(IllegalArgumentException.class, "No value specified for the mandatory configuration parameter `writeProperty` (a similar parameter exists: [wirteProperty])")
         );
     }
 

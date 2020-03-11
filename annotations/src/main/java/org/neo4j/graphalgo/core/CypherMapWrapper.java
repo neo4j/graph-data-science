@@ -364,13 +364,13 @@ public final class CypherMapWrapper {
         }
         if (suggestions.size() == 1) {
             return String.format(
-                "No value specified for the mandatory configuration parameter `%s` (A similar parameter exists: [%s])",
+                "No value specified for the mandatory configuration parameter `%s` (a similar parameter exists: [%s])",
                 key,
                 suggestions.get(0)
             );
         }
         return String.format(
-            "No value specified for the mandatory configuration parameter `%s` (Similar parameters exist: [%s])",
+            "No value specified for the mandatory configuration parameter `%s` (similar parameters exist: [%s])",
             key,
             String.join(", ", suggestions)
         );

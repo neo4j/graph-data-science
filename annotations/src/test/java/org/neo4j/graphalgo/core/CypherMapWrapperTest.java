@@ -129,11 +129,11 @@ class CypherMapWrapperTest {
         return Stream.of(
             arguments(
                 map("foo", 42, "bar", -42),
-                "A similar parameter exists: [foo]"
+                "a similar parameter exists: [foo]"
             ),
             arguments(
                 map("foo", 42, "bar", -42, "foi", 1337),
-                "Similar parameters exist: [foi, foo]"
+                "similar parameters exist: [foi, foo]"
             )
         );
     }
@@ -209,15 +209,15 @@ class CypherMapWrapperTest {
             ),
             arguments(
                 map("aaa", 42, "bb", 42),
-                "Test: No value specified for the mandatory configuration parameter `bbb` (A similar parameter exists: [bb])"
+                "Test: No value specified for the mandatory configuration parameter `bbb` (a similar parameter exists: [bb])"
             ),
             arguments(
                 map("aaa", 42, "bb", 42, "bbbb", 42),
-                "Test: No value specified for the mandatory configuration parameter `bbb` (Similar parameters exist: [bbbb, bb])"
+                "Test: No value specified for the mandatory configuration parameter `bbb` (similar parameters exist: [bbbb, bb])"
             ),
             arguments(
                 map("aaa", 42, "bb", 42, "bbbb", 42, "xx", 1337),
-                "Test: No value specified for the mandatory configuration parameter `bbb` (Similar parameters exist: [bbbb, bb])"
+                "Test: No value specified for the mandatory configuration parameter `bbb` (similar parameters exist: [bbbb, bb])"
             ),
             arguments(
                 map("aaa", 42, "bb", 42, "bbbb", 42, "xxx", 1337),
@@ -225,15 +225,15 @@ class CypherMapWrapperTest {
             ),
             arguments(
                 map("xxx", 42, "yy", 42),
-                "Test: No value specified for the mandatory configuration parameter `yyy` (A similar parameter exists: [yy])"
+                "Test: No value specified for the mandatory configuration parameter `yyy` (a similar parameter exists: [yy])"
             ),
             arguments(
                 map("xxx", 42, "yy", 42, "yyyy", 42),
-                "Test: No value specified for the mandatory configuration parameter `yyy` (Similar parameters exist: [yyyy, yy])"
+                "Test: No value specified for the mandatory configuration parameter `yyy` (similar parameters exist: [yyyy, yy])"
             ),
             arguments(
                 map("xxx", 42, "yy", 42, "yyyy", 42, "aa", 1337),
-                "Test: No value specified for the mandatory configuration parameter `yyy` (Similar parameters exist: [yyyy, yy])"
+                "Test: No value specified for the mandatory configuration parameter `yyy` (similar parameters exist: [yyyy, yy])"
             ),
             arguments(
                 map("xxx", 42, "yy", 42, "yyyy", 42, "aaa", 1337),
