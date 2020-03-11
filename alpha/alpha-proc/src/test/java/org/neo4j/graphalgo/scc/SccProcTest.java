@@ -89,7 +89,7 @@ class SccProcTest extends BaseProcTest {
             assertEquals(3, row.getNumber("minSetSize").longValue());
             assertEquals(3, row.getNumber("maxSetSize").longValue());
             assertEquals("componentId", row.getString("writeProperty"));
-            assertNotEquals(-1, loadMillis);
+            assertNotEquals(-1, createMillis);
             assertNotEquals(-1, computeMillis);
             assertNotEquals(-1, writeMillis);
         });
