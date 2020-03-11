@@ -68,7 +68,7 @@ public abstract class BaseProc {
             .build();
     }
 
-    protected void runWithExceptionLogging(String message, Runnable runnable) {
+    protected final void runWithExceptionLogging(String message, Runnable runnable) {
         try {
             runnable.run();
         } catch (Exception e) {
@@ -77,7 +77,7 @@ public abstract class BaseProc {
         }
     }
 
-    protected <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {
+    protected final <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {
         try {
             return supplier.get();
         } catch (Exception e) {
@@ -86,15 +86,15 @@ public abstract class BaseProc {
         }
     }
 
-    protected void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
+    protected final void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
         validateConfig(cypherConfig, config.configKeys());
     }
 
-    void validateConfig(CypherMapWrapper cypherConfig, Collection<String> allowedKeys) {
+    final void validateConfig(CypherMapWrapper cypherConfig, Collection<String> allowedKeys) {
         cypherConfig.requireOnlyKeysFrom(allowedKeys);
     }
 
-    protected void validateGraphName(String username, String graphName) {
+    protected final void validateGraphName(String username, String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
         if (GraphStoreCatalog.exists(username, graphName)) {
             throw new IllegalArgumentException(String.format(
