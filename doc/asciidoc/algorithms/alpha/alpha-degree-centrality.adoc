@@ -47,7 +47,7 @@ Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two 
 [source, cypher]
 ----
 CALL gds.alpha.degree.write(configuration: Map)
-YIELD nodes, createMillis, computeMillis, writeMillis, write, writeProperty
+YIELD nodes, createMillis, computeMillis, writeMillis, writeProperty
 ----
 
 .Configuration

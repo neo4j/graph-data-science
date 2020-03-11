@@ -52,7 +52,7 @@ CALL gds.alpha.articleRank.write({
   iterations:20, dampingFactor:0.85,
   writeProperty: "pagerank"
 })
-YIELD nodes, iterations, createMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
+YIELD nodes, iterations, createMillis, computeMillis, writeMillis, dampingFactor, writeProperty
 
 // end::write-sample-graph[]
 
