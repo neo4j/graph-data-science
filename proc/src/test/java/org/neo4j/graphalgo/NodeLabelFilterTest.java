@@ -24,22 +24,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
-import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Result;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
-public class NodeFilterTest extends BaseProcTest {
+public class NodeLabelFilterTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BitSetBuilder;
@@ -40,6 +41,17 @@ public final class IdMapBuilder {
             int concurrency,
             AllocationTracker tracker) {
 
+        SparseNodeMapping nodeToGraphIds = buildSparseNodeMapping(graphIds, highestNodeId, concurrency, tracker);
+        return new IdMap(graphIds, nodeToGraphIds, labelInformation, nodeCount);
+    }
+
+    @NotNull
+    public static SparseNodeMapping buildSparseNodeMapping(
+        HugeLongArray graphIds,
+        long highestNodeId,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
         SparseNodeMapping.Builder nodeMappingBuilder = SparseNodeMapping.Builder.create(highestNodeId == 0 ? 1 : highestNodeId, tracker);
         ParallelUtil.readParallel(
                 concurrency,
@@ -60,8 +72,7 @@ public final class IdMapBuilder {
                 }
         );
 
-        SparseNodeMapping nodeToGraphIds = nodeMappingBuilder.build();
-        return new IdMap(graphIds, nodeToGraphIds, labelInformation, nodeCount);
+        return nodeMappingBuilder.build();
     }
 
     public static IdMap build(

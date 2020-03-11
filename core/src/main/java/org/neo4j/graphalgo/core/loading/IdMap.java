@@ -39,7 +39,7 @@ import java.util.function.LongPredicate;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
+public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
             .builder(IdMap.class)
@@ -50,10 +50,10 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
         // TODO memory estimation for labelInformation
             .build();
 
-    private long nodeCount;
-    private HugeLongArray graphIds;
-    private SparseNodeMapping nodeToGraphIds;
-    private final Map<String, BitSet> labelInformation;
+    protected long nodeCount;
+    protected HugeLongArray graphIds;
+    protected SparseNodeMapping nodeToGraphIds;
+    protected final Map<String, BitSet> labelInformation;
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
@@ -127,14 +127,14 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
             newGraphIds.set(cursor, nodeId);
             cursor++;
         }
-        return IdMapBuilder.build(
+
+        SparseNodeMapping newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
             newGraphIds,
-            null,
-            newNodeCount,
             nodeToGraphIds.getCapacity(),
             concurrency,
             AllocationTracker.EMPTY
         );
+        return new FilteredIdMap(graphIds, newGraphIds, newNodeToGraphIds, labelInformation, newNodeCount);
     }
 
     public static final class IdIterable implements PrimitiveLongIterable {
