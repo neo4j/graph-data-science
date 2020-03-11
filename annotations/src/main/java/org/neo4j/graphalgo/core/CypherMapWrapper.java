@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.immutables.value.Value;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -451,20 +452,17 @@ public final class CypherMapWrapper {
         String secondPairKeyOne,
         String secondPairKeyTwo
     ) {
-        StringWithValue firstMessage = missingMutuallyExclusivePairs(firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo);
-        StringWithValue secondMessage = missingMutuallyExclusivePairs(secondPairKeyOne, secondPairKeyTwo, firstPairKeyOne, firstPairKeyTwo);
+        StringAndScore firstMessage = missingMutuallyExclusivePairs(firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo);
+        StringAndScore secondMessage = missingMutuallyExclusivePairs(secondPairKeyOne, secondPairKeyTwo, firstPairKeyOne, firstPairKeyTwo);
 
-        if (firstMessage != null) {
+        if (firstMessage != null && firstMessage.isBetterThan(secondMessage)) {
             // only return if the second message does not have a competitive score
-            if (secondMessage == null || secondMessage.value < firstMessage.value) {
-                return firstMessage.string;
-            }
+            return firstMessage.string();
         }
-        if (secondMessage != null) {
+
+        if (secondMessage != null && secondMessage.isBetterThan(firstMessage)) {
             // only return if the first message does not have a competitive score
-            if (firstMessage == null || firstMessage.value < secondMessage.value) {
-                return secondMessage.string;
-            }
+            return secondMessage.string();
         }
 
         // either pairs have the same possibility score, we don't know which one we should use
@@ -477,7 +475,7 @@ public final class CypherMapWrapper {
         );
     }
 
-    private @Nullable StringWithValue missingMutuallyExclusivePairs(
+    private @Nullable StringAndScore missingMutuallyExclusivePairs(
         String keyOne,
         String keyTwo,
         String... forbiddenSuggestions
@@ -508,11 +506,11 @@ public final class CypherMapWrapper {
         if (!missingAndCandidates.isEmpty()) {
             missingAndCandidates.addAll(missingWithoutCandidates);
             String message = String.join(". ", missingAndCandidates);
-            return new StringWithValue(message, score);
+            return ImmutableStringAndScore.of(message, score);
         }
         if (hasAtLastOneKey && !missingWithoutCandidates.isEmpty()) {
             String message = String.join(". ", missingWithoutCandidates);
-            return new StringWithValue(message, score);
+            return ImmutableStringAndScore.of(message, score);
         }
         // null here means, that there are no valid keys, but also no good error message
         // so it might be that this pair is not relevant for the error reporting
@@ -546,10 +544,10 @@ public final class CypherMapWrapper {
 
     private static List<String> similarStrings(CharSequence value, Collection<String> candidates) {
         return candidates.stream()
-            .map(candidate -> new StringWithValue(candidate, jaroWinkler(value, candidate)))
-            .filter(candidate -> candidate.value > REQUIRED_SIMILARITY)
+            .map(candidate -> ImmutableStringAndScore.of(candidate, jaroWinkler(value, candidate)))
+            .filter(candidate -> candidate.value() > REQUIRED_SIMILARITY)
             .sorted()
-            .map(candidate -> candidate.string)
+            .map(StringAndScore::string)
             .collect(Collectors.toList());
     }
 
@@ -609,19 +607,29 @@ public final class CypherMapWrapper {
         return new CypherMapWrapper(newMap);
     }
 
-    private static final class StringWithValue implements Comparable<StringWithValue> {
-        private final String string;
-        private final double value;
+    @Value.Style(
+        allParameters = true,
+        builderVisibility = Value.Style.BuilderVisibility.SAME,
+        jdkOnly = true,
+        overshadowImplementation = true,
+        typeAbstract = "*",
+        visibility = Value.Style.ImplementationVisibility.PACKAGE
+    )
+    @Value.Immutable(copy = false, builder = false)
+    interface StringAndScore extends Comparable<StringAndScore> {
+        String string();
 
-        private StringWithValue(String string, double value) {
-            this.string = string;
-            this.value = value;
+        double value();
+
+        default boolean isBetterThan(@Nullable StringAndScore other) {
+            return other == null || value() > other.value();
         }
 
         @Override
-        public int compareTo(CypherMapWrapper.StringWithValue other) {
-            int result = Double.compare(other.value, this.value);
-            return (result != 0) ? result : this.string.compareTo(other.string);
+        default int compareTo(StringAndScore other) {
+            // ORDER BY score DESC, string ASC
+            int result = Double.compare(other.value(), this.value());
+            return (result != 0) ? result : this.string().compareTo(other.string());
         }
     }
 }
