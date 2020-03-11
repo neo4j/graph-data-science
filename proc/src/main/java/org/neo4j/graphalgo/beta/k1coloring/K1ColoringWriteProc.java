@@ -125,7 +125,6 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
                 nodePropertiesWritten,
                 colorCount,
                 ranIterations,
-                true,
                 didConverge,
                 config.toMap()
             );
@@ -143,7 +142,6 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             0,
             0,
             false,
-            false,
             null
         );
 
@@ -156,8 +154,6 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         public final long ranIterations;
         public final boolean didConverge;
 
-        public final boolean write;
-
         public Map<String, Object> configuration;
 
         WriteResult(
@@ -167,7 +163,6 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             long nodes,
             long colorCount,
             long ranIterations,
-            boolean write,
             boolean didConverge,
             Map<String, Object> configuration
         ) {
@@ -177,7 +172,6 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             this.nodes = nodes;
             this.colorCount = colorCount;
             this.ranIterations = ranIterations;
-            this.write = write;
             this.didConverge = didConverge;
             this.configuration = configuration;
         }
