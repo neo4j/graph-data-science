@@ -187,17 +187,16 @@ public class OverlapDocTest extends BaseProcTest {
             "  relationshipProjection: '*', " +
             "  data: data, " +
             "  topK: 2, " +
-            "  similarityCutoff: 0.5, " +
-            "  write:true " +
+            "  similarityCutoff: 0.5 " +
             " }) " +
-            " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100 " +
-            " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
+            " YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100 " +
+            " RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedResult = "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |\n" +
-                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| 4     | 5               | true  | \"NARROWER_THAN\"       | \"score\"       | 0.6666641235351562 | 1.0000038146972656 | 0.8833351135253906 | 1.0000038146972656 |\n" +
-                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+        String expectedResult = "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| nodes | similarityPairs | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |\n" +
+                                "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| 4     | 5               | \"NARROWER_THAN\"       | \"score\"       | 0.6666641235351562 | 1.0000038146972656 | 0.8833351135253906 | 1.0000038146972656 |\n" +
+                                "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
         runQueryWithResultConsumer(query, result-> assertEquals(expectedResult, result.resultAsString()));

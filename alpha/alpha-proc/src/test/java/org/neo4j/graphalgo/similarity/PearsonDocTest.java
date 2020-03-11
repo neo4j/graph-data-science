@@ -247,18 +247,17 @@ class PearsonDocTest extends BaseProcTest {
                        "  relationshipProjection: '*', " +
                        "  data: data," +
                        "  topK: 1, " +
-                       "  similarityCutoff: 0.1, " +
-                       "  write: true" +
+                       "  similarityCutoff: 0.1 " +
                        " })" +
-                       " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100" +
-                       " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
+                       " YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100" +
+                       " RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedString = "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
-                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |" + NL +
-                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
-                                "| 5     | 4               | true  | \"SIMILAR\"             | \"score\"       | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688 |" + NL +
-                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
-                                "1 row" + NL;
+        String expectedString = "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| nodes | similarityPairs | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |\n" +
+                                "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| 5     | 4               | \"SIMILAR\"             | \"score\"       | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688 |\n" +
+                                "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "1 row\n";
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
 
@@ -363,18 +362,17 @@ class PearsonDocTest extends BaseProcTest {
                        "  data: query," +
                        "  graph: 'cypher'," +
                        "  topK: 1," +
-                       "  similarityCutoff: 0.1," +
-                       "  write:true" +
+                       "  similarityCutoff: 0.1" +
                        " })" +
-                       " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95" +
-                       " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
+                       " YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95" +
+                       " RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedString = "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
-                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |" + NL +
-                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
-                                "| 5     | 4               | true  | \"SIMILAR\"             | \"score\"       | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688 |" + NL +
-                                "+-------------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
-                                "1 row" + NL;
+        String expectedString = "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| nodes | similarityPairs | writeRelationshipType | writeProperty | min                | max                | mean               | p95                |\n" +
+                                "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| 5     | 4               | \"SIMILAR\"             | \"score\"       | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688 |\n" +
+                                "+-----------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "1 row\n";
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
     }

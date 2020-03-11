@@ -279,17 +279,16 @@ public class EuclideanDocTest extends BaseProcTest {
             "  nodeProjection: '*', " +
             "  relationshipProjection: '*', " +
             "  data: data," +
-            "  topK: 1," +
-            "  write:true" +
+            "  topK: 1" +
             " })" +
-            " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100" +
-            " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
+            " YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100" +
+            " RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedResult = "+----------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min | max                | mean               | p95                |\n" +
-                                "+----------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| 5     | 5               | true  | \"SIMILAR\"             | \"score\"       | 3.0 | 4.3589019775390625 | 3.5139984130859374 | 4.3589019775390625 |\n" +
-                                "+----------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+        String expectedResult = "+--------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| nodes | similarityPairs | writeRelationshipType | writeProperty | min | max                | mean               | p95                |\n" +
+                                "+--------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| 5     | 5               | \"SIMILAR\"             | \"score\"       | 3.0 | 4.3589019775390625 | 3.5139984130859374 | 4.3589019775390625 |\n" +
+                                "+--------------------------------------------------------------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
         runQueryWithResultConsumer(query, result-> assertEquals(expectedResult, result.resultAsString()));
@@ -413,17 +412,16 @@ public class EuclideanDocTest extends BaseProcTest {
             "  data: query," +
             "  graph: 'cypher'," +
             "  topK: 1," +
-            "  similarityCutoff: 4.0," +
-            "  write:true" +
+            "  similarityCutoff: 4.0" +
             " })" +
-            " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95" +
-            " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
+            " YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95" +
+            " RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedResult = "+---------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min | max                | mean              | p95                |\n" +
-                                "+---------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| 5     | 5               | true  | \"SIMILAR\"             | \"score\"       | 0.0 | 3.6055450439453125 | 2.642218017578125 | 3.6055450439453125 |\n" +
-                                "+---------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+        String expectedResult = "+-------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| nodes | similarityPairs | writeRelationshipType | writeProperty | min | max                | mean              | p95                |\n" +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| 5     | 5               | \"SIMILAR\"             | \"score\"       | 0.0 | 3.6055450439453125 | 2.642218017578125 | 3.6055450439453125 |\n" +
+                                "+-------------------------------------------------------------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
         runQueryWithResultConsumer(query, result-> assertEquals(expectedResult, result.resultAsString()));

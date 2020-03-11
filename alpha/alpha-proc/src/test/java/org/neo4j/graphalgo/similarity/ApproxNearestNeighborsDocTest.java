@@ -131,8 +131,7 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
             "  data: data, " +
             "  similarityCutoff: 0.1, " +
             "  showComputations: true," +
-            "  concurrency: 1, " +
-            "  write: true " +
+            "  concurrency: 1" +
             " }) " +
             " YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95 " +
             " RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95 ";

@@ -224,19 +224,18 @@ We can do that by passing in the `topK` parameter.
   relationshipProjection: '*',
   data: data,
   topK: 2,
-  similarityCutoff: 0.5,
-  write:true
+  similarityCutoff: 0.5
  })
- YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
- RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
+ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
 ----
 
 // tag::write-back[]
 .Results
 [opts="header"]
 |===
-| `nodes` | `similarityPairs` | `write` | `writeRelationshipType` | `writeProperty` | `min`  | `max`  | `mean` | `p95`
-| 4     | 5               | TRUE  | NARROWER_THAN       | score       | 0.6666641235351562 | 1.0000038146972656 | 0.8833351135253906 | 1.0000038146972656
+| `nodes` | `similarityPairs` | `writeRelationshipType` | `writeProperty` | `min`              | `max`              | `mean`             | `p95`
+| 4       | 5                 | NARROWER_THAN           | score           | 0.6666641235351562 | 1.0000038146972656 | 0.8833351135253906 | 1.0000038146972656
 |===
 // end::write-back[]
 
@@ -305,7 +304,7 @@ We could use this technique to compute the similarity of a subset of items to al
 [source, cypher]
 ----
 CALL gds.alpha.similarity.overlap.write(graphNameOrConfig: String|Map, configuration: Map)
-YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
 .Parameters
@@ -331,7 +330,6 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | readConcurrency       | Integer           | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency      | Integer           | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | graph                 | String            | dense                  | yes      | The graph name ('dense' or 'cypher').
-| write                 | Boolean           | false                  | yes      | Indicates whether results should be stored.
 | writeBatchSize        | Integer           | 10000                  | yes      | The batch size to use when storing results.
 | writeRelationshipType | String            | SIMILAR                | yes      | The relationship type to use when storing results.
 | writeProperty         | String            | score                  | yes      | The property to use when storing results.
@@ -345,7 +343,6 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | Name                  | Type      | Description
 | nodes                 | Integer   | The number of nodes passed in.
 | similarityPairs       | Integer   | The number of pairs of similar nodes computed.
-| write                 | Boolean   | Indicates whether results were stored.
 | writeRelationshipType | String    | The relationship type used when storing results.
 | writeProperty         | String    | The property used when storing results.
 | min                   | Float     | The minimum similarity score computed.

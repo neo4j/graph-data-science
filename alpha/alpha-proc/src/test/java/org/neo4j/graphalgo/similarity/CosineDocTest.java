@@ -248,17 +248,16 @@ class CosineDocTest extends BaseProcTest {
                        "    relationshipProjection: '*', " +
                        "    data: data," +
                        "    topK: 1, " +
-                       "    similarityCutoff: 0.1," +
-                       "    write: True" +
+                       "    similarityCutoff: 0.1" +
                        "    })" +
-                       " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100" +
-                       " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
+                       " YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100" +
+                       " RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedString = "+----------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min             | max                | mean               | p95                |\n" +
-                                "+----------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| 5     | 5               | true  | \"SIMILAR\"             | \"score\"       | 0.9542236328125 | 1.0000038146972656 | 0.9824020385742187 | 1.0000038146972656 |\n" +
-                                "+----------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+        String expectedString = "+--------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| nodes | similarityPairs | writeRelationshipType | writeProperty | min             | max                | mean               | p95                |\n" +
+                                "+--------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| 5     | 5               | \"SIMILAR\"             | \"score\"       | 0.9542236328125 | 1.0000038146972656 | 0.9824020385742187 | 1.0000038146972656 |\n" +
+                                "+--------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
         assertEquals(expectedString, runQuery(query, Result::resultAsString));
@@ -377,17 +376,16 @@ class CosineDocTest extends BaseProcTest {
                        "  data: query," +
                        "  graph: 'cypher'," +
                        "  topK: 1," +
-                       "  similarityCutoff: 0.1," +
-                       "  write:true" +
+                       "  similarityCutoff: 0.1" +
                        " })" +
-                       " YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95" +
-                       " RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95";
+                       " YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95" +
+                       " RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95";
 
-        String expectedString = "+----------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| nodes | similarityPairs | write | writeRelationshipType | writeProperty | min             | max                | mean               | p95                |\n" +
-                                "+----------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
-                                "| 5     | 5               | true  | \"SIMILAR\"             | \"score\"       | 0.9542236328125 | 1.0000038146972656 | 0.9824020385742187 | 1.0000038146972656 |\n" +
-                                "+----------------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+        String expectedString = "+--------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| nodes | similarityPairs | writeRelationshipType | writeProperty | min             | max                | mean               | p95                |\n" +
+                                "+--------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
+                                "| 5     | 5               | \"SIMILAR\"             | \"score\"       | 0.9542236328125 | 1.0000038146972656 | 0.9824020385742187 | 1.0000038146972656 |\n" +
+                                "+--------------------------------------------------------------------------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
         assertEquals(expectedString, runQuery(query, Result::resultAsString));
