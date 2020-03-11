@@ -32,6 +32,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 final class NodesScanner extends StatementAction implements RecordScanner {
@@ -40,7 +41,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             GraphDatabaseAPI api,
             AbstractStorePageCacheScanner<NodeRecord> scanner,
             LongSet labels,
-            Map<Long, String> labelMapping,
+            Map<Long, List<String>> labelMapping,
             ImportProgress progress,
             NodeImporter importer,
             TerminationFlag terminationFlag) {
@@ -58,7 +59,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         private final GraphDatabaseAPI api;
         private final AbstractStorePageCacheScanner<NodeRecord> scanner;
         private final LongSet labels;
-        private final Map<Long, String> labelMapping;
+        private final Map<Long, List<String>> labelMapping;
         private final ImportProgress progress;
         private final NodeImporter importer;
         private final TerminationFlag terminationFlag;
@@ -67,7 +68,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                 GraphDatabaseAPI api,
                 AbstractStorePageCacheScanner<NodeRecord> scanner,
                 LongSet labels,
-                Map<Long, String> labelMapping,
+                Map<Long, List<String>> labelMapping,
                 ImportProgress progress,
                 NodeImporter importer, 
                 TerminationFlag terminationFlag) {
@@ -105,7 +106,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private final NodeStore nodeStore;
     private final AbstractStorePageCacheScanner<NodeRecord> scanner;
     private final LongSet labels;
-    private final Map<Long, String> labelMapping;
+    private final Map<Long, List<String>> labelMapping;
     private final int scannerIndex;
     private final ImportProgress progress;
     private final NodeImporter importer;
@@ -117,7 +118,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             TerminationFlag terminationFlag,
             AbstractStorePageCacheScanner<NodeRecord> scanner,
             LongSet labels,
-            Map<Long, String> labelMapping,
+            Map<Long, List<String>> labelMapping,
             int threadIndex,
             ImportProgress progress,
             NodeImporter importer) {

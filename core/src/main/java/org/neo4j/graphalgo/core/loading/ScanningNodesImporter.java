@@ -31,11 +31,12 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.StreamSupport;
+import java.util.stream.Collectors;
 
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, IdsAndProperties> {
@@ -50,14 +51,15 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private Map<String, BitSetBuilder> labelInformationBuilders;
 
     ScanningNodesImporter(
-            GraphDatabaseAPI api,
-            GraphDimensions dimensions,
-            ImportProgress progress,
-            AllocationTracker tracker,
-            TerminationFlag terminationFlag,
-            ExecutorService threadPool,
-            int concurrency,
-            PropertyMappings propertyMappings) {
+        GraphDatabaseAPI api,
+        GraphDimensions dimensions,
+        ImportProgress progress,
+        AllocationTracker tracker,
+        TerminationFlag terminationFlag,
+        ExecutorService threadPool,
+        int concurrency,
+        PropertyMappings propertyMappings
+    ) {
         super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
         this.progress = progress;
         this.tracker = tracker;
@@ -67,36 +69,41 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     @Override
     InternalImporter.CreateScanner creator(
-            long nodeCount,
-            ImportSizing sizing,
-            AbstractStorePageCacheScanner<NodeRecord> scanner) {
+        long nodeCount,
+        ImportSizing sizing,
+        AbstractStorePageCacheScanner<NodeRecord> scanner
+    ) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
 
-        labelInformationBuilders = new HashMap<>(dimensions.labelMapping().values().size());
-        dimensions.labelMapping().values().forEach(identifier -> labelInformationBuilders.put(
-                identifier,
-                BitSetBuilder.of(nodeCount, tracker)
-            ));
+        labelInformationBuilders = dimensions
+            .labelMapping()
+            .values()
+            .stream()
+            .flatMap(Collection::stream)
+            .distinct()
+            .collect(Collectors.toMap(s -> s, s -> BitSetBuilder.of(nodeCount, tracker)));
+
         builders = propertyBuilders(nodeCount);
         return NodesScanner.of(
-                api,
-                scanner,
-                dimensions.nodeLabelIds(),
-                dimensions.labelMapping(),
-                progress,
-                new NodeImporter(idMapBuilder, labelInformationBuilders, builders.values()),
-                terminationFlag
+            api,
+            scanner,
+            dimensions.nodeLabelIds(),
+            dimensions.labelMapping(),
+            progress,
+            new NodeImporter(idMapBuilder, labelInformationBuilders, builders.values()),
+            terminationFlag
         );
     }
 
     @Override
     IdsAndProperties build() {
         IdMap hugeIdMap = IdMapBuilder.build(
-                idMapBuilder,
-                labelInformationBuilders,
-                dimensions.highestNeoId(),
-                concurrency,
-                tracker);
+            idMapBuilder,
+            labelInformationBuilders,
+            dimensions.highestNeoId(),
+            concurrency,
+            tracker
+        );
         Map<String, NodeProperties> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : propertyMappings) {
             NodePropertiesBuilder builder = builders.get(propertyMapping.propertyKey());

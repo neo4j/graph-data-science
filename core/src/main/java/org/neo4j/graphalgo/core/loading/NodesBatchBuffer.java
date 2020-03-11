@@ -26,6 +26,7 @@ import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
@@ -36,7 +37,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     private final LongSet nodeLabelIds;
     private final NodeStore nodeStore;
     private final Map<String, BitSet> labelBitSets;
-    private final Map<Long, String> labelMapping;
+    private final Map<Long, List<String>> labelMapping;
 
 
     // property ids, consecutive
@@ -45,7 +46,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     public NodesBatchBuffer(
         final NodeStore store,
         final LongSet labels,
-        final Map<Long, String> labelMapping,
+        final Map<Long, List<String>> labelMapping,
         int capacity,
         boolean readProperty
     ) {
@@ -74,10 +75,12 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
         if (labelBitSets != null && labelId != EMPTY_LABEL) {
             if (labelMapping.containsKey(labelId)) {
-                if (!labelBitSets.containsKey(labelMapping.get(labelId))) {
-                    labelBitSets.put(labelMapping.get(labelId), new BitSet(capacity()));
+                for (String identifier : labelMapping.get(labelId)) {
+                    if (!labelBitSets.containsKey(identifier)) {
+                        labelBitSets.put(identifier, new BitSet(capacity()));
+                    }
+                    labelBitSets.get(identifier).set(len);
                 }
-                labelBitSets.get(labelMapping.get(labelId)).set(len);
             }
         }
     }

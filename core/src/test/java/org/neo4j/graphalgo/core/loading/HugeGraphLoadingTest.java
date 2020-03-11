@@ -205,7 +205,7 @@ final class HugeGraphLoadingTest {
         Graph undirected = graphStore.getGraph("TYPE_UNDIRECTED");
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), undirected);
 
-        Graph both = graphStore.getGraph(ALL_NODE_LABELS, Arrays.asList("TYPE_NATURAL", "TYPE_REVERSE"), Optional.empty());
+        Graph both = graphStore.getGraph(ALL_NODE_LABELS, Arrays.asList("TYPE_NATURAL", "TYPE_REVERSE"), Optional.empty(), 1);
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), both);
 
         Graph union = graphStore.getUnion();

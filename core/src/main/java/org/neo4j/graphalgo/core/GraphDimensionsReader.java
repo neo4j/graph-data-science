@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
-import org.eclipse.collections.impl.block.factory.Functions;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -38,8 +37,11 @@ import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,17 +66,21 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         Read dataRead = transaction.dataRead();
 
         NodeLabelIds nodeLabelIds = new NodeLabelIds();
-        Map<Long, String> labelMapping = new HashMap<>();
+        final Map<Long, List<String>> labelMapping = new HashMap<>();
         if (readTokens) {
-             labelMapping = setup.nodeProjections()
+             setup.nodeProjections()
                 .projections()
                 .entrySet()
                 .stream()
                 .filter(entry -> !entry.getValue().projectAll())
-                 .collect(Collectors.toMap(
-                     entry -> (long)tokenRead.nodeLabel(entry.getValue().label()),
-                     entry -> entry.getKey().name
-                 ));
+                .forEach(entry -> {
+                    String elementIdentifier = entry.getKey().name;
+                    Arrays
+                        .stream(entry.getValue().label().split(","))
+                        .map(String::trim)
+                        .map(neoLabel -> (long) tokenRead.nodeLabel(neoLabel))
+                        .forEach(labelId -> addToListMap(labelId, elementIdentifier, labelMapping));
+                });
 
             labelMapping.keySet().stream().mapToInt(Long::intValue).forEach(nodeLabelIds.ids::add);
         }
@@ -170,4 +176,10 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         }
     }
 
+    private void addToListMap(long key, String value, Map<Long, List<String>> container) {
+        if (!container.containsKey(key)) {
+            container.put(key, new LinkedList<>());
+        }
+        container.get(key).add(value);
+    }
 }

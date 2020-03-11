@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @ValueClass
@@ -53,7 +54,7 @@ public interface GraphDimensions {
     LongSet nodeLabelIds();
 
     @Nullable
-    Map<Long, String> labelMapping();
+    Map<Long, List<String>> labelMapping();
 
     @Value.Default
     default ResolvedPropertyMappings nodeProperties() {
