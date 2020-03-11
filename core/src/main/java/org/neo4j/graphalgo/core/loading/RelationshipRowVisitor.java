@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static org.neo4j.graphalgo.utils.ExceptionUtil.validateNodeIsLoaded;
+
 class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     private static final long NO_RELATIONSHIP_REFERENCE = -1L;
@@ -134,13 +136,6 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private boolean visit(Result.ResultRow row, String relationshipType) {
 
         readSourceId(row);
-        if (sourceId == -1) {
-            return true;
-        }
-        readTargetId(row);
-        if (targetId == -1) {
-            return true;
-        }
 
         SingleTypeRelationshipImporter importer = localImporters.get(relationshipType);
 
@@ -184,6 +179,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         long neoTargetId = row.getNumber(TARGET_COLUMN).longValue();
         if (neoTargetId != lastNeoTargetId) {
             targetId = idMap.toMappedNodeId(neoTargetId);
+            validateNodeIsLoaded(targetId, neoTargetId, "target");
             lastNeoTargetId = neoTargetId;
         }
     }
@@ -192,6 +188,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         long neoSourceId = row.getNumber(SOURCE_COLUMN).longValue();
         if (neoSourceId != lastNeoSourceId) {
             sourceId = idMap.toMappedNodeId(neoSourceId);
+            validateNodeIsLoaded(sourceId, neoSourceId, "source");
             lastNeoSourceId = neoSourceId;
         }
     }

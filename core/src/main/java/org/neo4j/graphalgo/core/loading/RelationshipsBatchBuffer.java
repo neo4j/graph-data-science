@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_RELATIONSHIP_TYPE;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.validateNodeIsLoaded;
 
 
 public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRecord> {
@@ -59,6 +60,12 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
                 if (target != -1L) {
                     add(source, target, record.getId(), record.getNextProp());
                 }
+                else {
+                    validateNodeIsLoaded(source, record.getSecondNode(), "target");
+                }
+            }
+            else {
+                validateNodeIsLoaded(source, record.getFirstNode(), "source");
             }
         }
     }

@@ -94,6 +94,13 @@ public final class ExceptionUtil {
         }
     }
 
+    public static void validateNodeIsLoaded(long mappedId, long neoId, String side) {
+        if (mappedId == -1) {
+            throw new IllegalStateException(
+                String.format("Failed to load relationship with unknown %s-node id %s.", side, neoId));
+        }
+    }
+
     private ExceptionUtil() {
         throw new UnsupportedOperationException("No instances");
     }

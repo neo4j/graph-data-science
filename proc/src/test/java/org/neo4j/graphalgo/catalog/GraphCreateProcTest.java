@@ -1436,6 +1436,36 @@ class GraphCreateProcTest extends BaseProcTest {
         assertGraphDoesNotExist(name);
     }
 
+    @Test
+    void failCypherCreationWitIncompleteNodeQuery() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(db, GraphCreateProc.class);
+        runQuery(DB_CYPHER_ESTIMATE, emptyMap());
+
+        String query = "CALL gds.graph.create.cypher(" +
+                       "'g', " +
+                       "'MATCH (n:A) Return id(n) as id', " +
+                       "'MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target')" +
+                       "YIELD nodeCount, relationshipCount";
+
+        assertError(query, emptyMap(), "Failed to load relationship with unknown source-node id");
+    }
+
+    @Test
+    void failCreationWitIncompleteNodeQuery() throws Exception {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(db, GraphCreateProc.class);
+        runQuery(DB_CYPHER_ESTIMATE, emptyMap());
+
+        String query = GdsCypher.call()
+            .withNodeLabel("A")
+            .withAnyRelationshipType()
+            .graphCreate("'g'")
+            .yields("nodeCount");
+
+        assertError(query, emptyMap(), "Failed to load relationship with unknown source-node id");
+    }
+
     // Arguments for parameterised tests
 
     static Stream<Arguments> nodeProjectionVariants() {
