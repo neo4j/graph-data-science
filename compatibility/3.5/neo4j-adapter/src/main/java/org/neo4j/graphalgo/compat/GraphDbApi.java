@@ -54,8 +54,8 @@ public final class GraphDbApi implements GraphDatabaseAPI {
         this.api = api;
     }
 
-    public Path dbHome() {
-        return api.databaseLayout().databaseDirectory().toPath();
+    public Path dbHome(Path workingDir) {
+        return workingDir.resolve(api.databaseLayout().getDatabaseName());
     }
 
     // delegate methods
