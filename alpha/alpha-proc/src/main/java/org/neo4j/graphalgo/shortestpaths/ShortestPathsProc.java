@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
@@ -80,7 +81,7 @@ public class ShortestPathsProc extends AlgoBaseProc<ShortestPaths, ShortestPaths
         final ShortestPaths algorithm = computationResult.algorithm();
 
         ShortestPathResult.Builder builder = ShortestPathResult.builder();
-        builder.timeWrite(() -> {
+        try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             IntDoubleMap shortestPaths = algorithm.getShortestPaths();
             algorithm.release();
 
@@ -94,7 +95,7 @@ public class ShortestPathsProc extends AlgoBaseProc<ShortestPaths, ShortestPaths
                     shortestPaths,
                     Translators.INT_DOUBLE_MAP_TRANSLATOR
                 );
-        });
+        }
 
         return Stream.of(builder.build());
     }

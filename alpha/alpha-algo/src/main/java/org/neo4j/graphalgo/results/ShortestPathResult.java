@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.results;
 
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
+
 public class ShortestPathResult {
 
     public final long createMillis;

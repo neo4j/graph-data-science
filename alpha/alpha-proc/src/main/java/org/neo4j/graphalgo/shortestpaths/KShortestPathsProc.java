@@ -25,9 +25,10 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.shortestpaths.WeightedPathExporter;
@@ -35,8 +36,7 @@ import org.neo4j.graphalgo.impl.shortestpaths.YensKShortestPaths;
 import org.neo4j.graphalgo.impl.shortestpaths.YensKShortestPathsConfig;
 import org.neo4j.graphalgo.impl.shortestpaths.YensKShortestPathsConfigImpl;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphdb.Path;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -78,8 +78,8 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
         );
 
         KspResult.Builder builder = new KspResult.Builder();
-        builder.setCreateMillis(computationResult.createMillis());
-        builder.setComputeMillis(computationResult.computeMillis());
+        builder.withCreateMillis(computationResult.createMillis());
+        builder.withComputeMillis(computationResult.computeMillis());
 
         Graph graph = computationResult.graph();
         YensKShortestPaths algorithm = computationResult.algorithm();
@@ -144,8 +144,8 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
         );
 
         KspResult.Builder builder = new KspResult.Builder();
-        builder.setCreateMillis(computationResult.createMillis());
-        builder.setComputeMillis(computationResult.computeMillis());
+        builder.withCreateMillis(computationResult.createMillis());
+        builder.withComputeMillis(computationResult.computeMillis());
 
         Graph graph = computationResult.graph();
         YensKShortestPaths algorithm = computationResult.algorithm();
@@ -157,7 +157,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
         }
 
         builder.withResultCount(algorithm.getPaths().size());
-        try (ProgressTimer timer = builder.timeWrite()) {
+        try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             new WeightedPathExporter(
                 api,
                 Pools.DEFAULT,

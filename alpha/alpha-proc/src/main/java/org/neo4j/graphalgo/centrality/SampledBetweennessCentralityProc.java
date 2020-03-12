@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
@@ -103,14 +104,14 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
 
         graph.release();
 
-        builder.timeWrite(() -> {
+        try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             AtomicDoubleArray centrality = algo.getCentrality();
             NodePropertyExporter.of(api, graph, algo.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build()
                 .write(config.writeProperty(), centrality, Translators.ATOMIC_DOUBLE_ARRAY_TRANSLATOR);
-        });
+        }
         algo.release();
         return Stream.of(builder.build());
     }

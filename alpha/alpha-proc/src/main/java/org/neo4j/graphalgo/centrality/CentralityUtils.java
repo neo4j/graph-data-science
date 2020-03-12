@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityResult;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -46,11 +45,11 @@ public final class CentralityUtils {
         TerminationFlag terminationFlag,
         CentralityResult result,
         WritePropertyConfig configuration,
-        AbstractResultBuilder<R> statsBuilder
+        CentralityScore.Stats.Builder statsBuilder
     ) {
         log.debug("Writing results");
         String propertyName = configuration.writeProperty();
-        try (ProgressTimer ignored = statsBuilder.timeWrite()) {
+        try(ProgressTimer ignore = ProgressTimer.start(statsBuilder::withWriteMillis)) {
             NodePropertyExporter exporter = NodePropertyExporter
                 .of(api, graph, terminationFlag)
                 .withLog(log)

@@ -23,12 +23,11 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.degree.DegreeCentrality;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -92,10 +91,9 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
         DegreeCentralityConfig config = computeResult.config();
         DegreeCentrality algorithm = computeResult.algorithm();
 
-        AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
-            .withCreateMillis(computeResult.createMillis())
-            .withComputeMillis(computeResult.computeMillis())
+        CentralityScore.Stats.Builder builder = new CentralityScore.Stats.Builder()
             .withNodeCount(graph.nodeCount());
+
 
         CentralityUtils.write(
             api,
@@ -106,6 +104,9 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
             config,
             builder
         );
+
+        builder.withCreateMillis(computeResult.createMillis())
+                .withComputeMillis(computeResult.computeMillis());
 
         graph.release();
         return Stream.of(builder.build());
