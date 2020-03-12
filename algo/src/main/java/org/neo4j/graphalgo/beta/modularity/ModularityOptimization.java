@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.modularity;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -81,7 +82,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         final Graph graph,
         int maxIterations,
         double tolerance,
-        NodeProperties seedProperty,
+        @Nullable NodeProperties seedProperty,
         final int concurrency,
         final int minBatchSize,
         final ExecutorService executor,

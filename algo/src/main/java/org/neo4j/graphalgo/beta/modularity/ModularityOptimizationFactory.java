@@ -71,7 +71,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             graph,
             configuration.maxIterations(),
             configuration.tolerance(),
-            graph.nodeProperties(configuration.seedProperty()),
+            configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null,
             configuration.concurrency(),
             configuration.batchSize(),
             Pools.DEFAULT,
