@@ -57,7 +57,7 @@ CALL gds.graph.create(
 | readConcurrency        | Integer               | 4              | The number of concurrent threads used for creating the graph.
 | nodeProperties         | String, List or Map   | empty map      | Node properties to load for all node projections.
 | relationshipProperties | String, List or Map   | empty map      | Relationship properties to load for all relationship projections.
-| throwOnUnresolvedRelationships | Boolean | true   | Whether to throw an error if relationships contain nodes not included in the nodeProjection.
+| throwOnUnresolvedRelationships | Boolean | false   | Whether to throw an error if relationships contain nodes not included in the nodeProjection.
 |===
 
 

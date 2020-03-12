@@ -257,7 +257,7 @@ In the following example we supply a list of strings to limit the cities we want
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
     'MATCH (n:City) WHERE n.name IN $cities RETURN id(n) AS id',
-    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target',
+    'MATCH (n:City)-[r:ROAD]->(m:City) WHERE n.name IN $cities AND m.name IN $cities RETURN id(n) AS source, id(m) AS target',
     {
        parameters: { cities: ["Leipzig", "Malmö"] }
     }

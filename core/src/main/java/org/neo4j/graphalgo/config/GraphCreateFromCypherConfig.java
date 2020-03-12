@@ -83,6 +83,13 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         return Collections.emptyMap();
     }
 
+    @Override
+    @Value.Default
+    @Value.Parameter(false)
+    default boolean throwOnUnresolvedRelationships() {
+        return true;
+    }
+
     @Configuration.Ignore
     default GraphCreateFromCypherConfig inferProjections(GraphDimensions dimensions) {
         NodeProjections nodeProjections = NodeProjections.builder()

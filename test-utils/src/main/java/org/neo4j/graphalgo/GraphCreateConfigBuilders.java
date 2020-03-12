@@ -64,7 +64,8 @@ final class GraphCreateConfigBuilders {
         @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Orientation> globalProjection,
-        Optional<Aggregation> globalAggregation
+        Optional<Aggregation> globalAggregation,
+        Optional<Boolean> throwOnUnresolvedRelationships
     ) {
         // Node projections
         Map<String, NodeProjection> tempNP = new LinkedHashMap<>();
@@ -119,6 +120,7 @@ final class GraphCreateConfigBuilders {
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
             .readConcurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
+            .throwOnUnresolvedRelationships(throwOnUnresolvedRelationships.orElse(false))
             .build()
             .withNormalizedPropertyMappings();
     }
@@ -138,6 +140,7 @@ final class GraphCreateConfigBuilders {
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
         Optional<Aggregation> globalAggregation,
+        Optional<Boolean> throwOnUnresolvedRelationships,
         Optional<Map<String, Object>> parameters
     ) {
         if (!(nodeQuery.isPresent() || anyLabel == AnyLabel.LOAD)) {
@@ -178,6 +181,7 @@ final class GraphCreateConfigBuilders {
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
             .readConcurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
+            .throwOnUnresolvedRelationships(throwOnUnresolvedRelationships.orElse(true))
             .parameters(parameters.orElse(Collections.emptyMap()))
             .build();
     }

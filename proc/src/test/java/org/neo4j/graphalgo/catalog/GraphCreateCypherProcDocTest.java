@@ -178,7 +178,7 @@ class GraphCreateCypherProcDocTest extends BaseProcTest {
         String createQuery = "CALL gds.graph.create.cypher(\n" +
                              "    'myCypherGraph',\n" +
                              "    'MATCH (n:City) WHERE n.name IN $cities RETURN id(n) AS id',\n" +
-                             "    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target',\n" +
+                             "    'MATCH (n:City)-[r:ROAD]->(m:City) WHERE n.name IN $cities AND m.name IN $cities RETURN id(n) AS source, id(m) AS target',\n" +
                              "    {\n" +
                              "       parameters: { cities: [\"Leipzig\", \"Malmö\"] }\n" +
                              "    }\n" +

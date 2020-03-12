@@ -184,7 +184,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String relationshipQuery = "MATCH (a)-[r:REL]->(b) RETURN id(a) AS source, id(b) AS target, type(r) AS type";
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, {throwOnUnresolvedRelationships: false})",
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
             singletonList(map(
                 "graphName", name,
@@ -218,8 +218,8 @@ class GraphCreateProcTest extends BaseProcTest {
         String nodeQuery = "MATCH (n) WHERE n.age = $age RETURN id(n) AS id";
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { parameters: { age: 2 }})",
-            map("name", graphName, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { parameters: { age: 2 }, throwOnUnresolvedRelationships: false})",
+            map("name", graphName, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "throwOnUnresolvedRelationships", false),
             singletonList(map(
                 "graphName", graphName,
                 NODE_PROJECTION_KEY, map(
@@ -1178,7 +1178,6 @@ class GraphCreateProcTest extends BaseProcTest {
             .withNodeLabel("A")
             .withAnyRelationshipType()
             .graphCreate("'g'")
-            .addParameter("throwOnUnresolvedRelationships", false)
             .yields("nodeCount", "relationshipCount");
 
         runQueryWithRowConsumer(query, resultRow -> {
@@ -1499,6 +1498,7 @@ class GraphCreateProcTest extends BaseProcTest {
             .withNodeLabel("A")
             .withAnyRelationshipType()
             .graphCreate("'g'")
+            .addParameter("throwOnUnresolvedRelationships", true)
             .yields("nodeCount");
 
         assertError(query, emptyMap(), "Failed to load relationship with unknown source-node id");

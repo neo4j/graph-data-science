@@ -90,7 +90,7 @@ public interface GraphCreateConfig extends BaseConfig {
     @Value.Default
     @Value.Parameter(false)
     default boolean throwOnUnresolvedRelationships() {
-        return true;
+        return false;
     }
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
