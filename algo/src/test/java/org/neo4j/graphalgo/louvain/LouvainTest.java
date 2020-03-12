@@ -27,10 +27,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
+import org.neo4j.graphalgo.ImmutableResolvedPropertyMapping;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
+import org.neo4j.graphalgo.ResolvedPropertyMapping;
+import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
@@ -41,11 +44,12 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -59,6 +63,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -310,6 +315,44 @@ class LouvainTest extends AlgoTestBase {
         MemoryTree memoryTree = new LouvainFactory<>().memoryEstimation(config).estimate(dimensions, concurrency);
         assertEquals(min, memoryTree.memoryUsage().min);
         assertEquals(max, memoryTree.memoryUsage().max);
+    }
+
+    @Test
+    void testMemoryEstimationUsesOnlyOnePropertyForEachEntity() {
+        ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions.builder()
+            .nodeCount(100_000L)
+            .maxRelCount(500_000L)
+            .relationshipProjectionMappings(RelationshipProjectionMappings.all());
+
+
+        ResolvedPropertyMapping propertyMapping = ImmutableResolvedPropertyMapping.of("foo", "bar", 1.0, Aggregation.NONE, 1);
+        ResolvedPropertyMappings oneProperty = ResolvedPropertyMappings.of(Arrays.asList(propertyMapping));
+        ResolvedPropertyMappings twoProperties = ResolvedPropertyMappings.of(Arrays.asList(propertyMapping, propertyMapping));
+
+        GraphDimensions dimensionsWithoutProperties = dimensionsBuilder.build();
+        GraphDimensions dimensionsWithOneProperty = dimensionsBuilder
+            .relationshipProperties(oneProperty)
+            .nodeProperties(oneProperty)
+            .build();
+        GraphDimensions dimensionsWithTwoProperties = dimensionsBuilder
+            .relationshipProperties(twoProperties)
+            .nodeProperties(twoProperties)
+            .build();
+
+        LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
+            .maxLevels(1)
+            .maxIterations(10)
+            .tolerance(TOLERANCE_DEFAULT)
+            .includeIntermediateCommunities(false)
+            .concurrency(1)
+            .build();
+
+        MemoryTree memoryTree = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithoutProperties, 1);
+        MemoryTree memoryTreeOneProperty = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithOneProperty, 1);
+        MemoryTree memoryTreeTwoProperties = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithTwoProperties, 1);
+
+        assertNotEquals(memoryTree.memoryUsage(), memoryTreeOneProperty.memoryUsage());
+        assertEquals(memoryTreeOneProperty.memoryUsage(), memoryTreeTwoProperties.memoryUsage());
     }
 
     @Test

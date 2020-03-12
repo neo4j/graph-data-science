@@ -20,16 +20,21 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationFactory;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
+
+import java.util.Collections;
 
 public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmFactory<Louvain, CONFIG> {
 
@@ -54,10 +59,25 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
         return MemoryEstimations.builder(Louvain.class)
             .add("modularityOptimization()", ModularityOptimizationFactory.MEMORY_ESTIMATION)
             .rangePerGraphDimension("subGraph", (graphDimensions, concurrency) -> {
-                // TODO: copy graphDimensions but keep only one node and rel property
+                ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions.builder().from(graphDimensions);
+
+                graphDimensions
+                    .relationshipProperties()
+                    .stream()
+                    .findFirst()
+                    .map(prop -> dimensionsBuilder.relationshipProperties(ResolvedPropertyMappings.of(Collections.singletonList(prop))));
+
+                graphDimensions
+                    .nodeProperties()
+                    .stream()
+                    .findFirst()
+                    .map(prop -> dimensionsBuilder.nodeProperties(ResolvedPropertyMappings.of(Collections.singletonList(prop))));
+
+                GraphDimensions sparseDimensions = dimensionsBuilder.build();
+
                 long maxGraphSize = NativeFactory
-                    .getMemoryEstimation(graphDimensions)
-                    .estimate(graphDimensions, concurrency)
+                    .getMemoryEstimation(sparseDimensions)
+                    .estimate(sparseDimensions, concurrency)
                     .memoryUsage()
                     .max;
                 return MemoryRange.of(1L, maxGraphSize); // rough estimate of graph size
