@@ -24,21 +24,20 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.GraphStore;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.Map;
 import java.util.Optional;
@@ -82,10 +81,9 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
         assertEquals("weight", config.nodeWeightProperty());
     }
 
-    @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.AlgoBaseProcTest#emptyStringPropertyValues")
-    default void testEmptyNodeWeightPropertyValues(String weightPropertyParameter) {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", weightPropertyParameter));
+    @Test
+    default void testEmptyNodeWeightPropertyValues() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", null));
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertNull(config.nodeWeightProperty());
     }

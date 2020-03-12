@@ -84,22 +84,9 @@ public final class CypherMapWrapper {
         return getChecked(key, emptyList(), List.class);
     }
 
-    // TODO: this is a special case as it's treating the empty string as null
-    //       and doesn't throw on those values. Can we remove that specialization?
-
-    /**
-     * specialized getter for String which either returns the value
-     * if found, the defaultValue if the key is not found or null if
-     * the key is found but its value is empty.
-     *
-     * @param key          configuration key
-     * @param defaultValue the default value if key is not found
-     * @return the configuration value
-     */
     @Contract("_, !null -> !null")
     public @Nullable String getString(String key, @Nullable String defaultValue) {
-        String value = (String) config.getOrDefault(key, defaultValue);
-        return (null == value || "".equals(value)) ? defaultValue : value;
+        return getChecked(key, defaultValue, String.class);
     }
 
     @Contract("_, _, !null -> !null")

@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -60,10 +58,9 @@ public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESU
         assertEquals("foo", config.seedProperty());
     }
 
-    @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.AlgoBaseProcTest#emptyStringPropertyValues")
-    default void testEmptySeedPropertyValues(String seedPropertyParameter) {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", seedPropertyParameter));
+    @Test
+    default void testEmptySeedPropertyValues() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", null));
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertNull(config.seedProperty());
     }

@@ -84,10 +84,6 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     String TEST_USERNAME = AuthSubject.ANONYMOUS.username();
 
-    static Stream<String> emptyStringPropertyValues() {
-        return Stream.of(null, "");
-    }
-
     @AfterEach
     default void removeAllLoadedGraphs() {
         GraphStoreCatalog.removeAllLoadedGraphs();
