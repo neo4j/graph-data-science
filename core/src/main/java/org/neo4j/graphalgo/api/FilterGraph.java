@@ -117,7 +117,6 @@ public abstract class FilterGraph implements Graph {
     @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         graph.forEachRelationship(nodeId, consumer);
-
     }
 
     @Override

@@ -30,23 +30,24 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class IdMapBuilder {
     public static IdMap build(
             HugeLongArray graphIds,
-            Map<String, BitSet> labelInformation,
+            Optional<Map<String, BitSet>> maybeLabelInformation,
             long nodeCount,
             long highestNodeId,
             int concurrency,
             AllocationTracker tracker) {
 
         SparseNodeMapping nodeToGraphIds = buildSparseNodeMapping(graphIds, highestNodeId, concurrency, tracker);
-        return new IdMap(graphIds, nodeToGraphIds, labelInformation, nodeCount);
+        return new IdMap(graphIds, nodeToGraphIds, maybeLabelInformation, nodeCount);
     }
 
     @NotNull
-    public static SparseNodeMapping buildSparseNodeMapping(
+    static SparseNodeMapping buildSparseNodeMapping(
         HugeLongArray graphIds,
         long highestNodeId,
         int concurrency,
@@ -81,21 +82,20 @@ public final class IdMapBuilder {
             long highestNodeId,
             int concurrency,
             AllocationTracker tracker) {
-        Map<String, BitSet> labelInformation = labelInformationBuilders == null
-            ? null
-            : labelInformationBuilders
+        Optional<Map<String, BitSet>> maybeLabelInformation = labelInformationBuilders == null
+            ? Optional.empty()
+            : Optional.of(labelInformationBuilders
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, value -> value.getValue().build()));
+                .collect(Collectors.toMap(Map.Entry::getKey, value -> value.getValue().build())));
         return build(idMapBuilder.build(),
-            labelInformation,
+            maybeLabelInformation,
             idMapBuilder.size(),
             highestNodeId,
             concurrency,
             tracker
         );
     }
-
 
     private IdMapBuilder() {
     }

@@ -124,7 +124,7 @@ public final class HugeGraphUtil {
                     nodeId
                 ));
 
-                idMap = new IdMap(internalToNeo, originalToInternal, (Map) null, internalToNeo.size());
+                idMap = new IdMap(internalToNeo, originalToInternal, internalToNeo.size());
             }
             return idMap;
         }

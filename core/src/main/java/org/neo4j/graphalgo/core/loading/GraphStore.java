@@ -243,13 +243,29 @@ public final class GraphStore {
     private Graph createGraph(List<String> nodeLabels, List<String> relationshipTypes, Optional<String> maybeRelationshipProperty, int concurrency) {
         boolean loadAllRelationships = relationshipTypes.contains(PROJECT_ALL.name);
 
+        Optional<IdMap> filteredNodes = nodeLabels.contains(PROJECT_ALL.name)
+            ? Optional.empty()
+            : Optional.of(this.nodes.withFilteredLabels(nodeLabels, concurrency));
+
         List<Graph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))
-            .map(relTypeAndCSR -> HugeGraph.create(
-                nodes, nodeProperties, relTypeAndCSR.getValue(), maybeRelationshipProperty.map(propertyKey -> relationshipProperties
-                    .get(relTypeAndCSR.getKey())
-                    .get(propertyKey)), tracker
-            ))
+            .map(relTypeAndCSR -> {
+                HugeGraph initialGraph = HugeGraph.create(
+                    tracker,
+                    this.nodes,
+                    nodeProperties,
+                    relTypeAndCSR.getValue(),
+                    maybeRelationshipProperty.map(propertyKey -> relationshipProperties
+                        .get(relTypeAndCSR.getKey())
+                        .get(propertyKey))
+                );
+
+                if (filteredNodes.isPresent()) {
+                    return new NodeFilteredGraph(initialGraph, filteredNodes.get());
+                } else {
+                    return initialGraph;
+                }
+            })
             .collect(Collectors.toList());
 
         filteredGraphs.forEach(graph -> graph.canRelease(false));

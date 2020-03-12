@@ -20,6 +20,7 @@ dependencies {
     testAnnotationProcessor project(':annotations')
 
     testImplementation project(':test-utils')
+    testCompile project(':alpha-proc')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 }

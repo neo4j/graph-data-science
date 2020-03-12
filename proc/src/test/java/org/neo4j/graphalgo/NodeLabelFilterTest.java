@@ -24,10 +24,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
+import org.neo4j.graphalgo.triangle.TriangleCountProc;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,9 +50,12 @@ public class NodeLabelFilterTest extends BaseProcTest {
             ", (c:Label2 {name: 'c'})" +
             ", (d:Label3 {name: 'd'})" +
             ", (e:Label4 {name: 'e'})" +
-            ", (f:Label5 {name: 'f'})";
+            ", (f:Label5 {name: 'f'})" +
+            ", (c)-[:REL]->(d)" +
+            ", (c)-[:REL]->(e)" +
+            ", (d)-[:REL]->(e)";
 
-        registerProcedures(PageRankStreamProc.class, GraphCreateProc.class);
+        registerProcedures(PageRankStreamProc.class, TriangleCountProc.class, DegreeCentralityProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(cypher);
 
@@ -73,6 +80,21 @@ public class NodeLabelFilterTest extends BaseProcTest {
                  "  L5: 'Label5'" +
                  "}, " +
                  "'*')");
+
+        runQuery("CALL gds.graph.create(" +
+                 "'relGraph'," +
+                 "{" +
+                 "  L1: 'Label1'," +
+                 "  L2: 'Label2'," +
+                 "  L3: 'Label3'," +
+                 "  L4: 'Label4'" +
+                 "}, " +
+                 "{" +
+                 "  REL: {" +
+                 "      type: 'REL'," +
+                 "      orientation: 'UNDIRECTED'" +
+                 "  }" +
+                 "})");
     }
 
     @AfterEach
@@ -124,6 +146,36 @@ public class NodeLabelFilterTest extends BaseProcTest {
 
         assertEquals(expected, actual);
         assertEquals(expected, actual2);
+    }
+
+    @Test
+    void testRelationshipsOnNodeFilteredGraph() {
+        String query = "CALL gds.alpha.degree.stream('relGraph', { nodeLabels: ['L2', 'L3', 'L4'] }) YIELD nodeId, score RETURN gds.util.asNode(nodeId).name AS name, score";
+
+        List<String> nodes = new ArrayList<>();
+        List<Integer> scores = new ArrayList<>();
+        runQueryWithRowConsumer(query, (row) -> {
+            nodes.add(row.getString("name"));
+            scores.add(row.getNumber("score").intValue());
+        });
+
+        System.out.println(nodes);
+        System.out.println(scores);
+    }
+
+    @Test
+    void testGraphIntersectionOnFilteredGraph() {
+        String query = "CALL gds.alpha.triangleCount.stream('relGraph', { nodeLabels: ['L2', 'L3', 'L4'] }) YIELD nodeId, triangles RETURN gds.util.asNode(nodeId).name AS name, triangles";
+
+        List<String> nodes = new ArrayList<>();
+        List<Integer> triangles = new ArrayList<>();
+        runQueryWithRowConsumer(query, (row) -> {
+            nodes.add(row.getString("name"));
+            triangles.add(row.getNumber("triangles").intValue());
+        });
+
+        System.out.println(nodes);
+        System.out.println(triangles);
     }
 
 }

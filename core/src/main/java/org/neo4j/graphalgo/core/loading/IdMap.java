@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongPredicate;
 
 /**
@@ -53,19 +54,23 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
     protected long nodeCount;
     protected HugeLongArray graphIds;
     protected SparseNodeMapping nodeToGraphIds;
-    protected final Map<String, BitSet> labelInformation;
+    protected final Optional<Map<String, BitSet>> maybeLabelInformation;
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
     }
 
+    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, long nodeCount) {
+        this(graphIds, nodeToGraphIds, Optional.empty(), nodeCount);
+    }
+
     /**
      * initialize the map with pre-built sub arrays
      */
-    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, Map<String, BitSet> labelInformation, long nodeCount) {
+    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, Optional<Map<String, BitSet>> maybeLabelInformation, long nodeCount) {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
-        this.labelInformation = labelInformation;
+        this.maybeLabelInformation = maybeLabelInformation;
         this.nodeCount = nodeCount;
     }
 
@@ -113,12 +118,12 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
     }
 
     public IdMap withFilteredLabels(Iterable<String> labelIds, int concurrency) {
-        if (labelIds == null) {
+        if (labelIds == null || !maybeLabelInformation.isPresent()) {
             return this;
         }
 
         BitSet combinedBitSet = BitSet.newInstance();
-        labelIds.forEach(label -> combinedBitSet.union(labelInformation.get(label)));
+        labelIds.forEach(label -> combinedBitSet.union(maybeLabelInformation.get().get(label)));
         long nodeId = -1L;
         long cursor = 0L;
         long newNodeCount = combinedBitSet.cardinality();
@@ -134,7 +139,7 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
             concurrency,
             AllocationTracker.EMPTY
         );
-        return new FilteredIdMap(graphIds, newGraphIds, newNodeToGraphIds, labelInformation, newNodeCount);
+        return new IdMap(newGraphIds, newNodeToGraphIds, newNodeCount);
     }
 
     public static final class IdIterable implements PrimitiveLongIterable {

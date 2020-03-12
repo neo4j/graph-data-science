@@ -449,11 +449,11 @@ public class HugeGraph implements Graph {
         }
     }
 
-    static class GetTargetConsumer implements RelationshipConsumer {
+    public static class GetTargetConsumer implements RelationshipConsumer {
         static final long TARGET_NOT_FOUND = -1L;
 
         private long count;
-        private long target = TARGET_NOT_FOUND;
+        public long target = TARGET_NOT_FOUND;
 
         GetTargetConsumer(long count) {
             this.count = count;
