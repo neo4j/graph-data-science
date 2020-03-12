@@ -37,9 +37,9 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
     private static final long EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT = 4L;
 
-    private final boolean buildHistogram;
-    private final boolean buildCommunityCount;
     private final AllocationTracker tracker;
+    protected boolean buildHistogram;
+    protected boolean buildCommunityCount;
 
     protected long nodeCount;
     protected long postProcessingDuration = -1L;
