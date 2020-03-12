@@ -34,8 +34,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.scc.SccAlgorithm;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -69,34 +70,42 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         AllocationTracker tracker = computationResult.tracker();
         Graph graph = computationResult.graph();
 
-        AbstractResultBuilder<SccResult> builder = new SccResultBuilder(true, true, tracker)
+        AbstractResultBuilder<SccResult> writeBuilder = new SccResultBuilder(
+            graph.nodeCount(),
+            callContext,
+            computationResult.tracker()
+        )
+            .withBuildCommunityCount(true)
+            .withBuildHistogram(true)
+            .withWriteProperty(config.writeProperty())
             .withCommunityFunction(components != null ? components::get : null)
             .withCreateMillis(computationResult.createMillis())
-            .withComputeMillis(computationResult.computeMillis())
-            .withWriteProperty(config.writeProperty())
-            .withNodeCount(graph.nodeCount());
+            .withComputeMillis(computationResult.computeMillis());
 
         if (graph.isEmpty()) {
             graph.release();
-            return Stream.of(builder.build());
+            return Stream.of(writeBuilder.build());
         }
 
         log.info("Scc: overall memory usage: %s", tracker.getUsageString());
 
-        try (ProgressTimer ignored = builder.timeWrite()) {
-            NodePropertyExporter.of(api, graph, algorithm.getTerminationFlag())
+        try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
+            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
-                .build()
+                .build();
+            exporter
                 .write(
                     config.writeProperty(),
                     components,
                     HugeLongArray.Translator.INSTANCE
                 );
+
+            writeBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
         }
 
         graph.release();
-        return Stream.of(builder.build());
+        return Stream.of(writeBuilder.build());
     }
 
     @Procedure(value = "gds.alpha.scc.stream", mode = READ)
@@ -214,11 +223,15 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         }
     }
 
-    static final class SccResultBuilder extends AbstractCommunityResultBuilder<SccResult> {
+    public static final class SccResultBuilder extends AbstractCommunityResultBuilder<SccResult> {
         private String writeProperty;
 
-        public SccResultBuilder(boolean buildHistogram, boolean buildCommunityCount, AllocationTracker tracker) {
-            super(buildHistogram, buildCommunityCount, tracker);
+        SccResultBuilder(
+            long nodeCount,
+            ProcedureCallContext context,
+            AllocationTracker tracker
+        ) {
+            super(nodeCount, context, tracker);
         }
 
         @Override
@@ -245,6 +258,17 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
                 writeProperty
             );
         }
+
+        public SccResultBuilder withBuildHistogram(boolean buildHistogram) {
+            this.buildHistogram = buildHistogram;
+            return this;
+        }
+
+        public SccResultBuilder withBuildCommunityCount(boolean buildCommunityCount) {
+            this.buildCommunityCount = buildCommunityCount;
+            return this;
+        }
+
 
         public SccResultBuilder withWriteProperty(String writeProperty) {
             this.writeProperty = writeProperty;

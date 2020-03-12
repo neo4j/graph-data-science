@@ -36,7 +36,8 @@ import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
-import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -85,9 +86,13 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         Graph graph = computationResult.graph();
         IntersectingTriangleCount algorithm = computationResult.algorithm();
 
-        TriangleCountResultBuilder builder = new TriangleCountResultBuilder(true, true, tracker);
-        builder.withCreateMillis(computationResult.createMillis());
-        builder.withComputeMillis(computationResult.computeMillis());
+        TriangleCountResultBuilder builder = new TriangleCountResultBuilder(
+            graph.nodeCount(),
+            callContext,
+            computationResult.tracker()
+        )
+            .withBuildCommunityCount(true)
+            .withBuildHistogram(true);
 
         if (graph.isEmpty()) {
             graph.release();
@@ -101,7 +106,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         PagedAtomicIntegerArray triangles = algorithm.getTriangles();
         String clusteringCoefficientProperty = config.clusteringCoefficientProperty();
 
-        try (ProgressTimer ignored = builder.timeWrite()) {
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             if (clusteringCoefficientProperty != null) {
                 // huge with coefficients
                 exporter.write(
@@ -129,12 +134,14 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         }
 
         return Stream.of(builder
-            .withClusteringCoefficientProperty(clusteringCoefficientProperty)
             .withAverageClusteringCoefficient(algorithm.getAverageCoefficient())
             .withTriangleCount(algorithm.getTriangleCount())
-            .withCommunityFunction(triangles::get)
             .withWriteProperty(config.writeProperty())
-            .withNodeCount(graph.nodeCount())
+            .withClusteringCoefficientProperty(clusteringCoefficientProperty)
+            .withCommunityFunction(triangles::get)
+            .withCreateMillis(computationResult.createMillis())
+            .withComputeMillis(computationResult.computeMillis())
+            .withNodePropertiesWritten(exporter.propertiesWritten())
             .build()
         );
     }
@@ -242,13 +249,10 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         private String writeProperty;
         private String clusteringCoefficientProperty;
 
-        protected TriangleCountResultBuilder(
-            boolean buildHistogram,
-            boolean buildCommunityCount,
-            AllocationTracker tracker
-        ) {
-            super(buildHistogram, buildCommunityCount, tracker);
+        public TriangleCountResultBuilder(long nodeCount, ProcedureCallContext callContext, AllocationTracker tracker) {
+            super(nodeCount, callContext, tracker);
         }
+
 
         public TriangleCountResultBuilder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
             this.averageClusteringCoefficient = averageClusteringCoefficient;
@@ -257,6 +261,16 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
 
         public TriangleCountResultBuilder withTriangleCount(long triangleCount) {
             this.triangleCount = triangleCount;
+            return this;
+        }
+
+        public TriangleCountResultBuilder withBuildHistogram(boolean buildHistogram) {
+            this.buildHistogram = buildHistogram;
+            return this;
+        }
+
+        public TriangleCountResultBuilder withBuildCommunityCount(boolean buildCommunityCount) {
+            this.buildCommunityCount = buildCommunityCount;
             return this;
         }
 
