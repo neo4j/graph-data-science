@@ -29,7 +29,8 @@ import java.util.Optional;
 public interface AlgoBaseConfig extends BaseConfig {
 
     int DEFAULT_CONCURRENCY = 4;
-    public List<String> ALL_NODE_LABELS = Collections.singletonList("*");
+    String NODE_LABELS_KEY = "nodeLabels";
+    List<String> ALL_NODE_LABELS = Collections.singletonList("*");
 
     @Value.Default
     default int concurrency() {

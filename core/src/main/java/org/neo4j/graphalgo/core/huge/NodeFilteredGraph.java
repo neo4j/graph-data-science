@@ -94,7 +94,7 @@ public class NodeFilteredGraph extends FilterGraph {
     public void forEachRelationship(
         long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer
     ) {
-        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue, (s, t, p) -> filterAndConsume(s, t, fallbackValue, consumer));
+        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue, (s, t, p) -> filterAndConsume(s, t, p, consumer));
     }
 
     @Override
@@ -128,11 +128,11 @@ public class NodeFilteredGraph extends FilterGraph {
         return false;
     }
 
-    private boolean filterAndConsume(long source, long target, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+    private boolean filterAndConsume(long source, long target, double propertyValue, RelationshipWithPropertyConsumer consumer) {
         if (filteredIdMap.contains(source) && filteredIdMap.contains(target)) {
             long internalSourceId = filteredIdMap.toMappedNodeId(source);
             long internalTargetId = filteredIdMap.toMappedNodeId(target);
-            return consumer.accept(internalSourceId, internalTargetId, fallbackValue);
+            return consumer.accept(internalSourceId, internalTargetId, propertyValue);
         }
         return false;
     }
