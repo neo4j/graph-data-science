@@ -323,7 +323,7 @@ class CypherFactoryTest {
         GraphLoader loader = new CypherLoaderBuilder()
             .api(db)
             .nodeQuery("MATCH (n) WHERE n.id = $nodeProp RETURN id(n) AS id, n.id as nodeProp")
-            .relationshipQuery("MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target, $relProp as relProp")
+            .relationshipQuery("MATCH (n)-[]->(m) WHERE n.id = $nodeProp and m.id = $nodeProp RETURN id(n) AS source, id(m) AS target, $relProp as relProp")
             .parameters(MapUtil.map("nodeProp", 42, "relProp", 21))
             .build();
 
