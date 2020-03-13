@@ -21,9 +21,6 @@ package org.neo4j.graphalgo.impl.ocd;
 
 import org.neo4j.graphalgo.api.Graph;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import static org.neo4j.graphalgo.impl.ocd.CommunityAffiliations.LAMBDA;
 
 public class AffiliationBlockGain implements GainFunction {
@@ -59,7 +56,7 @@ public class AffiliationBlockGain implements GainFunction {
         double[] gain = new double[1];
         Vector affiliationVector = communityAffiliations.nodeAffiliations(nodeU).add(increment);
         gain[0] = -affiliationVector.innerProduct(affiliationSum) - affiliationVector.innerProduct(increment) - graph.nodeCount() * deltaSquared;
-        gain[0] += affiliationVector.l2() + deltaSquared;
+        gain[0] += affiliationVector.l2Squared() + deltaSquared;
         graph.concurrentCopy().forEachRelationship(nodeU, (src, trg) -> {
             Vector neighborAffiliationVector = communityAffiliations.nodeAffiliations((int) trg);
             double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector) + deltaSquared;

@@ -100,7 +100,7 @@ public class Vector {
         return result;
     }
 
-    double l2() {
+    double l2Squared() {
         return innerProduct(this);
     }
 

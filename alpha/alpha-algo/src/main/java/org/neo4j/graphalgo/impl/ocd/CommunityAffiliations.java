@@ -70,13 +70,13 @@ public class CommunityAffiliations {
         double deltaSquared = delta * delta;
         double totalDeltaSquared = (graph.nodeCount() * delta) * (graph.nodeCount() * delta);
         double[] gain = new double[1];
-        gain[0] = -affiliationSum.l2() - totalDeltaSquared;
+        gain[0] = -affiliationSum.l2Squared() - totalDeltaSquared;
         double[] l1Penalty = new double[1];
         l1Penalty[0] = 0;
         for (int nodeU = 0; nodeU < graph.nodeCount(); nodeU++) {
             Vector affiliationVector = nodeAffiliations(nodeU);
             l1Penalty[0] += affiliationVector.l1();
-            gain[0] += affiliationVector.l2() + deltaSquared;
+            gain[0] += affiliationVector.l2Squared() + deltaSquared;
             graph.forEachRelationship(nodeU, (src, trg) -> {
                 if (src < trg) {
                     return true;

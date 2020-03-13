@@ -26,11 +26,10 @@ public class BacktrackingLineSearch {
     private static final int MAX_ITERATIONS = 1000;
 
     public double search(GainFunction gain, Vector point, Vector gradient) {
-        double gradientL2 = gradient.l2();
         double lossAtPoint = gain.gain();
         double lr = LR;
         int iterations = 0;
-        while (simulateStep(gain, point, gradient, gradientL2, lossAtPoint, lr) < C && iterations < MAX_ITERATIONS) {
+        while (simulateStep(gain, point, gradient, lossAtPoint, lr) < C && iterations < MAX_ITERATIONS) {
             lr *= TAU;
             iterations++;
         }
@@ -41,7 +40,8 @@ public class BacktrackingLineSearch {
         return lr;
     }
 
-    private double simulateStep(GainFunction gain, Vector point, Vector gradient, double gradientL2, double lossAtPoint, double lr) {
+    private double simulateStep(GainFunction gain, Vector point, Vector gradient, double lossAtPoint, double lr) {
+        // if we only project after doing the search things diverge badly
         Vector candidate = point.addAndProject(gradient.multiply(lr));
         Vector diff = candidate.subtract(point);
         double expectedGain = diff.innerProduct(gradient);
