@@ -33,7 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class GraphExportProcTest extends BaseProcTest {
+class GraphStoreExportProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -54,7 +54,7 @@ class GraphExportProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(GraphCreateProc.class, GraphExportProc.class);
+        registerProcedures(GraphCreateProc.class, GraphStoreExportProc.class);
         runQuery(DB_CYPHER);
     }
 

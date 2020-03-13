@@ -30,8 +30,8 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 
 @IdenticalCompat
 @ValueClass
-@Configuration("NeoExportConfigImpl")
-public interface NeoExportConfig extends BaseConfig {
+@Configuration("GraphStoreExportConfigImpl")
+public interface GraphStoreExportConfig extends BaseConfig {
 
     String storeDir();
 
@@ -52,7 +52,7 @@ public interface NeoExportConfig extends BaseConfig {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
 
-    static NeoExportConfig of(String username, CypherMapWrapper config) {
-        return new NeoExportConfigImpl(username, config);
+    static GraphStoreExportConfig of(String username, CypherMapWrapper config) {
+        return new GraphStoreExportConfigImpl(username, config);
     }
 }

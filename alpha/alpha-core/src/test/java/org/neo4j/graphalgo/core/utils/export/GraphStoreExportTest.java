@@ -36,7 +36,7 @@ import java.io.File;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-class NeoExportTest {
+class GraphStoreExportTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -75,15 +75,15 @@ class NeoExportTest {
 
         GraphStore inputGraphStore = loaderBuilder.api(db).build().graphStore(NativeFactory.class);
 
-        NeoExportConfig config = NeoExportConfig.of(
+        GraphStoreExportConfig config = GraphStoreExportConfig.of(
             "test-user",
             CypherMapWrapper.empty()
                 .withString("storeDir", tempDir.getAbsolutePath())
                 .withString("dbName", "test-db")
         );
 
-        NeoExport neoExport = new NeoExport(inputGraphStore, config);
-        neoExport.runFromTests();
+        GraphStoreExport graphStoreExport = new GraphStoreExport(inputGraphStore, config);
+        graphStoreExport.runFromTests();
 
         GraphDbApi exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
         GraphStore outputGraphStore = loaderBuilder.api(exportDb).build().graphStore(NativeFactory.class);
@@ -103,15 +103,15 @@ class NeoExportTest {
 
         GraphStore inputGraphStore = loaderBuilder.api(db).build().graphStore(NativeFactory.class);
 
-        NeoExportConfig config = NeoExportConfig.of(
+        GraphStoreExportConfig config = GraphStoreExportConfig.of(
             "test-user",
             CypherMapWrapper.empty()
                 .withString("storeDir", tempDir.getAbsolutePath())
                 .withString("dbName", "test-db")
         );
 
-        NeoExport neoExport = new NeoExport(inputGraphStore, config);
-        neoExport.runFromTests();
+        GraphStoreExport graphStoreExport = new GraphStoreExport(inputGraphStore, config);
+        graphStoreExport.runFromTests();
 
         GraphDbApi exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
         GraphStore outputGraphStore = loaderBuilder.api(exportDb).build().graphStore(NativeFactory.class);

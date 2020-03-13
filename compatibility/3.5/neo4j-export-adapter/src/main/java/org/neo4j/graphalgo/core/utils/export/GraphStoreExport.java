@@ -47,13 +47,13 @@ import java.io.IOException;
 
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
 
-public class NeoExport {
+public class GraphStoreExport {
 
     private final GraphStore graphStore;
 
-    private final NeoExportConfig config;
+    private final GraphStoreExportConfig config;
 
-    public NeoExport(GraphStore graphStore, NeoExportConfig config) {
+    public GraphStoreExport(GraphStore graphStore, GraphStoreExportConfig config) {
         this.graphStore = graphStore;
         this.config = config;
     }

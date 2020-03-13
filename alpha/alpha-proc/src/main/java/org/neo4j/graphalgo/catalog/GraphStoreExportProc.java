@@ -23,8 +23,8 @@ import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.export.NeoExport;
-import org.neo4j.graphalgo.core.utils.export.NeoExportConfig;
+import org.neo4j.graphalgo.core.utils.export.GraphStoreExport;
+import org.neo4j.graphalgo.core.utils.export.GraphStoreExportConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,28 +34,28 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphExportProc extends BaseProc {
+public class GraphStoreExportProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.graph.export", mode = READ)
-    @Description("Exports a named graph into a new Neo4j database.")
-    public Stream<GraphExportResult> create(
+    @Description("Exports a named graph into a new offline Neo4j database.")
+    public Stream<GraphStoreExportResult> create(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        NeoExportConfig config = NeoExportConfig.of(getUsername(), cypherConfig);
+        GraphStoreExportConfig config = GraphStoreExportConfig.of(getUsername(), cypherConfig);
         validateConfig(cypherConfig, config);
 
-        GraphExportResult result = runWithExceptionLogging(
+        GraphStoreExportResult result = runWithExceptionLogging(
             "Graph creation failed", () -> {
                 GraphStore graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
-                NeoExport neoExport = new NeoExport(graphStore, config);
+                GraphStoreExport graphStoreExport = new GraphStoreExport(graphStore, config);
 
                 long start = System.nanoTime();
-                neoExport.run();
+                graphStoreExport.run();
                 long end = System.nanoTime();
 
-                return new GraphExportResult(
+                return new GraphStoreExportResult(
                     graphName,
                     config.storeDir(),
                     config.dbName(),
@@ -70,7 +70,7 @@ public class GraphExportProc extends BaseProc {
         return Stream.of(result);
     }
 
-    public static class GraphExportResult {
+    public static class GraphStoreExportResult {
         public final String graphName;
         public final String storeDir;
         public final String dbName;
@@ -79,7 +79,7 @@ public class GraphExportProc extends BaseProc {
         public final long nodePropertyCount;
         public final long writeMillis;
 
-        public GraphExportResult(
+        public GraphStoreExportResult(
             String graphName,
             String storeDir,
             String dbName,
