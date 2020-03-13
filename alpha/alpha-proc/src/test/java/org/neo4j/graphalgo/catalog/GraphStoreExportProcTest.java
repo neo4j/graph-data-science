@@ -25,7 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.io.File;
 
@@ -41,12 +46,12 @@ class GraphStoreExportProcTest extends BaseProcTest {
         ", (b { prop1: 1, prop2: 43 })" +
         ", (c { prop1: 2, prop2: 44 })" +
         ", (d { prop1: 3 })" +
-        ", (a)-[:REL]->(a)" +
-        ", (a)-[:REL]->(b)" +
-        ", (b)-[:REL]->(a)" +
-        ", (b)-[:REL]->(c)" +
-        ", (c)-[:REL]->(d)" +
-        ", (d)-[:REL]->(a)";
+        ", (a)-[:REL1 { weight1: 42}]->(a)" +
+        ", (a)-[:REL1 { weight1: 42}]->(b)" +
+        ", (b)-[:REL2 { weight2: 42}]->(a)" +
+        ", (b)-[:REL2 { weight2: 42}]->(c)" +
+        ", (c)-[:REL3 { weight3: 42}]->(d)" +
+        ", (d)-[:REL3 { weight3: 42}]->(a)";
 
     @TempDir
     File tempDir;
@@ -69,7 +74,12 @@ class GraphStoreExportProcTest extends BaseProcTest {
             .withAnyLabel()
             .withNodeProperty("prop1")
             .withNodeProperty("prop2")
-            .withAnyRelationshipType()
+            .withRelationshipType("REL1")
+            .withRelationshipType("REL2")
+            .withRelationshipType("REL3")
+            .withRelationshipProperty("weight1")
+            .withRelationshipProperty("weight2")
+            .withRelationshipProperty("weight3")
             .graphCreate("test-graph")
             .yields());
 
@@ -77,7 +87,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
             "CALL gds.alpha.graph.export('test-graph', {" +
             "  storeDir: '%s'," +
             "  dbName: 'test-db'" +
-            "}) YIELD graphName, storeDir, dbName, nodeCount, relationshipCount, nodePropertyCount, writeMillis",
+            "})",
             tempDir.getAbsolutePath()
         );
 
@@ -86,7 +96,9 @@ class GraphStoreExportProcTest extends BaseProcTest {
             assertEquals("test-db", row.getString("dbName"));
             assertEquals(4, row.getNumber("nodeCount").longValue());
             assertEquals(6, row.getNumber("relationshipCount").longValue());
+            assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
             assertEquals(8, row.getNumber("nodePropertyCount").longValue());
+            assertEquals(18, row.getNumber("relationshipPropertyCount").longValue());
             assertThat(row.getNumber("writeMillis").longValue(), greaterThan(0L));
         });
     }

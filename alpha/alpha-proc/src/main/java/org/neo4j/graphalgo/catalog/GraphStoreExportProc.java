@@ -61,7 +61,9 @@ public class GraphStoreExportProc extends BaseProc {
                     config.dbName(),
                     graphStore.nodeCount(),
                     graphStore.relationshipCount(),
-                    graphStore.nodePropertyCount() * graphStore.nodeCount(),
+                    graphStore.relationshipTypes().size(),
+                    graphStore.nodePropertyCount(),
+                    graphStore.relationshipPropertyCount(),
                     java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(end - start)
                 );
             }
@@ -76,7 +78,9 @@ public class GraphStoreExportProc extends BaseProc {
         public final String dbName;
         public final long nodeCount;
         public final long relationshipCount;
+        public final long relationshipTypeCount;
         public final long nodePropertyCount;
+        public final long relationshipPropertyCount;
         public final long writeMillis;
 
         public GraphStoreExportResult(
@@ -85,7 +89,9 @@ public class GraphStoreExportProc extends BaseProc {
             String dbName,
             long nodeCount,
             long relationshipCount,
+            long relationshipTypeCount,
             long nodePropertyCount,
+            long relationshipPropertyCount,
             long writeMillis
         ) {
             this.graphName = graphName;
@@ -93,7 +99,9 @@ public class GraphStoreExportProc extends BaseProc {
             this.dbName = dbName;
             this.nodeCount = nodeCount;
             this.relationshipCount = relationshipCount;
+            this.relationshipTypeCount = relationshipTypeCount;
             this.nodePropertyCount = nodePropertyCount;
+            this.relationshipPropertyCount = relationshipPropertyCount;
             this.writeMillis = writeMillis;
         }
     }

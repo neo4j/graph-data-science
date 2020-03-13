@@ -123,8 +123,8 @@ public final class GraphStore {
         return nodeProperties.keySet();
     }
 
-    public int nodePropertyCount() {
-        return nodeProperties.size();
+    public long nodePropertyCount() {
+        return nodeProperties.size() * nodeCount();
     }
 
     public boolean hasNodeProperty(String propertyKey) {
@@ -137,6 +137,10 @@ public final class GraphStore {
 
     public NodeProperties nodeProperty(String propertyKey) {
         return this.nodeProperties.get(propertyKey);
+    }
+
+    public Set<String> relationshipTypes() {
+        return relationships.keySet();
     }
 
     public boolean hasRelationshipType(String relationshipType) {
@@ -153,12 +157,12 @@ public final class GraphStore {
         return relationships.get(relationshipType).elementCount();
     }
 
-    public Set<String> relationshipTypes() {
-        return relationships.keySet();
-    }
-
-    public int relationshipPropertyCount() {
-        return relationshipProperties.values().stream().mapToInt(Map::size).sum();
+    public long relationshipPropertyCount() {
+        return relationshipProperties
+            .values()
+            .stream()
+            .flatMapToLong(map -> map.values().stream().mapToLong(HugeGraph.PropertyCSR::elementCount))
+            .sum();
     }
 
     public Set<Pair<String, Optional<String>>> relationshipPropertyKeys() {

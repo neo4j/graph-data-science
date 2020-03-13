@@ -76,16 +76,12 @@ public final class GraphInput implements Input {
 
     @Override
     public Estimates calculateEstimates(ToIntFunction<Value[]> valueSizeCalculator) {
-        long nodeCount = graphStore.nodeCount();
-        long relationshipCount = graphStore.relationshipCount();
-        long numberOfNodeProperties = graphStore.nodePropertyCount() * nodeCount;
-        long numberOfRelationshipProperties = graphStore.relationshipPropertyKeys().stream()
-            .mapToLong(relTypeAndProperty -> graphStore.relationshipCount(relTypeAndProperty.getOne()))
-            .sum();
+        long numberOfNodeProperties = graphStore.nodePropertyCount();
+        long numberOfRelationshipProperties = graphStore.relationshipPropertyCount();
 
         return Inputs.knownEstimates(
-            nodeCount,
-            relationshipCount,
+            graphStore.nodeCount(),
+            graphStore.relationshipCount(),
             numberOfNodeProperties,
             numberOfRelationshipProperties,
             numberOfNodeProperties * Double.BYTES,
