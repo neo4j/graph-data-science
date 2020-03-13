@@ -57,7 +57,7 @@ public class AffiliationBlockGain implements GainFunction {
         SparseVector affiliationSum = communityAffiliations.affiliationSum().add(increment);
         gain[0] = -affiliationVector.innerProduct(affiliationSum) - graph.nodeCount() * deltaSquared;
         gain[0] += affiliationVector.l2() + deltaSquared;
-        graph.forEachRelationship(nodeU, (src, trg) -> {
+        graph.concurrentCopy().forEachRelationship(nodeU, (src, trg) -> {
             SparseVector neighborAffiliationVector = communityAffiliations.nodeAffiliations((int) trg);
             double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector) + deltaSquared;
             if (affiliationInnerProduct < 0) {
@@ -75,7 +75,7 @@ public class AffiliationBlockGain implements GainFunction {
     public SparseVector gradient() {
         SparseVector Fu = communityAffiliations.nodeAffiliations(nodeU);
         List<SparseVector> gradientTerms = new LinkedList<>();
-        graph.forEachRelationship(nodeU, (src, trg) -> {
+        graph.concurrentCopy().forEachRelationship(nodeU, (src, trg) -> {
             gradientTerms.add(weightedNeighbor(Fu, communityAffiliations.nodeAffiliations((int) trg)));
             return true;
         });
