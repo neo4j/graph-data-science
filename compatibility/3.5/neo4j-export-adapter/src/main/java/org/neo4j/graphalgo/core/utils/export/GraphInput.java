@@ -79,8 +79,9 @@ public final class GraphInput implements Input {
         long nodeCount = graphStore.nodeCount();
         long relationshipCount = graphStore.relationshipCount();
         long numberOfNodeProperties = graphStore.nodePropertyCount() * nodeCount;
-        // TODO: this is wayyyy off
-        long numberOfRelationshipProperties = graphStore.relationshipPropertyCount() * relationshipCount;
+        long numberOfRelationshipProperties = graphStore.relationshipPropertyKeys().stream()
+            .mapToLong(relTypeAndProperty -> graphStore.relationshipCount(relTypeAndProperty.getOne()))
+            .sum();
 
         return Inputs.knownEstimates(
             nodeCount,

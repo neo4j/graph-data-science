@@ -149,6 +149,10 @@ public final class GraphStore {
             .sum();
     }
 
+    public long relationshipCount(String relationshipType) {
+        return relationships.get(relationshipType).elementCount();
+    }
+
     public Set<String> relationshipTypes() {
         return relationships.keySet();
     }
