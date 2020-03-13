@@ -25,7 +25,7 @@ public class BacktrackingLineSearch {
     private static final double LR = 100;
     private static final int MAX_ITERATIONS = 1000;
 
-    public double search(GainFunction gain, SparseVector point, SparseVector gradient) {
+    public double search(GainFunction gain, Vector point, Vector gradient) {
         double gradientL2 = gradient.l2();
         double lossAtPoint = gain.gain();
         double lr = LR;
@@ -41,9 +41,9 @@ public class BacktrackingLineSearch {
         return lr;
     }
 
-    private double simulateStep(GainFunction gain, SparseVector point, SparseVector gradient, double gradientL2, double lossAtPoint, double lr) {
-        SparseVector candidate = point.addAndProject(gradient.multiply(lr));
-        SparseVector diff = candidate.subtract(point);
+    private double simulateStep(GainFunction gain, Vector point, Vector gradient, double gradientL2, double lossAtPoint, double lr) {
+        Vector candidate = point.addAndProject(gradient.multiply(lr));
+        Vector diff = candidate.subtract(point);
         double expectedGain = diff.innerProduct(gradient);
         double increase = gain.gain(diff) - lossAtPoint;
         return increase / expectedGain;

@@ -27,35 +27,41 @@ import java.util.List;
 
 public class CommunityAffiliations {
     private final long totalDoubleEdgeCount;
-    private final List<SparseVector> affiliationVectors;
+    private final List<Vector> affiliationVectors;
     private final Graph graph;
-    private SparseVector affiliationSum;
+    private final Vector affiliationSum;
     static final double LAMBDA = 0.1;
+    private final Vector l1PenaltyGradient;
 
-    CommunityAffiliations(long totalDoubleEdgeCount, List<SparseVector> affiliationVectors, Graph graph) {
+    CommunityAffiliations(long totalDoubleEdgeCount, List<Vector> affiliationVectors, Graph graph) {
         this.totalDoubleEdgeCount = totalDoubleEdgeCount;
         this.affiliationVectors = affiliationVectors;
         this.graph = graph;
-        this.affiliationSum = SparseVector.sum(affiliationVectors);
+        this.affiliationSum = Vector.sum(affiliationVectors);
+        this.l1PenaltyGradient = Vector.l1PenaltyGradient(affiliationSum.dim(), LAMBDA);
     }
 
     GainFunction blockGain(int nodeId, double delta) {
         return new AffiliationBlockGain(this, graph, nodeId, delta);
     }
 
-    synchronized SparseVector affiliationSum() {
+    Vector affiliationSum() {
         return this.affiliationSum;
     }
 
-    public SparseVector nodeAffiliations(int nodeId) {
+    Vector l1PenaltyGradient() {
+        return l1PenaltyGradient;
+    }
+
+    public Vector nodeAffiliations(int nodeId) {
         return affiliationVectors.get(nodeId);
     }
 
-    synchronized void updateNodeAffiliations(int nodeU, SparseVector increment) {
-        SparseVector newVector = affiliationVectors.get(nodeU).addAndProject(increment);
-        SparseVector diff = newVector.subtract(affiliationVectors.get(nodeU));
+    synchronized void updateNodeAffiliations(int nodeU, Vector increment) {
+        Vector newVector = affiliationVectors.get(nodeU).addAndProject(increment);
+        Vector diff = newVector.subtract(affiliationVectors.get(nodeU));
         affiliationVectors.set(nodeU, newVector);
-        affiliationSum = affiliationSum.add(diff);
+        affiliationSum.addInPlace(diff);
     }
 
     double gain() {
@@ -68,14 +74,14 @@ public class CommunityAffiliations {
         double[] l1Penalty = new double[1];
         l1Penalty[0] = 0;
         for (int nodeU = 0; nodeU < graph.nodeCount(); nodeU++) {
-            SparseVector affiliationVector = nodeAffiliations(nodeU);
+            Vector affiliationVector = nodeAffiliations(nodeU);
             l1Penalty[0] += affiliationVector.l1();
             gain[0] += affiliationVector.l2() + deltaSquared;
             graph.forEachRelationship(nodeU, (src, trg) -> {
                 if (src < trg) {
                     return true;
                 }
-                SparseVector neighborAffiliationVector = nodeAffiliations((int) trg);
+                Vector neighborAffiliationVector = nodeAffiliations((int) trg);
                 double affiliationInnerProduct = affiliationVector.innerProduct(neighborAffiliationVector) + deltaSquared;
                 gain[0] += 2*(Math.log(1 - Math.exp(-affiliationInnerProduct)) + affiliationInnerProduct);
                 return true;

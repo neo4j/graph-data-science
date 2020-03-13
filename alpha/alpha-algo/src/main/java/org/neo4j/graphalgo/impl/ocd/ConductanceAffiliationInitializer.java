@@ -29,8 +29,9 @@ import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -70,63 +71,76 @@ public class ConductanceAffiliationInitializer implements AffiliationInitializer
             true
         );
         LocallyMinimalNeighborhoods.Result neighborhoodCommunityResult = locallyMinimalNeighborhoods.compute();
-        List<SparseVector> affiliationVectors = new ArrayList<>((int) graph.nodeCount());
+        List<Vector> affiliationVectors = new ArrayList<>((int) graph.nodeCount());
         for (int i = 0; i < graph.nodeCount(); i++) {
             affiliationVectors.add(null);
         }
         AtomicLong queue = new AtomicLong(0);
         AtomicLong totalDoubleEdgeCount = new AtomicLong(0);
+        ConcurrentSkipListSet<Long> centers = neighborhoodCommunityResult.neighborhoodCenters;
+        Map<Long, Integer> centerMapping = centerMapping(centers);
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new AffiliationTask(queue, totalDoubleEdgeCount, affiliationVectors, neighborhoodCommunityResult.neighborhoodCenters, graph)
+            () -> new AffiliationTask(queue, totalDoubleEdgeCount, affiliationVectors,
+                centers, centerMapping, graph)
         );
         // run
         ParallelUtil.run(tasks, executorService);
         return new CommunityAffiliations(totalDoubleEdgeCount.get(), affiliationVectors, graph);
     }
 
+    private Map<Long, Integer> centerMapping(ConcurrentSkipListSet<Long> centers) {
+        Map<Long, Integer> centerIds = new HashMap<>();
+        int mapped = 0;
+        for (long center : centers) {
+            centerIds.put(center, mapped);
+            mapped++;
+        }
+        return centerIds;
+    }
+
     class AffiliationTask implements Runnable {
         private final AtomicLong queue;
         private final AtomicLong totalDoubleEdgeCount;
-        private final List<SparseVector> affiliationVectors;
+        private final List<Vector> affiliationVectors;
         private final ConcurrentSkipListSet<Long> centers;
+        private final Map<Long, Integer> centerMapping;
         private final Graph graph;
 
         AffiliationTask(
             AtomicLong queue,
             AtomicLong totalDoubleEdgeCount,
-            List<SparseVector> affiliationVectors,
+            List<Vector> affiliationVectors,
             ConcurrentSkipListSet<Long> centers,
+            Map<Long, Integer> centerMapping,
             Graph graph
         ) {
             this.queue = queue;
             this.totalDoubleEdgeCount = totalDoubleEdgeCount;
             this.affiliationVectors = affiliationVectors;
             this.centers = centers;
+            this.centerMapping = centerMapping;
             this.graph = graph;
         }
 
         @Override
         public void run() {
             long nodeId;
+            int dimension = centers.size();
             while ((nodeId = queue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
                 totalDoubleEdgeCount.addAndGet(graph.degree(nodeId));
-                List<Integer> indices = new LinkedList<>();
-                List<Double> values = new LinkedList<>();
+                double[] values = new double[dimension];
                 if (centers.contains(nodeId)) {
-                    indices.add((int)nodeId);
-                    values.add(1D);
+                    values[centerMapping.get(nodeId)] = 1D;
                 }
                 graph.concurrentCopy().forEachRelationship(nodeId, (src, trg) -> {
                     if (centers.contains(trg)) {
-                        indices.add((int)trg);
-                        values.add(1D);
+                        values[centerMapping.get(trg)] = 1D;
                     }
                     return true;
                 });
-                SparseVector affiliationVector = SparseVector.getSparseVectorFromLists(indices, values);
-                affiliationVectors.set((int)nodeId, affiliationVector);
+                affiliationVectors.set((int)nodeId, new Vector(values));
             }
         }
     }

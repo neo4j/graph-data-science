@@ -25,7 +25,7 @@ public interface GainFunction {
      * @param increment the value at which to evaluate the gain.
      * @return
      */
-    double gain(SparseVector increment);
+    double gain(Vector increment);
     /**
      * Evaluate gain at current parameter values.
      * @return
@@ -35,5 +35,5 @@ public interface GainFunction {
      * Evaluate gradient of gain at current parameter values.
      * @return gradient of gain.
      */
-    SparseVector gradient();
+    Vector gradient();
 }
