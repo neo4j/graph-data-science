@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.ocd;
 
 public class BacktrackingLineSearch {
     private static final double C = 0.5;
-    private static final double TAU = 0.8;
+    private static final double TAU = 0.5;
     private static final double LR = 100;
     private static final int MAX_ITERATIONS = 1000;
 
