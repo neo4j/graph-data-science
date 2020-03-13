@@ -23,8 +23,8 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.SettingsProxy;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
@@ -50,14 +50,14 @@ import java.io.IOException;
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
 
-public class NeoExport {
+public class GraphStoreExport {
 
-    private final Graph graph;
+    private final GraphStore graph;
 
-    private final NeoExportConfig config;
+    private final GraphStoreExportConfig config;
 
-    public NeoExport(Graph graph, NeoExportConfig config) {
-        this.graph = graph;
+    public GraphStoreExport(GraphStore graphStore, GraphStoreExportConfig config) {
+        this.graph = graphStore;
         this.config = config;
     }
 
@@ -109,7 +109,7 @@ public class NeoExport {
 
             life.start();
 
-            Input input = new GraphInput(graph, config.batchSize());
+            Input input = new GraphStoreInput(graph, config.batchSize());
 
             BatchImporter importer = BatchImporterFactory.withHighestPriority().instantiate(
                 databaseLayout,
