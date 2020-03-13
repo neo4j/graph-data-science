@@ -143,7 +143,7 @@ public final class GraphInput implements Input {
         RelationshipImporter(GraphStore graphStore, long nodeCount, int batchSize) {
             super(nodeCount, batchSize);
             relationships = graphStore
-                .relationshipProperties()
+                .relationshipPropertyKeys()
                 .stream()
                 .collect(Collectors.toMap(
                     relTypeAndProperty -> relTypeAndProperty,
@@ -185,7 +185,7 @@ public final class GraphInput implements Input {
         public boolean next(InputEntityVisitor visitor) throws IOException {
             if (id < endId) {
                 visitor.id(id);
-                nodeProperties.forEach(p -> visitor.property(p, graphStore.getNodeProperty(p).nodeProperty(id)));
+                nodeProperties.forEach(p -> visitor.property(p, graphStore.nodeProperty(p).nodeProperty(id)));
                 visitor.endOfEntity();
                 id++;
                 return true;

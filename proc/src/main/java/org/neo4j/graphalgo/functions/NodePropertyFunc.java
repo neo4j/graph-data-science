@@ -59,7 +59,7 @@ public class NodePropertyFunc {
         }
 
         return graphStore
-            .getNodeProperty(propertyKey)
+            .nodeProperty(propertyKey)
             .nodeProperty(internalId);
     }
 }

@@ -135,12 +135,40 @@ public final class GraphStore {
         this.nodeProperties.putIfAbsent(propertyKey, nodeProperties);
     }
 
-    public NodeProperties getNodeProperty(String propertyKey) {
+    public NodeProperties nodeProperty(String propertyKey) {
         return this.nodeProperties.get(propertyKey);
     }
 
     public boolean hasRelationshipType(String relationshipType) {
         return relationships.containsKey(relationshipType);
+    }
+
+    public long relationshipCount() {
+        return relationships.values().stream()
+            .mapToLong(HugeGraph.TopologyCSR::elementCount)
+            .sum();
+    }
+
+    public Set<String> relationshipTypes() {
+        return relationships.keySet();
+    }
+
+    public int relationshipPropertyCount() {
+        return relationshipProperties.values().stream().mapToInt(Map::size).sum();
+    }
+
+    public Set<Pair<String, Optional<String>>> relationshipPropertyKeys() {
+        return this.relationshipTypes().stream().flatMap(relType -> {
+            if (relationshipProperties.containsKey(relType)) {
+                return relationshipProperties
+                    .get(relType)
+                    .keySet()
+                    .stream()
+                    .map(propertyKey -> Tuples.pair(relType, Optional.of(propertyKey)));
+            } else {
+                return Stream.of(Tuples.pair(relType, Optional.<String>empty()));
+            }
+        }).collect(Collectors.toSet());
     }
 
     public synchronized void addRelationshipType(String relationshipType, Optional<String> relationshipProperty, HugeGraph.Relationships relationships) {
@@ -193,34 +221,6 @@ public final class GraphStore {
 
     public long nodeCount() {
         return nodes.nodeCount();
-    }
-
-    public long relationshipCount() {
-        return relationships.values().stream()
-            .mapToLong(HugeGraph.TopologyCSR::elementCount)
-            .sum();
-    }
-
-    public Set<String> relationshipTypes() {
-        return relationships.keySet();
-    }
-
-    public int relationshipPropertyCount() {
-        return relationshipProperties.values().stream().mapToInt(Map::size).sum();
-    }
-
-    public Set<Pair<String, Optional<String>>> relationshipProperties() {
-        return this.relationshipTypes().stream().flatMap(relType -> {
-            if (relationshipProperties.containsKey(relType)) {
-                return relationshipProperties
-                    .get(relType)
-                    .keySet()
-                    .stream()
-                    .map(propertyKey -> Tuples.pair(relType, Optional.of(propertyKey)));
-            } else {
-                return Stream.of(Tuples.pair(relType, Optional.<String>empty()));
-            }
-        }).collect(Collectors.toSet());
     }
 
     private Graph createGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
