@@ -1,0 +1,64 @@
+[[migration-memory-estimation]]
+= Memory estimation
+
+.Changes in the YIELD fields
+[opts=header,cols="1,1"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+| `requiredMemory`    | `requiredMemory`
+| `bytesMin`          | `bytesMin`
+| `bytesMax`          | `bytesMax`
+| `mapView`           | `mapView`
+| -                   | `treeView`
+| -                   | `nodeCount`
+| -                   | `relationshipCount`
+|===
+
+The most significant change in memory estimation is that in GDS to estimate an operation you suffix it with `.estimate` while in GA the operation had to be passed as parameter to `algo.memrec`.
+
+.Estimating the memory requirements of loading a named graph:
+[opts=header,cols="1a,1a"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+2+| Native Projections:
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  'graph.load'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create.estimate(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+2+| Cypher Projections:
+|
+[source, cypher]
+----
+CALL algo.memrec(
+  'MATCH (n:MyLabel) RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target',
+  'graph.load',
+  {
+    graph: 'cypher'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create.cypher.estimate(
+  'MATCH (n:MyLabel) RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   RETURN id(s) AS source, id(t) AS target'
+)
+----
+|===

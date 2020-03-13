@@ -1,0 +1,138 @@
+[[migration-named-graph]]
+= Graph creation - Named Graph
+
+.Changes in the YIELD fields
+[opts=header, cols="1,1"]
+|====
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+| `name`                      | `graphName`
+| `graph`                     | -
+| `direction`                 | -
+| `undirected`                | -
+| `sorted`                    | -
+| `nodes`                     | `nodesCount`
+| `loadMillis`                | `createMillis`
+| `alreadyLoaded`             | -
+| `nodeProperties`            | -
+| `relationshipProperties`    | `relationshipCount`
+| `relationshipWeight`        | -
+| `loadNodes`                 | -
+| `loadRelationships`         | -
+| -                           | `nodeProjection`
+| -                           | `relationshipProjection`
+|====
+
+.Loading a named graph in the default way:
+[opts=header,cols="1a,1a"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+2+| Minimal Native Projection:
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+2+| Native Projection with additional properties:
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  {
+    concurrency: 4,
+    graph: 'huge',
+    direction: 'INCOMING'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'MyLabel',
+  {
+    MY_RELATIONSHIP_TYPE: {
+      orientation: 'REVERSE'
+    }
+  },
+  {
+    readConcurrency: 4
+  }
+)
+----
+2+|[[direction-both-example]]Native Projection with `direction: 'BOTH'`:
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  {
+    graph: 'huge',
+    direction: 'BOTH'
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'MyLabel',
+  {
+    MY_RELATIONSHIP_TYPE_NATURAL: {
+      type: 'MY_RELATIONSHIP_TYPE',
+      orientation: 'NATURAL'
+    },
+    MY_RELATIONSHIP_TYPE_REVERSE: {
+      type: 'MY_RELATIONSHIP_TYPE',
+      orientation: 'REVERSE'
+    }
+  }
+)
+----
+2+| Undirected Native Projection:
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE',
+  {
+    graph: 'huge',
+    undirected: true
+  }
+)
+----
+|
+[source, cypher]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'MyLabel',
+  {
+    MY_RELATIONSHIP_TYPE: {
+      orientation: 'UNDIRECTED'
+    }
+  }
+)
+----
+|===
