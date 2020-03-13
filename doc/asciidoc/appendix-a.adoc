@@ -214,9 +214,10 @@ The following table lists all functions in the GDS library:
 | `gds.version`
 | `gds.list`
 |Graph Operations | `gds.graph.exists`
-.6+<.^| Utilities
+.7+<.^| Utilities
 | `gds.util.asNode`
 | `gds.util.asNodes`
+| `gds.util.nodeProperty`
 | `gds.util.infinity`
 | `gds.util.isFinite`
 | `gds.util.isInfinite`
