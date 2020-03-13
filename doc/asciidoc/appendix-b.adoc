@@ -21,9 +21,9 @@ In this section we will focus on side-by-side examples of operations using the s
 This section is divided into the following sub-sections:
 
 * <<migration-algos-common, Common Changes>>
-* <<migration-estimate, Memory estimation>>
+* <<migration-memory-estimation, Memory estimation>>
 * <<migration-named-graph, Graph creation - Named Graph>>
-* <<migration-cypher-queries, Graph creation - Cypher Queries>>
+* <<migration-cypher-projection, Graph creation - Cypher Queries>>
 * <<migration-graph-list, Graph listing>>
 * <<migration-graph-info, Graph info>>
 * <<migration-graph-remove, Graph removal>>
@@ -31,11 +31,11 @@ This section is divided into the following sub-sections:
 
 include::migration/migration-algos-common.adoc[leveloffset=+2]
 
-include::migration/migration-estimate.adoc[leveloffset=+2]
+include::migration/migration-memory-estimation.adoc[leveloffset=+2]
 
 include::migration/migration-named-graph.adoc[leveloffset=+2]
 
-include::migration/migration-cypher-queries.adoc[leveloffset=+2]
+include::migration/migration-cypher-projection.adoc[leveloffset=+2]
 
 include::migration/migration-graph-list.adoc[leveloffset=+2]
 

@@ -1,4 +1,4 @@
-[[migration-cypher-queries]]
+[[migration-cypher-projection]]
 = Graph creation - Cypher Queries
 
 .Loading a named graph using Cypher queries:

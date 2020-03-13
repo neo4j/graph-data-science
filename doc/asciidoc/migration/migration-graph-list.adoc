@@ -10,11 +10,11 @@
 | `relationships`     | `relationshipCount`
 | `type`              | -
 | `direction`         | -
-| -                 | `nodeProjection`
-| -                 | `relationshipProjection`
-| -                 | `nodeQuery` footnote:list-cypher[Field will be `null` unless a Cypher projection was used]
-| -                 | `relationshipQuery` footnote:list-cypher[]
-| -                 | `degreeDistribution` footnote:[Graph statistics map, i.e. min, max, percentiles, etc.]
+| -                   | `nodeProjection`
+| -                   | `relationshipProjection`
+| -                   | `nodeQuery` footnote:list-cypher[Field will be `null` unless a Cypher projection was used]
+| -                   | `relationshipQuery` footnote:list-cypher[]
+| -                   | `degreeDistribution` footnote:[Graph statistics map, i.e. min, max, percentiles, etc.]
 |===
 
 .Listing named graphs:

@@ -1,5 +1,5 @@
 [[migration-product-algos]]
-= Production-quality algorithms
+= Production-ready algorithms
 
 * <<migration-lpa, Label Propagation>>
 * <<migration-louvain, Louvain>>

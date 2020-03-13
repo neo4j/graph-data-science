@@ -18,9 +18,10 @@
 | `relationshipWeight`        | -
 | `loadNodes`                 | -
 | `loadRelationships`         | -
-| -                         | `nodeProjection`
-| -                         | `relationshipProjection`
+| -                           | `nodeProjection`
+| -                           | `relationshipProjection`
 |====
+
 .Loading a named graph in the default way:
 [opts=header,cols="1a,1a"]
 |===

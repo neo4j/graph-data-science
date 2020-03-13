@@ -1,4 +1,4 @@
-[[migration-estimate]]
+[[migration-memory-estimation]]
 = Memory estimation
 
 .Changes in the YIELD fields
@@ -9,9 +9,9 @@
 | `bytesMin`          | `bytesMin`
 | `bytesMax`          | `bytesMax`
 | `mapView`           | `mapView`
-| -                 | `treeView`
-| -                 | `nodeCount`
-| -                 | `relationshipCount`
+| -                   | `treeView`
+| -                   | `nodeCount`
+| -                   | `relationshipCount`
 |===
 
 The most significant change in memory estimation is that in GDS to estimate an operation you suffix it with `.estimate` while in GA the operation had to be passed as parameter to `algo.memrec`.
