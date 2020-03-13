@@ -97,21 +97,15 @@ public class LocallyMinimalNeighborhoodsStreamProcTest extends BaseProcTest {
             );
             actualRowDescriptions.add(actual);
         });
-        Set<String> expectedRowDescriptions = new HashSet<>(Arrays.asList(("node b community a conductance 0.75\n" +
-                                                             "node c community a conductance 0.75\n" +
-                                                             "node a community a conductance 0.666666\n" +
-                                                             "node d community e conductance 0.5\n" +
-                                                             "node f community e conductance 0.333333\n" +
-                                                             "node e community e conductance 0.333333\n" +
-                                                             "node e community f conductance 0.333333\n" +
-                                                             "node f community f conductance 0.333333\n" +
-                                                             "node d community f conductance 0.5\n" +
-                                                             "node i community g conductance 0.333333\n" +
-                                                             "node h community g conductance 0.5\n" +
-                                                             "node g community g conductance 0.333333\n" +
-                                                             "node h community i conductance 0.5\n" +
-                                                             "node g community i conductance 0.333333\n" +
-                                                             "node i community i conductance 0.333333").split("\n")));
+        Set<String> expectedRowDescriptions = new HashSet<>(Arrays.asList(("node a community a conductance 0.25\n" +
+                                                                           "node e community e conductance 0.142857\n" +
+                                                                           "node h community g conductance 0.2\n" +
+                                                                           "node i community g conductance 0.142857\n" +
+                                                                           "node c community a conductance 0.272727\n" +
+                                                                           "node f community e conductance 0.142857\n" +
+                                                                           "node g community g conductance 0.142857\n" +
+                                                                           "node b community a conductance 0.272727\n" +
+                                                                           "node d community e conductance 0.2").split("\n")));
         assertEquals(expectedRowDescriptions, actualRowDescriptions);
     }
 
@@ -133,11 +127,9 @@ public class LocallyMinimalNeighborhoodsStreamProcTest extends BaseProcTest {
             );
             actualRowDescriptions.add(actual);
         });
-        Set<String> expectedRowDescriptions = new HashSet<>(Arrays.asList(("node a community a conductance 0.666666\n" +
-                                                                           "node e community e conductance 0.333333\n" +
-                                                                           "node f community f conductance 0.333333\n" +
-                                                                           "node g community g conductance 0.333333\n" +
-                                                                           "node i community i conductance 0.333333").split("\n")));
+        Set<String> expectedRowDescriptions = new HashSet<>(Arrays.asList(("node a community a conductance 0.25\n" +
+                                                                           "node e community e conductance 0.142857\n" +
+                                                                           "node g community g conductance 0.142857").split("\n")));
         assertEquals(expectedRowDescriptions, actualRowDescriptions);
     }
 }

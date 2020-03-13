@@ -157,17 +157,19 @@ public class LocallyMinimalNeighborhoods extends Algorithm<LocallyMinimalNeighbo
         @Override
         public void run() {
             long nodeId;
-            long nodeCount = graph.nodeCount();
             while ((nodeId = queue.getAndIncrement()) < graph.nodeCount() && running()) {
                 long[] cut = new long[1];
                 int degree = graph.degree(nodeId);
+                long[] volume = new long[1];
+                volume[0] = degree;
                 cut[0] = -degree - 2 * triangleCounts.get(nodeId);
                 graph.concurrentCopy().forEachRelationship(nodeId, (s, t) -> {
                     cut[0] += graph.degree(t);
+                    volume[0] += graph.degree(t);
                     return true;
                 });
-                long volume = degree < nodeCount / 2 ? degree + 1 : nodeCount - degree - 1;
-                conductances.set(nodeId, quotient(cut[0], volume));
+                long minVolume = Math.min(volume[0], graph.relationshipCount() - volume[0]);
+                conductances.set(nodeId, quotient(cut[0], minVolume));
             }
         }
 
