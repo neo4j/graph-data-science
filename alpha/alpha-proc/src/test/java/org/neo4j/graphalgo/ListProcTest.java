@@ -30,6 +30,8 @@ import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
 import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.functions.IsFiniteFunc;
+import org.neo4j.graphalgo.functions.OneHotEncodingFunc;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.scc.SccProc;
 import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;

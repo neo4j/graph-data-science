@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.GetNodeFunc;
-import org.neo4j.graphalgo.IsFiniteFunc;
-import org.neo4j.graphalgo.VersionFunc;
+import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.functions.IsFiniteFunc;
+import org.neo4j.graphalgo.functions.VersionFunc;
 
 import java.util.Arrays;
 import java.util.Collections;
