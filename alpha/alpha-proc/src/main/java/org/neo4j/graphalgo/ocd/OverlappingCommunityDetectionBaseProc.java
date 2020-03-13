@@ -22,7 +22,9 @@ package org.neo4j.graphalgo.ocd;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -36,6 +38,18 @@ import org.neo4j.logging.Log;
 abstract class OverlappingCommunityDetectionBaseProc<CONFIG extends OverlappingCommunityDetectionBaseConfig> extends AlgoBaseProc<OverlappingCommunityDetection, CommunityAffiliations, CONFIG> {
     protected static final String DESCRIPTION = "The BIGCLAM overlapping community detection algorithm can detect non-overlapping, overlapping and nested community structures at scale";
 
+    @Override
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) {
+        graphCreateConfig.relationshipProjections().projections().entrySet().stream()
+            .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
+            .forEach(entry -> {
+                throw new IllegalArgumentException(String.format(
+                    "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses projection `%s`",
+                    entry.getKey().name,
+                    entry.getValue().orientation()
+                ));
+            });
+    }
     @Override
     protected AlgorithmFactory<OverlappingCommunityDetection, CONFIG> algorithmFactory(CONFIG config) {
         return new AlphaAlgorithmFactory<OverlappingCommunityDetection, CONFIG>() {

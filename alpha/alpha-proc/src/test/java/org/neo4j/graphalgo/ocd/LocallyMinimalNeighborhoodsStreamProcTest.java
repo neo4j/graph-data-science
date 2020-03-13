@@ -68,9 +68,7 @@ public class LocallyMinimalNeighborhoodsStreamProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.util.*")
-        );
+        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(LocallyMinimalNeighborhoodsStreamProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(dbCypher());

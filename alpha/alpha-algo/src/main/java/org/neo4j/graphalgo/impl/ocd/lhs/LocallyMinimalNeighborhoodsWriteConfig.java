@@ -22,14 +22,14 @@ package org.neo4j.graphalgo.impl.ocd.lhs;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("LocallyMinimalNeighborhoodsWriteConfigImpl")
-public interface LocallyMinimalNeighborhoodsWriteConfig extends LocallyMinimalNeighborhoodsBaseConfig, WriteConfig {
+public interface LocallyMinimalNeighborhoodsWriteConfig extends LocallyMinimalNeighborhoodsBaseConfig, WritePropertyConfig {
     static LocallyMinimalNeighborhoodsWriteConfig of(
         String username,
         Optional<String> graphName,

@@ -41,7 +41,7 @@ public abstract class LocallyMinimalNeighborhoodsBaseProc<CONFIG extends Locally
         "find good seeding communities for other community detection algorithms.";
 
     @Override
-    protected void validateGraphCreateConfig(GraphCreateConfig graphCreateConfig, CONFIG config) {
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) {
         graphCreateConfig.relationshipProjections().projections().entrySet().stream()
             .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
             .forEach(entry -> {

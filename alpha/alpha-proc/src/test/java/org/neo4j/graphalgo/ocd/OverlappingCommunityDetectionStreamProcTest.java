@@ -25,10 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
-
-import java.util.HashSet;
-import java.util.Set;
+import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 
 public class OverlappingCommunityDetectionStreamProcTest extends BaseProcTest {
     /**
@@ -63,14 +60,13 @@ public class OverlappingCommunityDetectionStreamProcTest extends BaseProcTest {
             ", (i)-[:TYPE]->(g)";
     }
 
+    String generateQuery = "CALL gds.beta.graph.generate('myGraph', 1000, 80, {orientation: 'UNDIRECTED', aggregation: 'SINGLE'})";
+
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase((builder) ->
-            builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.util.*")
-        );
-        registerProcedures(OverlappingCommunityDetectionStreamProc.class);
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(OverlappingCommunityDetectionStreamProc.class, GraphGenerateProc.class);
         registerFunctions(GetNodeFunc.class);
-        runQuery(dbCypher());
     }
 
     @AfterEach
@@ -84,14 +80,17 @@ public class OverlappingCommunityDetectionStreamProcTest extends BaseProcTest {
                    " YIELD nodeId, communityIds, scores" +
                    " RETURN nodeId, gds.util.asNode(nodeId).name as node, communityIds, scores";
 
-        Set<String> actualRowDescriptions = new HashSet<>();
+        runQuery(dbCypher());
+        runQueryWithResultConsumer(q, result -> System.out.println(result.resultAsString()));
+    }
 
-/*
-        runQueryWithRowConsumer(q, row -> {
-            System.out.println(row);
-        });
-*/
+    @Test
+    void streamOnGenerated() {
+        String q = "CALL gds.alpha.ocd.stream('myGraph', { concurrency: 4})" +
+                   " YIELD nodeId, communityIds, scores" +
+                   " RETURN nodeId, gds.util.asNode(nodeId).name as node, communityIds, scores";
 
+        runQuery(generateQuery);
         runQueryWithResultConsumer(q, result -> System.out.println(result.resultAsString()));
     }
 }
