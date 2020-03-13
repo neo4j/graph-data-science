@@ -69,10 +69,12 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
         double newGain;
         int iteration = 0;
         printState(iteration, communityAffiliations);
+        long start = System.nanoTime();
         while (Math.abs((newGain = update(communityAffiliations, iteration + 1)) - oldGain) > TOLERANCE && iteration < MAX_ITERATIONS) {
             oldGain = newGain;
             iteration++;
         }
+        System.out.println(String.format("Took: %s", System.nanoTime() - start));
         return communityAffiliations;
     }
 
@@ -107,6 +109,10 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
         private final AtomicInteger queue;
         private final CommunityAffiliations communityAffiliations;
         private final BacktrackingLineSearch lineSearch;
+        private long searchTime = 0;
+        private long updateTime = 0;
+        private long gradientTime = 0;
+        private int processedNodes = 0;
 
         GradientStepTask(AtomicInteger queue, CommunityAffiliations communityAffiliations) {
             this.queue = queue;
@@ -119,14 +125,28 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
             int nodeU;
             while ((nodeU = queue.getAndIncrement()) < graph.nodeCount() && running()) {
                 GainFunction blockGain = communityAffiliations.blockGain(nodeU, delta);
-                SparseVector gradient = blockGain.gradient();
+                long l = System.nanoTime();
+                Vector gradient = blockGain.gradient();
+                gradientTime += System.nanoTime() - l;
+                long l1 = System.nanoTime();
                 double learningRate = lineSearch.search(
                     blockGain,
                     communityAffiliations.nodeAffiliations(nodeU),
                     gradient
                 );
+                searchTime += System.nanoTime() - l1;
+                long l2 = System.nanoTime();
                 communityAffiliations.updateNodeAffiliations(nodeU, gradient.multiply(learningRate));
+                updateTime += System.nanoTime() - l2;
+                processedNodes++;
             }
+            System.out.println(String.format(
+                "Gradient: %s, Search: %s, Update: %s, Processed nodes: %s",
+                gradientTime,
+                searchTime,
+                updateTime,
+                processedNodes
+            ));
         }
     }
 }
