@@ -270,6 +270,17 @@ public final class ParallelUtil {
         return tasks;
     }
 
+    public static Collection<Runnable> tasks(
+        final int concurrency,
+        final Function<Integer, ? extends Runnable> newTask
+    ) {
+        final Collection<Runnable> tasks = new ArrayList<>();
+        for (int i = 0; i < concurrency; i++) {
+            tasks.add(newTask.apply(i));
+        }
+        return tasks;
+    }
+
     /**
      * Runs a single task and waits until it's finished.
      */

@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.logging.Log;
+import scala.collection.Parallel;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -30,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunityDetection, CommunityAffiliations> {
     private static final double TOLERANCE = 0.00001;
-    private static final int MAX_ITERATIONS = 100;
+    private static final int MAX_ITERATIONS = 10000;
 
     private Graph graph;
     private AffiliationInitializer initializer;
@@ -74,16 +75,15 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
             oldGain = newGain;
             iteration++;
         }
-        System.out.println(String.format("Took: %s", System.nanoTime() - start));
+        System.out.println(String.format("Took: %s", (System.nanoTime() - start)/1e6));
         return communityAffiliations;
     }
 
     double update(CommunityAffiliations communityAffiliations, int iteration) {
-        AtomicInteger queue = new AtomicInteger(0);
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
             gradientConcurrency,
-            () -> new GradientStepTask(queue, communityAffiliations)
+            (taskId) -> new GradientStepTask(taskId, gradientConcurrency, communityAffiliations)
         );
         // run
         ParallelUtil.run(tasks, executorService);
@@ -106,7 +106,8 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
     }
 
     class GradientStepTask implements Runnable {
-        private final AtomicInteger queue;
+        private final int numTasks;
+        private final int taskId;
         private final CommunityAffiliations communityAffiliations;
         private final BacktrackingLineSearch lineSearch;
         private long searchTime = 0;
@@ -114,16 +115,16 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
         private long gradientTime = 0;
         private int processedNodes = 0;
 
-        GradientStepTask(AtomicInteger queue, CommunityAffiliations communityAffiliations) {
-            this.queue = queue;
+        GradientStepTask(int taskId, int numTasks, CommunityAffiliations communityAffiliations) {
             this.communityAffiliations = communityAffiliations;
             this.lineSearch = new BacktrackingLineSearch();
+            this.taskId = taskId;
+            this.numTasks = numTasks;
         }
 
         @Override
         public void run() {
-            int nodeU;
-            while ((nodeU = queue.getAndIncrement()) < graph.nodeCount() && running()) {
+            for (int nodeU = taskId; nodeU < graph.nodeCount(); nodeU += numTasks) {
                 GainFunction blockGain = communityAffiliations.blockGain(nodeU, delta);
                 long l = System.nanoTime();
                 Vector gradient = blockGain.gradient();
@@ -142,9 +143,9 @@ public class OverlappingCommunityDetection extends Algorithm<OverlappingCommunit
             }
             System.out.println(String.format(
                 "Gradient: %s, Search: %s, Update: %s, Processed nodes: %s",
-                gradientTime,
-                searchTime,
-                updateTime,
+                gradientTime/1e6,
+                searchTime/1e6,
+                updateTime/1e6,
                 processedNodes
             ));
         }

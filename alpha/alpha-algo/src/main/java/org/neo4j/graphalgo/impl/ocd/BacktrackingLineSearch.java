@@ -22,10 +22,10 @@ package org.neo4j.graphalgo.impl.ocd;
 public class BacktrackingLineSearch {
     private static final double C = 0.5;
     private static final double TAU = 0.5;
-    private static final double LR = 100;
-    private static final int MAX_ITERATIONS = 1000;
+    private static final double LR = 1;
+    private static final int MAX_ITERATIONS = 17;
 
-    public double search(GainFunction gain, Vector point, Vector gradient) {
+    double search(GainFunction gain, Vector point, Vector gradient) {
         double lossAtPoint = gain.gain();
         double lr = LR;
         int iterations = 0;
@@ -34,7 +34,7 @@ public class BacktrackingLineSearch {
             iterations++;
         }
         if (iterations == MAX_ITERATIONS) {
-            System.out.println("Stopped Backtracking line search after max iterations.");
+            //System.out.println("Stopped Backtracking line search after max iterations.");
             return 0;
         }
         return lr;

@@ -60,7 +60,7 @@ public class OverlappingCommunityDetectionStreamProcTest extends BaseProcTest {
             ", (i)-[:TYPE]->(g)";
     }
 
-    String generateQuery = "CALL gds.beta.graph.generate('myGraph', 1000, 80, {orientation: 'UNDIRECTED', aggregation: 'SINGLE'})";
+    String generateQuery = "CALL gds.beta.graph.generate('myGraph', 1000, 20, {orientation: 'UNDIRECTED', aggregation: 'SINGLE'})";
 
     @BeforeEach
     void setup() throws Exception {
@@ -76,7 +76,7 @@ public class OverlappingCommunityDetectionStreamProcTest extends BaseProcTest {
 
     @Test
     void stream() {
-        String q = "CALL gds.alpha.ocd.stream({nodeProjection: \"*\", relationshipProjection: {`*`: {type: \"*\", orientation: \"UNDIRECTED\"}}, concurrency: 1})" +
+        String q = "CALL gds.alpha.ocd.stream({nodeProjection: \"*\", relationshipProjection: {`*`: {type: \"*\", orientation: \"UNDIRECTED\"}}, concurrency: 4})" +
                    " YIELD nodeId, communityIds, scores" +
                    " RETURN nodeId, gds.util.asNode(nodeId).name as node, communityIds, scores";
 
@@ -91,6 +91,9 @@ public class OverlappingCommunityDetectionStreamProcTest extends BaseProcTest {
                    " RETURN nodeId, gds.util.asNode(nodeId).name as node, communityIds, scores";
 
         runQuery(generateQuery);
-        runQueryWithResultConsumer(q, result -> System.out.println(result.resultAsString()));
+        //runQueryWithResultConsumer(q, result -> System.out.println(result.resultAsString()));
+        runQueryWithResultConsumer(q, result -> {
+            System.out.println(result.resultAsString().length());
+        });
     }
 }

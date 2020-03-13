@@ -90,6 +90,8 @@ public final class RandomGraphGenerator {
         this.random = new Random();
         if (seed != null) {
             this.random.setSeed(seed);
+        } else {
+            this.random.setSeed(1);
         }
     }
 
