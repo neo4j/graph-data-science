@@ -43,13 +43,13 @@ import java.util.Set;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
-public final class GraphInput implements Input {
+public final class GraphStoreInput implements Input {
 
     private final GraphStore graphStore;
 
     private final int batchSize;
 
-    GraphInput(GraphStore graphStore, int batchSize) {
+    GraphStoreInput(GraphStore graphStore, int batchSize) {
         this.graphStore = graphStore;
         this.batchSize = batchSize;
     }

@@ -97,7 +97,7 @@ public class GraphStoreExport {
 
             life.start();
 
-            Input input = new GraphInput(graphStore, config.batchSize());
+            Input input = new GraphStoreInput(graphStore, config.batchSize());
 
             BatchImporter importer = BatchImporterFactory.withHighestPriority().instantiate(
                 databaseLayout,
