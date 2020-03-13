@@ -57,7 +57,7 @@ YIELD min, max, mean, p50
 [source, cypher]
 ----
 CALL gds.graph.list('myGraph')
-YIELD degreeDistribution as dd
+YIELD degreeDistribution AS dd
 RETURN dd.min, dd.max, dd.mean, dd.p50
 ----
 |===
