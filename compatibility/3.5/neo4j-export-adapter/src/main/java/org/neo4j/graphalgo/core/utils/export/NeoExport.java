@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.core.utils.export;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.SettingsProxy;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -49,12 +49,12 @@ import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createSchedule
 
 public class NeoExport {
 
-    private final Graph graph;
+    private final GraphStore graphStore;
 
     private final NeoExportConfig config;
 
-    public NeoExport(Graph graph, NeoExportConfig config) {
-        this.graph = graph;
+    public NeoExport(GraphStore graphStore, NeoExportConfig config) {
+        this.graphStore = graphStore;
         this.config = config;
     }
 
@@ -97,7 +97,7 @@ public class NeoExport {
 
             life.start();
 
-            Input input = new GraphInput(graph, config.batchSize());
+            Input input = new GraphInput(graphStore, config.batchSize());
 
             BatchImporter importer = BatchImporterFactory.withHighestPriority().instantiate(
                 databaseLayout,

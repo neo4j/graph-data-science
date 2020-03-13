@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -117,6 +119,14 @@ public final class GraphStore {
         return this.nodes;
     }
 
+    public Set<String> nodePropertyKeys() {
+        return nodeProperties.keySet();
+    }
+
+    public int nodePropertyCount() {
+        return nodeProperties.size();
+    }
+
     public boolean hasNodeProperty(String propertyKey) {
         return nodeProperties.containsKey(propertyKey);
     }
@@ -193,6 +203,24 @@ public final class GraphStore {
 
     public Set<String> relationshipTypes() {
         return relationships.keySet();
+    }
+
+    public int relationshipPropertyCount() {
+        return relationshipProperties.values().stream().mapToInt(Map::size).sum();
+    }
+
+    public Set<Pair<String, Optional<String>>> relationshipProperties() {
+        return this.relationshipTypes().stream().flatMap(relType -> {
+            if (relationshipProperties.containsKey(relType)) {
+                return relationshipProperties
+                    .get(relType)
+                    .keySet()
+                    .stream()
+                    .map(propertyKey -> Tuples.pair(relType, Optional.of(propertyKey)));
+            } else {
+                return Stream.of(Tuples.pair(relType, Optional.<String>empty()));
+            }
+        }).collect(Collectors.toSet());
     }
 
     private Graph createGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {

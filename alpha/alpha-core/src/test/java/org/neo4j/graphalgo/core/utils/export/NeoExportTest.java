@@ -26,9 +26,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.io.File;
@@ -68,13 +68,12 @@ class NeoExportTest {
     }
 
     @Test
-//    @Disabled("fix missing, shutdown state persists")
     void exportTopology() {
         StoreLoaderBuilder loaderBuilder = new StoreLoaderBuilder()
             .loadAnyLabel()
             .loadAnyRelationshipType();
 
-        Graph inputGraph = loaderBuilder.api(db).build().graph(NativeFactory.class);
+        GraphStore inputGraphStore = loaderBuilder.api(db).build().graphStore(NativeFactory.class);
 
         NeoExportConfig config = NeoExportConfig.of(
             "test-user",
@@ -83,19 +82,18 @@ class NeoExportTest {
                 .withString("dbName", "test-db")
         );
 
-        NeoExport neoExport = new NeoExport(inputGraph, config);
+        NeoExport neoExport = new NeoExport(inputGraphStore, config);
         neoExport.runFromTests();
 
         GraphDbApi exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
-        Graph outputGraph = loaderBuilder.api(exportDb).build().graph(NativeFactory.class);
+        GraphStore outputGraphStore = loaderBuilder.api(exportDb).build().graphStore(NativeFactory.class);
 
-        assertGraphEquals(inputGraph, outputGraph);
+        assertGraphEquals(inputGraphStore.getUnion(), outputGraphStore.getUnion());
 
         exportDb.shutdown();
     }
 
     @Test
-//    @Disabled("fix missing, shutdown state persists")
     void exportTopologyAndNodeProperties() {
         StoreLoaderBuilder loaderBuilder = new StoreLoaderBuilder()
             .loadAnyLabel()
@@ -103,7 +101,7 @@ class NeoExportTest {
             .addNodeProperty(PropertyMapping.of("prop2", 42))
             .loadAnyRelationshipType();
 
-        Graph inputGraph = loaderBuilder.api(db).build().graph(NativeFactory.class);
+        GraphStore inputGraphStore = loaderBuilder.api(db).build().graphStore(NativeFactory.class);
 
         NeoExportConfig config = NeoExportConfig.of(
             "test-user",
@@ -112,13 +110,13 @@ class NeoExportTest {
                 .withString("dbName", "test-db")
         );
 
-        NeoExport neoExport = new NeoExport(inputGraph, config);
+        NeoExport neoExport = new NeoExport(inputGraphStore, config);
         neoExport.runFromTests();
 
         GraphDbApi exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
-        Graph outputGraph = loaderBuilder.api(exportDb).build().graph(NativeFactory.class);
+        GraphStore outputGraphStore = loaderBuilder.api(exportDb).build().graphStore(NativeFactory.class);
 
-        assertGraphEquals(inputGraph, outputGraph);
+        assertGraphEquals(inputGraphStore.getUnion(), outputGraphStore.getUnion());
 
         exportDb.shutdown();
     }
