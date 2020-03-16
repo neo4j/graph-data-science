@@ -27,6 +27,7 @@ import org.neo4j.kernel.impl.store.record.NodeRecord;
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
     public static final int IGNORE_LABEL = -1;
+    public static final int ANY_LABEL = -2;
 
     private final LongSet nodeLabelIds;
     private final NodeStore nodeStore;
@@ -38,15 +39,15 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
     public NodesBatchBuffer(
         final NodeStore store,
-        final LongSet labels,
+        final LongSet nodeLabelIds,
         int capacity,
         boolean readProperty
     ) {
         super(capacity);
-        this.nodeLabelIds = labels;
+        this.nodeLabelIds = nodeLabelIds;
         this.nodeStore = store;
         this.properties = readProperty ? new long[capacity] : null;
-        this.labelIds = nodeLabelIds.isEmpty() ? null : new long[capacity][];
+        this.labelIds = this.nodeLabelIds.isEmpty() ? null : new long[capacity][];
     }
 
     @Override
@@ -58,7 +59,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
             final long[] labels = NodeLabelsField.get(record, nodeStore);
             for (int i = 0; i < labels.length; i++) {
                 long l = labels[i];
-                if (!nodeLabelIds.contains(l)) {
+                if (!nodeLabelIds.contains(l) && !nodeLabelIds.contains(ANY_LABEL)) {
                     labels[i] = IGNORE_LABEL;
                 } else {
                     atLeastOneLabelFound = true;

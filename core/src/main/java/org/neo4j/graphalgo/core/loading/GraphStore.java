@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.BitSet;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.api.Graph;
@@ -242,10 +243,19 @@ public final class GraphStore {
 
     private Graph createGraph(List<String> nodeLabels, List<String> relationshipTypes, Optional<String> maybeRelationshipProperty, int concurrency) {
         boolean loadAllRelationships = relationshipTypes.contains(PROJECT_ALL.name);
+        boolean loadAllNodes = nodeLabels.contains(PROJECT_ALL.name);
 
-        Optional<IdMap> filteredNodes = nodeLabels.contains(PROJECT_ALL.name)
+        BitSet combinedBitSet = BitSet.newInstance();
+        if (this.nodes.maybeLabelInformation.isPresent() && !loadAllNodes) {
+            nodeLabels.forEach(label -> combinedBitSet.union(
+                this.nodes.maybeLabelInformation.get().get(label)));
+        }
+
+        boolean containsAllNodes = combinedBitSet.cardinality() == this.nodes.nodeCount();
+
+        Optional<IdMap> filteredNodes = loadAllNodes || !this.nodes.maybeLabelInformation.isPresent() || containsAllNodes
             ? Optional.empty()
-            : Optional.of(this.nodes.withFilteredLabels(nodeLabels, concurrency));
+            : Optional.of(this.nodes.withFilteredLabels(combinedBitSet, concurrency));
 
         List<Graph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))

@@ -35,6 +35,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
+
 public class NodeImporter {
 
     interface PropertyReader {
@@ -129,6 +131,11 @@ public class NodeImporter {
                     labelProjectionBitSetMapping.get(elementIdentifier).set(startIndex + i);
                 }
             }
+        }
+
+        // set the whole range for '*' projections
+        for (String allProjectionIdentifier : labelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
+            labelProjectionBitSetMapping.get(allProjectionIdentifier).set(startIndex, startIndex + batchLength);
         }
     }
 

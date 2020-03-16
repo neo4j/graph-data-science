@@ -117,18 +117,16 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
                 IdIterable::new);
     }
 
-    public IdMap withFilteredLabels(Iterable<String> labelIds, int concurrency) {
-        if (labelIds == null || !maybeLabelInformation.isPresent()) {
+    public IdMap withFilteredLabels(BitSet unionedBitSet, int concurrency) {
+        if (!maybeLabelInformation.isPresent()) {
             return this;
         }
 
-        BitSet combinedBitSet = BitSet.newInstance();
-        labelIds.forEach(label -> combinedBitSet.union(maybeLabelInformation.get().get(label)));
         long nodeId = -1L;
         long cursor = 0L;
-        long newNodeCount = combinedBitSet.cardinality();
+        long newNodeCount = unionedBitSet.cardinality();
         HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, AllocationTracker.EMPTY);
-        while((nodeId = combinedBitSet.nextSetBit(nodeId+1)) != -1) {
+        while((nodeId = unionedBitSet.nextSetBit(nodeId+1)) != -1) {
             newGraphIds.set(cursor, nodeId);
             cursor++;
         }

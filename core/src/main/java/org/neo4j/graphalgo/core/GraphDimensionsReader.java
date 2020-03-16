@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongObjectHashMap;
 import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.LongSet;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -48,6 +49,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
+
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
     private final GraphSetup setup;
     private final boolean readTokens;
@@ -69,24 +72,26 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         NodeLabelIds nodeLabelIds = new NodeLabelIds();
         final LongObjectMap<List<String>> labelMapping = new LongObjectHashMap<>();
         if (readTokens) {
-             setup.nodeProjections()
+            MutableBoolean onlyAllProjections = new MutableBoolean(true);
+            setup.nodeProjections()
                 .projections()
-                .entrySet()
-                .stream()
-                .filter(entry -> !entry.getValue().projectAll())
-                .forEach(entry -> {
-                    String elementIdentifier = entry.getKey().name;
+                .forEach((key, value) -> {
+                    boolean projectAll = value.projectAll();
+                    onlyAllProjections.setValue(onlyAllProjections.booleanValue() & projectAll);
+                    String elementIdentifier = key.name;
                     Arrays
-                        .stream(entry.getValue().label().split(","))
+                        .stream(value.label().split(","))
                         .map(String::trim)
-                        .map(neoLabel -> (long) tokenRead.nodeLabel(neoLabel))
+                        .map(neoLabel -> projectAll ? ANY_LABEL : (long) tokenRead.nodeLabel(neoLabel))
                         .forEach(labelId -> addToListMap(labelId, elementIdentifier, labelMapping));
                 });
 
-            StreamSupport
-                .stream(labelMapping.keys().spliterator(), false)
-                .mapToInt(cursor -> (int)cursor.value)
-                .forEach(nodeLabelIds.ids::add);
+            if (onlyAllProjections.booleanValue()) {
+                StreamSupport
+                    .stream(labelMapping.keys().spliterator(), false)
+                    .mapToInt(cursor -> (int)cursor.value)
+                    .forEach(nodeLabelIds.ids::add);
+            }
         }
 
         RelationshipProjectionMappings.Builder mappingsBuilder = new RelationshipProjectionMappings.Builder();
@@ -115,6 +120,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         long nodeCount = nodeLabelIds.stream().mapToLong(dataRead::countsForNode).sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
+        long finalNodeCount = nodeLabelIds.ids.contains(ANY_LABEL) ? allNodesCount : nodeCount;
         // TODO: this will double count relationships between distinct labels
         Map<String, Long> relationshipCounts = relationshipProjectionMappings
             .stream()
@@ -131,7 +137,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         long maxRelCount = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
 
         return ImmutableGraphDimensions.builder()
-                .nodeCount(nodeCount)
+                .nodeCount(finalNodeCount)
                 .highestNeoId(allNodesCount)
                 .maxRelCount(maxRelCount)
                 .relationshipCounts(relationshipCounts)

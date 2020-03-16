@@ -66,7 +66,16 @@ public class NodeLabelFilterTest extends BaseProcTest {
                  "  L2: 'Label2'," +
                  "  L3: 'Label3'," +
                  "  L4: 'Label4'," +
-                 "  L5: 'Label5'" +
+                 "  L5: 'Label5'," +
+                 "  ALL: '*'" +
+                 "}, " +
+                 "'*')");
+
+        runQuery("CALL gds.graph.create(" +
+                 "'allGraph'," +
+                 "{" +
+                 "  ALL: '*'," +
+                 "  L1: 'Label1'" +
                  "}, " +
                  "'*')");
 
@@ -130,6 +139,7 @@ public class NodeLabelFilterTest extends BaseProcTest {
         runQueryWithRowConsumer(query, row -> {
             actual.add(row.getString("name"));
         });
+
         String query2 = "CALL gds.pageRank.stream('myGraph2', { nodeLabels: ['L1', 'L2', 'L3'] }) " +
                        "YIELD nodeId " +
                        "RETURN gds.util.asNode(nodeId).name AS name";
@@ -149,6 +159,36 @@ public class NodeLabelFilterTest extends BaseProcTest {
     }
 
     @Test
+    void testMultipleLabelsWithAllProjectionIncluded() {
+        String query = "CALL gds.pageRank.stream('myGraph2', { nodeLabels: ['L1', 'L2', 'L3', 'L4', 'L5'] }) " +
+                       "YIELD nodeId " +
+                       "RETURN gds.util.asNode(nodeId).name AS name";
+        Set<String> actual = new HashSet<>();
+        runQueryWithRowConsumer(query, row -> {
+            actual.add(row.getString("name"));
+        });
+
+        String query2 = "CALL gds.pageRank.stream('allGraph', { nodeLabels: ['ALL'] }) " +
+                        "YIELD nodeId " +
+                        "RETURN gds.util.asNode(nodeId).name AS name";
+        Set<String> actual2 = new HashSet<>();
+        runQueryWithRowConsumer(query2, row -> {
+            actual2.add(row.getString("name"));
+        });
+
+        Set<String> expected = new HashSet<>();
+        expected.add("a");
+        expected.add("b");
+        expected.add("c");
+        expected.add("d");
+        expected.add("e");
+        expected.add("f");
+
+        assertEquals(expected, actual);
+        assertEquals(expected, actual2);
+    }
+
+    @Test
     void testRelationshipsOnNodeFilteredGraph() {
         String query = "CALL gds.alpha.degree.stream('relGraph', { nodeLabels: ['L2', 'L3', 'L4'] }) YIELD nodeId, score RETURN gds.util.asNode(nodeId).name AS name, score";
 
@@ -159,6 +199,7 @@ public class NodeLabelFilterTest extends BaseProcTest {
             scores.add(row.getNumber("score").intValue());
         });
 
+        //TODO: assert
         System.out.println(nodes);
         System.out.println(scores);
     }
@@ -174,6 +215,7 @@ public class NodeLabelFilterTest extends BaseProcTest {
             triangles.add(row.getNumber("triangles").intValue());
         });
 
+        //TODO: assert
         System.out.println(nodes);
         System.out.println(triangles);
     }
