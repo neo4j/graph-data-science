@@ -32,7 +32,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class WccMutateProcTest extends WccBaseProcTest<WccWriteConfig> implements GraphMutationTest<WccWriteConfig, DisjointSetStruct> {
+class WccMutateProcTest extends WccProcTest<WccWriteConfig> implements GraphMutationTest<WccWriteConfig, DisjointSetStruct> {
 
     private static final String WRITE_PROPERTY = "componentId";
 
@@ -100,7 +100,7 @@ class WccMutateProcTest extends WccBaseProcTest<WccWriteConfig> implements Graph
                 "nodePropertiesWritten",
                 "createMillis",
                 "computeMillis",
-                "writeMillis",
+                "mutateMillis",
                 "postProcessingMillis",
                 "componentCount",
                 "componentDistribution",
@@ -118,7 +118,7 @@ class WccMutateProcTest extends WccBaseProcTest<WccWriteConfig> implements Graph
 
                 assertNotEquals(-1L, row.getNumber("createMillis"));
                 assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("writeMillis"));
+                assertNotEquals(-1L, row.getNumber("mutateMillis"));
                 assertNotEquals(-1L, row.getNumber("postProcessingMillis"));
 
                 assertEquals(3L, row.getNumber("componentCount"));

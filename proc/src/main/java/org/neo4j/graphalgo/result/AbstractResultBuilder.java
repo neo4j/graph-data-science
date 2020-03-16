@@ -26,6 +26,7 @@ public abstract class AbstractResultBuilder<WRITE_RESULT> {
     protected long createMillis = -1;
     protected long computeMillis = -1;
     protected long writeMillis = -1;
+    protected long mutateMillis = -1;
     protected long nodePropertiesWritten;
     protected long relationshipsWritten;
     protected AlgoBaseConfig config;
@@ -42,6 +43,11 @@ public abstract class AbstractResultBuilder<WRITE_RESULT> {
 
     public AbstractResultBuilder<WRITE_RESULT> withWriteMillis(long writeMillis) {
         this.writeMillis = writeMillis;
+        return this;
+    }
+
+    public AbstractResultBuilder<WRITE_RESULT> withMutateMillis(long mutateMillis) {
+        this.mutateMillis = mutateMillis;
         return this;
     }
 

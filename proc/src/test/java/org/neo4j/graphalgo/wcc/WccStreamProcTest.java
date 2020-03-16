@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class WccStreamProcTest extends WccBaseProcTest<WccStreamConfig> {
+class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
     private static final long[][] EXPECTED_COMMUNITIES = {new long[]{0L, 1L, 2L, 3L, 4, 5, 6}, new long[]{7, 8}, new long[]{9}};
 

@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class WccWriteProcTest extends WccBaseProcTest<WccWriteConfig> {
+class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
     private static final String WRITE_PROPERTY = "componentId";
     private static final String SEED_PROPERTY = "seedId";

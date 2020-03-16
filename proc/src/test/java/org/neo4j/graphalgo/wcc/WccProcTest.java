@@ -33,6 +33,11 @@ import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.wcc2.WccStatsProc;
+import org.neo4j.graphalgo.wcc2.WccStreamProc;
+import org.neo4j.graphalgo.wcc2.WccWriteProc;
+import org.neo4j.graphalgo.wcc2.WccStatsProc;
+import org.neo4j.graphalgo.wcc2.WccMutateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
@@ -44,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
+abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, DisjointSetStruct>,
     SeedConfigTest<CONFIG, DisjointSetStruct>,
     RelationshipWeightConfigTest<CONFIG, DisjointSetStruct>,
@@ -83,7 +88,7 @@ abstract class WccBaseProcTest<CONFIG extends WccBaseConfig> extends BaseProcTes
             // {H, I}
             ",(nH)-[:TYPE]->(nI)";
 
-        registerProcedures(WccStreamProc.class, WccWriteProc.class, WccMutateProc.class, GraphCreateProc.class);
+        registerProcedures(WccStreamProc.class, WccWriteProc.class, WccStatsProc.class, WccMutateProc.class, GraphCreateProc.class);
         runQuery(cypher);
     }
 
