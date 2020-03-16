@@ -93,7 +93,7 @@ public class NodeImporter {
         if (labelInformation != null) {
             labelInformation
                 .keySet()
-                .forEach(elementIdentifier -> labelInformationBuilders.get(elementIdentifier).bulkAdd(labelInformation.get(elementIdentifier)));
+                .forEach(elementIdentifier -> labelInformationBuilders.get(elementIdentifier).bulkAdd(batchLength, labelInformation.get(elementIdentifier)));
         }
         int batchOffset = 0;
         while (adder.nextBuffer()) {

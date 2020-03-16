@@ -41,10 +41,10 @@ public class BitSetBuilder {
     }
 
     // naive implementation, probably not threadsafe! Use direct array assignment instead
-    public final boolean bulkAdd(BitSet other) {
-        long startIndex = allocationIndex.getAndAccumulate(other.size(), this::upperAllocation);
+    public final boolean bulkAdd(long size, BitSet other) {
+        long startIndex = allocationIndex.getAndAccumulate(size, this::upperAllocation);
 
-        for (int i = 0; i < other.size(); i++) {
+        for (int i = 0; i < size; i++) {
             if (other.get(i)) {
                 bitSet.set(startIndex + i);
             }
