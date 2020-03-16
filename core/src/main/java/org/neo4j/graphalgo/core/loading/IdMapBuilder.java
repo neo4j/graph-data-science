@@ -78,16 +78,13 @@ public final class IdMapBuilder {
 
     public static IdMap build(
             HugeLongArrayBuilder idMapBuilder,
-            Map<String, BitSetBuilder> labelInformationBuilders,
+            Map<String, BitSet> projectionLabelMapping,
             long highestNodeId,
             int concurrency,
             AllocationTracker tracker) {
-        Optional<Map<String, BitSet>> maybeLabelInformation = labelInformationBuilders == null
+        Optional<Map<String, BitSet>> maybeLabelInformation = projectionLabelMapping == null
             ? Optional.empty()
-            : Optional.of(labelInformationBuilders
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, value -> value.getValue().build())));
+            : Optional.of(projectionLabelMapping);
         return build(idMapBuilder.build(),
             maybeLabelInformation,
             idMapBuilder.size(),

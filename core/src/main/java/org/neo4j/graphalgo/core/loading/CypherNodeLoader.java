@@ -80,7 +80,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     private void initImporter(PropertyMappings nodeProperties) {
         nodePropertyBuilders = nodeProperties(nodeProperties);
         builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());
-        importer = new NodeImporter(builder, null, nodePropertyBuilders.values());
+        importer = new NodeImporter(builder, null, nodePropertyBuilders.values(), null);
     }
 
     @Override
@@ -106,7 +106,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             initializedFromResult = true;
         }
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), null, bufferSize, true);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), bufferSize, true);
         NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
         result.accept(visitor);
         visitor.flush();

@@ -20,44 +20,32 @@
 package org.neo4j.graphalgo.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import com.carrotsearch.hppc.LongObjectMap;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class BitSetBuilder {
 
-    private final BitSet bitSet;
-    private final long length;
-    private final AtomicLong allocationIndex;
+    private final Map<String, BitSet> bitSets;
 
-    BitSetBuilder(BitSet bitSet, final long length) {
-        this.bitSet = bitSet;
-        this.length = length;
-        this.allocationIndex = new AtomicLong();
+    public BitSetBuilder(Map<String, BitSet> bitSets) {
+        this.bitSets = bitSets;
     }
 
-    public static BitSetBuilder of(long length, AllocationTracker tracker) {
-        return new BitSetBuilder(new BitSet(length), length);
-    }
-
-    // naive implementation, probably not threadsafe! Use direct array assignment instead
-    public final boolean bulkAdd(long size, BitSet other) {
-        long startIndex = allocationIndex.getAndAccumulate(size, this::upperAllocation);
-
-        for (int i = 0; i < size; i++) {
-            if (other.get(i)) {
-                bitSet.set(startIndex + i);
+    public final boolean bulkAdd(long startIndex, int batchLength, LongObjectMap<List<String>> labelMapping, long[][] labelIds) {
+        int cappedBatchLength = Math.min(labelIds.length, batchLength);
+        for (int i = 0; i < cappedBatchLength; i++) {
+            long[] labeldsForNode = labelIds[i];
+            for (long labelId : labeldsForNode) {
+                List<String> elementIdentifiers = labelMapping.getOrDefault(labelId, Collections.emptyList());
+                for (String elementIdentifier : elementIdentifiers) {
+                    bitSets.get(elementIdentifier).set(startIndex + i);
+                }
             }
         }
 
         return true;
-    }
-
-    public final BitSet build() {
-        return this.bitSet;
-    }
-
-    private long upperAllocation(long lower, long size) {
-        return Math.min(length, lower + size);
     }
 }

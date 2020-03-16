@@ -19,24 +19,24 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.utils.BitSetBuilder;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, IdsAndProperties> {
@@ -48,7 +48,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     private Map<String, NodePropertiesBuilder> builders;
     private HugeLongArrayBuilder idMapBuilder;
-    private Map<String, BitSetBuilder> labelInformationBuilders;
+    private Map<String, BitSet> projectionBitSetMapping;
 
     ScanningNodesImporter(
         GraphDatabaseAPI api,
@@ -75,22 +75,23 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     ) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
 
-        labelInformationBuilders = dimensions
-            .labelMapping()
-            .values()
-            .stream()
-            .flatMap(Collection::stream)
+        projectionBitSetMapping = StreamSupport.stream(
+            dimensions
+                .labelMapping()
+                .values()
+                .spliterator(),
+            false)
+            .flatMap(cursor -> cursor.value.stream())
             .distinct()
-            .collect(Collectors.toMap(s -> s, s -> BitSetBuilder.of(nodeCount, tracker)));
+            .collect(Collectors.toMap(s -> s, s -> new BitSet(nodeCount)));
 
         builders = propertyBuilders(nodeCount);
         return NodesScanner.of(
             api,
             scanner,
             dimensions.nodeLabelIds(),
-            dimensions.labelMapping(),
             progress,
-            new NodeImporter(idMapBuilder, labelInformationBuilders, builders.values()),
+            new NodeImporter(idMapBuilder, projectionBitSetMapping, builders.values(), dimensions.labelMapping()),
             terminationFlag
         );
     }
@@ -99,7 +100,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     IdsAndProperties build() {
         IdMap hugeIdMap = IdMapBuilder.build(
             idMapBuilder,
-            labelInformationBuilders,
+            projectionBitSetMapping,
             dimensions.highestNeoId(),
             concurrency,
             tracker

@@ -75,7 +75,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
         int propRef = cypherNodeProperties.size();
         cypherNodeProperties.add(weights);
-        buffer.add(neoId, propRef, NodesBatchBuffer.EMPTY_LABEL);
+        buffer.add(neoId, propRef, null);
         if (buffer.isFull()) {
             flush();
             reset();

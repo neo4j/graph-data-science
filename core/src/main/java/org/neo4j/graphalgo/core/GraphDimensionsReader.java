@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongObjectHashMap;
+import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.LongSet;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -38,7 +40,6 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +47,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
     private final GraphSetup setup;
@@ -66,7 +68,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         Read dataRead = transaction.dataRead();
 
         NodeLabelIds nodeLabelIds = new NodeLabelIds();
-        final Map<Long, List<String>> labelMapping = new HashMap<>();
+        final LongObjectMap<List<String>> labelMapping = new LongObjectHashMap<>();
         if (readTokens) {
              setup.nodeProjections()
                 .projections()
@@ -82,7 +84,10 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                         .forEach(labelId -> addToListMap(labelId, elementIdentifier, labelMapping));
                 });
 
-            labelMapping.keySet().stream().mapToInt(Long::intValue).forEach(nodeLabelIds.ids::add);
+            StreamSupport
+                .stream(labelMapping.keys().spliterator(), false)
+                .mapToInt(cursor -> (int)cursor.value)
+                .forEach(nodeLabelIds.ids::add);
         }
 
         RelationshipProjectionMappings.Builder mappingsBuilder = new RelationshipProjectionMappings.Builder();
@@ -176,7 +181,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         }
     }
 
-    private void addToListMap(long key, String value, Map<Long, List<String>> container) {
+    private void addToListMap(long key, String value, LongObjectMap<List<String>> container) {
         if (!container.containsKey(key)) {
             container.put(key, new LinkedList<>());
         }

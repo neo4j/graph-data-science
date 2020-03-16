@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.LongObjectMap;
 import org.neo4j.graphalgo.core.utils.BitSetBuilder;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
@@ -41,19 +42,22 @@ public class NodeImporter {
     }
 
     private final HugeLongArrayBuilder idMapBuilder;
-    private final Map<String, BitSetBuilder> labelInformationBuilders;
+    private final BitSetBuilder bitSetBuilder;
     private final IntObjectMap<NodePropertiesBuilder> buildersByPropertyId;
     private final Collection<NodePropertiesBuilder> nodePropertyBuilders;
+    private final LongObjectMap<List<String>> labelMapping;
 
     public NodeImporter(
         HugeLongArrayBuilder idMapBuilder,
-        Map<String, BitSetBuilder> labelInformationBuilders,
-        Collection<NodePropertiesBuilder> nodePropertyBuilders
+        Map<String, BitSet> labelProjectionBitSetMapping,
+        Collection<NodePropertiesBuilder> nodePropertyBuilders,
+        LongObjectMap<List<String>> labelMapping
     ) {
         this.idMapBuilder = idMapBuilder;
-        this.labelInformationBuilders = labelInformationBuilders;
         this.buildersByPropertyId = mapBuildersByPropertyId(nodePropertyBuilders);
         this.nodePropertyBuilders = nodePropertyBuilders;
+        this.labelMapping = labelMapping;
+        this.bitSetBuilder = new BitSetBuilder(labelProjectionBitSetMapping);
     }
 
     boolean readsProperties() {
@@ -89,11 +93,9 @@ public class NodeImporter {
 
         long[] batch = buffer.batch();
         long[] properties = buffer.properties();
-        Map<String, BitSet> labelInformation = buffer.labelBitSets();
-        if (labelInformation != null) {
-            labelInformation
-                .keySet()
-                .forEach(elementIdentifier -> labelInformationBuilders.get(elementIdentifier).bulkAdd(batchLength, labelInformation.get(elementIdentifier)));
+        long[][] labelIds = buffer.labelIds();
+        if (labelIds != null) {
+            bitSetBuilder.bulkAdd(adder.start, batchLength, labelMapping, labelIds);
         }
         int batchOffset = 0;
         while (adder.nextBuffer()) {
