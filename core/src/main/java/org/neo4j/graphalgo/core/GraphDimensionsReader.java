@@ -26,7 +26,6 @@ import com.carrotsearch.hppc.LongSet;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
@@ -92,24 +91,22 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         RelationshipProjectionMappings.Builder mappingsBuilder = new RelationshipProjectionMappings.Builder();
         if (readTokens) {
-            setup.relationshipProjections().projections().entrySet()
-                .forEach(e -> {
-                    String elementIdentifier = e.getKey().name;
-                    RelationshipProjection relationshipProjection = e.getValue();
+            setup.relationshipProjections().projections().forEach((key, relationshipProjection) -> {
+                String elementIdentifier = key.name;
 
-                    String typeName = relationshipProjection.type();
-                    Orientation orientation = relationshipProjection.orientation();
+                String typeName = relationshipProjection.type();
+                Orientation orientation = relationshipProjection.orientation();
 
-                    RelationshipProjectionMapping mapping = relationshipProjection.projectAll()
-                        ? RelationshipProjectionMapping.all(orientation)
-                        : RelationshipProjectionMapping.of(
-                            elementIdentifier,
-                            typeName,
-                            orientation,
-                            tokenRead.relationshipType(typeName)
-                        );
-                    mappingsBuilder.addMapping(mapping);
-                });
+                RelationshipProjectionMapping mapping = relationshipProjection.projectAll()
+                    ? RelationshipProjectionMapping.all(orientation)
+                    : RelationshipProjectionMapping.of(
+                        elementIdentifier,
+                        typeName,
+                        orientation,
+                        tokenRead.relationshipType(typeName)
+                    );
+                mappingsBuilder.addMapping(mapping);
+            });
         }
 
         RelationshipProjectionMappings relationshipProjectionMappings = mappingsBuilder.build();

@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.BitSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.BitSetBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -31,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class IdMapBuilder {
     public static IdMap build(
