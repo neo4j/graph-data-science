@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -112,12 +113,20 @@ public final class GraphStore {
         this.tracker = tracker;
     }
 
+    public IdMapping nodes() {
+        return this.nodes;
+    }
+
     public boolean hasNodeProperty(String propertyKey) {
         return nodeProperties.containsKey(propertyKey);
     }
 
     public void addNodeProperty(String propertyKey, NodeProperties nodeProperties) {
         this.nodeProperties.putIfAbsent(propertyKey, nodeProperties);
+    }
+
+    public NodeProperties getNodeProperty(String propertyKey) {
+        return this.nodeProperties.get(propertyKey);
     }
 
     public boolean hasRelationshipType(String relationshipType) {
