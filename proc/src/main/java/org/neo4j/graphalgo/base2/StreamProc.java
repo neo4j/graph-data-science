@@ -45,7 +45,7 @@ public abstract class StreamProc<
         ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult
     );
 
-    protected Stream<PROC_RESULT> stream(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected final Stream<PROC_RESULT> stream(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         if (computationResult.isGraphEmpty()) {
             return Stream.empty();
         }

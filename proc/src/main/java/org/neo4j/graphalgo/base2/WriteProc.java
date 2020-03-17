@@ -41,7 +41,7 @@ public abstract class WriteProc<
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
-    protected Stream<PROC_RESULT> write(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult) {
+    protected final Stream<PROC_RESULT> write(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult) {
         CONFIG config = computeResult.config();
         AbstractResultBuilder<PROC_RESULT> builder = resultBuilder(computeResult)
             .withCreateMillis(computeResult.createMillis())
