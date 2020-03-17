@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 
-class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> implements
+class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implements
     WritePropertyConfigTest<LouvainWriteConfig, Louvain> {
 
     @Override
@@ -52,7 +52,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
     void testWrite(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
         @Language("Cypher") String query = queryBuilder
@@ -94,7 +94,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
     void testWriteIntermediateCommunities(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
         String query = queryBuilder
@@ -146,7 +146,7 @@ class LouvainWriteProcTest extends LouvainBaseProcTest<LouvainWriteConfig> imple
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
     void testWriteWithSeeding(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyWriteProperty";
         String query = queryBuilder

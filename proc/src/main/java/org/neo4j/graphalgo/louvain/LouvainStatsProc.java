@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.labelpropagation;
+package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
@@ -31,28 +31,31 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, LabelPropagation, LabelPropagationStatsProc.StatsResult, LabelPropagationStreamConfig> {
+public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsProc.StatsResult, LouvainStreamConfig> {
 
-    @Procedure(value = "gds.labelPropagation.stats", mode = READ)
+    @Procedure(value = "gds.louvain.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult = compute(
+        ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
         return stats(computationResult);
     }
 
-    @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)
+    @Procedure(value = "gds.louvain.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -62,38 +65,37 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computeResult) {
-        return LabelPropagationProc.resultBuilder(
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computeResult) {
+        return LouvainProc.resultBuilder(
             new StatsResult.Builder(computeResult.graph().nodeCount(), callContext, computeResult.tracker()),
             computeResult
         );
     }
 
     @Override
-    protected LabelPropagationStreamConfig newConfig(
+    protected LouvainStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LabelPropagationStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LouvainStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation, LabelPropagationStreamConfig> algorithmFactory(
-        LabelPropagationStreamConfig config
-    ) {
-        return new LabelPropagationFactory<>(config);
+    protected AlgorithmFactory<Louvain, LouvainStreamConfig> algorithmFactory(LouvainStreamConfig config) {
+        return new LouvainFactory<>();
     }
 
-    public static class StatsResult {
+    public static final class StatsResult {
 
         public long createMillis;
         public long computeMillis;
         public long postProcessingMillis;
+        public long ranLevels;
         public long communityCount;
-        public long ranIterations;
-        public boolean didConverge;
+        public double modularity;
+        public List<Double> modularities;
         public Map<String, Object> communityDistribution;
         public Map<String, Object> configuration;
 
@@ -101,23 +103,26 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
+            long ranLevels,
             long communityCount,
-            long ranIterations,
-            boolean didConverge,
+            double modularity,
+            double[] modularities,
             Map<String, Object> communityDistribution,
             Map<String, Object> configuration
+
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;
+            this.ranLevels = ranLevels;
             this.communityCount = communityCount;
-            this.ranIterations = ranIterations;
-            this.didConverge = didConverge;
+            this.modularity = modularity;
+            this.modularities = Arrays.stream(modularities).boxed().collect(Collectors.toList());;
             this.communityDistribution = communityDistribution;
             this.configuration = configuration;
         }
 
-        static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<StatsResult> {
+        static class Builder extends LouvainProc.LouvainResultBuilder<StatsResult> {
 
             Builder(
                 long nodeCount,
@@ -137,13 +142,15 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
                     createMillis,
                     computeMillis,
                     postProcessingDuration,
+                    levels,
                     maybeCommunityCount.orElse(-1L),
-                    ranIterations,
-                    didConverge,
+                    modularity,
+                    modularities,
                     communityHistogramOrNull(),
                     config.toMap()
                 );
             }
         }
+
     }
 }

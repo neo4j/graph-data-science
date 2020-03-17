@@ -89,12 +89,10 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computeResult) {
-        return LabelPropagationProc
-            .resultBuilder(new WriteResult.Builder(
-                computeResult.graph().nodeCount(),
-                callContext,
-                computeResult.tracker()
-            ), computeResult);
+        return LabelPropagationProc.resultBuilder(
+            new WriteResult.Builder(computeResult.graph().nodeCount(), callContext, computeResult.tracker()),
+            computeResult
+        );
     }
 
     @Override

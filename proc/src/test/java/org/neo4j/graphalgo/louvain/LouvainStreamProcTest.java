@@ -40,14 +40,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
-class LouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
+class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
     @Override
     public Class<? extends AlgoBaseProc<?, Louvain, LouvainStreamConfig>> getProcedureClazz() {
         return LouvainStreamProc.class;
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
     void testStream(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         @Language("Cypher") String query = queryBuilder
             .algo("louvain")
@@ -65,7 +65,7 @@ class LouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
     void testStreamCommunities(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         @Language("Cypher") String query = queryBuilder
             .algo("louvain")
@@ -95,7 +95,7 @@ class LouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.louvain.LouvainBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
     void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String query = queryBuilder
             .algo("louvain")

@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class WeightedLouvainStreamProcTest extends LouvainBaseProcTest<LouvainStreamConfig> {
+class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
 
     private static final Map<String, Object> expectedWeightedResult = map(
         "Alice", 3L,

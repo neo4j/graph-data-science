@@ -46,9 +46,9 @@ final class LabelPropagationProc {
     }
 
     abstract static class LabelPropagationResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
-        protected long ranIterations;
+        long ranIterations;
 
-        protected boolean didConverge;
+        boolean didConverge;
 
         LabelPropagationResultBuilder(
             long nodeCount,

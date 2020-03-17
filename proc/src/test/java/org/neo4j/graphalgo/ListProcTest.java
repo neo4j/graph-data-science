@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.functions.VersionFunc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
+import org.neo4j.graphalgo.louvain.LouvainStatsProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
@@ -160,6 +161,7 @@ class ListProcTest extends BaseProcTest {
             ListProc.class,
             LouvainWriteProc.class,
             LouvainStreamProc.class,
+            LouvainStatsProc.class,
             ModularityOptimizationWriteProc.class,
             ModularityOptimizationStreamProc.class,
             NodeSimilarityWriteProc.class,

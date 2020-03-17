@@ -20,9 +20,10 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,12 +34,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.louvain.LouvainProc.LOUVAIN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
+public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStreamProc.StreamResult, LouvainStreamConfig> {
 
     @Procedure(value = "gds.louvain.stream", mode = READ)
     @Description(LOUVAIN_DESCRIPTION)
@@ -46,53 +47,12 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-
-        if (computationResult.isGraphEmpty() || computationResult.result() == null) {
-            return Stream.empty();
-        }
-
-        Graph graph = computationResult.graph();
-        Louvain louvain = computationResult.result();
-        boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
-
-        return LongStream.range(0, graph.nodeCount())
-            .mapToObj(nodeId -> {
-                long neoNodeId = graph.toOriginalNodeId(nodeId);
-                long[] communities = includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
-                return new StreamResult(neoNodeId, communities, louvain.getCommunity(nodeId));
-            });
+        return stream(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.louvain.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Procedure(value = "gds.louvain.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult)
-            .map(StatsResult::from);
-    }
-
-    @Procedure(value = "gds.louvain.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -107,6 +67,18 @@ public class LouvainStreamProc extends LouvainBaseProc<LouvainStreamConfig> {
         CypherMapWrapper config
     ) {
         return LouvainStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected AlgorithmFactory<Louvain, LouvainStreamConfig> algorithmFactory(LouvainStreamConfig config) {
+        return new LouvainFactory<>();
+    }
+
+    @Override
+    protected StreamResult streamResult(long nodeId, long originalNodeId, Louvain computationResult) {
+        boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
+        long[] communities = includeIntermediateCommunities ? computationResult.getCommunities(nodeId) : null;
+        return new StreamResult(originalNodeId, communities, computationResult.getCommunity(nodeId));
     }
 
     public static final class StreamResult {

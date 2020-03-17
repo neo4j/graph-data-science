@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
+abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, Louvain>,
     SeedConfigTest<CONFIG, Louvain>,
     IterationsConfigTest<CONFIG, Louvain>,
@@ -78,7 +78,12 @@ abstract class LouvainBaseProcTest<CONFIG extends LouvainBaseConfig> extends Bas
 
         db = TestDatabaseCreator.createTestDatabase();
 
-        registerProcedures(LouvainStreamProc.class, LouvainWriteProc.class, GraphCreateProc.class);
+        registerProcedures(
+            LouvainStreamProc.class,
+            LouvainWriteProc.class,
+            LouvainStatsProc.class,
+            GraphCreateProc.class
+        );
         registerFunctions(GetNodeFunc.class);
 
         @Language("Cypher") String cypher =
