@@ -130,7 +130,7 @@ public class NodeFilteredGraph extends FilterGraph {
             long internalTargetId = filteredIdMap.toMappedNodeId(target);
             return consumer.accept(internalSourceId, internalTargetId);
         }
-        return false;
+        return true;
     }
 
     private boolean filterAndConsume(long source, long target, double propertyValue, RelationshipWithPropertyConsumer consumer) {
@@ -139,6 +139,6 @@ public class NodeFilteredGraph extends FilterGraph {
             long internalTargetId = filteredIdMap.toMappedNodeId(target);
             return consumer.accept(internalSourceId, internalTargetId, propertyValue);
         }
-        return false;
+        return true;
     }
 }
