@@ -146,7 +146,9 @@ public abstract class AlgoBaseProc<
                 .findFirst()
                 .get();
 
-            GraphLoader loader = newLoader(graphCreateConfig, AllocationTracker.EMPTY);
+            GraphCreateConfig filteredConfig = filterGraphCreateConfig(config, graphCreateConfig);
+
+            GraphLoader loader = newLoader(filteredConfig, AllocationTracker.EMPTY);
             GraphStoreFactory graphStoreFactory = loader.build(config.getGraphImpl());
             estimateDimensions = graphStoreFactory.dimensions();
         }
@@ -155,6 +157,30 @@ public abstract class AlgoBaseProc<
 
         MemoryTree memoryTree = estimationBuilder.build().estimate(estimateDimensions, config.concurrency());
         return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);
+    }
+
+    private GraphCreateConfig filterGraphCreateConfig(CONFIG config, GraphCreateConfig graphCreateConfig) {
+        NodeProjections nodeProjections = graphCreateConfig.nodeProjections();
+        List<String> nodeLabels = config.nodeLabels();
+        if (nodeLabels.isEmpty()) {
+            return graphCreateConfig;
+        } else {
+            NodeProjections.Builder builder = NodeProjections.builder();
+            nodeProjections
+                .projections()
+                .entrySet()
+                .stream()
+                .filter(proj -> nodeLabels.contains(proj.getKey().name))
+                .forEach(entry -> builder.putProjection(entry.getKey(), entry.getValue()));
+            NodeProjections filteredNodeProjections = builder.build();
+            return GraphCreateFromStoreConfig.of(
+                config.username(),
+                config.graphName().get(),
+                filteredNodeProjections,
+                graphCreateConfig.relationshipProjections(),
+                CypherMapWrapper.create(config.toMap())
+            );
+        }
     }
 
     protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
