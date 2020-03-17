@@ -10,6 +10,25 @@ The Neo4j Graph Data Science (GDS) library is delivered as a plugin to the Neo4j
 The plugin needs to be installed into the database and whitelisted in the Neo4j configuration.
 There are two main ways of achieving this, which we will detail in this chapter.
 
+
+== Supported Neo4j versions
+
+The GDS library supports the following Neo4j versions:
+
+[opts=header,cols="1, 1"]
+|===
+| Neo4j Graph Data Science | Neo4j version
+.7+<.^|`1.0.x`
+| `3.5.9`
+| `3.5.10`
+| `3.5.11`
+| `3.5.12`
+| `3.5.13`
+| `3.5.14`
+| `3.5.15`
+|===
+
+
 == Neo4j Desktop
 
 The most convenient way of installing the GDS library is through the https://neo4j.com/docs/operations-manual/current/installation/neo4j-desktop/index.html[Neo4j Desktop^] plugin called Neo4j Graph Data Science.
