@@ -34,7 +34,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -111,16 +110,6 @@ public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateP
         public final long componentCount;
         public final Map<String, Object> componentDistribution;
         public final Map<String, Object> configuration;
-
-        static WccMutateProc.MutateResult empty(Map<String, Object> configuration, long createMillis) {
-            return new WccMutateProc.MutateResult(
-                0,
-                createMillis,
-                0, 0, 0, 0,
-                Collections.emptyMap(),
-                configuration
-            );
-        }
 
         MutateResult(
             long nodePropertiesWritten,

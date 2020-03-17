@@ -34,7 +34,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -111,16 +110,6 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         public final long componentCount;
         public final Map<String, Object> componentDistribution;
         public final Map<String, Object> configuration;
-
-        static WccWriteProc.WriteResult empty(Map<String, Object> configuration, long createMillis) {
-            return new WccWriteProc.WriteResult(
-                0,
-                createMillis,
-                0, 0, 0, 0,
-                Collections.emptyMap(),
-                configuration
-            );
-        }
 
         WriteResult(
             long nodePropertiesWritten,
