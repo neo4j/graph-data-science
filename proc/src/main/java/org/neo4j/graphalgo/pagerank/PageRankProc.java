@@ -19,13 +19,14 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
-abstract class PageRankProc<CONFIG extends PageRankBaseConfig> extends AlgoBaseProc<PageRank, PageRank, CONFIG> {
+final class PageRankProc {
 
     static final String PAGE_RANK_DESCRIPTION =
         "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
+
+    private PageRankProc() {}
 
     static final class ScoresTranslator implements PropertyTranslator.OfDouble<PageRank> {
         public static final ScoresTranslator INSTANCE = new ScoresTranslator();

@@ -34,10 +34,12 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.logging.Log;
 
-abstract class WccProc {
+final class WccProc {
 
     static final String WCC_DESCRIPTION =
         "The WCC algorithm finds sets of connected nodes in an undirected graph, where all nodes in the same set form a connected component.";
+
+    private WccProc() {}
 
     static <CONFIG extends WccBaseConfig> AlgorithmFactory<Wcc, CONFIG> algorithmFactory() {
         return new AlgorithmFactory<Wcc, CONFIG>() {
