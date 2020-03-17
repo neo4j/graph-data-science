@@ -35,7 +35,7 @@ public class NodeFilteredGraph extends FilterGraph {
 
     private final IdMap filteredIdMap;
 
-    public NodeFilteredGraph(Graph graph, IdMap filteredIdMap) {
+    public NodeFilteredGraph(HugeGraph graph, IdMap filteredIdMap) {
         super(graph);
         this.filteredIdMap = filteredIdMap;
     }
@@ -117,6 +117,11 @@ public class NodeFilteredGraph extends FilterGraph {
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
         return super.relationshipProperty(filteredIdMap.toMappedNodeId(sourceNodeId), filteredIdMap.toMappedNodeId(targetNodeId));
+    }
+
+    @Override
+    public RelationshipIterator concurrentCopy() {
+        return new NodeFilteredGraph((HugeGraph) graph.concurrentCopy(), filteredIdMap);
     }
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {
