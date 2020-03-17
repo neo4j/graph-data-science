@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
@@ -155,6 +156,7 @@ class ListProcTest extends BaseProcTest {
             K1ColoringStreamProc.class,
             LabelPropagationWriteProc.class,
             LabelPropagationStreamProc.class,
+            LabelPropagationStatsProc.class,
             ListProc.class,
             LouvainWriteProc.class,
             LouvainStreamProc.class,

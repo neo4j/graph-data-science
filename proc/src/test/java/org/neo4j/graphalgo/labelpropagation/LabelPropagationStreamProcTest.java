@@ -38,14 +38,14 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class LabelPropagationStreamProcTest extends LabelPropagationBaseProcTest<LabelPropagationStreamConfig> {
+class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropagationStreamConfig> {
     @Override
     public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationStreamConfig>> getProcedureClazz() {
         return LabelPropagationStreamProc.class;
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#gdsGraphVariations")
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
     void testStream(
         GdsCypher.QueryBuilder queryBuilder,
         String desc

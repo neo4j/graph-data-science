@@ -20,12 +20,10 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -37,28 +35,26 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.labelpropagation.LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
-public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, LabelPropagation, LabelPropagationWriteProc.WriteResult, LabelPropagationWriteConfig> {
+public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, LabelPropagation, LabelPropagationStatsProc.StatsResult, LabelPropagationStreamConfig> {
 
-    @Procedure(value = "gds.labelPropagation.write", mode = WRITE)
-    @Description(LABEL_PROPAGATION_DESCRIPTION)
-    public Stream<WriteResult> write(
+    @Procedure(value = "gds.labelPropagation.stats", mode = READ)
+    @Description(STATS_DESCRIPTION)
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> result = compute(
+        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        return write(result);
+        return stats(computationResult);
     }
 
-    @Procedure(value = "gds.labelPropagation.write.estimate", mode = READ)
+    @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimate(
+    public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -66,31 +62,9 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     }
 
     @Override
-    protected PropertyTranslator<LabelPropagation> nodePropertyTranslator(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult) {
-
-        LabelPropagationWriteConfig config = computationResult.config();
-
-        boolean writePropertyEqualsSeedProperty = config.seedProperty() != null && config
-            .writeProperty()
-            .equals(config.seedProperty());
-
-        if (writePropertyEqualsSeedProperty) {
-            NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
-            return new PropertyTranslator.OfLongIfChanged<>(
-                seedProperties,
-                (data, nodeId) -> data.labels().get(nodeId)
-            );
-        }
-
-        return (PropertyTranslator.OfLong<LabelPropagation>) (data, nodeId) -> data
-            .labels()
-            .get(nodeId);
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computeResult) {
         return LabelPropagationProc
-            .resultBuilder(new WriteResult.Builder(
+            .resultBuilder(new StatsResult.Builder(
                 computeResult.graph().nodeCount(),
                 callContext,
                 computeResult.tracker()
@@ -98,28 +72,26 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     }
 
     @Override
-    public LabelPropagationWriteConfig newConfig(
+    protected LabelPropagationStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LabelPropagationWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LabelPropagationStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation, LabelPropagationWriteConfig> algorithmFactory(
-        LabelPropagationWriteConfig config
+    protected AlgorithmFactory<LabelPropagation, LabelPropagationStreamConfig> algorithmFactory(
+        LabelPropagationStreamConfig config
     ) {
         return new LabelPropagationFactory<>(config);
     }
 
-    public static class WriteResult {
+    public static class StatsResult {
 
-        public long nodePropertiesWritten;
         public long createMillis;
         public long computeMillis;
-        public long writeMillis;
         public long postProcessingMillis;
         public long communityCount;
         public long ranIterations;
@@ -127,11 +99,9 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
         public Map<String, Object> communityDistribution;
         public Map<String, Object> configuration;
 
-        WriteResult(
-            long nodePropertiesWritten,
+        StatsResult(
             long createMillis,
             long computeMillis,
-            long writeMillis,
             long postProcessingMillis,
             long communityCount,
             long ranIterations,
@@ -139,10 +109,8 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
             Map<String, Object> communityDistribution,
             Map<String, Object> configuration
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.communityCount = communityCount;
             this.ranIterations = ranIterations;
@@ -151,7 +119,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
             this.configuration = configuration;
         }
 
-        static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<WriteResult> {
+        static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<StatsResult> {
 
             Builder(
                 long nodeCount,
@@ -166,12 +134,10 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
             }
 
             @Override
-            protected WriteResult buildResult() {
-                return new WriteResult(
-                    nodePropertiesWritten,
+            protected StatsResult buildResult() {
+                return new StatsResult(
                     createMillis,
                     computeMillis,
-                    writeMillis,
                     postProcessingDuration,
                     maybeCommunityCount.orElse(-1L),
                     ranIterations,
@@ -182,5 +148,4 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
             }
         }
     }
-
 }

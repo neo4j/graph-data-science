@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,12 +30,12 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.labelpropagation.LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPropagationStreamConfig> {
+public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, LabelPropagation, LabelPropagationStreamProc.StreamResult, LabelPropagationStreamConfig> {
 
     @Procedure(value = "gds.labelPropagation.stream", mode = READ)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
@@ -60,41 +60,9 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.labelPropagation.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult)
-            .map(StatsResult::from);
-    }
-
-    @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    private Stream<LabelPropagationStreamProc.StreamResult> stream(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult) {
-        Graph graph = computationResult.graph();
-        if (computationResult.isGraphEmpty()) {
-            return Stream.empty();
-        }
-        HugeLongArray labels = computationResult.result().labels();
-
-        return LongStream.range(0, graph.nodeCount())
-            .mapToObj(nodeId -> {
-                long neoNodeId = graph.toOriginalNodeId(nodeId);
-                return new StreamResult(neoNodeId, labels.get(nodeId));
-            });
+    @Override
+    protected StreamResult streamResult(long nodeId, long originalNodeId, LabelPropagation computationResult) {
+        return new StreamResult(originalNodeId, computationResult.labels().get(nodeId));
     }
 
     @Override
@@ -105,6 +73,13 @@ public class LabelPropagationStreamProc extends LabelPropagationBaseProc<LabelPr
         CypherMapWrapper config
     ) {
         return LabelPropagationStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected AlgorithmFactory<LabelPropagation, LabelPropagationStreamConfig> algorithmFactory(
+        LabelPropagationStreamConfig config
+    ) {
+        return new LabelPropagationFactory<>(config);
     }
 
     public static final class StreamResult {

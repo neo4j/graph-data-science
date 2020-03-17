@@ -85,7 +85,7 @@ public class WccStreamProc extends StreamProc<
     }
 
     @Override
-    protected WccStreamProc.StreamResult streamResult(long originalNodeId, DisjointSetStruct computationResult) {
+    protected WccStreamProc.StreamResult streamResult(long nodeId, long originalNodeId, DisjointSetStruct computationResult) {
         throw new UnsupportedOperationException("gds.wcc.stream overrides StreamProc#stream");
     }
 

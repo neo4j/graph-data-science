@@ -32,7 +32,7 @@ public abstract class StreamProc<
     PROC_RESULT,
     CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    protected abstract PROC_RESULT streamResult(long originalNodeId, ALGO_RESULT computationResult);
+    protected abstract PROC_RESULT streamResult(long nodeId, long originalNodeId, ALGO_RESULT computationResult);
 
     protected Stream<PROC_RESULT> stream(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         if (computationResult.isGraphEmpty()) {
@@ -41,6 +41,6 @@ public abstract class StreamProc<
         Graph graph = computationResult.graph();
         return LongStream
             .range(IdMapping.START_NODE_ID, graph.nodeCount())
-            .mapToObj(nodeId -> streamResult(graph.toMappedNodeId(nodeId), computationResult.result()));
+            .mapToObj(nodeId -> streamResult(nodeId, graph.toOriginalNodeId(nodeId), computationResult.result()));
     }
 }

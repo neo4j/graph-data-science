@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPropagationWriteConfig> implements
+class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropagationWriteConfig> implements
     WritePropertyConfigTest<LabelPropagationWriteConfig, LabelPropagation> {
 
     @Override
@@ -69,7 +69,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#gdsGraphVariations")
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
     void testWrite(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         String writeProperty = "myFancyCommunity";
         @Language("Cypher") String query = queryBuilder
@@ -106,7 +106,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#gdsGraphVariations")
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
     void respectsMaxIterations(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
         @Language("Cypher") String query = queryBuilder
             .algo("labelPropagation")
@@ -141,12 +141,12 @@ class LabelPropagationWriteProcTest extends LabelPropagationBaseProcTest<LabelPr
     static Stream<Arguments> concurrenciesExplicitAndImplicitCreate() {
         return TestSupport.crossArguments(
             () -> Stream.of(1, 4, 8).map(Arguments::of),
-            LabelPropagationBaseProcTest::gdsGraphVariations
+            LabelPropagationProcTest::gdsGraphVariations
         );
     }
 
     @ParameterizedTest(name = "concurrency = {0}, {2}")
-    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationBaseProcTest#gdsGraphVariations")
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationProcTest#gdsGraphVariations")
     void shouldRunLabelPropagationNatural(GdsCypher.QueryBuilder queryBuilder, String desc) {
 
         String query = queryBuilder

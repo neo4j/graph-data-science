@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
+abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, LabelPropagation>,
     SeedConfigTest<CONFIG, LabelPropagation>,
     IterationsConfigTest<CONFIG, LabelPropagation>,
@@ -94,7 +94,12 @@ abstract class LabelPropagationBaseProcTest<CONFIG extends LabelPropagationBaseC
             ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
             ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
 
-        registerProcedures(LabelPropagationStreamProc.class, LabelPropagationWriteProc.class, GraphCreateProc.class);
+        registerProcedures(
+            LabelPropagationStreamProc.class,
+            LabelPropagationWriteProc.class,
+            LabelPropagationStatsProc.class,
+            GraphCreateProc.class
+        );
         runQuery(cypher);
 
         // Create explicit graphs with both projection variants
