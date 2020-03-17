@@ -100,6 +100,10 @@ public final class SparseNodeMapping {
         return (int) (index & PAGE_MASK);
     }
 
+    public long size() {
+        return pages.length * PAGE_SIZE_IN_BYTES;
+    }
+
     public static final class Builder {
         private final long capacity;
         private final AtomicReferenceArray<long[]> pages;

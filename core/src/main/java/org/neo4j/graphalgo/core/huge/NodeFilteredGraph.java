@@ -22,9 +22,10 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.FilterGraph;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 
@@ -122,6 +123,15 @@ public class NodeFilteredGraph extends FilterGraph {
     @Override
     public RelationshipIterator concurrentCopy() {
         return new NodeFilteredGraph((HugeGraph) graph.concurrentCopy(), filteredIdMap);
+    }
+
+    @Override
+    public NodeProperties nodeProperties(String type) {
+        NodeProperties properties = graph.nodeProperties(type);
+        if (properties == null) {
+            return null;
+        }
+        return new FilteredNodeProperties(properties, filteredIdMap);
     }
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {

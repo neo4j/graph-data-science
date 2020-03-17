@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongPredicate;
+import java.util.stream.Stream;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
@@ -138,6 +139,15 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
             AllocationTracker.EMPTY
         );
         return new IdMap(newGraphIds, newNodeToGraphIds, newNodeCount);
+    }
+
+    public long size() {
+        long totalBitsetSize = maybeLabelInformation.isPresent() ? this.maybeLabelInformation
+            .get()
+            .values()
+            .stream()
+            .mapToLong(BitSet::size).sum() : 0;
+        return graphIds.size() + totalBitsetSize + nodeToGraphIds.size();
     }
 
     public static final class IdIterable implements PrimitiveLongIterable {
