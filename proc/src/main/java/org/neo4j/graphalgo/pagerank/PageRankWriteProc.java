@@ -69,9 +69,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computeResult) {
-        return new WriteResult.Builder()
-            .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.result().didConverge())
-            .withRanIterations(computeResult.isGraphEmpty() ? 0 : computeResult.result().iterations());
+        return PageRankProc.resultBuilder(new WriteResult.Builder(), computeResult);
     }
 
     @Override
@@ -117,20 +115,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
             this.configuration = configuration;
         }
 
-        static class Builder extends AbstractResultBuilder<WriteResult> {
-
-            private long ranIterations;
-            private boolean didConverge;
-
-            Builder withRanIterations(long ranIterations) {
-                this.ranIterations = ranIterations;
-                return this;
-            }
-
-            Builder withDidConverge(boolean didConverge) {
-                this.didConverge = didConverge;
-                return this;
-            }
+        static class Builder extends PageRankProc.PageRankResultBuilder<WriteResult> {
 
             @Override
             public WriteResult build() {

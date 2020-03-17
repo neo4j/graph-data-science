@@ -61,9 +61,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
 
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computeResult) {
-        return new StatsResult.Builder()
-            .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.result().didConverge())
-            .withRanIterations(computeResult.isGraphEmpty() ? 0 : computeResult.result().iterations());
+        return PageRankProc.resultBuilder(new StatsResult.Builder(), computeResult);
     }
 
     @Override
@@ -103,20 +101,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
             this.configuration = configuration;
         }
 
-        static class Builder extends AbstractResultBuilder<StatsResult> {
-
-            private long ranIterations;
-            private boolean didConverge;
-
-            Builder withRanIterations(long ranIterations) {
-                this.ranIterations = ranIterations;
-                return this;
-            }
-
-            Builder withDidConverge(boolean didConverge) {
-                this.didConverge = didConverge;
-                return this;
-            }
+        static class Builder extends PageRankProc.PageRankResultBuilder<StatsResult> {
 
             @Override
             public StatsResult build() {

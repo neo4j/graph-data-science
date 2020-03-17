@@ -83,9 +83,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computeResult) {
-        return new MutateResult.Builder()
-            .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.result().didConverge())
-            .withRanIterations(computeResult.isGraphEmpty() ? 0 : computeResult.result().iterations());
+        return PageRankProc.resultBuilder(new MutateResult.Builder(), computeResult);
     }
 
     public static final class MutateResult {
@@ -116,20 +114,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
             this.configuration = configuration;
         }
 
-        static class Builder extends AbstractResultBuilder<MutateResult> {
-
-            private long ranIterations;
-            private boolean didConverge;
-
-            Builder withRanIterations(long ranIterations) {
-                this.ranIterations = ranIterations;
-                return this;
-            }
-
-            Builder withDidConverge(boolean didConverge) {
-                this.didConverge = didConverge;
-                return this;
-            }
+        static class Builder extends PageRankProc.PageRankResultBuilder<MutateResult> {
 
             @Override
             public MutateResult build() {

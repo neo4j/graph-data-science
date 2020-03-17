@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 final class PageRankProc {
 
@@ -34,6 +36,32 @@ final class PageRankProc {
             return new PageRankFactory<>();
         }
         return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
+    }
+
+    static <PROC_RESULT, CONFIG extends PageRankBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
+        PageRankResultBuilder<PROC_RESULT> procResultBuilder,
+        AlgoBaseProc.ComputationResult<PageRank, PageRank, CONFIG> computeResult
+    ) {
+        return procResultBuilder
+            .withDidConverge(!computeResult.isGraphEmpty() ? computeResult.result().didConverge() : false)
+            .withRanIterations(!computeResult.isGraphEmpty() ? computeResult.result().iterations() : 0);
+    }
+
+    abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
+
+        protected long ranIterations;
+
+        protected boolean didConverge;
+
+        PageRankResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {
+            this.ranIterations = ranIterations;
+            return this;
+        }
+
+        PageRankResultBuilder<PROC_RESULT> withDidConverge(boolean didConverge) {
+            this.didConverge = didConverge;
+            return this;
+        }
     }
 
     static final class ScoresTranslator implements PropertyTranslator.OfDouble<PageRank> {
