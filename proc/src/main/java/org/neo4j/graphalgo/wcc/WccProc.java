@@ -21,13 +21,18 @@ package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.logging.Log;
 
 abstract class WccProc {
 
@@ -35,7 +40,23 @@ abstract class WccProc {
         "The WCC algorithm finds sets of connected nodes in an undirected graph, where all nodes in the same set form a connected component.";
 
     static <CONFIG extends WccBaseConfig> AlgorithmFactory<Wcc, CONFIG> algorithmFactory() {
-        return new WccFactory<>();
+        return new AlgorithmFactory<Wcc, CONFIG>() {
+            @Override
+            public Wcc build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
+                return new Wcc(
+                    graph,
+                    Pools.DEFAULT,
+                    ParallelUtil.DEFAULT_BATCH_SIZE,
+                    configuration,
+                    tracker
+                );
+            }
+
+            @Override
+            public MemoryEstimation memoryEstimation(CONFIG config) {
+                return Wcc.memoryEstimation(config.isIncremental());
+            }
+        };
     }
 
     static <CONFIG extends WccWriteConfig> PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
