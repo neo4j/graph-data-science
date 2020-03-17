@@ -19,28 +19,35 @@
  */
 package org.neo4j.graphalgo.wcc;
 
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
+public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc.WriteResult, WccWriteConfig> {
 
     @Procedure(value = "gds.wcc.write", mode = WRITE)
     @Description(WCC_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<WccWriteProc.WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -71,28 +78,98 @@ public class WccWriteProc extends WccBaseProc<WccWriteConfig> {
     }
 
     @Override
+    protected AlgorithmFactory<Wcc, WccWriteConfig> algorithmFactory(WccWriteConfig config) {
+        return new WccFactory<>();
+    }
+
+    @Override
     protected PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
         ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult
     ) {
-        WccWriteConfig config = computationResult.config();
+        return WccProc.nodePropertyTranslator(computationResult);
+    }
 
-        boolean consecutiveIds = config.consecutiveIds();
-        boolean isIncremental = config.isIncremental();
-        boolean seedPropertyEqualsWriteProperty = config.writeProperty().equalsIgnoreCase(config.seedProperty());
+    @Override
+    protected AbstractResultBuilder<WccWriteProc.WriteResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult) {
+        WriteResult.WriteResultBuilder writeResultBuilder = new WriteResult.WriteResultBuilder(
+            computeResult.graph().nodeCount(),
+            callContext,
+            computeResult.tracker()
+        );
+        return computeResult.result() != null
+            ? writeResultBuilder.withCommunityFunction(computeResult.result()::setIdOf)
+            : writeResultBuilder;
+    }
 
-        PropertyTranslator<DisjointSetStruct> propertyTranslator;
-        if (seedPropertyEqualsWriteProperty && !consecutiveIds) {
-            NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
-            propertyTranslator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, DisjointSetStruct::setIdOf);
-        } else if (consecutiveIds && !isIncremental) {
-            propertyTranslator = new ConsecutivePropertyTranslator(
-                computationResult.result(),
-                computationResult.tracker()
+    public static final class WriteResult {
+
+        public final long nodePropertiesWritten;
+        public final long createMillis;
+        public final long computeMillis;
+        public final long writeMillis;
+        public final long postProcessingMillis;
+        public final long componentCount;
+        public final Map<String, Object> componentDistribution;
+        public final Map<String, Object> configuration;
+
+        static WccWriteProc.WriteResult empty(Map<String, Object> configuration, long createMillis) {
+            return new WccWriteProc.WriteResult(
+                0,
+                createMillis,
+                0, 0, 0, 0,
+                Collections.emptyMap(),
+                configuration
             );
-        } else {
-            propertyTranslator = (PropertyTranslator.OfLong<DisjointSetStruct>) DisjointSetStruct::setIdOf;
         }
 
-        return propertyTranslator;
+        WriteResult(
+            long nodePropertiesWritten,
+            long createMillis,
+            long computeMillis,
+            long writeMillis,
+            long postProcessingMillis,
+            long componentCount,
+            Map<String, Object> componentDistribution,
+            Map<String, Object> configuration
+        ) {
+
+            this.nodePropertiesWritten = nodePropertiesWritten;
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.writeMillis = writeMillis;
+            this.postProcessingMillis = postProcessingMillis;
+            this.componentCount = componentCount;
+            this.componentDistribution = componentDistribution;
+            this.configuration = configuration;
+        }
+
+        static class WriteResultBuilder extends AbstractCommunityResultBuilder<WccWriteProc.WriteResult> {
+
+            WriteResultBuilder(
+                long nodeCount,
+                ProcedureCallContext context,
+                AllocationTracker tracker
+            ) {
+                super(
+                    nodeCount,
+                    context,
+                    tracker
+                );
+            }
+
+            @Override
+            protected WccWriteProc.WriteResult buildResult() {
+                return new WccWriteProc.WriteResult(
+                    nodePropertiesWritten,  // should be nodePropertiesWritten
+                    createMillis,
+                    computeMillis,
+                    writeMillis,
+                    postProcessingDuration,
+                    maybeCommunityCount.orElse(-1L),
+                    communityHistogramOrNull(),
+                    config.toMap()
+                );
+            }
+        }
     }
 }

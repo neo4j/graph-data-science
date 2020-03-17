@@ -19,29 +19,38 @@
  */
 package org.neo4j.graphalgo.wcc;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class WccMutateProc extends WccWriteProc {
+public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateProc.MutateResult, WccMutateConfig> {
 
     @Procedure(value = "gds.beta.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)
-    public Stream<WriteResult> mutate(
+    public Stream<WccMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult = compute(
+        ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -66,5 +75,101 @@ public class WccMutateProc extends WccWriteProc {
         CypherMapWrapper config
     ) {
         return WccMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected AlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory(WccMutateConfig config) {
+        return new WccFactory<>();
+    }
+
+    @Override
+    protected PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
+        ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult
+    ) {
+        return WccProc.nodePropertyTranslator(computationResult);
+    }
+
+    @Override
+    protected AbstractResultBuilder<WccMutateProc.MutateResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computeResult) {
+        MutateResult.MutateResultBuilder writeResultBuilder = new MutateResult.MutateResultBuilder(
+            computeResult.graph().nodeCount(),
+            callContext,
+            computeResult.tracker()
+        );
+        return computeResult.result() != null
+            ? writeResultBuilder.withCommunityFunction(computeResult.result()::setIdOf)
+            : writeResultBuilder;
+    }
+
+    public static final class MutateResult {
+
+        public final long nodePropertiesWritten;
+        public final long createMillis;
+        public final long computeMillis;
+        public final long mutateMillis;
+        public final long postProcessingMillis;
+        public final long componentCount;
+        public final Map<String, Object> componentDistribution;
+        public final Map<String, Object> configuration;
+
+        static WccMutateProc.MutateResult empty(Map<String, Object> configuration, long createMillis) {
+            return new WccMutateProc.MutateResult(
+                0,
+                createMillis,
+                0, 0, 0, 0,
+                Collections.emptyMap(),
+                configuration
+            );
+        }
+
+        MutateResult(
+            long nodePropertiesWritten,
+            long createMillis,
+            long computeMillis,
+            long mutateMillis,
+            long postProcessingMillis,
+            long componentCount,
+            Map<String, Object> componentDistribution,
+            Map<String, Object> configuration
+        ) {
+
+            this.nodePropertiesWritten = nodePropertiesWritten;
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.mutateMillis = mutateMillis;
+            this.postProcessingMillis = postProcessingMillis;
+            this.componentCount = componentCount;
+            this.componentDistribution = componentDistribution;
+            this.configuration = configuration;
+        }
+
+        static class MutateResultBuilder extends AbstractCommunityResultBuilder<WccMutateProc.MutateResult> {
+
+            MutateResultBuilder(
+                long nodeCount,
+                ProcedureCallContext context,
+                AllocationTracker tracker
+            ) {
+                super(
+                    nodeCount,
+                    context,
+                    tracker
+                );
+            }
+
+            @Override
+            protected WccMutateProc.MutateResult buildResult() {
+                return new WccMutateProc.MutateResult(
+                    nodePropertiesWritten,  // should be nodePropertiesWritten
+                    createMillis,
+                    computeMillis,
+                    mutateMillis,
+                    postProcessingDuration,
+                    maybeCommunityCount.orElse(-1L),
+                    communityHistogramOrNull(),
+                    config.toMap()
+                );
+            }
+        }
     }
 }

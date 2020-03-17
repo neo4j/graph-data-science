@@ -46,6 +46,7 @@ import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
+import org.neo4j.graphalgo.wcc.WccStatsProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 
@@ -168,7 +169,8 @@ class ListProcTest extends BaseProcTest {
             PageRankMutateProc.class,
             WccWriteProc.class,
             WccStreamProc.class,
-            WccMutateProc.class
+            WccMutateProc.class,
+            WccStatsProc.class
         );
         registerFunctions(
             GetNodeFunc.class,

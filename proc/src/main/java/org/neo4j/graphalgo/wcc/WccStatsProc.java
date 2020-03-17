@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.wcc2;
+package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
@@ -26,9 +26,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.wcc.Wcc;
-import org.neo4j.graphalgo.wcc.WccFactory;
-import org.neo4j.graphalgo.wcc.WccStreamConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -65,11 +62,14 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccWriteProc
 
     @Override
     protected AbstractResultBuilder<WccWriteProc.WriteResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computeResult) {
-        return new WccWriteProc.WriteResult.WriteResultBuilder(
+        WccWriteProc.WriteResult.WriteResultBuilder writeResultBuilder = new WccWriteProc.WriteResult.WriteResultBuilder(
             computeResult.graph().nodeCount(),
             callContext,
             computeResult.tracker()
-        ).withCommunityFunction(computeResult.result()::setIdOf);
+        );
+        return computeResult.result() != null
+            ? writeResultBuilder.withCommunityFunction(computeResult.result()::setIdOf)
+            : writeResultBuilder;
     }
 
     @Override

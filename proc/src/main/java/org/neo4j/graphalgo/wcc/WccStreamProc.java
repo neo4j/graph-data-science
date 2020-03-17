@@ -19,12 +19,14 @@
  */
 package org.neo4j.graphalgo.wcc;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -35,14 +37,19 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
+public class WccStreamProc extends StreamProc<
+    Wcc,
+    DisjointSetStruct,
+    WccStreamProc.StreamResult,
+    WccStreamConfig> {
 
     @Procedure(value = "gds.wcc.stream", mode = WRITE)
     @Description(WCC_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<WccStreamProc.StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -62,50 +69,6 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.wcc.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult)
-            .map(StatsResult::from);
-    }
-
-    @Procedure(value = "gds.wcc.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> statsEstimate(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    private Stream<StreamResult> stream(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
-        if (computationResult.isGraphEmpty()) {
-            return Stream.empty();
-        }
-        DisjointSetStruct dss = computationResult.result();
-        Graph graph = computationResult.graph();
-
-        PropertyTranslator.OfLong<DisjointSetStruct> propertyTranslator;
-        if (computationResult.config().consecutiveIds()) {
-            propertyTranslator = new ConsecutivePropertyTranslator(dss, computationResult.tracker());
-        } else {
-            propertyTranslator = (data, nodeId) -> dss.setIdOf(nodeId);
-        }
-
-        return LongStream.range(IdMapping.START_NODE_ID, graph.nodeCount())
-            .mapToObj(mappedId -> new StreamResult(
-                graph.toOriginalNodeId(mappedId),
-                propertyTranslator.toLong(dss, mappedId)
-            ));
-    }
-
     @Override
     protected WccStreamConfig newConfig(
         String username,
@@ -114,6 +77,38 @@ public class WccStreamProc extends WccBaseProc<WccStreamConfig> {
         CypherMapWrapper config
     ) {
         return WccStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected AlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory(WccStreamConfig config) {
+        return new WccFactory<>();
+    }
+
+    @Override
+    protected WccStreamProc.StreamResult streamResult(long originalNodeId, DisjointSetStruct computationResult) {
+        throw new UnsupportedOperationException("gds.wcc.stream overrides StreamProc#stream");
+    }
+
+    @Override
+    protected Stream<WccStreamProc.StreamResult> stream(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
+        if (computationResult.isGraphEmpty()) {
+            return Stream.empty();
+        }
+
+        DisjointSetStruct dss = computationResult.result();
+
+        PropertyTranslator.OfLong<DisjointSetStruct> propertyTranslator = computationResult.config().consecutiveIds()
+            ? new WccProc.ConsecutivePropertyTranslator(dss, computationResult.tracker())
+            : (data, nodeId) -> dss.setIdOf(nodeId);
+
+        Graph graph = computationResult.graph();
+        return LongStream
+            .range(IdMapping.START_NODE_ID, graph.nodeCount())
+            .mapToObj(nodeId -> new WccStreamProc.StreamResult(
+                    graph.toOriginalNodeId(nodeId),
+                    propertyTranslator.toLong(dss, nodeId)
+                )
+            );
     }
 
     public static class StreamResult {

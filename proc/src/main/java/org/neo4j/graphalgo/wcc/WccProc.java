@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.wcc2;
+package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -27,8 +27,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.wcc.Wcc;
-import org.neo4j.graphalgo.wcc.WccWriteConfig;
 
 abstract class WccProc {
 
@@ -94,5 +92,4 @@ abstract class WccProc {
             return communities.get(nodeId);
         }
     }
-
 }

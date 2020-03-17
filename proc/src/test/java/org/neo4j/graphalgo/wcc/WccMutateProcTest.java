@@ -32,12 +32,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class WccMutateProcTest extends WccProcTest<WccWriteConfig> implements GraphMutationTest<WccWriteConfig, DisjointSetStruct> {
+class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMutationTest<WccMutateConfig, DisjointSetStruct> {
 
     private static final String WRITE_PROPERTY = "componentId";
 
     @Override
-    public Class<? extends AlgoBaseProc<?, DisjointSetStruct, WccWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, DisjointSetStruct, WccMutateConfig>> getProcedureClazz() {
         return WccMutateProc.class;
     }
 

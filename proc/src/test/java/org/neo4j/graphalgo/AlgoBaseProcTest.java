@@ -462,7 +462,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     @Test
     default void checkStatsModeExists() {
         applyOnProcedure((proc) -> {
-            boolean inStreamClass = methodExists(proc, "stream");
+            boolean inStreamClass = methodExists(proc, "stats");
             if (inStreamClass) {
                 assertTrue(
                     methodExists(proc, "stats"),
