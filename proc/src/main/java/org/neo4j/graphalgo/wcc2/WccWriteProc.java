@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.wcc2;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.base2.WriteProc;
+import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -54,7 +54,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult2<Wcc, DisjointSetStruct, WccWriteConfig> computationResult = compute(
+        ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -87,13 +87,13 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
 
     @Override
     protected PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
-        ComputationResult2<Wcc, DisjointSetStruct, WccWriteConfig> computationResult
+        ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult
     ) {
         return WccProc.nodePropertyTranslator(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult2<Wcc, DisjointSetStruct, WccWriteConfig> computeResult) {
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult) {
         return new WriteResult.WriteResultBuilder(
             computeResult.graph().nodeCount(),
             callContext,

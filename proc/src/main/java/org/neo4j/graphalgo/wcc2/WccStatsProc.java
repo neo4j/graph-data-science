@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.wcc2;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.base2.StatsProc;
+import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
@@ -47,7 +47,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccWriteProc
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult2<Wcc, DisjointSetStruct, WccStreamConfig> computationResult = compute(
+        ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -64,7 +64,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccWriteProc
     }
 
     @Override
-    protected AbstractResultBuilder<WccWriteProc.WriteResult> resultBuilder(ComputationResult2<Wcc, DisjointSetStruct, WccStreamConfig> computeResult) {
+    protected AbstractResultBuilder<WccWriteProc.WriteResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computeResult) {
         return new WccWriteProc.WriteResult.WriteResultBuilder(
             computeResult.graph().nodeCount(),
             callContext,

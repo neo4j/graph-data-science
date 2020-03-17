@@ -17,31 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.base2;
+package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public abstract class StreamProc<
+public abstract class StatsProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
     CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    protected abstract PROC_RESULT streamResult(long originalNodeId, ALGO_RESULT computationResult);
+    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
-    protected Stream<PROC_RESULT> stream(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        if (computationResult.isGraphEmpty()) {
-            return Stream.empty();
-        }
-        Graph graph = computationResult.graph();
-        return LongStream
-            .range(IdMapping.START_NODE_ID, graph.nodeCount())
-            .mapToObj(nodeId -> streamResult(graph.toMappedNodeId(nodeId), computationResult.result()));
+    protected final Stream<PROC_RESULT> stats(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
+        return Stream.of(resultBuilder(computeResult)
+            .withCreateMillis(computeResult.createMillis())
+            .withComputeMillis(computeResult.computeMillis())
+            .withConfig(computeResult.config())
+            .build());
     }
 }

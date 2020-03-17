@@ -63,7 +63,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> extends BaseProc {
+public abstract class AlgoBaseProc<
+    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO_RESULT,
+    CONFIG extends AlgoBaseConfig> extends BaseProc {
 
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
@@ -95,7 +98,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
     }
 
     // TODO make AlgorithmFactory have a constructor that accepts CONFIG
-    protected final A newAlgorithm(
+    protected final ALGO newAlgorithm(
         final Graph graph,
         final CONFIG config,
         final AllocationTracker tracker
@@ -107,7 +110,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             .withTerminationFlag(terminationFlag);
     }
 
-    protected abstract AlgorithmFactory<A, CONFIG> algorithmFactory(CONFIG config);
+    protected abstract AlgorithmFactory<ALGO, CONFIG> algorithmFactory(CONFIG config);
 
     protected MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
@@ -287,20 +290,20 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) { }
 
-    protected ComputationResult<A, RESULT, CONFIG> compute(
+    protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,
         Map<String, Object> configuration
     ) {
         return compute(graphNameOrConfig, configuration, true, true);
     }
 
-    protected ComputationResult<A, RESULT, CONFIG> compute(
+    protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,
         Map<String, Object> configuration,
         boolean releaseAlgorithm,
         boolean releaseTopology
     ) {
-        ImmutableComputationResult.Builder<A, RESULT, CONFIG> builder = ImmutableComputationResult.builder();
+        ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
         AllocationTracker tracker = AllocationTracker.create();
 
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
@@ -327,9 +330,9 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
                 .build();
         }
 
-        A algo = newAlgorithm(graph, config, tracker);
+        ALGO algo = newAlgorithm(graph, config, tracker);
 
-        RESULT result = runWithExceptionLogging(
+        ALGO_RESULT result = runWithExceptionLogging(
             "Computation failed",
             () -> {
                 try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
@@ -357,8 +360,8 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             .build();
     }
 
-    protected PropertyTranslator<RESULT> nodePropertyTranslator(
-        ComputationResult<A, RESULT, CONFIG> computationResult
+    protected PropertyTranslator<ALGO_RESULT> nodePropertyTranslator(
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         throw new UnsupportedOperationException(
             "Write procedures needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
@@ -370,9 +373,9 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
     protected void writeNodeProperties(
         AbstractResultBuilder<?> writeBuilder,
-        ComputationResult<A, RESULT, CONFIG> computationResult
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
-        PropertyTranslator<RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
+        PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
 
         CONFIG config = computationResult.config();
         if (!(config instanceof WritePropertyConfig)) {
@@ -404,9 +407,9 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
 
     protected void mutateNodeProperties(
         AbstractResultBuilder<?> writeBuilder,
-        ComputationResult<A, RESULT, CONFIG> computationResult
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
-        PropertyTranslator<RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
+        PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
 
         CONFIG config = computationResult.config();
         if (!(config instanceof MutatePropertyConfig)) {
@@ -416,7 +419,7 @@ public abstract class AlgoBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFI
             ));
         }
         MutatePropertyConfig mutatePropertyConfig = (MutatePropertyConfig) config;
-        RESULT result = computationResult.result();
+        ALGO_RESULT result = computationResult.result();
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
             log.debug("Updating in-memory graph store");
             GraphStore graphStore = computationResult.graphStore();

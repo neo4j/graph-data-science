@@ -17,10 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.base2;
+package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -35,11 +33,11 @@ public abstract class MutateProc<
     PROC_RESULT,
     CONFIG extends MutatePropertyConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    protected abstract PropertyTranslator<ALGO_RESULT> nodePropertyTranslator(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult);
+    protected abstract PropertyTranslator<ALGO_RESULT> nodePropertyTranslator(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
 
-    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult);
+    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
-    protected final Stream<PROC_RESULT> mutate(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult) {
+    protected final Stream<PROC_RESULT> mutate(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
         CONFIG config = computeResult.config();
         AbstractResultBuilder<PROC_RESULT> builder = resultBuilder(computeResult)
             .withCreateMillis(computeResult.createMillis())
@@ -49,16 +47,15 @@ public abstract class MutateProc<
         if (computeResult.isGraphEmpty()) {
             return Stream.of(builder.build());
         } else {
-            Graph graph = computeResult.graph();
-            mutateNodeProperties(builder, computeResult);
-            graph.releaseProperties();
+            updateGraphStore(builder, computeResult);
+            computeResult.graph().releaseProperties();
             return Stream.of(builder.build());
         }
     }
 
-    private void mutateNodeProperties(
+    private void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();

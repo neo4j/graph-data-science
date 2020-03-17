@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.base2;
+package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -37,11 +36,11 @@ public abstract class WriteProc<
     PROC_RESULT,
     CONFIG extends WritePropertyConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    protected abstract PropertyTranslator<ALGO_RESULT> nodePropertyTranslator(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult);
+    protected abstract PropertyTranslator<ALGO_RESULT> nodePropertyTranslator(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
 
-    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult);
+    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
-    protected final Stream<PROC_RESULT> write(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult) {
+    protected final Stream<PROC_RESULT> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
         CONFIG config = computeResult.config();
         AbstractResultBuilder<PROC_RESULT> builder = resultBuilder(computeResult)
             .withCreateMillis(computeResult.createMillis())
@@ -51,16 +50,15 @@ public abstract class WriteProc<
         if (computeResult.isGraphEmpty()) {
             return Stream.of(builder.build());
         } else {
-            Graph graph = computeResult.graph();
-            writeNodeProperties(builder, computeResult);
-            graph.releaseProperties();
+            writeToNeo(builder, computeResult);
+            computeResult.graph().releaseProperties();
             return Stream.of(builder.build());
         }
     }
 
-    private void writeNodeProperties(
+    private void writeToNeo(
         AbstractResultBuilder<?> writeBuilder,
-        ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
         WritePropertyConfig writePropertyConfig = computationResult.config();

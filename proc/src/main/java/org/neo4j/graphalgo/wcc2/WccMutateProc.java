@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.wcc2;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.base2.MutateProc;
+import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -53,7 +53,7 @@ public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateP
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult2<Wcc, DisjointSetStruct, WccMutateConfig> computationResult = compute(
+        ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -87,13 +87,13 @@ public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateP
 
     @Override
     protected PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
-        ComputationResult2<Wcc, DisjointSetStruct, WccMutateConfig> computationResult
+        ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult
     ) {
         return WccProc.nodePropertyTranslator(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult2<Wcc, DisjointSetStruct, WccMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computeResult) {
         return new MutateResult.MutateResultBuilder(
             computeResult.graph().nodeCount(),
             callContext,

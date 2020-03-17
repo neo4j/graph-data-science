@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.wcc2;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.base2.StreamProc;
+import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
@@ -56,7 +56,7 @@ public class WccStreamProc extends StreamProc<
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult2<Wcc, DisjointSetStruct, WccStreamConfig> computationResult = compute(
+        ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -93,7 +93,7 @@ public class WccStreamProc extends StreamProc<
     }
 
     @Override
-    protected Stream<StreamResult> stream(ComputationResult2<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
+    protected Stream<StreamResult> stream(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
         if (computationResult.isGraphEmpty()) {
             return Stream.empty();
         }
