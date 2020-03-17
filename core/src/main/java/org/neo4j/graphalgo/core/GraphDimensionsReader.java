@@ -120,7 +120,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         long nodeCount = nodeLabelIds.stream().mapToLong(dataRead::countsForNode).sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
-        long finalNodeCount = nodeLabelIds.ids.contains(ANY_LABEL) ? allNodesCount : nodeCount;
+        long finalNodeCount = nodeLabelIds.ids.contains(ANY_LABEL) ? allNodesCount : Math.min(nodeCount, allNodesCount);
         // TODO: this will double count relationships between distinct labels
         Map<String, Long> relationshipCounts = relationshipProjectionMappings
             .stream()
