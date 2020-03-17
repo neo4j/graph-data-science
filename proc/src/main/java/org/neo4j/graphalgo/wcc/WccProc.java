@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.logging.Log;
 
 final class WccProc {
@@ -59,6 +60,13 @@ final class WccProc {
                 return Wcc.memoryEstimation(config.isIncremental());
             }
         };
+    }
+
+    static <PROC_RESULT, CONFIG extends WccBaseConfig> AbstractCommunityResultBuilder<PROC_RESULT> resultBuilder(
+        AbstractCommunityResultBuilder<PROC_RESULT> procResultBuilder,
+        AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult
+    ) {
+        return procResultBuilder.withCommunityFunction(!computationResult.isGraphEmpty() ? computationResult.result()::setIdOf : null);
     }
 
     static <CONFIG extends WccWriteConfig> PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
