@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.wcc2;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.base2.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -35,6 +37,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.wcc2.WccProc.WCC_DESCRIPTION;
@@ -45,7 +48,6 @@ public class WccStreamProc extends StreamProc<
     Wcc,
     DisjointSetStruct,
     WccStreamProc.StreamResult,
-    PropertyTranslator.OfLong<DisjointSetStruct>,
     WccStreamConfig> {
 
     @Procedure(value = "gds.wcc.stream", mode = WRITE)
@@ -86,24 +88,30 @@ public class WccStreamProc extends StreamProc<
     }
 
     @Override
-    protected StreamResult streamResult(
-        long originalNodeId,
-        DisjointSetStruct disjointSetStruct,
-        PropertyTranslator.OfLong<DisjointSetStruct> nodePropertyTranslator
-    ) {
-        return new WccStreamProc.StreamResult(
-            originalNodeId,
-            nodePropertyTranslator.toLong(disjointSetStruct, originalNodeId)
-        );
+    protected StreamResult streamResult(long originalNodeId, DisjointSetStruct computationResult) {
+        throw new UnsupportedOperationException("gds.wcc.stream overrides StreamProc#stream");
     }
 
     @Override
-    protected PropertyTranslator.OfLong<DisjointSetStruct> nodePropertyTranslator(
-        ComputationResult2<Wcc, DisjointSetStruct, WccStreamConfig> computationResult
-    ) {
-        return computationResult.config().consecutiveIds()
-            ? new WccProc.ConsecutivePropertyTranslator(computationResult.result(), computationResult.tracker())
-            : (data, nodeId) -> computationResult.result().setIdOf(nodeId);
+    protected Stream<StreamResult> stream(ComputationResult2<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
+        if (computationResult.isGraphEmpty()) {
+            return Stream.empty();
+        }
+
+        DisjointSetStruct dss = computationResult.result();
+
+        PropertyTranslator.OfLong<DisjointSetStruct> propertyTranslator = computationResult.config().consecutiveIds()
+            ? new WccProc.ConsecutivePropertyTranslator(dss, computationResult.tracker())
+            : (data, nodeId) -> dss.setIdOf(nodeId);
+
+        Graph graph = computationResult.graph();
+        return LongStream
+            .range(IdMapping.START_NODE_ID, graph.nodeCount())
+            .mapToObj(nodeId -> new WccStreamProc.StreamResult(
+                    graph.toOriginalNodeId(nodeId),
+                    propertyTranslator.toLong(dss, nodeId)
+                )
+            );
     }
 
     public static class StreamResult {

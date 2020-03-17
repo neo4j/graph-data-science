@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -32,32 +31,17 @@ public abstract class StreamProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
-    TRANSLATOR extends PropertyTranslator<ALGO_RESULT>,
     CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    protected abstract PROC_RESULT streamResult(
-        long originalNodeId,
-        ALGO_RESULT computationResult,
-        TRANSLATOR nodePropertyTranslator
-    );
+    protected abstract PROC_RESULT streamResult(long originalNodeId, ALGO_RESULT computationResult);
 
-    protected abstract TRANSLATOR nodePropertyTranslator(
-        ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult
-    );
-
-    protected final Stream<PROC_RESULT> stream(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected Stream<PROC_RESULT> stream(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         if (computationResult.isGraphEmpty()) {
             return Stream.empty();
         }
         Graph graph = computationResult.graph();
-        TRANSLATOR propertyTranslator = nodePropertyTranslator(computationResult);
-
         return LongStream
             .range(IdMapping.START_NODE_ID, graph.nodeCount())
-            .mapToObj(mappedId -> streamResult(
-                graph.toMappedNodeId(mappedId),
-                computationResult.result(),
-                propertyTranslator
-            ));
+            .mapToObj(nodeId -> streamResult(graph.toMappedNodeId(nodeId), computationResult.result()));
     }
 }
