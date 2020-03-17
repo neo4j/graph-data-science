@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankWriteProc.WriteResult, PageRankStreamConfig> {
+public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankStatsProc.StatsResult, PageRankStreamConfig> {
 
     @Procedure(value = "gds.pageRank.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -47,7 +47,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankWri
             graphNameOrConfig,
             configuration
         );
-        return stats(computationResult).map(StatsResult::from);
+        return stats(computationResult);
     }
 
     @Procedure(value = "gds.pageRank.stats.estimate", mode = READ)
@@ -60,8 +60,8 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankWri
     }
 
     @Override
-    protected AbstractResultBuilder<PageRankWriteProc.WriteResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computeResult) {
-        return new PageRankWriteProc.WriteResult.Builder()
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computeResult) {
+        return new StatsResult.Builder()
             .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.result().didConverge())
             .withRanIterations(computeResult.isGraphEmpty() ? 0 : computeResult.result().iterations());
     }
@@ -103,14 +103,31 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankWri
             this.configuration = configuration;
         }
 
-        public static StatsResult from(PageRankWriteProc.WriteResult writeResult) {
-            return new StatsResult(
-                writeResult.createMillis,
-                writeResult.computeMillis,
-                writeResult.ranIterations,
-                writeResult.didConverge,
-                writeResult.configuration
-            );
+        static class Builder extends AbstractResultBuilder<StatsResult> {
+
+            private long ranIterations;
+            private boolean didConverge;
+
+            Builder withRanIterations(long ranIterations) {
+                this.ranIterations = ranIterations;
+                return this;
+            }
+
+            Builder withDidConverge(boolean didConverge) {
+                this.didConverge = didConverge;
+                return this;
+            }
+
+            @Override
+            public StatsResult build() {
+                return new StatsResult(
+                    createMillis,
+                    computeMillis,
+                    ranIterations,
+                    didConverge,
+                    config.toMap()
+                );
+            }
         }
     }
 }
