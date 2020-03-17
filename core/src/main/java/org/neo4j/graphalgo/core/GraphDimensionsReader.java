@@ -86,7 +86,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                         .forEach(labelId -> addToListMap(labelId, elementIdentifier, labelMapping));
                 });
 
-            if (onlyAllProjections.booleanValue()) {
+            if (!onlyAllProjections.booleanValue()) {
                 StreamSupport
                     .stream(labelMapping.keys().spliterator(), false)
                     .mapToInt(cursor -> (int)cursor.value)
