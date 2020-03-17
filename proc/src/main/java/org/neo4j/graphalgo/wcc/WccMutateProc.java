@@ -78,7 +78,7 @@ public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateP
 
     @Override
     protected AlgorithmFactory<Wcc, WccMutateConfig> algorithmFactory(WccMutateConfig config) {
-        return new WccFactory<>();
+        return WccProc.algorithmFactory();
     }
 
     @Override

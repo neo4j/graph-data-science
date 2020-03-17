@@ -84,7 +84,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccWriteProc
 
     @Override
     protected AlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory(WccStreamConfig config) {
-        return new WccFactory<>();
+        return WccProc.algorithmFactory();
     }
 
     public static class StatsResult {

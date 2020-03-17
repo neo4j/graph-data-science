@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -32,6 +33,10 @@ abstract class WccProc {
 
     static final String WCC_DESCRIPTION =
         "The WCC algorithm finds sets of connected nodes in an undirected graph, where all nodes in the same set form a connected component.";
+
+    static <CONFIG extends WccBaseConfig> AlgorithmFactory<Wcc, CONFIG> algorithmFactory() {
+        return new WccFactory<>();
+    }
 
     static <CONFIG extends WccWriteConfig> PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
         AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult
