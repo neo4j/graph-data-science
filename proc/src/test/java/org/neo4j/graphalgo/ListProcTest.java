@@ -45,6 +45,7 @@ import org.neo4j.graphalgo.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityWriteProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
+import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
@@ -171,6 +172,7 @@ class ListProcTest extends BaseProcTest {
             PageRankWriteProc.class,
             PageRankStreamProc.class,
             PageRankMutateProc.class,
+            PageRankStatsProc.class,
             WccWriteProc.class,
             WccStreamProc.class,
             WccMutateProc.class,

@@ -32,7 +32,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class PageRankMutateProcTest extends PageRankBaseProcTest<PageRankWriteConfig> implements GraphMutationTest<PageRankWriteConfig, PageRank> {
+class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements GraphMutationTest<PageRankMutateConfig, PageRank> {
 
     private static final String WRITE_PROPERTY = "score";
 
@@ -98,7 +98,7 @@ class PageRankMutateProcTest extends PageRankBaseProcTest<PageRankWriteConfig> i
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<?, PageRank, PageRankWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, PageRank, PageRankMutateConfig>> getProcedureClazz() {
         return PageRankMutateProc.class;
     }
 
@@ -128,7 +128,7 @@ class PageRankMutateProcTest extends PageRankBaseProcTest<PageRankWriteConfig> i
                 "nodePropertiesWritten",
                 "createMillis",
                 "computeMillis",
-                "writeMillis",
+                "mutateMillis",
                 "didConverge",
                 "ranIterations",
                 "configuration"
@@ -141,7 +141,7 @@ class PageRankMutateProcTest extends PageRankBaseProcTest<PageRankWriteConfig> i
 
                 assertNotEquals(-1L, row.getNumber("createMillis"));
                 assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("writeMillis"));
+                assertNotEquals(-1L, row.getNumber("mutateMillis"));
 
                 assertEquals(false, row.get("didConverge"));
                 assertEquals(20L, row.get("ranIterations"));

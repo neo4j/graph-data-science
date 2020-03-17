@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> implements
+class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implements
     WritePropertyConfigTest<PageRankWriteConfig, PageRank> {
 
     @Override
@@ -43,7 +43,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testPageRankWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
         String writeProperty = "myFancyScore";
         String query = queryBuilder
@@ -61,7 +61,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsWeight")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsWeight")
     void testWeightedPageRankWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .writeMode()
@@ -80,7 +80,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testPageRankParallelWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .writeMode()
@@ -95,7 +95,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testPageRankWithToleranceParam(ModeBuildStage queryBuilder, String testCaseName) {
         GdsCypher.ParametersBuildStage builder = queryBuilder
             .writeMode()
@@ -134,7 +134,7 @@ class PageRankWriteProcTest extends PageRankBaseProcTest<PageRankWriteConfig> im
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testWriteYieldRanAndMaxIterationsAndDidConverge(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .writeMode()

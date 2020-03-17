@@ -20,10 +20,9 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -34,28 +33,26 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
-public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWriteProc.WriteResult, PageRankWriteConfig> {
+public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankWriteProc.WriteResult, PageRankStreamConfig> {
 
-    @Procedure(value = "gds.pageRank.write", mode = WRITE)
-    @Description(PAGE_RANK_DESCRIPTION)
-    public Stream<WriteResult> write(
+    @Procedure(value = "gds.pageRank.stats", mode = READ)
+    @Description(STATS_DESCRIPTION)
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult = compute(
+        ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        return write(computationResult);
+        return stats(computationResult).map(StatsResult::from);
     }
 
-    @Procedure(value = "gds.pageRank.write.estimate", mode = READ)
+    @Procedure(value = "gds.pageRank.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimate(
+    public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -63,91 +60,60 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
     }
 
     @Override
-    protected PropertyTranslator<PageRank> nodePropertyTranslator(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult) {
-        return PageRankProc.ScoresTranslator.INSTANCE;
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computeResult) {
-        return new WriteResult.Builder()
+    protected AbstractResultBuilder<PageRankWriteProc.WriteResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computeResult) {
+        return new PageRankWriteProc.WriteResult.Builder()
             .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.result().didConverge())
             .withRanIterations(computeResult.isGraphEmpty() ? 0 : computeResult.result().iterations());
     }
 
     @Override
-    protected AlgorithmFactory<PageRank, PageRankWriteConfig> algorithmFactory(PageRankWriteConfig config) {
+    protected PageRankStreamConfig newConfig(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return PageRankStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected AlgorithmFactory<PageRank, PageRankStreamConfig> algorithmFactory(PageRankStreamConfig config) {
         if (config.relationshipWeightProperty() == null) {
             return new PageRankFactory<>();
         }
         return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
     }
 
-    @Override
-    protected PageRankWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    ) {
-        return PageRankWriteConfig.of(username, graphName, maybeImplicitCreate, config);
-    }
+    public static final class StatsResult {
 
-    public static final class WriteResult {
-
-        public long nodePropertiesWritten;
         public long createMillis;
         public long computeMillis;
-        public long writeMillis;
         public long ranIterations;
         public boolean didConverge;
         public Map<String, Object> configuration;
 
-        WriteResult(
-            long nodePropertiesWritten,
+        StatsResult(
             long createMillis,
             long computeMillis,
-            long writeMillis,
             long ranIterations,
             boolean didConverge,
             Map<String, Object> configuration
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
             this.configuration = configuration;
         }
 
-        static class Builder extends AbstractResultBuilder<WriteResult> {
-
-            private long ranIterations;
-            private boolean didConverge;
-
-            Builder withRanIterations(long ranIterations) {
-                this.ranIterations = ranIterations;
-                return this;
-            }
-
-            Builder withDidConverge(boolean didConverge) {
-                this.didConverge = didConverge;
-                return this;
-            }
-
-            @Override
-            public WriteResult build() {
-                return new WriteResult(
-                    nodePropertiesWritten,
-                    createMillis,
-                    computeMillis,
-                    writeMillis,
-                    ranIterations,
-                    didConverge,
-                    config.toMap()
-                );
-            }
+        public static StatsResult from(PageRankWriteProc.WriteResult writeResult) {
+            return new StatsResult(
+                writeResult.createMillis,
+                writeResult.computeMillis,
+                writeResult.ranIterations,
+                writeResult.didConverge,
+                writeResult.configuration
+            );
         }
     }
-
 }

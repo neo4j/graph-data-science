@@ -19,8 +19,12 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,17 +34,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class PageRankMutateProc extends PageRankWriteProc {
+public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankMutateProc.MutateResult, PageRankMutateConfig> {
 
     @Procedure(value = "gds.beta.pageRank.mutate", mode = READ)
     @Description(PAGE_RANK_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult = compute(
+        ComputationResult<PageRank, PageRank, PageRankMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -64,5 +69,83 @@ public class PageRankMutateProc extends PageRankWriteProc {
         CypherMapWrapper config
     ) {
         return PageRankMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected AlgorithmFactory<PageRank, PageRankMutateConfig> algorithmFactory(PageRankMutateConfig config) {
+        if (config.relationshipWeightProperty() == null) {
+            return new PageRankFactory<>();
+        }
+        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
+    }
+
+    @Override
+    protected PropertyTranslator<PageRank> nodePropertyTranslator(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computationResult) {
+        return PageRankProc.ScoresTranslator.INSTANCE;
+    }
+
+    @Override
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computeResult) {
+        return new MutateResult.Builder()
+            .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.result().didConverge())
+            .withRanIterations(computeResult.isGraphEmpty() ? 0 : computeResult.result().iterations());
+    }
+
+    public static final class MutateResult {
+
+        public long nodePropertiesWritten;
+        public long createMillis;
+        public long computeMillis;
+        public long mutateMillis;
+        public long ranIterations;
+        public boolean didConverge;
+        public Map<String, Object> configuration;
+
+        MutateResult(
+            long nodePropertiesWritten,
+            long createMillis,
+            long computeMillis,
+            long mutateMillis,
+            long ranIterations,
+            boolean didConverge,
+            Map<String, Object> configuration
+        ) {
+            this.nodePropertiesWritten = nodePropertiesWritten;
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.mutateMillis = mutateMillis;
+            this.ranIterations = ranIterations;
+            this.didConverge = didConverge;
+            this.configuration = configuration;
+        }
+
+        static class Builder extends AbstractResultBuilder<MutateResult> {
+
+            private long ranIterations;
+            private boolean didConverge;
+
+            Builder withRanIterations(long ranIterations) {
+                this.ranIterations = ranIterations;
+                return this;
+            }
+
+            Builder withDidConverge(boolean didConverge) {
+                this.didConverge = didConverge;
+                return this;
+            }
+
+            @Override
+            public MutateResult build() {
+                return new MutateResult(
+                    nodePropertiesWritten,
+                    createMillis,
+                    computeMillis,
+                    mutateMillis,
+                    ranIterations,
+                    didConverge,
+                    config.toMap()
+                );
+            }
+        }
     }
 }

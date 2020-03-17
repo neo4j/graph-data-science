@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> {
+class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
     @Override
     public Class<? extends AlgoBaseProc<?, PageRank, PageRankStreamConfig>> getProcedureClazz() {
@@ -53,7 +53,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testPageRankParallelExecution(ModeBuildStage queryBuilder, String testName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = queryBuilder.streamMode().yields("nodeId", "score");
@@ -68,7 +68,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsEqualWeight")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsEqualWeight")
     void testWeightedPageRankWithAllRelationshipsEqual(ModeBuildStage queryBuilder, String testCase) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = queryBuilder
@@ -83,7 +83,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsLabel3")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsLabel3")
     void testWeightedPageRankFromLoadedGraphWithDirectionBoth(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .streamMode()
@@ -100,7 +100,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testWeightedPageRankThrowsIfWeightPropertyDoesNotExist(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .streamMode()
@@ -117,7 +117,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsWeight")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsWeight")
     void testWeightedPageRankWithCachedWeights(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .streamMode()
@@ -133,7 +133,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testPageRank(ModeBuildStage queryBuilder, String testCaseName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = queryBuilder
@@ -148,7 +148,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariationsWeight")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsWeight")
     void testWeightedPageRank(ModeBuildStage queryBuilder, String testCaseName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = queryBuilder
@@ -163,7 +163,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testStatsYieldRanAndMaxIterationsAndDidConverge(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .statsMode()
@@ -182,7 +182,7 @@ class PageRankStreamProcTest extends PageRankBaseProcTest<PageRankStreamConfig> 
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankBaseProcTest#graphVariations")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void statsShouldNotHaveWriteProperties(ModeBuildStage queryBuilder, String testCaseName) {
         String query = queryBuilder
             .statsMode()

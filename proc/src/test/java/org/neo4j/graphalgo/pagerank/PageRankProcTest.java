@@ -53,7 +53,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
-abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends BaseProcTest implements
+abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, PageRank>,
     IterationsConfigTest<CONFIG, PageRank>,
     RelationshipWeightConfigTest<CONFIG, PageRank>,
@@ -123,6 +123,7 @@ abstract class PageRankBaseProcTest<CONFIG extends PageRankBaseConfig> extends B
             PageRankStreamProc.class,
             PageRankWriteProc.class,
             PageRankMutateProc.class,
+            PageRankStatsProc.class,
             GraphCreateProc.class
         );
         runQuery(cypher);

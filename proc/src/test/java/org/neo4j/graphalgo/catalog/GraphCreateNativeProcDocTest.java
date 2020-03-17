@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
+import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphdb.Result;
 
@@ -42,7 +43,12 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
 
     private void setup(boolean runSetupQuery) throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(LabelPropagationStreamProc.class, PageRankStreamProc.class, GraphCreateProc.class);
+        registerProcedures(
+            LabelPropagationStreamProc.class,
+            PageRankStreamProc.class,
+            PageRankStatsProc.class,
+            GraphCreateProc.class
+        );
 
         if (runSetupQuery) {
             String dbQuery =

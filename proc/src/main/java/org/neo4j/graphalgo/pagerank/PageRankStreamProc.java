@@ -19,9 +19,10 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -29,12 +30,12 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
+public class PageRankStreamProc extends StreamProc<PageRank, PageRank, PageRankStreamProc.StreamResult, PageRankStreamConfig> {
 
     @Procedure(value = "gds.pageRank.stream", mode = READ)
     @Description(PAGE_RANK_DESCRIPTION)
@@ -58,38 +59,9 @@ public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    @Procedure(value = "gds.pageRank.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult)
-            .map(StatsResult::from);
-    }
-
-    @Procedure(value = "gds.pageRank.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    private Stream<StreamResult> stream(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {
-        Graph graph = computationResult.graph();
-        PageRank pageRank = computationResult.result();
-        return LongStream.range(0, graph.nodeCount())
-            .mapToObj(nodeId -> {
-                long neoNodeId = graph.toOriginalNodeId(nodeId);
-                double score = pageRank.result().score(nodeId);
-                return new StreamResult(neoNodeId, score);
-            });
+    @Override
+    protected StreamResult streamResult(long nodeId, long originalNodeId, PageRank computationResult) {
+        return new StreamResult(originalNodeId, computationResult.result().score(nodeId));
     }
 
     @Override
@@ -100,6 +72,14 @@ public class PageRankStreamProc extends PageRankBaseProc<PageRankStreamConfig> {
         CypherMapWrapper config
     ) {
         return PageRankStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected AlgorithmFactory<PageRank, PageRankStreamConfig> algorithmFactory(PageRankStreamConfig config) {
+        if (config.relationshipWeightProperty() == null) {
+            return new PageRankFactory<>();
+        }
+        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
     }
 
     public static final class StreamResult {
