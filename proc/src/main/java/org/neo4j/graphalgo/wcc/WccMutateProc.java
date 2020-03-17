@@ -121,7 +121,6 @@ public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateP
             Map<String, Object> componentDistribution,
             Map<String, Object> configuration
         ) {
-
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
@@ -149,7 +148,7 @@ public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateP
             @Override
             protected WccMutateProc.MutateResult buildResult() {
                 return new WccMutateProc.MutateResult(
-                    nodePropertiesWritten,  // should be nodePropertiesWritten
+                    nodePropertiesWritten,
                     createMillis,
                     computeMillis,
                     mutateMillis,

@@ -70,7 +70,4 @@ public abstract class MutateProc<
             resultBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
         }
     }
-
-    /* private void mutateRelationshipTypes(....) */
-
 }

@@ -104,7 +104,6 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccWriteProc
             Map<String, Object> componentDistribution,
             Map<String, Object> configuration
         ) {
-
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;

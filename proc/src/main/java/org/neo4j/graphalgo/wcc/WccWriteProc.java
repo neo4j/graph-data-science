@@ -121,7 +121,6 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
             Map<String, Object> componentDistribution,
             Map<String, Object> configuration
         ) {
-
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
@@ -149,7 +148,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
             @Override
             protected WccWriteProc.WriteResult buildResult() {
                 return new WccWriteProc.WriteResult(
-                    nodePropertiesWritten,  // should be nodePropertiesWritten
+                    nodePropertiesWritten,
                     createMillis,
                     computeMillis,
                     writeMillis,
