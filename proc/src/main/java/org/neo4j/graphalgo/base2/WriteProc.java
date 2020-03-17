@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.base2;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -36,13 +35,27 @@ public abstract class WriteProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
-    CONFIG extends AlgoBaseConfig> extends WriteOrMutateProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {
+    CONFIG extends WritePropertyConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
+
+    protected abstract PropertyTranslator<ALGO_RESULT> nodePropertyTranslator(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult);
+
+    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
     protected Stream<PROC_RESULT> write(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult) {
-        return writeOrMutate(
-            computeResult,
-            (writeBuilder, computationResult) -> writeNodeProperties(writeBuilder, computationResult)
-        );
+        CONFIG config = computeResult.config();
+        AbstractResultBuilder<PROC_RESULT> builder = resultBuilder(computeResult)
+            .withCreateMillis(computeResult.createMillis())
+            .withComputeMillis(computeResult.computeMillis())
+            .withConfig(config);
+
+        if (computeResult.isGraphEmpty()) {
+            return Stream.of(builder.build());
+        } else {
+            Graph graph = computeResult.graph();
+            writeNodeProperties(builder, computeResult);
+            graph.releaseProperties();
+            return Stream.of(builder.build());
+        }
     }
 
     private void writeNodeProperties(
@@ -50,16 +63,7 @@ public abstract class WriteProc<
         ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
-
-        CONFIG config = computationResult.config();
-        if (!(config instanceof WritePropertyConfig)) {
-            throw new IllegalArgumentException(String.format(
-                "Can only write results if the config implements %s.",
-                WritePropertyConfig.class
-            ));
-        }
-
-        WritePropertyConfig writePropertyConfig = (WritePropertyConfig) config;
+        WritePropertyConfig writePropertyConfig = computationResult.config();
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
             log.debug("Writing results");
 

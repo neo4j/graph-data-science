@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.base2;
 
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -33,14 +33,27 @@ public abstract class MutateProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
-    CONFIG extends AlgoBaseConfig> extends WriteOrMutateProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {
+    CONFIG extends MutatePropertyConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
     protected abstract PropertyTranslator<ALGO_RESULT> nodePropertyTranslator(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult);
 
+    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult);
+
     protected Stream<PROC_RESULT> mutate(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult) {
-        return writeOrMutate(computeResult,
-            (writeBuilder, computationResult) -> mutateNodeProperties(writeBuilder, computationResult)
-        );
+        CONFIG config = computeResult.config();
+        AbstractResultBuilder<PROC_RESULT> builder = resultBuilder(computeResult)
+            .withCreateMillis(computeResult.createMillis())
+            .withComputeMillis(computeResult.computeMillis())
+            .withConfig(config);
+
+        if (computeResult.isGraphEmpty()) {
+            return Stream.of(builder.build());
+        } else {
+            Graph graph = computeResult.graph();
+            mutateNodeProperties(builder, computeResult);
+            graph.releaseProperties();
+            return Stream.of(builder.build());
+        }
     }
 
     private void mutateNodeProperties(
@@ -48,16 +61,7 @@ public abstract class MutateProc<
         ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
-
-        CONFIG config = computationResult.config();
-        if (!(config instanceof MutatePropertyConfig)) {
-            throw new IllegalArgumentException(String.format(
-                "Can only mutate results if the config implements %s.",
-                MutatePropertyConfig.class
-            ));
-        }
-
-        MutatePropertyConfig mutatePropertyConfig = (MutatePropertyConfig) config;
+        MutatePropertyConfig mutatePropertyConfig = computationResult.config();
         ALGO_RESULT result = computationResult.result();
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             log.debug("Updating in-memory graph store");
