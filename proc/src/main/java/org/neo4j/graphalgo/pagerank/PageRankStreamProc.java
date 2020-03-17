@@ -76,10 +76,7 @@ public class PageRankStreamProc extends StreamProc<PageRank, PageRank, PageRankS
 
     @Override
     protected AlgorithmFactory<PageRank, PageRankStreamConfig> algorithmFactory(PageRankStreamConfig config) {
-        if (config.relationshipWeightProperty() == null) {
-            return new PageRankFactory<>();
-        }
-        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
+        return PageRankProc.algorithmFactory(config);
     }
 
     public static final class StreamResult {

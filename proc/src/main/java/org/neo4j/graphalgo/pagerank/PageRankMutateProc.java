@@ -73,10 +73,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
 
     @Override
     protected AlgorithmFactory<PageRank, PageRankMutateConfig> algorithmFactory(PageRankMutateConfig config) {
-        if (config.relationshipWeightProperty() == null) {
-            return new PageRankFactory<>();
-        }
-        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
+        return PageRankProc.algorithmFactory(config);
     }
 
     @Override

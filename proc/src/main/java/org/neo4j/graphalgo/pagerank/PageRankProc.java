@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 final class PageRankProc {
@@ -27,6 +28,13 @@ final class PageRankProc {
         "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
 
     private PageRankProc() {}
+
+    static <CONFIG extends PageRankBaseConfig> AlgorithmFactory<PageRank, CONFIG> algorithmFactory(CONFIG config) {
+        if (config.relationshipWeightProperty() == null) {
+            return new PageRankFactory<>();
+        }
+        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
+    }
 
     static final class ScoresTranslator implements PropertyTranslator.OfDouble<PageRank> {
         public static final ScoresTranslator INSTANCE = new ScoresTranslator();

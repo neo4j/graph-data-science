@@ -76,10 +76,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
 
     @Override
     protected AlgorithmFactory<PageRank, PageRankWriteConfig> algorithmFactory(PageRankWriteConfig config) {
-        if (config.relationshipWeightProperty() == null) {
-            return new PageRankFactory<>();
-        }
-        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
+        return PageRankProc.algorithmFactory(config);
     }
 
     @Override
