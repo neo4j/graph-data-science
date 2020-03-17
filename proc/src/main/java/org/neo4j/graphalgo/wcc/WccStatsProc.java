@@ -23,9 +23,12 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,7 +39,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccWriteProc.WriteResult, WccStreamConfig> {
+public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc.StatsResult, WccStreamConfig> {
 
     @Procedure(value = "gds.wcc.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -48,7 +51,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccWriteProc
             graphNameOrConfig,
             configuration
         );
-        return stats(computationResult).map(StatsResult::from);
+        return stats(computationResult);
     }
 
     @Procedure(value = "gds.wcc.stats.estimate", mode = READ)
@@ -61,15 +64,15 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccWriteProc
     }
 
     @Override
-    protected AbstractResultBuilder<WccWriteProc.WriteResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computeResult) {
-        WccWriteProc.WriteResult.WriteResultBuilder writeResultBuilder = new WccWriteProc.WriteResult.WriteResultBuilder(
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computeResult) {
+        StatsResult.Builder builder = new StatsResult.Builder(
             computeResult.graph().nodeCount(),
             callContext,
             computeResult.tracker()
         );
         return computeResult.result() != null
-            ? writeResultBuilder.withCommunityFunction(computeResult.result()::setIdOf)
-            : writeResultBuilder;
+            ? builder.withCommunityFunction(computeResult.result()::setIdOf)
+            : builder;
     }
 
     @Override
@@ -112,15 +115,31 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccWriteProc
             this.configuration = configuration;
         }
 
-        public static StatsResult from(WccWriteProc.WriteResult writeResult) {
-            return new StatsResult(
-                writeResult.createMillis,
-                writeResult.computeMillis,
-                writeResult.postProcessingMillis,
-                writeResult.componentCount,
-                writeResult.componentDistribution,
-                writeResult.configuration
-            );
+        static class Builder extends AbstractCommunityResultBuilder<StatsResult> {
+
+            Builder(
+                long nodeCount,
+                ProcedureCallContext context,
+                AllocationTracker tracker
+            ) {
+                super(
+                    nodeCount,
+                    context,
+                    tracker
+                );
+            }
+
+            @Override
+            protected StatsResult buildResult() {
+                return new StatsResult(
+                    createMillis,
+                    computeMillis,
+                    postProcessingDuration,
+                    maybeCommunityCount.orElse(-1L),
+                    communityHistogramOrNull(),
+                    config.toMap()
+                );
+            }
         }
     }
 }
