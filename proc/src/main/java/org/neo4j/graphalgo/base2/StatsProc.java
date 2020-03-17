@@ -26,14 +26,14 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import java.util.stream.Stream;
 
 public abstract class StatsProc<
-    ALGO extends Algorithm<ALGO, COMPUTE_RESULT>,
-    COMPUTE_RESULT,
+    ALGO extends Algorithm<ALGO, ALGO_RESULT>,
+    ALGO_RESULT,
     PROC_RESULT,
-    CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, COMPUTE_RESULT, CONFIG> {
+    CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult2<ALGO, COMPUTE_RESULT, CONFIG> computeResult);
+    protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
-    protected Stream<PROC_RESULT> stats(ComputationResult2<ALGO, COMPUTE_RESULT, CONFIG> computeResult) {
+    protected Stream<PROC_RESULT> stats(ComputationResult2<ALGO, ALGO_RESULT, CONFIG> computeResult) {
         return Stream.of(resultBuilder(computeResult)
             .withCreateMillis(computeResult.createMillis())
             .withComputeMillis(computeResult.computeMillis())

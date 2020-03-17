@@ -69,7 +69,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccWriteProc
             computeResult.graph().nodeCount(),
             callContext,
             computeResult.tracker()
-        );
+        ).withCommunityFunction(computeResult.result()::setIdOf);
     }
 
     @Override
