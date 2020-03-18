@@ -57,7 +57,7 @@ public final class CentralityUtils {
                 .build();
             result.export(propertyName, exporter);
         }
-        statsBuilder.withWriteProperty(propertyName);
+        statsBuilder.withConfig(configuration);
     }
 
     public static Stream<CentralityScore> streamResults(Graph graph, CentralityResult scores) {

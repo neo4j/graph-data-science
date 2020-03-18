@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.results;
 
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 public class PageRankScore {
@@ -59,16 +60,10 @@ public class PageRankScore {
 
             private long iterations;
             private double dampingFactor;
-            String writeProperty;
             protected long nodeCount;
 
             public Builder withNodeCount(long nodeCount) {
                 this.nodeCount = nodeCount;
-                return this;
-            }
-
-            public Builder withWriteProperty(String writeProperty) {
-                this.writeProperty = writeProperty;
                 return this;
             }
 
@@ -90,7 +85,7 @@ public class PageRankScore {
                     computeMillis,
                     writeMillis,
                     dampingFactor,
-                    writeProperty
+                    ((WritePropertyConfig) config).writeProperty()
                 );
             }
         }

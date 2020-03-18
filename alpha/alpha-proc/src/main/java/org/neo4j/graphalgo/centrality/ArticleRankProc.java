@@ -67,6 +67,7 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
         Graph graph = computationResult.graph();
 
         AbstractResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder()
+            .withConfig(config)
             .withCreateMillis(computationResult.createMillis())
             .withComputeMillis(computationResult.computeMillis());
 

@@ -95,7 +95,7 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
 
         AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
             .withNodeCount(graph.nodeCount())
-            .withWriteProperty(config.writeProperty())
+            .withConfig(config)
             .withComputeMillis(computationResult.computeMillis())
             .withCreateMillis(computationResult.createMillis());
 

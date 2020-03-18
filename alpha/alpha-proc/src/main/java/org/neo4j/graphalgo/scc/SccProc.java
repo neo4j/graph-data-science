@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.scc;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.impl.scc.SccConfig;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -77,8 +78,8 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         )
             .withBuildCommunityCount(true)
             .withBuildHistogram(true)
-            .withWriteProperty(config.writeProperty())
             .withCommunityFunction(components != null ? components::get : null)
+            .withConfig(config)
             .withCreateMillis(computationResult.createMillis())
             .withComputeMillis(computationResult.computeMillis());
 
@@ -224,7 +225,6 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
     }
 
     public static final class SccResultBuilder extends AbstractCommunityResultBuilder<SccResult> {
-        private String writeProperty;
 
         SccResultBuilder(
             long nodeCount,
@@ -255,7 +255,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getMinNonZeroValue()).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getMaxValue()).orElse(0L),
-                writeProperty
+                ((WritePropertyConfig) config).writeProperty()
             );
         }
 
@@ -266,12 +266,6 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
 
         public SccResultBuilder withBuildCommunityCount(boolean buildCommunityCount) {
             this.buildCommunityCount = buildCommunityCount;
-            return this;
-        }
-
-
-        public SccResultBuilder withWriteProperty(String writeProperty) {
-            this.writeProperty = writeProperty;
             return this;
         }
     }

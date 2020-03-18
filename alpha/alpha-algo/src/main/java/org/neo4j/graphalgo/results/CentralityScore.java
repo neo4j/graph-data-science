@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.results;
 
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 public class CentralityScore {
@@ -51,16 +52,10 @@ public class CentralityScore {
         }
 
         public static final class Builder extends AbstractResultBuilder<Stats> {
-            String writeProperty;
             protected long nodeCount;
 
             public Builder withNodeCount(long nodeCount) {
                 this.nodeCount = nodeCount;
-                return this;
-            }
-
-            public Builder withWriteProperty(String writeProperty) {
-                this.writeProperty = writeProperty;
                 return this;
             }
 
@@ -70,7 +65,7 @@ public class CentralityScore {
                     createMillis,
                     computeMillis,
                     writeMillis,
-                    writeProperty
+                    ((WritePropertyConfig) config).writeProperty()
                 );
             }
         }
