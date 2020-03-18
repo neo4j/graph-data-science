@@ -75,7 +75,7 @@ final class GraphLoaderBuilders {
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Orientation> globalOrientation,
         Optional<Aggregation> globalAggregation,
-        Optional<Boolean> throwOnUnresolvedRelationships
+        Optional<Boolean> validateRelationships
         ) {
 
         GraphCreateFromStoreConfig graphCreateConfig = GraphCreateConfigBuilders.storeConfig(
@@ -94,7 +94,7 @@ final class GraphLoaderBuilders {
             anyRelationshipType,
             globalOrientation,
             globalAggregation,
-            throwOnUnresolvedRelationships
+            validateRelationships
         );
 
         return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, graphCreateConfig);
@@ -124,7 +124,7 @@ final class GraphLoaderBuilders {
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
         Optional<Aggregation> globalAggregation,
-        Optional<Boolean> throwOnUnresolvedRelationships,
+        Optional<Boolean> validateRelationships,
         Optional<Map<String, Object>> parameters
     ) {
         GraphCreateFromCypherConfig graphCreateConfig = GraphCreateConfigBuilders.cypherConfig(
@@ -138,7 +138,7 @@ final class GraphLoaderBuilders {
             anyRelationshipType,
             concurrency,
             globalAggregation,
-            throwOnUnresolvedRelationships,
+            validateRelationships,
             parameters
         );
 

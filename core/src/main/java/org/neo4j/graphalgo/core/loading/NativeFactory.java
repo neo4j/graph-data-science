@@ -139,7 +139,7 @@ public final class NativeFactory extends GraphStoreFactory {
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker();
         IdsAndProperties nodes = loadNodes(tracker, concurrency);
-        RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency, setup.throwOnUnresolvedRelationships());
+        RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency, setup.validateRelationships());
         GraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
         progressLogger.logDone(tracker);
 
@@ -163,7 +163,7 @@ public final class NativeFactory extends GraphStoreFactory {
         AllocationTracker tracker,
         IdsAndProperties idsAndProperties,
         int concurrency,
-        boolean throwOnUnresolvedRelationships
+        boolean validateRelationships
     ) {
         Aggregation[] aggregations = dimensions.aggregations(setup.aggregation());
         int propertyCount = setup.relationshipPropertyMappings().numberOfMappings();
@@ -185,7 +185,7 @@ public final class NativeFactory extends GraphStoreFactory {
             allBuilders,
             threadPool,
             concurrency,
-            throwOnUnresolvedRelationships
+            validateRelationships
         ).call(setup.log());
 
         return RelationshipImportResult.of(allBuilders, relationshipCounts, dimensions);

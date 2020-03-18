@@ -86,7 +86,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     @Override
     @Value.Default
     @Value.Parameter(false)
-    default boolean throwOnUnresolvedRelationships() {
+    default boolean validateRelationships() {
         return true;
     }
 

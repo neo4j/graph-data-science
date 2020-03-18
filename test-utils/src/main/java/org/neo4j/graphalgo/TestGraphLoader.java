@@ -153,7 +153,7 @@ public final class TestGraphLoader {
         ));
 
         cypherLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));
-        cypherLoaderBuilder.throwOnUnresolvedRelationships(false);
+        cypherLoaderBuilder.validateRelationships(false);
         if (addNodePropertiesToLoader) cypherLoaderBuilder.nodeProperties(nodeProperties);
         if (addRelationshipPropertiesToLoader) cypherLoaderBuilder.relationshipProperties(relProperties);
 

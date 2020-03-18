@@ -89,7 +89,7 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Value.Default
     @Value.Parameter(false)
-    default boolean throwOnUnresolvedRelationships() {
+    default boolean validateRelationships() {
         return false;
     }
 

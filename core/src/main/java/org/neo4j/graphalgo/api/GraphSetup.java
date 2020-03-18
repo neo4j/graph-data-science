@@ -83,8 +83,8 @@ public class GraphSetup {
         return createConfig.readConcurrency();
     }
 
-    public boolean throwOnUnresolvedRelationships() {
-        return createConfig.throwOnUnresolvedRelationships();
+    public boolean validateRelationships() {
+        return createConfig.validateRelationships();
     }
 
     public @NotNull String relationshipType() {

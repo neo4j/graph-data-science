@@ -46,7 +46,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders;
     private final Map<RelationshipProjectionMapping, LongAdder> allRelationshipCounters;
 
-    private boolean throwOnUnresolvedRelationships;
+    private boolean validateRelationships;
 
     ScanningRelationshipsImporter(
         GraphSetup setup,
@@ -58,7 +58,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders,
         ExecutorService threadPool,
         int concurrency,
-        boolean throwOnUnresolvedRelationships
+        boolean validateRelationships
     ) {
         super(
                 RelationshipStoreScanner.RELATIONSHIP_ACCESS,
@@ -72,7 +72,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         this.tracker = tracker;
         this.idMap = idMap;
         this.allBuilders = allBuilders;
-        this.throwOnUnresolvedRelationships = throwOnUnresolvedRelationships;
+        this.validateRelationships = validateRelationships;
         this.allRelationshipCounters = new HashMap<>();
     }
 
@@ -129,7 +129,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         );
 
         RelationshipImporter importer = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
-        return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter, throwOnUnresolvedRelationships);
+        return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter, validateRelationships);
     }
 
     @Override

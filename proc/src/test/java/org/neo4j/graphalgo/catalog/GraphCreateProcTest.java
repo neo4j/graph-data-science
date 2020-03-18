@@ -184,7 +184,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String relationshipQuery = "MATCH (a)-[r:REL]->(b) RETURN id(a) AS source, id(b) AS target, type(r) AS type";
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, {throwOnUnresolvedRelationships: false})",
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, {validateRelationships: false})",
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
             singletonList(map(
                 "graphName", name,
@@ -218,8 +218,8 @@ class GraphCreateProcTest extends BaseProcTest {
         String nodeQuery = "MATCH (n) WHERE n.age = $age RETURN id(n) AS id";
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { parameters: { age: 2 }, throwOnUnresolvedRelationships: false})",
-            map("name", graphName, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "throwOnUnresolvedRelationships", false),
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { parameters: { age: 2 }, validateRelationships: false})",
+            map("name", graphName, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "validateRelationships", false),
             singletonList(map(
                 "graphName", graphName,
                 NODE_PROJECTION_KEY, map(
@@ -1159,7 +1159,7 @@ class GraphCreateProcTest extends BaseProcTest {
                        "'g', " +
                        "'MATCH (n:A) Return id(n) as id', " +
                        "'MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target'," +
-                       "{throwOnUnresolvedRelationships: false})" +
+                       "{validateRelationships: false})" +
                        "YIELD nodeCount, relationshipCount";
 
         runQueryWithRowConsumer(query, resultRow -> {
@@ -1498,7 +1498,7 @@ class GraphCreateProcTest extends BaseProcTest {
             .withNodeLabel("A")
             .withAnyRelationshipType()
             .graphCreate("'g'")
-            .addParameter("throwOnUnresolvedRelationships", true)
+            .addParameter("validateRelationships", true)
             .yields("nodeCount");
 
         assertError(query, emptyMap(), "Failed to load relationship with unknown source-node id");
