@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.CentralityResult;
+import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphalgo.results.CentralityResultWithStatistics;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphalgo.results.PageRankScore;

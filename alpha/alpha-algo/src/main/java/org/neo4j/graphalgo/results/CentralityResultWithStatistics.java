@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.results;
 
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
+import org.neo4j.graphalgo.result.CentralityResult;
 
 import java.util.function.DoubleUnaryOperator;
 
