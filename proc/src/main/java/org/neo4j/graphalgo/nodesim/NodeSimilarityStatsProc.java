@@ -20,12 +20,13 @@
 package org.neo4j.graphalgo.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -37,9 +38,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.computeHistogram;
+import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeSimilarityStatsProc extends NodeSimilarityBaseProc<NodeSimilarityStatsConfig> {
+public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsProc.StatsResult, NodeSimilarityStatsConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -47,11 +50,7 @@ public class NodeSimilarityStatsProc extends NodeSimilarityBaseProc<NodeSimilari
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        AlgoBaseProc.ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> result = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return stats(result);
+        return stats(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.nodeSimilarity.stats.estimate", mode = READ)
@@ -73,6 +72,17 @@ public class NodeSimilarityStatsProc extends NodeSimilarityBaseProc<NodeSimilari
         return NodeSimilarityStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
+    @Override
+    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityStatsConfig> algorithmFactory(NodeSimilarityStatsConfig config) {
+        return new NodeSimilarityFactory<>();
+    }
+
+    @Override
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computeResult) {
+        throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
+    }
+
+    @Override
     public Stream<StatsResult> stats(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computationResult) {
         NodeSimilarityStatsConfig config = computationResult.config();
 
@@ -93,7 +103,7 @@ public class NodeSimilarityStatsProc extends NodeSimilarityBaseProc<NodeSimilari
         SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
         Graph similarityGraph = similarityGraphResult.similarityGraph();
 
-        StatsResultBuilder resultBuilder = new StatsResultBuilder();
+        StatsResult.Builder resultBuilder = new StatsResult.Builder();
         resultBuilder
             .withNodesCompared(similarityGraphResult.comparedNodes())
             .withRelationshipsWritten(similarityGraph.relationshipCount());
@@ -101,7 +111,7 @@ public class NodeSimilarityStatsProc extends NodeSimilarityBaseProc<NodeSimilari
         resultBuilder.withComputeMillis(computationResult.computeMillis());
         resultBuilder.withConfig(config);
 
-        if (shouldComputeHistogram()) {
+        if (shouldComputeHistogram(callContext)) {
             try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
                 resultBuilder.withHistogram(computeHistogram(similarityGraph));
             }
@@ -135,67 +145,67 @@ public class NodeSimilarityStatsProc extends NodeSimilarityBaseProc<NodeSimilari
             this.similarityDistribution = communityDistribution;
             this.configuration = configuration;
         }
-    }
 
-    static class StatsResultBuilder extends AbstractResultBuilder<StatsResult> {
+        static class Builder extends AbstractResultBuilder<StatsResult> {
 
-        private long nodesCompared = 0L;
+            private long nodesCompared = 0L;
 
-        private long postProcessingMillis = -1L;
+            private long postProcessingMillis = -1L;
 
-        private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
+            private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
 
-        public StatsResultBuilder withNodesCompared(long nodesCompared) {
-            this.nodesCompared = nodesCompared;
-            return this;
-        }
+            public Builder withNodesCompared(long nodesCompared) {
+                this.nodesCompared = nodesCompared;
+                return this;
+            }
 
-        StatsResultBuilder withHistogram(DoubleHistogram histogram) {
-            this.maybeHistogram = Optional.of(histogram);
-            return this;
-        }
+            Builder withHistogram(DoubleHistogram histogram) {
+                this.maybeHistogram = Optional.of(histogram);
+                return this;
+            }
 
-        void setPostProcessingMillis(long postProcessingMillis) {
-            this.postProcessingMillis = postProcessingMillis;
-        }
+            void setPostProcessingMillis(long postProcessingMillis) {
+                this.postProcessingMillis = postProcessingMillis;
+            }
 
-        ProgressTimer timePostProcessing() {
-            return ProgressTimer.start(this::setPostProcessingMillis);
-        }
+            ProgressTimer timePostProcessing() {
+                return ProgressTimer.start(this::setPostProcessingMillis);
+            }
 
-        private Map<String, Object> distribution() {
-            if (maybeHistogram.isPresent()) {
-                DoubleHistogram definitelyHistogram = maybeHistogram.get();
-                return MapUtil.map(
-                    "min", definitelyHistogram.getMinValue(),
-                    "max", definitelyHistogram.getMaxValue(),
-                    "mean", definitelyHistogram.getMean(),
-                    "stdDev", definitelyHistogram.getStdDeviation(),
-                    "p1", definitelyHistogram.getValueAtPercentile(1),
-                    "p5", definitelyHistogram.getValueAtPercentile(5),
-                    "p10", definitelyHistogram.getValueAtPercentile(10),
-                    "p25", definitelyHistogram.getValueAtPercentile(25),
-                    "p50", definitelyHistogram.getValueAtPercentile(50),
-                    "p75", definitelyHistogram.getValueAtPercentile(75),
-                    "p90", definitelyHistogram.getValueAtPercentile(90),
-                    "p95", definitelyHistogram.getValueAtPercentile(95),
-                    "p99", definitelyHistogram.getValueAtPercentile(99),
-                    "p100", definitelyHistogram.getValueAtPercentile(100)
+            private Map<String, Object> distribution() {
+                if (maybeHistogram.isPresent()) {
+                    DoubleHistogram definitelyHistogram = maybeHistogram.get();
+                    return MapUtil.map(
+                        "min", definitelyHistogram.getMinValue(),
+                        "max", definitelyHistogram.getMaxValue(),
+                        "mean", definitelyHistogram.getMean(),
+                        "stdDev", definitelyHistogram.getStdDeviation(),
+                        "p1", definitelyHistogram.getValueAtPercentile(1),
+                        "p5", definitelyHistogram.getValueAtPercentile(5),
+                        "p10", definitelyHistogram.getValueAtPercentile(10),
+                        "p25", definitelyHistogram.getValueAtPercentile(25),
+                        "p50", definitelyHistogram.getValueAtPercentile(50),
+                        "p75", definitelyHistogram.getValueAtPercentile(75),
+                        "p90", definitelyHistogram.getValueAtPercentile(90),
+                        "p95", definitelyHistogram.getValueAtPercentile(95),
+                        "p99", definitelyHistogram.getValueAtPercentile(99),
+                        "p100", definitelyHistogram.getValueAtPercentile(100)
+                    );
+                }
+                return Collections.emptyMap();
+            }
+
+            @Override
+            public StatsResult build() {
+                return new StatsResult(
+                    createMillis,
+                    computeMillis,
+                    postProcessingMillis,
+                    nodesCompared,
+                    distribution(),
+                    config.toMap()
                 );
             }
-            return Collections.emptyMap();
-        }
-
-        @Override
-        public StatsResult build() {
-            return new StatsResult(
-                createMillis,
-                computeMillis,
-                postProcessingMillis,
-                nodesCompared,
-                distribution(),
-                config.toMap()
-            );
         }
     }
 }

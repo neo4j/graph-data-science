@@ -20,40 +20,25 @@
 package org.neo4j.graphalgo.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
-import java.util.Optional;
-
-public abstract class NodeSimilarityBaseProc<CONFIG extends NodeSimilarityBaseConfig> extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, CONFIG> {
+final class NodeSimilarityProc {
 
     static final String NODE_SIMILARITY_DESCRIPTION =
         "The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +
         "Two nodes are considered similar if they share many of the same neighbors. " +
         "Node Similarity computes pair-wise similarities based on the Jaccard metric.";
 
-    protected abstract CONFIG newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    );
+    private NodeSimilarityProc() {}
 
-    @Override
-    protected AlgorithmFactory<NodeSimilarity, CONFIG> algorithmFactory(CONFIG config) {
-        return new NodeSimilarityFactory<>();
-    }
-
-    boolean shouldComputeHistogram() {
+    static boolean shouldComputeHistogram(ProcedureCallContext callContext) {
         return callContext
             .outputFields()
             .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
     }
 
-    DoubleHistogram computeHistogram(Graph similarityGraph) {
+    static DoubleHistogram computeHistogram(Graph similarityGraph) {
         DoubleHistogram histogram = new DoubleHistogram(5);
         similarityGraph.forEachNode(nodeId -> {
             similarityGraph.forEachRelationship(nodeId, Double.NaN, (node1, node2, property) -> {

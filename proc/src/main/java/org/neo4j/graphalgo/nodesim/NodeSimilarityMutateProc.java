@@ -20,13 +20,19 @@
 package org.neo4j.graphalgo.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -37,21 +43,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
+import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.computeHistogram;
+import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeSimilarityMutateProc extends NodeSimilarityWriteProc {
+public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateProc.MutateResult, NodeSimilarityMutateConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.mutate", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
-    public Stream<WriteResult> mutate(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> result = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return mutate(result);
+        return mutate(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.nodeSimilarity.mutate.estimate", mode = READ)
@@ -73,12 +78,28 @@ public class NodeSimilarityMutateProc extends NodeSimilarityWriteProc {
         return NodeSimilarityMutateConfig.of(username, graphName, maybeImplicitCreate, userInput);
     }
 
-    private Stream<WriteResult> mutate(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
+    @Override
+    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityMutateConfig> algorithmFactory(NodeSimilarityMutateConfig config) {
+        return new NodeSimilarityFactory<>();
+    }
+
+    @Override
+    protected PropertyTranslator<NodeSimilarityResult> nodePropertyTranslator(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult) {
+        throw new UnsupportedOperationException("NodeSimilarity does not mutate node properties.");
+    }
+
+    @Override
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computeResult) {
+        throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
+    }
+
+    @Override
+    public Stream<MutateResult> mutate(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult) {
         NodeSimilarityWriteConfig config = computationResult.config();
 
         if (computationResult.isGraphEmpty()) {
             return Stream.of(
-                new WriteResult(
+                new MutateResult(
                     computationResult.createMillis(),
                     0,
                     0,
@@ -94,7 +115,7 @@ public class NodeSimilarityMutateProc extends NodeSimilarityWriteProc {
         NodeSimilarityResult result = computationResult.result();
         SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
 
-        WriteResultBuilder resultBuilder = new WriteResultBuilder();
+        MutateResult.Builder resultBuilder = new MutateResult.Builder();
         resultBuilder
             .withNodesCompared(similarityGraphResult.comparedNodes())
             .withRelationshipsWritten(similarityGraphResult.similarityGraph().relationshipCount());
@@ -115,9 +136,9 @@ public class NodeSimilarityMutateProc extends NodeSimilarityWriteProc {
     }
 
     private HugeGraph.Relationships getRelationships(
-        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult,
+        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
-        WriteResultBuilder resultBuilder
+        MutateResult.Builder resultBuilder
     ) {
         HugeGraph.Relationships resultRelationships;
 
@@ -133,7 +154,7 @@ public class NodeSimilarityMutateProc extends NodeSimilarityWriteProc {
                 computationResult.tracker()
             );
 
-            if (shouldComputeHistogram()){
+            if (shouldComputeHistogram(callContext)){
                 DoubleHistogram histogram = new DoubleHistogram(5);
                 topKGraph.forEachNode(nodeId -> {
                     topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
@@ -157,10 +178,107 @@ public class NodeSimilarityMutateProc extends NodeSimilarityWriteProc {
         } else {
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
             resultRelationships = similarityGraph.relationships();
-            if (shouldComputeHistogram()) {
+            if (shouldComputeHistogram(callContext)) {
                resultBuilder.withHistogram(computeHistogram(similarityGraph));
             }
         }
         return resultRelationships;
+    }
+
+    public static class MutateResult {
+        public final long createMillis;
+        public final long computeMillis;
+        public final long writeMillis;
+        public final long postProcessingMillis;
+
+        public final long nodesCompared;
+        public final long relationshipsWritten;
+
+        public final Map<String, Object> similarityDistribution;
+        public final Map<String, Object> configuration;
+
+        MutateResult(
+            long createMillis,
+            long computeMillis,
+            long writeMillis,
+            long postProcessingMillis,
+            long nodesCompared,
+            long relationshipsWritten,
+            Map<String, Object> similarityDistribution,
+            Map<String, Object> configuration
+        ) {
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.writeMillis = writeMillis;
+            this.postProcessingMillis = postProcessingMillis;
+            this.nodesCompared = nodesCompared;
+            this.relationshipsWritten = relationshipsWritten;
+            this.similarityDistribution = similarityDistribution;
+            this.configuration = configuration;
+        }
+
+        static class Builder extends AbstractResultBuilder<MutateResult> {
+
+            private long nodesCompared = 0L;
+
+            private long postProcessingMillis = -1L;
+
+            private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
+
+            public Builder withNodesCompared(long nodesCompared) {
+                this.nodesCompared = nodesCompared;
+                return this;
+            }
+
+            Builder withHistogram(DoubleHistogram histogram) {
+                this.maybeHistogram = Optional.of(histogram);
+                return this;
+            }
+
+            void setPostProcessingMillis(long postProcessingMillis) {
+                this.postProcessingMillis = postProcessingMillis;
+            }
+
+            ProgressTimer timePostProcessing() {
+                return ProgressTimer.start(this::setPostProcessingMillis);
+            }
+
+            private Map<String, Object> distribution() {
+                if (maybeHistogram.isPresent()) {
+                    DoubleHistogram definitelyHistogram = maybeHistogram.get();
+                    return MapUtil.map(
+                        "min", definitelyHistogram.getMinValue(),
+                        "max", definitelyHistogram.getMaxValue(),
+                        "mean", definitelyHistogram.getMean(),
+                        "stdDev", definitelyHistogram.getStdDeviation(),
+                        "p1", definitelyHistogram.getValueAtPercentile(1),
+                        "p5", definitelyHistogram.getValueAtPercentile(5),
+                        "p10", definitelyHistogram.getValueAtPercentile(10),
+                        "p25", definitelyHistogram.getValueAtPercentile(25),
+                        "p50", definitelyHistogram.getValueAtPercentile(50),
+                        "p75", definitelyHistogram.getValueAtPercentile(75),
+                        "p90", definitelyHistogram.getValueAtPercentile(90),
+                        "p95", definitelyHistogram.getValueAtPercentile(95),
+                        "p99", definitelyHistogram.getValueAtPercentile(99),
+                        "p100", definitelyHistogram.getValueAtPercentile(100)
+                    );
+                }
+                return Collections.emptyMap();
+            }
+
+            @Override
+            public MutateResult build() {
+                return new MutateResult(
+                    createMillis,
+                    computeMillis,
+                    writeMillis,
+                    postProcessingMillis,
+                    nodesCompared,
+                    relationshipsWritten,
+                    distribution(),
+                    config.toMap()
+                );
+            }
+        }
     }
 }

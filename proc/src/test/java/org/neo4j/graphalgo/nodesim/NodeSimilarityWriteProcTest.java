@@ -44,7 +44,7 @@ import static org.neo4j.graphalgo.Orientation.REVERSE;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<NodeSimilarityWriteConfig> {
+public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimilarityWriteConfig> {
 
     @Override
     public Class<? extends AlgoBaseProc<?, NodeSimilarityResult, NodeSimilarityWriteConfig>> getProcedureClazz() {
@@ -57,7 +57,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityBaseProcTest<Node
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allValidGraphVariationsWithProjections")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
     void shouldWriteResults(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         String query = queryBuilder
             .algo("nodeSimilarity")

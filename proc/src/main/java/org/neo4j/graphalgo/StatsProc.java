@@ -32,7 +32,7 @@ public abstract class StatsProc<
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
-    protected final Stream<PROC_RESULT> stats(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
+    protected Stream<PROC_RESULT> stats(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
         return Stream.of(
             resultBuilder(computeResult)
                 .withCreateMillis(computeResult.createMillis())

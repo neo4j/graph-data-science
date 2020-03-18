@@ -34,14 +34,14 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NodeSimilarityMutateProcTest
-    extends NodeSimilarityBaseProcTest<NodeSimilarityWriteConfig>
-    implements GraphMutationTest<NodeSimilarityWriteConfig, NodeSimilarityResult> {
+    extends NodeSimilarityProcTest<NodeSimilarityMutateConfig>
+    implements GraphMutationTest<NodeSimilarityMutateConfig, NodeSimilarityResult> {
 
     private static final String WRITE_PROPERTY = "similarity";
     private static final String WRITE_RELATIONSHIP_TYPE = "SIMILAR_TO";
 
     @Override
-    public Class<? extends AlgoBaseProc<?, NodeSimilarityResult, NodeSimilarityWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<?, NodeSimilarityResult, NodeSimilarityMutateConfig>> getProcedureClazz() {
         return NodeSimilarityMutateProc.class;
     }
 
