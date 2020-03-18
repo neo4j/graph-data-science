@@ -41,7 +41,6 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
     protected boolean buildHistogram;
     protected boolean buildCommunityCount;
 
-    protected long nodeCount;
     protected long postProcessingDuration = -1L;
     protected OptionalLong maybeCommunityCount = OptionalLong.empty();
     protected Optional<Histogram> maybeCommunityHistogram = Optional.empty();
@@ -63,7 +62,6 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
     private OptionalLong maybeExpectedCommunityCount = OptionalLong.empty();
 
     protected AbstractCommunityResultBuilder(
-        long nodeCount,
         ProcedureCallContext callContext,
         AllocationTracker tracker
     ) {
@@ -74,7 +72,6 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
             .outputFields()
             .anyMatch(s -> s.equalsIgnoreCase("communityCount") || s.equalsIgnoreCase("componentCount"));
         this.tracker = tracker;
-        this.nodeCount = nodeCount;
     }
 
     protected abstract WRITE_RESULT buildResult();

@@ -72,13 +72,13 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         Graph graph = computationResult.graph();
 
         AbstractResultBuilder<SccResult> writeBuilder = new SccResultBuilder(
-            graph.nodeCount(),
             callContext,
             computationResult.tracker()
         )
             .withBuildCommunityCount(true)
             .withBuildHistogram(true)
             .withCommunityFunction(components != null ? components::get : null)
+            .withNodeCount(graph.nodeCount())
             .withConfig(config)
             .withCreateMillis(computationResult.createMillis())
             .withComputeMillis(computationResult.computeMillis());
@@ -227,11 +227,10 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
     public static final class SccResultBuilder extends AbstractCommunityResultBuilder<SccResult> {
 
         SccResultBuilder(
-            long nodeCount,
             ProcedureCallContext context,
             AllocationTracker tracker
         ) {
-            super(nodeCount, context, tracker);
+            super(context, tracker);
         }
 
         @Override

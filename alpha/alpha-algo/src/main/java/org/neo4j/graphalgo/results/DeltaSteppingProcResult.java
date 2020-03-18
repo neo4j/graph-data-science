@@ -42,8 +42,6 @@ public class DeltaSteppingProcResult {
 
     public static class Builder extends AbstractResultBuilder<DeltaSteppingProcResult> {
 
-        protected long nodeCount = 0;
-
         public ProgressTimer load() {
             return ProgressTimer.start(res -> createMillis = res);
         }
@@ -54,11 +52,6 @@ public class DeltaSteppingProcResult {
 
         public ProgressTimer write() {
             return ProgressTimer.start(res -> writeMillis = res);
-        }
-
-        public Builder withNodeCount(long nodeCount) {
-            this.nodeCount = nodeCount;
-            return this;
         }
 
         public DeltaSteppingProcResult build() {

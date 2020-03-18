@@ -60,12 +60,6 @@ public class PageRankScore {
 
             private long iterations;
             private double dampingFactor;
-            protected long nodeCount;
-
-            public Builder withNodeCount(long nodeCount) {
-                this.nodeCount = nodeCount;
-                return this;
-            }
 
             public Builder withIterations(long iterations) {
                 this.iterations = iterations;

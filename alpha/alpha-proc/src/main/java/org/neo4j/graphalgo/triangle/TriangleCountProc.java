@@ -88,14 +88,14 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         IntersectingTriangleCount algorithm = computationResult.algorithm();
 
         TriangleCountResultBuilder builder = new TriangleCountResultBuilder(
-            graph.nodeCount(),
             callContext,
             computationResult.tracker()
         )
             .withBuildCommunityCount(true)
             .withBuildHistogram(true);
 
-        builder.withConfig(config);
+        builder.withNodeCount(graph.nodeCount())
+            .withConfig(config);
 
         if (graph.isEmpty()) {
             graph.release();
@@ -251,8 +251,8 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         private long triangleCount = 0;
         private String clusteringCoefficientProperty;
 
-        public TriangleCountResultBuilder(long nodeCount, ProcedureCallContext callContext, AllocationTracker tracker) {
-            super(nodeCount, callContext, tracker);
+        public TriangleCountResultBuilder(ProcedureCallContext callContext, AllocationTracker tracker) {
+            super(callContext, tracker);
         }
 
 

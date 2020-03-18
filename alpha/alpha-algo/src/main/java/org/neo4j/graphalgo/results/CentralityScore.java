@@ -52,12 +52,6 @@ public class CentralityScore {
         }
 
         public static final class Builder extends AbstractResultBuilder<Stats> {
-            protected long nodeCount;
-
-            public Builder withNodeCount(long nodeCount) {
-                this.nodeCount = nodeCount;
-                return this;
-            }
 
             public CentralityScore.Stats build() {
                 return new CentralityScore.Stats(

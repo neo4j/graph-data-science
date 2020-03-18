@@ -64,9 +64,10 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computeResult) {
         return LabelPropagationProc.resultBuilder(
-            new StatsResult.Builder(computeResult.graph().nodeCount(), callContext, computeResult.tracker()),
+            new StatsResult.Builder(callContext, computeResult.tracker()),
             computeResult
-        );
+        )
+            .withNodeCount(computeResult.graph().nodeCount());
     }
 
     @Override
@@ -120,12 +121,10 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<StatsResult> {
 
             Builder(
-                long nodeCount,
                 ProcedureCallContext context,
                 AllocationTracker tracker
             ) {
                 super(
-                    nodeCount,
                     context,
                     tracker
                 );

@@ -53,12 +53,10 @@ final class LouvainProc {
         double modularity = -1;
 
         LouvainResultBuilder(
-            long nodeCount,
             ProcedureCallContext context,
             AllocationTracker tracker
         ) {
             super(
-                nodeCount,
                 context,
                 tracker
             );

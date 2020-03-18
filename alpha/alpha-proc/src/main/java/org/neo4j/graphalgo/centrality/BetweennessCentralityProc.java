@@ -207,15 +207,9 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
 
         public static class Builder extends AbstractResultBuilder<BetweennessCentralityProcResult> {
 
-            private long nodes = 0;
             private double centralityMin = -1;
             private double centralityMax = -1;
             private double centralitySum = -1;
-
-            public Builder withNodeCount(long nodes) {
-                this.nodes = nodes;
-                return this;
-            }
 
             public Builder withCentralityMin(double centralityMin) {
                 this.centralityMin = centralityMin;
@@ -237,7 +231,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
                     createMillis,
                     computeMillis,
                     writeMillis,
-                    nodes,
+                    nodeCount,
                     centralityMin,
                     centralityMax,
                     centralitySum

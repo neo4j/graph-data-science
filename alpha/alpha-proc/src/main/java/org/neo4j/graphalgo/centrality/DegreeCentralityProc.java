@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.degree.DegreeCentrality;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -91,7 +92,7 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
         DegreeCentralityConfig config = computeResult.config();
         DegreeCentrality algorithm = computeResult.algorithm();
 
-        CentralityScore.Stats.Builder builder = new CentralityScore.Stats.Builder()
+        AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
             .withNodeCount(graph.nodeCount());
 
 

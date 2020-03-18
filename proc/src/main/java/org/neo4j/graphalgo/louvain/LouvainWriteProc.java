@@ -92,9 +92,10 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computeResult) {
         return LouvainProc.resultBuilder(new WriteResult.Builder(
-            computeResult.graph().nodeCount(), callContext, computeResult.tracker()),
+            callContext, computeResult.tracker()),
             computeResult
-        );
+        )
+            .withNodeCount(computeResult.graph().nodeCount());
     }
 
     @Override
@@ -174,12 +175,10 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
         static class Builder extends LouvainProc.LouvainResultBuilder<WriteResult> {
 
             Builder(
-                long nodeCount,
                 ProcedureCallContext context,
                 AllocationTracker tracker
             ) {
                 super(
-                    nodeCount,
                     context,
                     tracker
                 );
