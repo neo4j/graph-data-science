@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
@@ -90,6 +91,8 @@ class ListProcTest extends BaseProcTest {
         "gds.graph.exists",
         "gds.graph.list",
 
+        "gds.labelPropagation.mutate",
+        "gds.labelPropagation.mutate.estimate",
         "gds.labelPropagation.stats",
         "gds.labelPropagation.stats.estimate",
         "gds.labelPropagation.stream",
@@ -159,6 +162,7 @@ class ListProcTest extends BaseProcTest {
             LabelPropagationWriteProc.class,
             LabelPropagationStreamProc.class,
             LabelPropagationStatsProc.class,
+            LabelPropagationMutateProc.class,
             ListProc.class,
             LouvainWriteProc.class,
             LouvainStreamProc.class,

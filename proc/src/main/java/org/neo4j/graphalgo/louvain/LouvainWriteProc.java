@@ -54,11 +54,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult);
+        return write(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.louvain.write.estimate", mode = READ)

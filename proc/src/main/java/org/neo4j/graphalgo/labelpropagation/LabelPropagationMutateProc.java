@@ -20,10 +20,11 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.StatsProc;
+import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -35,22 +36,23 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.labelpropagation.LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, LabelPropagation, LabelPropagationStatsProc.StatsResult, LabelPropagationStreamConfig> {
+public class LabelPropagationMutateProc extends MutateProc<LabelPropagation, LabelPropagation, LabelPropagationMutateProc.MutateResult, LabelPropagationMutateConfig> {
 
-    @Procedure(value = "gds.labelPropagation.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    @Procedure(value = "gds.labelPropagation.mutate", mode = READ)
+    @Description(LABEL_PROPAGATION_DESCRIPTION)
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stats(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)
+    @Procedure(value = "gds.labelPropagation.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
+    public Stream<MemoryEstimateResult> mutateEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -58,34 +60,40 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computeResult) {
-        return LabelPropagationProc.resultBuilder(
-            new StatsResult.Builder(computeResult.graph().nodeCount(), callContext, computeResult.tracker()),
-            computeResult
-        );
-    }
-
-    @Override
-    protected LabelPropagationStreamConfig newConfig(
+    protected LabelPropagationMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LabelPropagationStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LabelPropagationMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation, LabelPropagationStreamConfig> algorithmFactory(
-        LabelPropagationStreamConfig config
+    protected AlgorithmFactory<LabelPropagation, LabelPropagationMutateConfig> algorithmFactory(
+        LabelPropagationMutateConfig config
     ) {
         return new LabelPropagationFactory<>(config);
     }
 
-    public static class StatsResult {
+    @Override
+    protected PropertyTranslator<LabelPropagation> nodePropertyTranslator(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computationResult) {
+        return LabelPropagationProc.nodePropertyTranslator(computationResult);
+    }
+
+    @Override
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computeResult) {
+        return LabelPropagationProc.resultBuilder(
+            new MutateResult.Builder(computeResult.graph().nodeCount(), callContext, computeResult.tracker()),
+            computeResult
+        );
+    }
+
+    public static class MutateResult {
 
         public long createMillis;
         public long computeMillis;
+        public long mutateMillis;
         public long postProcessingMillis;
         public long communityCount;
         public long ranIterations;
@@ -93,9 +101,10 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
         public Map<String, Object> communityDistribution;
         public Map<String, Object> configuration;
 
-        StatsResult(
+        MutateResult(
             long createMillis,
             long computeMillis,
+            long mutateMillis,
             long postProcessingMillis,
             long communityCount,
             long ranIterations,
@@ -105,6 +114,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
+            this.mutateMillis = mutateMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.communityCount = communityCount;
             this.ranIterations = ranIterations;
@@ -113,25 +123,18 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
             this.configuration = configuration;
         }
 
-        static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<StatsResult> {
+        static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<MutateResult> {
 
-            Builder(
-                long nodeCount,
-                ProcedureCallContext context,
-                AllocationTracker tracker
-            ) {
-                super(
-                    nodeCount,
-                    context,
-                    tracker
-                );
+            Builder(long nodeCount, ProcedureCallContext context, AllocationTracker tracker) {
+                super(nodeCount, context, tracker);
             }
 
             @Override
-            protected StatsResult buildResult() {
-                return new StatsResult(
+            protected MutateResult buildResult() {
+                return new MutateResult(
                     createMillis,
                     computeMillis,
+                    mutateMillis,
                     postProcessingDuration,
                     maybeCommunityCount.orElse(-1L),
                     ranIterations,

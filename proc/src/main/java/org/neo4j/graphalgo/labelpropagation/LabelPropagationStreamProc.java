@@ -43,12 +43,7 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-
-        return stream(computationResult);
+        return stream(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.labelPropagation.stream.estimate", mode = READ)

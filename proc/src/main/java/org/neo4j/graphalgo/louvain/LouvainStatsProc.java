@@ -48,11 +48,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return stats(computationResult);
+        return stats(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.louvain.stats.estimate", mode = READ)

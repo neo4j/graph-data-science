@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -49,11 +48,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> result = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(result);
+        return write(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.labelPropagation.write.estimate", mode = READ)
@@ -67,24 +62,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
 
     @Override
     protected PropertyTranslator<LabelPropagation> nodePropertyTranslator(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult) {
-
-        LabelPropagationWriteConfig config = computationResult.config();
-
-        boolean writePropertyEqualsSeedProperty = config.seedProperty() != null && config
-            .writeProperty()
-            .equals(config.seedProperty());
-
-        if (writePropertyEqualsSeedProperty) {
-            NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
-            return new PropertyTranslator.OfLongIfChanged<>(
-                seedProperties,
-                (data, nodeId) -> data.labels().get(nodeId)
-            );
-        }
-
-        return (PropertyTranslator.OfLong<LabelPropagation>) (data, nodeId) -> data
-            .labels()
-            .get(nodeId);
+        return LabelPropagationProc.nodePropertyTranslator(computationResult);
     }
 
     @Override

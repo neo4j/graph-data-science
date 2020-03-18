@@ -43,7 +43,9 @@ The following table lists all production-quality procedures in the GDS library:
 [opts=header,cols="1, 1"]
 |===
 | Algorithm | Procedure
-.6+<.^|<<algorithms-label-propagation-syntax, Label Propagation>>
+.8+<.^|<<algorithms-label-propagation-syntax, Label Propagation>>
+| `gds.labelPropagation.mutate`
+| `gds.labelPropagation.mutate.estimate`
 | `gds.labelPropagation.write`
 | `gds.labelPropagation.write.estimate`
 | `gds.labelPropagation.stream`
