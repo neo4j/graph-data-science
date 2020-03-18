@@ -74,7 +74,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     private double[] propertyDefaultValues;
     private Aggregation[] aggregations;
     private boolean initializedFromResult;
-    private boolean validateRelationships;
 
     private GraphDimensions resultDimensions;
 
@@ -83,15 +82,13 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         IdMap idMap,
         GraphDatabaseAPI api,
         GraphSetup setup,
-        GraphDimensions dimensions,
-        boolean validateRelationships
+        GraphDimensions dimensions
     ) {
         super(relationshipQuery, idMap.nodeCount(), api, setup);
         this.idMap = idMap;
         this.outerDimensions = dimensions;
         this.loaderContext = new Context();
         this.relationshipCounters = new HashMap<>();
-        this.validateRelationships = validateRelationships;
 
         this.hasExplicitPropertyMappings = dimensions.relationshipProperties().hasMappings();
 
@@ -189,7 +186,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             propertyDefaultValueByName,
             bufferSize,
             isAnyRelTypeQuery,
-            validateRelationships
+            setup.validateRelationships()
         );
 
         queryResult.accept(visitor);
@@ -307,7 +304,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             );
 
             RelationshipImporter relationshipImporter = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
-            return new SingleTypeRelationshipImporter.Builder(mapping, relationshipImporter, relationshipCounter, validateRelationships);
+            return new SingleTypeRelationshipImporter.Builder(mapping, relationshipImporter, relationshipCounter, setup.validateRelationships());
         }
     }
 

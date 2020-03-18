@@ -94,8 +94,7 @@ public class CypherFactory extends GraphStoreFactory {
                 relationshipQuery(),
                 nodes.idsAndProperties(),
                 nodes.dimensions(),
-                ktx,
-                setup.validateRelationships()
+                ktx
             );
 
             GraphStore graphStore = createGraphStore(
@@ -122,16 +121,14 @@ public class CypherFactory extends GraphStoreFactory {
         String relationshipQuery,
         IdsAndProperties idsAndProperties,
         GraphDimensions nodeLoadDimensions,
-        Ktx ktx,
-        boolean validateRelationships
+        Ktx ktx
     ) {
         CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
             relationshipQuery,
             idsAndProperties.idMap(),
             api,
             setup,
-            nodeLoadDimensions,
-            validateRelationships
+            nodeLoadDimensions
         );
 
         CypherRelationshipLoader.LoadResult result = relationshipLoader.load(ktx);
