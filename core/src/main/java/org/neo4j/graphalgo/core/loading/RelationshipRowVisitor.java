@@ -30,7 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.graphalgo.utils.ExceptionUtil.validateNodeIsLoaded;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.validateSourceNodeIsLoaded;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.validateTargetNodeIsLoaded;
 
 class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
@@ -188,7 +189,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         if (neoTargetId != lastNeoTargetId) {
             targetId = idMap.toMappedNodeId(neoTargetId);
             if (throwOnUnMappedNodeIds) {
-                validateNodeIsLoaded(targetId, neoTargetId, "target");
+                validateTargetNodeIsLoaded(targetId, neoTargetId);
             }
             lastNeoTargetId = neoTargetId;
         }
@@ -199,7 +200,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         if (neoSourceId != lastNeoSourceId) {
             sourceId = idMap.toMappedNodeId(neoSourceId);
             if (throwOnUnMappedNodeIds) {
-                validateNodeIsLoaded(sourceId, neoSourceId, "source");
+                validateSourceNodeIsLoaded(sourceId, neoSourceId);
             }
             lastNeoSourceId = neoSourceId;
         }

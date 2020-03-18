@@ -94,7 +94,15 @@ public final class ExceptionUtil {
         }
     }
 
-    public static void validateNodeIsLoaded(long mappedId, long neoId, String side) {
+    public static void validateTargetNodeIsLoaded(long mappedId, long neoId) {
+        validateNodeIsLoaded(mappedId, neoId, "target");
+    }
+
+    public static void validateSourceNodeIsLoaded(long mappedId, long neoId) {
+        validateNodeIsLoaded(mappedId, neoId, "source");
+    }
+
+    private static void validateNodeIsLoaded(long mappedId, long neoId, String side) {
         if (mappedId == -1) {
             throw new IllegalStateException(
                 String.format("Failed to load relationship with unknown %s-node id %s.", side, neoId));
