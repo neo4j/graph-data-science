@@ -80,17 +80,6 @@ public class NodeLabelFilterTest extends BaseProcTest {
                  "'*')");
 
         runQuery("CALL gds.graph.create(" +
-                 "'myGraph2'," +
-                 "{" +
-                 "  L1: 'Label1,Label2', " +
-                 "  L2: 'Label2'," +
-                 "  L3: 'Label3'," +
-                 "  L4: 'Label4'," +
-                 "  L5: 'Label5'" +
-                 "}, " +
-                 "'*')");
-
-        runQuery("CALL gds.graph.create(" +
                  "'relGraph'," +
                  "{" +
                  "  L1: 'Label1'," +
@@ -131,36 +120,8 @@ public class NodeLabelFilterTest extends BaseProcTest {
     }
 
     @Test
-    void testFilterMultipleLabelsPerProjection() {
-        String query = "CALL gds.pageRank.stream('myGraph2', { nodeLabels: ['L1', 'L3'] }) " +
-                       "YIELD nodeId " +
-                       "RETURN gds.util.asNode(nodeId).name AS name";
-        Set<String> actual = new HashSet<>();
-        runQueryWithRowConsumer(query, row -> {
-            actual.add(row.getString("name"));
-        });
-
-        String query2 = "CALL gds.pageRank.stream('myGraph2', { nodeLabels: ['L1', 'L2', 'L3'] }) " +
-                       "YIELD nodeId " +
-                       "RETURN gds.util.asNode(nodeId).name AS name";
-        Set<String> actual2 = new HashSet<>();
-        runQueryWithRowConsumer(query2, row -> {
-            actual2.add(row.getString("name"));
-        });
-
-        Set<String> expected = new HashSet<>();
-        expected.add("a");
-        expected.add("b");
-        expected.add("c");
-        expected.add("d");
-
-        assertEquals(expected, actual);
-        assertEquals(expected, actual2);
-    }
-
-    @Test
-    void testMultipleLabelsWithAllProjectionIncluded() {
-        String query = "CALL gds.pageRank.stream('myGraph2', { nodeLabels: ['L1', 'L2', 'L3', 'L4', 'L5'] }) " +
+    void testMultipleProjectionsWithAllProjectionIncluded() {
+        String query = "CALL gds.pageRank.stream('myGraph', { nodeLabels: ['L1', 'L2', 'L3', 'L4', 'L5'] }) " +
                        "YIELD nodeId " +
                        "RETURN gds.util.asNode(nodeId).name AS name";
         Set<String> actual = new HashSet<>();

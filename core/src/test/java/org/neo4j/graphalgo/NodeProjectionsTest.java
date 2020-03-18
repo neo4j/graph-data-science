@@ -101,7 +101,7 @@ class NodeProjectionsTest {
             .build();
 
         assertThat(actual, equalTo(expected));
-        assertThat(actual.labelProjection(), equalTo("A|B"));
+        assertThat(actual.labelProjection(), equalTo("A, B"));
     }
 
     @Test

@@ -135,7 +135,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
             .values()
             .stream()
             .map(NodeProjection::label)
-            .collect(joining("|")
+            .collect(joining(", ")
         );
     }
 

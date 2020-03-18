@@ -79,11 +79,9 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                     boolean projectAll = value.projectAll();
                     onlyAllProjections.setValue(onlyAllProjections.booleanValue() & projectAll);
                     String elementIdentifier = key.name;
-                    Arrays
-                        .stream(value.label().split(","))
-                        .map(String::trim)
-                        .map(neoLabel -> projectAll ? ANY_LABEL : (long) tokenRead.nodeLabel(neoLabel))
-                        .forEach(labelId -> addToListMap(labelId, elementIdentifier, labelMapping));
+                    String neoLabel = value.label();
+                    long labelId = projectAll ? ANY_LABEL : (long) tokenRead.nodeLabel(neoLabel);
+                    addToListMap(labelId, elementIdentifier, labelMapping);
                 });
 
             if (!onlyAllProjections.booleanValue()) {
