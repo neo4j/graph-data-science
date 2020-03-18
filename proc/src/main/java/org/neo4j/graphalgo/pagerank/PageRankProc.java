@@ -43,7 +43,7 @@ final class PageRankProc {
         AlgoBaseProc.ComputationResult<PageRank, PageRank, CONFIG> computeResult
     ) {
         return procResultBuilder
-            .withDidConverge(!computeResult.isGraphEmpty() ? computeResult.result().didConverge() : false)
+            .withDidConverge(!computeResult.isGraphEmpty() && computeResult.result().didConverge())
             .withRanIterations(!computeResult.isGraphEmpty() ? computeResult.result().iterations() : 0);
     }
 
