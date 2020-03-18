@@ -93,7 +93,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
             .call()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .algo("gds", "beta", "wcc")
+            .algo("wcc")
             .mutateMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields(

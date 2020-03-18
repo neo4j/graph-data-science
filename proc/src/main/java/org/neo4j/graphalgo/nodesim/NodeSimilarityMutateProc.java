@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityMutateProc extends NodeSimilarityWriteProc {
 
-    @Procedure(name = "gds.beta.nodeSimilarity.mutate", mode = READ)
+    @Procedure(name = "gds.nodeSimilarity.mutate", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<WriteResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -54,7 +54,7 @@ public class NodeSimilarityMutateProc extends NodeSimilarityWriteProc {
         return mutate(result);
     }
 
-    @Procedure(value = "gds.beta.nodeSimilarity.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.nodeSimilarity.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateMutate(
         @Name(value = "graphName") Object graphNameOrConfig,

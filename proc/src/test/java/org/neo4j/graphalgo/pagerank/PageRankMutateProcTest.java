@@ -121,7 +121,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
             .call()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .algo("gds", "beta", "pageRank")
+            .algo("pageRank")
             .mutateMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
             .yields(

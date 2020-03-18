@@ -43,7 +43,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateProc.MutateResult, WccMutateConfig> {
 
-    @Procedure(value = "gds.beta.wcc.mutate", mode = READ)
+    @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)
     public Stream<WccMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -57,7 +57,7 @@ public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateP
         return mutate(computationResult);
     }
 
-    @Procedure(value = "gds.beta.wcc.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.wcc.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> mutateEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

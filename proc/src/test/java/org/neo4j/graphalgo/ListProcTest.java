@@ -77,12 +77,6 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.modularityOptimization.stream.estimate",
         "gds.beta.modularityOptimization.write",
         "gds.beta.modularityOptimization.write.estimate",
-        "gds.beta.nodeSimilarity.mutate",
-        "gds.beta.nodeSimilarity.mutate.estimate",
-        "gds.beta.pageRank.mutate",
-        "gds.beta.pageRank.mutate.estimate",
-        "gds.beta.wcc.mutate",
-        "gds.beta.wcc.mutate.estimate",
 
         "gds.graph.create",
         "gds.graph.create.cypher",
@@ -110,6 +104,8 @@ class ListProcTest extends BaseProcTest {
         "gds.louvain.write",
         "gds.louvain.write.estimate",
 
+        "gds.nodeSimilarity.mutate",
+        "gds.nodeSimilarity.mutate.estimate",
         "gds.nodeSimilarity.stats",
         "gds.nodeSimilarity.stats.estimate",
         "gds.nodeSimilarity.stream",
@@ -117,6 +113,8 @@ class ListProcTest extends BaseProcTest {
         "gds.nodeSimilarity.write",
         "gds.nodeSimilarity.write.estimate",
 
+        "gds.pageRank.mutate",
+        "gds.pageRank.mutate.estimate",
         "gds.pageRank.stats",
         "gds.pageRank.stats.estimate",
         "gds.pageRank.stream",
@@ -124,6 +122,8 @@ class ListProcTest extends BaseProcTest {
         "gds.pageRank.write",
         "gds.pageRank.write.estimate",
 
+        "gds.wcc.mutate",
+        "gds.wcc.mutate.estimate",
         "gds.wcc.stats",
         "gds.wcc.stats.estimate",
         "gds.wcc.stream",
@@ -139,8 +139,8 @@ class ListProcTest extends BaseProcTest {
     );
 
     private static final List<String> PAGE_RANK = asList(
-        "gds.beta.pageRank.mutate",
-        "gds.beta.pageRank.mutate.estimate",
+        "gds.pageRank.mutate",
+        "gds.pageRank.mutate.estimate",
         "gds.pageRank.stats",
         "gds.pageRank.stats.estimate",
         "gds.pageRank.stream",
