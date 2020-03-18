@@ -33,10 +33,10 @@ final class LabelPropagationProc {
     private LabelPropagationProc() {}
 
     static <PROC_RESULT, CONFIG extends LabelPropagationBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
-        LabelPropagationResultBuilder<PROC_RESULT> procBuilder,
+        LabelPropagationResultBuilder<PROC_RESULT> procResultBuilder,
         AlgoBaseProc.ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computeResult
     ) {
-        return procBuilder
+        return procResultBuilder
             .didConverge(!computeResult.isGraphEmpty() ? computeResult.result().didConverge() : false)
             .ranIterations(!computeResult.isGraphEmpty() ? computeResult.result().ranIterations() : 0)
             .withCommunityFunction(!computeResult.isGraphEmpty()
