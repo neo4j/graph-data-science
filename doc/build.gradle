@@ -360,8 +360,8 @@ task asciidocJar(type: Jar) {
 
 tasks.assemble.dependsOn packageHtml, packagePdf
 
-tasks.ci.finalizedBy assemble
-tasks.cipr.finalizedBy packageHtml
+rootProject.tasks.ci.finalizedBy assemble
+rootProject.tasks.cipr.finalizedBy packageHtml
 
 apply from: "$publicDir/gradle/build.preview.gradle"
 
