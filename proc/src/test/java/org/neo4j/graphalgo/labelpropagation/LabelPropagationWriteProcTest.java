@@ -25,11 +25,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Arrays;
@@ -155,6 +161,67 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             .addParameter("writeProperty", "community")
             .addParameter("seedProperty", "seed")
             .addParameter("nodeWeightProperty", "weight")
+            .yields();
+
+        runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
+                checkMillisSet(row);
+                assertEquals(
+                    MapUtil.map(
+                        "p999", 8L,
+                        "p99", 8L,
+                        "p95", 8L,
+                        "p90", 8L,
+                        "p75", 8L,
+                        "p50", 4L,
+                        "min", 4L,
+                        "max", 8L,
+                        "mean", 6.0D
+                    ),
+                    row.get("communityDistribution")
+                );
+
+            }
+        );
+        String check = "MATCH (n) " +
+                       "WHERE n.id IN [0,1] " +
+                       "RETURN n.community AS community";
+        runQueryWithRowConsumer(check, row -> {
+            assertEquals(2, row.getNumber("community").intValue());
+        });
+    }
+
+    @Test
+    void shouldRunLabelPropagationNaturalOnFilteredNodes() {
+
+        runQuery("MATCH (n) DETACH DELETE n");
+
+        runQuery("CREATE  (c:Ignore {id:12, seed: 0})");
+        runQuery(DB_CYPHER);
+        runQuery("CREATE (a)-[:X]->(c), (c)-[:X]->(b)");
+
+        String graphCreateQuery = GdsCypher
+            .call()
+            .withNodeLabels("A", "B", "Ignore")
+            .withNodeProperty("id")
+            .withNodeProperty("seed")
+            .withNodeProperty("weight")
+            .withAnyRelationshipType()
+            .graphCreate("nodeFilterGraph")
+            .yields();
+
+        runQuery(graphCreateQuery);
+
+        String query = GdsCypher.call()
+            .explicitCreation("nodeFilterGraph")
+            .algo("gds.labelPropagation")
+            .writeMode()
+            .addParameter("writeProperty", "community")
+            .addParameter("seedProperty", "seed")
+            .addParameter("nodeWeightProperty", "weight")
+            .addParameter("nodeLabels", Arrays.asList("A", "B"))
             .yields();
 
         runQueryWithRowConsumer(

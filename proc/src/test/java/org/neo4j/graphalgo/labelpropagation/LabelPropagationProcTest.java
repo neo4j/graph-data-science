@@ -67,6 +67,23 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     private static final String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.weight AS weight, n.seed AS seed";
     private static final String relQuery = "MATCH (s)-[:X]->(t) RETURN id(s) AS source, id(t) AS target";
 
+    protected static final @Language("Cypher") String DB_CYPHER =
+        "CREATE" +
+        "  (a:A {id: 0, seed: 42}) " +
+        ", (b:B {id: 1, seed: 42}) " +
+
+        ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
+        ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
+
+        ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
+        ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
+
     @Override
     public GraphDatabaseAPI graphDb() {
         return db;
@@ -77,23 +94,6 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
 
         db = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
 
-        @Language("Cypher") String cypher =
-            "CREATE" +
-            "  (a:A {id: 0, seed: 42}) " +
-            ", (b:B {id: 1, seed: 42}) " +
-
-            ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
-            ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
-            ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
-            ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
-            ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
-
-            ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
-            ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
-            ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
-            ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
-            ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
-
         registerProcedures(
             LabelPropagationStreamProc.class,
             LabelPropagationWriteProc.class,
@@ -101,7 +101,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
             LabelPropagationMutateProc.class,
             GraphCreateProc.class
         );
-        runQuery(cypher);
+        runQuery(DB_CYPHER);
 
         // Create explicit graphs with both projection variants
         runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
