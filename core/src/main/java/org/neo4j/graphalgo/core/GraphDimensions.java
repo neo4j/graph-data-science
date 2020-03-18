@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
+import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.value.Value;
@@ -55,7 +56,7 @@ public interface GraphDimensions {
     LongSet nodeLabelIds();
 
     @Nullable
-    LongObjectMap<List<String>> labelMapping();
+    LongObjectMap<List<String>> labelProjectionMapping();
 
     @Value.Default
     default ResolvedPropertyMappings nodeProperties() {

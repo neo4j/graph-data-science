@@ -77,7 +77,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
         projectionBitSetMapping = StreamSupport.stream(
             dimensions
-                .labelMapping()
+                .labelProjectionMapping()
                 .values()
                 .spliterator(),
             false)
@@ -91,7 +91,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             scanner,
             dimensions.nodeLabelIds(),
             progress,
-            new NodeImporter(idMapBuilder, projectionBitSetMapping, builders.values(), dimensions.labelMapping()),
+            new NodeImporter(idMapBuilder, projectionBitSetMapping, builders.values(), dimensions.labelProjectionMapping()),
             terminationFlag
         );
     }

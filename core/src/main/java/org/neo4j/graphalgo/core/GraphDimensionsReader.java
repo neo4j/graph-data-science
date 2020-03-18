@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongObjectHashMap;
 import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.LongSet;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -39,12 +38,9 @@ import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -69,27 +65,14 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
 
-        NodeLabelIds nodeLabelIds = new NodeLabelIds();
-        final LongObjectMap<List<String>> labelMapping = new LongObjectHashMap<>();
+        final LabelProjectionMappings labelProjectionMappings = new LabelProjectionMappings();
         if (readTokens) {
-            MutableBoolean onlyAllProjections = new MutableBoolean(true);
             setup.nodeProjections()
                 .projections()
                 .forEach((key, value) -> {
-                    boolean projectAll = value.projectAll();
-                    onlyAllProjections.setValue(onlyAllProjections.booleanValue() & projectAll);
-                    String elementIdentifier = key.name;
-                    String neoLabel = value.label();
-                    long labelId = projectAll ? ANY_LABEL : (long) tokenRead.nodeLabel(neoLabel);
-                    addToListMap(labelId, elementIdentifier, labelMapping);
+                    long labelId = value.projectAll() ? ANY_LABEL : (long) tokenRead.nodeLabel(value.label());
+                    labelProjectionMappings.put(labelId, key.name);
                 });
-
-            if (!onlyAllProjections.booleanValue()) {
-                StreamSupport
-                    .stream(labelMapping.keys().spliterator(), false)
-                    .mapToInt(cursor -> (int)cursor.value)
-                    .forEach(nodeLabelIds.ids::add);
-            }
         }
 
         RelationshipProjectionMappings.Builder mappingsBuilder = new RelationshipProjectionMappings.Builder();
@@ -116,19 +99,23 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         ResolvedPropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());
         ResolvedPropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
 
-        long nodeCount = nodeLabelIds.stream().mapToLong(dataRead::countsForNode).sum();
+        long nodeCount = labelProjectionMappings.keyStream()
+            .mapToLong(dataRead::countsForNode)
+            .sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
-        long finalNodeCount = nodeLabelIds.ids.contains(ANY_LABEL) ? allNodesCount : Math.min(nodeCount, allNodesCount);
+        long finalNodeCount = labelProjectionMappings.keys().contains(ANY_LABEL)
+            ? allNodesCount
+            : Math.min(nodeCount, allNodesCount);
         // TODO: this will double count relationships between distinct labels
         Map<String, Long> relationshipCounts = relationshipProjectionMappings
             .stream()
             .filter(RelationshipProjectionMapping::exists)
             .collect(Collectors.toMap(
                 RelationshipProjectionMapping::elementIdentifier,
-                relationshipProjectionMapping -> nodeLabelIds.stream()
-                    .mapToLong(nodeLabelId -> maxRelCountForLabelAndType(
+                relationshipProjectionMapping -> labelProjectionMappings.keyStream()
+                    .mapToLong(labelId -> maxRelCountForLabelAndType(
                         dataRead,
-                        nodeLabelId,
+                        labelId,
                         relationshipProjectionMapping.typeId()
                     )).sum()
             ));
@@ -139,8 +126,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .highestNeoId(allNodesCount)
                 .maxRelCount(maxRelCount)
                 .relationshipCounts(relationshipCounts)
-                .nodeLabelIds(nodeLabelIds.longSet())
-                .labelMapping(labelMapping)
+                .nodeLabelIds(labelProjectionMappings.keys())
+                .labelProjectionMapping(labelProjectionMappings.mappings())
                 .nodeProperties(nodeProperties)
                 .relationshipProjectionMappings(relationshipProjectionMappings)
                 .relationshipProperties(relProperties)
@@ -164,28 +151,40 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         );
     }
 
-    static class NodeLabelIds {
-        Set<Integer> ids;
+    public static class LabelProjectionMappings {
+        private final LongObjectMap<List<String>> mappings;
 
-        NodeLabelIds() {
-            this.ids = new HashSet<>();
+        LabelProjectionMappings() {
+            this.mappings = new LongObjectHashMap<>();
         }
 
-        Stream<Integer> stream() {
-            return ids.isEmpty() ? Stream.of(StatementConstantsProxy.ANY_LABEL) : ids.stream();
+        LongSet keys() {
+            LongSet keySet = new LongHashSet(mappings.keys().size());
+            boolean allNodes = StreamSupport.stream(mappings.keys().spliterator(), false)
+                .allMatch(cursor -> cursor.value == ANY_LABEL);
+            if (!allNodes) {
+                StreamSupport.stream(mappings.keys().spliterator(), false)
+                    .forEach(cursor -> keySet.add(cursor.value));
+            }
+            return keySet;
         }
 
-        LongSet longSet() {
-            LongSet longSet = new LongHashSet(ids.size());
-            ids.forEach(longSet::add);
-            return longSet;
+        Stream<Integer> keyStream() {
+            return keys().isEmpty()
+                ? Stream.of(StatementConstantsProxy.ANY_LABEL)
+                : StreamSupport.stream(keys().spliterator(), false).map(cursor -> (int) cursor.value);
         }
-    }
 
-    private void addToListMap(long key, String value, LongObjectMap<List<String>> container) {
-        if (!container.containsKey(key)) {
-            container.put(key, new LinkedList<>());
+        LongObjectMap<List<String>> mappings() {
+            return this.mappings;
         }
-        container.get(key).add(value);
+
+        void put(long key, String value) {
+            if (!this.mappings.containsKey(key)) {
+                this.mappings.put(key, new LinkedList<>());
+            }
+            this.mappings.get(key).add(value);
+        }
+
     }
 }
