@@ -141,7 +141,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         readSourceId(row);
         readTargetId(row);
 
-        if (!throwOnUnMappedNodeIds && sourceId == -1 || targetId == -1) {
+        if (!throwOnUnMappedNodeIds && (sourceId == -1 || targetId == -1)) {
             return true;
         }
 
