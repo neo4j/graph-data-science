@@ -8,7 +8,6 @@ dependencies {
     annotationProcessor group: 'org.immutables', name: 'value', version: ver.immutables
 
     compileOnly project(':algo')
-    compileOnly project(':proc')
     compile project(':alpha-core')
     compile group: 'org.roaringbitmap', name: 'RoaringBitmap', version: ver.'RoaringBitmap'
 
