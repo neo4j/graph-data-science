@@ -63,7 +63,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -326,8 +325,9 @@ class LouvainTest extends AlgoTestBase {
 
 
         ResolvedPropertyMapping propertyMapping = ImmutableResolvedPropertyMapping.of("foo", "bar", 1.0, Aggregation.NONE, 1);
+        ResolvedPropertyMapping otherPropertyMapping = ImmutableResolvedPropertyMapping.of("bar", "foo", 2.0, Aggregation.NONE, 1);
         ResolvedPropertyMappings oneProperty = ResolvedPropertyMappings.of(Arrays.asList(propertyMapping));
-        ResolvedPropertyMappings twoProperties = ResolvedPropertyMappings.of(Arrays.asList(propertyMapping, propertyMapping));
+        ResolvedPropertyMappings twoProperties = ResolvedPropertyMappings.of(Arrays.asList(propertyMapping, otherPropertyMapping));
 
         GraphDimensions dimensionsWithoutProperties = dimensionsBuilder.build();
         GraphDimensions dimensionsWithOneProperty = dimensionsBuilder
@@ -351,7 +351,7 @@ class LouvainTest extends AlgoTestBase {
         MemoryTree memoryTreeOneProperty = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithOneProperty, 1);
         MemoryTree memoryTreeTwoProperties = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithTwoProperties, 1);
 
-        assertNotEquals(memoryTree.memoryUsage(), memoryTreeOneProperty.memoryUsage());
+        assertTrue(memoryTree.memoryUsage().max < memoryTreeOneProperty.memoryUsage().max);
         assertEquals(memoryTreeOneProperty.memoryUsage(), memoryTreeTwoProperties.memoryUsage());
     }
 
