@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
+import org.neo4j.graphalgo.louvain.LouvainMutateProc;
 import org.neo4j.graphalgo.louvain.LouvainStatsProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
@@ -100,6 +101,8 @@ class ListProcTest extends BaseProcTest {
         "gds.labelPropagation.write",
         "gds.labelPropagation.write.estimate",
 
+        "gds.louvain.mutate",
+        "gds.louvain.mutate.estimate",
         "gds.louvain.stats",
         "gds.louvain.stats.estimate",
         "gds.louvain.stream",
@@ -167,6 +170,7 @@ class ListProcTest extends BaseProcTest {
             LouvainWriteProc.class,
             LouvainStreamProc.class,
             LouvainStatsProc.class,
+            LouvainMutateProc.class,
             ModularityOptimizationWriteProc.class,
             ModularityOptimizationStreamProc.class,
             NodeSimilarityWriteProc.class,

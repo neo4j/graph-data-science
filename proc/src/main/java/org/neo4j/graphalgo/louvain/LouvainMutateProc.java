@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -43,18 +43,18 @@ import static org.neo4j.graphalgo.louvain.LouvainProc.LOUVAIN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWriteProc.WriteResult, LouvainWriteConfig> {
+public class LouvainMutateProc extends MutateProc<Louvain, Louvain, LouvainMutateProc.MutateResult, LouvainMutateConfig> {
 
-    @Procedure(value = "gds.louvain.write", mode = WRITE)
+    @Procedure(value = "gds.louvain.mutate", mode = WRITE)
     @Description(LOUVAIN_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<MutateResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(value = "gds.louvain.write.estimate", mode = READ)
+    @Procedure(value = "gds.louvain.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -64,58 +64,38 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     }
 
     @Override
-    protected PropertyTranslator<Louvain> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
-        return LouvainProc.nodePropertyTranslator(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computeResult) {
-        return LouvainProc.resultBuilder(new WriteResult.Builder(
-            callContext, computeResult.tracker()),
-            computeResult
-        )
-            .withNodeCount(computeResult.graph().nodeCount());
-    }
-
-    @Override
-    protected LouvainWriteConfig newConfig(
+    protected LouvainMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LouvainWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LouvainMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<Louvain, LouvainWriteConfig> algorithmFactory(LouvainWriteConfig config) {
+    protected AlgorithmFactory<Louvain, LouvainMutateConfig> algorithmFactory(LouvainMutateConfig config) {
         return new LouvainFactory<>();
     }
 
-    static final class CommunityTranslator implements PropertyTranslator.OfLong<Louvain> {
-        public static final CommunityTranslator INSTANCE = new CommunityTranslator();
-
-        @Override
-        public long toLong(Louvain louvain, long nodeId) {
-            return louvain.getCommunity(nodeId);
-        }
+    @Override
+    protected PropertyTranslator<Louvain> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainMutateConfig> computationResult) {
+        return LouvainProc.nodePropertyTranslator(computationResult);
     }
 
-    static final class CommunitiesTranslator implements PropertyTranslator.OfLongArray<Louvain> {
-        public static final CommunitiesTranslator INSTANCE = new CommunitiesTranslator();
-
-        @Override
-        public long[] toLongArray(Louvain louvain, long nodeId) {
-            return louvain.getCommunities(nodeId);
-        }
+    @Override
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainMutateConfig> computeResult) {
+        return LouvainProc.resultBuilder(
+            new MutateResult.Builder(computeResult.graph().nodeCount(), callContext, computeResult.tracker()),
+            computeResult
+        );
     }
 
-    public static final class WriteResult {
+    public static final class MutateResult {
 
-        public long nodePropertiesWritten;
         public long createMillis;
         public long computeMillis;
-        public long writeMillis;
+        public long mutateMillis;
         public long postProcessingMillis;
         public long ranLevels;
         public long communityCount;
@@ -124,11 +104,10 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
         public Map<String, Object> communityDistribution;
         public Map<String, Object> configuration;
 
-        WriteResult(
-            long nodePropertiesWritten,
+        MutateResult(
             long createMillis,
             long computeMillis,
-            long writeMillis,
+            long mutateMillis,
             long postProcessingMillis,
             long ranLevels,
             long communityCount,
@@ -136,12 +115,10 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
             double[] modularities,
             Map<String, Object> communityDistribution,
             Map<String, Object> configuration
-
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
+            this.mutateMillis = mutateMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.ranLevels = ranLevels;
             this.communityCount = communityCount;
@@ -151,25 +128,26 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
             this.configuration = configuration;
         }
 
-        static class Builder extends LouvainProc.LouvainResultBuilder<WriteResult> {
+        static class Builder extends LouvainProc.LouvainResultBuilder<MutateResult> {
 
             Builder(
+                long nodeCount,
                 ProcedureCallContext context,
                 AllocationTracker tracker
             ) {
                 super(
+                    nodeCount,
                     context,
                     tracker
                 );
             }
 
             @Override
-            protected WriteResult buildResult() {
-                return new WriteResult(
-                    nodePropertiesWritten,
+            protected MutateResult buildResult() {
+                return new MutateResult(
                     createMillis,
                     computeMillis,
-                    writeMillis,
+                    mutateMillis,
                     postProcessingDuration,
                     levels,
                     maybeCommunityCount.orElse(-1L),

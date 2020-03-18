@@ -68,6 +68,8 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
         Arrays.asList(9L, 10L, 11L, 12L, 13L)
     );
 
+    static final String LOUVAIN_GRAPH = "myGraph";
+
     @Override
     public GraphDatabaseAPI graphDb() {
         return db;
@@ -82,6 +84,7 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
             LouvainStreamProc.class,
             LouvainWriteProc.class,
             LouvainStatsProc.class,
+            LouvainMutateProc.class,
             GraphCreateProc.class
         );
         registerFunctions(GetNodeFunc.class);
@@ -105,7 +108,7 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
                         Aggregation.DEFAULT
                     )
                 )
-                .graphCreate("myGraph")
+                .graphCreate(LOUVAIN_GRAPH)
                 .yields()
         );
     }

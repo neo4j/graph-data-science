@@ -20,10 +20,16 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+
+import java.util.Objects;
+import java.util.Optional;
 
 final class LouvainProc {
 
@@ -31,6 +37,24 @@ final class LouvainProc {
         "The Louvain method for community detection is an algorithm for detecting communities in networks.";
 
     private LouvainProc() {}
+
+    static <CONFIG extends LouvainWriteConfig> PropertyTranslator<Louvain> nodePropertyTranslator(AlgoBaseProc.ComputationResult<Louvain, Louvain, CONFIG> computationResult) {
+        Graph graph = computationResult.graph();
+        Louvain louvain = computationResult.result();
+        CONFIG config = computationResult.config();
+        Optional<NodeProperties> seed = Optional.ofNullable(louvain.config().seedProperty()).map(graph::nodeProperties);
+        PropertyTranslator<Louvain> translator;
+        if (!louvain.config().includeIntermediateCommunities()) {
+            if (seed.isPresent() && Objects.equals(config.seedProperty(), config.writeProperty())) {
+                translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
+            } else {
+                translator = LouvainWriteProc.CommunityTranslator.INSTANCE;
+            }
+        } else {
+            translator = LouvainWriteProc.CommunitiesTranslator.INSTANCE;
+        }
+        return translator;
+    }
 
     static <PROC_RESULT, CONFIG extends LouvainBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         LouvainResultBuilder<PROC_RESULT> procResultBuilder,

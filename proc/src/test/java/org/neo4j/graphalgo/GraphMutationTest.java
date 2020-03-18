@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.utils.ExceptionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,14 +40,24 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public interface GraphMutationTest<CONFIG extends WritePropertyConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
+    default Optional<String> mutateGraphName() {
+        return Optional.empty();
+    }
+
     @Test
     default void testGraphMutation() {
-        String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
-        GraphStoreCatalog.set(
-            graphCreateConfig,
-            graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
-        );
+        String graphName = mutateGraphName().orElseGet(() -> {
+            String loadedGraphName = "loadGraph";
+            GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName(
+                TEST_USERNAME,
+                loadedGraphName
+            );
+            GraphStoreCatalog.set(
+                graphCreateConfig,
+                graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
+            );
+            return loadedGraphName;
+        });
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)
@@ -54,25 +65,31 @@ public interface GraphMutationTest<CONFIG extends WritePropertyConfig & AlgoBase
                 .forEach(mutateMethod -> {
                     Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     try {
-                        mutateMethod.invoke(procedure, loadedGraphName, config);
+                        mutateMethod.invoke(procedure, graphName, config);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
                 })
         );
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, loadedGraphName).getGraph();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).getGraph();
         TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
     @Test
     default void testMutateFailsOnExistingToken() {
-        String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
-        GraphStoreCatalog.set(
-            graphCreateConfig,
-            graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
-        );
+        String graphName = mutateGraphName().orElseGet(() -> {
+            String loadedGraphName = "loadGraph";
+            GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName(
+                TEST_USERNAME,
+                loadedGraphName
+            );
+            GraphStoreCatalog.set(
+                graphCreateConfig,
+                graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
+            );
+            return loadedGraphName;
+        });
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)
@@ -81,11 +98,11 @@ public interface GraphMutationTest<CONFIG extends WritePropertyConfig & AlgoBase
                     Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     try {
                         // write first time
-                        mutateMethod.invoke(procedure, loadedGraphName, config);
+                        mutateMethod.invoke(procedure, graphName, config);
                         // write second time using same `writeProperty`
                         InvocationTargetException ex = assertThrows(
                             InvocationTargetException.class,
-                            () -> mutateMethod.invoke(procedure, loadedGraphName, config)
+                            () -> mutateMethod.invoke(procedure, graphName, config)
                         );
 
 
@@ -98,7 +115,7 @@ public interface GraphMutationTest<CONFIG extends WritePropertyConfig & AlgoBase
                 })
         );
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, loadedGraphName).getGraph();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).getGraph();
         TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 

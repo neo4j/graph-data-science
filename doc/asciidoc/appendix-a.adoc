@@ -52,7 +52,9 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.labelPropagation.stream.estimate`
 | `gds.labelPropagation.stats`
 | `gds.labelPropagation.stats.estimate`
-.6+<.^|<<algorithms-louvain-syntax, Louvain>>
+.8+<.^|<<algorithms-louvain-syntax, Louvain>>
+| `gds.louvain.mutate`
+| `gds.louvain.mutate.estimate`
 | `gds.louvain.write`
 | `gds.louvain.write.estimate`
 | `gds.louvain.stream`
