@@ -247,8 +247,10 @@ public final class GraphStore {
 
         BitSet combinedBitSet = BitSet.newInstance();
         if (this.nodes.maybeLabelInformation.isPresent() && !loadAllNodes) {
+            Map<String, BitSet> labelInformation = this.nodes.maybeLabelInformation.get();
+            validateNodeLabelFilter(nodeLabels, labelInformation);
             nodeLabels.forEach(label -> combinedBitSet.union(
-                this.nodes.maybeLabelInformation.get().get(label)));
+                labelInformation.get(label)));
         }
 
         boolean containsAllNodes = combinedBitSet.cardinality() == this.nodes.nodeCount();
@@ -281,6 +283,16 @@ public final class GraphStore {
         filteredGraphs.forEach(graph -> graph.canRelease(false));
         createdGraphs.addAll(filteredGraphs);
         return UnionGraph.of(filteredGraphs);
+    }
+
+    private void validateNodeLabelFilter(List<String> nodeLabels, Map<String, BitSet> labelInformation) {
+        List<String> invalidLabels = nodeLabels
+            .stream()
+            .filter(label -> !labelInformation.containsKey(label))
+            .collect(Collectors.toList());
+        if (!invalidLabels.isEmpty()) {
+            throw new IllegalArgumentException(String.format("Specified labels %s do not correspond to any of the node projections %s.",invalidLabels, labelInformation.keySet()));
+        }
     }
 
     private void validateInput(Collection<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {

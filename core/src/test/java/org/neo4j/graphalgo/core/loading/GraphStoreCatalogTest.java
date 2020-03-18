@@ -25,23 +25,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
@@ -55,11 +56,16 @@ class GraphStoreCatalogTest {
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, " CREATE (a:A)" +
-                     " CREATE (b:B)" +
+        runQuery(db, " CREATE (a:A {nodeProperty: 33})" +
+                     " CREATE (b:B {nodeProperty: 42})" +
+                     " CREATE (c:Ignore)" +
                      " CREATE (a)-[:T1 {property1: 42, property2: 1337}]->(b)" +
                      " CREATE (a)-[:T2 {property1: 43}]->(b)" +
-                     " CREATE (a)-[:T3 {property2: 1338}]->(b)");
+                     " CREATE (a)-[:T3 {property2: 1338}]->(b)" +
+                     " CREATE (a)-[:T1 {property1: 33}]->(c)" +
+                     " CREATE (c)-[:T1 {property1: 33}]->(a)" +
+                     " CREATE (b)-[:T1 {property1: 33}]->(c)" +
+                     " CREATE (c)-[:T1 {property1: 33}]->(b)");
     }
 
     @AfterEach
@@ -70,12 +76,11 @@ class GraphStoreCatalogTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validFilterParameters")
-    void testFilteringGraphs(String desc, List<String> relTypes, Optional<String> relProperty, String expectedGraph) {
-
+    void testFilteringGraphsByRelationships(String desc, List<String> relTypes, Optional<String> relProperty, String expectedGraph) {
         final GraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
             .graphName("myGraph")
-            .nodeProjections(emptyList())
+            .nodeProjections(nodeProjections(false))
             .relationshipProjections(relationshipProjections())
             .build();
 
@@ -88,6 +93,41 @@ class GraphStoreCatalogTest {
         Graph filteredGraph = GraphStoreCatalog.get("", "myGraph").graphStore().getGraph(ALL_NODE_LABELS, relTypes, relProperty, 1);
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("validFilterParameters")
+    void testFilteringGraphsByNodeLabels(String desc, List<String> relTypes, Optional<String> relProperty, String expectedGraph) {
+        final GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(db)
+            .graphName("myGraph")
+            .nodeProjections(nodeProjections(true))
+            .relationshipProjections(relationshipProjections())
+            .build();
+
+        GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
+
+        final GraphCreateConfig graphCreateConfig = graphLoader.createConfig();
+
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+
+        Graph filteredGraph = GraphStoreCatalog.get("", "myGraph").graphStore().getGraph(Arrays.asList("A", "B"), relTypes, relProperty, 1);
+
+        assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
+    }
+
+    @NotNull
+    private List<NodeProjection> nodeProjections(boolean includeIgnore) {
+        NodeProjection aMapping = NodeProjection.builder()
+            .label("A")
+            .properties(PropertyMappings.of(PropertyMapping.of("nodeProperty", -1D)))
+            .build();
+        NodeProjection bMapping = NodeProjection.builder()
+            .label("B")
+            .properties(PropertyMappings.of(PropertyMapping.of("nodeProperty", -1D)))
+            .build();
+        NodeProjection ignoreMapping = NodeProjection.of("Ignore");
+        return includeIgnore ? Arrays.asList(aMapping, bMapping, ignoreMapping) : Arrays.asList(aMapping, bMapping);
     }
 
     @NotNull
@@ -132,31 +172,31 @@ class GraphStoreCatalogTest {
                 "filterByRelationshipType",
                 singletonList("T1"),
                 Optional.empty(),
-                "(a), (b), (a)-[T1]->(b)"
+                "(a {nodeProperty: 33}), (b {nodeProperty: 42}), (a)-[T1]->(b)"
             ),
             Arguments.of(
                 "filterByMultipleRelationshipTypes",
                 Arrays.asList("T1", "T2"),
                 Optional.empty(),
-                "(a), (b), (a)-[T1]->(b), (a)-[T2]->(b)"
+                "(a {nodeProperty: 33}), (b {nodeProperty: 42}), (a)-[T1]->(b), (a)-[T2]->(b)"
             ),
             Arguments.of(
                 "filterByAnyRelationshipType",
                 singletonList("*"),
                 Optional.empty(),
-                "(a), (b), (a)-[T1]->(b), (a)-[T2]->(b), (a)-[T3]->(b)"
+                "(a {nodeProperty: 33}), (b {nodeProperty: 42}), (a)-[T1]->(b), (a)-[T2]->(b), (a)-[T3]->(b)"
             ),
             Arguments.of(
                 "filterByRelationshipProperty",
                 Arrays.asList("T1", "T2"),
                 Optional.of("property1"),
-                "(a), (b), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b)"
+                "(a {nodeProperty: 33}), (b {nodeProperty: 42}), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b)"
             ),
             Arguments.of(
                 "filterByRelationshipTypeAndProperty",
                 singletonList("T1"),
                 Optional.of("property1"),
-                "(a), (b), (a)-[T1 {property1: 42}]->(b)"
+                "(a {nodeProperty: 33}), (b {nodeProperty: 42}), (a)-[T1 {property1: 42}]->(b)"
             ),
             /*
               As our graph loader is not capable of loading different relationship properties for different types
@@ -168,7 +208,7 @@ class GraphStoreCatalogTest {
                 "includeRelatiionshipTypesThatDoNotHaveTheProperty",
                 singletonList("*"),
                 Optional.of("property1"),
-                "(a), (b), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b), (a)-[T3 {property1: 42.0}]->(b)"
+                "(a {nodeProperty: 33}), (b {nodeProperty: 42}), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b), (a)-[T3 {property1: 42.0}]->(b)"
             )
         );
     }
