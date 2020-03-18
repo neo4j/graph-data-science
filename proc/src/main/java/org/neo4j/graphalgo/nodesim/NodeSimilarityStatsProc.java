@@ -19,11 +19,9 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
-import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -99,26 +97,16 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
             );
         }
 
-        NodeSimilarityResult result = computationResult.result();
-        SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
-        Graph similarityGraph = similarityGraphResult.similarityGraph();
-
-        StatsResult.Builder resultBuilder = new StatsResult.Builder();
-        resultBuilder
-            .withNodesCompared(similarityGraphResult.comparedNodes())
-            .withRelationshipsWritten(similarityGraph.relationshipCount());
-        resultBuilder.withCreateMillis(computationResult.createMillis());
-        resultBuilder.withComputeMillis(computationResult.computeMillis());
-        resultBuilder.withConfig(config);
+        NodeSimilarityProc.NodeSimilarityResultBuilder<StatsResult> resultBuilder =
+            NodeSimilarityProc.resultBuilder(new StatsResult.Builder(), computationResult);
 
         if (shouldComputeHistogram(callContext)) {
             try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
-                resultBuilder.withHistogram(computeHistogram(similarityGraph));
+                resultBuilder.withHistogram(computeHistogram(computationResult.result().graphResult().similarityGraph()));
             }
         }
         return Stream.of(resultBuilder.build());
     }
-
 
     public static final class StatsResult {
 
@@ -146,54 +134,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
             this.configuration = configuration;
         }
 
-        static class Builder extends AbstractResultBuilder<StatsResult> {
-
-            private long nodesCompared = 0L;
-
-            private long postProcessingMillis = -1L;
-
-            private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
-
-            public Builder withNodesCompared(long nodesCompared) {
-                this.nodesCompared = nodesCompared;
-                return this;
-            }
-
-            Builder withHistogram(DoubleHistogram histogram) {
-                this.maybeHistogram = Optional.of(histogram);
-                return this;
-            }
-
-            void setPostProcessingMillis(long postProcessingMillis) {
-                this.postProcessingMillis = postProcessingMillis;
-            }
-
-            ProgressTimer timePostProcessing() {
-                return ProgressTimer.start(this::setPostProcessingMillis);
-            }
-
-            private Map<String, Object> distribution() {
-                if (maybeHistogram.isPresent()) {
-                    DoubleHistogram definitelyHistogram = maybeHistogram.get();
-                    return MapUtil.map(
-                        "min", definitelyHistogram.getMinValue(),
-                        "max", definitelyHistogram.getMaxValue(),
-                        "mean", definitelyHistogram.getMean(),
-                        "stdDev", definitelyHistogram.getStdDeviation(),
-                        "p1", definitelyHistogram.getValueAtPercentile(1),
-                        "p5", definitelyHistogram.getValueAtPercentile(5),
-                        "p10", definitelyHistogram.getValueAtPercentile(10),
-                        "p25", definitelyHistogram.getValueAtPercentile(25),
-                        "p50", definitelyHistogram.getValueAtPercentile(50),
-                        "p75", definitelyHistogram.getValueAtPercentile(75),
-                        "p90", definitelyHistogram.getValueAtPercentile(90),
-                        "p95", definitelyHistogram.getValueAtPercentile(95),
-                        "p99", definitelyHistogram.getValueAtPercentile(99),
-                        "p100", definitelyHistogram.getValueAtPercentile(100)
-                    );
-                }
-                return Collections.emptyMap();
-            }
+        static class Builder extends NodeSimilarityProc.NodeSimilarityResultBuilder<StatsResult> {
 
             @Override
             public StatsResult build() {

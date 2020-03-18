@@ -23,12 +23,11 @@ import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -109,18 +108,11 @@ public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimil
             );
         }
 
-        NodeSimilarityResult result = computationResult.result();
         NodeSimilarity algorithm = computationResult.algorithm();
-        SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
-        Graph similarityGraph = similarityGraphResult.similarityGraph();
+        Graph similarityGraph = computationResult.result().graphResult().similarityGraph();
 
-        WriteResult.Builder resultBuilder = new WriteResult.Builder();
-        resultBuilder
-            .withNodesCompared(similarityGraphResult.comparedNodes())
-            .withRelationshipsWritten(similarityGraphResult.similarityGraph().relationshipCount());
-        resultBuilder.withCreateMillis(computationResult.createMillis());
-        resultBuilder.withComputeMillis(computationResult.computeMillis());
-        resultBuilder.withConfig(config);
+        NodeSimilarityProc.NodeSimilarityResultBuilder<WriteResult> resultBuilder =
+            NodeSimilarityProc.resultBuilder(new WriteResult.Builder(), computationResult);
 
         if (similarityGraph.relationshipCount() > 0) {
             String writeRelationshipType = config.writeRelationshipType();
@@ -187,54 +179,7 @@ public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimil
             this.configuration = configuration;
         }
 
-        static class Builder extends AbstractResultBuilder<WriteResult> {
-
-            private long nodesCompared = 0L;
-
-            private long postProcessingMillis = -1L;
-
-            private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
-
-            public Builder withNodesCompared(long nodesCompared) {
-                this.nodesCompared = nodesCompared;
-                return this;
-            }
-
-            Builder withHistogram(DoubleHistogram histogram) {
-                this.maybeHistogram = Optional.of(histogram);
-                return this;
-            }
-
-            void setPostProcessingMillis(long postProcessingMillis) {
-                this.postProcessingMillis = postProcessingMillis;
-            }
-
-            ProgressTimer timePostProcessing() {
-                return ProgressTimer.start(this::setPostProcessingMillis);
-            }
-
-            private Map<String, Object> distribution() {
-                if (maybeHistogram.isPresent()) {
-                    DoubleHistogram definitelyHistogram = maybeHistogram.get();
-                    return MapUtil.map(
-                        "min", definitelyHistogram.getMinValue(),
-                        "max", definitelyHistogram.getMaxValue(),
-                        "mean", definitelyHistogram.getMean(),
-                        "stdDev", definitelyHistogram.getStdDeviation(),
-                        "p1", definitelyHistogram.getValueAtPercentile(1),
-                        "p5", definitelyHistogram.getValueAtPercentile(5),
-                        "p10", definitelyHistogram.getValueAtPercentile(10),
-                        "p25", definitelyHistogram.getValueAtPercentile(25),
-                        "p50", definitelyHistogram.getValueAtPercentile(50),
-                        "p75", definitelyHistogram.getValueAtPercentile(75),
-                        "p90", definitelyHistogram.getValueAtPercentile(90),
-                        "p95", definitelyHistogram.getValueAtPercentile(95),
-                        "p99", definitelyHistogram.getValueAtPercentile(99),
-                        "p100", definitelyHistogram.getValueAtPercentile(100)
-                    );
-                }
-                return Collections.emptyMap();
-            }
+        static class Builder extends NodeSimilarityProc.NodeSimilarityResultBuilder<WriteResult> {
 
             @Override
             public WriteResult build() {

@@ -28,4 +28,12 @@ import java.util.stream.Stream;
 public interface NodeSimilarityResult {
     Optional<Stream<SimilarityResult>> maybeStreamResult();
     Optional<SimilarityGraphResult> maybeGraphResult();
+
+    default Stream<SimilarityResult> streamResult() {
+        return maybeStreamResult().get();
+    }
+
+    default SimilarityGraphResult graphResult() {
+        return maybeGraphResult().get();
+    }
 }

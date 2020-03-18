@@ -114,7 +114,7 @@ class NodeSimilarityMutateProcTest
                 "createMillis",
                 "nodesCompared ",
                 "relationshipsWritten",
-                "writeMillis",
+                "mutateMillis",
                 "similarityDistribution",
                 "postProcessingMillis",
                 "configuration"
@@ -127,7 +127,7 @@ class NodeSimilarityMutateProcTest
             assertUserInput(row, "writeProperty", WRITE_PROPERTY);
             assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
             assertThat("Missing createMillis", -1L, lessThan(row.getNumber("createMillis").longValue()));
-            assertThat("Missing writeMillis", -1L, equalTo(row.getNumber("writeMillis").longValue()));
+            assertThat("Missing mutateMillis", -1L, lessThan(row.getNumber("mutateMillis").longValue()));
 
             Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");
             assertThat("Missing min", -1.0, lessThan(distribution.get("min")));

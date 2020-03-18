@@ -23,7 +23,6 @@ import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -112,33 +111,30 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
             );
         }
 
-        NodeSimilarityResult result = computationResult.result();
-        SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
+        NodeSimilarityProc.NodeSimilarityResultBuilder<MutateResult> resultBuilder =
+            NodeSimilarityProc.resultBuilder(new MutateResult.Builder(), computationResult);
 
-        MutateResult.Builder resultBuilder = new MutateResult.Builder();
-        resultBuilder
-            .withNodesCompared(similarityGraphResult.comparedNodes())
-            .withRelationshipsWritten(similarityGraphResult.similarityGraph().relationshipCount());
-        resultBuilder.withCreateMillis(computationResult.createMillis());
-        resultBuilder.withComputeMillis(computationResult.computeMillis());
-        resultBuilder.withConfig(config);
+        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+            HugeGraph.Relationships resultRelationships = getRelationships(
+                computationResult,
+                computationResult.result().graphResult(),
+                resultBuilder
+            );
 
-        HugeGraph.Relationships resultRelationships = getRelationships(computationResult, similarityGraphResult, resultBuilder);
+            String writeRelationshipType = config.writeRelationshipType();
+            String writeProperty = config.writeProperty();
 
-        String writeRelationshipType = config.writeRelationshipType();
-        String writeProperty = config.writeProperty();
-
-        computationResult
-            .graphStore()
-            .addRelationshipType(writeRelationshipType, Optional.of(writeProperty), resultRelationships);
-
+            computationResult
+                .graphStore()
+                .addRelationshipType(writeRelationshipType, Optional.of(writeProperty), resultRelationships);
+        }
         return Stream.of(resultBuilder.build());
     }
 
     private HugeGraph.Relationships getRelationships(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
-        MutateResult.Builder resultBuilder
+        NodeSimilarityProc.NodeSimilarityResultBuilder<MutateResult> resultBuilder
     ) {
         HugeGraph.Relationships resultRelationships;
 
@@ -154,7 +150,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
                 computationResult.tracker()
             );
 
-            if (shouldComputeHistogram(callContext)){
+            if (shouldComputeHistogram(callContext)) {
                 DoubleHistogram histogram = new DoubleHistogram(5);
                 topKGraph.forEachNode(nodeId -> {
                     topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
@@ -179,7 +175,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
             resultRelationships = similarityGraph.relationships();
             if (shouldComputeHistogram(callContext)) {
-               resultBuilder.withHistogram(computeHistogram(similarityGraph));
+                resultBuilder.withHistogram(computeHistogram(similarityGraph));
             }
         }
         return resultRelationships;
@@ -188,7 +184,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
     public static class MutateResult {
         public final long createMillis;
         public final long computeMillis;
-        public final long writeMillis;
+        public final long mutateMillis;
         public final long postProcessingMillis;
 
         public final long nodesCompared;
@@ -200,7 +196,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
         MutateResult(
             long createMillis,
             long computeMillis,
-            long writeMillis,
+            long mutateMillis,
             long postProcessingMillis,
             long nodesCompared,
             long relationshipsWritten,
@@ -209,7 +205,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
+            this.mutateMillis = mutateMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.nodesCompared = nodesCompared;
             this.relationshipsWritten = relationshipsWritten;
@@ -217,61 +213,14 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
             this.configuration = configuration;
         }
 
-        static class Builder extends AbstractResultBuilder<MutateResult> {
-
-            private long nodesCompared = 0L;
-
-            private long postProcessingMillis = -1L;
-
-            private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
-
-            public Builder withNodesCompared(long nodesCompared) {
-                this.nodesCompared = nodesCompared;
-                return this;
-            }
-
-            Builder withHistogram(DoubleHistogram histogram) {
-                this.maybeHistogram = Optional.of(histogram);
-                return this;
-            }
-
-            void setPostProcessingMillis(long postProcessingMillis) {
-                this.postProcessingMillis = postProcessingMillis;
-            }
-
-            ProgressTimer timePostProcessing() {
-                return ProgressTimer.start(this::setPostProcessingMillis);
-            }
-
-            private Map<String, Object> distribution() {
-                if (maybeHistogram.isPresent()) {
-                    DoubleHistogram definitelyHistogram = maybeHistogram.get();
-                    return MapUtil.map(
-                        "min", definitelyHistogram.getMinValue(),
-                        "max", definitelyHistogram.getMaxValue(),
-                        "mean", definitelyHistogram.getMean(),
-                        "stdDev", definitelyHistogram.getStdDeviation(),
-                        "p1", definitelyHistogram.getValueAtPercentile(1),
-                        "p5", definitelyHistogram.getValueAtPercentile(5),
-                        "p10", definitelyHistogram.getValueAtPercentile(10),
-                        "p25", definitelyHistogram.getValueAtPercentile(25),
-                        "p50", definitelyHistogram.getValueAtPercentile(50),
-                        "p75", definitelyHistogram.getValueAtPercentile(75),
-                        "p90", definitelyHistogram.getValueAtPercentile(90),
-                        "p95", definitelyHistogram.getValueAtPercentile(95),
-                        "p99", definitelyHistogram.getValueAtPercentile(99),
-                        "p100", definitelyHistogram.getValueAtPercentile(100)
-                    );
-                }
-                return Collections.emptyMap();
-            }
+        static class Builder extends NodeSimilarityProc.NodeSimilarityResultBuilder<MutateResult> {
 
             @Override
             public MutateResult build() {
                 return new MutateResult(
                     createMillis,
                     computeMillis,
-                    writeMillis,
+                    mutateMillis,
                     postProcessingMillis,
                     nodesCompared,
                     relationshipsWritten,
