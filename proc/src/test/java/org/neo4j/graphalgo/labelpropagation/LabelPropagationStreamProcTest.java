@@ -24,6 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -61,6 +63,47 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
             int id = row.getNumber("nodeId").intValue();
             long community = row.getNumber("communityId").longValue();
             actualCommunities.add(id, community);
+        });
+
+        assertEquals(actualCommunities, RESULT);
+    }
+
+    @Test
+    void testStreamWithFilteredNodes() throws Exception {
+        db.shutdown();
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(GraphCreateProc.class, LabelPropagationStreamProc.class);
+
+        String queryWithIgnore = "CREATE (c:Ignore {id:12, seed: 0}) " + DB_CYPHER + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)";
+        runQuery(queryWithIgnore);
+
+        String graphCreateQuery = GdsCypher
+            .call()
+            .withNodeLabels("A", "B", "Ignore")
+            .withNodeProperty("id")
+            .withNodeProperty("seed")
+            .withNodeProperty("weight")
+            .withAnyRelationshipType()
+            .graphCreate("nodeFilteredGraph")
+            .yields("nodeCount", "relationshipCount");
+
+        runQueryWithRowConsumer(graphCreateQuery, row -> {
+            assertEquals(13L, row.getNumber("nodeCount"));
+            assertEquals(12L, row.getNumber("relationshipCount"));
+        });
+
+        String query = GdsCypher.call()
+            .explicitCreation("nodeFilteredGraph")
+            .algo("gds.labelPropagation")
+            .streamMode()
+            .addParameter("nodeLabels", Arrays.asList("A", "B"))
+            .yields();
+
+        List<Long> actualCommunities = new ArrayList<>();
+        runQueryWithRowConsumer(query, row -> {
+            int id = row.getNumber("nodeId").intValue();
+            long community = row.getNumber("communityId").longValue();
+            actualCommunities.add(id - 1, community - 1);
         });
 
         assertEquals(actualCommunities, RESULT);

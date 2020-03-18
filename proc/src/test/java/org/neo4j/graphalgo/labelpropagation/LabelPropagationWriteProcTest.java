@@ -31,12 +31,15 @@ import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.wcc.WccStreamProc;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -194,13 +197,13 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     }
 
     @Test
-    void shouldRunLabelPropagationNaturalOnFilteredNodes() {
+    void shouldRunLabelPropagationNaturalOnFilteredNodes() throws Exception {
+        db.shutdown();
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(GraphCreateProc.class, LabelPropagationWriteProc.class);
 
-        runQuery("MATCH (n) DETACH DELETE n");
-
-        runQuery("CREATE  (c:Ignore {id:12, seed: 0})");
-        runQuery(DB_CYPHER);
-        runQuery("CREATE (a)-[:X]->(c), (c)-[:X]->(b)");
+        String queryWithIgnore = "CREATE (c:Ignore {id:12, seed: 0}) " + DB_CYPHER + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)";
+        runQuery(queryWithIgnore);
 
         String graphCreateQuery = GdsCypher
             .call()
@@ -210,9 +213,12 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             .withNodeProperty("weight")
             .withAnyRelationshipType()
             .graphCreate("nodeFilterGraph")
-            .yields();
+            .yields("nodeCount", "relationshipCount");
 
-        runQuery(graphCreateQuery);
+        runQueryWithRowConsumer(graphCreateQuery, row -> {
+            assertEquals(13L, row.getNumber("nodeCount"));
+            assertEquals(12L, row.getNumber("relationshipCount"));
+        });
 
         String query = GdsCypher.call()
             .explicitCreation("nodeFilterGraph")

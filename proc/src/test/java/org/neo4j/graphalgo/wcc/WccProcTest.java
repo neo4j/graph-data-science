@@ -55,36 +55,36 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         return db;
     }
 
+    protected static final @Language("Cypher") String DB_CYPHER =
+        "CREATE" +
+        " (nA:Label {nodeId: 0, seedId: 42})" +
+        ",(nB:Label {nodeId: 1, seedId: 42})" +
+        ",(nC:Label {nodeId: 2, seedId: 42})" +
+        ",(nD:Label {nodeId: 3, seedId: 42})" +
+        ",(nE:Label2 {nodeId: 4})" +
+        ",(nF:Label2 {nodeId: 5})" +
+        ",(nG:Label2 {nodeId: 6})" +
+        ",(nH:Label2 {nodeId: 7})" +
+        ",(nI:Label2 {nodeId: 8})" +
+        ",(nJ:Label2 {nodeId: 9})" +
+        // {A, B, C, D}
+        ",(nA)-[:TYPE]->(nB)" +
+        ",(nB)-[:TYPE]->(nC)" +
+        ",(nC)-[:TYPE]->(nD)" +
+        ",(nD)-[:TYPE {cost:4.2}]->(nE)" + // threshold UF should split here
+        // {E, F, G}
+        ",(nE)-[:TYPE]->(nF)" +
+        ",(nF)-[:TYPE]->(nG)" +
+        // {H, I}
+        ",(nH)-[:TYPE]->(nI)";
+
     @BeforeEach
     void setupGraph() throws Exception {
 
         db = TestDatabaseCreator.createTestDatabase();
 
-        @Language("Cypher") String cypher =
-            "CREATE" +
-            " (nA:Label {nodeId: 0, seedId: 42})" +
-            ",(nB:Label {nodeId: 1, seedId: 42})" +
-            ",(nC:Label {nodeId: 2, seedId: 42})" +
-            ",(nD:Label {nodeId: 3, seedId: 42})" +
-            ",(nE {nodeId: 4})" +
-            ",(nF {nodeId: 5})" +
-            ",(nG {nodeId: 6})" +
-            ",(nH {nodeId: 7})" +
-            ",(nI {nodeId: 8})" +
-            ",(nJ {nodeId: 9})" +
-            // {A, B, C, D}
-            ",(nA)-[:TYPE]->(nB)" +
-            ",(nB)-[:TYPE]->(nC)" +
-            ",(nC)-[:TYPE]->(nD)" +
-            ",(nD)-[:TYPE {cost:4.2}]->(nE)" + // threshold UF should split here
-            // {E, F, G}
-            ",(nE)-[:TYPE]->(nF)" +
-            ",(nF)-[:TYPE]->(nG)" +
-            // {H, I}
-            ",(nH)-[:TYPE]->(nI)";
-
         registerProcedures(WccStreamProc.class, WccWriteProc.class, WccStatsProc.class, WccMutateProc.class, GraphCreateProc.class);
-        runQuery(cypher);
+        runQuery(DB_CYPHER);
     }
 
     @AfterEach

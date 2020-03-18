@@ -26,18 +26,22 @@ import org.neo4j.graphalgo.CommunityHelper;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -109,6 +113,42 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
         });
 
         CommunityHelper.assertCommunities(communities, EXPECTED_COMMUNITIES);
+    }
+
+    @Test
+    void testStreamRunsOnLoadedGraphWithNodeLabelFilter() throws Exception {
+        db.shutdown();
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(GraphCreateProc.class, WccStreamProc.class);
+
+        String queryWithIgnore = "CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)";
+        runQuery(queryWithIgnore);
+
+        String graphCreateQuery = GdsCypher
+            .call()
+            .withNodeLabels("Label", "Label2", "Ignore")
+            .withAnyRelationshipType()
+            .graphCreate("nodeFilterGraph")
+            .yields();
+
+        runQueryWithRowConsumer(graphCreateQuery, row -> {
+            assertEquals(11L, row.getNumber("nodeCount"));
+            assertEquals(11L, row.getNumber("relationshipCount"));
+        });
+
+        String query = GdsCypher.call()
+            .explicitCreation("nodeFilterGraph")
+            .algo("wcc")
+            .streamMode()
+            .addParameter("nodeLabels", Arrays.asList("Label", "Label2"))
+            .yields("nodeId", "componentId");
+
+        Set<Long> actualCommunities = new HashSet<>();
+        runQueryWithRowConsumer(query, row -> {
+            actualCommunities.add(row.getNumber("componentId").longValue());
+        });
+
+        assertEquals(3, actualCommunities.size());
     }
 
     @Test

@@ -22,10 +22,13 @@ package org.neo4j.graphalgo.wcc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -120,6 +123,41 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             .algo("wcc")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
+            .yields("componentCount");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(3L, row.getNumber("componentCount"));
+        });
+    }
+
+    @Test
+    void testWriteWithNodeLabelFilter() throws Exception {
+        db.shutdown();
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(GraphCreateProc.class, WccWriteProc.class);
+
+        String queryWithIgnore = "CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)";
+        runQuery(queryWithIgnore);
+
+        String graphCreateQuery = GdsCypher
+            .call()
+            .withNodeLabels("Label", "Label2", "Ignore")
+            .withAnyRelationshipType()
+            .graphCreate("nodeFilterGraph")
+            .yields("nodeCount", "relationshipCount");
+
+        runQueryWithRowConsumer(graphCreateQuery, row -> {
+            assertEquals(11L, row.getNumber("nodeCount"));
+            assertEquals(11L, row.getNumber("relationshipCount"));
+        });
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation("nodeFilterGraph")
+            .algo("wcc")
+            .writeMode()
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("nodeLabels", Arrays.asList("Label", "Label2"))
             .yields("componentCount");
 
         runQueryWithRowConsumer(query, row -> {
@@ -237,7 +275,7 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
         });
 
         runQueryWithRowConsumer(
-            "MATCH (n) RETURN collect(distinct n." + WRITE_PROPERTY + ") AS components ",
+            "MATCH (n) RETURN collect(DISTINCT n." + WRITE_PROPERTY + ") AS components ",
             row -> assertThat((List<Long>) row.get("components"), containsInAnyOrder(0L, 1L, 2L))
         );
     }
