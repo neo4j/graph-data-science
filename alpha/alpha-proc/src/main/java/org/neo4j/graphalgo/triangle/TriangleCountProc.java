@@ -301,7 +301,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(5)).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
                 averageClusteringCoefficient,
-                ((WritePropertyConfig) config).writeProperty(),
+                config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : "",
                 clusteringCoefficientProperty
             );
         }

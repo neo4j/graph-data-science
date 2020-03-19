@@ -54,12 +54,13 @@ public class CentralityScore {
         public static final class Builder extends AbstractResultBuilder<Stats> {
 
             public CentralityScore.Stats build() {
+
                 return new CentralityScore.Stats(
                     nodeCount,
                     createMillis,
                     computeMillis,
                     writeMillis,
-                    ((WritePropertyConfig) config).writeProperty()
+                    config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : ""
                 );
             }
         }

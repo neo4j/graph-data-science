@@ -79,7 +79,7 @@ public class PageRankScore {
                     computeMillis,
                     writeMillis,
                     dampingFactor,
-                    ((WritePropertyConfig) config).writeProperty()
+                    config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : ""
                 );
             }
         }

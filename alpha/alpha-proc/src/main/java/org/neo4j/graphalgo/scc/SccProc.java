@@ -254,7 +254,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getMinNonZeroValue()).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getMaxValue()).orElse(0L),
-                ((WritePropertyConfig) config).writeProperty()
+                config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : ""
             );
         }
 
