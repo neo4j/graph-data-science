@@ -296,7 +296,7 @@ final class PageRankTest extends AlgoTestBase {
     private void assertMemoryEstimation(final long nodeCount, final int concurrency) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
 
-        final PageRankFactory pageRank = new PageRankFactory(PageRankAlgorithmType.NON_WEIGHTED);
+        final PageRankFactory<PageRankStreamConfig> pageRank = new PageRankFactory<>(PageRankAlgorithmType.NON_WEIGHTED);
 
         long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
         final MemoryRange actual = pageRank
