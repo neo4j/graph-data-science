@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -39,6 +40,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -77,7 +79,7 @@ class GraphStoreCatalogTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("validFilterParameters")
     void testFilteringGraphsByRelationships(String desc, List<String> relTypes, Optional<String> relProperty, String expectedGraph) {
-        final GraphLoader graphLoader = new StoreLoaderBuilder()
+        GraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
             .graphName("myGraph")
             .nodeProjections(nodeProjections(false))
@@ -86,7 +88,7 @@ class GraphStoreCatalogTest {
 
         GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
 
-        final GraphCreateConfig graphCreateConfig = graphLoader.createConfig();
+        GraphCreateConfig graphCreateConfig = graphLoader.createConfig();
 
         GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
@@ -98,7 +100,7 @@ class GraphStoreCatalogTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("validFilterParameters")
     void testFilteringGraphsByNodeLabels(String desc, List<String> relTypes, Optional<String> relProperty, String expectedGraph) {
-        final GraphLoader graphLoader = new StoreLoaderBuilder()
+        GraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
             .graphName("myGraph")
             .nodeProjections(nodeProjections(true))
@@ -107,13 +109,49 @@ class GraphStoreCatalogTest {
 
         GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
 
-        final GraphCreateConfig graphCreateConfig = graphLoader.createConfig();
+        GraphCreateConfig graphCreateConfig = graphLoader.createConfig();
 
         GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
         Graph filteredGraph = GraphStoreCatalog.get("", "myGraph").graphStore().getGraph(Arrays.asList("A", "B"), relTypes, relProperty, 1);
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
+    }
+
+    @Test
+    void testFilterNodesWithAllProjectionIncluded() {
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(db)
+            .graphName("myGraph")
+            .putNodeProjectionsWithIdentifier("A", NodeProjection.of("A", PropertyMappings.of()))
+            .putNodeProjectionsWithIdentifier("All", NodeProjection.all())
+            .loadAnyRelationshipType()
+            .build();
+
+        GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
+
+        GraphCreateConfig graphCreateConfig = graphLoader.createConfig();
+
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+
+        Graph filteredAGraph = GraphStoreCatalog
+            .get("", "myGraph")
+            .graphStore()
+            .getGraph(Collections.singletonList("A"), Collections.singletonList("*"), Optional.empty(), 1);
+
+        assertGraphEquals(fromGdl("(a)"), filteredAGraph);
+
+        Graph filteredAllGraph = GraphStoreCatalog
+            .get("", "myGraph")
+            .graphStore()
+            .getGraph(Collections.singletonList("All"), Collections.singletonList("*"), Optional.empty(), 1);
+
+        Graph nonFilteredGraph = GraphStoreCatalog
+            .get("", "myGraph")
+            .graphStore()
+            .getGraph(Collections.singletonList("*"), Collections.singletonList("*"), Optional.empty(), 1);
+
+        assertGraphEquals(filteredAllGraph, nonFilteredGraph);
     }
 
     @NotNull
