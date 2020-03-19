@@ -126,7 +126,7 @@ public class LabelPropagationMutateProc extends MutateProc<LabelPropagation, Lab
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<MutateResult> {
 
             Builder(long nodeCount, ProcedureCallContext context, AllocationTracker tracker) {
-                super(nodeCount, context, tracker);
+                super(context, tracker);
             }
 
             @Override
