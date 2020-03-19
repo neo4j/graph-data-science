@@ -31,7 +31,6 @@ import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-// TODO: Update the tests after https://trello.com/c/EWgz8KfE is fixed
 class SpanningTreeDocTest extends BaseProcTest {
     private static final String NL = System.lineSeparator();
 
@@ -90,22 +89,21 @@ class SpanningTreeDocTest extends BaseProcTest {
 
         runQuery(spanningTreeQuery);
 
-        // Can't assert on the written cost because of currently open bug: https://trello.com/c/EWgz8KfE
         String query = "MATCH path = (n:Place {id: 'D'})-[:MINST*]-()" + NL +
                        "WITH relationships(path) AS rels" + NL +
                        "UNWIND rels AS rel" + NL +
                        "WITH DISTINCT rel AS rel" + NL +
-                       "RETURN startNode(rel).id AS source, endNode(rel).id AS destination";
+                       "RETURN startNode(rel).id AS source, endNode(rel).id AS destination, rel.writeCost AS cost";
 
         String actual = runQuery(query, Result::resultAsString);
-        String expected = "+----------------------+" + NL +
-                          "| source | destination |" + NL +
-                          "+----------------------+" + NL +
-                          "| \"D\"    | \"B\"         |" + NL +
-                          "| \"B\"    | \"A\"         |" + NL +
-                          "| \"A\"    | \"C\"         |" + NL +
-                          "| \"C\"    | \"E\"         |" + NL +
-                          "+----------------------+" + NL +
+        String expected = "+-----------------------------+" + NL +
+                          "| source | destination | cost |" + NL +
+                          "+-----------------------------+" + NL +
+                          "| \"D\"    | \"B\"         | 4.0  |" + NL +
+                          "| \"B\"    | \"A\"         | 1.0  |" + NL +
+                          "| \"A\"    | \"C\"         | 2.0  |" + NL +
+                          "| \"C\"    | \"E\"         | 5.0  |" + NL +
+                          "+-----------------------------+" + NL +
                           "4 rows" + NL;
 
         assertEquals(expected, actual);
@@ -133,22 +131,21 @@ class SpanningTreeDocTest extends BaseProcTest {
 
         runQuery(spanningTreeQuery);
 
-        // Can't assert on the written cost because of currently open bug: https://trello.com/c/EWgz8KfE
         String query = "MATCH path = (n:Place {id: 'D'})-[:MAXST*]-()" + NL +
                        "WITH relationships(path) AS rels" + NL +
                        "UNWIND rels AS rel" + NL +
                        "WITH DISTINCT rel AS rel" + NL +
-                       "RETURN startNode(rel).id AS source, endNode(rel).id AS destination";
+                       "RETURN startNode(rel).id AS source, endNode(rel).id AS destination, rel.writeCost AS cost";
 
         String actual = runQuery(query, Result::resultAsString);
-        String expected = "+----------------------+" + NL +
-                          "| source | destination |" + NL +
-                          "+----------------------+" + NL +
-                          "| \"D\"    | \"B\"         |" + NL +
-                          "| \"D\"    | \"E\"         |" + NL +
-                          "| \"E\"    | \"C\"         |" + NL +
-                          "| \"C\"    | \"A\"         |" + NL +
-                          "+----------------------+" + NL +
+        String expected = "+-----------------------------+" + NL +
+                          "| source | destination | cost |" + NL +
+                          "+-----------------------------+" + NL +
+                          "| \"D\"    | \"B\"         | 4.0  |" + NL +
+                          "| \"D\"    | \"E\"         | 6.0  |" + NL +
+                          "| \"E\"    | \"C\"         | 5.0  |" + NL +
+                          "| \"C\"    | \"A\"         | 2.0  |" + NL +
+                          "+-----------------------------+" + NL +
                           "4 rows" + NL;
 
         assertEquals(expected, actual);
