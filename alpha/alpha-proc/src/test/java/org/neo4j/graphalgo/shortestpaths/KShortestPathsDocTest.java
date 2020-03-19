@@ -161,7 +161,7 @@ class KShortestPathsDocTest extends BaseProcTest {
         String query = "MATCH (start:Loc{name:'A'}), (end:Loc{name:'F'})" +
                        " CALL gds.alpha.kShortestPaths.write({ " +
                        "  nodeQuery:'MATCH(n:Loc) WHERE not n.name = \"C\" RETURN id(n) as id'," +
-                       "  relationshipQuery:'MATCH (n:Loc)-[r:ROAD]->(m:Loc) WHERE not n.name = \"C\" and  not m.name = \"C\" RETURN id(n) as source, id(m) as target, r.cost as cost'," +
+                       "  relationshipQuery:'MATCH (n:Loc)-[r:ROAD]->(m:Loc) WHERE NOT n.name = \"C\" AND  NOT m.name = \"C\" RETURN id(n) AS source, id(m) AS target, r.cost AS cost'," +
                        "  startNode: start, " +
                        "  endNode: end, " +
                        "  k: 3," +
