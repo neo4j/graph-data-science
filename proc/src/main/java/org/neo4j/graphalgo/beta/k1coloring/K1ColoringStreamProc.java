@@ -19,10 +19,11 @@
  */
 package org.neo4j.graphalgo.beta.k1coloring;
 
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,31 +31,20 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.beta.k1coloring.K1ColoringProc.K1_COLORING_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringStreamConfig> {
+public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, K1ColoringStreamProc.StreamResult, K1ColoringStreamConfig> {
 
     @Procedure(name = "gds.beta.k1coloring.stream", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(K1_COLORING_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<K1Coloring, HugeLongArray, K1ColoringStreamConfig> compute = compute(graphNameOrConfig, configuration);
-
-        return Optional.ofNullable(compute.result())
-            .map(coloring -> {
-                Graph graph = compute.graph();
-                return LongStream.range(0, graph.nodeCount())
-                    .mapToObj(nodeId -> {
-                        long neoNodeId = graph.toOriginalNodeId(nodeId);
-                        return new StreamResult(neoNodeId, coloring.get(nodeId));
-                    });
-
-            }).orElse(Stream.empty());
+        return stream(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.beta.k1coloring.stream.estimate", mode = READ)
@@ -74,6 +64,18 @@ public class K1ColoringStreamProc extends K1ColoringBaseProc<K1ColoringStreamCon
         CypherMapWrapper config
     ) {
         return K1ColoringStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected AlgorithmFactory<K1Coloring, K1ColoringStreamConfig> algorithmFactory(K1ColoringStreamConfig config) {
+        return new K1ColoringFactory<>();
+    }
+
+    @Override
+    protected StreamResult streamResult(
+        long nodeId, long originalNodeId, HugeLongArray computationResult
+    ) {
+        return new StreamResult(originalNodeId, computationResult.get(nodeId));
     }
 
     public static class StreamResult {

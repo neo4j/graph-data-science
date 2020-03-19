@@ -45,6 +45,7 @@ public abstract class WriteProc<
         AbstractResultBuilder<PROC_RESULT> builder = resultBuilder(computeResult)
             .withCreateMillis(computeResult.createMillis())
             .withComputeMillis(computeResult.computeMillis())
+            .withNodeCount(computeResult.graph().nodeCount())
             .withConfig(config);
 
         if (computeResult.isGraphEmpty()) {

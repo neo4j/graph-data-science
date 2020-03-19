@@ -19,12 +19,16 @@
  */
 package org.neo4j.graphalgo.beta.k1coloring;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -33,14 +37,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.beta.k1coloring.K1ColoringProc.K1_COLORING_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfig> {
+public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1ColoringWriteProc.WriteResult, K1ColoringWriteConfig> {
     private static final String COLOR_COUNT_FIELD_NAME = "colorCount";
 
     @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(K1_COLORING_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -60,24 +65,26 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-    private Stream<WriteResult> write(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> compute) {
-        K1ColoringWriteConfig config = compute.config();
-        K1Coloring result = compute.algorithm();
-        WriteResultBuilder builder = new WriteResultBuilder();
+    @Override
+    protected PropertyTranslator<HugeLongArray> nodePropertyTranslator(ComputationResult computationResult) {
+        return HugeLongArray.Translator.INSTANCE;
+    }
+
+
+    @Override
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computeResult) {
+        WriteResult.Builder builder = new WriteResult.Builder(callContext, computeResult.tracker());
 
         if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
-            builder.withColorCount(result.usedColors().cardinality());
+            builder.withColorCount(computeResult.algorithm().usedColors().cardinality());
         }
 
-        builder
-            .withRanIterations(result.ranIterations())
-            .withDidConverge(result.didConverge())
-            .withCreateMillis(compute.createMillis())
-            .withComputeMillis(compute.computeMillis())
-            .withConfig(config);
+        return K1ColoringProc.resultBuilder(builder, computeResult);
+    }
 
-        writeNodeProperties(builder, compute);
-        return Stream.of(builder.build());
+    @Override
+    protected AlgorithmFactory<K1Coloring, K1ColoringWriteConfig> algorithmFactory(K1ColoringWriteConfig config) {
+        return new K1ColoringFactory<>();
     }
 
     @Override
@@ -88,48 +95,6 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
         CypherMapWrapper config
     ) {
         return K1ColoringWriteConfig.of(username, graphName, maybeImplicitCreate, config);
-    }
-
-    @Override
-    protected PropertyTranslator<HugeLongArray> nodePropertyTranslator(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult) {
-        return HugeLongArray.Translator.INSTANCE;
-    }
-
-    public static class WriteResultBuilder extends AbstractResultBuilder<WriteResult> {
-
-        private long colorCount = -1L;
-        private long ranIterations;
-        private boolean didConverge;
-
-        WriteResultBuilder withColorCount(long colorCount) {
-            this.colorCount = colorCount;
-            return this;
-        }
-
-        WriteResultBuilder withRanIterations(long ranIterations) {
-            this.ranIterations = ranIterations;
-            return this;
-        }
-
-        WriteResultBuilder withDidConverge(boolean didConverge) {
-            this.didConverge = didConverge;
-            return this;
-        }
-
-        @Override
-        public WriteResult build() {
-            return new WriteResult(
-                createMillis,
-                computeMillis,
-                writeMillis,
-                nodePropertiesWritten,
-                colorCount,
-                ranIterations,
-                didConverge,
-                config.toMap()
-            );
-        }
-
     }
 
     public static class WriteResult {
@@ -174,6 +139,30 @@ public class K1ColoringWriteProc extends K1ColoringBaseProc<K1ColoringWriteConfi
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
             this.configuration = configuration;
+        }
+
+        static class Builder extends K1ColoringProc.K1ColoringResultBuilder<WriteResult> {
+
+            Builder(
+                ProcedureCallContext context,
+                AllocationTracker tracker
+            ) {
+                super(context, tracker);
+            }
+
+            @Override
+            protected WriteResult buildResult() {
+                return new WriteResult(
+                    createMillis,
+                    computeMillis,
+                    writeMillis,
+                    nodeCount,
+                    colorCount,
+                    ranIterations,
+                    didConverge,
+                    config.toMap()
+                );
+            }
         }
     }
 
