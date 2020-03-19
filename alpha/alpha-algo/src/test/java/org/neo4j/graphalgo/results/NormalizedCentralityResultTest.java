@@ -24,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
+import org.neo4j.graphalgo.result.CentralityResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;

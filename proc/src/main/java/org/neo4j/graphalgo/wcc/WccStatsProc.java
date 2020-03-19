@@ -66,7 +66,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computeResult) {
         return WccProc.resultBuilder(
-            new StatsResult.Builder(computeResult.graph().nodeCount(), callContext, computeResult.tracker()),
+            new StatsResult.Builder(callContext, computeResult.tracker()),
             computeResult
         );
     }
@@ -113,8 +113,11 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
 
         static class Builder extends AbstractCommunityResultBuilder<StatsResult> {
 
-            Builder(long nodeCount, ProcedureCallContext context, AllocationTracker tracker) {
-                super(nodeCount, context, tracker);
+            Builder(
+                ProcedureCallContext context,
+                AllocationTracker tracker
+            ) {
+                super(context, tracker);
             }
 
             @Override

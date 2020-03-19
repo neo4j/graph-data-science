@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.shortestpaths.DijkstraConfig;
 import org.neo4j.graphalgo.impl.shortestpaths.ShortestPathDijkstra;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -83,8 +83,8 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
             configuration
         );
         DijkstraResult.Builder builder = DijkstraResult.builder();
-        builder.setCreateMillis(computationResult.createMillis());
-        builder.setComputeMillis(computationResult.computeMillis());
+        builder.withCreateMillis(computationResult.createMillis());
+        builder.withComputeMillis(computationResult.computeMillis());
 
         Graph graph = computationResult.graph();
         ShortestPathDijkstra dijkstra = computationResult.algorithm();
@@ -97,7 +97,7 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
         builder.withNodeCount(dijkstra.getPathLength())
                .withTotalCosts(dijkstra.getTotalCost());
 
-        try (ProgressTimer timer = builder.timeWrite()) {
+        try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             final IntArrayDeque finalPath = dijkstra.getFinalPath();
             final double[] finalPathCost = dijkstra.getFinalPathCosts();
             dijkstra.release();

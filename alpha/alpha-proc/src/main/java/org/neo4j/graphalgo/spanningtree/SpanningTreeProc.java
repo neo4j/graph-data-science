@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
@@ -101,7 +102,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
         }
 
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
-        builder.timeWrite(() -> {
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             RelationshipExporter.of(
                 api,
                 new SpanningGraph(graph, spanningTree),
@@ -110,9 +111,10 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
                 .withLog(log)
                 .build()
                 .write(config.writeProperty(), config.weightWriteProperty());
-        });
-        builder.setComputeMillis(computationResult.computeMillis());
-        builder.setCreateMillis(computationResult.createMillis());
+
+        }
+        builder.withComputeMillis(computationResult.computeMillis());
+        builder.withCreateMillis(computationResult.createMillis());
         return Stream.of(builder.build());
     }
 

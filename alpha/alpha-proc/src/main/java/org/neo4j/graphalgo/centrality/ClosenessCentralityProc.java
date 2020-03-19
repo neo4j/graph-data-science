@@ -25,16 +25,17 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.closeness.ClosenessCentralityConfig;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -94,7 +95,7 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
 
         AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
             .withNodeCount(graph.nodeCount())
-            .withWriteProperty(config.writeProperty())
+            .withConfig(config)
             .withComputeMillis(computationResult.computeMillis())
             .withCreateMillis(computationResult.createMillis());
 
@@ -103,13 +104,13 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
             return Stream.of(builder.build());
         }
 
-        builder.timeWrite(() -> {
+        try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, computationResult.config().writeConcurrency())
                 .build();
             algorithm.export(config.writeProperty(), exporter);
-        });
+        }
 
         graph.release();
         return Stream.of(builder.build());

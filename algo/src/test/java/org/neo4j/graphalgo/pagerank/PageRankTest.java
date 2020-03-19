@@ -36,7 +36,7 @@ import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.results.CentralityResult;
+import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;

@@ -75,11 +75,10 @@ final class LabelPropagationProc {
         boolean didConverge;
 
         LabelPropagationResultBuilder(
-            long nodeCount,
             ProcedureCallContext callContext,
             AllocationTracker tracker
         ) {
-            super(nodeCount, callContext, tracker);
+            super(callContext, tracker);
         }
 
         LabelPropagationResultBuilder<PROC_RESULT> ranIterations(long iterations) {

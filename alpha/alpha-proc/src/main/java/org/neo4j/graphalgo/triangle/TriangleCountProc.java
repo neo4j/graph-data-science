@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -36,7 +37,8 @@ import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
-import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -85,9 +87,15 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         Graph graph = computationResult.graph();
         IntersectingTriangleCount algorithm = computationResult.algorithm();
 
-        TriangleCountResultBuilder builder = new TriangleCountResultBuilder(true, true, tracker);
-        builder.withCreateMillis(computationResult.createMillis());
-        builder.withComputeMillis(computationResult.computeMillis());
+        TriangleCountResultBuilder builder = new TriangleCountResultBuilder(
+            callContext,
+            computationResult.tracker()
+        )
+            .buildCommunityCount(true)
+            .buildHistogram(true);
+
+        builder.withNodeCount(graph.nodeCount())
+            .withConfig(config);
 
         if (graph.isEmpty()) {
             graph.release();
@@ -101,7 +109,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         PagedAtomicIntegerArray triangles = algorithm.getTriangles();
         String clusteringCoefficientProperty = config.clusteringCoefficientProperty();
 
-        try (ProgressTimer ignored = builder.timeWrite()) {
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             if (clusteringCoefficientProperty != null) {
                 // huge with coefficients
                 exporter.write(
@@ -129,12 +137,14 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         }
 
         return Stream.of(builder
-            .withClusteringCoefficientProperty(clusteringCoefficientProperty)
             .withAverageClusteringCoefficient(algorithm.getAverageCoefficient())
             .withTriangleCount(algorithm.getTriangleCount())
+            .withClusteringCoefficientProperty(clusteringCoefficientProperty)
             .withCommunityFunction(triangles::get)
-            .withWriteProperty(config.writeProperty())
-            .withNodeCount(graph.nodeCount())
+            .withConfig(config)
+            .withCreateMillis(computationResult.createMillis())
+            .withComputeMillis(computationResult.computeMillis())
+            .withNodePropertiesWritten(exporter.propertiesWritten())
             .build()
         );
     }
@@ -239,16 +249,12 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
 
         private double averageClusteringCoefficient = .0;
         private long triangleCount = 0;
-        private String writeProperty;
         private String clusteringCoefficientProperty;
 
-        protected TriangleCountResultBuilder(
-            boolean buildHistogram,
-            boolean buildCommunityCount,
-            AllocationTracker tracker
-        ) {
-            super(buildHistogram, buildCommunityCount, tracker);
+        public TriangleCountResultBuilder(ProcedureCallContext callContext, AllocationTracker tracker) {
+            super(callContext, tracker);
         }
+
 
         public TriangleCountResultBuilder withAverageClusteringCoefficient(double averageClusteringCoefficient) {
             this.averageClusteringCoefficient = averageClusteringCoefficient;
@@ -260,8 +266,13 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
             return this;
         }
 
-        public TriangleCountResultBuilder withWriteProperty(String writeProperty) {
-            this.writeProperty = writeProperty;
+        public TriangleCountResultBuilder buildHistogram(boolean buildHistogram) {
+            this.buildHistogram = buildHistogram;
+            return this;
+        }
+
+        public TriangleCountResultBuilder buildCommunityCount(boolean buildCommunityCount) {
+            this.buildCommunityCount = buildCommunityCount;
             return this;
         }
 
@@ -290,7 +301,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(5)).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
                 averageClusteringCoefficient,
-                writeProperty,
+                config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : "",
                 clusteringCoefficientProperty
             );
         }

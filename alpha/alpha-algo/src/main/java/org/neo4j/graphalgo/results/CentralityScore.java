@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.results;
 
+import org.neo4j.graphalgo.config.WritePropertyConfig;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
+
 public class CentralityScore {
 
     public final long nodeId;
@@ -51,12 +54,13 @@ public class CentralityScore {
         public static final class Builder extends AbstractResultBuilder<Stats> {
 
             public CentralityScore.Stats build() {
+
                 return new CentralityScore.Stats(
                     nodeCount,
                     createMillis,
                     computeMillis,
                     writeMillis,
-                    writeProperty
+                    config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : ""
                 );
             }
         }

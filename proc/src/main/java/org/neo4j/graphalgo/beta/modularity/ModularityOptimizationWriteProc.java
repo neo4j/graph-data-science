@@ -71,7 +71,6 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
         Graph graph = computationResult.graph();
 
         AbstractResultBuilder<WriteResult> builder = new WriteResultBuilder(
-            graph.nodeCount(),
             callContext,
             computationResult.tracker()
         )
@@ -79,6 +78,7 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
             .withRanIterations(result.getIterations())
             .withDidConverge(result.didConverge())
             .withCommunityFunction(result::getCommunityId)
+            .withNodeCount(graph.nodeCount())
             .withConfig(computationResult.config());
 
         if (graph.isEmpty()) {
@@ -163,11 +163,10 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
         private double modularity;
 
         WriteResultBuilder(
-            long nodeCount,
             ProcedureCallContext context,
             AllocationTracker tracker
         ) {
-            super(nodeCount, context, tracker);
+            super(context, tracker);
         }
 
         WriteResultBuilder withRanIterations(long ranIterations) {

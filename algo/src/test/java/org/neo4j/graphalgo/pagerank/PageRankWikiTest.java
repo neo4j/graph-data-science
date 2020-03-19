@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.results.CentralityResult;
+import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;

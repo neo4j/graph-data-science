@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
-import org.neo4j.graphalgo.results.CentralityResult;
+import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.logging.Log;
 
 import java.util.ArrayList;

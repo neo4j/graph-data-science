@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.pagerank.PageRank;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphalgo.results.PageRankScore;
 import org.neo4j.graphalgo.utils.CentralityUtils;
@@ -67,6 +67,7 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
         Graph graph = computationResult.graph();
 
         AbstractResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder()
+            .withConfig(config)
             .withCreateMillis(computationResult.createMillis())
             .withComputeMillis(computationResult.computeMillis());
 
@@ -79,7 +80,7 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
 
         // NOTE: could not use `writeNodeProperties` just yet, as this requires changes to
         //  the Page Rank class and therefore to all product Page Rank procs as well.
-        try (ProgressTimer ignored = statsBuilder.timeWrite()) {
+        try(ProgressTimer ignore = ProgressTimer.start(statsBuilder::withWriteMillis)) {
             NodePropertyExporter exporter = NodePropertyExporter
                 .of(api, graph, algo.getTerminationFlag())
                 .withLog(log)

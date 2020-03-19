@@ -46,7 +46,6 @@ final class AbstractCommunityResultBuilderTest {
     @Test
     void countCommunitySizesOverHugeCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            42,
             procedureCallContext("communityCount", "communityDistribution"),
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
@@ -63,13 +62,13 @@ final class AbstractCommunityResultBuilderTest {
 
         builder
             .withCommunityFunction(n -> n % 10L)
+            .withNodeCount(42)
             .build();
     }
 
     @Test
     void countCommunitySizesOverPresizedHugeCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            42,
             procedureCallContext("communityCount", "communityDistribution"),
             (maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
@@ -86,13 +85,13 @@ final class AbstractCommunityResultBuilderTest {
         builder
             .withExpectedNumberOfCommunities(10L)
             .withCommunityFunction(n -> n % 10L)
+            .withNodeCount(42)
             .build();
     }
 
     @Test
     void countCommunitySizesOverIntegerCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            42,
             procedureCallContext("communityCount", "communityDistribution"),
             (maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
@@ -108,13 +107,13 @@ final class AbstractCommunityResultBuilderTest {
 
         builder
             .withCommunityFunction(n -> (n / 10) + 1)
+            .withNodeCount(42)
             .build();
     }
 
     @Test
     void countCommunitySizesOverLongCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            42,
             procedureCallContext("communityCount", "communityDistribution"),
             (maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
@@ -131,13 +130,13 @@ final class AbstractCommunityResultBuilderTest {
         builder
             .withExpectedNumberOfCommunities(42)
             .withCommunityFunction(n -> (int) (n / 10) + 1)
+            .withNodeCount(42)
             .build();
     }
 
     @Test
     void doNotGenerateCommunityCountOrHistogram() {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            42,
             procedureCallContext(),
             (maybeCommunityCount, maybeHistogram) -> {
             assertFalse(maybeCommunityCount.isPresent());
@@ -145,13 +144,13 @@ final class AbstractCommunityResultBuilderTest {
         });
         builder
             .withCommunityFunction(n -> n % 10L)
+            .withNodeCount(42)
             .build();
     }
 
     @Test
     void doNotGenerateHistogram() {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            42,
             procedureCallContext("communityCount"),
             (maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
@@ -160,6 +159,7 @@ final class AbstractCommunityResultBuilderTest {
 
         builder
             .withCommunityFunction(n -> n % 10L)
+            .withNodeCount(42)
             .build();
     }
 
@@ -179,12 +179,10 @@ final class AbstractCommunityResultBuilderTest {
 
 
     private AbstractCommunityResultBuilder<Void> builder(
-        long nodeCount,
         ProcedureCallContext context,
         BiConsumer<OptionalLong, Optional<Histogram>> check
     ) {
         return new AbstractCommunityResultBuilder<Void>(
-            nodeCount,
             context,
             AllocationTracker.EMPTY
         ) {

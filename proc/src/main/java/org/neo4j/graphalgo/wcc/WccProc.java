@@ -66,6 +66,7 @@ final class WccProc {
         AbstractCommunityResultBuilder<PROC_RESULT> procResultBuilder,
         AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult
     ) {
+        procResultBuilder.withNodeCount(computationResult.graph().nodeCount());
         return procResultBuilder.withCommunityFunction(!computationResult.isGraphEmpty() ? computationResult.result()::setIdOf : null);
     }
 

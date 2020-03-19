@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
@@ -93,7 +94,7 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
         }
 
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
-        builder.timeWrite(() -> {
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             final NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, TerminationFlag.wrap(transaction))
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
@@ -102,10 +103,14 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
             exporter.write(
                 config.writeProperty(),
                 spanningTree,
-                SpanningTree.TRANSLATOR);
-        });
-        builder.setComputeMillis(computationResult.computeMillis());
-        builder.setCreateMillis(computationResult.createMillis());
+                SpanningTree.TRANSLATOR
+            );
+
+            builder.withNodePropertiesWritten(exporter.propertiesWritten());
+        }
+
+        builder.withComputeMillis(computationResult.computeMillis());
+        builder.withCreateMillis(computationResult.createMillis());
         return Stream.of(builder.build());
     }
 

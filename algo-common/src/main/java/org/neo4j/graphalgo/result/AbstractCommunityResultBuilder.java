@@ -17,36 +17,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.results;
+package org.neo4j.graphalgo.result;
 
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.HdrHistogram.Histogram;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.LongUnaryOperator;
 
-public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBuilder<R> {
+public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 
     private static final long EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT = 4L;
 
-    private final boolean buildHistogram;
-    private final boolean buildCommunityCount;
+    private final AllocationTracker tracker;
+    protected boolean buildHistogram;
+    protected boolean buildCommunityCount;
 
     protected long postProcessingDuration = -1L;
-
-    private LongUnaryOperator communityFunction = null;
-    private OptionalLong maybeExpectedCommunityCount = OptionalLong.empty();
-
     protected OptionalLong maybeCommunityCount = OptionalLong.empty();
     protected Optional<Histogram> maybeCommunityHistogram = Optional.empty();
-
-    protected Map<String, Object> communityHistogramOrNull() {
+    protected @Nullable Map<String, Object> communityHistogramOrNull() {
         return maybeCommunityHistogram.map(histogram -> MapUtil.map(
             "min", histogram.getMinValue(),
             "mean", histogram.getMean(),
@@ -60,31 +58,39 @@ public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBu
         )).orElse(null);
     }
 
-    private final AllocationTracker tracker;
+    private LongUnaryOperator communityFunction = null;
+    private OptionalLong maybeExpectedCommunityCount = OptionalLong.empty();
 
-    protected AbstractCommunityResultBuilder(boolean buildHistogram, boolean buildCommunityCount, AllocationTracker tracker) {
-        this.buildHistogram = buildHistogram;
-        this.buildCommunityCount = buildCommunityCount;
+    protected AbstractCommunityResultBuilder(
+        ProcedureCallContext callContext,
+        AllocationTracker tracker
+    ) {
+        this.buildHistogram = callContext
+            .outputFields()
+            .anyMatch(s -> s.equalsIgnoreCase("communityDistribution") || s.equalsIgnoreCase("componentDistribution"));
+        this.buildCommunityCount = callContext
+            .outputFields()
+            .anyMatch(s -> s.equalsIgnoreCase("communityCount") || s.equalsIgnoreCase("componentCount"));
         this.tracker = tracker;
     }
 
-    protected abstract R buildResult();
+    protected abstract WRITE_RESULT buildResult();
 
-    public AbstractCommunityResultBuilder<R> withExpectedNumberOfCommunities(long expectedNumberOfCommunities) {
+    public AbstractCommunityResultBuilder<WRITE_RESULT> withExpectedNumberOfCommunities(long expectedNumberOfCommunities) {
         this.maybeExpectedCommunityCount = OptionalLong.of(expectedNumberOfCommunities);
         return this;
     }
 
-    public AbstractCommunityResultBuilder<R> withCommunityFunction(LongUnaryOperator communityFunction) {
+    public AbstractCommunityResultBuilder<WRITE_RESULT> withCommunityFunction(LongUnaryOperator communityFunction) {
         this.communityFunction = communityFunction;
         return this;
     }
 
     @Override
-    public R build() {
+    public WRITE_RESULT build() {
         final ProgressTimer timer = ProgressTimer.start();
 
-        if (buildCommunityCount && communityFunction != null) {
+        if (communityFunction != null && (buildCommunityCount || buildHistogram)) {
             long expectedNumberOfCommunities = maybeExpectedCommunityCount.orElse(EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT);
             HugeLongLongMap communitySizeMap = new HugeLongLongMap(expectedNumberOfCommunities, tracker);
             for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {

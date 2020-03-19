@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.results.CentralityResult;
+import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;

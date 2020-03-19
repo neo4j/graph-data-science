@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.results;
 
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
+
 public class ShortestPathResult {
 
     public final long createMillis;
@@ -47,13 +49,7 @@ public class ShortestPathResult {
 
     public static class Builder extends AbstractResultBuilder<ShortestPathResult> {
 
-        private long nodeCount = 0;
         private String targetProperty = "";
-
-        public Builder withNodeCount(long nodeCount) {
-            this.nodeCount = nodeCount;
-            return this;
-        }
 
         @Override
         public ShortestPathResult build() {

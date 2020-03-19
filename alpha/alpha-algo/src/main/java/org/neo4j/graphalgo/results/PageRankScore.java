@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.results;
 
+import org.neo4j.graphalgo.config.WritePropertyConfig;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
+
 public class PageRankScore {
 
     public final long nodeId;
@@ -76,7 +79,7 @@ public class PageRankScore {
                     computeMillis,
                     writeMillis,
                     dampingFactor,
-                    writeProperty
+                    config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : ""
                 );
             }
         }

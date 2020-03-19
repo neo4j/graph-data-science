@@ -22,15 +22,15 @@ package org.neo4j.graphalgo.centrality.eigenvector;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.pagerank.PageRank;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.CentralityResult;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphalgo.results.CentralityResultWithStatistics;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphalgo.results.PageRankScore;
@@ -68,7 +68,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         AbstractResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder()
             .withIterations(algorithm.iterations())
             .withDampingFactor(algorithm.dampingFactor())
-            .withWriteProperty(config.writeProperty())
+            .withConfig(config)
             .withCreateMillis(computationResult.createMillis())
             .withComputeMillis(computationResult.computeMillis());
 
@@ -79,7 +79,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
 
         // NOTE: could not use `writeNodeProperties` just yet, as this requires changes to
         //  the Page Rank class and therefore to all product Page Rank procs as well.
-        try (ProgressTimer ignored = statsBuilder.timeWrite()) {
+        try(ProgressTimer ignore = ProgressTimer.start(statsBuilder::withWriteMillis)) {
             NodePropertyExporter exporter = NodePropertyExporter
                 .of(api, computationResult.graph(), algorithm.getTerminationFlag())
                 .withLog(log)
