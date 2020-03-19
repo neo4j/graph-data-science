@@ -4,10 +4,7 @@ allprojects {
         targetCompatibility = '1.8'
 
         repositories {
-            mavenLocal()
-            maven {
-                url = 'https://repo.maven.apache.org/maven2'
-            }
+            mavenCentral()
             if (project.hasProperty('pipelineRepository')) {
                 maven {
                     url = "file://${project.getProperty('pipelineRepository')}"
