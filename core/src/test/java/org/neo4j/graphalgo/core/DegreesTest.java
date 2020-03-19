@@ -166,7 +166,7 @@ class DegreesTest extends AlgoTestBase {
         } else if (orientation == Orientation.UNDIRECTED) {
             graph = graphStore.getGraph("TYPE_UNDIRECTED");
         } else if (orientation == null) { // BOTH case
-            graph = graphStore.getGraph(ALL_NODE_LABELS, Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty(), 1);
+            graph = graphStore.getGraph(Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty());
         }
     }
 

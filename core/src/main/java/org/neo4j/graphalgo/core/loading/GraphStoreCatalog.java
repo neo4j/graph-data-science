@@ -31,8 +31,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABELS;
-
 public final class GraphStoreCatalog {
 
     private static final ConcurrentHashMap<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
@@ -152,7 +150,7 @@ public final class GraphStoreCatalog {
          * This method returns the union of all subgraphs refered to by the given name.
          */
         Optional<Graph> getUnion(String graphName) {
-            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).graphStore().getUnion(ALL_NODE_LABELS));
+            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).graphStore().getUnion());
         }
 
         boolean exists(String graphName) {

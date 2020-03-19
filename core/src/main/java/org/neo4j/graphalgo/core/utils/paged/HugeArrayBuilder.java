@@ -61,10 +61,6 @@ abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
         return allocationIndex.get();
     }
 
-    public final long length() {
-        return length;
-    }
-
     public static final class BulkAdder<Array> {
         public Array buffer;
         public int offset;

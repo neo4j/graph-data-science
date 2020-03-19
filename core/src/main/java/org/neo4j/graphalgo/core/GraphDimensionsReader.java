@@ -151,7 +151,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         );
     }
 
-    public static class LabelProjectionMappings {
+    static class LabelProjectionMappings {
         private final LongObjectMap<List<String>> mappings;
 
         LabelProjectionMappings() {

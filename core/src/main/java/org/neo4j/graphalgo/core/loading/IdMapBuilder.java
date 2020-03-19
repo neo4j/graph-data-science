@@ -32,16 +32,21 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class IdMapBuilder {
+
     public static IdMap build(
-            HugeLongArray graphIds,
-            Optional<Map<String, BitSet>> maybeLabelInformation,
-            long nodeCount,
-            long highestNodeId,
-            int concurrency,
-            AllocationTracker tracker) {
+        HugeLongArrayBuilder idMapBuilder,
+        Map<String, BitSet> projectionLabelMapping,
+        long highestNodeId,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
+        Optional<Map<String, BitSet>> maybeLabelInformation = projectionLabelMapping == null
+            ? Optional.empty()
+            : Optional.of(projectionLabelMapping);
+        HugeLongArray graphIds = idMapBuilder.build();
 
         SparseNodeMapping nodeToGraphIds = buildSparseNodeMapping(graphIds, highestNodeId, concurrency, tracker);
-        return new IdMap(graphIds, nodeToGraphIds, maybeLabelInformation, nodeCount);
+        return new IdMap(graphIds, nodeToGraphIds, maybeLabelInformation, idMapBuilder.size());
     }
 
     @NotNull
@@ -72,24 +77,6 @@ public final class IdMapBuilder {
         );
 
         return nodeMappingBuilder.build();
-    }
-
-    public static IdMap build(
-            HugeLongArrayBuilder idMapBuilder,
-            Map<String, BitSet> projectionLabelMapping,
-            long highestNodeId,
-            int concurrency,
-            AllocationTracker tracker) {
-        Optional<Map<String, BitSet>> maybeLabelInformation = projectionLabelMapping == null
-            ? Optional.empty()
-            : Optional.of(projectionLabelMapping);
-        return build(idMapBuilder.build(),
-            maybeLabelInformation,
-            idMapBuilder.size(),
-            highestNodeId,
-            concurrency,
-            tracker
-        );
     }
 
     private IdMapBuilder() {

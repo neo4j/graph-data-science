@@ -83,7 +83,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             false)
             .flatMap(cursor -> cursor.value.stream())
             .distinct()
-            .collect(Collectors.toMap(s -> s, s -> new BitSet(nodeCount)));
+            .collect(Collectors.toMap(identifier -> identifier, s -> new BitSet(nodeCount)));
 
         builders = propertyBuilders(nodeCount);
         return NodesScanner.of(

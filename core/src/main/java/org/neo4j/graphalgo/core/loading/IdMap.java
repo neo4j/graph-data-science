@@ -141,15 +141,6 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
         return new IdMap(newGraphIds, newNodeToGraphIds, newNodeCount);
     }
 
-    public long size() {
-        long totalBitsetSize = maybeLabelInformation.isPresent() ? this.maybeLabelInformation
-            .get()
-            .values()
-            .stream()
-            .mapToLong(BitSet::size).sum() : 0;
-        return graphIds.size() + totalBitsetSize + nodeToGraphIds.size();
-    }
-
     public static final class IdIterable implements PrimitiveLongIterable {
         private final long start;
         private final long length;

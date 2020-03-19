@@ -202,16 +202,17 @@ public final class GraphStore {
         return getGraph(ALL_NODE_LABELS, singletonList(relationshipType), relationshipProperty, 1);
     }
 
+    public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+        validateInput(relationshipTypes, maybeRelationshipProperty);
+        return createGraph(ALL_NODE_LABELS, relationshipTypes, maybeRelationshipProperty, 1);
+    }
+
     public Graph getGraph(List<String> nodeLabels, List<String> relationshipTypes, Optional<String> maybeRelationshipProperty, int concurrency) {
         validateInput(relationshipTypes, maybeRelationshipProperty);
         return createGraph(nodeLabels, relationshipTypes, maybeRelationshipProperty, concurrency);
     }
 
     public Graph getUnion() {
-        return getUnion(ALL_NODE_LABELS);
-    }
-
-    public Graph getUnion(List<String> nodeLabels) {
         return UnionGraph.of(relationships
             .keySet()
             .stream()
@@ -221,9 +222,9 @@ public final class GraphStore {
                         .get(relationshipType)
                         .keySet()
                         .stream()
-                        .map(propertyKey -> createGraph(nodeLabels, relationshipType, Optional.of(propertyKey)));
+                        .map(propertyKey -> createGraph(ALL_NODE_LABELS, relationshipType, Optional.of(propertyKey)));
                 } else {
-                    return Stream.of(createGraph(nodeLabels, relationshipType, Optional.empty()));
+                    return Stream.of(createGraph(ALL_NODE_LABELS, relationshipType, Optional.empty()));
                 }
             })
             .collect(Collectors.toList()));

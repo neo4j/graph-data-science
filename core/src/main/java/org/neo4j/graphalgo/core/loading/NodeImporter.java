@@ -44,22 +44,22 @@ public class NodeImporter {
     }
 
     private final HugeLongArrayBuilder idMapBuilder;
-    private final Map<String, BitSet> labelProjectionBitSetMapping;
+    private final Map<String, BitSet> projectionBitSetMapping;
     private final IntObjectMap<NodePropertiesBuilder> buildersByPropertyId;
     private final Collection<NodePropertiesBuilder> nodePropertyBuilders;
-    private final LongObjectMap<List<String>> labelMapping;
+    private final LongObjectMap<List<String>> labelProjectionMapping;
 
     public NodeImporter(
         HugeLongArrayBuilder idMapBuilder,
-        Map<String, BitSet> labelProjectionBitSetMapping,
+        Map<String, BitSet> projectionBitSetMapping,
         Collection<NodePropertiesBuilder> nodePropertyBuilders,
-        LongObjectMap<List<String>> labelMapping
+        LongObjectMap<List<String>> labelProjectionMapping
     ) {
         this.idMapBuilder = idMapBuilder;
-        this.labelProjectionBitSetMapping = labelProjectionBitSetMapping;
+        this.projectionBitSetMapping = projectionBitSetMapping;
         this.buildersByPropertyId = mapBuildersByPropertyId(nodePropertyBuilders);
         this.nodePropertyBuilders = nodePropertyBuilders;
-        this.labelMapping = labelMapping;
+        this.labelProjectionMapping = labelProjectionMapping;
     }
 
     boolean readsProperties() {
@@ -74,10 +74,6 @@ public class NodeImporter {
     long importCypherNodes(NodesBatchBuffer buffer, List<Map<String, Number>> cypherNodeProperties) {
         return importNodes(buffer, (nodeReference, propertiesReference, internalId) ->
                 readCypherProperty(propertiesReference, internalId, cypherNodeProperties));
-    }
-
-    public long nodeCount() {
-        return idMapBuilder.length();
     }
 
     public long importNodes(NodesBatchBuffer buffer, PropertyReader reader) {
@@ -126,16 +122,16 @@ public class NodeImporter {
         for (int i = 0; i < cappedBatchLength; i++) {
             long[] labelIdsForNode = labelIds[i];
             for (long labelId : labelIdsForNode) {
-                List<String> elementIdentifiers = labelMapping.getOrDefault(labelId, Collections.emptyList());
+                List<String> elementIdentifiers = labelProjectionMapping.getOrDefault(labelId, Collections.emptyList());
                 for (String elementIdentifier : elementIdentifiers) {
-                    labelProjectionBitSetMapping.get(elementIdentifier).set(startIndex + i);
+                    projectionBitSetMapping.get(elementIdentifier).set(startIndex + i);
                 }
             }
         }
 
         // set the whole range for '*' projections
-        for (String allProjectionIdentifier : labelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
-            labelProjectionBitSetMapping.get(allProjectionIdentifier).set(startIndex, startIndex + batchLength);
+        for (String allProjectionIdentifier : labelProjectionMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
+            projectionBitSetMapping.get(allProjectionIdentifier).set(startIndex, startIndex + batchLength);
         }
     }
 

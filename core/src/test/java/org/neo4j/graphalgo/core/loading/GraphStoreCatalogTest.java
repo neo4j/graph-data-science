@@ -92,7 +92,7 @@ class GraphStoreCatalogTest {
 
         GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
-        Graph filteredGraph = GraphStoreCatalog.get("", "myGraph").graphStore().getGraph(ALL_NODE_LABELS, relTypes, relProperty, 1);
+        Graph filteredGraph = GraphStoreCatalog.get("", "myGraph").graphStore().getGraph(relTypes, relProperty);
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
     }
