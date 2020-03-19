@@ -20,12 +20,12 @@
 
 package org.neo4j.graphalgo.beta.modularity;
 
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -37,24 +37,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.beta.modularity.ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseProc<ModularityOptimizationWriteConfig> {
+public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteProc.WriteResult, ModularityOptimizationWriteConfig> {
 
     @Procedure(name = "gds.beta.modularityOptimization.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult =
-            compute(graphNameOrConfig, configuration);
-
-        // TODO product: check for an empty graph (not algorithm) and return a single "empty write result" value
-        return computationResult.result() != null
-            ? write(computationResult)
-            : Stream.empty();
+        return write(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.beta.modularityOptimization.write.estimate", mode = READ)
@@ -64,32 +59,6 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    private Stream<WriteResult> write(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult) {
-        ModularityOptimization result = computationResult.result();
-        Graph graph = computationResult.graph();
-
-        AbstractResultBuilder<WriteResult> builder = new WriteResultBuilder(
-            callContext,
-            computationResult.tracker()
-        )
-            .withModularity(result.getModularity())
-            .withRanIterations(result.getIterations())
-            .withDidConverge(result.didConverge())
-            .withCommunityFunction(result::getCommunityId)
-            .withNodeCount(graph.nodeCount())
-            .withConfig(computationResult.config());
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.of(builder.build());
-        }
-
-        writeNodeProperties(builder, computationResult);
-
-        graph.release();
-        return Stream.of(builder.build());
     }
 
     @Override
@@ -103,17 +72,23 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
     }
 
     @Override
-    protected PropertyTranslator<ModularityOptimization> nodePropertyTranslator(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult) {
-        return ModularityOptimizationTranslator.INSTANCE;
+    protected AlgorithmFactory<ModularityOptimization, ModularityOptimizationWriteConfig> algorithmFactory(
+        ModularityOptimizationWriteConfig config
+    ) {
+        return new ModularityOptimizationFactory<>();
     }
 
-    static final class ModularityOptimizationTranslator implements PropertyTranslator.OfLong<ModularityOptimization> {
-        public static final ModularityOptimizationTranslator INSTANCE = new ModularityOptimizationTranslator();
+    @Override
+    protected PropertyTranslator<ModularityOptimization> nodePropertyTranslator(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult) {
+        return ModularityOptimizationProc.ModularityOptimizationTranslator.INSTANCE;
+    }
 
-        @Override
-        public long toLong(ModularityOptimization data, long nodeId) {
-            return data.getCommunityId(nodeId);
-        }
+    @Override
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computeResult) {
+        return ModularityOptimizationProc.resultBuilder(
+            new WriteResult.Builder(callContext, computeResult.tracker()),
+            computeResult
+        );
     }
 
     public static class WriteResult {
@@ -155,50 +130,32 @@ public class ModularityOptimizationWriteProc extends ModularityOptimizationBaseP
             this.communityDistribution = communityDistribution;
             this.configuration = configuration;
         }
-    }
 
-    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
-        private long ranIterations;
-        private boolean didConverge;
-        private double modularity;
+        static class Builder extends ModularityOptimizationProc.ModularityOptimizationResultBuilder<WriteResult> {
 
-        WriteResultBuilder(
-            ProcedureCallContext context,
-            AllocationTracker tracker
-        ) {
-            super(context, tracker);
-        }
+            Builder(
+                ProcedureCallContext context,
+                AllocationTracker tracker
+            ) {
+                super(context, tracker);
+            }
 
-        WriteResultBuilder withRanIterations(long ranIterations) {
-            this.ranIterations = ranIterations;
-            return this;
-        }
-
-        WriteResultBuilder withDidConverge(boolean didConverge) {
-            this.didConverge = didConverge;
-            return this;
-        }
-
-        WriteResultBuilder withModularity(double modularity) {
-            this.modularity = modularity;
-            return this;
-        }
-
-        @Override
-        protected WriteResult buildResult() {
-            return new WriteResult(
-                createMillis,
-                computeMillis,
-                postProcessingDuration,
-                writeMillis,
-                nodePropertiesWritten,
-                didConverge,
-                ranIterations,
-                modularity,
-                maybeCommunityCount.orElse(0),
-                communityHistogramOrNull(),
-                config.toMap()
-            );
+            @Override
+            protected WriteResult buildResult() {
+                return new WriteResult(
+                    createMillis,
+                    computeMillis,
+                    postProcessingDuration,
+                    writeMillis,
+                    nodeCount,
+                    didConverge,
+                    ranIterations,
+                    modularity,
+                    maybeCommunityCount.orElse(0),
+                    communityHistogramOrNull(),
+                    config.toMap()
+                );
+            }
         }
     }
 }

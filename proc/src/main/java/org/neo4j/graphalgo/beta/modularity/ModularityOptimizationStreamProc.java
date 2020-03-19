@@ -20,9 +20,10 @@
 
 package org.neo4j.graphalgo.beta.modularity;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,32 +31,20 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.beta.modularity.ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModularityOptimizationStreamProc extends ModularityOptimizationBaseProc<ModularityOptimizationStreamConfig> {
+public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationStreamProc.StreamResult, ModularityOptimizationStreamConfig> {
 
     @Procedure(name = "gds.beta.modularityOptimization.stream", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationStreamConfig> compute =
-            compute(graphNameOrConfig, configuration);
-
-        return Optional.ofNullable(compute.result())
-            .map(modularityOptimization -> {
-                Graph graph = compute.graph();
-                return LongStream.range(0, graph.nodeCount())
-                    .mapToObj(nodeId -> {
-                        long neoNodeId = graph.toOriginalNodeId(nodeId);
-                        return new StreamResult(neoNodeId, modularityOptimization.getCommunityId(nodeId));
-                    });
-
-            }).orElse(Stream.empty());
+        return stream(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.beta.modularityOptimization.stream.estimate", mode = READ)
@@ -65,6 +54,20 @@ public class ModularityOptimizationStreamProc extends ModularityOptimizationBase
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
+    }
+
+    @Override
+    protected AlgorithmFactory<ModularityOptimization, ModularityOptimizationStreamConfig> algorithmFactory(
+        ModularityOptimizationStreamConfig config
+    ) {
+        return new ModularityOptimizationFactory<>();
+    }
+
+    @Override
+    protected StreamResult streamResult(
+        long nodeId, long originalNodeId, ModularityOptimization computationResult
+    ) {
+        return new StreamResult(originalNodeId, computationResult.getCommunityId(originalNodeId));
     }
 
     @Override
