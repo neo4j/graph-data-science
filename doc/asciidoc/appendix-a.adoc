@@ -109,7 +109,9 @@ The following table lists all beta procedures in the GDS library:
 [opts=header,cols="1, 1"]
 |===
 |Algorithm | Procedure
-.4+<.^|<<algorithms-k1coloring, K1Coloring>>
+.6+<.^|<<algorithms-k1coloring, K1Coloring>>
+| `gds.beta.k1coloring.mutate`
+| `gds.beta.k1coloring.mutate.estimate`
 | `gds.beta.k1coloring.stream`
 | `gds.beta.k1coloring.stream.estimate`
 | `gds.beta.k1coloring.write`

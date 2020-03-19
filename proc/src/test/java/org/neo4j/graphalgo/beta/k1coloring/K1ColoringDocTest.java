@@ -40,7 +40,7 @@ public final class K1ColoringDocTest extends BaseProcTest {
     void setupGraph() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
 
-        registerProcedures(K1ColoringWriteProc.class, K1ColoringStreamProc.class);
+        registerProcedures(K1ColoringMutateProc.class, K1ColoringWriteProc.class, K1ColoringStreamProc.class);
         registerProcedures(GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class);
 
@@ -91,17 +91,17 @@ public final class K1ColoringDocTest extends BaseProcTest {
     @Test
     void shouldWrite() {
         String query = " CALL gds.beta.k1coloring.write('myGraph', {writeProperty: 'color'})" +
-                       " YIELD nodes, colorCount, ranIterations, didConverge";
+                       " YIELD nodeCount, colorCount, ranIterations, didConverge";
 
         String verifyQuery = "MATCH (n:User) RETURN n.name AS name, n.color AS color ORDER BY name";
 
         String actual = runQuery(query, Result::resultAsString);
         String expected =
-            "+--------------------------------------------------+" + NL +
-            "| nodes | colorCount | ranIterations | didConverge |" + NL +
-            "+--------------------------------------------------+" + NL +
-            "| 4     | 3          | 3             | true        |" + NL +
-            "+--------------------------------------------------+" + NL +
+            "+------------------------------------------------------+" + NL +
+            "| nodeCount | colorCount | ranIterations | didConverge |" + NL +
+            "+------------------------------------------------------+" + NL +
+            "| 4         | 3          | 3             | true        |" + NL +
+            "+------------------------------------------------------+" + NL +
             "1 row" + NL;
 
         assertEquals(expected, actual);
@@ -119,5 +119,22 @@ public final class K1ColoringDocTest extends BaseProcTest {
             "4 rows" + NL;
 
         assertEquals(expectedVerify, verify);
+    }
+
+    @Test
+    void shouldMutate() {
+        String query = " CALL gds.beta.k1coloring.mutate('myGraph', {writeProperty: 'color'})" +
+                       " YIELD nodeCount, colorCount, ranIterations, didConverge";
+
+        String actual = runQuery(query, Result::resultAsString);
+        String expected =
+            "+------------------------------------------------------+" + NL +
+            "| nodeCount | colorCount | ranIterations | didConverge |" + NL +
+            "+------------------------------------------------------+" + NL +
+            "| 4         | 3          | 3             | true        |" + NL +
+            "+------------------------------------------------------+" + NL +
+            "1 row" + NL;
+
+        assertEquals(expected, actual);
     }
 }

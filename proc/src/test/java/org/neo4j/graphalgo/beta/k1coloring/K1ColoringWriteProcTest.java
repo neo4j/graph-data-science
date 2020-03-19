@@ -51,7 +51,7 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest {
             assertNotEquals(-1L, row.getNumber("createMillis").longValue());
             assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
             assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
-            assertEquals(4, row.getNumber("nodes").longValue());
+            assertEquals(4, row.getNumber("nodeCount").longValue());
             assertEquals(2, row.getNumber("colorCount").longValue());
             assertUserInput(row, "writeProperty", "color");
             assertTrue(row.getBoolean("didConverge"));

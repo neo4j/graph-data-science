@@ -22,22 +22,33 @@ package org.neo4j.graphalgo.beta.k1coloring;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class K1ColoringProc {
     static final String K1_COLORING_DESCRIPTION = "The K-1 Coloring algorithm assigns a color to every node in the graph.";
+    private static final String COLOR_COUNT_FIELD_NAME = "colorCount";
 
     private K1ColoringProc() {}
 
     static <PROC_RESULT, CONFIG extends K1ColoringConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         K1ColoringResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult
+        AlgoBaseProc.ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult,
+        ProcedureCallContext callContext
     ) {
+        if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
+            procResultBuilder.withColorCount(computeResult.algorithm().usedColors().cardinality());
+        }
+
         return procResultBuilder
             .withRanIterations(computeResult.algorithm().ranIterations())
             .withDidConverge(computeResult.algorithm().didConverge());
+    }
+
+    static PropertyTranslator<HugeLongArray> nodePropertyTranslator() {
+        return HugeLongArray.Translator.INSTANCE;
     }
 
     abstract static class K1ColoringResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {

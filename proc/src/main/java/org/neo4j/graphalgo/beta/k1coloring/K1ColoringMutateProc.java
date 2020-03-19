@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -39,24 +39,21 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.beta.k1coloring.K1ColoringProc.K1_COLORING_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
-public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1ColoringWriteProc.WriteResult, K1ColoringWriteConfig> {
-    @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE)
+public class K1ColoringMutateProc extends MutateProc<K1Coloring, HugeLongArray, K1ColoringMutateProc.MutateResult, K1ColoringMutateConfig> {
+
+    @Procedure(value = "gds.beta.k1coloring.mutate", mode = READ)
     @Description(K1_COLORING_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<K1ColoringMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult =
-            compute(graphNameOrConfig, configuration);
-
-        return computationResult.isGraphEmpty() ? Stream.empty() : write(computationResult);
+        return mutate(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(value = "gds.beta.k1coloring.write.estimate", mode = READ)
+    @Procedure(value = "gds.beta.k1coloring.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimate(
+    public Stream<MemoryEstimateResult> mutateEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -64,34 +61,33 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected PropertyTranslator<HugeLongArray> nodePropertyTranslator(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult) {
-        return K1ColoringProc.nodePropertyTranslator();
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computeResult) {
-        WriteResult.Builder builder = new WriteResult.Builder(callContext, computeResult.tracker());
-        return K1ColoringProc.resultBuilder(builder, computeResult, callContext);
-    }
-
-    @Override
-    protected AlgorithmFactory<K1Coloring, K1ColoringWriteConfig> algorithmFactory(K1ColoringWriteConfig config) {
-        return new K1ColoringFactory<>();
-    }
-
-    @Override
-    protected K1ColoringWriteConfig newConfig(
+    protected K1ColoringMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return K1ColoringWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return K1ColoringMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
-    public static class WriteResult {
+    @Override
+    protected AlgorithmFactory<K1Coloring, K1ColoringMutateConfig> algorithmFactory(K1ColoringMutateConfig config) {
+        return new K1ColoringFactory<>();
+    }
 
-        public static final WriteResult EMPTY = new WriteResult(
+    @Override
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computeResult) {
+        return K1ColoringProc.resultBuilder(new MutateResult.Builder(callContext, computeResult.tracker()), computeResult, callContext);
+    }
+
+    @Override
+    protected PropertyTranslator<HugeLongArray> nodePropertyTranslator(ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computationResult) {
+        return K1ColoringProc.nodePropertyTranslator();
+    }
+
+    public static class MutateResult {
+
+        public static final MutateResult EMPTY = new MutateResult(
             0,
             0,
             0,
@@ -104,7 +100,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
 
         public final long createMillis;
         public final long computeMillis;
-        public final long writeMillis;
+        public final long mutateMillis;
 
         public final long nodeCount;
         public final long colorCount;
@@ -113,10 +109,10 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
 
         public Map<String, Object> configuration;
 
-        WriteResult(
+        MutateResult(
             long createMillis,
             long computeMillis,
-            long writeMillis,
+            long mutateMillis,
             long nodeCount,
             long colorCount,
             long ranIterations,
@@ -125,7 +121,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
+            this.mutateMillis = mutateMillis;
             this.nodeCount = nodeCount;
             this.colorCount = colorCount;
             this.ranIterations = ranIterations;
@@ -133,8 +129,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
             this.configuration = configuration;
         }
 
-        static class Builder extends K1ColoringProc.K1ColoringResultBuilder<WriteResult> {
-
+        static class Builder extends K1ColoringProc.K1ColoringResultBuilder<MutateResult> {
             Builder(
                 ProcedureCallContext context,
                 AllocationTracker tracker
@@ -143,11 +138,11 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
             }
 
             @Override
-            protected WriteResult buildResult() {
-                return new WriteResult(
+            protected MutateResult buildResult() {
+                return new MutateResult(
                     createMillis,
                     computeMillis,
-                    writeMillis,
+                    mutateMillis,
                     nodeCount,
                     colorCount,
                     ranIterations,
