@@ -75,8 +75,8 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
             callContext,
             computationResult.tracker()
         )
-            .withBuildCommunityCount(true)
-            .withBuildHistogram(true)
+            .buildCommunityCount(true)
+            .buildHistogram(true)
             .withCommunityFunction(components != null ? components::get : null)
             .withNodeCount(graph.nodeCount())
             .withConfig(config)
@@ -258,12 +258,12 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
             );
         }
 
-        public SccResultBuilder withBuildHistogram(boolean buildHistogram) {
+        public SccResultBuilder buildHistogram(boolean buildHistogram) {
             this.buildHistogram = buildHistogram;
             return this;
         }
 
-        public SccResultBuilder withBuildCommunityCount(boolean buildCommunityCount) {
+        public SccResultBuilder buildCommunityCount(boolean buildCommunityCount) {
             this.buildCommunityCount = buildCommunityCount;
             return this;
         }

@@ -91,8 +91,8 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
             callContext,
             computationResult.tracker()
         )
-            .withBuildCommunityCount(true)
-            .withBuildHistogram(true);
+            .buildCommunityCount(true)
+            .buildHistogram(true);
 
         builder.withNodeCount(graph.nodeCount())
             .withConfig(config);
@@ -266,12 +266,12 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
             return this;
         }
 
-        public TriangleCountResultBuilder withBuildHistogram(boolean buildHistogram) {
+        public TriangleCountResultBuilder buildHistogram(boolean buildHistogram) {
             this.buildHistogram = buildHistogram;
             return this;
         }
 
-        public TriangleCountResultBuilder withBuildCommunityCount(boolean buildCommunityCount) {
+        public TriangleCountResultBuilder buildCommunityCount(boolean buildCommunityCount) {
             this.buildCommunityCount = buildCommunityCount;
             return this;
         }
