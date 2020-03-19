@@ -98,6 +98,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
             LabelPropagationStreamProc.class,
             LabelPropagationWriteProc.class,
             LabelPropagationStatsProc.class,
+            LabelPropagationMutateProc.class,
             GraphCreateProc.class
         );
         runQuery(cypher);

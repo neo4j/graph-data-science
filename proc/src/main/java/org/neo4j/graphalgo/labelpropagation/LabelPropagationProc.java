@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -31,6 +33,28 @@ final class LabelPropagationProc {
         "The Label Propagation algorithm is a fast algorithm for finding communities in a graph.";
 
     private LabelPropagationProc() {}
+
+    static <CONFIG extends LabelPropagationWriteConfig> PropertyTranslator<LabelPropagation> nodePropertyTranslator(
+        AlgoBaseProc.ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult
+    ) {
+        CONFIG config = computationResult.config();
+
+        boolean writePropertyEqualsSeedProperty = config.seedProperty() != null && config
+            .writeProperty()
+            .equals(config.seedProperty());
+
+        if (writePropertyEqualsSeedProperty) {
+            NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
+            return new PropertyTranslator.OfLongIfChanged<>(
+                seedProperties,
+                (data, nodeId) -> data.labels().get(nodeId)
+            );
+        }
+
+        return (PropertyTranslator.OfLong<LabelPropagation>) (data, nodeId) -> data
+            .labels()
+            .get(nodeId);
+    }
 
     static <PROC_RESULT, CONFIG extends LabelPropagationBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         LabelPropagationResultBuilder<PROC_RESULT> procResultBuilder,
