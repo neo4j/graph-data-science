@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
@@ -62,8 +63,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABELS;
 
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -223,9 +222,10 @@ public abstract class AlgoBaseProc<
             ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
             : Optional.empty();
 
+        List<String> nodeLabels = config.nodeLabels();
         List<String> relationshipTypes = config.relationshipTypes();
 
-        return graphStore.getGraph(relationshipTypes, weightProperty);
+        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty, config.concurrency());
     }
 
     private GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
@@ -233,18 +233,15 @@ public abstract class AlgoBaseProc<
         Optional<String> maybeGraphName = configAndName.getTwo();
 
         GraphStoreWithConfig graphCandidate;
-        List<String> nodeLabels;
 
         if (maybeGraphName.isPresent()) {
             graphCandidate = GraphStoreCatalog.get(getUsername(), maybeGraphName.get());
-            nodeLabels = config.nodeLabels();
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
             GraphStore graphStore = loader.build(createConfig.getGraphImpl()).build().graphStore();
 
             graphCandidate = ImmutableGraphStoreWithConfig.of(graphStore, createConfig);
-            nodeLabels = ALL_NODE_LABELS;
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }

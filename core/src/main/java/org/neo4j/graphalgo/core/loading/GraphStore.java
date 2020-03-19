@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
@@ -264,13 +265,13 @@ public final class GraphStore {
             .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> {
                 HugeGraph initialGraph = HugeGraph.create(
-                    tracker,
                     this.nodes,
                     nodeProperties,
                     relTypeAndCSR.getValue(),
                     maybeRelationshipProperty.map(propertyKey -> relationshipProperties
                         .get(relTypeAndCSR.getKey())
-                        .get(propertyKey))
+                        .get(propertyKey)),
+                    tracker
                 );
 
                 if (filteredNodes.isPresent()) {
