@@ -19,7 +19,7 @@ allprojects {
 
         javadoc {
             StandardJavadocDocletOptions opts = (options as StandardJavadocDocletOptions)
-            opts.addBooleanOption('Xdoclint:all', true)
+            opts.addBooleanOption('Xdoclint:all,-missing', true)
         }
 
         task javadocJar(type: Jar) {
