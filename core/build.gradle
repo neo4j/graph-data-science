@@ -21,7 +21,7 @@ dependencies {
         [group: 'com.carrotsearch',           name: 'hppc',               version: ver.'hppc']
     )
 
-    implementation project(":neo4j-collections")
+    api project(":neo4j-collections")
 
     testImplementation project(':test-utils')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
