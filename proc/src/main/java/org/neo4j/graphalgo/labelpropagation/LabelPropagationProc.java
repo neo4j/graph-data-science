@@ -66,7 +66,8 @@ final class LabelPropagationProc {
             .withCommunityFunction(!computeResult.isGraphEmpty()
                 ? (nodeId) -> computeResult.result().labels().get(nodeId)
                 : null
-            );
+            )
+            .withNodeCount(computeResult.graph().nodeCount());
     }
 
     abstract static class LabelPropagationResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {

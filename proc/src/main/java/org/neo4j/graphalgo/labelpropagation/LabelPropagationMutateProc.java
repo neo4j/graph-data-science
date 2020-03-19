@@ -84,7 +84,7 @@ public class LabelPropagationMutateProc extends MutateProc<LabelPropagation, Lab
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computeResult) {
         return LabelPropagationProc.resultBuilder(
-            new MutateResult.Builder(computeResult.graph().nodeCount(), callContext, computeResult.tracker()),
+            new MutateResult.Builder(callContext, computeResult.tracker()),
             computeResult
         );
     }
@@ -125,7 +125,7 @@ public class LabelPropagationMutateProc extends MutateProc<LabelPropagation, Lab
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<MutateResult> {
 
-            Builder(long nodeCount, ProcedureCallContext context, AllocationTracker tracker) {
+            Builder(ProcedureCallContext context, AllocationTracker tracker) {
                 super(context, tracker);
             }
 
