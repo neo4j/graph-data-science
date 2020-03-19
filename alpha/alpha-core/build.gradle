@@ -12,7 +12,7 @@ dependencies {
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
 
     compileOnly project(':core')
-    compile project(':neo4j-export-adapter')
+    api project(':neo4j-export-adapter')
 
     compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
 

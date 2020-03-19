@@ -9,6 +9,6 @@ dependencies {
     compileOnly         group: 'org.immutables',  name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.jetbrains',   name: 'annotations',        version: ver.'jetbrains-annotations'
 
-    testCompile platform(dep.junit5bom)
-    testCompile dep.junit5jupiter
+    testImplementation platform(dep.junit5bom)
+    testImplementation dep.junit5jupiter
 }

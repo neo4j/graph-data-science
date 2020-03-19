@@ -10,9 +10,11 @@ dependencies {
 
     compileOnly group: 'org.immutables',          name: 'builder',     version: ver.'immutables'
 
-    compile project(':algo-common')
-    compile project(':test-utils-adapter')
-    compile platform(dep.junit5bom)
-    compile dep.junit5jupiter
-    compile group: 'org.jetbrains',           name: 'annotations', version: ver.'jetbrains-annotations'
+    api (
+        project(':algo-common'),
+        project(':test-utils-adapter'),
+        platform(dep.junit5bom),
+        dep.junit5jupiter,
+        [group: 'org.jetbrains',           name: 'annotations', version: ver.'jetbrains-annotations']
+    )
 }
