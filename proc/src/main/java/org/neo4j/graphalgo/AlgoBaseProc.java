@@ -367,10 +367,6 @@ public abstract class AlgoBaseProc<
             "Write procedures needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
     }
 
-    protected interface WriteOrMutate<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends AlgoBaseConfig> {
-        void apply(AbstractResultBuilder<?> writeBuilder, ComputationResult<A, RESULT, CONFIG> computationResult);
-    }
-
     protected void writeNodeProperties(
         AbstractResultBuilder<?> writeBuilder,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
@@ -405,32 +401,6 @@ public abstract class AlgoBaseProc<
         }
     }
 
-    protected void mutateNodeProperties(
-        AbstractResultBuilder<?> writeBuilder,
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
-    ) {
-        PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
-
-        CONFIG config = computationResult.config();
-        if (!(config instanceof MutatePropertyConfig)) {
-            throw new IllegalArgumentException(String.format(
-                "Can only mutate results if the config implements %s.",
-                MutatePropertyConfig.class
-            ));
-        }
-        MutatePropertyConfig mutatePropertyConfig = (MutatePropertyConfig) config;
-        ALGO_RESULT result = computationResult.result();
-        try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
-            log.debug("Updating in-memory graph store");
-            GraphStore graphStore = computationResult.graphStore();
-            graphStore.addNodeProperty(
-                mutatePropertyConfig.writeProperty(),
-                nodeId -> resultPropertyTranslator.toDouble(result, nodeId)
-            );
-            writeBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
-        }
-    }
-
     protected Stream<MemoryEstimateResult> computeEstimate(
         Object graphNameOrConfig,
         Map<String, Object> configuration
@@ -444,10 +414,6 @@ public abstract class AlgoBaseProc<
         return Stream.of(
             new MemoryEstimateResult(memoryTreeWithDimensions)
         );
-    }
-
-    protected boolean shouldWrite(CONFIG config) {
-        return config instanceof WritePropertyConfig;
     }
 
     @ValueClass
