@@ -67,6 +67,7 @@ public abstract class MutateProc<
                 mutatePropertyConfig.writeProperty(),
                 nodeId -> resultPropertyTranslator.toDouble(result, nodeId)
             );
+            resultBuilder.withNodeCount(computationResult.graph().nodeCount());
             resultBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
         }
     }

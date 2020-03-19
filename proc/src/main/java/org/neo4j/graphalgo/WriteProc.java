@@ -57,12 +57,12 @@ public abstract class WriteProc<
     }
 
     private void writeToNeo(
-        AbstractResultBuilder<?> writeBuilder,
+        AbstractResultBuilder<?> resultBuilder,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
         WritePropertyConfig writePropertyConfig = computationResult.config();
-        try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
+        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
             log.debug("Writing results");
 
             Graph graph = computationResult.graph();
@@ -77,7 +77,8 @@ public abstract class WriteProc<
                 computationResult.result(),
                 resultPropertyTranslator
             );
-            writeBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
+            resultBuilder.withNodeCount(computationResult.graph().nodeCount());
+            resultBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
         }
     }
 }
