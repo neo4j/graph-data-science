@@ -757,9 +757,9 @@ section.enterprise-edition > div.titlepage .title:after {
   }
 }
 
-section.alpha h3.title:after {
+section.alpha h3.title:after,
+section.beta h3.title:after {
   color       : #F58220;
-  content     : "alpha";
   text-align: center;
   font-family: "Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue","Helvetica","Arial",sans-serif;
   font-weight: normal;
@@ -774,23 +774,12 @@ section.alpha h3.title:after {
   margin-right: 10px;
   bottom: 4px;
 }
+section.alpha h3.title:after {
+  content     : "alpha";
+}
 
 section.beta h3.title:after {
-  color       : #F58220;
   content     : "beta";
-  text-align: center;
-  font-family: "Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue","Helvetica","Arial",sans-serif;
-  font-weight: normal;
-  font-size: 0.5em;
-  position: relative;
-  box-sizing: border-box;
-  padding: 4px 8px;
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 6px;
-  margin-left: 10px;
-  margin-right: 10px;
-  bottom: 4px;
 }
 
 p.tier-note {
