@@ -122,6 +122,14 @@ public final class GraphStore {
         return this.nodes;
     }
 
+    public Set<String> nodeLabels() {
+        return this
+            .nodes
+            .maybeLabelInformation
+            .map(Map::keySet)
+            .orElseGet(Collections::emptySet);
+    }
+
     public Set<String> nodePropertyKeys() {
         return nodeProperties.keySet();
     }

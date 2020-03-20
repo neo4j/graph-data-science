@@ -25,6 +25,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,30 +33,65 @@ import java.util.Set;
 
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private static final String ID_COLUMN = "id";
-    static final Set<String> RESERVED_COLUMNS = Sets.newHashSet(ID_COLUMN);
-    static final Set<String> REQUIRED_COLUMNS = RESERVED_COLUMNS;
+    static final String LABELS_COLUMN = "labels";
+    static final Set<String> RESERVED_COLUMNS = Sets.newHashSet(ID_COLUMN, LABELS_COLUMN);
+    static final Set<String> REQUIRED_COLUMNS = Sets.newHashSet(ID_COLUMN);
+
 
     private long rows;
     private long maxNeoId = 0;
-    private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties;
-    private NodesBatchBuffer buffer;
-    private List<Map<String, Number>> cypherNodeProperties;
-    private NodeImporter importer;
+    private final Map<PropertyMapping, NodePropertiesBuilder> nodeProperties;
+    private final NodesBatchBuffer buffer;
+    private final List<Map<String, Number>> cypherNodeProperties;
+    private final NodeImporter importer;
+    private final boolean hasLabelInformation;
 
-    public NodeRowVisitor(Map<PropertyMapping, NodePropertiesBuilder> nodeProperties, NodesBatchBuffer buffer, NodeImporter importer) {
+    private final Map<String, Long> labelIdMapping;
+    private long labelIdCounter = 0;
+
+    public NodeRowVisitor(Map<PropertyMapping, NodePropertiesBuilder> nodeProperties, NodesBatchBuffer buffer, NodeImporter importer, boolean hasLabelInformation) {
         this.nodeProperties = nodeProperties;
         this.buffer = buffer;
         this.importer = importer;
         this.cypherNodeProperties = new ArrayList<>(buffer.capacity());
+        this.hasLabelInformation = hasLabelInformation;
+        labelIdMapping = new HashMap<>();
     }
 
     @Override
     public boolean visit(Result.ResultRow row) throws RuntimeException {
-        long neoId = row.getNumber("id").longValue();
+        long neoId = row.getNumber(ID_COLUMN).longValue();
         if (neoId > maxNeoId) {
             maxNeoId = neoId;
         }
         rows++;
+
+        long[] labelIds = null;
+        if (hasLabelInformation) {
+            Object labelsObject = row.get(LABELS_COLUMN);
+            if (!(labelsObject instanceof List)) {
+                throw new IllegalArgumentException("dasd");
+            }
+
+            List<String> labelStrings = (List<String>) labelsObject;
+
+            // Do not import this row if the record has no labels
+            if (labelStrings.isEmpty()) {
+                return true;
+            }
+
+            labelIds = new long[labelStrings.size()];
+
+            for (int i = 0; i < labelStrings.size(); i++) {
+                String labelString = labelStrings.get(i);
+                long labelId = labelIdMapping.computeIfAbsent(labelString, (l) -> {
+                    importer.labelProjectionMapping.put(labelIdCounter, Collections.singletonList(labelString));
+                    return labelIdCounter++;
+                });
+                labelIds[i] = labelId;
+            }
+        }
+
 
         HashMap<String, Number> weights = new HashMap<>();
         for (Map.Entry<PropertyMapping, NodePropertiesBuilder> entry : nodeProperties.entrySet()) {
@@ -75,7 +111,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
         int propRef = cypherNodeProperties.size();
         cypherNodeProperties.add(weights);
-        buffer.add(neoId, propRef, null);
+        buffer.add(neoId, propRef, labelIds);
         if (buffer.isFull()) {
             flush();
             reset();

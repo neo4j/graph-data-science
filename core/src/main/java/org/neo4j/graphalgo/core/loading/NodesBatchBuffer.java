@@ -31,8 +31,8 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
     private final LongSet nodeLabelIds;
     private final NodeStore nodeStore;
+    private final boolean hasLabelInformation;
     private final long[][] labelIds;
-
 
     // property ids, consecutive
     private final long[] properties;
@@ -41,13 +41,15 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
         final NodeStore store,
         final LongSet nodeLabelIds,
         int capacity,
+        boolean hasLabelInformation,
         boolean readProperty
     ) {
         super(capacity);
         this.nodeLabelIds = nodeLabelIds;
         this.nodeStore = store;
+        this.hasLabelInformation = hasLabelInformation;
         this.properties = readProperty ? new long[capacity] : null;
-        this.labelIds = this.nodeLabelIds.isEmpty() ? null : new long[capacity][];
+        this.labelIds = hasLabelInformation ? new long[capacity][] : null;
     }
 
     @Override
@@ -84,6 +86,10 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
     long[] properties() {
         return this.properties;
+    }
+
+    boolean hasLabelInformation() {
+        return hasLabelInformation;
     }
 
     long[][] labelIds() {

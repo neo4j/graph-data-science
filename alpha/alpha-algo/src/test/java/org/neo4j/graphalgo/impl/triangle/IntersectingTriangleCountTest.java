@@ -135,7 +135,7 @@ class IntersectingTriangleCountTest {
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(inputs.length, AllocationTracker.EMPTY);
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null, null, null);
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), inputs.length, false);
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), inputs.length, false, false);
 
         long maxNodeId = 0L;
         for (long input : inputs) {

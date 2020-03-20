@@ -44,11 +44,12 @@ public class NodeImporter {
         int readProperty(long nodeReference, long propertiesReference, long internalId);
     }
 
+    final Map<String, BitSet> projectionBitSetMapping;
+    final LongObjectMap<List<String>> labelProjectionMapping;
+
     private final HugeLongArrayBuilder idMapBuilder;
-    private final Map<String, BitSet> projectionBitSetMapping;
     private final IntObjectMap<NodePropertiesBuilder> buildersByPropertyId;
     private final Collection<NodePropertiesBuilder> nodePropertyBuilders;
-    private final LongObjectMap<List<String>> labelProjectionMapping;
 
     public NodeImporter(HugeLongArrayBuilder idMapBuilder) {
         this(idMapBuilder, null, null, null);
@@ -73,12 +74,12 @@ public class NodeImporter {
 
     long importNodes(NodesBatchBuffer buffer, Read read, CursorFactory cursors) {
         return importNodes(buffer, (nodeReference, propertiesReference, internalId) ->
-                readProperty(nodeReference, propertiesReference, buildersByPropertyId, internalId, cursors, read));
+            readProperty(nodeReference, propertiesReference, buildersByPropertyId, internalId, cursors, read));
     }
 
     long importCypherNodes(NodesBatchBuffer buffer, List<Map<String, Number>> cypherNodeProperties) {
         return importNodes(buffer, (nodeReference, propertiesReference, internalId) ->
-                readCypherProperty(propertiesReference, internalId, cypherNodeProperties));
+            readCypherProperty(propertiesReference, internalId, cypherNodeProperties));
     }
 
     public long importNodes(NodesBatchBuffer buffer, PropertyReader reader) {
@@ -96,10 +97,11 @@ public class NodeImporter {
 
         long[] batch = buffer.batch();
         long[] properties = buffer.properties();
-        long[][] labelIds = buffer.labelIds();
-        if (labelIds != null) {
-            setNodeLabelInformation(batchLength, adder.start, labelIds);
+
+        if (buffer.hasLabelInformation()) {
+            setNodeLabelInformation(batchLength, adder.start, buffer.labelIds());
         }
+
         int batchOffset = 0;
         while (adder.nextBuffer()) {
             int length = adder.length;
@@ -111,9 +113,9 @@ public class NodeImporter {
                     long localIndex = start + i;
                     int batchIndex = batchOffset + i;
                     importedProperties += reader.readProperty(
-                            batch[batchIndex],
-                            properties[batchIndex],
-                            localIndex
+                        batch[batchIndex],
+                        properties[batchIndex],
+                        localIndex
                     );
                 }
             }
@@ -129,7 +131,9 @@ public class NodeImporter {
             for (long labelId : labelIdsForNode) {
                 List<String> elementIdentifiers = labelProjectionMapping.getOrDefault(labelId, Collections.emptyList());
                 for (String elementIdentifier : elementIdentifiers) {
-                    projectionBitSetMapping.get(elementIdentifier).set(startIndex + i);
+                    projectionBitSetMapping
+                        .computeIfAbsent(elementIdentifier, (ignore) -> new BitSet(1337))
+                        .set(startIndex + i);
                 }
             }
         }
@@ -141,12 +145,13 @@ public class NodeImporter {
     }
 
     private int readProperty(
-            long nodeReference,
-            long propertiesReference,
-            IntObjectMap<NodePropertiesBuilder> nodeProperties,
-            long internalId,
-            CursorFactory cursors,
-            Read read) {
+        long nodeReference,
+        long propertiesReference,
+        IntObjectMap<NodePropertiesBuilder> nodeProperties,
+        long internalId,
+        CursorFactory cursors,
+        Read read
+    ) {
         try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
             read.nodeProperties(nodeReference, propertiesReference, pc);
             int nodePropertiesRead = 0;
@@ -165,9 +170,10 @@ public class NodeImporter {
     }
 
     private int readCypherProperty(
-            long propertiesReference,
-            long internalId,
-            List<Map<String, Number>> cypherNodeProperties) {
+        long propertiesReference,
+        long internalId,
+        List<Map<String, Number>> cypherNodeProperties
+    ) {
         Map<String, Number> properties = cypherNodeProperties.get((int) propertiesReference);
         int nodePropertiesRead = 0;
         for (NodePropertiesBuilder props : nodePropertyBuilders) {
@@ -186,7 +192,10 @@ public class NodeImporter {
             return null;
         }
         IntObjectMap<NodePropertiesBuilder> map = new IntObjectHashMap<>(builders.size());
-        builders.stream().filter(builder -> builder.propertyId() >= 0).forEach(builder -> map.put(builder.propertyId(), builder));
+        builders
+            .stream()
+            .filter(builder -> builder.propertyId() >= 0)
+            .forEach(builder -> map.put(builder.propertyId(), builder));
         return map.isEmpty() ? null : map;
     }
 }

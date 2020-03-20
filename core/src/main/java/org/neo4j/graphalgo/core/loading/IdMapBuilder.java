@@ -40,7 +40,7 @@ public final class IdMapBuilder {
         int concurrency,
         AllocationTracker tracker
     ) {
-        Optional<Map<String, BitSet>> maybeLabelInformation = projectionLabelMapping == null
+        Optional<Map<String, BitSet>> maybeLabelInformation = projectionLabelMapping == null || projectionLabelMapping.isEmpty()
             ? Optional.empty()
             : Optional.of(projectionLabelMapping);
         HugeLongArray graphIds = idMapBuilder.build();

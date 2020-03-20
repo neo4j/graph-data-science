@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongObjectHashMap;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -37,6 +37,7 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -80,14 +81,14 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     private void initImporter(PropertyMappings nodeProperties) {
         nodePropertyBuilders = nodeProperties(nodeProperties);
         builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());
-        importer = new NodeImporter(builder, null, nodePropertyBuilders.values(), null);
+        importer = new NodeImporter(builder, new HashMap<>(), nodePropertyBuilders.values(), new LongObjectHashMap<>());
     }
 
     @Override
     BatchLoadResult loadOneBatch(Transaction tx, long offset, int batchSize, int bufferSize) {
-        Result result = runLoadingQuery(tx, offset, batchSize);
+        Result queryResult = runLoadingQuery(tx, offset, batchSize);
 
-        Collection<String> propertyColumns = getPropertyColumns(result);
+        Collection<String> propertyColumns = getPropertyColumns(queryResult);
         if (!hasExplicitPropertyMappings && !initializedFromResult) {
             PropertyMappings propertyMappings = PropertyMappings.of(propertyColumns
                 .stream()
@@ -106,9 +107,11 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             initializedFromResult = true;
         }
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), bufferSize, true);
-        NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
-        result.accept(visitor);
+        boolean hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);
+
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, null, bufferSize, hasLabelInformation, true);
+        NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer, hasLabelInformation);
+        queryResult.accept(visitor);
         visitor.flush();
         return new BatchLoadResult(offset, visitor.rows(), visitor.maxId(), visitor.rows());
     }
@@ -122,7 +125,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     @Override
     LoadResult result() {
-        IdMap idMap = IdMapBuilder.build(builder, null, maxNodeId, setup.concurrency(), setup.tracker());
+        IdMap idMap = IdMapBuilder.build(builder, importer.projectionBitSetMapping, maxNodeId, setup.concurrency(), setup.tracker());
         Map<String, NodeProperties> nodeProperties = nodePropertyBuilders.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
 
@@ -143,6 +146,11 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             .dimensions(resultDimensions)
             .idsAndProperties(new IdsAndProperties(idMap, nodeProperties))
             .build();
+    }
+
+    @Override
+    Set<String> getMandatoryColumns() {
+        return NodeRowVisitor.REQUIRED_COLUMNS;
     }
 
     @Override

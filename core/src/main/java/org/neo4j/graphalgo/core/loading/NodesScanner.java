@@ -136,6 +136,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                 nodeStore,
                 labels,
                 cursor.bulkSize(),
+                !labels.isEmpty(),
                 importer.readsProperties()
             );
             ImportProgress progress = this.progress;
