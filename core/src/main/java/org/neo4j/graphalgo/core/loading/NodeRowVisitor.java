@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,14 +71,23 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         if (hasLabelInformation) {
             Object labelsObject = row.get(LABELS_COLUMN);
             if (!(labelsObject instanceof List)) {
-                throw new IllegalArgumentException("dasd");
+                throw new IllegalArgumentException(String.format(
+                    Locale.US,
+                    "Type of column `%s` should be of type List, but was `%s`",
+                    LABELS_COLUMN,
+                    labelsObject
+                ));
             }
 
             List<String> labelStrings = (List<String>) labelsObject;
 
-            // Do not import this row if the record has no labels
             if (labelStrings.isEmpty()) {
-                return true;
+                throw new IllegalArgumentException(String.format(
+                    Locale.US,
+                    "Node with ID '%d' does not specify a label, but label column '%s' was specified.",
+                    neoId,
+                    LABELS_COLUMN
+                ));
             }
 
             labelIds = new long[labelStrings.size()];
