@@ -29,8 +29,9 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Collections;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements GraphMutationTest<PageRankMutateConfig, PageRank> {
 
@@ -139,9 +140,9 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
             row -> {
                 assertEquals(10L, row.getNumber("nodePropertiesWritten"));
 
-                assertNotEquals(-1L, row.getNumber("createMillis"));
-                assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("mutateMillis"));
+                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
 
                 assertEquals(false, row.get("didConverge"));
                 assertEquals(20L, row.get("ranIterations"));

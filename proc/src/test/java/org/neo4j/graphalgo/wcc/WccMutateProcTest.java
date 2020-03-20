@@ -29,8 +29,9 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMutationTest<WccMutateConfig, DisjointSetStruct> {
 
@@ -116,10 +117,10 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
 
                 assertEquals(10L, row.getNumber("nodePropertiesWritten"));
 
-                assertNotEquals(-1L, row.getNumber("createMillis"));
-                assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("mutateMillis"));
-                assertNotEquals(-1L, row.getNumber("postProcessingMillis"));
+                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
 
                 assertEquals(3L, row.getNumber("componentCount"));
                 assertUserInput(row, "threshold", 0D);

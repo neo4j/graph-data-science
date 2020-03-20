@@ -28,8 +28,9 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements GraphMutationTest<LabelPropagationMutateConfig, LabelPropagation> {
@@ -102,10 +103,10 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertNotEquals(-1L, row.getNumber("createMillis"));
-                assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("mutateMillis"));
-                assertNotEquals(-1L, row.getNumber("postProcessingMillis"));
+                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
 
                 assertEquals(10L, row.getNumber("communityCount"));
                 assertTrue(row.getBoolean("didConverge"));

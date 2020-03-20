@@ -29,8 +29,9 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements GraphMutationTest<LouvainMutateConfig, Louvain> {
 
@@ -137,9 +138,9 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertNotEquals(-1L, row.getNumber("createMillis"));
-                assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("mutateMillis"));
+                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
 
                 assertEquals(1L, row.get("ranLevels"));
                 assertEquals(4L, row.getNumber("communityCount"));
