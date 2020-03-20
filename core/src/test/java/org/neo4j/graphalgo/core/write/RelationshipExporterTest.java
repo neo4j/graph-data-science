@@ -21,18 +21,22 @@ package org.neo4j.graphalgo.core.write;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collections;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.core.utils.TerminationFlag.RUNNING_TRUE;
@@ -80,19 +84,27 @@ class RelationshipExporterTest {
     @Test
     void exportRelationshipsWithoutProperties() {
         RelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
-        exporter.write("FOOBAR", "weight");
+        exporter.write("FOOBAR");
         validateWrittenGraphWithoutProperties();
+
+        runQueryWithRowConsumer(
+            db,
+            "MATCH ()-[r:FOOBAR]->() RETURN sum(size(keys(r))) AS keyCount",
+            Collections.emptyMap(),
+            (tx, row) -> assertEquals(0L, row.getNumber("keyCount").longValue())
+        );
+
     }
 
     @Test
     void exportRelationshipsWithAfterWriteConsumer() {
         RelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
         MutableInt count = new MutableInt();
-        exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
+        exporter.write("FOOBAR", Optional.of("weight"), (sourceNodeId, targetNodeId, property) -> {
             count.increment();
             return true;
         });
-        Assertions.assertEquals(4, count.getValue());
+        assertEquals(4, count.getValue());
         validateWrittenGraph();
     }
 
@@ -100,11 +112,11 @@ class RelationshipExporterTest {
     void exportRelationshipsWithAfterWriteConsumerAndNoProperties() {
         RelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
         MutableInt count = new MutableInt();
-        exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
+        exporter.write("FOOBAR", Optional.of("weight"), (sourceNodeId, targetNodeId, property) -> {
             count.increment();
             return true;
         });
-        Assertions.assertEquals(4, count.getValue());
+        assertEquals(4, count.getValue());
         validateWrittenGraphWithoutProperties();
     }
 
@@ -133,7 +145,7 @@ class RelationshipExporterTest {
     }
 
     private void validateWrittenGraph() {
-        Graph actual = loadWrittenGraph();
+        Graph actual = loadWrittenGraph(true);
         assertGraphEquals(
             fromGdl(
                 "(a)-[{w: 4.2}]->(b)," +
@@ -146,25 +158,26 @@ class RelationshipExporterTest {
     }
 
     private void validateWrittenGraphWithoutProperties() {
-        Graph actual = loadWrittenGraph();
+        Graph actual = loadWrittenGraph(false);
         assertGraphEquals(
             fromGdl(
-                "(a)-[{w: " + PROPERTY_VALUE_IF_NOT_WRITTEN + "}]->(b)," +
-                "(a)-[{w: " + PROPERTY_VALUE_IF_NOT_WRITTEN + "}]->(a)," +
-                "(a)-[{w: " + PROPERTY_VALUE_IF_NOT_WRITTEN + "}]->(c)," +
-                "(b)-[{w: " + PROPERTY_VALUE_IF_NOT_WRITTEN + "}]->(c)," +
+                "(a)-->(b)," +
+                "(a)-->(a)," +
+                "(a)-->(c)," +
+                "(b)-->(c)," +
                 "(d)"),
             actual
         );
     }
 
-    private Graph loadWrittenGraph() {
-        return new StoreLoaderBuilder()
+    private Graph loadWrittenGraph(boolean loadRelProperty) {
+        StoreLoaderBuilder loader = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipType("FOOBAR")
-            .addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN))
-            .build()
-            .graph(NativeFactory.class);
+            .addRelationshipType("FOOBAR");
+        if (loadRelProperty) {
+            loader.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN));
+        }
+        return loader.build().graph(NativeFactory.class);
     }
 }

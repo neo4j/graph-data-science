@@ -130,7 +130,7 @@ public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimil
                             DoubleHistogram histogram = new DoubleHistogram(5);
                             exporter.write(
                                 writeRelationshipType,
-                                writeProperty,
+                                Optional.of(writeProperty),
                                 (node1, node2, similarity) -> {
                                     histogram.recordValue(similarity);
                                     return true;
