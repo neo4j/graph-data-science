@@ -78,22 +78,30 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
     }
 
     @Override
-    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityMutateConfig> algorithmFactory(NodeSimilarityMutateConfig config) {
+    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityMutateConfig> algorithmFactory(
+        NodeSimilarityMutateConfig config
+    ) {
         return new NodeSimilarityFactory<>();
     }
 
     @Override
-    protected PropertyTranslator<NodeSimilarityResult> nodePropertyTranslator(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult) {
+    protected PropertyTranslator<NodeSimilarityResult> nodePropertyTranslator(
+        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult
+    ) {
         throw new UnsupportedOperationException("NodeSimilarity does not mutate node properties.");
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
+        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computeResult
+    ) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 
     @Override
-    public Stream<MutateResult> mutate(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult) {
+    public Stream<MutateResult> mutate(
+        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult
+    ) {
         NodeSimilarityWriteConfig config = computationResult.config();
 
         if (computationResult.isGraphEmpty()) {
