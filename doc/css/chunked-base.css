@@ -759,15 +759,20 @@ section.enterprise-edition > div.titlepage .title:after {
 
 .alpha h3.title:after {
   color       : #F58220;
-  content     : "\03b1";
-  display     : inline-block;
-  font-family : monospace;
-  position: relative;
+  content     : "alpha";
   text-align: center;
-  border: 1px solid;
-  padding: 0 20px;
-  border-radius: 7px;
+  font-family: "Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue","Helvetica","Arial",sans-serif;
+  font-weight: normal;
+  font-size: 0.5em;
+  position: relative;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 6px;
   margin-left: 10px;
+  margin-right: 10px;
+  bottom: 4px;
 }
 
 /*
@@ -778,15 +783,20 @@ section.enterprise-edition > div.titlepage .title:after {
 
 .beta h3.title:after {
   color       : #F58220;
-  content     : "\03b2";
-  display     : inline-block;
-  font-family : monospace;
-  position: relative;
+  content     : "beta";
   text-align: center;
-  border: 1px solid;
-  padding: 0 20px;
-  border-radius: 7px;
+  font-family: "Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue","Helvetica","Arial",sans-serif;
+  font-weight: normal;
+  font-size: 0.5em;
+  position: relative;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 6px;
   margin-left: 10px;
+  margin-right: 10px;
+  bottom: 4px;
 }
 /*
 .beta .admonitionblock td.icon .icon-note:before {
