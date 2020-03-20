@@ -1,5 +1,7 @@
 [[algorithms-louvain]]
 = Louvain
+:entity: node
+:result: community ID
 
 [abstract]
 --
@@ -72,8 +74,6 @@ YIELD
   modularity: Float
 ----
 
-:entity: node
-:result: community ID
 include::common-parameters-anonymous-graph.adoc[]
 
 include::common-configuration-anonymous-graph.adoc[]

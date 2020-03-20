@@ -1,5 +1,7 @@
 [[algorithms-label-propagation]]
 = Label Propagation
+:entity: node
+:result: community ID
 
 [abstract]
 --
@@ -138,8 +140,6 @@ YIELD
     communityId: Integer
 ----
 
-:entity: node
-:result: community ID
 include::common-parameters-named-graph.adoc[]
 
 include::common-configuration-named-graph.adoc[]

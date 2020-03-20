@@ -1,5 +1,7 @@
 [[algorithms-wcc]]
 = Weakly Connected Components
+:entity: node
+:result: component ID
 
 [abstract]
 --
@@ -71,8 +73,6 @@ YIELD
   componentDistribution: Map
 ----
 
-:entity: node
-:result: component ID
 include::common-parameters-anonymous-graph.adoc[]
 
 include::common-configuration-anonymous-graph.adoc[]
