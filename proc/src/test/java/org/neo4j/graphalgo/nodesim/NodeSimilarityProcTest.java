@@ -59,7 +59,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
+abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, NodeSimilarityResult>,
     MemoryEstimateTest<CONFIG, NodeSimilarityResult> {
 
@@ -111,7 +111,7 @@ abstract class NodeSimilarityBaseProcTest<CONFIG extends NodeSimilarityBaseConfi
     }
 
     static Stream<Arguments> allValidGraphVariationsWithProjections() {
-        return TestSupport.allDirectedProjections().flatMap(NodeSimilarityBaseProcTest::graphVariationForProjection);
+        return TestSupport.allDirectedProjections().flatMap(NodeSimilarityProcTest::graphVariationForProjection);
     }
 
     private static Stream<Arguments> graphVariationForProjection(Orientation orientation) {

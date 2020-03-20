@@ -19,9 +19,11 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,9 +33,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilarityStreamConfig> {
+public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSimilarityResult, SimilarityResult, NodeSimilarityStreamConfig> {
 
     @Procedure(value = "gds.nodeSimilarity.stream", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
@@ -77,5 +80,15 @@ public class NodeSimilarityStreamProc extends NodeSimilarityBaseProc<NodeSimilar
         CypherMapWrapper config
     ) {
         return NodeSimilarityStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityStreamConfig> algorithmFactory(NodeSimilarityStreamConfig config) {
+        return new NodeSimilarityFactory<>();
+    }
+
+    @Override
+    protected SimilarityResult streamResult(long nodeId, long originalNodeId, NodeSimilarityResult computationResult) {
+        throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 }

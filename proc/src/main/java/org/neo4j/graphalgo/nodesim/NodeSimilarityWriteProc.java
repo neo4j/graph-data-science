@@ -20,12 +20,14 @@
 package org.neo4j.graphalgo.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -37,10 +39,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
+import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilarityWriteConfig> {
+public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteProc.WriteResult, NodeSimilarityWriteConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.write", mode = WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
@@ -48,11 +52,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> result = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(result);
+        return write(compute(graphNameOrConfig, configuration));
     }
 
     @Procedure(value = "gds.nodeSimilarity.write.estimate", mode = READ)
@@ -74,7 +74,23 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
         return NodeSimilarityWriteConfig.of(username, graphName, maybeImplicitCreate, userInput);
     }
 
-    private Stream<WriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
+    @Override
+    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityWriteConfig> algorithmFactory(NodeSimilarityWriteConfig config) {
+        return new NodeSimilarityFactory<>();
+    }
+
+    @Override
+    protected PropertyTranslator<NodeSimilarityResult> nodePropertyTranslator(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
+        throw new UnsupportedOperationException("NodeSimilarity does not write node properties.");
+    }
+
+    @Override
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computeResult) {
+        throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
+    }
+
+    @Override
+    public Stream<WriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
         NodeSimilarityWriteConfig config = computationResult.config();
 
         if (computationResult.isGraphEmpty()) {
@@ -92,18 +108,11 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
             );
         }
 
-        NodeSimilarityResult result = computationResult.result();
         NodeSimilarity algorithm = computationResult.algorithm();
-        SimilarityGraphResult similarityGraphResult = result.maybeGraphResult().get();
-        Graph similarityGraph = similarityGraphResult.similarityGraph();
+        Graph similarityGraph = computationResult.result().graphResult().similarityGraph();
 
-        WriteResultBuilder resultBuilder = new WriteResultBuilder();
-        resultBuilder
-            .withNodesCompared(similarityGraphResult.comparedNodes())
-            .withRelationshipsWritten(similarityGraphResult.similarityGraph().relationshipCount());
-        resultBuilder.withCreateMillis(computationResult.createMillis());
-        resultBuilder.withComputeMillis(computationResult.computeMillis());
-        resultBuilder.withConfig(config);
+        NodeSimilarityProc.NodeSimilarityResultBuilder<WriteResult> resultBuilder =
+            NodeSimilarityProc.resultBuilder(new WriteResult.Builder(), computationResult);
 
         if (similarityGraph.relationshipCount() > 0) {
             String writeRelationshipType = config.writeRelationshipType();
@@ -117,7 +126,7 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
                             .of(api, similarityGraph, algorithm.getTerminationFlag())
                             .withLog(log)
                             .build();
-                        if (shouldComputeHistogram()) {
+                        if (shouldComputeHistogram(callContext)) {
                             DoubleHistogram histogram = new DoubleHistogram(5);
                             exporter.write(
                                 writeRelationshipType,
@@ -169,69 +178,22 @@ public class NodeSimilarityWriteProc extends NodeSimilarityBaseProc<NodeSimilari
             this.similarityDistribution = similarityDistribution;
             this.configuration = configuration;
         }
-    }
 
-    static class WriteResultBuilder extends AbstractResultBuilder<WriteResult> {
+        static class Builder extends NodeSimilarityProc.NodeSimilarityResultBuilder<WriteResult> {
 
-        private long nodesCompared = 0L;
-
-        private long postProcessingMillis = -1L;
-
-        private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
-
-        public WriteResultBuilder withNodesCompared(long nodesCompared) {
-            this.nodesCompared = nodesCompared;
-            return this;
-        }
-
-        WriteResultBuilder withHistogram(DoubleHistogram histogram) {
-            this.maybeHistogram = Optional.of(histogram);
-            return this;
-        }
-
-        void setPostProcessingMillis(long postProcessingMillis) {
-            this.postProcessingMillis = postProcessingMillis;
-        }
-
-        ProgressTimer timePostProcessing() {
-            return ProgressTimer.start(this::setPostProcessingMillis);
-        }
-
-        private Map<String, Object> distribution() {
-            if (maybeHistogram.isPresent()) {
-                DoubleHistogram definitelyHistogram = maybeHistogram.get();
-                return MapUtil.map(
-                    "min", definitelyHistogram.getMinValue(),
-                    "max", definitelyHistogram.getMaxValue(),
-                    "mean", definitelyHistogram.getMean(),
-                    "stdDev", definitelyHistogram.getStdDeviation(),
-                    "p1", definitelyHistogram.getValueAtPercentile(1),
-                    "p5", definitelyHistogram.getValueAtPercentile(5),
-                    "p10", definitelyHistogram.getValueAtPercentile(10),
-                    "p25", definitelyHistogram.getValueAtPercentile(25),
-                    "p50", definitelyHistogram.getValueAtPercentile(50),
-                    "p75", definitelyHistogram.getValueAtPercentile(75),
-                    "p90", definitelyHistogram.getValueAtPercentile(90),
-                    "p95", definitelyHistogram.getValueAtPercentile(95),
-                    "p99", definitelyHistogram.getValueAtPercentile(99),
-                    "p100", definitelyHistogram.getValueAtPercentile(100)
+            @Override
+            public WriteResult build() {
+                return new WriteResult(
+                    createMillis,
+                    computeMillis,
+                    writeMillis,
+                    postProcessingMillis,
+                    nodesCompared,
+                    relationshipsWritten,
+                    distribution(),
+                    config.toMap()
                 );
             }
-            return Collections.emptyMap();
-        }
-
-        @Override
-        public WriteResult build() {
-            return new WriteResult(
-                createMillis,
-                computeMillis,
-                writeMillis,
-                postProcessingMillis,
-                nodesCompared,
-                relationshipsWritten,
-                distribution(),
-                config.toMap()
-            );
         }
     }
 }

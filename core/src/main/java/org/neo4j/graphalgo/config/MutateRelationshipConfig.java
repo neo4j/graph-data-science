@@ -22,4 +22,4 @@ package org.neo4j.graphalgo.config;
 /**
  * Marker interface for mutate procedures
  */
-public interface MutateRelationshipConfig extends WriteRelationshipConfig { }
+public interface MutateRelationshipConfig extends MutatePropertyConfig, WriteRelationshipConfig { }

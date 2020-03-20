@@ -35,10 +35,10 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class NodeSimilarityStatsProcTest extends NodeSimilarityBaseProcTest<NodeSimilarityStatsConfig>  {
+public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimilarityStatsConfig> {
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityBaseProcTest#allGraphVariations")
+    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTest#allGraphVariations")
     void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testName) {
         String query = queryBuilder
             .algo("nodeSimilarity")
