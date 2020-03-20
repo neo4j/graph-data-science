@@ -73,8 +73,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
         return LouvainProc.resultBuilder(new WriteResult.Builder(
             callContext, computeResult.tracker()),
             computeResult
-        )
-            .withNodeCount(computeResult.graph().nodeCount());
+        );
     }
 
     @Override

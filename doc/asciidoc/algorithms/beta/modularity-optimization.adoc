@@ -38,7 +38,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .The following describes the API for running the algorithm and mutating the in-memory graph with the results:
 [source, cypher]
 ----
-CALL gds.beta.modularityOptimization.write(graphName: String|Map, configuration: Map})
+CALL gds.beta.modularityOptimization.mutate(graphName: String|Map, configuration: Map})
 YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, mutateMillis
 ----
 
@@ -242,3 +242,24 @@ When using `write` mode the procedure will return information about the algorith
 In this example we return the number of processed nodes, the number of communities assigned to the nodes in the graph, the number of iterations and information whether the algorithm converged.
 
 Running the algorithm without specifying the `relationshipWeightProperty` will default all relationship weights to 1.0.
+
+To instead mutate the in-memory graph with the assigned community ids, the `mutate` mode is used.
+
+[role=query-example]
+--
+.Running the Modularity Optimization algorithm in mutate mode:
+[source, cypher]
+----
+CALL gds.beta.modularityOptimization.mutate('myGraph', { relationshipWeightProperty: 'weight', writeProperty: 'community' })
+YIELD nodes, communityCount, ranIterations, didConverge
+----
+
+.Results
+[opts="header"]
+|===
+| nodes | communityCount | ranIterations | didConverge
+| 6     | 2              | 3             | true
+|===
+--
+
+When using `mutate` mode the procedure will return information about the algorithm execution as in `write` mode.

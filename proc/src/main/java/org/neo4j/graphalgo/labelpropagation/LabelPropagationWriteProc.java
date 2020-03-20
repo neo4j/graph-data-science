@@ -70,8 +70,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
         return LabelPropagationProc.resultBuilder(
             new WriteResult.Builder(callContext, computeResult.tracker()),
             computeResult
-        )
-            .withNodeCount(computeResult.graph().nodeCount());
+        );
     }
 
     @Override

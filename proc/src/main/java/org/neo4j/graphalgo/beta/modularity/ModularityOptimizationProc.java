@@ -41,7 +41,6 @@ final class ModularityOptimizationProc {
             .withRanIterations(result.getIterations())
             .didConverge(result.didConverge())
             .withCommunityFunction(result::getCommunityId)
-            .withNodeCount(computeResult.graph().nodeCount())
             .withConfig(computeResult.config());
 
     }

@@ -62,8 +62,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
         return LabelPropagationProc.resultBuilder(
             new StatsResult.Builder(callContext, computeResult.tracker()),
             computeResult
-        )
-            .withNodeCount(computeResult.graph().nodeCount());
+        );
     }
 
     @Override

@@ -37,6 +37,7 @@ public abstract class StatsProc<
             resultBuilder(computeResult)
                 .withCreateMillis(computeResult.createMillis())
                 .withComputeMillis(computeResult.computeMillis())
+                .withNodeCount(computeResult.graph().nodeCount())
                 .withConfig(computeResult.config())
                 .build()
         );
