@@ -762,6 +762,12 @@ section.enterprise-edition > div.titlepage .title:after {
   content     : "\03b1";
   display     : inline-block;
   font-family : monospace;
+  position: relative;
+  text-align: center;
+  border: 1px solid;
+  padding: 0 20px;
+  border-radius: 7px;
+  margin-left: 10px;
 }
 
 /*
@@ -775,6 +781,12 @@ section.enterprise-edition > div.titlepage .title:after {
   content     : "\03b2";
   display     : inline-block;
   font-family : monospace;
+  position: relative;
+  text-align: center;
+  border: 1px solid;
+  padding: 0 20px;
+  border-radius: 7px;
+  margin-left: 10px;
 }
 /*
 .beta .admonitionblock td.icon .icon-note:before {
