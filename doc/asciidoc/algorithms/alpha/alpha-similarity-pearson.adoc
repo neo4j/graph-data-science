@@ -349,7 +349,7 @@ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, m
 ----
 
 .Results
-[opts="header",cols="1,1,1,1,1,1,1,1,1"]
+[opts="header"]
 |===
 | `nodes` | `similarityPairs` | `writeRelationshipType` | `writeProperty` | `min`              | `max`              | `mean`             | `p95`
 | 5       | 4                 | "SIMILAR"               | "score"         | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688
@@ -484,7 +484,7 @@ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, m
 ----
 
 .Results
-[opts="header",cols="1,1,1,1,1,1,1,1,1"]
+[opts="header"]
 |===
 | `nodes` | `similarityPairs` | `writeRelationshipType` | `writeProperty` | `min`              | `max`              | `mean`             | `p95`
 | 5       | 4                 | "SIMILAR"               | "score"         | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688

@@ -481,7 +481,7 @@ For example, the person most similar to Zhen is Michael, but the person most sim
 
 
 .Results
-[opts="header",cols="1,1,1,1,1,1,1,1,1"]
+[opts="header"]
 |===
 | `nodes` | `similarityPairs` | `writeRelationshipType` | `writeProperty` | `min`           | `max`              | `mean`             | `p95`
 | 5       | 5                 | "SIMILAR"               | "score"         | 0.9542236328125 | 1.0000038146972656 | 0.9824020385742187 | 1.0000038146972656
