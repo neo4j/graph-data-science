@@ -2,7 +2,7 @@
 = Louvain
 
 .Changes in Configuration
-[opts=header,cols="1a,1a"]
+[opts=header]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 | `direction`                         | -
@@ -21,7 +21,7 @@
 |===
 
 .Changes in YIELD fields
-[opts=header,cols="1a,1a"]
+[opts=header]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 | `loadMillis`             | `createMillis`
