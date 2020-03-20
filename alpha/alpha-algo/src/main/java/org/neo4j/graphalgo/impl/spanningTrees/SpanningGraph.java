@@ -57,7 +57,7 @@ public class SpanningGraph extends FilterGraph {
     public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         int parent = spanningTree.parent[Math.toIntExact(nodeId)];
         if (parent != -1) {
-            consumer.accept(parent, nodeId, fallbackValue);
+            consumer.accept(parent, nodeId, relationshipProperty(parent, nodeId, fallbackValue));
         }
     }
 
