@@ -1,4 +1,5 @@
 [[alpha-algorithms-minimum-weight-spanning-tree]]
+[.alpha]
 = Minimum Weight Spanning Tree
 
 [abstract]

@@ -1,4 +1,5 @@
 [[alpha-algorithms-similarity-jaccard]]
+[.alpha]
 = Jaccard Similarity
 
 [abstract]

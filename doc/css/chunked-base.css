@@ -757,4 +757,28 @@ section.enterprise-edition > div.titlepage .title:after {
   }
 }
 
+.alpha h3.title:after {
+  color       : #F58220;
+  content     : "\03b1";
+  display     : inline-block;
+  font-family : monospace;
+}
+
+/*
+.alpha .admonitionblock td.icon .icon-note:before {
+  content: "\03b1";
+}
+*/
+
+.beta h3.title:after {
+  color       : #F58220;
+  content     : "\03b2";
+  display     : inline-block;
+  font-family : monospace;
+}
+/*
+.beta .admonitionblock td.icon .icon-note:before {
+  content: "\03b2";
+}*/
+
 /* vim: set sw=2 ts=2: */

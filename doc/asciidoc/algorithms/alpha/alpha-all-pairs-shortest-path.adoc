@@ -1,4 +1,5 @@
 [[alpha-algorithm-all-pairs-shortest-path]]
+[.alpha]
 = All Pairs Shortest Path
 
 [abstract]

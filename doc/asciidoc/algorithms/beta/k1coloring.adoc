@@ -1,4 +1,5 @@
 [[algorithms-k1coloring]]
+[.beta]
 = K-1 Coloring
 
 [abstract]
