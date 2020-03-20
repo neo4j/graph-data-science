@@ -757,7 +757,7 @@ section.enterprise-edition > div.titlepage .title:after {
   }
 }
 
-.alpha h3.title:after {
+section.alpha h3.title:after {
   color       : #F58220;
   content     : "alpha";
   text-align: center;
@@ -775,13 +775,7 @@ section.enterprise-edition > div.titlepage .title:after {
   bottom: 4px;
 }
 
-/*
-.alpha .admonitionblock td.icon .icon-note:before {
-  content: "\03b1";
-}
-*/
-
-.beta h3.title:after {
+section.beta h3.title:after {
   color       : #F58220;
   content     : "beta";
   text-align: center;
@@ -798,9 +792,31 @@ section.enterprise-edition > div.titlepage .title:after {
   margin-right: 10px;
   bottom: 4px;
 }
-/*
-.beta .admonitionblock td.icon .icon-note:before {
+
+p.tier-note {
+  padding: 10px;
+  font-size: 1.15rem;
+  line-height: 1.75;
+  text-align: justify;
+  font-weight: bold;
+}
+
+p.tier-note:before {
+  border-right: thin solid #dddddd;
+  padding: 0 10px;
+  margin-right: 10px;
+  font-family: fantasy;
+  font-size: 2rem;
+  font-weight: normal;
+  color: #F58220;
+}
+
+section.alpha p.tier-note:before {
+  content: "\03b1";
+}
+
+section.beta p.tier-note:before {
   content: "\03b2";
-}*/
+}
 
 /* vim: set sw=2 ts=2: */
