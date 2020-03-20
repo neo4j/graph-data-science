@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStreamProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
+import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -73,6 +74,8 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.k1coloring.write",
         "gds.beta.k1coloring.write.estimate",
 
+        "gds.beta.modularityOptimization.mutate",
+        "gds.beta.modularityOptimization.mutate.estimate",
         "gds.beta.modularityOptimization.stream",
         "gds.beta.modularityOptimization.stream.estimate",
         "gds.beta.modularityOptimization.write",
@@ -171,6 +174,7 @@ class ListProcTest extends BaseProcTest {
             LouvainStreamProc.class,
             LouvainStatsProc.class,
             LouvainMutateProc.class,
+            ModularityOptimizationMutateProc.class,
             ModularityOptimizationWriteProc.class,
             ModularityOptimizationStreamProc.class,
             NodeSimilarityWriteProc.class,
