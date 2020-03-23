@@ -21,10 +21,12 @@ package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.annotation.Configuration;
 
 public interface RelationshipWeightConfig {
 
     @Value.Default
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     default @Nullable String relationshipWeightProperty() {
         return null;
     }
