@@ -139,21 +139,21 @@ CALL gds.graph.create('my-graph', ['Person', 'City'], '*')
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
+Projecting multiple node labels enables algorithms to only use a subset of those.
+
+[source,cypher]
+----
+// Uses `Person` nodes for computing Page Rank values between persons
+CALL gds.pageRank.stream('my-graph', { nodeLabels: ['Person'] }) YIELD nodeId, score;
+----
+
 To project all nodes in the Neo4j graph, we can use the special `*` ('star') node projection.
-Note, that this node projection can not be combined with any other node label.
 
 [source,cypher]
 ----
 CALL gds.graph.create('my-graph', '*', '*')
 YIELD graphName, nodeCount, relationshipCount;
 ----
-
-[NOTE]
-====
-In the in-memory graph, all projected node labels are merged into a single label.
-Unlike for relationship projections, it is currently not possible to specify a filter on projected labels.
-If the graph is used as input for an algorithm, all nodes will be considered.
-====
 
 === Node properties
 
