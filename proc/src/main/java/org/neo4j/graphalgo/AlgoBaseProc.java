@@ -138,17 +138,11 @@ public abstract class AlgoBaseProc<
 
             estimationBuilder.add("graph", graphStoreFactory.memoryEstimation(estimateDimensions));
         } else {
-            String graphName = config.graphName().get();
+            String graphName = config.graphName().orElseThrow(IllegalStateException::new);
+
+            GraphCreateConfig graphCreateConfig = GraphStoreCatalog.get(getUsername(), graphName).config();
 
             // TODO get the dimensions from the graph itself.
-            GraphCreateConfig graphCreateConfig = GraphStoreCatalog
-                .getLoadedGraphs(getUsername())
-                .keySet()
-                .stream()
-                .filter(graph -> graph.graphName().equals(graphName))
-                .findFirst()
-                .get();
-
             if (graphCreateConfig instanceof RandomGraphGeneratorConfig) {
                 estimateDimensions = ImmutableGraphDimensions.builder()
                     .nodeCount(graphCreateConfig.nodeCount())

@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.wcc.WccStatsProc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -103,7 +104,7 @@ class GraphCreateProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(GraphCreateProc.class);
+        registerProcedures(GraphCreateProc.class, PageRankStatsProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -111,6 +112,15 @@ class GraphCreateProcTest extends BaseProcTest {
     void tearDown() {
         db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @Test
+    void failWhenNotFindingGraph() {
+        String query1 = "CALL gds.pageRank.stats('nope')";
+        String query2 = "CALL gds.pageRank.stats.estimate('nope')";
+
+        assertError(query1, "Cannot find graph with name 'nope'");
+        assertError(query2, "Cannot find graph with name 'nope'");
     }
 
     @Test
