@@ -32,8 +32,8 @@ public interface ConcurrencyValidation {
             // do nothing
             return;
         }
-        if (this instanceof WritePropertyConfig) {
-            WritePropertyConfig wc = (WritePropertyConfig) this;
+        if (this instanceof WriteConfig) {
+            WriteConfig wc = (WriteConfig) this;
             Validator.validate(wc.concurrency());
             Validator.validate(wc.writeConcurrency());
         } else if (this instanceof AlgoBaseConfig) {

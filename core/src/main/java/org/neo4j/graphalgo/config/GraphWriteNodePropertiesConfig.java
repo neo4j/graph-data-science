@@ -32,15 +32,10 @@ import static java.util.stream.Collectors.joining;
 @ValueClass
 @Configuration("GraphWriteNodePropertyConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface GraphWriteNodePropertiesConfig extends WritePropertyConfig {
+public interface GraphWriteNodePropertiesConfig extends WriteConfig {
 
     @Configuration.Parameter
     List<String> nodeProperties();
-
-    @Override
-    default String writeProperty() {
-        return "unused";
-    }
 
     static GraphWriteNodePropertiesConfig of(
         String userName,

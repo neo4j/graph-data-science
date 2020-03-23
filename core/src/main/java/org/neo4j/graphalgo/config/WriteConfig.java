@@ -19,10 +19,12 @@
  */
 package org.neo4j.graphalgo.config;
 
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.immutables.value.Value;
 
-public interface WriteRelationshipConfig extends WriteConfig {
+public interface WriteConfig extends AlgoBaseConfig {
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
-    String writeRelationshipType();
+    @Value.Default
+    default int writeConcurrency() {
+        return concurrency();
+    }
 }
