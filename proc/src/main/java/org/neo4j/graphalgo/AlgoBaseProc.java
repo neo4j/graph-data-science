@@ -150,22 +150,10 @@ public abstract class AlgoBaseProc<
                 .get();
 
             if (graphCreateConfig instanceof RandomGraphGeneratorConfig) {
-                estimateDimensions = new GraphDimensions() {
-                    @Override
-                    public long nodeCount() {
-                        return graphCreateConfig.nodeCount();
-                    }
-
-                    @Override
-                    public long maxRelCount() {
-                        return ((RandomGraphGeneratorConfig) graphCreateConfig).averageDegree() * nodeCount();
-                    }
-
-                    @Override
-                    public @Nullable LongSet nodeLabelIds() {
-                        return null;
-                    }
-                };
+                estimateDimensions = ImmutableGraphDimensions.builder()
+                    .nodeCount(graphCreateConfig.nodeCount())
+                    .maxRelCount(((RandomGraphGeneratorConfig) graphCreateConfig).averageDegree() * graphCreateConfig.nodeCount())
+                    .build();
             } else {
                 GraphCreateConfig filteredConfig = filterGraphCreateConfig(config, graphCreateConfig);
 
