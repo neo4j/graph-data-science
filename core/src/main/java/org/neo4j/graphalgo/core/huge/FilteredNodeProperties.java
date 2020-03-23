@@ -65,6 +65,6 @@ public class FilteredNodeProperties implements NodeProperties {
 
     @Override
     public long size() {
-        return Math.max(properties.size(), idMap.nodeCount());
+        return Math.min(properties.size(), idMap.nodeCount());
     }
 }

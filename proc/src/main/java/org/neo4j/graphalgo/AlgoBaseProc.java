@@ -163,7 +163,7 @@ public abstract class AlgoBaseProc<
     private GraphCreateConfig filterGraphCreateConfig(CONFIG config, GraphCreateConfig graphCreateConfig) {
         NodeProjections nodeProjections = graphCreateConfig.nodeProjections();
         List<String> nodeLabels = config.nodeLabels();
-        if (nodeLabels.isEmpty()) {
+        if (nodeLabels.contains(PROJECT_ALL.name)) {
             return graphCreateConfig;
         } else {
             NodeProjections.Builder builder = NodeProjections.builder();
