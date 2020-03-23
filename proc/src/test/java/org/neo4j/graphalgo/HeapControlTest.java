@@ -82,7 +82,7 @@ public class HeapControlTest extends BaseProcTest implements AlgoBaseProcTest<Pa
 
         String message = ExceptionUtil.rootCause(exception).getMessage();
         assertTrue(message.matches(
-            "Procedure was blocked since minimum estimated memory \\(\\d+\\) exceeds current free memory 42."));
+            "Procedure was blocked since minimum estimated memory \\(\\d+\\) exceeds current free memory \\(42\\)."));
     }
 
     @Override

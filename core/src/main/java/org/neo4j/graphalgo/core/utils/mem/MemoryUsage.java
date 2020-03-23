@@ -223,9 +223,10 @@ public final class MemoryUsage {
             throw new IllegalArgumentException(
                 "Number of elements must be >= 0: " + elements);
         }
+        long newElements = Math.max(elements, DEFAULT_EXPECTED_ELEMENTS);
 
-        long length = (long) Math.ceil(elements / (double) DEFAULT_LOAD_FACTOR);
-        if (length == elements) {
+        long length = (long) Math.ceil(newElements / (double) DEFAULT_LOAD_FACTOR);
+        if (length == newElements) {
             length++;
         }
         length = Math.max(MIN_HASH_ARRAY_LENGTH, BitUtil.nextHighestPowerOfTwo(length));
