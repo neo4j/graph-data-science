@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.generator;
 
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -29,17 +30,17 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.AllowSelfLoops;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MAX_KEY;
-import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MIN_KEY;
-import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_NAME_KEY;
-import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_TYPE_KEY;
-import static org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
+import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MAX_KEY;
+import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MIN_KEY;
+import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_NAME_KEY;
+import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_TYPE_KEY;
+import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 public final class GraphGenerateProc extends BaseProc {

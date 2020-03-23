@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.beta.generator;
+package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.config.BaseConfig;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 
 import java.util.Collections;
 import java.util.Map;
@@ -100,14 +100,19 @@ public interface RandomGraphGeneratorConfig extends BaseConfig {
 
     enum AllowSelfLoops {
         YES(true), NO(false);
-        boolean value;
+
+        private final boolean value;
 
         AllowSelfLoops(boolean value) {
             this.value = value;
         }
 
-        static AllowSelfLoops of(boolean value) {
+        public static AllowSelfLoops of(boolean value) {
             return value ? YES : NO;
+        }
+
+        public boolean value() {
+            return value;
         }
     }
 }

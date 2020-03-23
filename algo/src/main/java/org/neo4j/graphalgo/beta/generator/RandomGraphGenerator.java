@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.beta.generator;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorConfig.AllowSelfLoops;
 
 import java.util.Optional;
 import java.util.Random;
@@ -176,7 +176,7 @@ public final class RandomGraphGenerator {
             degree = degreeProducer.applyAsLong(nodeId);
 
             for (int j = 0; j < degree; j++) {
-                if (allowSelfLoops.value) {
+                if (allowSelfLoops.value()) {
                     targetId = relationshipProducer.applyAsLong(nodeId);
                 } else {
                     while ((targetId = relationshipProducer.applyAsLong(nodeId)) == nodeId) {}

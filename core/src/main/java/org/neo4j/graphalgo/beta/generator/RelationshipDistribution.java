@@ -84,7 +84,7 @@ public enum RelationshipDistribution {
      * @param random Random instance to be used to generate the number of outgoing relationships
      * @return A unary function that accepts a node id and returns that nodes out degree
      */
-    abstract LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random);
+    public abstract LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random);
 
     /**
      * Produces a unary function which accepts a node id parameter and returns another node id to wich the node will
@@ -95,5 +95,5 @@ public enum RelationshipDistribution {
      * @param random Random instance to be used to generate the other node id
      * @return A unary function that accepts a node id and returns another node id to wich a relationship will be created.
      */
-    abstract LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random);
+    public abstract LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree, Random random);
 }
