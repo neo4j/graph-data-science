@@ -22,7 +22,12 @@ package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -35,7 +40,7 @@ import java.util.Map;
 @ValueClass
 @Configuration("RandomGraphGeneratorConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface RandomGraphGeneratorConfig extends BaseConfig {
+public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
 
     String RELATIONSHIP_SEED_KEY = "relationshipSeed";
     String RELATIONSHIP_PROPERTY_KEY = "relationshipProperty";
@@ -45,9 +50,6 @@ public interface RandomGraphGeneratorConfig extends BaseConfig {
     String RELATIONSHIP_PROPERTY_MIN_KEY = "min";
     String RELATIONSHIP_PROPERTY_MAX_KEY = "max";
     String RELATIONSHIP_PROPERTY_VALUE_KEY = "value";
-
-    @Configuration.Parameter
-    String graphName();
 
     @Configuration.Parameter
     long nodeCount();
@@ -88,6 +90,25 @@ public interface RandomGraphGeneratorConfig extends BaseConfig {
         return Collections.emptyMap();
     }
 
+    @Value.Default
+    default NodeProjections nodeProjections() {
+        return NodeProjections.builder()
+            .putProjection(
+                ElementIdentifier.of(nodeCount() + "_Nodes"),
+                NodeProjection.of(nodeCount() + "_Nodes"))
+            .build();
+    }
+
+    @Value.Default
+    default RelationshipProjections relationshipProjections() {
+        return RelationshipProjections.builder()
+            .putProjection(
+                ElementIdentifier.of(relationshipDistribution().name()),
+                RelationshipProjection.of(relationshipDistribution().name(), orientation(), aggregation())
+            )
+            .build();
+    }
+
     static RandomGraphGeneratorConfig of(
         String username,
         String graphName,
@@ -95,7 +116,7 @@ public interface RandomGraphGeneratorConfig extends BaseConfig {
         long averageDegree,
         CypherMapWrapper config
     ) {
-        return new RandomGraphGeneratorConfigImpl(graphName, nodeCount, averageDegree, username, config);
+        return new RandomGraphGeneratorConfigImpl(nodeCount, averageDegree, graphName, username, config);
     }
 
     enum AllowSelfLoops {

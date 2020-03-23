@@ -100,7 +100,7 @@ public final class GraphGenerateProc extends BaseProc {
 
             stats.nodes = graphStore.nodeCount();
             stats.relationships = graphStore.relationshipCount();
-            GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName(getUsername(), name), graphStore);
+            GraphStoreCatalog.set(config, graphStore);
         }
 
         return stats;

@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.nodesim.NodeSimilarityStatsProc;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,9 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_SEED_KEY;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
-import static org.neo4j.graphalgo.core.CypherMapWrapper.create;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_DISTRIBUTION_KEY;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MAX_KEY;
@@ -55,19 +54,44 @@ import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_NAME_KEY;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_TYPE_KEY;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
+import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_SEED_KEY;
+import static org.neo4j.graphalgo.core.CypherMapWrapper.create;
 
 class GraphGenerateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(GraphGenerateProc.class);
+        registerProcedures(GraphGenerateProc.class, NodeSimilarityStatsProc.class);
     }
 
     @AfterEach
     void tearDown() {
         db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @ParameterizedTest
+    @MethodSource("estimations")
+    void shouldWorkWithEstimate(int nodeCount, int avgDegree, String memReq) {
+        String generateQ =
+            "CALL gds.beta.graph.generate( " +
+            "  'g', " +
+            "  $nodeCount, " +
+            "  $avgDegree " +
+            ")";
+
+        runQuery(generateQ, map("nodeCount", nodeCount, "avgDegree", avgDegree));
+
+        String estimateQ =
+            "CALL gds.nodeSimilarity.stats.estimate( " +
+            "  'g', " +
+            "  {} " +
+            ") YIELD requiredMemory";
+
+        runQueryWithRowConsumer(estimateQ, row ->
+            assertEquals(memReq, row.getString("requiredMemory"))
+        );
     }
 
     @Test
@@ -288,5 +312,12 @@ class GraphGenerateProcTest extends BaseProcTest {
         ));
 
         return producers.stream();
+    }
+
+    private static Stream<Arguments> estimations() {
+        return Stream.of(
+            Arguments.of(100, 2, "27 KiB"),
+            Arguments.of(100, 4, "29 KiB")
+        );
     }
 }

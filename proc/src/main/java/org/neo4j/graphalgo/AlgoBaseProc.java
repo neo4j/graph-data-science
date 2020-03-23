@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import com.carrotsearch.hppc.LongSet;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.immutables.value.Value;
@@ -33,6 +34,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
@@ -147,11 +149,30 @@ public abstract class AlgoBaseProc<
                 .findFirst()
                 .get();
 
-            GraphCreateConfig filteredConfig = filterGraphCreateConfig(config, graphCreateConfig);
+            if (graphCreateConfig instanceof RandomGraphGeneratorConfig) {
+                estimateDimensions = new GraphDimensions() {
+                    @Override
+                    public long nodeCount() {
+                        return graphCreateConfig.nodeCount();
+                    }
 
-            GraphLoader loader = newLoader(filteredConfig, AllocationTracker.EMPTY);
-            GraphStoreFactory graphStoreFactory = loader.build(config.getGraphImpl());
-            estimateDimensions = graphStoreFactory.dimensions();
+                    @Override
+                    public long maxRelCount() {
+                        return ((RandomGraphGeneratorConfig) graphCreateConfig).averageDegree() * nodeCount();
+                    }
+
+                    @Override
+                    public @Nullable LongSet nodeLabelIds() {
+                        return null;
+                    }
+                };
+            } else {
+                GraphCreateConfig filteredConfig = filterGraphCreateConfig(config, graphCreateConfig);
+
+                GraphLoader loader = newLoader(filteredConfig, AllocationTracker.EMPTY);
+                GraphStoreFactory graphStoreFactory = loader.build(config.getGraphImpl());
+                estimateDimensions = graphStoreFactory.dimensions();
+            }
         }
 
         estimationBuilder.add("algorithm", algorithmFactory(config).memoryEstimation(config));
