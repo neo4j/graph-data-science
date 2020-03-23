@@ -73,7 +73,7 @@ public class NodeFilteredGraph extends FilterGraph {
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        return super.toMappedNodeId(filteredIdMap.toMappedNodeId(nodeId));
+        return filteredIdMap.toMappedNodeId(super.toMappedNodeId(nodeId));
     }
 
     @Override

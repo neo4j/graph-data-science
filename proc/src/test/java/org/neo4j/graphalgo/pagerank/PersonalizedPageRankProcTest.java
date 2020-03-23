@@ -27,15 +27,19 @@ import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,8 +84,11 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
+        expected = createExpectedResults(db);
+    }
 
-        expected = new HashMap<>();
+    Map<Long, Double> createExpectedResults(final GraphDatabaseService db) {
+        Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
             expected.put(findNode(db, tx, PERSON_LABEL, "name", "John").getId(), 0.24851499999999993);
@@ -95,6 +102,8 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
             expected.put(findNode(db, tx, PRODUCT_LABEL, "name", "Harry Potter").getId(), 0.01224);
             expected.put(findNode(db, tx, PRODUCT_LABEL, "name", "Hobbit").getId(), 0.01224);
         });
+
+        return expected;
     }
 
     @Test
@@ -227,5 +236,57 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         );
 
         assertMapEquals(expected, actual);
+    }
+
+    @Test
+    void testStreamRunsOnLoadedGraphWithNodeLabelFilter() throws Exception {
+        GraphDbApi db = TestDatabaseCreator.createTestDatabase();
+        try {
+            registerProcedures(db, GraphCreateProc.class, PageRankStreamProc.class);
+
+            String queryWithIgnore = "CREATE (nXX:IgnoreAlso {nodeId: 1337}), (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(a), (a)-[:X]->(nX), (nX)-[:X]->(e), (e)-[:X]->(nX)";
+            QueryRunner.runQuery(db, queryWithIgnore);
+
+            Map<Long, Double> expected = createExpectedResults(db);
+
+            List<Node> startNodes = new ArrayList<>();
+            runInTransaction(db, tx -> startNodes.add(findNode(db, tx, PERSON_LABEL, "name", "John")));
+
+            QueryRunner.runQuery(
+                db,
+                "CALL  gds.graph.create('personalisedGraph', " +
+                "  ['Ignore', 'Person', 'Product']," +
+                "  {" +
+                "      Product:{" +
+                "        type:'PURCHASED'," +
+                "        orientation:'UNDIRECTED'," +
+                "        aggregation: 'DEFAULT'" +
+                "      }" +
+                "  }" +
+                ")"
+            );
+
+            String query = GdsCypher.call().explicitCreation("personalisedGraph")
+                .algo("pageRank").streamMode()
+                .addPlaceholder("sourceNodes", "startNodes")
+                .addParameter("nodeLabels", Arrays.asList("Person", "Product"))
+                .yields("nodeId", "score");
+
+            Map<Long, Double> actual = new HashMap<>();
+
+            runQueryWithRowConsumer(
+                db,
+                query,
+                map("startNodes", startNodes),
+                row -> actual.put(
+                    (Long) row.get("nodeId"),
+                    (Double) row.get("score")
+                )
+            );
+
+            assertMapEquals(expected, actual);
+        } finally {
+            db.shutdown();
+        }
     }
 }
