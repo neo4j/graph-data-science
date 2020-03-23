@@ -340,6 +340,7 @@ public abstract class AlgoBaseProc<
 
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
+        validateMemoryUsage(memoryEstimation(config));
 
         GraphStore graphStore;
         Graph graph;

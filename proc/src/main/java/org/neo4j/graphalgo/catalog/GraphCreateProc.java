@@ -154,6 +154,7 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     private GraphCreateResult createGraph(GraphCreateConfig config, Class<? extends GraphStoreFactory> factoryClazz) {
+        validateMemoryUsage(memoryTreeWithDimensions(config, factoryClazz));
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
@@ -179,12 +180,16 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     private Stream<MemoryEstimateResult> estimateGraph(GraphCreateConfig config, Class<? extends GraphStoreFactory> factoryClazz) {
+        return Stream.of(new MemoryEstimateResult(memoryTreeWithDimensions(config, factoryClazz)));
+    }
+
+    public MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config, Class<? extends GraphStoreFactory> factoryClazz) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphStoreFactory graphStoreFactory = loader.build(factoryClazz);
         GraphDimensions dimensions = updateDimensions(config, graphStoreFactory, graphStoreFactory.dimensions());
 
         MemoryTree memoryTree = estimate(graphStoreFactory, dimensions, config);
-        return Stream.of(new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
+        return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 
     private GraphDimensions updateDimensions(

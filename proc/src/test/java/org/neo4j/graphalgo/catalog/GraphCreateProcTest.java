@@ -34,14 +34,23 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.graphalgo.wcc.WccStatsProc;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.math.BigDecimal;
@@ -56,6 +65,7 @@ import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
@@ -66,6 +76,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
@@ -74,10 +85,13 @@ import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
@@ -830,6 +844,57 @@ class GraphCreateProcTest extends BaseProcTest {
                 assertEquals(expectedPercentage, row.getNumber("heapPercentageMax").doubleValue());
             }
         );
+    }
+
+    @Test
+    void shouldFailOnTooBigGraphNative() {
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            applyOnProcedure(proc -> {
+                GraphCreateConfig config = GraphCreateConfig.createImplicit(
+                    "",
+                    CypherMapWrapper.create(MapUtil.map(
+                        NODE_PROJECTION_KEY, "*",
+                        RELATIONSHIP_PROJECTION_KEY, "*"))
+                );
+                proc.validateMemoryUsage(proc.memoryTreeWithDimensions(config, NativeFactory.class), () -> 42);
+            });
+        });
+
+        String message = ExceptionUtil.rootCause(exception).getMessage();
+        assertTrue(message.matches(
+            "Procedure was blocked since minimum estimated memory \\(\\d+\\) exceeds current free memory \\(42\\)."));
+    }
+
+    @Test
+    void shouldFailOnTooBigGraphCypher() {
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            applyOnProcedure(proc -> {
+                GraphCreateConfig config = GraphCreateConfig.createImplicit(
+                    "",
+                    CypherMapWrapper.create(MapUtil.map(
+                        NODE_QUERY_KEY, "MATCH (n) RETURN n",
+                        RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r"))
+                );
+                proc.validateMemoryUsage(proc.memoryTreeWithDimensions(config, CypherFactory.class), () -> 42);
+            });
+        });
+
+        String message = ExceptionUtil.rootCause(exception).getMessage();
+        assertTrue(message.matches(
+            "Procedure was blocked since minimum estimated memory \\(\\d+\\) exceeds current free memory \\(42\\)."));
+    }
+
+    void applyOnProcedure(Consumer<GraphCreateProc> func) {
+        try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
+            GraphCreateProc proc = new GraphCreateProc();
+
+            proc.transaction = transactions.ktx();
+            proc.api = db;
+            proc.callContext = ProcedureCallContext.EMPTY;
+            proc.log = new TestLog();
+
+            func.accept(proc);
+        }
     }
 
     @Test
