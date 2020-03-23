@@ -71,7 +71,7 @@ def product = [
 ]
 
 allprojects { proj ->
-    plugins.withType(JavaPlugin) {
+    plugins.withType(JavaLibraryPlugin) {
         if (proj.path in product) {
             proj.apply plugin: 'com.github.hierynomus.license'
             // License header checking and insertion

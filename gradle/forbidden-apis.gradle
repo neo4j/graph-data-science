@@ -1,5 +1,5 @@
 allprojects { proj ->
-    plugins.withType(JavaPlugin) {
+    plugins.withType(JavaLibraryPlugin) {
         proj.apply plugin: 'de.thetaphi.forbiddenapis'
         proj.forbiddenApis {
             signaturesFiles = files("$publicDir/etc/forbidden-apis")

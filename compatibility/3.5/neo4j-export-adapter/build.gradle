@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Neo4j Export Adapter'
 

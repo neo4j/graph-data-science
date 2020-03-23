@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 description = 'Neo4j Graph Algorithms :: Cypher Printer for Neo4j Version 4.0'
 

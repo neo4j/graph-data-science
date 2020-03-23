@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 description = 'Neo4j Graph Algorithms :: Copy of Neo4j Collections from 3.5'
 

@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 description = 'Neo4j Graph Algorithms :: Dummy project to enable Neo4j version toggling'
 // TODO: This dummy project should not need to exist.

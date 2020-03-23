@@ -1,5 +1,5 @@
 allprojects {
-    plugins.withType(JavaPlugin) {
+    plugins.withType(JavaLibraryPlugin) {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
 
