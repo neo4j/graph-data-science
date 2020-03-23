@@ -101,23 +101,23 @@ public class NodeFilteredGraph extends FilterGraph {
     @Override
     public long getTarget(long sourceNodeId, long index) {
         HugeGraph.GetTargetConsumer consumer = new HugeGraph.GetTargetConsumer(index);
-        forEachRelationship(filteredIdMap.toMappedNodeId(sourceNodeId), (s, t) -> filterAndConsume(s, t, consumer));
-        return filteredIdMap.toOriginalNodeId(consumer.target);
+        forEachRelationship(sourceNodeId, consumer);
+        return consumer.target;
     }
 
     @Override
     public boolean exists(long sourceNodeId, long targetNodeId) {
-        return super.exists(filteredIdMap.toMappedNodeId(sourceNodeId), filteredIdMap.toMappedNodeId(targetNodeId));
+        return super.exists(filteredIdMap.toOriginalNodeId(sourceNodeId), filteredIdMap.toOriginalNodeId(targetNodeId));
     }
 
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
-        return super.relationshipProperty(filteredIdMap.toMappedNodeId(sourceNodeId), filteredIdMap.toMappedNodeId(targetNodeId), fallbackValue);
+        return super.relationshipProperty(filteredIdMap.toOriginalNodeId(sourceNodeId), filteredIdMap.toOriginalNodeId(targetNodeId), fallbackValue);
     }
 
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
-        return super.relationshipProperty(filteredIdMap.toMappedNodeId(sourceNodeId), filteredIdMap.toMappedNodeId(targetNodeId));
+        return super.relationshipProperty(filteredIdMap.toOriginalNodeId(sourceNodeId), filteredIdMap.toOriginalNodeId(targetNodeId));
     }
 
     @Override
