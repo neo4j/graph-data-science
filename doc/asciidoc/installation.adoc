@@ -18,7 +18,7 @@ The GDS library supports the following Neo4j versions:
 [opts=header,cols="1, 1"]
 |===
 | Neo4j Graph Data Science | Neo4j version
-.7+<.^|`1.0.x`
+.7+<.^|`1.0.x`, `1.1.x`
 | `3.5.9`
 | `3.5.10`
 | `3.5.11`
