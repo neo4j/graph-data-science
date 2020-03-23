@@ -46,13 +46,14 @@ public class FilteredNodeProperties implements NodeProperties {
 
     @Override
     public OptionalLong getMaxPropertyValue() {
-        double[] currentMax = new double[1];
-        currentMax[0] = Double.MIN_VALUE;
+        MutableDouble currentMax = new MutableDouble(Double.NEGATIVE_INFINITY);
         idMap.forEachNode(id -> {
-            currentMax[0] = Math.max(currentMax[0], nodeProperty(id, Double.MIN_VALUE));
+            currentMax.setValue(Math.max(currentMax.doubleValue(), nodeProperty(id, Double.MIN_VALUE)));
             return true;
         });
-        return OptionalLong.of((long) currentMax[0]);
+        return currentMax.doubleValue() == Double.NEGATIVE_INFINITY
+            ? OptionalLong.empty()
+            : OptionalLong.of((long) currentMax.doubleValue());
     }
 
     @Override

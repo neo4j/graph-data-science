@@ -49,6 +49,10 @@ public class NodeImporter {
     private final Collection<NodePropertiesBuilder> nodePropertyBuilders;
     private final LongObjectMap<List<String>> labelProjectionMapping;
 
+    public NodeImporter(HugeLongArrayBuilder idMapBuilder) {
+        this(idMapBuilder, null, null, null);
+    }
+
     public NodeImporter(
         HugeLongArrayBuilder idMapBuilder,
         Map<String, BitSet> projectionBitSetMapping,

@@ -261,7 +261,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
     private IdsAndProperties buildNodes(INPUT[] inputs) {
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(inputs.length, AllocationTracker.EMPTY);
-        NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null, null, null);
+        NodeImporter nodeImporter = new NodeImporter(idMapBuilder);
         long maxNodeId = 0L;
 
         NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), inputs.length, false);

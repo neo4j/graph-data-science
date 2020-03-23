@@ -39,7 +39,6 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -182,7 +181,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         void put(long key, String value) {
             if (!this.mappings.containsKey(key)) {
-                this.mappings.put(key, new LinkedList<>());
+                this.mappings.put(key, new ArrayList<>());
             }
             this.mappings.get(key).add(value);
         }
