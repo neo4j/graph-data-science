@@ -416,7 +416,7 @@ class CypherFactoryTest {
             () -> applyInTransaction(db, tx -> loader.build(CypherFactory.class).build().graphStore())
         );
 
-        assertTrue(ex.getMessage().contains("should be of type list"));
+        assertTrue(ex.getMessage().contains("should be of type List"));
     }
 
     private void loadAndTestGraph(
