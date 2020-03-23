@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core;
 
-import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.value.Value;
