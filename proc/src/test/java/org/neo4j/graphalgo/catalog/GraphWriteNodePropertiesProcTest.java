@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,11 +80,12 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             "CALL gds.graph.writeNodeProperties(" +
             "   '%s', " +
             "   ['newNodeProp1', 'newNodeProp2']" +
-            ") YIELD graphName, nodeProperties, propertiesWritten",
+            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
             TEST_GRAPH_NAME
         );
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
+            assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
             assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
             assertEquals(Arrays.asList("newNodeProp1", "newNodeProp2"), row.get("nodeProperties"));
             assertEquals(12L, row.getNumber("propertiesWritten").longValue());

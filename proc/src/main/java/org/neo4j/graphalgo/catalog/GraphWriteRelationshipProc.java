@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.procedure.Description;
@@ -66,17 +67,25 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
         config.validate(graphStore);
         // writing
-        long relationshipsWritten = runWithExceptionLogging(
-            "Writing relationships failed",
-            () -> writeRelationshipType(graphStore, config)
-        );
+        Result.Builder builder =  new Result.Builder(graphName, relationshipType, maybeRelationshipProperty);
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+            long relationshipsWritten = runWithExceptionLogging(
+                "Writing relationships failed",
+                () -> writeRelationshipType(graphStore, config)
+            );
+            builder.withRelationshipsWritten(relationshipsWritten);
+        }
         // result
-        return Stream.of(new Result(graphName, relationshipType, maybeRelationshipProperty, relationshipsWritten));
+        return Stream.of(builder.build());
     }
 
     private long writeRelationshipType(GraphStore graphStore, GraphWriteRelationshipConfig config) {
         RelationshipExporter exporter = RelationshipExporter
-            .of(api, graphStore.getGraph(config.relationshipType(), config.relationshipProperty()), TerminationFlag.wrap(transaction))
+            .of(
+                api,
+                graphStore.getGraph(config.relationshipType(), config.relationshipProperty()),
+                TerminationFlag.wrap(transaction)
+            )
             .withLog(log)
             .parallel(Pools.DEFAULT, config.writeConcurrency())
             .build();
@@ -86,27 +95,61 @@ public class GraphWriteRelationshipProc extends CatalogProc {
     }
 
     public static class Result {
+        public final long writeMillis;
         public final String graphName;
-
         public final String relationshipType;
-
         public final String relationshipProperty;
-
         public final long relationshipsWritten;
-
         public final long propertiesWritten;
 
         Result(
+            long writeMillis,
             String graphName,
             String relationshipType,
             Optional<String> relationshipProperty,
             long relationshipsWritten
         ) {
+            this.writeMillis = writeMillis;
             this.graphName = graphName;
             this.relationshipType = relationshipType;
             this.relationshipProperty = relationshipProperty.orElse(null);
             this.relationshipsWritten = relationshipsWritten;
             this.propertiesWritten = relationshipProperty.isPresent() ? relationshipsWritten : 0L;
+        }
+
+        static class Builder {
+            private final String graphName;
+            private final String relationshipType;
+            private final Optional<String> maybeRelationshipProperty;
+
+            private long writeMillis;
+            private long relationshipsWritten;
+
+            Builder withWriteMillis(long writeMillis) {
+                this.writeMillis = writeMillis;
+                return this;
+            }
+
+            Builder withRelationshipsWritten(long relationshipsWritten) {
+                this.relationshipsWritten = relationshipsWritten;
+                return this;
+            }
+
+            Builder(String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
+                this.graphName = graphName;
+                this.relationshipType = relationshipType;
+                this.maybeRelationshipProperty = maybeRelationshipProperty;
+            }
+
+            Result build() {
+                return new Result(
+                    writeMillis,
+                    graphName,
+                    relationshipType,
+                    maybeRelationshipProperty,
+                    relationshipsWritten
+                );
+            }
         }
     }
 

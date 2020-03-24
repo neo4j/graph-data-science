@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
@@ -65,12 +66,16 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
         config.validate(graphStore);
         // writing
-        long propertiesWritten = runWithExceptionLogging(
-            "Graph creation failed",
-            () -> writeNodeProperties(graphStore, nodeProperties, config.writeConcurrency())
-        );
+        Result.Builder builder = new Result.Builder(graphName, nodeProperties);
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+            long propertiesWritten = runWithExceptionLogging(
+                "Graph creation failed",
+                () -> writeNodeProperties(graphStore, nodeProperties, config.writeConcurrency())
+            );
+            builder.withPropertiesWritten(propertiesWritten);
+        }
         // result
-        return Stream.of(new Result(graphName, nodeProperties, propertiesWritten));
+        return Stream.of(builder.build());
     }
 
     private long writeNodeProperties(GraphStore graphStore, List<String> nodePropertyKeys, int writeConcurrency) {
@@ -93,16 +98,42 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
     }
 
     public static class Result {
+        public final long writeMillis;
         public final String graphName;
-
         public final List<String> nodeProperties;
-
         public final long propertiesWritten;
 
-        Result(String graphName, List<String> nodeProperties, long propertiesWritten) {
+        Result(long writeMillis, String graphName, List<String> nodeProperties, long propertiesWritten) {
+            this.writeMillis = writeMillis;
             this.graphName = graphName;
             this.nodeProperties = nodeProperties.stream().sorted().collect(Collectors.toList());
             this.propertiesWritten = propertiesWritten;
+        }
+
+        static class Builder {
+            private final String graphName;
+            private final List<String> nodeProperties;
+            private long propertiesWritten;
+            private long writeMillis;
+
+            Builder(String graphName, List<String> nodeProperties) {
+                this.graphName = graphName;
+                this.nodeProperties = nodeProperties;
+            }
+
+            Builder withWriteMillis(long writeMillis) {
+                this.writeMillis = writeMillis;
+                return this;
+            }
+
+            Builder withPropertiesWritten(long propertiesWritten) {
+                this.propertiesWritten = propertiesWritten;
+                return this;
+            }
+
+            Result build() {
+                return new Result(writeMillis, graphName, nodeProperties, propertiesWritten);
+            }
         }
     }
 

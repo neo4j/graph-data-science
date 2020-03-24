@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,11 +83,12 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
     void writeRelationship() {
         String graphWriteQuery = String.format(
             "CALL gds.graph.writeRelationship('%s', 'NEW_REL1')" +
-            "YIELD graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten",
+            "YIELD writeMillis, graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten",
             TEST_GRAPH_NAME
         );
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
+            assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
             assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
             assertEquals("NEW_REL1", row.get("relationshipType"));
             assertNull(row.get("relationshipProperty"));
@@ -118,13 +120,14 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
     ) {
         String graphWriteQuery = String.format(
             "CALL gds.graph.writeRelationship('%s', '%s', '%s')" +
-            "YIELD graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten",
+            "YIELD writeMillis, graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten",
             TEST_GRAPH_NAME,
             relType,
             relProperty
         );
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
+            assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
             assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
             assertEquals(relType, row.get("relationshipType"));
             assertEquals(relProperty, row.get("relationshipProperty"));
