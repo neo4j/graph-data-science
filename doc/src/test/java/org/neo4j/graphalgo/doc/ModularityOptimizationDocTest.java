@@ -31,7 +31,12 @@ public class ModularityOptimizationDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {
-        return Arrays.asList(ModularityOptimizationMutateProc.class, ModularityOptimizationStreamProc.class, ModularityOptimizationWriteProc.class, GraphCreateProc.class);
+        return Arrays.asList(
+            ModularityOptimizationMutateProc.class,
+            ModularityOptimizationStreamProc.class,
+            ModularityOptimizationWriteProc.class,
+            GraphCreateProc.class
+        );
     }
 
     @Override

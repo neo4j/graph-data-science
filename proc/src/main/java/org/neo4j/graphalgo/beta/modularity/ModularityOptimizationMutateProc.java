@@ -40,6 +40,7 @@ import static org.neo4j.graphalgo.beta.modularity.ModularityOptimizationProc.MOD
 import static org.neo4j.procedure.Mode.READ;
 
 public class ModularityOptimizationMutateProc extends MutateProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateProc.MutateResult, ModularityOptimizationMutateConfig> {
+
     @Procedure(value = "gds.beta.modularityOptimization.mutate", mode = READ)
     @Description(MODULARITY_OPTIMIZATION_DESCRIPTION)
     public Stream<MutateResult> mutate(
@@ -131,10 +132,7 @@ public class ModularityOptimizationMutateProc extends MutateProc<ModularityOptim
 
         static class Builder extends ModularityOptimizationProc.ModularityOptimizationResultBuilder<MutateResult> {
 
-            Builder(
-                ProcedureCallContext context,
-                AllocationTracker tracker
-            ) {
+            Builder(ProcedureCallContext context, AllocationTracker tracker) {
                 super(context, tracker);
             }
 

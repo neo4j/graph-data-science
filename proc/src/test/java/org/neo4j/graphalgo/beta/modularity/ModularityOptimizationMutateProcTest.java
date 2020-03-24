@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GdsCypher.ExecutionModes.MUTATE;
 
-class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcBaseTest implements GraphMutationTest<ModularityOptimizationMutateConfig, ModularityOptimization> {
+class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements GraphMutationTest<ModularityOptimizationMutateConfig, ModularityOptimization> {
     private static final String WRITE_PROPERTY = "community";
     static final String TEST_GRAPH_NAME = "myGraph";
 

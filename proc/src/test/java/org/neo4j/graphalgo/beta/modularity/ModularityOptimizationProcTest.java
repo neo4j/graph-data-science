@@ -38,7 +38,7 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import java.util.Arrays;
 import java.util.Collections;
 
-abstract class ModularityOptimizationProcBaseTest extends BaseProcTest {
+abstract class ModularityOptimizationProcTest extends BaseProcTest {
     static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {name:'a', seed1: 0, seed2: 1})" +

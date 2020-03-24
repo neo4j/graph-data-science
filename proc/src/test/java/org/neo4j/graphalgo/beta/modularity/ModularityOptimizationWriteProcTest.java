@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.GdsCypher.ExecutionModes.WRITE;
 
-class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcBaseTest {
+class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest {
 
     @Test
     void testWriting() {
