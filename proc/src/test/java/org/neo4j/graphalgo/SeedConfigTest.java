@@ -69,6 +69,13 @@ public interface SeedConfigTest<CONFIG extends SeedConfig & AlgoBaseConfig, RESU
     }
 
     @Test
+    default void testTrimmedToNullSeedProperty() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("seedProperty", "  "));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
+        assertNull(config.seedProperty());
+    }
+
+    @Test
     default void testSeedPropertyValidation() {
         runQuery(graphDb(), "CREATE (:A {a: 1, b:2, c:3})");
         List<String> nodeProperties = Arrays.asList("a", "b", "c");

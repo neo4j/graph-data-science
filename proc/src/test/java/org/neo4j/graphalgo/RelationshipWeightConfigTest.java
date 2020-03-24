@@ -115,6 +115,13 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
     }
 
     @Test
+    default void testTrimmedToNullRelationshipWeightProperty() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("relationshipWeightProperty", "  "));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
+        assertNull(config.relationshipWeightProperty());
+    }
+
+    @Test
     default void testRelationshipWeightPropertyValidation() {
         runQuery(graphDb(), "CREATE ()-[:A {a: 1}]->()");
         List<String> relationshipProperties = Arrays.asList("a");
