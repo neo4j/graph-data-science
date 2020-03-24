@@ -113,9 +113,16 @@ final class AdjacencyCompression {
 
     /**
      * Applies delta encoding to the given {@code values}.
-     * Weights are not encoded, {@code outRelProperties} contains weights according to {@code order}.
+     * Weights are not encoded.
      *
-     * @param noAggregation Is true iff all aggregations are none
+     * @param order Ordered indices into {@code values} and {@code weights} for consuming these in ascending value order.
+     * @param values Relationships represented by target node ID.
+     * @param outValues Sorted, delta-encoded and optionally aggregated relationships.
+     * @param weights Relationship properties by key, ordered by {@code order}.
+     * @param outWeights Sorted and optionally aggregated relationship properties.
+     * @param length Number of relationships (degree of source node) to process.
+     * @param aggregations Aggregations to apply to parallel edges. One per relationship property key in {@code weights}.
+     * @param noAggregation Is true iff all aggregations are NONE.
      */
     private static int applyDelta(
             int[] order,
@@ -125,7 +132,8 @@ final class AdjacencyCompression {
             long[][] outWeights,
             int length,
             Aggregation[] aggregations,
-            boolean noAggregation) {
+            boolean noAggregation
+    ) {
         int firstSortIdx = order[0];
         long value = values[firstSortIdx];
         long delta;
@@ -136,6 +144,7 @@ final class AdjacencyCompression {
         }
 
         int in = 1, out = 1;
+        boolean firstTimeSeen = false;
         for (; in < length; ++in) {
             final int sortIdx = order[in];
             delta = values[sortIdx] - value;
@@ -146,6 +155,7 @@ final class AdjacencyCompression {
                     outWeights[i][out] = weights[i][sortIdx];
                 }
                 outValues[out++] = delta;
+                firstTimeSeen = true;
             } else {
                 for (int i = 0; i < weights.length; i++) {
                     Aggregation aggregation = aggregations[i];
@@ -153,9 +163,10 @@ final class AdjacencyCompression {
                     long[] outWeight = outWeights[i];
                     double existingWeight = Double.longBitsToDouble(outWeight[existingIdx]);
                     double newWeight = Double.longBitsToDouble(weights[i][sortIdx]);
-                    newWeight = aggregation.merge(existingWeight, newWeight);
+                    newWeight = aggregation.merge(firstTimeSeen, existingWeight, newWeight);
                     outWeight[existingIdx] = Double.doubleToLongBits(newWeight);
                 }
+                firstTimeSeen = false;
             }
         }
         return out;

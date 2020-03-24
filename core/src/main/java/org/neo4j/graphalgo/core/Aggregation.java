@@ -24,46 +24,46 @@ import java.util.stream.Collectors;
 
 public enum Aggregation {
     DEFAULT {
-        public double merge(double runningTotal, double value) {
+        public double merge(boolean firstTimeSeen, double runningTotal, double value) {
             throw new UnsupportedOperationException(
                     "This should never be used as a valid aggregation, " +
                     "just as a placeholder for the default aggregation of a given loader.");
         }
     },
     NONE {
-        public double merge(double runningTotal, double value) {
+        public double merge(boolean firstTimeSeen, double runningTotal, double value) {
             throw new UnsupportedOperationException(
                     "Multiple relationships between the same pair of nodes are not expected. " +
                     "Try using SKIP or some other aggregation.");
         }
     },
     SINGLE {
-        public double merge(double runningTotal, double value) {
+        public double merge(boolean firstTimeSeen, double runningTotal, double value) {
             return runningTotal;
         }
     },
     SUM {
-        public double merge(double runningTotal, double value) {
+        public double merge(boolean firstTimeSeen, double runningTotal, double value) {
             return runningTotal + value;
         }
     },
     MIN {
-        public double merge(double runningTotal, double value) {
+        public double merge(boolean firstTimeSeen, double runningTotal, double value) {
             return Math.min(runningTotal, value);
         }
     },
     MAX {
-        public double merge(double runningTotal, double value) {
+        public double merge(boolean firstTimeSeen, double runningTotal, double value) {
             return Math.max(runningTotal, value);
         }
     },
     COUNT {
-        public double merge(double runningTotal, double value) {
-            return Math.ceil(runningTotal) + 1.0;
+        public double merge(boolean firstTimeSeen, double runningTotal, double value) {
+            return firstTimeSeen ? 2.0 : runningTotal + 1.0;
         }
     };
 
-    public abstract double merge(double runningTotal, double value);
+    public abstract double merge(boolean firstTimeSeen, double runningTotal, double value);
 
     public static Aggregation lookup(String name) {
         if (name.equalsIgnoreCase("SKIP")) {

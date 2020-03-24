@@ -28,19 +28,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AggregationTest {
 
-    private static final double[] inputs = new double[]{0.5, 1.4};
+    private static final double[] inputs = new double[]{1.4, 0.5, 4.2};
 
     @ParameterizedTest
-    @CsvSource({"MAX, 1.4", "MIN, 0.5", "SINGLE, 0.5", "SUM, 1.9", "COUNT, 2.0"})
-    void testSuccessfulDuplateRelationshipStrategies(Aggregation strategy, double expected) {
-        assertEquals(expected, strategy.merge(inputs[0], inputs[1]));
+    @CsvSource({"MAX, 1.4, 4.2", "MIN, 0.5, 0.5", "SINGLE, 1.4, 1.4", "SUM, 1.9, 6.1", "COUNT, 2.0, 3.0"})
+    void testSuccessfulMultipleAggregation(Aggregation strategy, double expectedFirst, double expectedSecond) {
+        double actualFirst = strategy.merge(true, inputs[0], inputs[1]);
+        assertEquals(expectedFirst, actualFirst);
+        assertEquals(expectedSecond, strategy.merge(false, actualFirst, inputs[2]));
     }
 
     @Test
     void testFailingDuplicateRelationshipStrategies() {
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
-                () -> Aggregation.NONE.merge(42, 42));
+                () -> Aggregation.NONE.merge(true, 42, 42));
         String expected = "Multiple relationships between the same pair of nodes are not expected. Try using SKIP or some other aggregation.";
         assertEquals(expected, exception.getMessage());
     }
@@ -49,7 +51,7 @@ class AggregationTest {
     void testFailingDefaultDuplicateRelationshipStrategies() {
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
-                () -> Aggregation.DEFAULT.merge(42, 42));
+                () -> Aggregation.DEFAULT.merge(true, 42, 42));
         String expected = "This should never be used as a valid aggregation, just as a placeholder for the default aggregation of a given loader.";
         assertEquals(expected, exception.getMessage());
     }
