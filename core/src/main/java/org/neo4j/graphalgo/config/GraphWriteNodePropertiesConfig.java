@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.loading.GraphStore;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.stream.Collectors.joining;
+import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 @ValueClass
 @Configuration("GraphWriteNodePropertyConfigImpl")
@@ -59,7 +59,7 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
                 throw new IllegalArgumentException(String.format(
                     "Node property key `%s` not found. Available keys: %s",
                     nodePropertyKey,
-                    graphStore.nodePropertyKeys().stream().sorted().collect(joining("', '", "['", "']"))
+                    join(graphStore.nodePropertyKeys())
                 ));
             }
         });

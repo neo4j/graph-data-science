@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
+import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 public final class TestGraphLoader {
 
@@ -141,7 +142,7 @@ public final class TestGraphLoader {
 
         String relTypeString = relTypes.isEmpty()
             ? ""
-            : relTypes.stream().collect(Collectors.joining("|", ":", ""));
+            : join(relTypes, "|", ":", "");
 
         relProperties = getUniquePropertyMappings(relProperties);
         String relPropertiesString = getPropertiesString(relProperties, "r");

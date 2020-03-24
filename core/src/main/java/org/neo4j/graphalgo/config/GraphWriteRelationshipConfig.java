@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.loading.GraphStore;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.stream.Collectors.joining;
+import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 @ValueClass
 @Configuration("GraphWriteRelationshipConfigImpl")
@@ -63,7 +63,7 @@ public interface GraphWriteRelationshipConfig extends WriteConfig {
             throw new IllegalArgumentException(String.format(
                 "Relationship type `%s` not found. Available types: %s",
                 relationshipType(),
-                graphStore.relationshipTypes().stream().sorted().collect(joining("', '", "['", "']"))
+                join(graphStore.relationshipTypes())
             ));
         }
         if (relationshipProperty().isPresent()) {
@@ -74,7 +74,7 @@ public interface GraphWriteRelationshipConfig extends WriteConfig {
                     "Relationship property `%s` not found for relationship type '%s'. Available properties: %s",
                     relProperty,
                     relationshipType(),
-                    availableProperties.stream().sorted().collect(joining("', '", "['", "']"))
+                    join(availableProperties)
                 ));
             }
         }

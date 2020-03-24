@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringJoining.join;
+
 public final class CanonicalAdjacencyMatrix {
 
     private CanonicalAdjacencyMatrix() {}
@@ -81,7 +83,8 @@ public final class CanonicalAdjacencyMatrix {
                 .stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> entry.getValue().stream().sorted().collect(Collectors.joining(", "))));
+                        entry -> join(entry.getValue(), ", ")
+                ));
     }
 
     private static BiFunction<Long, List<String>, List<String>> canonicalRelationship(
