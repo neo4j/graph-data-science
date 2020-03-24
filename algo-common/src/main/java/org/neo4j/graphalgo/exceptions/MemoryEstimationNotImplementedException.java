@@ -17,15 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.exceptions;
 
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
-
-public abstract class AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> extends AlgorithmFactory<ALGO, CONFIG> {
-    @Override
-    public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        throw new MemoryEstimationNotImplementedException("Memory estimation not implemented for this algorithm");
+public class MemoryEstimationNotImplementedException extends IllegalArgumentException {
+    public MemoryEstimationNotImplementedException(String message) {
+        super(message);
     }
 }

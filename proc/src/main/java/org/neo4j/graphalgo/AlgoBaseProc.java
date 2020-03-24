@@ -54,6 +54,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
@@ -340,7 +341,7 @@ public abstract class AlgoBaseProc<
 
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
-        validateMemoryUsage(memoryEstimation(config));
+        validateMemoryUsageIfImplemented(config);
 
         GraphStore graphStore;
         Graph graph;
@@ -433,6 +434,18 @@ public abstract class AlgoBaseProc<
             writeBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
         }
     }
+
+    protected void validateMemoryUsageIfImplemented(CONFIG config) {
+        MemoryTreeWithDimensions memoryTreeWithDimensions = null;
+        try {
+            memoryTreeWithDimensions = memoryEstimation(config);
+        } catch (MemoryEstimationNotImplementedException ignored) {
+        }
+        if (memoryTreeWithDimensions != null) {
+            validateMemoryUsage(memoryTreeWithDimensions);
+        }
+    }
+
 
     protected Stream<MemoryEstimateResult> computeEstimate(
         Object graphNameOrConfig,

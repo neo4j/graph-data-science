@@ -106,8 +106,7 @@ public abstract class BaseProc {
     }
 
     protected void validateMemoryUsage(
-        MemoryTreeWithDimensions memoryTreeWithDimensions
-    ) {
+        MemoryTreeWithDimensions memoryTreeWithDimensions) {
         validateMemoryUsage(memoryTreeWithDimensions, Runtime.getRuntime()::freeMemory);
     }
 
