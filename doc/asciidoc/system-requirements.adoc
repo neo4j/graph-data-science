@@ -8,6 +8,8 @@ The GDS library runs within a Neo4j instance and is therefore subject to the gen
 .GDS heap memory usage
 image::memory-usage.png[width=600]
 
+
+[[heap-size]]
 === Heap size
 
 The heap space is used for storing graph projections in the graph catalog and algorithm state.

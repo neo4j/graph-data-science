@@ -85,7 +85,7 @@ public class K1ColoringProc extends AlgoBaseProc<K1ColoringAlgorithm, HugeDouble
 
             @Override
             public MemoryEstimation memoryEstimation(K1ColoringPregelConfig configuration) {
-                throw new MemoryEstimationNotImplementedException(".memoryEstimation is not implemented.");
+                throw new MemoryEstimationNotImplementedException();
             }
         };
     }

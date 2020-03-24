@@ -31,19 +31,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public interface HeapControlTest<CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
-    static final String DB_CYPHER = "CREATE " +
-                                    " (zhen:Person {name: 'Zhen'})," +
-                                    " (praveena:Person {name: 'Praveena'})," +
-                                    " (michael:Person {name: 'Michael'})," +
-                                    " (arya:Person {name: 'Arya'})," +
-                                    " (karin:Person {name: 'Karin'})," +
+    String DB_CYPHER = "CREATE " +
+                       " (zhen:Person {name: 'Zhen'})," +
+                       " (praveena:Person {name: 'Praveena'})," +
+                       " (michael:Person {name: 'Michael'})," +
+                       " (arya:Person {name: 'Arya'})," +
+                       " (karin:Person {name: 'Karin'})," +
 
-                                    " (zhen)-[:FRIENDS]->(arya)," +
-                                    " (zhen)-[:FRIENDS]->(praveena)," +
-                                    " (praveena)-[:WORKS_WITH]->(karin)," +
-                                    " (praveena)-[:FRIENDS]->(michael)," +
-                                    " (michael)-[:WORKS_WITH]->(karin)," +
-                                    " (arya)-[:FRIENDS]->(karin)";
+                       " (zhen)-[:FRIENDS]->(arya)," +
+                       " (zhen)-[:FRIENDS]->(praveena)," +
+                       " (praveena)-[:WORKS_WITH]->(karin)," +
+                       " (praveena)-[:FRIENDS]->(michael)," +
+                       " (michael)-[:WORKS_WITH]->(karin)," +
+                       " (arya)-[:FRIENDS]->(karin)";
 
     @Test
     default void shouldPassOnSufficientMemory () {
@@ -64,6 +64,6 @@ public interface HeapControlTest<CONFIG extends AlgoBaseConfig, RESULT> extends 
 
         String message = ExceptionUtil.rootCause(exception).getMessage();
         assertTrue(message.matches(
-            "Procedure was blocked since minimum estimated memory \\(\\d+\\) exceeds current free memory \\(42\\)."));
+            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
     }
 }

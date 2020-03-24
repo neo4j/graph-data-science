@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.exceptions;
 
 public class MemoryEstimationNotImplementedException extends IllegalArgumentException {
-    public MemoryEstimationNotImplementedException(String message) {
-        super(message);
+    public MemoryEstimationNotImplementedException() {
+        super("Memory estimation not implemented for this algorithm");
     }
 }

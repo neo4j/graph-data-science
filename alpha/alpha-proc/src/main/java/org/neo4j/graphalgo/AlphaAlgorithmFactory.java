@@ -26,6 +26,6 @@ import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 public abstract class AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> extends AlgorithmFactory<ALGO, CONFIG> {
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        throw new MemoryEstimationNotImplementedException("Memory estimation not implemented for this algorithm");
+        throw new MemoryEstimationNotImplementedException();
     }
 }

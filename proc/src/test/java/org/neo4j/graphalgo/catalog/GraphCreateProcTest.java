@@ -40,6 +40,8 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -850,7 +852,7 @@ class GraphCreateProcTest extends BaseProcTest {
     void shouldFailOnTooBigGraphNative() {
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             applyOnProcedure(proc -> {
-                GraphCreateConfig config = GraphCreateConfig.createImplicit(
+                GraphCreateConfig config = GraphCreateFromStoreConfig.fromProcedureConfig(
                     "",
                     CypherMapWrapper.create(MapUtil.map(
                         NODE_PROJECTION_KEY, "*",
@@ -862,14 +864,14 @@ class GraphCreateProcTest extends BaseProcTest {
 
         String message = ExceptionUtil.rootCause(exception).getMessage();
         assertTrue(message.matches(
-            "Procedure was blocked since minimum estimated memory \\(\\d+\\) exceeds current free memory \\(42\\)."));
+            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
     }
 
     @Test
     void shouldFailOnTooBigGraphCypher() {
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             applyOnProcedure(proc -> {
-                GraphCreateConfig config = GraphCreateConfig.createImplicit(
+                GraphCreateConfig config = GraphCreateFromCypherConfig.fromProcedureConfig(
                     "",
                     CypherMapWrapper.create(MapUtil.map(
                         NODE_QUERY_KEY, "MATCH (n) RETURN n",
@@ -881,7 +883,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         String message = ExceptionUtil.rootCause(exception).getMessage();
         assertTrue(message.matches(
-            "Procedure was blocked since minimum estimated memory \\(\\d+\\) exceeds current free memory \\(42\\)."));
+            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
     }
 
     void applyOnProcedure(Consumer<GraphCreateProc> func) {

@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -105,8 +106,7 @@ public abstract class BaseProc {
         }
     }
 
-    protected void validateMemoryUsage(
-        MemoryTreeWithDimensions memoryTreeWithDimensions) {
+    protected void validateMemoryUsage(MemoryTreeWithDimensions memoryTreeWithDimensions) {
         validateMemoryUsage(memoryTreeWithDimensions, Runtime.getRuntime()::freeMemory);
     }
 
@@ -119,8 +119,8 @@ public abstract class BaseProc {
         if (minBytesProcedure > freeMemory) {
             throw new IllegalStateException(String.format(
                 "Procedure was blocked since minimum estimated memory (%s) exceeds current free memory (%s).",
-                minBytesProcedure,
-                freeMemory
+                MemoryUsage.humanReadable(minBytesProcedure),
+                MemoryUsage.humanReadable(freeMemory)
             ));
         }
     }
