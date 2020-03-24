@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
@@ -60,7 +61,8 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
     IterationsConfigTest<CONFIG, Louvain>,
     RelationshipWeightConfigTest<CONFIG, Louvain>,
     ToleranceConfigTest<CONFIG, Louvain>,
-    MemoryEstimateTest<CONFIG, Louvain> {
+    MemoryEstimateTest<CONFIG, Louvain>,
+    HeapControlTest<CONFIG, Louvain> {
 
     static final List<List<Long>> RESULT = Arrays.asList(
         Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 14L),

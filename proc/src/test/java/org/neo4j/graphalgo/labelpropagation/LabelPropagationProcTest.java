@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.NodeWeightConfigTest;
@@ -57,7 +58,8 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     IterationsConfigTest<CONFIG, LabelPropagation>,
     NodeWeightConfigTest<CONFIG, LabelPropagation>,
     RelationshipWeightConfigTest<CONFIG, LabelPropagation>,
-    MemoryEstimateTest<CONFIG, LabelPropagation>
+    MemoryEstimateTest<CONFIG, LabelPropagation>,
+    HeapControlTest<CONFIG, LabelPropagation>
 {
 
     static final List<Long> RESULT = Arrays.asList(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);

@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
@@ -48,7 +49,8 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
     AlgoBaseProcTest<CONFIG, DisjointSetStruct>,
     SeedConfigTest<CONFIG, DisjointSetStruct>,
     RelationshipWeightConfigTest<CONFIG, DisjointSetStruct>,
-    MemoryEstimateTest<CONFIG, DisjointSetStruct> {
+    MemoryEstimateTest<CONFIG, DisjointSetStruct>,
+    HeapControlTest<CONFIG, DisjointSetStruct> {
 
     @Override
     public GraphDatabaseAPI graphDb() {

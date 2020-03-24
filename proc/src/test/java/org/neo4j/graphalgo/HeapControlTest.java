@@ -19,24 +19,18 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.pagerank.PageRank;
-import org.neo4j.graphalgo.pagerank.PageRankStreamConfig;
-import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class HeapControlTest extends BaseProcTest implements AlgoBaseProcTest<PageRankStreamConfig, PageRank> {
+public interface HeapControlTest<CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
     static final String DB_CYPHER = "CREATE " +
                                     " (zhen:Person {name: 'Zhen'})," +
                                     " (praveena:Person {name: 'Praveena'})," +
@@ -51,31 +45,19 @@ public class HeapControlTest extends BaseProcTest implements AlgoBaseProcTest<Pa
                                     " (michael)-[:WORKS_WITH]->(karin)," +
                                     " (arya)-[:FRIENDS]->(karin)";
 
-    @BeforeEach
-    void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(DB_CYPHER);
-        registerProcedures(PageRankStreamProc.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
-    }
-
     @Test
-    void shouldPassOnSufficientMemory () {
+    default void shouldPassOnSufficientMemory () {
         applyOnProcedure(proc -> {
-            MemoryTreeWithDimensions memoryTreeWithDimensions = proc.memoryEstimation(createConfig(CypherMapWrapper.empty()));
+            MemoryTreeWithDimensions memoryTreeWithDimensions = proc.memoryEstimation(proc.newConfig(Optional.empty(), createMinimalImplicitConfig(CypherMapWrapper.empty())));
             proc.validateMemoryUsage(memoryTreeWithDimensions, () -> 10000000);
         });
     }
 
     @Test
-    void shouldFailOnInsufficientMemory () {
+    default void shouldFailOnInsufficientMemory () {
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             applyOnProcedure(proc -> {
-                MemoryTreeWithDimensions memoryTreeWithDimensions = proc.memoryEstimation(createConfig(CypherMapWrapper.empty()));
+                MemoryTreeWithDimensions memoryTreeWithDimensions = proc.memoryEstimation(proc.newConfig(Optional.empty(), createMinimalImplicitConfig(CypherMapWrapper.empty())));
                 proc.validateMemoryUsage(memoryTreeWithDimensions, () -> 42);
             });
         });
@@ -83,26 +65,5 @@ public class HeapControlTest extends BaseProcTest implements AlgoBaseProcTest<Pa
         String message = ExceptionUtil.rootCause(exception).getMessage();
         assertTrue(message.matches(
             "Procedure was blocked since minimum estimated memory \\(\\d+\\) exceeds current free memory \\(42\\)."));
-    }
-
-    @Override
-    public Class<? extends AlgoBaseProc<?, PageRank, PageRankStreamConfig>> getProcedureClazz() {
-        return PageRankStreamProc.class;
-    }
-
-    @Override
-    public GraphDatabaseAPI graphDb() {
-        return db;
-    }
-
-    @Override
-    public PageRankStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        CypherMapWrapper newMapWrapper = createMinimalImplicitConfig(CypherMapWrapper.empty());
-        GraphCreateConfig implicitConfig = GraphCreateConfig.createImplicit("", newMapWrapper);
-        return PageRankStreamConfig.of("", Optional.empty(), Optional.of(implicitConfig), newMapWrapper);
-    }
-
-    @Override
-    public void assertResultEquals(PageRank result1, PageRank result2) {
     }
 }

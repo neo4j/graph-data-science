@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -61,7 +62,8 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, NodeSimilarityResult>,
-    MemoryEstimateTest<CONFIG, NodeSimilarityResult> {
+    MemoryEstimateTest<CONFIG, NodeSimilarityResult>,
+    HeapControlTest<CONFIG, NodeSimilarityResult> {
 
     static final String DB_CYPHER =
         "CREATE" +

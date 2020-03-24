@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
@@ -58,7 +59,8 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
     IterationsConfigTest<CONFIG, PageRank>,
     RelationshipWeightConfigTest<CONFIG, PageRank>,
     ToleranceConfigTest<CONFIG, PageRank>,
-    MemoryEstimateTest<CONFIG, PageRank> {
+    MemoryEstimateTest<CONFIG, PageRank>,
+    HeapControlTest<CONFIG, PageRank> {
 
     static Map<Long, Double> expected = new HashMap<>();
     static Map<Long, Double> weightedExpected = new HashMap<>();
