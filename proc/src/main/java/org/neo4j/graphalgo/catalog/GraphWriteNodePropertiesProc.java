@@ -69,7 +69,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         Result.Builder builder = new Result.Builder(graphName, nodeProperties);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             long propertiesWritten = runWithExceptionLogging(
-                "Graph creation failed",
+                "Node property writing failed",
                 () -> writeNodeProperties(graphStore, nodeProperties, config.writeConcurrency())
             );
             builder.withPropertiesWritten(propertiesWritten);

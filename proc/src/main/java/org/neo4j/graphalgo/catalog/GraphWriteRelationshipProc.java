@@ -67,7 +67,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
         config.validate(graphStore);
         // writing
-        Result.Builder builder =  new Result.Builder(graphName, relationshipType, maybeRelationshipProperty);
+        Result.Builder builder = new Result.Builder(graphName, relationshipType, maybeRelationshipProperty);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             long relationshipsWritten = runWithExceptionLogging(
                 "Writing relationships failed",
