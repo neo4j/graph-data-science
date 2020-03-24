@@ -32,6 +32,7 @@ The following table lists all production-quality graph operations in the GDS lib
 |<<catalog-graph-list, List graphs>> | `gds.graph.list`
 |<<catalog-graph-drop, Remove a named graph from memory>> | `gds.graph.drop`
 |Write multiple node properties back to Neo4j | `gds.graph.writeNodeProperties`
+|Write a single relationship back to Neo4j | `gds.graph.writeRelationship`
 |===
 
 [[production-quality-tier]]
