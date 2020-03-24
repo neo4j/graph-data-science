@@ -23,6 +23,7 @@ This section includes:
 
 * <<estimate-procedure-algo>>
 * <<estimate-procedure-graph>>
+* <<estimate-heap-control>>
 
 [[estimate-procedure-algo]]
 == Estimating memory requirements for algorithms
@@ -143,3 +144,13 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, 
 | relationshipQuery | String | -         | no        | The relationship query to estimate for.
 | configuration     | Map    | {}        | yes       | Additional configuration, such as concurrency.
 |===
+
+[[estimate-heap-control]]
+== Automatic estimation and execution blocking
+
+Whenever any gds algorithm is executed, including graph creation, an estimation is always computed prior to the execution.
+If the lower memory bound exceeds the current free jvm memory, execution is going to be blocked with an error containing information free memory and the estimated required memory.
+
+This heap control logic is restrictive in the sense that it only blocks executions that are certain to not fit into memory.
+It does not guarantee that an execution that passed the heap control will succeed without depleting memory.
+Thus, it is still useful to run manual estimation before any large scale work loads.
