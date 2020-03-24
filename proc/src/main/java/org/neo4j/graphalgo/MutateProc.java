@@ -65,7 +65,7 @@ public abstract class MutateProc<
             log.debug("Updating in-memory graph store");
             GraphStore graphStore = computationResult.graphStore();
             graphStore.addNodeProperty(
-                mutatePropertyConfig.writeProperty(),
+                mutatePropertyConfig.mutateProperty(),
                 nodeId -> resultPropertyTranslator.toDouble(result, nodeId)
             );
             resultBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());

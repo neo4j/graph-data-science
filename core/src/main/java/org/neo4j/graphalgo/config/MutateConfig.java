@@ -19,10 +19,4 @@
  */
 package org.neo4j.graphalgo.config;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-
-public interface MutateRelationshipConfig extends MutateConfig {
-
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
-    String mutateRelationshipType();
-}
+public interface MutateConfig extends AlgoBaseConfig { }

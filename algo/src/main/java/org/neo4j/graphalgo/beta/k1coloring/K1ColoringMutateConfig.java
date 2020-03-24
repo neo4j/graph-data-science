@@ -23,14 +23,13 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("K1ColoringMutateConfigImpl")
-public interface K1ColoringMutateConfig extends K1ColoringWriteConfig, MutatePropertyConfig {
+public interface K1ColoringMutateConfig extends K1ColoringConfig, MutatePropertyConfig {
     static K1ColoringMutateConfig of(
         String username,
         Optional<String> graphName,

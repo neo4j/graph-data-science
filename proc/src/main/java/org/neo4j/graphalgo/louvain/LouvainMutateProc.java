@@ -80,7 +80,7 @@ public class LouvainMutateProc extends MutateProc<Louvain, Louvain, LouvainMutat
 
     @Override
     protected PropertyTranslator<Louvain> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainMutateConfig> computationResult) {
-        return LouvainProc.nodePropertyTranslator(computationResult);
+        return LouvainProc.nodePropertyTranslator(computationResult, computationResult.config().mutateProperty());
     }
 
     @Override

@@ -47,8 +47,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GdsCypher.ExecutionModes.MUTATE;
 
 class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements GraphMutationTest<ModularityOptimizationMutateConfig, ModularityOptimization> {
-    private static final String WRITE_PROPERTY = "community";
-    static final String TEST_GRAPH_NAME = "myGraph";
+
+    private static final String TEST_GRAPH_NAME = "myGraph";
+
+    @Override
+    public String mutateProperty() {
+        return "community";
+    }
 
     @BeforeEach
     @Override
@@ -61,7 +66,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     void testMutate() {
         String query = explicitAlgoBuildStage()
             .mutateMode()
-            .addParameter("writeProperty", "community")
+            .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
@@ -70,7 +75,6 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
             assertEquals(2, row.getNumber("communityCount").longValue());
             assertTrue(row.getNumber("ranIterations").longValue() <= 3);
         });
-
     }
 
     @Test
@@ -78,7 +82,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         String query = explicitAlgoBuildStage()
             .mutateMode()
             .addParameter("relationshipWeightProperty", "weight")
-            .addParameter("writeProperty", "community")
+            .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
@@ -94,13 +98,13 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         String query = explicitAlgoBuildStage()
             .mutateMode()
             .addParameter("seedProperty", "seed1")
-            .addParameter("writeProperty", "community")
+            .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQuery(query);
 
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, TEST_GRAPH_NAME).getGraph();
-        NodeProperties communities = mutatedGraph.nodeProperties("community");
+        NodeProperties communities = mutatedGraph.nodeProperties(mutateProperty());
         NodeProperties seeds = mutatedGraph.nodeProperties("seed1");
         for (int i = 0; i < mutatedGraph.nodeCount(); i++) {
             assertEquals(communities.nodeProperty(i), seeds.nodeProperty(i));
@@ -112,7 +116,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         String query = explicitAlgoBuildStage()
             .mutateMode()
             .addParameter("tolerance", 1)
-            .addParameter("writeProperty", "community")
+            .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, (row) -> {
@@ -126,7 +130,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         String query = explicitAlgoBuildStage()
             .mutateMode()
             .addParameter("maxIterations", 1)
-            .addParameter("writeProperty", "community")
+            .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, (row) -> {
@@ -139,7 +143,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     void testMutateEstimate() {
         String query = explicitAlgoBuildStage()
             .estimationMode(MUTATE)
-            .addParameter("writeProperty", "community")
+            .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, (row) -> {
@@ -167,14 +171,6 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     @Override
-    public String failOnExistingTokenMessage() {
-        return String.format(
-            "Node property `%s` already exists in the in-memory graph.",
-            WRITE_PROPERTY
-        );
-    }
-
-    @Override
     public Class<? extends AlgoBaseProc<?, ModularityOptimization, ModularityOptimizationMutateConfig>> getProcedureClazz() {
         return ModularityOptimizationMutateProc.class;
     }
@@ -187,14 +183,6 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     @Override
     public ModularityOptimizationMutateConfig createConfig(CypherMapWrapper mapWrapper) {
         return ModularityOptimizationMutateConfig.of(getUsername(), Optional.empty(),Optional.empty(), mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            return mapWrapper.withString("writeProperty", WRITE_PROPERTY);
-        }
-        return mapWrapper;
     }
 
     @Override

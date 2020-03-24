@@ -36,7 +36,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements GraphMutationTest<K1ColoringMutateConfig, HugeLongArray> {
-    private static final String WRITE_PROPERTY = "color";
+
+    @Override
+    public String mutateProperty() {
+        return "color";
+    }
 
     @Override
     void registerProcs() throws Exception {
@@ -54,24 +58,8 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements 
     }
 
     @Override
-    public String failOnExistingTokenMessage() {
-        return String.format(
-            "Node property `%s` already exists in the in-memory graph.",
-            WRITE_PROPERTY
-        );
-    }
-
-    @Override
     public K1ColoringMutateConfig createConfig(CypherMapWrapper mapWrapper) {
         return K1ColoringMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            return mapWrapper.withString("writeProperty", WRITE_PROPERTY);
-        }
-        return mapWrapper;
     }
 
     @Override
@@ -94,11 +82,10 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements 
         @Language("Cypher")
         String query = algoBuildStage()
             .mutateMode()
-            .addParameter("writeProperty", "color")
+            .addParameter("mutateProperty", mutateProperty())
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertUserInput(row, "writeProperty", "color");
             assertEquals(4, row.getNumber("nodeCount").longValue(), "wrong nodeCount");
             assertTrue(row.getBoolean("didConverge"), "did not converge");
             assertTrue(row.getNumber("ranIterations").longValue() < 3, "wrong ranIterations");
@@ -114,7 +101,7 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements 
         @Language("Cypher")
         String query = algoBuildStage()
             .mutateEstimation()
-            .addParameter("writeProperty", "color")
+            .addParameter("mutateProperty", "color")
             .yields("nodeCount", "bytesMin", "bytesMax", "requiredMemory");
 
         assertCypherResult(query, Arrays.asList(MapUtil.map(

@@ -69,17 +69,19 @@ final class WccProc {
         return procResultBuilder.withCommunityFunction(!computationResult.isGraphEmpty() ? computationResult.result()::setIdOf : null);
     }
 
-    static <CONFIG extends WccWriteConfig> PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
-        AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult
+    static <CONFIG extends WccBaseConfig> PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
+        AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
+        String resultProperty
     ) {
-        WccWriteConfig config = computationResult.config();
+        CONFIG config = computationResult.config();
 
         boolean consecutiveIds = config.consecutiveIds();
         boolean isIncremental = config.isIncremental();
-        boolean seedPropertyEqualsWriteProperty = config.writeProperty().equalsIgnoreCase(config.seedProperty());
+
+        boolean resultPropertyEqualsSeedProperty = config.seedProperty() != null && resultProperty.equals(config.seedProperty());
 
         PropertyTranslator<DisjointSetStruct> propertyTranslator;
-        if (seedPropertyEqualsWriteProperty && !consecutiveIds) {
+        if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
             NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
             propertyTranslator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, DisjointSetStruct::setIdOf);
         } else if (consecutiveIds && !isIncremental) {

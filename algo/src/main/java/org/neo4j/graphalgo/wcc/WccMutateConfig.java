@@ -29,7 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("WccMutateConfigImpl")
-public interface WccMutateConfig extends WccWriteConfig, MutatePropertyConfig {
+public interface WccMutateConfig extends WccBaseConfig, MutatePropertyConfig {
 
     static WccMutateConfig of(
         String username,

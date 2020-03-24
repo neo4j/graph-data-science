@@ -59,9 +59,8 @@ include::../common-parameters.adoc[]
 | relationshipProjection | String  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
 | concurrency            | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency        | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency       | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | maxIterations          | Integer | 20                     | yes      | The maximum number of iterations of K1 Coloring to run.
-| writeProperty          | String  | n/a                    | no       | The node property that stores the computed color.
+| mutateProperty         | String  | n/a                    | no       | The node property that stores the computed color.
 |===
 
 .Results
@@ -72,7 +71,6 @@ include::../common-parameters.adoc[]
 | ranIterations | Integer | The actual number of iterations the algorithm ran.
 | didConverge   | Boolean | An indicator of whether the algorithm found a correct coloring.
 | colorCount    | Integer | The number of colors used.
-| write         | Boolean | Specifies if the result was written back as a node property.
 | createMillis  | Integer | Milliseconds for loading data.
 | computeMillis | Integer | Milliseconds for running the algorithm.
 | mutateMillis  | Integer | Milliseconds for mutating the in-memory graph with the results.
@@ -234,7 +232,7 @@ To instead mutate the in-memory graph with the assigned colors, the `mutate` mod
 .Running the K-1 Coloring algorithm in mutate mode:
 [source, cypher]
 ----
-CALL gds.beta.k1coloring.mutate('myGraph', {writeProperty: 'color'})
+CALL gds.beta.k1coloring.mutate('myGraph', {mutateProperty: 'color'})
 YIELD nodes, colorCount, ranIterations, didConverge
 ----
 

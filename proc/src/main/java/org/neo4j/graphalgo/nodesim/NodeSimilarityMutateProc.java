@@ -102,7 +102,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
     public Stream<MutateResult> mutate(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult
     ) {
-        NodeSimilarityWriteConfig config = computationResult.config();
+        NodeSimilarityMutateConfig config = computationResult.config();
 
         if (computationResult.isGraphEmpty()) {
             return Stream.of(
@@ -129,12 +129,13 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
                 resultBuilder
             );
 
-            String writeRelationshipType = config.writeRelationshipType();
-            String writeProperty = config.writeProperty();
-
             computationResult
                 .graphStore()
-                .addRelationshipType(writeRelationshipType, Optional.of(writeProperty), resultRelationships);
+                .addRelationshipType(
+                    config.mutateRelationshipType(),
+                    Optional.of(config.mutateProperty()),
+                    resultRelationships
+                );
         }
         return Stream.of(resultBuilder.build());
     }

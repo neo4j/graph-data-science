@@ -19,7 +19,10 @@
  */
 package org.neo4j.graphalgo.config;
 
-/**
- * Marker interface for mutate procedures
- */
-public interface MutatePropertyConfig extends WritePropertyConfig { }
+import org.neo4j.graphalgo.annotation.Configuration;
+
+public interface MutatePropertyConfig extends MutateConfig {
+
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    String mutateProperty();
+}

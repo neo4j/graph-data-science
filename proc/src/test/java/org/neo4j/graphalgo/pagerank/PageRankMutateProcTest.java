@@ -35,8 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements GraphMutationTest<PageRankMutateConfig, PageRank> {
 
-    private static final String WRITE_PROPERTY = "score";
-
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Label1 {name: 'a'})" +
@@ -58,6 +56,11 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
         ", (e)-[:TYPE1]->(f)" +
         ", (f)-[:TYPE1]->(b)" +
         ", (f)-[:TYPE1]->(e)";
+
+    @Override
+    public String mutateProperty() {
+        return "score";
+    }
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -91,14 +94,6 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
     }
 
     @Override
-    public String failOnExistingTokenMessage() {
-        return String.format(
-            "Node property `%s` already exists in the in-memory graph.",
-            WRITE_PROPERTY
-        );
-    }
-
-    @Override
     public Class<? extends AlgoBaseProc<?, PageRank, PageRankMutateConfig>> getProcedureClazz() {
         return PageRankMutateProc.class;
     }
@@ -106,14 +101,6 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
     @Override
     public PageRankMutateConfig createConfig(CypherMapWrapper mapWrapper) {
         return PageRankMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            return mapWrapper.withString("writeProperty", WRITE_PROPERTY);
-        }
-        return mapWrapper;
     }
 
     @Test
@@ -124,7 +111,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
             .withAnyRelationshipType()
             .algo("pageRank")
             .mutateMode()
-            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("mutateProperty", mutateProperty())
             .yields(
                 "nodePropertiesWritten",
                 "createMillis",

@@ -78,7 +78,7 @@ public class LabelPropagationMutateProc extends MutateProc<LabelPropagation, Lab
 
     @Override
     protected PropertyTranslator<LabelPropagation> nodePropertyTranslator(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computationResult) {
-        return LabelPropagationProc.nodePropertyTranslator(computationResult);
+        return LabelPropagationProc.nodePropertyTranslator(computationResult, computationResult.config().mutateProperty());
     }
 
     @Override

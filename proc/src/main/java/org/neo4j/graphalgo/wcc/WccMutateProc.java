@@ -85,7 +85,7 @@ public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateP
     protected PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
         ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult
     ) {
-        return WccProc.nodePropertyTranslator(computationResult);
+        return WccProc.nodePropertyTranslator(computationResult, computationResult.config().mutateProperty());
     }
 
     @Override

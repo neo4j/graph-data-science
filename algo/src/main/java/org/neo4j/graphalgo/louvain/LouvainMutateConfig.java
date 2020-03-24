@@ -30,7 +30,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("LouvainMutateConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface LouvainMutateConfig extends LouvainWriteConfig, MutatePropertyConfig {
+public interface LouvainMutateConfig extends LouvainBaseConfig, MutatePropertyConfig {
 
     static LouvainMutateConfig of(
         String username,

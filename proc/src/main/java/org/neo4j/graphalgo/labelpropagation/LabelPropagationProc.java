@@ -34,16 +34,15 @@ final class LabelPropagationProc {
 
     private LabelPropagationProc() {}
 
-    static <CONFIG extends LabelPropagationWriteConfig> PropertyTranslator<LabelPropagation> nodePropertyTranslator(
-        AlgoBaseProc.ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult
+    static <CONFIG extends LabelPropagationBaseConfig> PropertyTranslator<LabelPropagation> nodePropertyTranslator(
+        AlgoBaseProc.ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult,
+        String resultProperty
     ) {
         CONFIG config = computationResult.config();
 
-        boolean writePropertyEqualsSeedProperty = config.seedProperty() != null && config
-            .writeProperty()
-            .equals(config.seedProperty());
+        boolean resultPropertyEqualsSeedProperty = config.seedProperty() != null && resultProperty.equals(config.seedProperty());
 
-        if (writePropertyEqualsSeedProperty) {
+        if (resultPropertyEqualsSeedProperty) {
             NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
             return new PropertyTranslator.OfLongIfChanged<>(
                 seedProperties,

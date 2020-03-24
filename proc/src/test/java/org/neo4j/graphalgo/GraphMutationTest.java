@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
+import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
@@ -38,10 +38,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public interface GraphMutationTest<CONFIG extends WritePropertyConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
+public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     default Optional<String> mutateGraphName() {
         return Optional.empty();
+    }
+
+    String mutateProperty();
+
+    @Override
+    default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        if (!mapWrapper.containsKey("mutateProperty")) {
+            mapWrapper = mapWrapper.withString("mutateProperty", mutateProperty());
+        }
+        return mapWrapper;
     }
 
     @Test
@@ -121,5 +131,10 @@ public interface GraphMutationTest<CONFIG extends WritePropertyConfig & AlgoBase
 
     String expectedMutatedGraph();
 
-    String failOnExistingTokenMessage();
+    default String failOnExistingTokenMessage() {
+        return String.format(
+            "Node property `%s` already exists in the in-memory graph.",
+            mutateProperty()
+        );
+    }
 }

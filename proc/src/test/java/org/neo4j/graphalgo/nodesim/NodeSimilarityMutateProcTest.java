@@ -37,8 +37,12 @@ class NodeSimilarityMutateProcTest
     extends NodeSimilarityProcTest<NodeSimilarityMutateConfig>
     implements GraphMutationTest<NodeSimilarityMutateConfig, NodeSimilarityResult> {
 
-    private static final String WRITE_PROPERTY = "similarity";
-    private static final String WRITE_RELATIONSHIP_TYPE = "SIMILAR_TO";
+    private static final String MUTATE_RELATIONSHIP_TYPE = "SIMILAR_TO";
+
+    @Override
+    public String mutateProperty() {
+        return "similarity";
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<?, NodeSimilarityResult, NodeSimilarityMutateConfig>> getProcedureClazz() {
@@ -52,11 +56,11 @@ class NodeSimilarityMutateProcTest
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            mapWrapper = mapWrapper.withString("writeProperty", WRITE_PROPERTY);
+        if (!mapWrapper.containsKey("mutateProperty")) {
+            mapWrapper = mapWrapper.withString("mutateProperty", mutateProperty());
         }
-        if (!mapWrapper.containsKey("writeRelationshipType")) {
-            mapWrapper = mapWrapper.withString("writeRelationshipType", WRITE_RELATIONSHIP_TYPE);
+        if (!mapWrapper.containsKey("mutateRelationshipType")) {
+            mapWrapper = mapWrapper.withString("mutateRelationshipType", MUTATE_RELATIONSHIP_TYPE);
         }
         return mapWrapper;
     }
@@ -95,7 +99,7 @@ class NodeSimilarityMutateProcTest
     public String failOnExistingTokenMessage() {
         return String.format(
             "Relationship type `%s` already exists in the in-memory graph.",
-            WRITE_RELATIONSHIP_TYPE
+            MUTATE_RELATIONSHIP_TYPE
         );
     }
 
@@ -107,8 +111,8 @@ class NodeSimilarityMutateProcTest
             .algo("nodeSimilarity")
             .mutateMode()
             .addParameter("similarityCutoff", 0.0)
-            .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
-            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("mutateRelationshipType", MUTATE_RELATIONSHIP_TYPE)
+            .addParameter("mutateProperty", mutateProperty())
             .yields(
                 "computeMillis",
                 "createMillis",
@@ -123,8 +127,6 @@ class NodeSimilarityMutateProcTest
         runQueryWithRowConsumer(query, row -> {
             assertEquals(3, row.getNumber("nodesCompared").longValue());
             assertEquals(6, row.getNumber("relationshipsWritten").longValue());
-            assertUserInput(row, "writeRelationshipType", WRITE_RELATIONSHIP_TYPE);
-            assertUserInput(row, "writeProperty", WRITE_PROPERTY);
             assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
             assertThat("Missing createMillis", -1L, lessThan(row.getNumber("createMillis").longValue()));
             assertThat("Missing mutateMillis", -1L, lessThan(row.getNumber("mutateMillis").longValue()));

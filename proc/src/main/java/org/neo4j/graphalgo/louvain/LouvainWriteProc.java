@@ -65,7 +65,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
 
     @Override
     protected PropertyTranslator<Louvain> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
-        return LouvainProc.nodePropertyTranslator(computationResult);
+        return LouvainProc.nodePropertyTranslator(computationResult, computationResult.config().writeProperty());
     }
 
     @Override

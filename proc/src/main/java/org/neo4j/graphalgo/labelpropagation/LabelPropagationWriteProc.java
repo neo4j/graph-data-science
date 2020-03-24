@@ -62,7 +62,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
 
     @Override
     protected PropertyTranslator<LabelPropagation> nodePropertyTranslator(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult) {
-        return LabelPropagationProc.nodePropertyTranslator(computationResult);
+        return LabelPropagationProc.nodePropertyTranslator(computationResult, computationResult.config().writeProperty());
     }
 
     @Override

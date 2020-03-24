@@ -38,14 +38,17 @@ final class LouvainProc {
 
     private LouvainProc() {}
 
-    static <CONFIG extends LouvainWriteConfig> PropertyTranslator<Louvain> nodePropertyTranslator(AlgoBaseProc.ComputationResult<Louvain, Louvain, CONFIG> computationResult) {
+    static <CONFIG extends LouvainBaseConfig> PropertyTranslator<Louvain> nodePropertyTranslator(
+        AlgoBaseProc.ComputationResult<Louvain, Louvain, CONFIG> computationResult,
+        String resultProperty
+    ) {
         Graph graph = computationResult.graph();
         Louvain louvain = computationResult.result();
         CONFIG config = computationResult.config();
         Optional<NodeProperties> seed = Optional.ofNullable(louvain.config().seedProperty()).map(graph::nodeProperties);
         PropertyTranslator<Louvain> translator;
         if (!louvain.config().includeIntermediateCommunities()) {
-            if (seed.isPresent() && Objects.equals(config.seedProperty(), config.writeProperty())) {
+            if (seed.isPresent() && Objects.equals(config.seedProperty(), resultProperty)) {
                 translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
             } else {
                 translator = LouvainWriteProc.CommunityTranslator.INSTANCE;

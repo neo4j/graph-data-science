@@ -35,7 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements GraphMutationTest<LabelPropagationMutateConfig, LabelPropagation> {
 
-    private static final String WRITE_PROPERTY = "communityId";
+    @Override
+    public String mutateProperty() {
+        return "communityId";
+    }
 
     @Override
     public String expectedMutatedGraph() {
@@ -55,14 +58,6 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     }
 
     @Override
-    public String failOnExistingTokenMessage() {
-        return String.format(
-            "Node property `%s` already exists in the in-memory graph.",
-            WRITE_PROPERTY
-        );
-    }
-
-    @Override
     public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationMutateConfig>> getProcedureClazz() {
         return LabelPropagationMutateProc.class;
     }
@@ -70,14 +65,6 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     @Override
     public LabelPropagationMutateConfig createConfig(CypherMapWrapper mapWrapper) {
         return LabelPropagationMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            return mapWrapper.withString("writeProperty", WRITE_PROPERTY);
-        }
-        return mapWrapper;
     }
 
     @Test
@@ -88,7 +75,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             .withAnyRelationshipType()
             .algo("labelPropagation")
             .mutateMode()
-            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("mutateProperty", mutateProperty())
             .yields(
                 "createMillis",
                 "computeMillis",

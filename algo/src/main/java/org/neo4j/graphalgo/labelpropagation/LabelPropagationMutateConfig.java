@@ -29,7 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("LabelPropagationMutateConfigImpl")
-public interface LabelPropagationMutateConfig extends LabelPropagationWriteConfig, MutatePropertyConfig {
+public interface LabelPropagationMutateConfig extends LabelPropagationBaseConfig, MutatePropertyConfig {
 
     static LabelPropagationMutateConfig of(
         String username,

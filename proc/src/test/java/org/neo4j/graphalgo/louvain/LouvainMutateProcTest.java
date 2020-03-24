@@ -35,7 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements GraphMutationTest<LouvainMutateConfig, Louvain> {
 
-    private static final String WRITE_PROPERTY = "communityId";
+    @Override
+    public String mutateProperty() {
+        return "communityId";
+    }
 
     @Override
     public Optional<String> mutateGraphName() {
@@ -89,14 +92,6 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     }
 
     @Override
-    public String failOnExistingTokenMessage() {
-        return String.format(
-            "Node property `%s` already exists in the in-memory graph.",
-            WRITE_PROPERTY
-        );
-    }
-
-    @Override
     public Class<? extends AlgoBaseProc<?, Louvain, LouvainMutateConfig>> getProcedureClazz() {
         return LouvainMutateProc.class;
     }
@@ -104,14 +99,6 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     @Override
     public LouvainMutateConfig createConfig(CypherMapWrapper mapWrapper) {
         return LouvainMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            mapWrapper = mapWrapper.withString("writeProperty", WRITE_PROPERTY);
-        }
-        return mapWrapper;
     }
 
     @Test
@@ -122,7 +109,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
             .withAnyRelationshipType()
             .algo("louvain")
             .mutateMode()
-            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("mutateProperty", mutateProperty())
             .yields(
                 "createMillis",
                 "computeMillis",

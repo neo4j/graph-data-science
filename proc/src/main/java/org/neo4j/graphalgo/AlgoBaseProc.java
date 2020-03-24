@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.LongSet;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.immutables.value.Value;
@@ -299,21 +298,21 @@ public abstract class AlgoBaseProc<
         }
 
         if (config instanceof MutatePropertyConfig) {
-            String writeProperty = ((MutatePropertyConfig) config).writeProperty();
-            if (writeProperty != null && graphStore.hasNodeProperty(writeProperty)) {
+            String mutateProperty = ((MutatePropertyConfig) config).mutateProperty();
+            if (mutateProperty != null && graphStore.hasNodeProperty(mutateProperty)) {
                 throw new IllegalArgumentException(String.format(
                     "Node property `%s` already exists in the in-memory graph.",
-                    writeProperty
+                    mutateProperty
                 ));
             }
         }
 
         if (config instanceof MutateRelationshipConfig) {
-            String writeRelationshipType = ((MutateRelationshipConfig) config).writeRelationshipType();
-            if (writeRelationshipType != null && graphStore.hasRelationshipType(writeRelationshipType)) {
+            String mutateRelationshipType = ((MutateRelationshipConfig) config).mutateRelationshipType();
+            if (mutateRelationshipType != null && graphStore.hasRelationshipType(mutateRelationshipType)) {
                 throw new IllegalArgumentException(String.format(
                     "Relationship type `%s` already exists in the in-memory graph.",
-                    writeRelationshipType
+                    mutateRelationshipType
                 ));
             }
         }

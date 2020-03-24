@@ -35,7 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMutationTest<WccMutateConfig, DisjointSetStruct> {
 
-    private static final String WRITE_PROPERTY = "componentId";
+    @Override
+    public String mutateProperty() {
+        return "componentId";
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<?, DisjointSetStruct, WccMutateConfig>> getProcedureClazz() {
@@ -45,14 +48,6 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
     @Override
     public WccMutateConfig createConfig(CypherMapWrapper mapWrapper) {
         return WccMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            return mapWrapper.withString("writeProperty", WRITE_PROPERTY);
-        }
-        return mapWrapper;
     }
 
     @Override
@@ -80,14 +75,6 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
             ", (h)-[{w: 1.0d}]->(i)";
     }
 
-    @Override
-    public String failOnExistingTokenMessage() {
-        return String.format(
-            "Node property `%s` already exists in the in-memory graph.",
-            WRITE_PROPERTY
-        );
-    }
-
     @Test
     void testMutateYields() {
         String query = GdsCypher
@@ -96,7 +83,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
             .withAnyRelationshipType()
             .algo("wcc")
             .mutateMode()
-            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("mutateProperty", mutateProperty())
             .yields(
                 "nodePropertiesWritten",
                 "createMillis",
@@ -111,10 +98,6 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertUserInput(row, "writeProperty", WRITE_PROPERTY);
-                assertUserInput(row, "seedProperty", null);
-                assertUserInput(row, "relationshipWeightProperty", null);
-
                 assertEquals(10L, row.getNumber("nodePropertiesWritten"));
 
                 assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));

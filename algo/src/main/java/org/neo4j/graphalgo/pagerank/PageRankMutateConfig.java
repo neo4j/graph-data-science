@@ -30,7 +30,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("PageRankMutateConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface PageRankMutateConfig extends PageRankWriteConfig, MutatePropertyConfig {
+public interface PageRankMutateConfig extends PageRankBaseConfig, MutatePropertyConfig {
 
     static PageRankMutateConfig of(
         String username,

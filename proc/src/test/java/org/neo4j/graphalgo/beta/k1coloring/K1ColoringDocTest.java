@@ -32,7 +32,7 @@ import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class K1ColoringDocTest extends BaseProcTest {
+final class K1ColoringDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
 
@@ -123,7 +123,7 @@ public final class K1ColoringDocTest extends BaseProcTest {
 
     @Test
     void shouldMutate() {
-        String query = " CALL gds.beta.k1coloring.mutate('myGraph', {writeProperty: 'color'})" +
+        String query = " CALL gds.beta.k1coloring.mutate('myGraph', {mutateProperty: 'color'})" +
                        " YIELD nodeCount, colorCount, ranIterations, didConverge";
 
         String actual = runQuery(query, Result::resultAsString);

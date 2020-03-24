@@ -29,7 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("ModularityOptimizationMutateConfigImpl")
-public interface ModularityOptimizationMutateConfig extends ModularityOptimizationWriteConfig, MutatePropertyConfig {
+public interface ModularityOptimizationMutateConfig extends ModularityOptimizationConfig, MutatePropertyConfig {
 
     static ModularityOptimizationMutateConfig of(
         String username,
