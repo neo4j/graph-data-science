@@ -19,16 +19,15 @@
  */
 package org.neo4j.graphalgo.centrality.eigenvector;
 
-import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.logging.Log;
 
-class EigenvectorCentralityAlgorithmFactory extends AlgorithmFactory<PageRank, EigenvectorCentralityConfig> {
+class EigenvectorCentralityAlgorithmFactory extends AlphaAlgorithmFactory<PageRank, EigenvectorCentralityConfig> {
     @Override
     public PageRank build(
         Graph graph,
@@ -50,10 +49,5 @@ class EigenvectorCentralityAlgorithmFactory extends AlgorithmFactory<PageRank, E
                 Pools.DEFAULT,
                 tracker
             );
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation(EigenvectorCentralityConfig configuration) {
-        throw new UnsupportedOperationException("Estimation is not implemented for this algorithm.");
     }
 }
