@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
+import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
@@ -30,7 +31,12 @@ public class ModularityOptimizationDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {
-        return Arrays.asList(ModularityOptimizationStreamProc.class, ModularityOptimizationWriteProc.class, GraphCreateProc.class);
+        return Arrays.asList(
+            ModularityOptimizationMutateProc.class,
+            ModularityOptimizationStreamProc.class,
+            ModularityOptimizationWriteProc.class,
+            GraphCreateProc.class
+        );
     }
 
     @Override

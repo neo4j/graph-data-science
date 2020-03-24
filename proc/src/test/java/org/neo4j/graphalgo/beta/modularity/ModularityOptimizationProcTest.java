@@ -24,12 +24,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
-abstract class ModularityOptimizationProcBaseTest extends BaseProcTest {
+import java.util.Arrays;
+import java.util.Collections;
 
+abstract class ModularityOptimizationProcTest extends BaseProcTest {
     static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
@@ -56,6 +65,7 @@ abstract class ModularityOptimizationProcBaseTest extends BaseProcTest {
         registerProcedures(
             ModularityOptimizationStreamProc.class,
             ModularityOptimizationWriteProc.class,
+            ModularityOptimizationMutateProc.class,
             GraphCreateProc.class);
         runQuery(DB_CYPHER);
     }

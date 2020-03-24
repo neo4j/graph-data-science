@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.GdsCypher.ExecutionModes.STREAM;
 
-class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcBaseTest {
+class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTest {
 
     @Test
     void testStreaming() {
