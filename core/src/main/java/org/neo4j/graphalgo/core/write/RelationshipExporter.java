@@ -24,21 +24,23 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.concurrency.Pools.DEFAULT_SINGLE_THREAD_POOL;
 import static org.neo4j.graphalgo.core.write.NodePropertyExporter.MIN_BATCH_SIZE;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
 public final class RelationshipExporter extends StatementApi {
 
@@ -94,20 +96,28 @@ public final class RelationshipExporter extends StatementApi {
         this.executorService = DEFAULT_SINGLE_THREAD_POOL;
     }
 
+    public void write(String relationshipType) {
+        write(relationshipType, Optional.empty(), null);
+    }
+
     public void write(String relationshipType, String propertyKey) {
-        write(relationshipType, propertyKey, null);
+        write(relationshipType, Optional.of(propertyKey), null);
+    }
+
+    public void write(String relationshipType, Optional<String> maybePropertyKey) {
+        write(relationshipType, maybePropertyKey, null);
     }
 
     public void write(
         String relationshipType,
-        String propertyKey,
+        Optional<String> maybePropertyKey,
         @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
     ) {
 
         final AtomicLong progress = new AtomicLong(0L);
 
         final int relationshipToken = getOrCreateRelationshipToken(relationshipType);
-        final int propertyToken = getOrCreatePropertyToken(propertyKey);
+        final int propertyKeyToken = maybePropertyKey.map(this::getOrCreatePropertyToken).orElse(NO_SUCH_PROPERTY_KEY);
 
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
@@ -116,7 +126,7 @@ public final class RelationshipExporter extends StatementApi {
             .map(partition -> createBatchRunnable(
                 progress,
                 relationshipToken,
-                propertyToken,
+                propertyKeyToken,
                 partition.startNode,
                 partition.nodeCount,
                 afterWriteConsumer
