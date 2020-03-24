@@ -55,6 +55,12 @@ public interface WritePropertyConfigTest<CONFIG extends WritePropertyConfig & Al
     }
 
     @Test
+    default void testTrimmedToNullWriteProperty() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("writeProperty", "  "));
+        assertThrows(IllegalArgumentException.class, () -> createConfig(mapWrapper));
+    }
+
+    @Test
     default void testWriteConfig() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
             "writeProperty", "writeProperty",

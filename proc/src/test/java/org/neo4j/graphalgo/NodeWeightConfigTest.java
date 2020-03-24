@@ -75,6 +75,13 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
     }
 
     @Test
+    default void testTrimmedToNullNodeWeightProperty() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", "  "));
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
+        assertNull(config.nodeWeightProperty());
+    }
+
+    @Test
     default void testNodeWeightPropertyFromConfig() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", "weight"));
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
