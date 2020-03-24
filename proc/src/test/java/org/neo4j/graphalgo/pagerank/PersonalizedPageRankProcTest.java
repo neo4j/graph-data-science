@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -287,6 +288,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
             assertMapEquals(expected, actual);
         } finally {
             db.shutdown();
+            GraphStoreCatalog.removeAllLoadedGraphs();
         }
     }
 }
