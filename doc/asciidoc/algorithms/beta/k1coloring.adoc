@@ -61,7 +61,7 @@ include::../common-parameters.adoc[]
 | readConcurrency        | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency       | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | maxIterations          | Integer | 20                     | yes      | The maximum number of iterations of K1 Coloring to run.
-| writeProperty          | String  | n/a                    | no       | The node property that stores the color.
+| writeProperty          | String  | n/a                    | no       | The node property that stores the computed color.
 |===
 
 .Results
@@ -100,7 +100,7 @@ include::../common-parameters.adoc[]
 | readConcurrency        | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency       | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | maxIterations          | Integer | 20                     | yes      | The maximum number of iterations of K1 Coloring to run.
-| writeProperty          | String  | n/a                    | no       | The node property that stores the color.
+| writeProperty          | String  | n/a                    | no       | The node property this procedure writes the color to.
 |===
 
 .Results
@@ -244,6 +244,3 @@ YIELD nodes, colorCount, ranIterations, didConverge
 | nodes | colorCount | ranIterations | didConverge
 | 4     | 3          | 3             | true
 |===
-
-When using `write` mode the procedure will return information about the algorithm execution.
-In this example we return the number of processed nodes, the number of colors used to color the graph, the number of iterations and information whether the algorithm converged.
