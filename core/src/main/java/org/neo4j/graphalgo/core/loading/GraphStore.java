@@ -273,10 +273,6 @@ public final class GraphStore {
             ? Optional.empty()
             : Optional.of(this.nodes.withFilteredLabels(combinedBitSet, concurrency));
 
-        Optional<IdMap> filteredNodes = nodeLabels.contains(PROJECT_ALL.name)
-            ? Optional.empty()
-            : Optional.of(this.nodes.withFilteredLabels(nodeLabels, concurrency));
-
         List<Graph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> {
