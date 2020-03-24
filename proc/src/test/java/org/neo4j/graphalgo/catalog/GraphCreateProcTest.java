@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -563,8 +564,9 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @MethodSource("relationshipAggregations")
-    void relationshipProjectionPropertyPropagateAggregations(String aggregation) {
+    @EnumSource(Aggregation.class)
+    void relationshipProjectionPropertyPropagateAggregations(Aggregation aggregationParam) {
+        String aggregation = aggregationParam.toString();
         String name = "g";
 
         Map<String, Object> relationshipProjection = map("B", map(
@@ -621,8 +623,9 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @MethodSource("relationshipAggregations")
-    void relationshipProjectionPropertyAggregations(String aggregation) {
+    @EnumSource(Aggregation.class)
+    void relationshipProjectionPropertyAggregations(Aggregation aggregationParam) {
+        String aggregation = aggregationParam.toString();
         String name = "g";
 
         Map<String, Object> relationshipProjection = map("B", map(
@@ -659,8 +662,9 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @MethodSource("relationshipAggregations")
-    void relationshipQueryPropertyAggregations(String aggregation) {
+    @EnumSource(Aggregation.class)
+    void relationshipQueryPropertyAggregations(Aggregation aggregationParam) {
+        String aggregation = aggregationParam.toString();
         String name = "g";
 
         assertCypherResult(
@@ -698,8 +702,9 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @MethodSource("relationshipAggregations")
-    void relationshipProjectionPropertyAggregationsNativeVsCypher(String aggregation) {
+    @EnumSource(Aggregation.class)
+    void relationshipProjectionPropertyAggregationsNativeVsCypher(Aggregation aggregationParam) {
+        String aggregation = aggregationParam.toString();
 
         runQuery(
             " CREATE (p:Person)-[:KNOWS]->(k:Person)," +
@@ -1736,16 +1741,6 @@ class GraphCreateProcTest extends BaseProcTest {
             "NATURAL",
             "REVERSE",
             "UNDIRECTED"
-        );
-    }
-
-    static Stream<String> relationshipAggregations() {
-        return Stream.of(
-            "MAX",
-            "MIN",
-            "SUM",
-            "SINGLE",
-            "NONE"
         );
     }
 

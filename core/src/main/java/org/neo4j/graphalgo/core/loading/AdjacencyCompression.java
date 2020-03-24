@@ -144,7 +144,7 @@ final class AdjacencyCompression {
         }
 
         int in = 1, out = 1;
-        boolean firstTimeSeen = false;
+        boolean firstTimeSeen = true;
         for (; in < length; ++in) {
             final int sortIdx = order[in];
             delta = values[sortIdx] - value;
