@@ -784,10 +784,7 @@ section.beta h3.title:after {
 
 p.tier-note {
   padding: 10px;
-  font-size: 1.15rem;
-  line-height: 1.75;
   text-align: justify;
-  font-weight: bold;
 }
 
 p.tier-note:before {
@@ -796,8 +793,8 @@ p.tier-note:before {
   margin-right: 10px;
   font-family: fantasy;
   font-size: 2rem;
-  font-weight: normal;
   color: #F58220;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 section.alpha p.tier-note:before {
