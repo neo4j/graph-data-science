@@ -46,6 +46,10 @@ dbms.security.procedures.unrestricted=gds.*
 
 This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 
+If the procedure whitelist was configured make sure to include the GDS library or any procedure you need to execute
+----
+dbms.security.procedures.whitelist=gds.*
+----
 
 == Neo4j Server
 
@@ -62,7 +66,14 @@ dbms.security.procedures.unrestricted=gds.*
 This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 +
 
-3. Restart Neo4j
+3. Check if the procedure whitelist is enabled int he `$NEO4J_HOME/conf/neo4j.conf` file and add the GDS library if necessary:
++
+----
+dbms.security.procedures.whitelist=gds.*
+----
++
+
+4. Restart Neo4j
 
 
 === Verifying installation
