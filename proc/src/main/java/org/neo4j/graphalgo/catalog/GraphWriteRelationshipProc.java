@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteRelationshipProc extends CatalogProc {
@@ -51,9 +53,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         validateGraphName(graphName);
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        Optional<String> maybeRelationshipProperty = (relationshipProperty == null || relationshipProperty.isEmpty())
-            ? Optional.empty()
-            : Optional.of(relationshipProperty);
+        Optional<String> maybeRelationshipProperty = ofNullable(trimToNull(relationshipProperty));
 
         GraphWriteRelationshipConfig config = GraphWriteRelationshipConfig.of(
             getUsername(),
