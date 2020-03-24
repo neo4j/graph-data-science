@@ -24,12 +24,14 @@ This chapter explains the available graph catalog operations.
 [[table-proc]]
 [opts=header,cols="1m,1"]
 |===
-| Name                                              | Description
-| <<catalog-graph-create, gds.graph.create>>        | Creates a graph in the catalog using a <<native-projection, Native projection>>.
-| <<catalog-graph-create, gds.graph.create.cypher>> | Creates a graph in the catalog using a <<cypher-projection, Cypher projection>>.
-| <<catalog-graph-list, gds.graph.list>>            | Prints information about graphs that are currently stored in the catalog.
-| <<catalog-graph-exists, gds.graph.exists>>        | Checks if a named graph is stored in the catalog.
-| <<catalog-graph-drop, gds.graph.drop>>            | Removes a named graph from the catalog.
+| Name                                                                   | Description
+| <<catalog-graph-create, gds.graph.create>>                             | Creates a graph in the catalog using a <<native-projection, Native projection>>.
+| <<catalog-graph-create, gds.graph.create.cypher>>                      | Creates a graph in the catalog using a <<cypher-projection, Cypher projection>>.
+| <<catalog-graph-list, gds.graph.list>>                                 | Prints information about graphs that are currently stored in the catalog.
+| <<catalog-graph-exists, gds.graph.exists>>                             | Checks if a named graph is stored in the catalog.
+| <<catalog-graph-drop, gds.graph.drop>>                                 | Removes a named graph from the catalog.
+| <<catalog-graph-write-node-properties, gds.graph.writeNodeProperties>> | Writes node properties stored in a named graph to Neo4j.
+| <<catalog-graph-write-relationship, gds.graph.writeRelationship>>      | Writes relationships stored in a named graph to Neo4j.
 |===
 
 [NOTE]
@@ -149,3 +151,41 @@ CALL gds.graph.drop('my-store-graph') YIELD graphName;
 ----
 
 
+[[catalog-graph-write-node-properties]]
+== Write node properties to Neo4j
+
+We can write multiple node properties stored in a named in-memory graph back to Neo4j.
+This is useful if we ran multiple algorithms in `mutate` mode and want to write back all results at once.
+
+The properties to write are typically the `writeProperty` values that were used when running algorithms.
+
+.Write multiple node properties to Neo4j:
+[source,cypher]
+----
+CALL gds.graph.writeNodeProperties('my-graph', ['componentId', 'pageRank', 'communityId'])
+----
+
+
+[[catalog-graph-write-relationship]]
+== Write relationships to Neo4j
+
+We can write relationships stored in a named in-memory graph back to Neo4j.
+This can be used to write algorithm results, e.g. for node similarity, or relationships that have been aggregated during graph creation.
+
+The relationships to write are specified by a relationship type.
+This can either be an element identifier used in a relationship projection during graph construction or the `writeRelationshipType` used in algorithms that create relationships.
+
+.Write relationships to Neo4j:
+[source,cypher]
+----
+CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO')
+----
+
+Note, that the above example does not write relationship properties by default.
+If we want to write properties, we need to specify the relationship property explicitly.
+
+.Write relationships and their properties to Neo4j:
+[source,cypher]
+----
+CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO', 'similarityScore')
+----
