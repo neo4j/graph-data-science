@@ -156,23 +156,23 @@ CALL gds.labelPropagation.stream(
 [[cypher-projection-node-labels]]
 == Node labels
 
-The native projection supports loading multiple node labels which can be filtered in an individual algorithm execution.
-The Cypher projection can achieve the same feature by returning the node label in the query.
-If the `label` column is present in the query result, we use the values in that column to distinguish node labels.
+Native projections supports specifying multiple node labels which can be filtered in an individual algorithm execution.
+Cypher projections can achieve the same feature by returning the node label in the node query.
+If a column called `labels` is present in the node query result, we use the values in that column to distinguish node labels.
 
-For the following example, let's assume `Author` nodes to be connected by `WROTE` relationships to either `Article` or `Book` nodes.
+Consider the following example where `Author` nodes are connected by `WROTE` relationships to either `Article` or `Book` nodes.
 
 .Using the `type` column to distinguish between multiple relationship types.
 [source,cypher]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
-    'MATCH (n) WHERE "Author" IN labels(n) OR "Article" IN labels(n) OR "Book" IN labels(n) RETURN id(n) AS id, labels(n) AS labels',
+    'MATCH (n) WHERE n:Author OR n:Article OR n:Book RETURN id(n) AS id, labels(n) AS labels',
     'MATCH (n:City)-[r:ROAD|RAIL]->(m:City) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
 )
 ----
 
-The loaded graph will be composed of the three node labels.
+The created graph will be composed of nodes labeled with either `:Book`, `:Article`, or `:Author`.
 This allows us to apply a node filter during algorithm execution:
 
 .Using a node filter to run the algorithm on a subgraph.

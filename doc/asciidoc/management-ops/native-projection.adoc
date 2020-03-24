@@ -143,7 +143,7 @@ Projecting multiple node labels enables algorithms to only use a subset of those
 
 [source,cypher]
 ----
-// Uses `Person` nodes for computing Page Rank values between persons
+// Uses `Person` nodes for computing Page Rank scores between persons
 CALL gds.pageRank.stream('my-graph', { nodeLabels: ['Person'] }) YIELD nodeId, score;
 ----
 
