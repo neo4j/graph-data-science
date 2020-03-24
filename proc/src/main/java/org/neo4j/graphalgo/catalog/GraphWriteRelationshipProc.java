@@ -40,7 +40,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class GraphWriteRelationshipProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.writeRelationship", mode = WRITE)
-    @Description("Writes the given relationship to an online Neo4j database.")
+    @Description("Writes the given relationship and an optional relationship property to an online Neo4j database.")
     public Stream<Result> create(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType,
@@ -80,7 +80,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
             .withLog(log)
             .parallel(Pools.DEFAULT, config.writeConcurrency())
             .build();
-        exporter.write(config.relationshipType(), "prop");
+        exporter.write(config.relationshipType(), config.relationshipProperty());
 
         return graphStore.relationshipCount(config.relationshipType());
     }

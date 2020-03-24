@@ -182,6 +182,10 @@ public final class GraphStore {
         }).collect(Collectors.toSet());
     }
 
+    public Set<String> relationshipPropertyKeys(String relationshipType) {
+        return relationshipProperties.get(relationshipType).keySet();
+    }
+
     public synchronized void addRelationshipType(String relationshipType, Optional<String> relationshipProperty, HugeGraph.Relationships relationships) {
         if (!hasRelationshipType(relationshipType)) {
             this.relationships.put(relationshipType, relationships.topology());

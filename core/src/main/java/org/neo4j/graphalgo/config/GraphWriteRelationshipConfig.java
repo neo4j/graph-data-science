@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 
@@ -64,6 +65,18 @@ public interface GraphWriteRelationshipConfig extends WriteConfig {
                 relationshipType(),
                 graphStore.relationshipTypes().stream().sorted().collect(joining("', '", "['", "']"))
             ));
+        }
+        if (relationshipProperty().isPresent()) {
+            Set<String> availableProperties = graphStore.relationshipPropertyKeys(relationshipType());
+            String relProperty = relationshipProperty().get();
+            if (!availableProperties.contains(relProperty)) {
+                throw new IllegalArgumentException(String.format(
+                    "Relationship property `%s` not found for relationship type '%s'. Available properties: %s",
+                    relProperty,
+                    relationshipType(),
+                    availableProperties.stream().sorted().collect(joining("', '", "['", "']"))
+                ));
+            }
         }
     }
 }
