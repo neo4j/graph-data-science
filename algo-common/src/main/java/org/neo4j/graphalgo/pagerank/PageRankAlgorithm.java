@@ -36,11 +36,11 @@ public interface PageRankAlgorithm extends Assessable {
     /**
      * Forces sequential use. If you want parallelism, prefer
      *
-     * {@link #create(Graph, LongStream, PageRank.Config, int, ExecutorService, int, AllocationTracker)} }
+     * {@link #create(Graph, LongStream, PageRankBaseConfig, int, ExecutorService, int, AllocationTracker)} }
      */
     default PageRank create(
         Graph graph,
-        PageRank.Config algoConfig,
+        PageRankBaseConfig algoConfig,
         LongStream sourceNodeIds
     ) {
         return create(graph, sourceNodeIds, algoConfig, -1, null, ParallelUtil.DEFAULT_BATCH_SIZE, AllocationTracker.EMPTY);
@@ -49,7 +49,7 @@ public interface PageRankAlgorithm extends Assessable {
     default PageRank create(
         Graph graph,
         LongStream sourceNodeIds,
-        PageRank.Config algoConfig,
+        PageRankBaseConfig algoConfig,
         int concurrency,
         ExecutorService executor,
         AllocationTracker tracker
@@ -68,7 +68,7 @@ public interface PageRankAlgorithm extends Assessable {
     default PageRank create(
         Graph graph,
         LongStream sourceNodeIds,
-        PageRank.Config algoConfig,
+        PageRankBaseConfig algoConfig,
         int concurrency,
         ExecutorService executor,
         int batchSize,
@@ -86,7 +86,7 @@ public interface PageRankAlgorithm extends Assessable {
         );
     }
 
-    PageRankVariant variant(PageRank.Config config);
+    PageRankVariant variant(PageRankBaseConfig config);
 
     Class<? extends BaseComputeStep> computeStepClass();
 

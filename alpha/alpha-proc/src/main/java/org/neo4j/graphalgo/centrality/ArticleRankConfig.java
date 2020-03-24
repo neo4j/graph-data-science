@@ -30,6 +30,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("ArticleRankConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface ArticleRankConfig extends PageRankWriteConfig {
 
     @Value.Default

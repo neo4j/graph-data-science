@@ -30,6 +30,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("AllShortestPathsConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface AllShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     static AllShortestPathsConfig of(

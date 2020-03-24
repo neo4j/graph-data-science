@@ -134,15 +134,10 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
                 AllocationTracker tracker,
                 Log log
             ) {
-                PageRank.Config algoConfig = new PageRank.Config(
-                    configuration.maxIterations(),
-                    configuration.dampingFactor(),
-                    configuration.tolerance()
-                );
                 return LabsPageRankAlgorithmType.ARTICLE_RANK.create(
                     graph,
                     configuration.sourceNodeIds(),
-                    algoConfig,
+                    configuration,
                     configuration.concurrency(),
                     Pools.DEFAULT,
                     tracker

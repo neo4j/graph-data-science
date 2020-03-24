@@ -123,28 +123,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
 
     private final HugeDoubleArray result;
 
-    public static final class Config {
-        public final int iterations;
-        public final double dampingFactor;
-        public final double toleranceValue;
-        public final boolean cacheWeights;
-
-        public Config(final int iterations, final double dampingFactor, final double toleranceValue) {
-            this(iterations, dampingFactor, toleranceValue, false);
-        }
-
-        public Config(
-                final int iterations,
-                final double dampingFactor,
-                final double toleranceValue,
-                boolean cacheWeights) {
-            this.iterations = iterations;
-            this.dampingFactor = dampingFactor;
-            this.toleranceValue = toleranceValue;
-            this.cacheWeights = cacheWeights;
-        }
-    }
-
     /**
      * Parallel Page Rank implementation.
      * Whether the algorithm actually runs in parallel depends on the given
@@ -154,24 +132,24 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         Graph graph,
         PageRankVariant pageRankVariant,
         LongStream sourceNodeIds,
-        PageRank.Config algoConfig,
+        PageRankBaseConfig algoConfig,
         int concurrency,
         ExecutorService executor,
         int batchSize,
         AllocationTracker tracker
     ) {
-        assert algoConfig.iterations >= 1;
+        assert algoConfig.maxIterations() >= 1;
         this.executor = executor;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.tracker = tracker;
         this.idMapping = graph;
         this.graph = graph;
-        this.dampingFactor = algoConfig.dampingFactor;
-        this.maxIterations = algoConfig.iterations;
+        this.dampingFactor = algoConfig.dampingFactor();
+        this.maxIterations = algoConfig.maxIterations();
         this.ranIterations = 0;
         this.didConverge = false;
-        this.toleranceValue = algoConfig.toleranceValue;
+        this.toleranceValue = algoConfig.tolerance();
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
         this.result = HugeDoubleArray.newArray(graph.nodeCount(), tracker);

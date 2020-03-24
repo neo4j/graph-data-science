@@ -24,22 +24,15 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.IterationsConfig;
-import org.neo4j.graphalgo.config.SourceNodesConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.graphalgo.pagerank.PageRankBaseConfig;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration("EigenvectorCentralityConfigImpl")
-public interface EigenvectorCentralityConfig extends
-    AlgoBaseConfig,
-    IterationsConfig,
-    SourceNodesConfig,
-    WritePropertyConfig,
-    RelationshipWeightConfig {
+@SuppressWarnings("immutables:subtype")
+public interface EigenvectorCentralityConfig extends PageRankBaseConfig, WritePropertyConfig {
 
     @Value.Default
     @Override

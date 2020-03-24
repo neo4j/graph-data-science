@@ -35,16 +35,12 @@ class EigenvectorCentralityAlgorithmFactory extends AlphaAlgorithmFactory<PageRa
         AllocationTracker tracker,
         Log log
     ) {
-        PageRank.Config algoConfig = new PageRank.Config(
-            configuration.maxIterations(),
-            1.0,
-            PageRank.DEFAULT_TOLERANCE
-        );
+        configuration = ImmutableEigenvectorCentralityConfig.builder().from(configuration).dampingFactor(1.0).build();
         return LabsPageRankAlgorithmType.EIGENVECTOR_CENTRALITY
             .create(
                 graph,
                 configuration.sourceNodeIds(),
-                algoConfig,
+                configuration,
                 configuration.concurrency(),
                 Pools.DEFAULT,
                 tracker

@@ -45,7 +45,10 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class WeightedPageRankTest extends AlgoTestBase {
 
-    static PageRank.Config DEFAULT_CONFIG = new PageRank.Config(40, 0.85, PageRank.DEFAULT_TOLERANCE);
+    private static final PageRankBaseConfig DEFAULT_CONFIG = ImmutablePageRankStreamConfig
+        .builder()
+        .maxIterations(40)
+        .build();
 
     private static final String DB_CYPHER =
             "CREATE" +

@@ -53,7 +53,7 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends Algorith
         return algorithmType.create(
             graph,
             configuration.sourceNodeIds(),
-            configuration.toOldConfig(),
+            configuration,
             configuration.concurrency(),
             Pools.DEFAULT,
             tracker

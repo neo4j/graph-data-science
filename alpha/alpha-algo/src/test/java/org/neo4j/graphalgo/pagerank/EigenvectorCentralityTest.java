@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.centrality.eigenvector.ImmutableEigenvectorCentralityConfig;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
@@ -90,7 +91,11 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
             ",  (j)-[:TYPE2]->(e)" +
             ",  (k)-[:TYPE2]->(e)";
 
-    private static final PageRank.Config DEFAULT_EIGENVECTOR_CONFIG = new PageRank.Config(40, 1, PageRank.DEFAULT_TOLERANCE);
+    private static final PageRankBaseConfig DEFAULT_EIGENVECTOR_CONFIG = ImmutableEigenvectorCentralityConfig
+        .builder()
+        .maxIterations(40)
+        .dampingFactor(1)
+        .build();
 
     @BeforeEach
     void setupGraphDb() {

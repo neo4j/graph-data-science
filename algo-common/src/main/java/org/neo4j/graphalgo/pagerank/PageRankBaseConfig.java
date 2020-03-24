@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
@@ -52,17 +51,8 @@ public interface PageRankBaseConfig extends
     }
 
     // TODO: consider moving this to WeightConfig or create a sub interface of that
+    @Value.Default
     default boolean cacheWeights() {
         return false;
-    }
-
-    @Configuration.Ignore
-    default PageRank.Config toOldConfig() {
-        return new PageRank.Config(
-            maxIterations(),
-            dampingFactor(),
-            tolerance(),
-            cacheWeights()
-        );
     }
 }

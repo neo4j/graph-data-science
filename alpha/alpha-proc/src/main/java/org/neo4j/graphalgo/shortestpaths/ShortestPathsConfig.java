@@ -34,6 +34,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("ShortestPathsConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface ShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig, WritePropertyConfig {
 
     String DEFAULT_TARGET_PROPERTY = "sssp";

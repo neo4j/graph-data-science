@@ -53,7 +53,7 @@ final class PageRankTest extends AlgoTestBase {
 
     private static final Label LABEL = Label.label("Label1");
     private static final String RELATIONSHIP_TYPE = "TYPE1";
-    private static final PageRank.Config DEFAULT_CONFIG = defaultConfigBuilder().build().toOldConfig();
+    private static final PageRankBaseConfig DEFAULT_CONFIG = defaultConfigBuilder().build();
 
     static ImmutablePageRankStreamConfig.Builder defaultConfigBuilder() {
         return ImmutablePageRankStreamConfig.builder()

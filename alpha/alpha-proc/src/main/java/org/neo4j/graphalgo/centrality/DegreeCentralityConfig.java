@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 
 @Configuration("DegreeCentralityConfigImpl")
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeightConfig, WritePropertyConfig {
 
     String DEFAULT_SCORE_PROPERTY = "degree";

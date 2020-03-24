@@ -33,6 +33,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("ShortestPathDeltaSteppingConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface ShortestPathDeltaSteppingConfig extends BaseConfig, RelationshipWeightConfig, WritePropertyConfig {
 
     String DEFAULT_TARGET_PROPERTY = "sssp";
