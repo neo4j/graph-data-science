@@ -155,6 +155,21 @@ CALL gds.graph.create('my-graph', '*', '*')
 YIELD graphName, nodeCount, relationshipCount;
 ----
 
+When a graph uses the special star projection, additional nodes from named node projections are not added additionally as the star projection already contains them.
+This also applies to filtering.
+For example, if a graph was projected with labels 'A', 'B' and also with the special star '*', any node filtering that includes the star is equivalent to using only the star.
+It is however still possible to filter for nodes with label 'A' or 'B' in order to retrieve a subgraph containing only those nodes:
+
+[source,cypher]
+----
+CALL gds.graph.create('myGraph', ['Person', 'City', '*'])
+CALL gds.pageRank.stats('my-graph', {nodeLabels: ['*']}) // will use all projected nodes
+CALL gds.algo.mode('my-graph', {nodeLabels: ['Person', 'City', '*']}) // equivalent to above
+CALL gds.algo.mode('my-graph') // equivalent to above
+CALL gds.algo.mode('my-graph', {nodeLabels: ['Person']}) // will use only 'Person' nodes
+CALL gds.algo.mode('my-graph', {nodeLabels: ['Person', 'City']}) // will use only 'Person' and 'City' nodes
+----
+
 === Node properties
 
 It is often useful to load an in-memory graph with more than one node property.
