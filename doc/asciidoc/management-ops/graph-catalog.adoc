@@ -139,25 +139,15 @@ CALL gds.graph.exists('my-store-graph') YIELD exists;
 ----
 
 
-[[catalog-graph-drop]]
-== Removing graphs from the catalog
-
-Once we have finished using the named graph we can remove it from the catalog to free up memory.
-
-.Remove a graph from the catalog:
-[source,cypher]
-----
-CALL gds.graph.drop('my-store-graph') YIELD graphName;
-----
-
-
 [[catalog-graph-write-node-properties]]
 == Write node properties to Neo4j
 
-We can write multiple node properties stored in a named in-memory graph back to Neo4j.
-This is useful if we ran multiple algorithms in `mutate` mode and want to write back all results at once.
+We can write node properties stored in a named in-memory graph back to Neo4j.
+This is useful if we ran multiple algorithms in `mutate` mode and want to write back some or all of the results.
+This is similar to what the `write` execution mode does, but allows more fine-grained control over the operations.
 
 The properties to write are typically the `writeProperty` values that were used when running algorithms.
+Properties that were added to the created graph at creation time will often already be present in the Neo4j database.
 
 .Write multiple node properties to Neo4j:
 [source,cypher]
@@ -170,7 +160,7 @@ CALL gds.graph.writeNodeProperties('my-graph', ['componentId', 'pageRank', 'comm
 == Write relationships to Neo4j
 
 We can write relationships stored in a named in-memory graph back to Neo4j.
-This can be used to write algorithm results, e.g. for node similarity, or relationships that have been aggregated during graph creation.
+This can be used to write algorithm results (for example from <<algorithms-node-similarity, Node Similarity>>) or relationships that have been aggregated during graph creation.
 
 The relationships to write are specified by a relationship type.
 This can either be an element identifier used in a relationship projection during graph construction or the `writeRelationshipType` used in algorithms that create relationships.
@@ -181,11 +171,23 @@ This can either be an element identifier used in a relationship projection durin
 CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO')
 ----
 
-Note, that the above example does not write relationship properties by default.
-If we want to write properties, we need to specify the relationship property explicitly.
+By default, no relationship properties will be written.
+To write relationship properties, these have to be explicitly specified.
 
 .Write relationships and their properties to Neo4j:
 [source,cypher]
 ----
 CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO', 'similarityScore')
+----
+
+
+[[catalog-graph-drop]]
+== Removing graphs from the catalog
+
+Once we have finished using the named graph we can remove it from the catalog to free up memory.
+
+.Remove a graph from the catalog:
+[source,cypher]
+----
+CALL gds.graph.drop('my-store-graph') YIELD graphName;
 ----
