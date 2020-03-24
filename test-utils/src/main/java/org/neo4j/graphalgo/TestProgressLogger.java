@@ -21,27 +21,39 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
 
 public class TestProgressLogger implements ProgressLogger {
 
-    public static final ProgressLogger INSTANCE = new TestProgressLogger();
+    public static final TestProgressLogger INSTANCE = new TestProgressLogger();
 
-    public static final long TIMEOUT = 3000;
+    private final BlockingQueue<String> messages;
+    private final BlockingQueue<Double> percentages;
 
-    private long lastLog = 0;
+    public TestProgressLogger() {
+        this.messages = new ArrayBlockingQueue<>(100);
+        this.percentages = new ArrayBlockingQueue<Double>(100);
+    }
+
 
     @Override
     public void logProgress(double percentDone, Supplier<String> msg) {
-        final long now = System.currentTimeMillis();
-        if (lastLog + TIMEOUT < now) {
-            lastLog = now;
-            System.out.printf("[%s] %.0f%% (%s)%n", Thread.currentThread().getName(), percentDone * 100, msg.get());
-        }
+        messages.add(msg.get() == null ? "NULL" : msg.get());
+        percentages.add(percentDone);
     }
 
     @Override
     public void log(Supplier<String> msg) {
-        System.out.println(msg.get());
+        messages.add(msg.get() == null ? "NULL" : msg.get());
+    }
+
+    public BlockingQueue<String> getMessages() {
+        return messages;
+    }
+
+    public BlockingQueue<Double> getPercentages() {
+        return percentages;
     }
 }

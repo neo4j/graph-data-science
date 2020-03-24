@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
@@ -48,16 +49,21 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -827,5 +833,73 @@ final class NodeSimilarityTest extends AlgoTestBase {
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
     }
 
+    @ParameterizedTest(name = "concurrency = {0}")
+    @ValueSource(ints = {1,2})
+    void shouldLogProgress(int concurrency) {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalOrientation(NATURAL)
+            .build()
+            .graph(NativeFactory.class);
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
+            graph,
+            configBuilder().degreeCutoff(0).concurrency(concurrency).build(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        TestProgressLogger progressLogger = new TestProgressLogger();
+
+        nodeSimilarity.withProgressLogger(progressLogger);
+
+        nodeSimilarity.computeToStream();
+
+        List<Double> sortedPercentages = progressLogger.getPercentages().stream().sorted().collect(Collectors.toList());
+
+        assertFalse(sortedPercentages.stream().anyMatch(percentage -> percentage > 1.0));
+
+        assertEquals(
+            Arrays.asList(0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0),
+            sortedPercentages
+        );
+
+        if (concurrency == 1) {
+            assertEquals(
+                new ArrayList<>(progressLogger.getPercentages()),
+                sortedPercentages
+            );
+        }
+    }
+
+    @Test
+    void shouldLogProgressWithDegreeCutoff() {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalOrientation(NATURAL)
+            .build()
+            .graph(NativeFactory.class);
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
+            graph,
+            configBuilder().degreeCutoff(2).concurrency(1).build(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        TestProgressLogger progressLogger = new TestProgressLogger();
+
+        nodeSimilarity.withProgressLogger(progressLogger);
+
+        nodeSimilarity.computeToStream();
+
+        List<Double> sortedPercentages = progressLogger.getPercentages().stream().sorted().collect(Collectors.toList());
+
+        assertFalse(sortedPercentages.stream().anyMatch(percentage -> percentage > 1.0));
+    }
 }
 
