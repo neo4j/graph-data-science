@@ -56,6 +56,11 @@ public enum Aggregation {
         public double merge(double runningTotal, double value) {
             return Math.max(runningTotal, value);
         }
+    },
+    COUNT {
+        public double merge(double runningTotal, double value) {
+            return Math.ceil(runningTotal) + 1.0;
+        }
     };
 
     public abstract double merge(double runningTotal, double value);

@@ -31,7 +31,7 @@ class AggregationTest {
     private static final double[] inputs = new double[]{0.5, 1.4};
 
     @ParameterizedTest
-    @CsvSource({"MAX, 1.4", "MIN, 0.5", "SINGLE, 0.5", "SUM, 1.9"})
+    @CsvSource({"MAX, 1.4", "MIN, 0.5", "SINGLE, 0.5", "SUM, 1.9", "COUNT, 2.0"})
     void testSuccessfulDuplateRelationshipStrategies(Aggregation strategy, double expected) {
         assertEquals(expected, strategy.merge(inputs[0], inputs[1]));
     }
