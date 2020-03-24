@@ -322,7 +322,7 @@ The following map-like syntax shows the general way of defining relationship pro
     The specified value is applied to all property mappings that have no aggregation specified.
     The following values are allowed:
 *** `NONE`: parallel relationships are not aggregated (default)
-*** `MIN`, `MAX`, `SUM`: applied to the numeric properties of parallel relationships
+*** `MIN`, `MAX`, `SUM`, `COUNT`: applied to the numeric properties of parallel relationships
 *** `SINGLE`: a single, arbitrary relationship out of the parallel relationships is projected
 ** `relationship-property-mappings` denotes a set of mappings between Neo4j and in-memory relationship properties
 
@@ -497,7 +497,7 @@ The following map-like syntax shows the general way of defining relationship pro
     The specified value overrides the aggregation type specified for the enclosing relationship projection.
     The following values are allowed:
 *** `NONE`: parallel relationships are not aggregated (default)
-*** `MIN`, `MAX`, `SUM`: applied to the numeric properties of parallel relationships
+*** `MIN`, `MAX`, `SUM`, `COUNT`: applied to the numeric properties of parallel relationships
 *** `SINGLE`: a single, arbitrary relationship out of the parallel relationships is projected
 
 In the following example, we want to project `City` nodes and `ROAD` relationships.
@@ -574,7 +574,7 @@ All other aggregations project all the parallel relationships between a pair of 
 In the following example, we want to aggregate all `ROAD` relationships between two cities to a single relationship.
 While doing so, we compute the maximum quality of the parallel relationships and store it on the resulting relationship.
 
-.Create a graph with aggregated parallel relationships:
+.Create a graph with aggregated parallel relationships using the maximum value of the `condition` property:
 [source,cypher]
 ----
 CALL gds.graph.create(
@@ -593,6 +593,32 @@ CALL gds.graph.create(
                     property: 'condition',
                     aggregation: 'MAX',
                     defaultValue: 1.0
+                }
+            }
+        }
+    }
+)
+YIELD graphName, nodeCount, relationshipCount;
+----
+
+.Create a graph with aggregated relationships using the parallel relationship count as a relationship property:
+[source,cypher]
+----
+CALL gds.graph.create(
+    'my-graph', {
+        City: {
+            properties: {
+                community: {
+                    property: 'stateId'
+                }
+            }
+        }
+    }, {
+        ROAD: {
+            properties: {
+                roadCount: {
+                    property: 'condition',
+                    aggregation: 'COUNT'
                 }
             }
         }
