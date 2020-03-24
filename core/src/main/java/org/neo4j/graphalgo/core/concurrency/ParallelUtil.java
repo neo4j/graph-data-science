@@ -22,12 +22,12 @@ package org.neo4j.graphalgo.core.concurrency;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
 import org.neo4j.graphalgo.core.utils.BiLongConsumer;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.utils.ExceptionUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -781,9 +781,7 @@ public final class ParallelUtil {
         final TerminationFlag terminationFlag,
         final ExecutorService executor
     ) {
-        if (!canRunInParallel(executor)
-            || tasks.size() == 1
-            || concurrency <= 1) {
+        if (!canRunInParallel(executor) || concurrency <= 1) {
             for (Runnable task : tasks) {
                 terminationFlag.assertRunning();
                 task.run();
