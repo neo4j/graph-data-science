@@ -139,8 +139,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     }
 
     @Override
-    BatchLoadResult loadOneBatch(Transaction tx, long offset, int batchSize, int bufferSize) {
-        Result queryResult = runLoadingQuery(tx, offset, batchSize);
+    BatchLoadResult loadSingleBatch(Transaction tx, int bufferSize) {
+        Result queryResult = runLoadingQuery(tx);
 
         List<String> allColumns = queryResult.columns();
 
@@ -191,7 +191,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
         queryResult.accept(visitor);
         visitor.flushAll();
-        return new BatchLoadResult(offset, visitor.rows(), -1L, visitor.relationshipCount());
+        return new BatchLoadResult(visitor.rows(), -1L);
     }
 
     @Override

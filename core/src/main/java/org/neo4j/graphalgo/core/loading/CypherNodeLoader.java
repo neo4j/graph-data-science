@@ -85,8 +85,8 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     }
 
     @Override
-    BatchLoadResult loadOneBatch(Transaction tx, long offset, int batchSize, int bufferSize) {
-        Result queryResult = runLoadingQuery(tx, offset, batchSize);
+    BatchLoadResult loadSingleBatch(Transaction tx, int bufferSize) {
+        Result queryResult = runLoadingQuery(tx);
 
         Collection<String> propertyColumns = getPropertyColumns(queryResult);
         if (!hasExplicitPropertyMappings && !initializedFromResult) {
@@ -117,7 +117,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer, hasLabelInformation);
         queryResult.accept(visitor);
         visitor.flush();
-        return new BatchLoadResult(offset, visitor.rows(), visitor.maxId(), visitor.rows());
+        return new BatchLoadResult(visitor.rows(), visitor.maxId());
     }
 
     @Override

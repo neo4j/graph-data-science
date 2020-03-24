@@ -21,26 +21,17 @@ package org.neo4j.graphalgo.core.loading;
 
 class BatchLoadResult {
 
-    private final long offset;
     private final long rows;
     private final long maxId;
-    private final long count;
 
     BatchLoadResult(
-            long offset,
             long rows,
-            long maxId,
-            long count
+            long maxId
     ) {
-        this.offset = offset;
         this.rows = rows;
         this.maxId = maxId;
-        this.count = count;
     }
 
-    long offset() {
-        return offset;
-    }
 
     long rows() {
         return rows;
@@ -48,9 +39,5 @@ class BatchLoadResult {
 
     long maxId() {
         return maxId;
-    }
-
-    long count() {
-        return count;
     }
 }

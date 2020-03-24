@@ -23,8 +23,6 @@ import org.eclipse.collections.api.block.function.Function;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -35,7 +33,6 @@ import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
@@ -63,7 +60,6 @@ class CypherFactoryTest {
     private static final int COUNT = 10_000;
     private static final String DB_CYPHER = "UNWIND range(1, $count) AS id " +
                                             "CREATE (n {id: id})-[:REL {prop: id % 10}]->(n)";
-    private static final String SKIP_LIMIT = "WITH * SKIP $skip LIMIT $limit";
 
     private GraphDbApi db;
 
@@ -162,93 +158,53 @@ class CypherFactoryTest {
         assertTrue(readOnlyException.getMessage().contains("Query must be read only"));
     }
 
-    @ParameterizedTest(name = "parallel={0}")
-    @ValueSource(booleans = {true, false})
-    void testLoadNoneParallelCypher(boolean parallel) {
+    @Test
+    void testLoadRelationshipsParallelCypher() {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
 
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE);
     }
 
-    @ParameterizedTest(name = "parallel={0}")
-    @ValueSource(booleans = {true, false})
-    void testLoadNodesParallelCypher(boolean parallel) {
-        String pagingQuery = "MATCH (n) %s RETURN id(n) AS id";
-        String nodeStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
+    @Test
+    void testLoadRelationshipsParallelAccumulateWeightCypher() {
+        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
+        String relStatement =
+            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
+            "UNION ALL " +
+            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
+
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SUM);
+    }
+
+    @Test
+    void uniqueRelationships() {
+        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
 
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE);
     }
 
-    @ParameterizedTest(name = "parallel={0}")
-    @ValueSource(booleans = {true, false})
-    void testLoadRelationshipsParallelCypher(boolean parallel) {
+    @Test
+    void accumulateWeightCypher() {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String pagingQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
-        String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
-
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE, parallel);
-    }
-
-    @ParameterizedTest(name = "parallel={0}")
-    @ValueSource(booleans = {true, false})
-    void testLoadRelationshipsParallelAccumulateWeightCypher(boolean parallel) {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String pagingQuery =
-            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
+        String relStatement =
+            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
             "UNION ALL " +
-            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
-        String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
+            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
 
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SUM, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SUM);
     }
 
-    @ParameterizedTest(name = "parallel={0}")
-    @ValueSource(booleans = {true, false})
-    void testLoadCypherBothParallel(boolean parallel) {
-        String pagingNodeQuery = "MATCH (n) %s RETURN id(n) AS id";
-        String nodeStatement = String.format(pagingNodeQuery, parallel ? SKIP_LIMIT : "");
-        String pagingRelQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
-        String relStatement = String.format(pagingRelQuery, parallel ? SKIP_LIMIT : "");
-
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE, parallel);
-    }
-
-    @ParameterizedTest(name = "parallel={0}")
-    @ValueSource(booleans = {true, false})
-    void uniqueRelationships(boolean parallel) {
+    @Test
+    void countEachRelationshipOnce() {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String pagingQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
-        String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
-
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE, parallel);
-    }
-
-    @ParameterizedTest(name = "parallel={0}")
-    @ValueSource(booleans = {true, false})
-    void accumulateWeightCypher(boolean parallel) {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String pagingQuery =
-            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
+        String relStatement =
+            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight " +
             "UNION ALL " +
-            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
-        String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
+            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight ";
 
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SUM, parallel);
-    }
-
-    @ParameterizedTest(name = "parallel={0}")
-    @ValueSource(booleans = {true, false})
-    void countEachRelationshipOnce(boolean parallel) {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String pagingQuery =
-            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight " +
-            "UNION ALL " +
-            "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight ";
-        String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
-
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SINGLE, parallel);
+        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SINGLE);
     }
 
     @Test
@@ -422,8 +378,7 @@ class CypherFactoryTest {
     private void loadAndTestGraph(
         String nodeStatement,
         String relStatement,
-        Aggregation aggregation,
-        boolean parallel
+        Aggregation aggregation
     ) {
         CypherLoaderBuilder builder = new CypherLoaderBuilder()
             .api(db)
@@ -431,9 +386,6 @@ class CypherFactoryTest {
             .relationshipQuery(relStatement)
             .globalAggregation(aggregation)
             .addRelationshipProperty(PropertyMapping.of("weight", 0D));
-        if (!parallel) {
-            builder.executorService(Pools.createDefaultSingleThreadPool());
-        }
 
         Graph graph = applyInTransaction(db, tx -> builder.build().load(CypherFactory.class));
 

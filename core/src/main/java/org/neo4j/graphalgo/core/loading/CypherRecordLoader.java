@@ -19,26 +19,19 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
-import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.utils.ArrayUtil;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -74,11 +67,9 @@ abstract class CypherRecordLoader<R> {
 
     final R load(CypherFactory.Ktx ktx) {
         try {
-            if (loadsInParallel()) {
-                parallelLoad(ktx);
-            } else {
-                nonParallelLoad(ktx);
-            }
+            int bufferSize = (int) Math.min(recordCount, RecordsBatchBuffer.DEFAULT_BUFFER_SIZE);
+            BatchLoadResult result = ktx.run(tx -> loadSingleBatch(tx, bufferSize));
+            updateCounts(result);
             return result();
         } catch (AuthorizationViolationException ex) {
             throw new IllegalArgumentException(String.format("Query must be read only. Query: [%s]", loadQuery));
@@ -87,10 +78,8 @@ abstract class CypherRecordLoader<R> {
 
     abstract QueryType queryType();
 
-    abstract BatchLoadResult loadOneBatch(
+    abstract BatchLoadResult loadSingleBatch(
         Transaction tx,
-        long offset,
-        int batchSize,
         int bufferSize
     );
 
@@ -111,63 +100,8 @@ abstract class CypherRecordLoader<R> {
             .collect(Collectors.toList());
     }
 
-    private boolean loadsInParallel() {
-        return CypherLoadingUtils.canBatchLoad(setup.concurrency(), loadQuery);
-    }
-
-    private void parallelLoad(CypherFactory.Ktx ktx) {
-        ExecutorService pool = setup.executor();
-
-        final int threads;
-        final int batchSize;
-        final int bufferSize;
-        // if records are not counted we are a counting loader and must count
-        // otherwise we are an importing node/relationship loader and must import
-        if (recordCount == NO_COUNT) {
-            threads = setup.concurrency();
-            batchSize = ArrayUtil.MAX_ARRAY_LENGTH;
-            bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
-        } else {
-            long optimalNumberOfThreads = BitUtil.ceilDiv(recordCount, ArrayUtil.MAX_ARRAY_LENGTH);
-            threads = (int) Math.min(setup.concurrency(), optimalNumberOfThreads);
-            long optimalBatchSize = BitUtil.ceilDiv(recordCount, threads);
-            batchSize = (int) Math.min(optimalBatchSize, ArrayUtil.MAX_ARRAY_LENGTH);
-            bufferSize = Math.min(RecordsBatchBuffer.DEFAULT_BUFFER_SIZE, batchSize);
-        }
-
-        long offset = 0;
-        long lastOffset = 0;
-        Deque<Future<BatchLoadResult>> futures = new ArrayDeque<>(threads);
-        boolean working = true;
-        do {
-            long skip = offset;
-            futures.add(pool.submit(() -> ktx.fork(tx -> loadOneBatch(tx, skip, batchSize, bufferSize))));
-            offset += batchSize;
-            if (futures.size() >= threads) {
-                Future<BatchLoadResult> oldestTask = futures.removeFirst();
-                BatchLoadResult result = CypherLoadingUtils.get(
-                        "Error during loading relationships offset: " + (lastOffset + batchSize),
-                        oldestTask);
-                updateCounts(result);
-                lastOffset = result.offset();
-                working = result.rows() > 0;
-            }
-        } while (working);
-        futures.forEach(f -> f.cancel(false));
-    }
-
-    private void nonParallelLoad(CypherFactory.Ktx ktx) {
-        int bufferSize = (int) Math.min(recordCount, RecordsBatchBuffer.DEFAULT_BUFFER_SIZE);
-        BatchLoadResult result = ktx.run(tx -> loadOneBatch(tx, 0L, CypherLoadingUtils.NO_BATCHING, bufferSize));
-        updateCounts(result);
-    }
-
-    Result runLoadingQuery(Transaction tx, long offset, int batchSize) {
-        Map<String, Object> parameters =
-            batchSize == CypherLoadingUtils.NO_BATCHING
-                ? setup.parameters()
-                : CypherLoadingUtils.params(setup.parameters(), offset, batchSize);
-        Result result = runQueryWithoutClosingTheResult(api, tx, loadQuery, parameters);
+    Result runLoadingQuery(Transaction tx) {
+        Result result = runQueryWithoutClosingTheResult(api, tx, loadQuery, setup.parameters());
         validateMandatoryColumns(Lists.newArrayList(result.columns().iterator()));
         return result;
     }
