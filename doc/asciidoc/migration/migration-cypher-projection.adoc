@@ -67,4 +67,26 @@ CALL gds.graph.create.cypher(
   }
 )
 ----
+2+| Parallel loading:
+|
+[source, cypher]
+----
+CALL algo.graph.load(
+  'myGraph',
+  'MATCH (n:MyLabel)
+   WITH * SKIP $skip LIMIT $limit
+   RETURN id(n) AS id',
+  'MATCH (s)-[r:MY_RELATIONSHIP_TYPE]->(t)
+   WITH * SKIP $skip LIMIT $limit
+   RETURN
+     id(s) AS source,
+     id(t) AS target,
+     r.myProperty AS weight',
+  {
+    concurrency: 4,
+    graph: 'cypher'
+  }
+)
+----
+| -
 |===
