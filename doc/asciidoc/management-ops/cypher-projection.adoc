@@ -159,16 +159,17 @@ CALL gds.labelPropagation.stream(
 Native projections supports specifying multiple node labels which can be filtered in an individual algorithm execution.
 Cypher projections can achieve the same feature by returning the node label in the node query.
 If a column called `labels` is present in the node query result, we use the values in that column to distinguish node labels.
+This column is expected to return a list of strings.
 
 Consider the following example where `Author` nodes are connected by `WROTE` relationships to either `Article` or `Book` nodes.
 
-.Using the `type` column to distinguish between multiple relationship types.
+.Using the `labels` column to distinguish between node labels.
 [source,cypher]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
     'MATCH (n) WHERE n:Author OR n:Article OR n:Book RETURN id(n) AS id, labels(n) AS labels',
-    'MATCH (n:City)-[r:ROAD|RAIL]->(m:City) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
+    'MATCH (n:Author)-[r:WROTE]->(m) RETURN id(n) AS source, id(m) AS target'
 )
 ----
 
