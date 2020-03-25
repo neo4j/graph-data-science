@@ -163,11 +163,17 @@ It is however still possible to filter for nodes with label `'A'` or `'B'` in or
 [source,cypher]
 ----
 CALL gds.graph.create('myGraph', ['Person', 'City', '*'])
-CALL gds.pageRank.stats('my-graph', {nodeLabels: ['*']}) // will use all projected nodes
-CALL gds.algo.mode('my-graph', {nodeLabels: ['Person', 'City', '*']}) // equivalent to above
-CALL gds.algo.mode('my-graph') // equivalent to above
-CALL gds.algo.mode('my-graph', {nodeLabels: ['Person']}) // will use only 'Person' nodes
-CALL gds.algo.mode('my-graph', {nodeLabels: ['Person', 'City']}) // will use only 'Person' and 'City' nodes
+
+ // using all nodes projected in 'myGraph' (the star projection)
+CALL gds.pageRank.stats('myGraph', {nodeLabels: ['*']})
+CALL gds.pageRank.stats('myGraph', {nodeLabels: ['Person', 'City', '*']}) // equivalent
+CALL gds.pageRank.stats('myGraph') // equivalent
+
+// will use only nodes projected as 'Person' in 'myGraph'
+CALL gds.pageRank.stats('myGraph', {nodeLabels: ['Person']}) 
+
+// will use nodes projected as 'Person' or 'City' in 'myGraph'
+CALL gds.pageRank.stats('myGraph', {nodeLabels: ['Person', 'City']})
 ----
 
 === Node properties
