@@ -159,7 +159,7 @@ class CypherFactoryTest {
     }
 
     @Test
-    void testLoadRelationshipsParallelCypher() {
+    void testLoadRelationshipsCypher() {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
 
@@ -167,7 +167,7 @@ class CypherFactoryTest {
     }
 
     @Test
-    void testLoadRelationshipsParallelAccumulateWeightCypher() {
+    void testLoadRelationshipsAccumulateWeightCypher() {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement =
             "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
