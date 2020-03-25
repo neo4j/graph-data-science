@@ -66,7 +66,7 @@ class VersionFuncTest extends BaseProcTest {
 
     private Optional<String> findVersion(File file) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
-        Pattern pattern = Pattern.compile(".*gdsVersion = '(\\d\\.\\d\\.\\d+)'.*");
+        Pattern pattern = Pattern.compile(".*gdsVersion = '(\\d\\.\\d\\.\\d+(-alpha\\d+|-beta\\d+)?)'.*");
 
         String version = null;
         while (reader.ready()) {
