@@ -132,7 +132,7 @@ public class NodeImporter {
                 List<ElementIdentifier> elementIdentifiers = labelElementIdentifierMapping.getOrDefault(labelId, Collections.emptyList());
                 for (ElementIdentifier elementIdentifier : elementIdentifiers) {
                     elementIdentifierBitSetMapping
-                        .computeIfAbsent(elementIdentifier, (ignore) -> new BitSet(1337))
+                        .computeIfAbsent(elementIdentifier, (ignore) -> new BitSet(batchLength))
                         .set(startIndex + i);
                 }
             }
