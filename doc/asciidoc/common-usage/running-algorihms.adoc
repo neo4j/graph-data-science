@@ -3,14 +3,14 @@
 
 [abstract]
 --
-This section describes the common execution modes for algorithms: `stream`, `write`, and `stats`.
+This section describes the common execution modes for algorithms: `stream`, `write`, `mutate` and `stats`.
 --
 
 All algorithms are exposed as Neo4j procedures.
 They can be called directly from Cypher using Neo4j Browser, `cypher-shell`, or from your client code using a Neo4j Driver in the language of your choice.
 
 For a detailed guide on the syntax to run algorithms, please see the <<algorithms-syntax, Syntax overview>> section.
-In short, the main execution modes to consider are `stream`, `write`, and `stats`, which we cover in this chapter.
+In short, the main execution modes to consider are `stream`, `write`, `mutate` and `stats`, which we cover in this chapter.
 
 The execution of any algorithm can be canceled by terminating the Cypher transaction that is executing the procedure call.
 For more on how transactions are used, see <<transaction-handling, Transaction Handling>>.
@@ -40,6 +40,22 @@ The written data can be node properties (such as Page Rank scores), new relation
 The `write` mode can be very useful for use cases where the algorithm results would be inspected multiple times by separate queries since the computational results are handled entirely by the library.
 
 In order for the results from a `write` mode computation to be used in another algorithm, a new graph must be created from the Neo4j database with the updated graph.
+
+
+[[running-algos-mutate]]
+== Mutate
+
+The `mutate` mode is very similar to the `write` mode but instead of writing results to the Neo4j database, they are made available at the in-memory graph.
+This enables running multiple algorithms on the same in-memory graph without writing results to Neo4j in-between algorithm executions.
+
+This execution mode is especially useful in three scenarios:
+
+* Algorithms can depend on the results of previous algorithms without the need to write to Neo4j.
+* Algorithm results can be written altogether (see <<catalog-graph-write-node-properties, write node properties>> and <<catalog-graph-write-relationship, write relationships>>).
+* Algorithm results can be queried via Cypher without the need to write to Neo4j at all (see `gds.util.nodeProperty`).
+
+A statistical summary of the computation is returned as a Cypher result row.
+As for the `write` mode, mutated data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
 
 
 [[running-algos-stats]]
