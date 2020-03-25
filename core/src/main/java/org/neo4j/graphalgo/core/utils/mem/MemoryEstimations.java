@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.GraphDimensions;
 
 import java.util.ArrayList;
@@ -191,6 +192,16 @@ public final class MemoryEstimations {
      */
     public static Builder builder(final String description, final Class<?> type) {
         return new Builder(description, type);
+    }
+
+    @TestOnly
+    static LeafTree leafTree(String description, MemoryRange memoryRange) {
+        return new LeafTree(description, memoryRange);
+    }
+
+    @TestOnly
+    static CompositeTree compositeTree(String description, Collection<MemoryTree> components) {
+        return new CompositeTree(description, components);
     }
 
     public static final class Builder {

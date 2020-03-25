@@ -34,7 +34,7 @@ final class MemoryTreeTest {
 
     @Test
     void renderLeaf() {
-        MemoryTree memoryTree = new LeafTree("description", MemoryRange.of(12L));
+        MemoryTree memoryTree = MemoryEstimations.leafTree("description", MemoryRange.of(12L));
         Map<String, Object> value = memoryTree.renderMap();
 
         assertEquals("description", value.get("name").toString());
@@ -43,12 +43,10 @@ final class MemoryTreeTest {
 
     @Test
     void renderChildren() {
-        MemoryTree level2A = new LeafTree("level2A", MemoryRange.of(12L));
-        MemoryTree level2B = new LeafTree("level2B", MemoryRange.of(22L));
+        MemoryTree level2A = MemoryEstimations.leafTree("level2A", MemoryRange.of(12L));
+        MemoryTree level2B = MemoryEstimations.leafTree("level2B", MemoryRange.of(22L));
 
-        CompositeTree compositeTree = new CompositeTree("level1", Arrays.asList(level2A, level2B));
-
-        Map<String, Object> value = compositeTree.renderMap();
+        Map<String, Object> value = MemoryEstimations.compositeTree("level1", Arrays.asList(level2A, level2B)).renderMap();
 
         assertEquals("level1", value.get("name").toString());
         assertEquals("34 Bytes", value.get("memoryUsage").toString());
