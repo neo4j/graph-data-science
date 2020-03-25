@@ -73,6 +73,7 @@ public final class NodePropertyExporter extends StatementApi {
         }
     }
 
+    @SuppressWarnings("immutables:subtype")
     @ValueClass
     interface ResolvedNodeProperty extends NodeProperty<Object> {
         int propertyToken();

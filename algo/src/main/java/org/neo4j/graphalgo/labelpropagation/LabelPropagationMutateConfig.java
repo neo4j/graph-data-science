@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("LabelPropagationMutateConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface LabelPropagationMutateConfig extends LabelPropagationBaseConfig, MutatePropertyConfig {
 
     static LabelPropagationMutateConfig of(

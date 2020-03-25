@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("WccMutateConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface WccMutateConfig extends WccBaseConfig, MutatePropertyConfig {
 
     static WccMutateConfig of(

@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("K1ColoringMutateConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface K1ColoringMutateConfig extends K1ColoringConfig, MutatePropertyConfig {
     static K1ColoringMutateConfig of(
         String username,

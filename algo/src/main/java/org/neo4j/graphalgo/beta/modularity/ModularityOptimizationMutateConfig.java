@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("ModularityOptimizationMutateConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface ModularityOptimizationMutateConfig extends ModularityOptimizationConfig, MutatePropertyConfig {
 
     static ModularityOptimizationMutateConfig of(
