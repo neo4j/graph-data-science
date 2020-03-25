@@ -67,7 +67,6 @@ class RleReaderTest {
 
         // when
         double[] vector1Rle = Weights.buildRleWeights(vector1List, 3);
-        System.out.println(Arrays.toString(vector1Rle));
 
         // then
         RleReader rleReader = new RleReader(vector1List.size());
@@ -83,7 +82,6 @@ class RleReaderTest {
 
         // when
         double[] vector1Rle = Weights.buildRleWeights(vector1List, 3);
-        System.out.println(Arrays.toString(vector1Rle));
 
         // then
         RleReader rleReader = new RleReader(vector1List.size());

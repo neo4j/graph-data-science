@@ -37,8 +37,6 @@ class RleReaderPropertyBasedTest {
     ) {
         // when
         double[] vector1Rle = Weights.buildRleWeights(vector1List, limit);
-        System.out.println(vector1List);
-        System.out.println(Arrays.toString(vector1Rle));
 
         // then
         RleReader rleReader = new RleReader(vector1List.size());
