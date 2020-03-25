@@ -20,8 +20,13 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.apache.lucene.util.LongsRef;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.Aggregation;
+
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static java.lang.Double.doubleToLongBits;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,27 +34,98 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 class AdjacencyCompressionTest {
 
-    @Test
-    void shouldCountRelationships() {
-        long[] targetNodeIds = {1, 1, 3, 3, 1, 1};
-        LongsRef data = new LongsRef(targetNodeIds, 0, 6);
-        long[][] weights = new long[][]{
-            {doubleToLongBits(2), doubleToLongBits(4), doubleToLongBits(3), doubleToLongBits(5), doubleToLongBits(5), doubleToLongBits(5)},
-            {doubleToLongBits(4), doubleToLongBits(7), doubleToLongBits(6), doubleToLongBits(8), doubleToLongBits(8), doubleToLongBits(8)}
-        };
-        Aggregation[] aggregations = new Aggregation[]{
-            Aggregation.COUNT,
-            Aggregation.COUNT
-        };
+    @ParameterizedTest(name = "{4}")
+    @MethodSource("aggregationsWithResults")
+    void shouldCountRelationships(long[] targetNodeIds, long[][] weights, Aggregation[] aggregations, double[][] expected, String aggregationType) {
+        LongsRef data = new LongsRef(targetNodeIds, 0, targetNodeIds.length);
+
+        // Calculate this before applying the delta because the target node ids array is updated in place
+        long expectedDataLength = Arrays.stream(targetNodeIds).distinct().count();
+
         AdjacencyCompression.applyDeltaEncoding(data, weights, aggregations, false);
 
-        assertEquals(4d, Double.longBitsToDouble(weights[0][0]));
-        assertEquals(2d, Double.longBitsToDouble(weights[0][1]));
+        for (int i = 0; i < expected.length; i++) {
+            for (int j = 0; j < expected[i].length; j++) {
+                assertEquals(expected[i][j], Double.longBitsToDouble(weights[i][j]));
+            }
+        }
 
-        assertEquals(2, data.length);
+        // The length of the data should be the count of the distinct elements in the target node ids array
+        assertEquals(expectedDataLength, data.length);
+        // The offset should be unchanged
         assertEquals(0, data.offset);
+
+        // The target data.longs should be the same instance as the one it was created
         assertSame(targetNodeIds, data.longs);
+
+        // These contain the `deltas` computed during the compression
         assertEquals(1L, data.longs[0]);
-        assertEquals(2L, data.longs[1]);
+        assertEquals(4L, data.longs[1]);
     }
+
+    static Stream<Arguments> aggregationsWithResults() {
+        return Stream.of(
+            Arguments.of(
+                new long[]{1, 1, 5, 5, 1, 1},
+                new long[][]{
+                    {doubleToLongBits(2), doubleToLongBits(4), doubleToLongBits(3), doubleToLongBits(5), doubleToLongBits(5), doubleToLongBits(
+                        5)},
+                    {doubleToLongBits(4), doubleToLongBits(7), doubleToLongBits(6), doubleToLongBits(8), doubleToLongBits(8), doubleToLongBits(
+                        8)}
+                },
+                new Aggregation[]{
+                    Aggregation.COUNT,
+                    Aggregation.COUNT
+                },
+                new double[][]{{4d, 2d}, {4d, 2d}},
+                "COUNT"
+            ),
+            Arguments.of(
+                new long[]{1, 1, 5, 5, 1, 1},
+                new long[][]{
+                    {doubleToLongBits(2), doubleToLongBits(4), doubleToLongBits(3), doubleToLongBits(5), doubleToLongBits(5), doubleToLongBits(
+                        5)},
+                    {doubleToLongBits(4), doubleToLongBits(7), doubleToLongBits(6), doubleToLongBits(8), doubleToLongBits(8), doubleToLongBits(
+                        8)}
+                },
+                new Aggregation[]{
+                    Aggregation.SUM,
+                    Aggregation.SUM
+                },
+                new double[][]{{16d, 8d}, {27d, 14d}},
+                "SUM"
+            ),
+            Arguments.of(
+                new long[]{1, 1, 5, 5, 1, 1},
+                new long[][]{
+                    {doubleToLongBits(2), doubleToLongBits(4), doubleToLongBits(3), doubleToLongBits(5), doubleToLongBits(5), doubleToLongBits(
+                        5)},
+                    {doubleToLongBits(4), doubleToLongBits(7), doubleToLongBits(6), doubleToLongBits(8), doubleToLongBits(8), doubleToLongBits(
+                        8)}
+                },
+                new Aggregation[]{
+                    Aggregation.MIN,
+                    Aggregation.MIN
+                },
+                new double[][]{{2d, 3d}, {4d, 6d}},
+                "MIN"
+            ),
+            Arguments.of(
+                new long[]{1, 1, 5, 5, 1, 1},
+                new long[][]{
+                    {doubleToLongBits(2), doubleToLongBits(4), doubleToLongBits(3), doubleToLongBits(5), doubleToLongBits(5), doubleToLongBits(
+                        5)},
+                    {doubleToLongBits(4), doubleToLongBits(7), doubleToLongBits(6), doubleToLongBits(8), doubleToLongBits(8), doubleToLongBits(
+                        8)}
+                },
+                new Aggregation[]{
+                    Aggregation.MAX,
+                    Aggregation.MAX
+                },
+                new double[][]{{5d, 5d}, {8d, 8d}},
+                "MAX"
+            )
+        );
+    }
+
 }
