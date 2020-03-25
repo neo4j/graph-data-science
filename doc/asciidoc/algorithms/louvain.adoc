@@ -108,6 +108,33 @@ include::common-configuration-anonymous-graph.adoc[]
 |===
 
 
+=== Mutate mode
+
+.Run Louvain in mutate mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.louvain.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general mutate return columns
+  nodePropertiesWritten: Integer,
+  communityCount: Integer,
+  modularity: Float
+----
+
+The configuration for the `mutate` mode is equivalent to the `write` mode.
+Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
+Also, specifying `writeConcurrency` is not allowed in `mutate` mode.
+
+.The following will run the algorithm and store the results in `myGraph`:
+[source, cypher]
+----
+CALL gds.lovain.mutate('myGraph', { mutateProperty: 'communityId' })
+----
+
+
 [[algorithms-louvain-syntax-stream]]
 === Stream mode
 

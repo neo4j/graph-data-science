@@ -133,6 +133,37 @@ include::common-configuration-anonymous-graph.adoc[]
 |===
 
 
+=== Mutate mode
+
+.Run Node Similarity in write mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.nodeSimilarity.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general mutate return columns
+  nodesCompared: Integer,
+  relationshipsWritten: Integer,
+  writeRelationshipType: String,
+  writeProperty: String
+----
+
+The configuration for the `mutate` mode is equivalent to the `write` mode.
+Instead of specifying a `writeRelationshipType` and `writeProperty`, we need to specify a `mutateRelationshipType` and `mutateProperty`.
+Also, specifying `writeConcurrency` is not allowed in `mutate` mode.
+
+.The following will run the algorithm and store the results in `myGraph`:
+[source, cypher]
+----
+CALL gds.nodeSimilarity.mutate('myGraph', {
+    mutateRelationshipType: 'SIMILAR',
+    mutateProperty: 'score'
+})
+----
+
+
 [[algorithms-node-similarity-syntax-stream]]
 === Stream mode
 

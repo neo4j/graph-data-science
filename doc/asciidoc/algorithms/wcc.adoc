@@ -44,7 +44,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 == Syntax
 
 
-== Write mode
+=== Write mode
 
 .Run WCC in write mode on a graph stored in the catalog.
 [source, cypher]
@@ -104,8 +104,34 @@ include::common-configuration-anonymous-graph.adoc[]
 |===
 
 
+=== Mutate mode
+
+.Run WCC in mutate mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.wcc.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general mutate return columns
+  componentCount: Integer,
+  componentDistribution: Map
+----
+
+The configuration for the `mutate` mode is equivalent to the `write` mode.
+Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
+Also, specifying `writeConcurrency` is not allowed in `mutate` mode.
+
+.The following will run the algorithm and store the results in `myGraph`:
+[source, cypher]
+----
+CALL gds.wcc.mutate('myGraph', { mutateProperty: 'componentId' })
+----
+
+
 [[algorithms-wcc-syntax-stream]]
-== Stream mode
+=== Stream mode
 
 .Run WCC in stream mode on a graph stored in the catalog.
 [source, cypher]
