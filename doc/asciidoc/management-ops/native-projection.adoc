@@ -158,8 +158,9 @@ YIELD graphName, nodeCount, relationshipCount;
 When a graph uses the special star projection, additional nodes from named node projections are not added additionally as the star projection already contains them.
 This also applies to filtering.
 For example, if a graph was projected with labels `'A'`, `'B'` and also with the special star `'*'`, any node filtering that includes the star is equivalent to using only the star.
-It is however still possible to filter for nodes with label `'A'` or `'B'` in order to retrieve a subgraph containing only those nodes:
+It is however still possible to filter for nodes with label `'A'` or `'B'` in order to retrieve a subgraph containing only those nodes.
 
+.Example usage of node label filters:
 [source,cypher]
 ----
 CALL gds.graph.create('myGraph', ['Person', 'City', '*'])
