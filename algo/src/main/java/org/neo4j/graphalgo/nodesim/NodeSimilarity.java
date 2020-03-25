@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.nodesim;
 import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongArrayList;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -36,6 +37,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -51,6 +53,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     private final AllocationTracker tracker;
 
     private final BitSet nodeFilter;
+
+    private final AtomicLong progressCounter = new AtomicLong(0);
 
     private HugeObjectArray<long[]> vectors;
     private long nodesToCompare;
@@ -296,23 +300,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         return topNList.stream();
     }
 
-    private LongStream log(LongStream stream) {
-        return peekLongStream(stream, (node) -> progressLogger.logProgress(node, nodesToCompare));
-    }
-
-    private LongStream assertRunning(LongStream stream) {
-        return peekLongStream(stream, (node) -> assertRunning());
-    }
-
-    private LongStream peekLongStream(LongStream stream, Consumer<Long> fn) {
-        long logInterval = Math.min(MAXIMUM_LOG_INTERVAL, Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100)));
-        return stream.peek(node -> {
-            if ((node & (logInterval - 1)) == 0) {
-                fn.accept(node);
-            }
-        });
-    }
-
     private double jaccard(long[] vector1, long[] vector2) {
         long intersection = Intersections.intersection3(vector1, vector2);
         double union = vector1.length + vector2.length - intersection;
@@ -325,7 +312,19 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private LongStream loggableAndTerminatableNodeStream() {
-        return log(assertRunning(nodeStream()));
+        return checkProgress(nodeStream());
+    }
+
+    private LongStream checkProgress(LongStream stream) {
+        long logInterval = Math.min(MAXIMUM_LOG_INTERVAL, Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100)));
+
+        return stream.peek(node -> {
+            long progress = progressCounter.incrementAndGet();
+            if ((progress & (logInterval - 1)) == 0) {
+                assertRunning();
+                progressLogger.logProgress(progress, nodesToCompare);
+            }
+        });
     }
 
     private LongStream nodeStream(long offset) {
