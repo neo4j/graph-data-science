@@ -115,7 +115,7 @@ include::common-configuration-anonymous-graph.adoc[]
 | bottomK                | Integer | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned. This value cannot be lower than 1.
 | topN                   | Integer | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned. This value cannot be negative, a value of 0 means no global limit.
 | bottomN                | Integer | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned. This value cannot be negative, a value of 0 means no global limit.
-| writeRelationshipType  | String  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
+| writeRelationshipType  | String  | SIMILAR                | no      | The relationship type used to represent a similarity score.
 |===
 
 .Results
