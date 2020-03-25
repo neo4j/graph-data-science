@@ -162,8 +162,11 @@ final class AdjacencyCompression {
                     int existingIdx = out - 1;
                     long[] outWeight = outWeights[i];
                     double existingWeight = Double.longBitsToDouble(outWeight[existingIdx]);
+                    if (firstTimeSeen) {
+                        existingWeight = aggregation.initialValue(existingWeight);
+                    }
                     double newWeight = Double.longBitsToDouble(weights[i][sortIdx]);
-                    newWeight = firstTimeSeen ? aggregation.init(existingWeight, newWeight) : aggregation.merge(existingWeight, newWeight);
+                    newWeight = aggregation.merge(existingWeight, newWeight);
                     outWeight[existingIdx] = Double.doubleToLongBits(newWeight);
                 }
                 firstTimeSeen = false;

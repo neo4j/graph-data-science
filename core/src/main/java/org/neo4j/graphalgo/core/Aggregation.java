@@ -62,14 +62,15 @@ public enum Aggregation {
             return runningTotal + 1.0;
         }
 
-        public double init(double firstValue, double secondValue) {
-            return 2.0;
+        public double initialValue(double value) {
+            return 1.0;
         }
     };
 
     public abstract double merge(double runningTotal, double value);
-    public double init(double runningTotal, double value) {
-        return merge(runningTotal, value);
+
+    public double initialValue(double value) {
+        return value;
     }
 
     public static Aggregation lookup(String name) {
@@ -102,5 +103,4 @@ public enum Aggregation {
         }
         return null;
     }
-
 }
