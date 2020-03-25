@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongObjectHashMap;
 import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.LongSet;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -65,13 +66,13 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
 
-        final LabelProjectionMappings labelProjectionMappings = new LabelProjectionMappings();
+        final LabelElementIdentifierMappings labelElementIdentifierMappings = new LabelElementIdentifierMappings();
         if (readTokens) {
             setup.nodeProjections()
                 .projections()
                 .forEach((key, value) -> {
                     long labelId = value.projectAll() ? ANY_LABEL : (long) tokenRead.nodeLabel(value.label());
-                    labelProjectionMappings.put(labelId, key.name);
+                    labelElementIdentifierMappings.put(labelId, key);
                 });
         }
 
@@ -99,11 +100,11 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         ResolvedPropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());
         ResolvedPropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
 
-        long nodeCount = labelProjectionMappings.keyStream()
+        long nodeCount = labelElementIdentifierMappings.keyStream()
             .mapToLong(dataRead::countsForNode)
             .sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
-        long finalNodeCount = labelProjectionMappings.keys().contains(ANY_LABEL)
+        long finalNodeCount = labelElementIdentifierMappings.keys().contains(ANY_LABEL)
             ? allNodesCount
             : Math.min(nodeCount, allNodesCount);
         // TODO: this will double count relationships between distinct labels
@@ -112,7 +113,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             .filter(RelationshipProjectionMapping::exists)
             .collect(Collectors.toMap(
                 RelationshipProjectionMapping::elementIdentifier,
-                relationshipProjectionMapping -> labelProjectionMappings.keyStream()
+                relationshipProjectionMapping -> labelElementIdentifierMappings.keyStream()
                     .mapToLong(labelId -> maxRelCountForLabelAndType(
                         dataRead,
                         labelId,
@@ -126,8 +127,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .highestNeoId(allNodesCount)
                 .maxRelCount(maxRelCount)
                 .relationshipCounts(relationshipCounts)
-                .nodeLabelIds(labelProjectionMappings.keys())
-                .labelProjectionMapping(labelProjectionMappings.mappings())
+                .nodeLabelIds(labelElementIdentifierMappings.keys())
+                .labelElementIdentifierMapping(labelElementIdentifierMappings.mappings())
                 .nodeProperties(nodeProperties)
                 .relationshipProjectionMappings(relationshipProjectionMappings)
                 .relationshipProperties(relProperties)
@@ -151,10 +152,10 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         );
     }
 
-    static class LabelProjectionMappings {
-        private final LongObjectMap<List<String>> mappings;
+    static class LabelElementIdentifierMappings {
+        private final LongObjectMap<List<ElementIdentifier>> mappings;
 
-        LabelProjectionMappings() {
+        LabelElementIdentifierMappings() {
             this.mappings = new LongObjectHashMap<>();
         }
 
@@ -175,11 +176,11 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 : StreamSupport.stream(keys().spliterator(), false).map(cursor -> (int) cursor.value);
         }
 
-        LongObjectMap<List<String>> mappings() {
+        LongObjectMap<List<ElementIdentifier>> mappings() {
             return this.mappings;
         }
 
-        void put(long key, String value) {
+        void put(long key, ElementIdentifier value) {
             if (!this.mappings.containsKey(key)) {
                 this.mappings.put(key, new ArrayList<>());
             }

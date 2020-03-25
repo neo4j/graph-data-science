@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -55,7 +56,7 @@ public interface GraphDimensions {
     LongSet nodeLabelIds();
 
     @Nullable
-    LongObjectMap<List<String>> labelProjectionMapping();
+    LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping();
 
     @Value.Default
     default ResolvedPropertyMappings nodeProperties() {

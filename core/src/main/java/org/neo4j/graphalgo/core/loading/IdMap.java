@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
@@ -35,7 +36,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongPredicate;
-import java.util.stream.Stream;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
@@ -55,7 +55,7 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
     protected long nodeCount;
     protected HugeLongArray graphIds;
     protected SparseNodeMapping nodeToGraphIds;
-    protected final Optional<Map<String, BitSet>> maybeLabelInformation;
+    protected final Optional<Map<ElementIdentifier, BitSet>> maybeLabelInformation;
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
@@ -68,7 +68,7 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
     /**
      * initialize the map with pre-built sub arrays
      */
-    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, Optional<Map<String, BitSet>> maybeLabelInformation, long nodeCount) {
+    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, Optional<Map<ElementIdentifier, BitSet>> maybeLabelInformation, long nodeCount) {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
         this.maybeLabelInformation = maybeLabelInformation;

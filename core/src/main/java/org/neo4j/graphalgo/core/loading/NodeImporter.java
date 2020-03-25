@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongObjectMap;
-import com.carrotsearch.hppc.LongObjectMap;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -44,8 +44,8 @@ public class NodeImporter {
         int readProperty(long nodeReference, long propertiesReference, long internalId);
     }
 
-    final Map<String, BitSet> projectionBitSetMapping;
-    final LongObjectMap<List<String>> labelProjectionMapping;
+    final Map<ElementIdentifier, BitSet> elementIdentifierBitSetMapping;
+    final LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping;
 
     private final HugeLongArrayBuilder idMapBuilder;
     private final IntObjectMap<NodePropertiesBuilder> buildersByPropertyId;
@@ -57,15 +57,15 @@ public class NodeImporter {
 
     public NodeImporter(
         HugeLongArrayBuilder idMapBuilder,
-        Map<String, BitSet> projectionBitSetMapping,
+        Map<ElementIdentifier, BitSet> elementIdentifierBitSetMapping,
         Collection<NodePropertiesBuilder> nodePropertyBuilders,
-        LongObjectMap<List<String>> labelProjectionMapping
+        LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping
     ) {
         this.idMapBuilder = idMapBuilder;
-        this.projectionBitSetMapping = projectionBitSetMapping;
+        this.elementIdentifierBitSetMapping = elementIdentifierBitSetMapping;
         this.buildersByPropertyId = mapBuildersByPropertyId(nodePropertyBuilders);
         this.nodePropertyBuilders = nodePropertyBuilders;
-        this.labelProjectionMapping = labelProjectionMapping;
+        this.labelElementIdentifierMapping = labelElementIdentifierMapping;
     }
 
     boolean readsProperties() {
@@ -129,9 +129,9 @@ public class NodeImporter {
         for (int i = 0; i < cappedBatchLength; i++) {
             long[] labelIdsForNode = labelIds[i];
             for (long labelId : labelIdsForNode) {
-                List<String> elementIdentifiers = labelProjectionMapping.getOrDefault(labelId, Collections.emptyList());
-                for (String elementIdentifier : elementIdentifiers) {
-                    projectionBitSetMapping
+                List<ElementIdentifier> elementIdentifiers = labelElementIdentifierMapping.getOrDefault(labelId, Collections.emptyList());
+                for (ElementIdentifier elementIdentifier : elementIdentifiers) {
+                    elementIdentifierBitSetMapping
                         .computeIfAbsent(elementIdentifier, (ignore) -> new BitSet(1337))
                         .set(startIndex + i);
                 }
@@ -139,8 +139,8 @@ public class NodeImporter {
         }
 
         // set the whole range for '*' projections
-        for (String allProjectionIdentifier : labelProjectionMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
-            projectionBitSetMapping.get(allProjectionIdentifier).set(startIndex, startIndex + batchLength);
+        for (ElementIdentifier allProjectionIdentifier : labelElementIdentifierMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
+            elementIdentifierBitSetMapping.get(allProjectionIdentifier).set(startIndex, startIndex + batchLength);
         }
     }
 

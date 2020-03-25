@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
@@ -48,7 +49,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     private Map<String, NodePropertiesBuilder> builders;
     private HugeLongArrayBuilder idMapBuilder;
-    private Map<String, BitSet> projectionBitSetMapping;
+    private Map<ElementIdentifier, BitSet> elementIdentifierBitSetMapping;
 
     ScanningNodesImporter(
         GraphDatabaseAPI api,
@@ -75,9 +76,9 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     ) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
 
-        projectionBitSetMapping = StreamSupport.stream(
+        elementIdentifierBitSetMapping = StreamSupport.stream(
             dimensions
-                .labelProjectionMapping()
+                .labelElementIdentifierMapping()
                 .values()
                 .spliterator(),
             false)
@@ -91,7 +92,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             scanner,
             dimensions.nodeLabelIds(),
             progress,
-            new NodeImporter(idMapBuilder, projectionBitSetMapping, builders.values(), dimensions.labelProjectionMapping()),
+            new NodeImporter(idMapBuilder, elementIdentifierBitSetMapping, builders.values(), dimensions.labelElementIdentifierMapping()),
             terminationFlag
         );
     }
@@ -100,7 +101,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     IdsAndProperties build() {
         IdMap hugeIdMap = IdMapBuilder.build(
             idMapBuilder,
-            projectionBitSetMapping,
+            elementIdentifierBitSetMapping,
             dimensions.highestNeoId(),
             concurrency,
             tracker

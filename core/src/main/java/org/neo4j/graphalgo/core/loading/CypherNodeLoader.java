@@ -129,7 +129,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     @Override
     LoadResult result() {
-        IdMap idMap = IdMapBuilder.build(builder, importer.projectionBitSetMapping, maxNodeId, setup.concurrency(), setup.tracker());
+        IdMap idMap = IdMapBuilder.build(builder, importer.elementIdentifierBitSetMapping, maxNodeId, setup.concurrency(), setup.tracker());
         Map<String, NodeProperties> nodeProperties = nodePropertyBuilders.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
 

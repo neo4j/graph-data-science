@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.apache.commons.compress.utils.Sets;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphdb.Result;
 import org.neo4j.values.storable.Values;
@@ -47,7 +48,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final NodeImporter importer;
     private final boolean hasLabelInformation;
 
-    private final Map<String, Long> labelIdMapping;
+    private final Map<ElementIdentifier, Long> elementIdentifierLabelIdMapping;
     private long labelIdCounter = 0;
 
     public NodeRowVisitor(Map<PropertyMapping, NodePropertiesBuilder> nodeProperties, NodesBatchBuffer buffer, NodeImporter importer, boolean hasLabelInformation) {
@@ -56,7 +57,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         this.importer = importer;
         this.cypherNodeProperties = new ArrayList<>(buffer.capacity());
         this.hasLabelInformation = hasLabelInformation;
-        labelIdMapping = new HashMap<>();
+        elementIdentifierLabelIdMapping = new HashMap<>();
     }
 
     @Override
@@ -93,9 +94,9 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
             labelIds = new long[labelStrings.size()];
 
             for (int i = 0; i < labelStrings.size(); i++) {
-                String labelString = labelStrings.get(i);
-                long labelId = labelIdMapping.computeIfAbsent(labelString, (l) -> {
-                    importer.labelProjectionMapping.put(labelIdCounter, Collections.singletonList(labelString));
+                ElementIdentifier labelString = ElementIdentifier.of(labelStrings.get(i));
+                long labelId = elementIdentifierLabelIdMapping.computeIfAbsent(labelString, (l) -> {
+                    importer.labelElementIdentifierMapping.put(labelIdCounter, Collections.singletonList(labelString));
                     return labelIdCounter++;
                 });
                 labelIds[i] = labelId;
