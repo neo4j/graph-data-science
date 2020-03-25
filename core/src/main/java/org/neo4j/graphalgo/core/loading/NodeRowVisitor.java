@@ -57,7 +57,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         this.importer = importer;
         this.cypherNodeProperties = new ArrayList<>(buffer.capacity());
         this.hasLabelInformation = hasLabelInformation;
-        elementIdentifierLabelIdMapping = new HashMap<>();
+        this.elementIdentifierLabelIdMapping = new HashMap<>();
     }
 
     @Override
@@ -119,7 +119,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
             if (labelStrings.isEmpty()) {
                 throw new IllegalArgumentException(String.format(
                     Locale.US,
-                    "Node with ID '%d' does not specify a label, but label column '%s' was specified.",
+                    "Node(%d) does not specify a label, but label column '%s' was specified.",
                     neoId,
                     LABELS_COLUMN
                 ));
