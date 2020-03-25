@@ -63,17 +63,17 @@ final class K1ColoringProc {
             super(callContext, tracker);
         }
 
-        K1ColoringResultBuilder withColorCount(long colorCount) {
+        K1ColoringResultBuilder<PROC_RESULT> withColorCount(long colorCount) {
             this.colorCount = colorCount;
             return this;
         }
 
-        K1ColoringResultBuilder withRanIterations(long ranIterations) {
+        K1ColoringResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {
             this.ranIterations = ranIterations;
             return this;
         }
 
-        K1ColoringResultBuilder withDidConverge(boolean didConverge) {
+        K1ColoringResultBuilder<PROC_RESULT> withDidConverge(boolean didConverge) {
             this.didConverge = didConverge;
             return this;
         }
