@@ -148,15 +148,16 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, 
 
 [[estimate-heap-control]]
 == Automatic estimation and execution blocking
-All algorithm procedures in the GDS library and the graph creation procedures will do an estimation check before executing.
-This includes the modes `write`, `stream`, `stats` and `mutate` but not the estimate modes.
+
+All algorithm procedures in the GDS library, including graph creation, will do an estimation check at the beginning of their execution.
+This includes all execution modes, but not the `estimate` procedures themselves.
 
 If the estimation check can determine that the current amount of free memory is insufficient to carry through the operation, the operation will be aborted and an error will be reported.
 The error will contain details of the estimation and the free memory at the time of estimation.
 
 This heap control logic is restrictive in the sense that it only blocks executions that are certain to not fit into memory.
 It does not guarantee that an execution that passed the heap control will succeed without depleting memory.
-Thus, it is still useful to first run the estimation mode before running an algorithm or graph creation on a large data set.
+Thus, it is still useful to first run the estimation mode before running an algorithm or graph creation on a large data set, in order to view all details of the estimation.
 
 The free memory taken into consideration is based on the Java runtime system information.
-The amount of free memory can be increased by either  <<catalog-graph-drop, dropping>> unused graphs from the catalog, or by <<heap-size, increasing the maximum heap size>> prior to starting the Neo4j instance.
+The amount of free memory can be increased by either <<catalog-graph-drop, dropping>> unused graphs from the catalog, or by <<heap-size, increasing the maximum heap size>> prior to starting the Neo4j instance.
