@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * <ul>
  * <li>[1]: <a href="https://github.com/wjakob/dset/blob/7967ef0e6041cd9d73b9c7f614ab8ae92e9e587a/dset.h">{@code https://github.com/wjakob/dset/blob/7967ef0e6041cd9d73b9c7f614ab8ae92e9e587a/dset.h}</a></li>
- * <li>[2]: <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf">{@code http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf}</a></li>
+ * <li>[2]: <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&amp;rep=rep1&amp;type=pdf">{@code http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf}</a></li>
  * <li>[3]: <a href="https://github.com/tov/disjoint-sets-rs/blob/88ab08df21f04fcf7c157b6e042efd561ee873ba/src/concurrent.rs">{@code https://github.com/tov/disjoint-sets-rs/blob/88ab08df21f04fcf7c157b6e042efd561ee873ba/src/concurrent.rs}</a></li>
  * <li>[4]: <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank">{@code https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank}</a></li>
  * </ul>
