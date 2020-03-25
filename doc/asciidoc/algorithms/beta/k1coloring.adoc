@@ -78,7 +78,7 @@ include::../common-parameters.adoc[]
 |===
 
 
-[[algorithms-k1coloring-syntax-stream]]
+[[algorithms-k1coloring-syntax-write]]
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
