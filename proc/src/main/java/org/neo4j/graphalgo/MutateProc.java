@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
+import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
@@ -64,10 +66,20 @@ public abstract class MutateProc<
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             log.debug("Updating in-memory graph store");
             GraphStore graphStore = computationResult.graphStore();
-            graphStore.addNodeProperty(
-                mutatePropertyConfig.mutateProperty(),
-                nodeId -> resultPropertyTranslator.toDouble(result, nodeId)
-            );
+            Graph graph = computationResult.graph();
+            if (graph instanceof NodeFilteredGraph) {
+                NodeFilteredGraph graph1 = (NodeFilteredGraph) graph;
+                graphStore.addNodeProperty(
+                    mutatePropertyConfig.mutateProperty(),
+                    nodeId -> !graph.contains(nodeId) ? Double.NaN : resultPropertyTranslator.toDouble(result, graph1.filteredIdMap.toMappedNodeId(nodeId))
+                );
+            }
+            else {
+                graphStore.addNodeProperty(
+                    mutatePropertyConfig.mutateProperty(),
+                    nodeId -> resultPropertyTranslator.toDouble(result, nodeId)
+                );
+            }
             resultBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
         }
     }

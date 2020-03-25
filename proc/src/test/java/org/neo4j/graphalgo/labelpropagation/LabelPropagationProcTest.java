@@ -93,6 +93,10 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
 
     @BeforeEach
     void setupGraph() throws Exception {
+        setupGraph(DB_CYPHER);
+    }
+
+    protected void setupGraph(String cypher) throws Exception {
 
         db = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
 
@@ -103,7 +107,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
             LabelPropagationMutateProc.class,
             GraphCreateProc.class
         );
-        runQuery(DB_CYPHER);
+        runQuery(cypher);
 
         // Create explicit graphs with both projection variants
         runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));

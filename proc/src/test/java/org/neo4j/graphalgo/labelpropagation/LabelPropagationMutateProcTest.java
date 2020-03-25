@@ -23,15 +23,24 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements GraphMutationTest<LabelPropagationMutateConfig, LabelPropagation> {
 
@@ -56,6 +65,8 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             ", (b)-->({ communityId: 10 }) " +
             ", (b)-->({ communityId: 11 })";
     }
+
+    private static String DB_CYPHER_FILTERED = "CREATE (x:Ignore {id: -1, communityId: null}) " + DB_CYPHER;
 
     @Override
     public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationMutateConfig>> getProcedureClazz() {
@@ -109,6 +120,56 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
                     "p95", 2L,
                     "p75", 1L
                 ), row.get("communityDistribution"));
+            }
+        );
+    }
+
+    @Test
+    void testGraphMutationFiltered() throws Exception {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+        setupGraph(DB_CYPHER_FILTERED);
+        registerFunctions(NodePropertyFunc.class);
+
+        String graphName = mutateGraphName().orElseGet(() -> {
+            String loadedGraphName = "loadGraph";
+            GraphCreateFromStoreConfig graphCreateConfig = GraphCreateFromStoreConfig.of(
+                TEST_USERNAME,
+                loadedGraphName,
+                Arrays.asList("Ignore", "A", "B"),
+                "*",
+                CypherMapWrapper.empty()
+            );
+
+            GraphStoreCatalog.set(
+                graphCreateConfig,
+                graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
+            );
+            return loadedGraphName;
+        });
+
+        applyOnProcedure(procedure ->
+            getProcedureMethods(procedure)
+                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+                .forEach(mutateMethod -> {
+                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+                    config.put("nodeLabels", Arrays.asList("A", "B"));
+                    try {
+                        mutateMethod.invoke(procedure, graphName, config);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                })
+        );
+
+        double[] expectedValues = new double[] {Double.NaN, 3, 8, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).getGraph();
+        mutatedGraph.forEachNode(nodeId -> {
+                assertEquals(
+                    mutatedGraph.nodeProperties("communityId").nodeProperty(nodeId),
+                    expectedValues[Math.toIntExact(nodeId)]
+                );
+                return true;
             }
         );
     }

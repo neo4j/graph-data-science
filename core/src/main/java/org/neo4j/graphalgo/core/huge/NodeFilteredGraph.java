@@ -34,7 +34,7 @@ import java.util.function.LongPredicate;
 
 public class NodeFilteredGraph extends FilterGraph {
 
-    private final IdMap filteredIdMap;
+    public final IdMap filteredIdMap;
 
     public NodeFilteredGraph(HugeGraph graph, IdMap filteredIdMap) {
         super(graph);
