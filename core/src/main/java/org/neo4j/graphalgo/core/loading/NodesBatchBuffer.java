@@ -19,10 +19,14 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
+import org.immutables.builder.Builder;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
+
+import java.util.Optional;
 
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
@@ -37,19 +41,20 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     // property ids, consecutive
     private final long[] properties;
 
-    public NodesBatchBuffer(
-        final NodeStore store,
-        final LongSet nodeLabelIds,
+    @Builder.Constructor
+    NodesBatchBuffer(
         int capacity,
-        boolean hasLabelInformation,
-        boolean readProperty
+        Optional<NodeStore> store,
+        Optional<LongSet> nodeLabelIds,
+        Optional<Boolean> hasLabelInformation,
+        Optional<Boolean> readProperty
     ) {
         super(capacity);
-        this.nodeLabelIds = nodeLabelIds;
-        this.nodeStore = store;
-        this.hasLabelInformation = hasLabelInformation;
-        this.properties = readProperty ? new long[capacity] : null;
-        this.labelIds = hasLabelInformation ? new long[capacity][] : null;
+        this.nodeStore = store.orElse(null);
+        this.nodeLabelIds = nodeLabelIds.orElseGet(LongHashSet::new);
+        this.hasLabelInformation = hasLabelInformation.orElse(false);
+        this.properties = readProperty.orElse(false) ? new long[capacity] : null;
+        this.labelIds = this.hasLabelInformation ? new long[capacity][] : null;
     }
 
     @Override

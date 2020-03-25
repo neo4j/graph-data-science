@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
-import com.carrotsearch.hppc.LongHashSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
@@ -30,6 +29,7 @@ import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
+import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
@@ -135,7 +135,9 @@ class IntersectingTriangleCountTest {
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(inputs.length, AllocationTracker.EMPTY);
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null, null, null);
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), inputs.length, false, false);
+        NodesBatchBuffer buffer = new NodesBatchBufferBuilder()
+            .capacity(inputs.length)
+            .build();
 
         long maxNodeId = 0L;
         for (long input : inputs) {

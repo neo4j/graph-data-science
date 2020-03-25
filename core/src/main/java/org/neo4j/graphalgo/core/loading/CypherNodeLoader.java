@@ -109,7 +109,11 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
         boolean hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, null, bufferSize, hasLabelInformation, true);
+        NodesBatchBuffer buffer = new NodesBatchBufferBuilder()
+            .capacity(bufferSize)
+            .hasLabelInformation(hasLabelInformation)
+            .readProperty(true)
+            .build();
         NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer, hasLabelInformation);
         queryResult.accept(visitor);
         visitor.flush();
