@@ -68,6 +68,40 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         }
         rows++;
 
+        long[] labelIds = getLabelIdsForRow(row, neoId);
+
+
+        HashMap<String, Number> weights = new HashMap<>();
+        for (Map.Entry<PropertyMapping, NodePropertiesBuilder> entry : nodeProperties.entrySet()) {
+            PropertyMapping key = entry.getKey();
+            Object value = CypherLoadingUtils.getProperty(row, entry.getKey().neoPropertyKey());
+            if (value instanceof Number) {
+                weights.put(key.propertyKey(), (Number) value);
+            } else if (null == value) {
+                weights.put(key.propertyKey(), key.defaultValue());
+            } else {
+                throw new IllegalArgumentException(String.format(
+                        "Unsupported type [%s] of value %s. Please use a numeric property.",
+                        Values.of(value).valueGroup(),
+                        value));
+            }
+        }
+
+        int propRef = cypherNodeProperties.size();
+        cypherNodeProperties.add(weights);
+        buffer.add(neoId, propRef, labelIds);
+        if (buffer.isFull()) {
+            flush();
+            reset();
+        }
+        return true;
+    }
+
+    void flush() {
+        importer.importCypherNodes(buffer, cypherNodeProperties);
+    }
+
+    private long[] getLabelIdsForRow(Result.ResultRow row, long neoId) {
         long[] labelIds = null;
         if (hasLabelInformation) {
             Object labelsObject = row.get(LABELS_COLUMN);
@@ -102,36 +136,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 labelIds[i] = labelId;
             }
         }
-
-
-        HashMap<String, Number> weights = new HashMap<>();
-        for (Map.Entry<PropertyMapping, NodePropertiesBuilder> entry : nodeProperties.entrySet()) {
-            PropertyMapping key = entry.getKey();
-            Object value = CypherLoadingUtils.getProperty(row, entry.getKey().neoPropertyKey());
-            if (value instanceof Number) {
-                weights.put(key.propertyKey(), (Number) value);
-            } else if (null == value) {
-                weights.put(key.propertyKey(), key.defaultValue());
-            } else {
-                throw new IllegalArgumentException(String.format(
-                        "Unsupported type [%s] of value %s. Please use a numeric property.",
-                        Values.of(value).valueGroup(),
-                        value));
-            }
-        }
-
-        int propRef = cypherNodeProperties.size();
-        cypherNodeProperties.add(weights);
-        buffer.add(neoId, propRef, labelIds);
-        if (buffer.isFull()) {
-            flush();
-            reset();
-        }
-        return true;
-    }
-
-    void flush() {
-        importer.importCypherNodes(buffer, cypherNodeProperties);
+        return labelIds;
     }
 
     private void reset() {
