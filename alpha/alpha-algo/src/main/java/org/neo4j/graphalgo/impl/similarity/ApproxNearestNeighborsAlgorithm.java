@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
+import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphalgo.results.SimilarityResult;
@@ -264,7 +265,12 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         NodeImporter nodeImporter = new NodeImporter(idMapBuilder);
         long maxNodeId = 0L;
 
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, new LongHashSet(), inputs.length, false);
+        NodesBatchBuffer buffer = new NodesBatchBufferBuilder()
+            .nodeLabelIds(new LongHashSet())
+            .capacity(inputs.length)
+            .hasLabelInformation(false)
+            .readProperty(false)
+            .build();
 
         for (INPUT input : inputs) {
             if (input.getId() > maxNodeId) {

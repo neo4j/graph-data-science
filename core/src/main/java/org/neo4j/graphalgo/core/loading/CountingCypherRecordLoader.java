@@ -54,10 +54,17 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
     }
 
     @Override
-    Set<String> getReservedColumns() {
+    Set<String> getMandatoryColumns() {
         return queryType == QueryType.NODE
             ? NodeRowVisitor.REQUIRED_COLUMNS
             : RelationshipRowVisitor.REQUIRED_COLUMNS;
+    }
+
+    @Override
+    Set<String> getReservedColumns() {
+        return queryType == QueryType.NODE
+            ? NodeRowVisitor.RESERVED_COLUMNS
+            : RelationshipRowVisitor.RESERVED_COLUMNS;
     }
 
     @Override

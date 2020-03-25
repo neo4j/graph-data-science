@@ -132,12 +132,13 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         Read read = transaction.dataRead();
         CursorFactory cursors = transaction.cursors();
         try (AbstractStorePageCacheScanner<NodeRecord>.Cursor cursor = scanner.getCursor()) {
-            NodesBatchBuffer batches = new NodesBatchBuffer(
-                nodeStore,
-                labels,
-                cursor.bulkSize(),
-                importer.readsProperties()
-            );
+            NodesBatchBuffer batches = new NodesBatchBufferBuilder()
+                .store(nodeStore)
+                .nodeLabelIds(labels)
+                .capacity(cursor.bulkSize())
+                .hasLabelInformation(!labels.isEmpty())
+                .readProperty(importer.readsProperties())
+                .build();
             ImportProgress progress = this.progress;
             while (batches.scan(cursor)) {
                 terminationFlag.assertRunning();

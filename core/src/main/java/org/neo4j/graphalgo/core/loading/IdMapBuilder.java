@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -35,14 +36,14 @@ public final class IdMapBuilder {
 
     public static IdMap build(
         HugeLongArrayBuilder idMapBuilder,
-        Map<String, BitSet> projectionLabelMapping,
+        Map<ElementIdentifier, BitSet> elementIdentifierLabelMapping,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
     ) {
-        Optional<Map<String, BitSet>> maybeLabelInformation = projectionLabelMapping == null
+        Optional<Map<ElementIdentifier, BitSet>> maybeLabelInformation = elementIdentifierLabelMapping == null || elementIdentifierLabelMapping.isEmpty()
             ? Optional.empty()
-            : Optional.of(projectionLabelMapping);
+            : Optional.of(elementIdentifierLabelMapping);
         HugeLongArray graphIds = idMapBuilder.build();
 
         SparseNodeMapping nodeToGraphIds = buildSparseNodeMapping(graphIds, highestNodeId, concurrency, tracker);

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.eclipse.collections.api.block.function.Function;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,12 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -303,17 +310,17 @@ class CypherFactoryTest {
             "(a)-[{w: %f}]->(b)";
 
         assertGraphEquals(
-            fromGdl(String.format(expectedGraph, 1.0, prop1.defaultValue(), prop1.defaultValue())),
+            fromGdl(String.format(Locale.US, expectedGraph, 1.0, prop1.defaultValue(), prop1.defaultValue())),
             graphs.getGraph("*", Optional.of(addSuffix(prop1.propertyKey(), 0)))
         );
 
         assertGraphEquals(
-            fromGdl(String.format(expectedGraph, prop2.defaultValue(), 2.0, prop2.defaultValue())),
+            fromGdl(String.format(Locale.US, expectedGraph, prop2.defaultValue(), 2.0, prop2.defaultValue())),
             graphs.getGraph("*", Optional.of(addSuffix(prop2.propertyKey(), 1)))
         );
 
         assertGraphEquals(
-            fromGdl(String.format(expectedGraph, prop3.defaultValue(), prop3.defaultValue(), 3.0)),
+            fromGdl(String.format(Locale.US, expectedGraph, prop3.defaultValue(), prop3.defaultValue(), 3.0)),
             graphs.getGraph("*", Optional.of(addSuffix(prop3.propertyKey(), 2)))
         );
     }
@@ -330,6 +337,86 @@ class CypherFactoryTest {
         Graph graph = applyInTransaction(db, tx -> loader.load(CypherFactory.class));
 
         assertGraphEquals(fromGdl("(a { nodeProp: 42 })-[{ w: 21 }]->(a)"), graph);
+    }
+
+    @Test
+    void testLoadingGraphWithLabelInformation() {
+        db = TestDatabaseCreator.createTestDatabase();
+
+        String query = "CREATE" +
+                       "  (a:A)" +
+                       ", (b:B)" +
+                       ", (c:C)" +
+                       ", (ab:A:B)" +
+                       "CREATE" +
+                       "  (a)-[:REL]->(b)" +
+                       ", (a)-[:REL]->(c)" +
+                       ", (a)-[:REL]->(ab)" +
+                       ", (c)-[:REL]->(a)";
+
+
+        runQuery(db, query);
+
+        GraphLoader loader = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery("MATCH (n) RETURN id(n) AS id, labels(n) as labels")
+            .relationshipQuery("MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target")
+            .validateRelationships(false)
+            .build();
+
+        GraphStore graphStore = applyInTransaction(db, tx -> loader.build(CypherFactory.class).build().graphStore());
+
+        Function<List<String>, Graph> getGraph = (List<String> labels) -> graphStore.getGraph(
+            labels,
+            Collections.singletonList("*"),
+            Optional.empty(),
+            1
+        );
+
+        assertEquals(4, graphStore.nodeCount());
+        assertEquals(2, getGraph.apply(Collections.singletonList("A")).nodeCount());
+        assertEquals(2, getGraph.apply(Collections.singletonList("B")).nodeCount());
+        assertEquals(3, getGraph.apply(Arrays.asList("A", "B")).nodeCount());
+
+        Collection<Long> neighbours = new ArrayList<>();
+        getGraph.apply(Arrays.asList("A", "B")).forEachRelationship(0, (source, target) -> {
+            neighbours.add(target);
+            return true;
+        });
+
+        assertEquals(Arrays.asList(1L, 2L), neighbours);
+    }
+
+    @Test
+    void testFailIfLabelColumnIsEmpty() {
+        GraphLoader loader = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery("RETURN 1 AS id, [] as labels")
+            .relationshipQuery("MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target")
+            .build();
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> applyInTransaction(db, tx -> loader.build(CypherFactory.class).build().graphStore())
+        );
+
+        assertTrue(ex.getMessage().contains("does not specify a label"));
+    }
+
+    @Test
+    void testFailIfLabelColumnIsOfWrongType() {
+        GraphLoader loader = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery("RETURN 1 AS id, 42 as labels")
+            .relationshipQuery("MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target")
+            .build();
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> applyInTransaction(db, tx -> loader.build(CypherFactory.class).build().graphStore())
+        );
+
+        assertTrue(ex.getMessage().contains("should be of type List"));
     }
 
     private void loadAndTestGraph(

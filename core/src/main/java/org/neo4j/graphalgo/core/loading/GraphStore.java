@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -120,6 +121,17 @@ public final class GraphStore {
 
     public IdMapping nodes() {
         return this.nodes;
+    }
+
+    public Set<String> nodeLabels() {
+        return this
+            .nodes
+            .maybeLabelInformation
+            .map(Map::keySet)
+            .orElseGet(Collections::emptySet)
+            .stream()
+            .map(ElementIdentifier::name)
+            .collect(Collectors.toSet());
     }
 
     public Set<String> nodePropertyKeys() {
@@ -253,10 +265,10 @@ public final class GraphStore {
 
         BitSet combinedBitSet = BitSet.newInstance();
         if (this.nodes.maybeLabelInformation.isPresent() && !loadAllNodes) {
-            Map<String, BitSet> labelInformation = this.nodes.maybeLabelInformation.get();
+            Map<ElementIdentifier, BitSet> labelInformation = this.nodes.maybeLabelInformation.get();
             validateNodeLabelFilter(nodeLabels, labelInformation);
             nodeLabels.forEach(label -> combinedBitSet.union(
-                labelInformation.get(label)));
+                labelInformation.get(ElementIdentifier.of(label))));
         }
 
         boolean containsAllNodes = combinedBitSet.cardinality() == this.nodes.nodeCount();
@@ -291,10 +303,15 @@ public final class GraphStore {
         return UnionGraph.of(filteredGraphs);
     }
 
-    private void validateNodeLabelFilter(List<String> nodeLabels, Map<String, BitSet> labelInformation) {
+    private void validateNodeLabelFilter(List<String> nodeLabels, Map<ElementIdentifier, BitSet> labelInformation) {
         List<String> invalidLabels = nodeLabels
             .stream()
-            .filter(label -> !labelInformation.containsKey(label))
+            .filter(label -> !labelInformation
+                .keySet()
+                .stream()
+                .map(ElementIdentifier::name)
+                .collect(Collectors.toSet())
+                .contains(label))
             .collect(Collectors.toList());
         if (!invalidLabels.isEmpty()) {
             throw new IllegalArgumentException(String.format("Specified labels %s do not correspond to any of the node projections %s.",invalidLabels, labelInformation.keySet()));

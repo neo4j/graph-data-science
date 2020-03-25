@@ -98,9 +98,7 @@ abstract class CypherRecordLoader<R> {
 
     abstract R result();
 
-    Set<String> getMandatoryColumns() {
-        return getReservedColumns();
-    }
+    abstract Set<String> getMandatoryColumns();
 
     abstract Set<String> getReservedColumns();
 
