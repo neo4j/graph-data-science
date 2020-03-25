@@ -152,7 +152,7 @@ YIELD
 
 The configuration for the `mutate` mode is equivalent to the `write` mode.
 Instead of specifying a `writeRelationshipType` and `writeProperty`, we need to specify a `mutateRelationshipType` and `mutateProperty`.
-Also, specifying `writeConcurrency` is not allowed in `mutate` mode.
+Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 
 .The following will run the algorithm and store the results in `myGraph`:
 [source, cypher]
