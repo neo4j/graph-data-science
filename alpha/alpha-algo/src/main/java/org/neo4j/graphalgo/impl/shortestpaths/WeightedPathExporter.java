@@ -62,7 +62,6 @@ public class WeightedPathExporter extends StatementApi {
 
     /**
      * export a list of weighted paths
-     * @param paths
      */
     public void export(List<WeightedPath> paths) {
         paths.sort(WeightedPath.comparator());

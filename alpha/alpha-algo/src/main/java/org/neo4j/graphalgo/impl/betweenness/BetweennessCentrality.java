@@ -110,9 +110,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
                     centrality.get(nodeId)));
     }
 
-    /**
-     * @return
-     */
     @Override
     public BetweennessCentrality me() {
         return this;

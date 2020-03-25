@@ -73,7 +73,6 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
 
     /**
      * compute scc
-     * @return
      */
     public HugeLongArray compute() {
         setCount = 0;
@@ -109,7 +108,6 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
 
     /**
      * number of connected components in the graph
-     * @return
      */
     public long getSetCount() {
         return setCount;
@@ -117,7 +115,6 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
 
     /**
      * minimum set size
-     * @return
      */
     public long getMinSetSize() {
         return minSetSize;
@@ -125,7 +122,6 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
 
     /**
      * maximum component size
-     * @return
      */
     public long getMaxSetSize() {
         return maxSetSize;

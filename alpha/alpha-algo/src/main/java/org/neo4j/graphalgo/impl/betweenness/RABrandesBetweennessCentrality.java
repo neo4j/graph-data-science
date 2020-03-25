@@ -110,8 +110,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
 
     /**
      * set max depth (maximum number of hops from the start node)
-     * @param maxDepth
-     * @return
+     * @param maxDepth maximum number of hops from the start node
      */
     public RABrandesBetweennessCentrality withMaxDepth(int maxDepth) {
         this.maxDepth = maxDepth;

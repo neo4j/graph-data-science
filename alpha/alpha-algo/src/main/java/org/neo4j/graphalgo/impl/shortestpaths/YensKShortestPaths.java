@@ -75,7 +75,6 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShort
 
     /**
      * retrieve the list of shortest paths
-     * @return
      */
     public List<WeightedPath> getPaths() {
         return shortestPaths;
