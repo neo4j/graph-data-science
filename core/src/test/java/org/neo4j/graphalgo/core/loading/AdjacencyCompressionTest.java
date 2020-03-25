@@ -66,13 +66,8 @@ class AdjacencyCompressionTest {
     static Stream<Arguments> aggregationsWithResults() {
         return Stream.of(
             Arguments.of(
-                new long[]{1, 1, 5, 5, 1, 1},
-                new long[][]{
-                    {doubleToLongBits(2), doubleToLongBits(4), doubleToLongBits(3), doubleToLongBits(5), doubleToLongBits(5), doubleToLongBits(
-                        5)},
-                    {doubleToLongBits(4), doubleToLongBits(7), doubleToLongBits(6), doubleToLongBits(8), doubleToLongBits(8), doubleToLongBits(
-                        8)}
-                },
+                values(),
+                weights(),
                 new Aggregation[]{
                     Aggregation.COUNT,
                     Aggregation.COUNT
@@ -81,13 +76,8 @@ class AdjacencyCompressionTest {
                 "COUNT"
             ),
             Arguments.of(
-                new long[]{1, 1, 5, 5, 1, 1},
-                new long[][]{
-                    {doubleToLongBits(2), doubleToLongBits(4), doubleToLongBits(3), doubleToLongBits(5), doubleToLongBits(5), doubleToLongBits(
-                        5)},
-                    {doubleToLongBits(4), doubleToLongBits(7), doubleToLongBits(6), doubleToLongBits(8), doubleToLongBits(8), doubleToLongBits(
-                        8)}
-                },
+                values(),
+                weights(),
                 new Aggregation[]{
                     Aggregation.SUM,
                     Aggregation.SUM
@@ -96,13 +86,8 @@ class AdjacencyCompressionTest {
                 "SUM"
             ),
             Arguments.of(
-                new long[]{1, 1, 5, 5, 1, 1},
-                new long[][]{
-                    {doubleToLongBits(2), doubleToLongBits(4), doubleToLongBits(3), doubleToLongBits(5), doubleToLongBits(5), doubleToLongBits(
-                        5)},
-                    {doubleToLongBits(4), doubleToLongBits(7), doubleToLongBits(6), doubleToLongBits(8), doubleToLongBits(8), doubleToLongBits(
-                        8)}
-                },
+                values(),
+                weights(),
                 new Aggregation[]{
                     Aggregation.MIN,
                     Aggregation.MIN
@@ -111,13 +96,8 @@ class AdjacencyCompressionTest {
                 "MIN"
             ),
             Arguments.of(
-                new long[]{1, 1, 5, 5, 1, 1},
-                new long[][]{
-                    {doubleToLongBits(2), doubleToLongBits(4), doubleToLongBits(3), doubleToLongBits(5), doubleToLongBits(5), doubleToLongBits(
-                        5)},
-                    {doubleToLongBits(4), doubleToLongBits(7), doubleToLongBits(6), doubleToLongBits(8), doubleToLongBits(8), doubleToLongBits(
-                        8)}
-                },
+                values(),
+                weights(),
                 new Aggregation[]{
                     Aggregation.MAX,
                     Aggregation.MAX
@@ -126,6 +106,28 @@ class AdjacencyCompressionTest {
                 "MAX"
             )
         );
+    }
+
+    private static long[][] weights() {
+        return new long[][]{{
+            doubleToLongBits(2),
+            doubleToLongBits(4),
+            doubleToLongBits(3),
+            doubleToLongBits(5),
+            doubleToLongBits(5),
+            doubleToLongBits(5)
+        }, {
+            doubleToLongBits(4),
+            doubleToLongBits(7),
+            doubleToLongBits(6),
+            doubleToLongBits(8),
+            doubleToLongBits(8),
+            doubleToLongBits(8)
+        }};
+    }
+
+    private static long[] values() {
+        return new long[]{1, 1, 5, 5, 1, 1};
     }
 
 }
