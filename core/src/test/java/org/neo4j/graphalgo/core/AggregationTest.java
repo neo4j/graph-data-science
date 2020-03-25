@@ -33,16 +33,16 @@ class AggregationTest {
     @ParameterizedTest
     @CsvSource({"MAX, 1.4, 4.2", "MIN, 0.5, 0.5", "SINGLE, 1.4, 1.4", "SUM, 1.9, 6.1", "COUNT, 2.0, 3.0"})
     void testSuccessfulMultipleAggregation(Aggregation strategy, double expectedFirst, double expectedSecond) {
-        double actualFirst = strategy.merge(true, inputs[0], inputs[1]);
+        double actualFirst = strategy.init(inputs[0], inputs[1]);
         assertEquals(expectedFirst, actualFirst);
-        assertEquals(expectedSecond, strategy.merge(false, actualFirst, inputs[2]));
+        assertEquals(expectedSecond, strategy.merge(actualFirst, inputs[2]));
     }
 
     @Test
     void testFailingDuplicateRelationshipStrategies() {
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
-                () -> Aggregation.NONE.merge(true, 42, 42));
+                () -> Aggregation.NONE.merge(42, 42));
         String expected = "Multiple relationships between the same pair of nodes are not expected. Try using SKIP or some other aggregation.";
         assertEquals(expected, exception.getMessage());
     }
@@ -51,7 +51,7 @@ class AggregationTest {
     void testFailingDefaultDuplicateRelationshipStrategies() {
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
-                () -> Aggregation.DEFAULT.merge(true, 42, 42));
+                () -> Aggregation.DEFAULT.merge(42, 42));
         String expected = "This should never be used as a valid aggregation, just as a placeholder for the default aggregation of a given loader.";
         assertEquals(expected, exception.getMessage());
     }
