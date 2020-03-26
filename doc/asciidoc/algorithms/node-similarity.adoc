@@ -20,7 +20,8 @@ This topic includes:
 *** <<algorithms-node-similarity-examples-limits-topk-bottomk, topK and bottomK>>
 *** <<algorithms-node-similarity-examples-limits-topn-bottomn, topN and bottomN>>
 ** <<algorithms-node-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
-
+** <<algorithms-node-similarity-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-node-similarity-examples-stats, Stats>>
 
 [[algorithms-node-similarity-intro]]
 == Introduction
@@ -587,5 +588,49 @@ ORDER BY Person1
 | "Dave"  | "Alice" | 1.0
 | "Dave"  | "Bob"   | 0.6666666666666666
 3+|6 rows
+|===
+--
+
+
+[[algorithms-node-similarity-examples-memory-estimation]]
+=== Memory Estimation
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.nodeSimilarity.write.estimate('myGraph', {
+  writeRelationshipType: 'SIMILAR',
+  writeProperty: 'score'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header", cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 9         | 18                | 2640     | 2640     | "2640 Bytes"
+|===
+--
+
+[[algorithms-node-similarity-examples-stats]]
+=== Stats
+
+[role=query-example]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stats('myGraph')
+YIELD nodesCompared
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| nodesCompared
+| 4
 |===
 --
