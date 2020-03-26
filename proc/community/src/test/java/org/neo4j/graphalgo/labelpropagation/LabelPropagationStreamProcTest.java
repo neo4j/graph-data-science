@@ -122,8 +122,8 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
         assertCypherResult(query, Arrays.asList(MapUtil.map(
             "nodeCount", 12L,
             "relationshipCount", 10L,
-            "bytesMin", 1720L,
-            "bytesMax", 2232L
+            "bytesMin", 1688L,
+            "bytesMax", 2200L
         )));
     }
 

@@ -106,8 +106,8 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements 
 
         assertCypherResult(query, Arrays.asList(MapUtil.map(
             "nodeCount", 4L,
-            "bytesMin", 304024L,
-            "bytesMax", 304024L,
+            "bytesMin", 304056L,
+            "bytesMax", 304056L,
             "requiredMemory", "296 KiB"
         )));
     }
