@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityWriteProc;
 
@@ -30,7 +31,12 @@ class NodeSimilarityDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {
-        return Arrays.asList(NodeSimilarityStreamProc.class, NodeSimilarityWriteProc.class, GraphCreateProc.class);
+        return Arrays.asList(
+            NodeSimilarityStreamProc.class,
+            NodeSimilarityWriteProc.class,
+            NodeSimilarityStatsProc.class,
+            GraphCreateProc.class
+        );
     }
 
     @Override
