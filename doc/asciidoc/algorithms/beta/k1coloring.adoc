@@ -51,7 +51,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [source, cypher]
 ----
 CALL gds.beta.k1coloring.write(graphName: String, configuration: Map)
-YIELD nodes, colorCount, ranIterations, didConverge, writeProperty, createMillis, computeMillis, writeMillis
+YIELD nodes, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, writeMillis
 ----
 
 include::../common-parameters.adoc[]
@@ -91,10 +91,10 @@ include::../common-parameters.adoc[]
 [source, cypher]
 ----
 CALL gds.beta.k1coloring.mutate(graphName: String, configuration: Map)
-YIELD nodes, colorCount, ranIterations, didConverge, writeProperty, createMillis, computeMillis, mutateMillis
+YIELD nodes, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, mutateMillis
 ----
 
-The configuration for the `mutate` mode is equivalent to the `write` mode.
+The configuration for the `mutate` mode is similar to the `write` mode.
 Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 

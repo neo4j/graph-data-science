@@ -43,7 +43,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [source, cypher]
 ----
 CALL gds.beta.modularityOptimization.write(graphName: String|Map, configuration: Map})
-YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, writeMillis
+YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, writeMillis, configuration
 ----
 
 include::../common-parameters.adoc[]
@@ -85,10 +85,10 @@ include::../common-configuration.adoc[]
 [source, cypher]
 ----
 CALL gds.beta.modularityOptimization.mutate(graphName: String|Map, configuration: Map})
-YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, mutateMillis
+YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, mutateMillis, configuration
 ----
 
-The configuration for the `mutate` mode is equivalent to the `write` mode.
+The configuration for the `mutate` mode is similar to the `write` mode.
 Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 

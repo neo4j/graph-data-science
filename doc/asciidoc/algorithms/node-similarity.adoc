@@ -96,9 +96,7 @@ CALL gds.nodeSimilarity.write(configuration: Map)
 YIELD
   // general write return columns
   nodesCompared: Integer,
-  relationshipsWritten: Integer,
-  writeRelationshipType: String,
-  writeProperty: String
+  relationshipsWritten: Integer
 ----
 
 include::common-parameters-anonymous-graph.adoc[]
@@ -145,13 +143,12 @@ CALL gds.nodeSimilarity.mutate(
 YIELD
   // general mutate return columns
   nodesCompared: Integer,
-  relationshipsWritten: Integer,
-  writeRelationshipType: String,
-  writeProperty: String
+  relationshipsWritten: Integer
 ----
 
-The configuration for the `mutate` mode is equivalent to the `write` mode.
-Instead of specifying a `writeRelationshipType` and `writeProperty`, we need to specify a `mutateRelationshipType` and `mutateProperty`.
+The configuration for the `mutate` mode is similar to the `write` mode.
+Instead of specifying a `writeRelationshipType` and `writeProperty`,
+we need to specify a `mutateRelationshipType` and `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 
 .The following will run the algorithm and store the results in `myGraph`:

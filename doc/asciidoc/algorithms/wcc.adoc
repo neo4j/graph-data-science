@@ -119,7 +119,7 @@ YIELD
   componentDistribution: Map
 ----
 
-The configuration for the `mutate` mode is equivalent to the `write` mode.
+The configuration for the `mutate` mode is similar to the `write` mode.
 Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 

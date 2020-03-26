@@ -46,6 +46,7 @@ In order for the results from a `write` mode computation to be used in another a
 == Mutate
 
 The `mutate` mode is very similar to the `write` mode but instead of writing results to the Neo4j database, they are made available at the in-memory graph.
+Note that the `mutateProperty` must not exist in the in-memory graph beforehand.
 This enables running multiple algorithms on the same in-memory graph without writing results to Neo4j in-between algorithm executions.
 
 This execution mode is especially useful in three scenarios:
