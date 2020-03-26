@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongSet;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -39,14 +40,14 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             GraphDatabaseAPI api,
             AbstractStorePageCacheScanner<NodeRecord> scanner,
             LongSet labels,
-            ImportProgress progress,
+            ProgressLogger progressLogger,
             NodeImporter importer,
             TerminationFlag terminationFlag) {
         return new NodesScanner.Creator(
                 api,
                 scanner,
                 labels,
-                progress,
+                progressLogger,
                 importer,
                 terminationFlag);
     }
@@ -55,7 +56,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         private final GraphDatabaseAPI api;
         private final AbstractStorePageCacheScanner<NodeRecord> scanner;
         private final LongSet labels;
-        private final ImportProgress progress;
+        private final ProgressLogger progressLogger;
         private final NodeImporter importer;
         private final TerminationFlag terminationFlag;
 
@@ -63,13 +64,13 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                 GraphDatabaseAPI api,
                 AbstractStorePageCacheScanner<NodeRecord> scanner,
                 LongSet labels,
-                ImportProgress progress,
+                ProgressLogger progressLogger,
                 NodeImporter importer, 
                 TerminationFlag terminationFlag) {
             this.api = api;
             this.scanner = scanner;
             this.labels = labels;
-            this.progress = progress;
+            this.progressLogger = progressLogger;
             this.importer = importer;
             this.terminationFlag = terminationFlag;
         }
@@ -82,7 +83,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                     scanner,
                     labels,
                     index,
-                    progress,
+                    progressLogger,
                     importer
             );
         }
@@ -99,7 +100,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private final AbstractStorePageCacheScanner<NodeRecord> scanner;
     private final LongSet labels;
     private final int scannerIndex;
-    private final ImportProgress progress;
+    private final ProgressLogger progressLogger;
     private final NodeImporter importer;
     private long propertiesImported;
     private long nodesImported;
@@ -110,7 +111,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             AbstractStorePageCacheScanner<NodeRecord> scanner,
             LongSet labels,
             int threadIndex,
-            ImportProgress progress,
+            ProgressLogger progressLogger,
             NodeImporter importer) {
         super(api);
         this.terminationFlag = terminationFlag;
@@ -118,7 +119,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         this.scanner = scanner;
         this.labels = labels;
         this.scannerIndex = threadIndex;
-        this.progress = progress;
+        this.progressLogger = progressLogger;
         this.importer = importer;
     }
 
@@ -139,13 +140,12 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                 .hasLabelInformation(!labels.isEmpty())
                 .readProperty(importer.readsProperties())
                 .build();
-            ImportProgress progress = this.progress;
             while (batches.scan(cursor)) {
                 terminationFlag.assertRunning();
                 long imported = importer.importNodes(batches, read, cursors);
                 int batchImportedNodes = RawValues.getHead(imported);
                 int batchImportedProperties = RawValues.getTail(imported);
-                progress.nodesImported(batchImportedNodes);
+                progressLogger.logProgress(batchImportedNodes);
                 nodesImported += batchImportedNodes;
                 propertiesImported += batchImportedProperties;
             }

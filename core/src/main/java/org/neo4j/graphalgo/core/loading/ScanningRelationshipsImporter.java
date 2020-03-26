@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -41,7 +42,7 @@ import java.util.stream.Collectors;
 final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, ObjectLongMap<RelationshipProjectionMapping>> {
 
     private final GraphSetup setup;
-    private final ImportProgress progress;
+    private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
     private final IdMapping idMap;
     private final Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders;
@@ -51,7 +52,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         GraphSetup setup,
         GraphDatabaseAPI api,
         GraphDimensions dimensions,
-        ImportProgress progress,
+        ProgressLogger progressLogger,
         AllocationTracker tracker,
         IdMapping idMap,
         Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders,
@@ -66,7 +67,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 threadPool,
                 concurrency);
         this.setup = setup;
-        this.progress = progress;
+        this.progressLogger = progressLogger;
         this.tracker = tracker;
         this.idMap = idMap;
         this.allBuilders = allBuilders;
@@ -97,7 +98,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         return RelationshipsScanner.of(
                 api,
                 setup,
-                progress,
+                progressLogger,
                 idMap,
                 scanner,
                 importWeights,

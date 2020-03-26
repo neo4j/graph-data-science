@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -110,25 +111,22 @@ public final class NativeFactory extends GraphStoreFactory {
     }
 
     @Override
-    protected ImportProgress importProgress(
-        ProgressLogger progressLogger,
-        GraphDimensions dimensions,
-        GraphSetup setup
-    ) {
-        // For undirected double the amount of relationships imported
+    protected ProgressLogger initProgressLogger() {
         long relationshipCount = setup.relationshipProjections().projections().entrySet().stream()
             .map(entry -> {
-                Long relCount = dimensions.relationshipCounts().getOrDefault(entry.getKey().name, 0L);
+                Long relCount = entry.getKey().name.equals("*")
+                     ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
+                     : dimensions.relationshipCounts().getOrDefault(entry.getKey().name, 0L);
+
                 return entry.getValue().orientation() == Orientation.UNDIRECTED
                     ? relCount * 2
                     : relCount;
             }).mapToLong(Long::longValue).sum();
 
-        return new ApproximatedImportProgress(
-            progressLogger,
-            setup.tracker(),
-            dimensions.nodeCount(),
-            relationshipCount
+        return new BatchingProgressLogger(
+            log,
+            dimensions.nodeCount() + relationshipCount,
+            TASK_LOADING
         );
     }
 
@@ -141,7 +139,7 @@ public final class NativeFactory extends GraphStoreFactory {
         IdsAndProperties nodes = loadNodes(tracker, concurrency);
         RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency);
         GraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
-        progressLogger.logDone(tracker);
+        progressLogger.logMessage(tracker);
 
         return ImportResult.of(dimensions, graphStore);
     }
@@ -150,7 +148,7 @@ public final class NativeFactory extends GraphStoreFactory {
         return new ScanningNodesImporter(
             api,
             dimensions,
-            progress,
+            progressLogger,
             tracker,
             setup.terminationFlag(),
             threadPool,
@@ -178,7 +176,7 @@ public final class NativeFactory extends GraphStoreFactory {
             setup,
             api,
             dimensions,
-            progress,
+            progressLogger,
             tracker,
             idsAndProperties.hugeIdMap,
             allBuilders,

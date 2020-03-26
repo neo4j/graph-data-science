@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -40,7 +41,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     static InternalImporter.CreateScanner of(
             GraphDatabaseAPI api,
             GraphSetup setup,
-            ImportProgress progress,
+            ProgressLogger progressLogger,
             IdMapping idMap,
             AbstractStorePageCacheScanner<RelationshipRecord> scanner,
             boolean loadProperties,
@@ -55,7 +56,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         }
         return new RelationshipsScanner.Creator(
                 api,
-                progress,
+                progressLogger,
                 idMap,
                 scanner,
                 builders,
@@ -65,7 +66,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
 
     static final class Creator implements InternalImporter.CreateScanner {
         private final GraphDatabaseAPI api;
-        private final ImportProgress progress;
+        private final ProgressLogger progressLogger;
         private final IdMapping idMap;
         private final AbstractStorePageCacheScanner<RelationshipRecord> scanner;
         private final List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders;
@@ -73,13 +74,13 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
 
         Creator(
                 GraphDatabaseAPI api,
-                ImportProgress progress,
+                ProgressLogger progressLogger,
                 IdMapping idMap,
                 AbstractStorePageCacheScanner<RelationshipRecord> scanner,
                 List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders,
                 TerminationFlag terminationFlag) {
             this.api = api;
-            this.progress = progress;
+            this.progressLogger = progressLogger;
             this.idMap = idMap;
             this.scanner = scanner;
             this.importerBuilders = importerBuilders;
@@ -91,7 +92,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             return new RelationshipsScanner(
                     api,
                     terminationFlag,
-                    progress,
+                    progressLogger,
                     idMap,
                     scanner,
                     index,
@@ -108,7 +109,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     }
 
     private final TerminationFlag terminationFlag;
-    private final ImportProgress progress;
+    private final ProgressLogger progressLogger;
     private final IdMapping idMap;
     private final AbstractStorePageCacheScanner<RelationshipRecord> scanner;
     private final int scannerIndex;
@@ -120,14 +121,14 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     private RelationshipsScanner(
             GraphDatabaseAPI api,
             TerminationFlag terminationFlag,
-            ImportProgress progress,
+            ProgressLogger progressLogger,
             IdMapping idMap,
             AbstractStorePageCacheScanner<RelationshipRecord> scanner,
             int threadIndex,
             List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders) {
         super(api);
         this.terminationFlag = terminationFlag;
-        this.progress = progress;
+        this.progressLogger = progressLogger;
         this.idMap = idMap;
         this.scanner = scanner;
         this.scannerIndex = threadIndex;
@@ -167,7 +168,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 }
                 int importedRels = RawValues.getHead(imported);
                 int importedWeights = RawValues.getTail(imported);
-                progress.relationshipsImported(importedRels);
+                progressLogger.logProgress(importedRels);
                 allImportedRels += importedRels;
                 allImportedWeights += importedWeights;
             }

@@ -28,13 +28,12 @@ import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.ImmutableTopologyCSR;
 import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
-import org.neo4j.graphalgo.core.loading.ApproximatedImportProgress;
+import org.neo4j.graphalgo.core.huge.ImmutableTopologyCSR;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
-import org.neo4j.graphalgo.core.loading.ImportProgress;
 import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -45,7 +44,6 @@ import org.neo4j.logging.Log;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -59,7 +57,6 @@ public abstract class GraphStoreFactory implements Assessable {
     protected final GraphDatabaseAPI api;
     protected final GraphSetup setup;
     protected final GraphDimensions dimensions;
-    protected final ImportProgress progress;
     protected final Log log;
     protected final ProgressLogger progressLogger;
 
@@ -72,9 +69,8 @@ public abstract class GraphStoreFactory implements Assessable {
         this.api = api;
         this.setup = setup;
         this.log = setup.log();
-        this.progressLogger = progressLogger(log, setup.logMillis());
         this.dimensions = new GraphDimensionsReader(api, setup, readTokens).call();
-        this.progress = importProgress(progressLogger, dimensions, setup);
+        this.progressLogger = initProgressLogger();
     }
 
     public abstract ImportResult build();
@@ -85,11 +81,7 @@ public abstract class GraphStoreFactory implements Assessable {
         return this.dimensions;
     }
 
-    protected ImportProgress importProgress(
-        ProgressLogger progressLogger,
-        GraphDimensions dimensions,
-        GraphSetup setup
-    ) {
+    protected ProgressLogger initProgressLogger() {
         long relationshipCount = dimensions.relationshipProjectionMappings().stream()
             .mapToLong(mapping -> {
                 Long typeCount = dimensions.relationshipCounts().get(mapping.elementIdentifier());
@@ -99,11 +91,10 @@ public abstract class GraphStoreFactory implements Assessable {
             })
             .sum();
 
-        return new ApproximatedImportProgress(
-            progressLogger,
-            setup.tracker(),
-            dimensions.nodeCount(),
-            relationshipCount
+        return new BatchingProgressLogger(
+            log,
+            dimensions.nodeCount() + relationshipCount,
+            TASK_LOADING
         );
     }
 
@@ -157,10 +148,6 @@ public abstract class GraphStoreFactory implements Assessable {
             relationshipProperties,
             tracker
         );
-    }
-
-    private static ProgressLogger progressLogger(Log log, long time) {
-        return ProgressLogger.wrap(log, TASK_LOADING, time, TimeUnit.MILLISECONDS);
     }
 
     @ValueClass

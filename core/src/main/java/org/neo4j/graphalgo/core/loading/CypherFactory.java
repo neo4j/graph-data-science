@@ -104,7 +104,7 @@ public class CypherFactory extends GraphStoreFactory {
                 relationships.dimensions()
             );
 
-            progressLogger.logDone(setup.tracker());
+            progressLogger.logMessage(setup.tracker());
             return ImportResult.of(relationships.dimensions(), graphStore);
         }
     }

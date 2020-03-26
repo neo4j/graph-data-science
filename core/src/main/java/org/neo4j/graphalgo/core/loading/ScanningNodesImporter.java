@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
@@ -42,7 +43,7 @@ import java.util.stream.StreamSupport;
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, IdsAndProperties> {
 
-    private final ImportProgress progress;
+    private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
     private final TerminationFlag terminationFlag;
     private final PropertyMappings propertyMappings;
@@ -54,7 +55,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     ScanningNodesImporter(
         GraphDatabaseAPI api,
         GraphDimensions dimensions,
-        ImportProgress progress,
+        ProgressLogger progressLogger,
         AllocationTracker tracker,
         TerminationFlag terminationFlag,
         ExecutorService threadPool,
@@ -62,7 +63,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
         PropertyMappings propertyMappings
     ) {
         super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
-        this.progress = progress;
+        this.progressLogger = progressLogger;
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
         this.propertyMappings = propertyMappings;
@@ -91,7 +92,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             api,
             scanner,
             dimensions.nodeLabelIds(),
-            progress,
+            progressLogger,
             new NodeImporter(idMapBuilder, elementIdentifierBitSetMapping, builders.values(), dimensions.labelElementIdentifierMapping()),
             terminationFlag
         );
