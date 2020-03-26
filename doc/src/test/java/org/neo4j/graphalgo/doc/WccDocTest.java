@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.wcc.WccStatsProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
 
@@ -30,7 +31,12 @@ class WccDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {
-        return Arrays.asList(WccStreamProc.class, WccWriteProc.class, GraphCreateProc.class);
+        return Arrays.asList(
+            WccStreamProc.class,
+            WccWriteProc.class,
+            WccStatsProc.class,
+            GraphCreateProc.class
+        );
     }
 
     @Override
