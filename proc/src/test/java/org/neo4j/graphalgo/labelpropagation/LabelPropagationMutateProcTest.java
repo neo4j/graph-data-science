@@ -25,22 +25,17 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements GraphMutationTest<LabelPropagationMutateConfig, LabelPropagation> {
 
@@ -130,36 +125,28 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         setupGraph(DB_CYPHER_FILTERED);
         registerFunctions(NodePropertyFunc.class);
 
-        String graphName = mutateGraphName().orElseGet(() -> {
-            String loadedGraphName = "loadGraph";
-            GraphCreateFromStoreConfig graphCreateConfig = GraphCreateFromStoreConfig.of(
-                TEST_USERNAME,
-                loadedGraphName,
-                Arrays.asList("Ignore", "A", "B"),
-                "*",
-                CypherMapWrapper.empty()
-            );
 
-            GraphStoreCatalog.set(
-                graphCreateConfig,
-                graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
-            );
-            return loadedGraphName;
-        });
+        String graphName = "loadGraph";
 
-        applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
-                .forEach(mutateMethod -> {
-                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-                    config.put("nodeLabels", Arrays.asList("A", "B"));
-                    try {
-                        mutateMethod.invoke(procedure, graphName, config);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                })
-        );
+        String loadQuery = GdsCypher
+            .call()
+            .withNodeLabels("Ignore", "A", "B")
+            .withAnyRelationshipType()
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(loadQuery);
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation(graphName)
+            .algo("labelPropagation")
+            .mutateMode()
+            .addParameter("nodeLabels", Arrays.asList("A", "B"))
+            .addParameter("mutateProperty", mutateProperty())
+            .yields();
+
+        runQuery(query);
 
         double[] expectedValues = new double[] {Double.NaN, 3, 8, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
