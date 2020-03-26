@@ -16,6 +16,9 @@ This topic includes:
 ** <<algorithms-louvain-examples-stream-weighted, Weights>>
 ** <<algorithms-louvain-examples-stream-seeded, Seeding>>
 ** <<algorithms-louvain-examples-stream-intermediate, Multi-Level>>
+** <<algorithms-louvain-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-louvain-examples-stats, Stats>>
+
 
 [[algorithms-louvain-intro]]
 == Introduction
@@ -532,3 +535,44 @@ ORDER BY name ASC
 --
 
 In this example graph, after the first iteration we see 4 clusters, which in the second iteration are reduced to three.
+
+
+[[algorithms-louvain-examples-memory-estimation]]
+=== Memory Estimation
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.louvain.write.estimate('myGraph', { writeProperty: 'community' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header", cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 7                 | 5361     | 580408   | "[5361 Bytes \... 566 KiB]"
+|===
+--
+
+[[algorithms-louvain-examples-stats]]
+=== Stats
+
+[role=query-example]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+CALL gds.louvain.stats('myGraph')
+YIELD communityCount
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| communityCount
+| 2
+|===
+--
