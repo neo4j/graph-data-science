@@ -21,10 +21,12 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.logging.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
@@ -36,14 +38,16 @@ public interface PageRankAlgorithm extends Assessable {
     /**
      * Forces sequential use. If you want parallelism, prefer
      *
-     * {@link #create(Graph, LongStream, PageRankBaseConfig, int, ExecutorService, int, AllocationTracker)} }
+     * {@link #create(Graph, LongStream, PageRankBaseConfig, int, ExecutorService, int, Log, ProgressLogger, AllocationTracker)} }
      */
     default PageRank create(
         Graph graph,
         PageRankBaseConfig algoConfig,
-        LongStream sourceNodeIds
+        LongStream sourceNodeIds,
+        Log log,
+        ProgressLogger progressLogger
     ) {
-        return create(graph, sourceNodeIds, algoConfig, -1, null, ParallelUtil.DEFAULT_BATCH_SIZE, AllocationTracker.EMPTY);
+        return create(graph, sourceNodeIds, algoConfig, -1, null, ParallelUtil.DEFAULT_BATCH_SIZE, log, progressLogger, AllocationTracker.EMPTY);
     }
 
     default PageRank create(
@@ -52,6 +56,8 @@ public interface PageRankAlgorithm extends Assessable {
         PageRankBaseConfig algoConfig,
         int concurrency,
         ExecutorService executor,
+        Log log,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         return create(
@@ -61,6 +67,8 @@ public interface PageRankAlgorithm extends Assessable {
             concurrency,
             executor,
             ParallelUtil.DEFAULT_BATCH_SIZE,
+            log,
+            progressLogger,
             tracker
         );
     }
@@ -72,6 +80,8 @@ public interface PageRankAlgorithm extends Assessable {
         int concurrency,
         ExecutorService executor,
         int batchSize,
+        Log log,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         return new PageRank(
@@ -82,6 +92,8 @@ public interface PageRankAlgorithm extends Assessable {
             concurrency,
             executor,
             batchSize,
+            log,
+            progressLogger,
             tracker
         );
     }

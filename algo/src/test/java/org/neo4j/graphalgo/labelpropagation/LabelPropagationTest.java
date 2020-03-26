@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
+import net.jqwik.api.constraints.LongRange;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,27 +32,36 @@ import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.logging.Log;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 final class LabelPropagationTest extends AlgoTestBase {
 
@@ -85,6 +95,8 @@ final class LabelPropagationTest extends AlgoTestBase {
         db.shutdown();
     }
 
+    private final Log log = new TestLog();
+
     Graph loadGraph(Class<? extends GraphStoreFactory> graphImpl) {
         GraphLoader graphLoader;
         if (graphImpl == CypherFactory.class) {
@@ -112,6 +124,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             graph,
             ImmutableLabelPropagationStreamConfig.builder().maxIterations(1).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
         lp.compute();
@@ -137,6 +150,7 @@ final class LabelPropagationTest extends AlgoTestBase {
                 .maxIterations(1)
                 .build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -165,10 +179,11 @@ final class LabelPropagationTest extends AlgoTestBase {
 
     private void testLPClustering(Graph graph, int batchSize) {
         LabelPropagation lp = new LabelPropagation(
-                graph,
-                defaultConfig(),
-                Pools.DEFAULT,
-                AllocationTracker.EMPTY
+            graph,
+            defaultConfig(),
+            Pools.DEFAULT,
+            progressLogger,
+            AllocationTracker.EMPTY
         );
         lp.withBatchSize(batchSize);
         lp.compute();
@@ -245,6 +260,41 @@ final class LabelPropagationTest extends AlgoTestBase {
             .memoryUsage().max);
     }
 
+    @Test
+    void shouldLogProgress(){
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("User")
+            .addRelationshipType("FOLLOW")
+            .build()
+            .graph(NativeFactory.class);
+
+        TestProgressLogger testLogger = new TestProgressLogger(graph.relationshipCount(), "Louvain");
+
+        LabelPropagation lp = new LabelPropagation(
+            graph,
+            defaultConfig(),
+            Pools.DEFAULT,
+            testLogger,
+            AllocationTracker.EMPTY
+        );
+
+        lp.compute();
+
+        List<AtomicLong> progresses = testLogger.getProgresses();
+
+        // Should log progress for every iteration + init step
+        assertEquals(defaultConfig().maxIterations() + 2, progresses.size());
+        progresses.forEach(progress -> assertTrue(progress.get() <= graph.relationshipCount()));
+
+        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
+        LongStream.range(1, lp.ranIterations() + 1).forEach(iteration -> {
+            assertTrue(testLogger.containsMessage(TestLog.INFO, String.format("Iteration %d :: Start", iteration)));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, String.format("Iteration %d :: Start", iteration)));
+        });
+        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
+    }
+
     private void assertMemoryEstimation(long nodeCount, int concurrency) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
 
@@ -254,29 +304,21 @@ final class LabelPropagationTest extends AlgoTestBase {
             .memoryEstimation(ImmutableLabelPropagationStreamConfig.builder().build())
             .estimate(dimensions, concurrency)
             .memoryUsage();
-        long min = 80L /* LabelPropagation.class */ +
-                         16L * concurrency /* StepRunner.class */ +
-                         48L * concurrency /* InitStep.class */ +
-                         56L * concurrency /* ComputeStep.class */ +
-                         24L * concurrency /* ComputeStepConsumer.class */ +
-                         HugeLongArray.memoryEstimation(nodeCount) /* labels HugeLongArray wrapper */ +
-                /* LongDoubleScatterMap votes */
-                         56L * concurrency /* LongDoubleScatterMap.class */ +
-                         (9 * 8 + 16) * concurrency /* long[] keys */ +
-                         (9 * 8 + 16) * concurrency; /* double[] values */
-        long max = 80L /* LabelPropagation.class */ +
-                         16L * concurrency /* StepRunner.class */ +
-                         48L * concurrency /* InitStep.class */ +
-                         56L * concurrency /* ComputeStep.class */ +
-                         24L * concurrency /* ComputeStepConsumer.class */ +
-                         HugeLongArray.memoryEstimation(nodeCount) /* labels HugeLongArray wrapper */ +
-                /* LongDoubleScattermap votes */
-                         56L * concurrency /* LongDoubleScatterMap.class */ +
-                         ((BitUtil.nextHighestPowerOfTwo((long) (nodeCount / 0.75)) + 1) * 8 + 16) * concurrency /* long[] keys */ +
-                         ((BitUtil.nextHighestPowerOfTwo((long) (nodeCount / 0.75)) + 1) * 8 + 16) * concurrency; /* double[] values */
 
-        assertEquals(min, actual.min, "min");
-        assertEquals(max, actual.max, "max");
+        Map<Integer, Long> minByConcurrency = genericMap(
+            1, 800488L,
+            4, 801592L,
+            42, 815576L
+        );
+
+        Map<Integer, Long> maxByConcurrency = genericMap(
+            1, 4994664L,
+            4, 17578296L,
+            42, 176970968L
+        );
+
+        assertEquals(minByConcurrency.get(concurrency), actual.min, "min");
+        assertEquals(maxByConcurrency.get(concurrency), actual.max, "max");
     }
 
     LabelPropagationStreamConfig defaultConfig() {

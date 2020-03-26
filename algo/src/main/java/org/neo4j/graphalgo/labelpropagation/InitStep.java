@@ -23,6 +23,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
@@ -73,6 +74,7 @@ final class InitStep implements Step {
                     ? maxLabelId + graph.toOriginalNodeId(nodeId) + 1L
                     : (long) existingLabelValue;
             existingLabels.set(nodeId, existingLabel);
+            progressLogger.logProgress(graph.degree(nodeId));
         }
     }
 

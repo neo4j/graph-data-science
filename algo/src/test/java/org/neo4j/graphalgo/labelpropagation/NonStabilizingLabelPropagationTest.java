@@ -96,6 +96,7 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
             graph,
             ImmutableLabelPropagationStreamConfig.builder().build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
         LabelPropagation compute = labelPropagation.compute();

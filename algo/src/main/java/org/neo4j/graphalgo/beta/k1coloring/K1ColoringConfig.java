@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 
-interface K1ColoringConfig extends AlgoBaseConfig, IterationsConfig {
+public interface K1ColoringConfig extends AlgoBaseConfig, IterationsConfig {
     int DEFAULT_ITERATIONS = 10;
 
     @Override

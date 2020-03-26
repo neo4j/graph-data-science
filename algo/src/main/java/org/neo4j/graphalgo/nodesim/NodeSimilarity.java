@@ -22,29 +22,28 @@ package org.neo4j.graphalgo.nodesim;
 import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongArrayList;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Intersections;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.logging.Log;
 
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResult> {
-
-    private static final long MAXIMUM_LOG_INTERVAL = (long) Math.pow(2, 13);
 
     private final Graph graph;
     private final NodeSimilarityBaseConfig config;
@@ -54,8 +53,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
     private final BitSet nodeFilter;
 
-    private final AtomicLong progressCounter = new AtomicLong(0);
-
     private HugeObjectArray<long[]> vectors;
     private long nodesToCompare;
 
@@ -63,11 +60,13 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         Graph graph,
         NodeSimilarityBaseConfig config,
         ExecutorService executorService,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
         this.executorService = executorService;
+        this.progressLogger = progressLogger;
         this.tracker = tracker;
         this.nodeFilter = new BitSet(graph.nodeCount());
     }
@@ -102,11 +101,12 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     public Stream<SimilarityResult> computeToStream() {
-        progressLogger.log("NodeSimilarity#computeToStream");
-
-        // Create a filter for which nodes to compare and calculate the neighborhood for each node
         prepare();
         assertRunning();
+
+        progressLogger.reset(calculateWorkload());
+
+        progressLogger.logMessage("NodeSimilarity#computeToStream");
 
         // Compute similarities
         if (config.hasTopN() && !config.hasTopK()) {
@@ -127,9 +127,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         boolean isTopKGraph = false;
 
         if (config.hasTopK() && !config.hasTopN()) {
-            progressLogger.log("NodeSimilarity#computeToGraph");
-
             prepare();
+            assertRunning();
+            progressLogger.reset(calculateWorkload());
+
+            progressLogger.logMessage("NodeSimilarity#computeToGraph");
 
             TopKMap topKMap = config.isParallel()
                 ? computeTopKMapParallel()
@@ -145,7 +147,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private void prepare() {
-        progressLogger.log("Start :: NodeSimilarity#prepare");
+        progressLogger.logMessage("Start :: NodeSimilarity#prepare");
 
         vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
 
@@ -156,16 +158,21 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             int degree = degreeComputer.degree;
             degreeComputer.reset();
             vectorComputer.reset(degree);
+
+
             if (degree >= config.degreeCutoff()) {
                 nodesToCompare++;
                 nodeFilter.set(node);
 
                 graph.forEachRelationship(node, vectorComputer);
+                progressLogger.logProgress(graph.degree(node));
                 return vectorComputer.targetIds.buffer;
             }
+
+            progressLogger.logProgress(graph.degree(node));
             return null;
         });
-        progressLogger.log("Finish :: NodeSimilarity#prepare");
+        progressLogger.logMessage("Finish :: NodeSimilarity#prepare");
     }
 
     private Stream<SimilarityResult> computeSimilarityResultStream() {
@@ -185,7 +192,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeAll() {
-        progressLogger.log("NodeSimilarity#computeAll");
+        progressLogger.logMessage("NodeSimilarity#computeAll");
 
         return loggableAndTerminatableNodeStream()
             .boxed()
@@ -201,7 +208,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeAllParallel() {
-        progressLogger.log("NodeSimilarity#computeAllParallel");
+        progressLogger.logMessage("NodeSimilarity#computeAllParallel");
 
         return ParallelUtil.parallelStream(
             loggableAndTerminatableNodeStream(), config.concurrency(), stream -> stream
@@ -219,7 +226,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private TopKMap computeTopKMap() {
-        progressLogger.log("Start :: NodeSimilarity#computeTopKMap");
+        progressLogger.logMessage("Start :: NodeSimilarity#computeTopKMap");
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
@@ -235,12 +242,12 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                         }
                     });
             });
-        progressLogger.log("Finish :: NodeSimilarity#computeTopKMap");
+        progressLogger.logMessage("Finish :: NodeSimilarity#computeTopKMap");
         return topKMap;
     }
 
     private TopKMap computeTopKMapParallel() {
-        progressLogger.log("Start :: NodeSimilarity#computeTopKMapParallel");
+        progressLogger.logMessage("Start :: NodeSimilarity#computeTopKMapParallel");
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
@@ -267,12 +274,12 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                 })
         );
 
-        progressLogger.log("Finish :: NodeSimilarity#computeTopKMapParallel");
+        progressLogger.logMessage("Finish :: NodeSimilarity#computeTopKMapParallel");
         return topKMap;
     }
 
     private Stream<SimilarityResult> computeTopN() {
-        progressLogger.log("Start :: NodeSimilarity#computeTopN");
+        progressLogger.logMessage("Start :: NodeSimilarity#computeTopN");
 
         TopNList topNList = new TopNList(config.normalizedN());
         loggableAndTerminatableNodeStream()
@@ -287,16 +294,16 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                     });
             });
 
-        progressLogger.log("Finish :: NodeSimilarity#computeTopN");
+        progressLogger.logMessage("Finish :: NodeSimilarity#computeTopN");
         return topNList.stream();
     }
 
     private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
-        progressLogger.log("Start :: NodeSimilarity#computeTopN(TopKMap)");
+        progressLogger.logMessage("Start :: NodeSimilarity#computeTopN(TopKMap)");
 
         TopNList topNList = new TopNList(config.normalizedN());
         topKMap.forEach(topNList::add);
-        progressLogger.log("Finish :: NodeSimilarity#computeTopN(TopKMap)");
+        progressLogger.logMessage("Finish :: NodeSimilarity#computeTopN(TopKMap)");
         return topNList.stream();
     }
 
@@ -304,7 +311,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         long intersection = Intersections.intersection3(vector1, vector2);
         double union = vector1.length + vector2.length - intersection;
         double similarity = union == 0 ? 0 : intersection / union;
+        getProgressLogger().logProgress();
         return similarity >= config.similarityCutoff() ? similarity : Double.NaN;
+
     }
 
     private LongStream nodeStream() {
@@ -316,19 +325,23 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private LongStream checkProgress(LongStream stream) {
-        long logInterval = Math.min(MAXIMUM_LOG_INTERVAL, Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100)));
-
         return stream.peek(node -> {
-            long progress = progressCounter.incrementAndGet();
-            if ((progress & (logInterval - 1)) == 0) {
+            if ((node & BatchingProgressLogger.MAXIMUM_LOG_INTERVAL) == 0) {
                 assertRunning();
-                progressLogger.logProgress(progress, nodesToCompare);
             }
         });
     }
 
     private LongStream nodeStream(long offset) {
         return new SetBitsIterable(nodeFilter, offset).stream();
+    }
+
+    private long calculateWorkload() {
+        long workload = nodesToCompare * nodesToCompare;
+        if (config.concurrency() == 1) {
+            workload = workload / 2;
+        }
+        return workload;
     }
 
     private static final class VectorComputer implements RelationshipConsumer {

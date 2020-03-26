@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
+import org.neo4j.logging.NullLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -166,7 +167,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
                 .compute()
                 .result();
 
@@ -221,7 +222,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
                 .compute()
                 .result();
 
@@ -276,7 +277,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
                 .compute()
                 .result();
 
@@ -331,7 +332,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
                 .compute()
                 .result();
 
@@ -386,7 +387,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
                 .compute()
                 .result();
 

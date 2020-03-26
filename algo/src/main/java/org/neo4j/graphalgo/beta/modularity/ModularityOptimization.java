@@ -27,16 +27,18 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.beta.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.graphalgo.beta.k1coloring.K1Coloring;
+import org.neo4j.graphalgo.beta.k1coloring.K1ColoringFactory;
+import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.PageFiller;
-import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +64,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final NodeProperties seedProperty;
     private final ExecutorService executor;
     private final AllocationTracker tracker;
-    private final Log log;
 
     private int iterationCounter;
     private boolean didConverge = false;
@@ -83,11 +84,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         int maxIterations,
         double tolerance,
         @Nullable NodeProperties seedProperty,
-        final int concurrency,
-        final int minBatchSize,
-        final ExecutorService executor,
-        final AllocationTracker tracker,
-        final Log log
+        int concurrency,
+        int minBatchSize,
+        ExecutorService executor,
+        ProgressLogger progressLogger,
+        AllocationTracker tracker
     ) {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
@@ -96,8 +97,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.seedProperty = seedProperty;
         this.executor = executor;
         this.concurrency = concurrency;
+        this.progressLogger = progressLogger;
         this.tracker = tracker;
-        this.log = log;
         this.batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
             concurrency,
@@ -115,55 +116,57 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     @Override
     public ModularityOptimization compute() {
-        try (ProgressTimer timer = ProgressTimer.start(millis -> log.info(
-            "Modularity Optimization - Initialization finished after %dms",
-            millis
-        ))) {
-            computeColoring();
-            initSeeding();
-            init();
-        }
+        progressLogger.logMessage(":: Start");
+
+
+        progressLogger.logMessage(":: Initialization :: Start");
+        computeColoring();
+        initSeeding();
+        init();
+        progressLogger.logMessage(":: Initialization :: Finished");
+
 
         for (iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
+            progressLogger.logMessage(String.format(":: Iteration %d :: Start", iterationCounter + 1));
+
             boolean hasConverged;
-            try (ProgressTimer timer = ProgressTimer.start(millis -> log.info(
-                "Modularity Optimization - Iteration %d finished after %dms",
-                iterationCounter + 1,
-                millis
-            ))) {
-                nodeCommunityInfluences.fill(0.0);
 
-                long currentColor = colorsUsed.nextSetBit(0);
-                while (currentColor != -1) {
-                    assertRunning();
-                    optimizeForColor(currentColor);
-                    currentColor = colorsUsed.nextSetBit(currentColor + 1);
-                }
+            nodeCommunityInfluences.fill(0.0);
 
-                hasConverged = !updateModularity();
+            long currentColor = colorsUsed.nextSetBit(0);
+            while (currentColor != -1) {
+                assertRunning();
+                optimizeForColor(currentColor);
+                currentColor = colorsUsed.nextSetBit(currentColor + 1);
             }
+
+            hasConverged = !updateModularity();
+
+            progressLogger.logMessage(String.format(":: Iteration %d :: Finished", iterationCounter + 1));
 
             if (hasConverged) {
                 this.didConverge = true;
                 iterationCounter++;
                 break;
             }
+
+            progressLogger.reset(graph.relationshipCount());
         }
 
-        log.info("Modularity Optimization - Finished");
+        progressLogger.logMessage(":: Finished");
         return this;
     }
 
     private void computeColoring() {
-        K1Coloring coloring = new K1Coloring(
-            graph,
-            5,
-            (int) batchSize,
-            concurrency,
-            executor,
-            tracker
-        )
-            .withProgressLogger(progressLogger)
+        K1ColoringStreamConfig k1Config = ImmutableK1ColoringStreamConfig
+            .builder()
+            .concurrency(concurrency)
+            .maxIterations(5)
+            .batchSize((int) batchSize)
+            .build();
+
+        K1Coloring coloring = new K1ColoringFactory<>()
+            .build(graph, k1Config, tracker, progressLogger.getLog())
             .withTerminationFlag(terminationFlag);
 
         this.colors = coloring.compute();
@@ -281,7 +284,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                     cumulativeNodeWeights,
                     nodeCommunityInfluences,
                     communityWeights,
-                    communityWeightUpdates
+                    communityWeightUpdates,
+                    getProgressLogger()
                 )
             );
         }

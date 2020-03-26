@@ -172,6 +172,7 @@ class IncrementalWccTest extends AlgoTestBase {
             Pools.DEFAULT,
             COMMUNITY_SIZE / AlgoBaseConfig.DEFAULT_CONCURRENCY,
             config,
+            progressLogger,
             AllocationTracker.EMPTY
         ).compute();
     }

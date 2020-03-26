@@ -26,9 +26,12 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,6 +63,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         Graph graph,
         LabelPropagationBaseConfig config,
         ExecutorService executor,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.graph = graph;
@@ -88,6 +92,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         this.nodeWeights = nodeWeightProperty;
 
         maxLabelId = nodeProperties.getMaxPropertyValue().orElse(NO_SUCH_LABEL);
+
+        this.progressLogger = progressLogger;
     }
 
     @Override
@@ -118,6 +124,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
 
+        getProgressLogger().logMessage(":: Start");
+
         if (labels == null || labels.size() != nodeCount) {
             labels = HugeLongArray.newArray(nodeCount, tracker);
         }
@@ -129,8 +137,11 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
 
         long currentIteration = 0L;
         while (currentIteration < config.maxIterations()) {
+            getProgressLogger().logMessage(String.format(":: Iteration %d :: Start", currentIteration + 1));
             ParallelUtil.runWithConcurrency(config.concurrency(), stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
             ++currentIteration;
+            getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", currentIteration));
+            getProgressLogger().reset(graph.relationshipCount());
         }
 
         long maxIteration = 0L;
@@ -149,6 +160,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
 
         ranIterations = maxIteration;
         didConverge = converged;
+
+        getProgressLogger().logMessage(":: Finished");
 
         return me();
     }
@@ -178,7 +191,10 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
             StepRunner task = new StepRunner(initStep);
             tasks.add(task);
         }
+        progressLogger.logMessage(":: Initialization :: Start");
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, 1, MICROSECONDS, terminationFlag, executor);
+        progressLogger.logMessage(":: Initialization :: Finished");
+        progressLogger.reset(graph.relationshipCount());
         return tasks;
     }
 

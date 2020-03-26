@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
@@ -111,6 +113,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     private final IdMapping idMapping;
     private final double dampingFactor;
     private final int maxIterations;
+    private final Log log;
     private int ranIterations;
     private boolean didConverge;
     private final double toleranceValue;
@@ -118,7 +121,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     private final LongStream sourceNodeIds;
     private final PageRankVariant pageRankVariant;
 
-    private Log log;
     private ComputeSteps computeSteps;
 
     private final HugeDoubleArray result;
@@ -136,12 +138,15 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         int concurrency,
         ExecutorService executor,
         int batchSize,
+        Log log,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         assert algoConfig.maxIterations() >= 1;
         this.executor = executor;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
+        this.log = log;
         this.tracker = tracker;
         this.idMapping = graph;
         this.graph = graph;
@@ -153,6 +158,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
         this.result = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
+        this.progressLogger = progressLogger;
     }
 
     public int iterations() {
@@ -172,21 +178,18 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
      */
     @Override
     public PageRank compute() {
+        getProgressLogger().logMessage(":: Start");
+
         initializeSteps();
         computeSteps.run(maxIterations);
         computeSteps.mergeResults();
+
+        getProgressLogger().logMessage(":: Finished");
         return this;
     }
 
     public CentralityResult result() {
         return new CentralityResult(result);
-    }
-
-    @Override
-    public PageRank withProgressLogger(final Log log) {
-        super.withProgressLogger(log);
-        this.log = log;
-        return this;
     }
 
     // we cannot do this in the constructor anymore since
@@ -271,7 +274,8 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
                     partitionSize,
                     start,
                     degreeCache,
-                    nodeCount
+                    nodeCount,
+                    progressLogger
             ));
         }
 
@@ -435,28 +439,28 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         }
 
         private void run(int iterations) {
-            final int operations = (iterations << 1) + 1;
-            int op = 0;
             didConverge = false;
             ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
-            getProgressLogger().logProgress(++op, operations, tracker);
             for (int i = 0; i < iterations && !didConverge; i++) {
+                getProgressLogger().logMessage(String.format(":: Iteration %d :: Start", i + 1));
                 // calculate scores
                 ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
-                getProgressLogger().logProgress(++op, operations, tracker);
 
                 // sync scores
                 synchronizeScores();
                 ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
                 didConverge = checkTolerance();
-                getProgressLogger().logProgress(++op, operations, tracker);
 
                 // normalize deltas
                 normalizeDeltas();
                 ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
-                getProgressLogger().logProgress(++op, operations, tracker);
 
                 ranIterations++;
+                if ((i < iterations - 1) && !didConverge) {
+                    getProgressLogger().reset(graph.relationshipCount());
+                }
+
+                getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", i + 1));
             }
         }
 

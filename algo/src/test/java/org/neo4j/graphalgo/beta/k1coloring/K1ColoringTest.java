@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.IdMapGraph;
@@ -41,14 +43,23 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
+import org.neo4j.graphalgo.pagerank.ImmutablePageRankStreamConfig;
+import org.neo4j.graphalgo.pagerank.PageRank;
+import org.neo4j.graphalgo.pagerank.PageRankAlgorithmType;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -111,6 +122,7 @@ class K1ColoringTest extends AlgoTestBase {
             DEFAULT_BATCH_SIZE,
             1,
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -155,6 +167,7 @@ class K1ColoringTest extends AlgoTestBase {
             DEFAULT_BATCH_SIZE,
             8,
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -184,21 +197,21 @@ class K1ColoringTest extends AlgoTestBase {
         long nodeCount = 100_000L;
         int concurrency = 1;
 
-        assertMemoryEstimation(nodeCount, concurrency, 825256);
+        assertMemoryEstimation(nodeCount, concurrency, 825264);
     }
 
     @Test
     void shouldComputeMemoryEstimation4Threads() {
         long nodeCount = 100_000L;
         int concurrency = 4;
-        assertMemoryEstimation(nodeCount, concurrency, 863032);
+        assertMemoryEstimation(nodeCount, concurrency, 863064);
     }
 
     @Test
     void shouldComputeMemoryEstimation42Threads() {
         long nodeCount = 100_000L;
         int concurrency = 42;
-        assertMemoryEstimation(nodeCount, concurrency, 1341528);
+        assertMemoryEstimation(nodeCount, concurrency, 1341864);
     }
 
     @Test
@@ -219,12 +232,49 @@ class K1ColoringTest extends AlgoTestBase {
             DEFAULT_BATCH_SIZE,
             8,
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
         k1Coloring.compute();
 
         assertFalse(k1Coloring.usedColors().get(ColoringStep.INITIAL_FORBIDDEN_COLORS));
+    }
+
+    @Test
+    void shouldLogProgress(){
+        Graph graph = RandomGraphGenerator.generate(
+            100,
+            10,
+            RelationshipDistribution.UNIFORM,
+            42L
+        );
+
+        TestProgressLogger testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring");
+
+        K1Coloring k1Coloring = new K1Coloring(
+            graph,
+            100,
+            DEFAULT_BATCH_SIZE,
+            8,
+            Pools.DEFAULT,
+            testLogger,
+            AllocationTracker.EMPTY
+        );
+
+        k1Coloring.compute();
+
+        List<AtomicLong> progresses = testLogger.getProgresses();
+
+        assertEquals(k1Coloring.ranIterations(), progresses.size());
+        progresses.forEach(progress -> assertTrue(progress.get() <= 2 * graph.relationshipCount()));
+
+        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
+        LongStream.range(1, k1Coloring.ranIterations() + 1).forEach(iteration -> {
+            assertTrue(testLogger.containsMessage(TestLog.INFO, String.format("Iteration %d :: Start", iteration)));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, String.format("Iteration %d :: Start", iteration)));
+        });
+        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
     }
 
     private void assertMemoryEstimation(long nodeCount, int concurrency, long expected) {

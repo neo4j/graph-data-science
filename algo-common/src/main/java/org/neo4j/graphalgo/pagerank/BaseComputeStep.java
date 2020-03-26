@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.pagerank;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
@@ -39,6 +40,7 @@ public abstract class BaseComputeStep implements ComputeStep {
     private static final int S_CALC = 1;
     private static final int S_SYNC = 2;
     private static final int S_NORM = 3;
+
 
     private int state;
 
@@ -59,6 +61,8 @@ public abstract class BaseComputeStep implements ComputeStep {
     float[][] prevScores;
 
     final long startNode;
+    final ProgressLogger progressLogger;
+    final Graph graph;
     final long endNode;
     private final int partitionSize;
     double l2Norm;
@@ -66,55 +70,61 @@ public abstract class BaseComputeStep implements ComputeStep {
     private boolean shouldBreak;
 
     BaseComputeStep(
-            double dampingFactor,
-            long[] sourceNodeIds,
-            Graph graph,
-            AllocationTracker tracker,
-            int partitionSize,
-            long startNode
+        double dampingFactor,
+        long[] sourceNodeIds,
+        Graph graph,
+        AllocationTracker tracker,
+        int partitionSize,
+        long startNode,
+        ProgressLogger progressLogger
     ) {
         this(
-                dampingFactor,
-                PageRank.DEFAULT_TOLERANCE,
-                sourceNodeIds,
-                graph,
-                tracker,
-                partitionSize,
-                startNode
+            dampingFactor,
+            PageRank.DEFAULT_TOLERANCE,
+            sourceNodeIds,
+            graph,
+            tracker,
+            partitionSize,
+            startNode,
+            progressLogger
         );
     }
 
     BaseComputeStep(
-            double dampingFactor,
-            double tolerance,
-            long[] sourceNodeIds,
-            Graph graph,
-            AllocationTracker tracker,
-            int partitionSize,
-            long startNode
+        double dampingFactor,
+        double tolerance,
+        long[] sourceNodeIds,
+        Graph graph,
+        AllocationTracker tracker,
+        int partitionSize,
+        long startNode,
+        ProgressLogger progressLogger
     ) {
         this.dampingFactor = dampingFactor;
         this.alpha = 1.0 - dampingFactor;
         this.tolerance = tolerance;
         this.sourceNodeIds = sourceNodeIds;
+        this.graph = graph;
         this.relationshipIterator = graph.concurrentCopy();
         this.degrees = graph;
         this.tracker = tracker;
         this.partitionSize = partitionSize;
         this.startNode = startNode;
+        this.progressLogger = progressLogger;
         this.endNode = startNode + (long) partitionSize;
         state = S_INIT;
     }
 
     static MemoryEstimation estimateMemory(
-            final int partitionSize,
-            final Class<?> computeStep) {
+        final int partitionSize,
+        final Class<?> computeStep
+    ) {
         return MemoryEstimations.builder(computeStep)
-                .perThread("nextScores[] wrapper", MemoryUsage::sizeOfObjectArray)
-                .perThread("inner nextScores[][]", sizeOfFloatArray(partitionSize))
-                .fixed("pageRank[]", sizeOfDoubleArray(partitionSize))
-                .fixed("deltas[]", sizeOfDoubleArray(partitionSize))
-                .build();
+            .perThread("nextScores[] wrapper", MemoryUsage::sizeOfObjectArray)
+            .perThread("inner nextScores[][]", sizeOfFloatArray(partitionSize))
+            .fixed("pageRank[]", sizeOfDoubleArray(partitionSize))
+            .fixed("deltas[]", sizeOfDoubleArray(partitionSize))
+            .build();
     }
 
     public void setStarts(long[] starts, int[] lengths) {
@@ -159,8 +169,8 @@ public abstract class BaseComputeStep implements ComputeStep {
             Arrays.fill(partitionRank, 0.0);
 
             long[] partitionSourceNodeIds = LongStream.of(sourceNodeIds)
-                    .filter(sourceNodeId -> sourceNodeId >= startNode && sourceNodeId < endNode)
-                    .toArray();
+                .filter(sourceNodeId -> sourceNodeId >= startNode && sourceNodeId < endNode)
+                .toArray();
 
             for (long sourceNodeId : partitionSourceNodeIds) {
                 partitionRank[Math.toIntExact(sourceNodeId - this.startNode)] = initialValue;

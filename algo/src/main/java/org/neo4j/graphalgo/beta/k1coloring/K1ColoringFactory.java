@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.beta.k1coloring;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
@@ -33,12 +35,15 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFact
 
     @Override
     public K1Coloring build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
+        ProgressLogger progressLogger = new BatchingProgressLogger(log, graph.nodeCount() * 2, "K1Coloring");
+
         return new K1Coloring(
             graph,
             configuration.maxIterations(),
             configuration.batchSize(),
             configuration.concurrency(),
             Pools.DEFAULT,
+            progressLogger,
             tracker
         );
     }

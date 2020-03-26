@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
+import org.neo4j.logging.NullLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -127,7 +128,7 @@ final class PageRankWikiTest extends AlgoTestBase {
                 .graph(NativeFactory.class);
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
                 .compute()
                 .result();
 

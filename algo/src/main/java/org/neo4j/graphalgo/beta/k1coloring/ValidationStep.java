@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 final class ValidationStep implements Runnable {
@@ -31,6 +32,7 @@ final class ValidationStep implements Runnable {
     private final BitSet nextNodesToColor;
     private final long offset;
     private final long batchEnd;
+    private final ProgressLogger progressLogger;
 
     ValidationStep(
         RelationshipIterator graph,
@@ -39,7 +41,8 @@ final class ValidationStep implements Runnable {
         BitSet nextNodesToColor,
         long nodeCount,
         long offset,
-        long batchSize
+        long batchSize,
+        ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.colors = colors;
@@ -47,11 +50,12 @@ final class ValidationStep implements Runnable {
         this.nextNodesToColor = nextNodesToColor;
         this.offset = offset;
         this.batchEnd = Math.min(offset + batchSize, nodeCount);
+        this.progressLogger = progressLogger;
     }
 
     @Override
     public void run() {
-        for (long nodeId = offset; nodeId <= batchEnd; nodeId++) {
+        for (long nodeId = offset; nodeId < batchEnd; nodeId++) {
             if (currentNodesToColor.get(nodeId)) {
                 graph.forEachRelationship(nodeId, (source, target) -> {
                     if (
@@ -65,6 +69,8 @@ final class ValidationStep implements Runnable {
 
                     return true;
                 });
+
+                progressLogger.logProgress();
             }
         }
     }

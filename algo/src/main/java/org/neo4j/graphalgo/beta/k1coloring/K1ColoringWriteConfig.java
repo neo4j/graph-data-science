@@ -31,7 +31,7 @@ import java.util.Optional;
 @Configuration("K1ColoringWriteConfigImpl")
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-interface K1ColoringWriteConfig extends K1ColoringConfig, WritePropertyConfig {
+public interface K1ColoringWriteConfig extends K1ColoringConfig, WritePropertyConfig {
 
     static K1ColoringWriteConfig of(
         String username,

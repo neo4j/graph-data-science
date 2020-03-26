@@ -26,11 +26,14 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
+import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,6 +70,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         ExecutorService executor,
         int minBatchSize,
         WccBaseConfig config,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.graph = graph;
@@ -94,17 +98,14 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             ));
         }
         this.threadSize = (int) threadSize;
+
+        this.progressLogger = progressLogger;
     }
 
-    public static double defaultWeight(double threshold) {
-        return threshold + 1;
-    }
+    @Override
+    public DisjointSetStruct compute() {
+        progressLogger.logMessage(":: Start");
 
-    public DisjointSetStruct computeUnrestricted() {
-        return compute(Double.NaN);
-    }
-
-    public DisjointSetStruct compute(double threshold) {
         long nodeCount = graph.nodeCount();
 
         DisjointSetStruct dss = config.isIncremental()
@@ -113,22 +114,15 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
 
         final Collection<Runnable> tasks = new ArrayList<>(threadSize);
         for (long i = 0L; i < this.nodeCount; i += batchSize) {
-            WCCTask wccTask = Double.isNaN(threshold)
+            WCCTask wccTask = Double.isNaN(threshold()) || threshold() == 0
                 ? new WCCTask(dss, i)
-                : new WCCWithThresholdTask(threshold, dss, i);
+                : new WCCWithThresholdTask(threshold(), dss, i);
             tasks.add(wccTask);
         }
         ParallelUtil.run(tasks, executor);
+
+        progressLogger.logMessage(":: Finished");
         return dss;
-    }
-
-    public double threshold() {
-        return config.threshold();
-    }
-
-    @Override
-    public DisjointSetStruct compute() {
-        return Double.isFinite(threshold()) ? compute(threshold()) : computeUnrestricted();
     }
 
     @Override
@@ -139,6 +133,14 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
     @Override
     public void release() {
         graph = null;
+    }
+
+    public double threshold() {
+        return config.threshold();
+    }
+
+    private static double defaultWeight(double threshold) {
+        return threshold + 1;
     }
 
     private class WCCTask implements Runnable, RelationshipConsumer {
@@ -162,8 +164,9 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
                 if (node % RUN_CHECK_NODE_COUNT == 0) {
                     assertRunning();
                 }
+
+                getProgressLogger().logProgress(graph.degree(node));
             }
-            getProgressLogger().logProgress((end - 1.0) / (nodeCount - 1.0));
         }
 
         void compute(final long node) {

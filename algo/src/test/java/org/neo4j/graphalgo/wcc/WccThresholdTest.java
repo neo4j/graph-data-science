@@ -112,6 +112,7 @@ class WccThresholdTest extends AlgoTestBase {
             Pools.DEFAULT,
             DEFAULT_BATCH_SIZE,
             wccConfig,
+            progressLogger,
             AllocationTracker.EMPTY
         ).compute();
 

@@ -38,31 +38,33 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.Log;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -226,6 +228,8 @@ final class NodeSimilarityTest extends AlgoTestBase {
         );
     }
 
+    private final Log log = new TestLog();
+
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
@@ -252,6 +256,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -279,6 +284,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder().concurrency(concurrency).topN(1).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -306,6 +312,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder().concurrency(concurrency).bottomN(1).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -336,6 +343,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder().topK(1).concurrency(concurrency).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -367,6 +375,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
                 .bottomK(1)
                 .build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -397,6 +406,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder().concurrency(concurrency).similarityCutoff(0.1).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -427,6 +437,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder().degreeCutoff(2).concurrency(concurrency).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -457,6 +468,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
         Set<SimilarityResult> result = nodeSimilarity.computeToStream().collect(Collectors.toSet());
@@ -479,6 +491,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -543,6 +556,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
                 .topN(1)
                 .build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -593,6 +607,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder().concurrency(concurrency).topN(1).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -635,6 +650,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             graph,
             configBuilder().concurrency(concurrency).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -665,49 +681,11 @@ final class NodeSimilarityTest extends AlgoTestBase {
                 graph,
                 configBuilder().concurrency(concurrency).build(),
                 Pools.DEFAULT,
+                progressLogger,
                 AllocationTracker.EMPTY
             ).computeToStream()
         );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
-    }
-
-    @ParameterizedTest(name = "topK = {0}, concurrency = {1}")
-    @MethodSource("topKAndConcurrencies")
-    void shouldLogProgress(int topK, int concurrency) {
-        TestLog log = new TestLog();
-
-        Graph graph =  new StoreLoaderBuilder()
-            .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
-            .build()
-            .graph(NativeFactory.class);
-
-        NodeSimilarity nodeSimilarity = new NodeSimilarity(
-            graph,
-            configBuilder().topN(100).topK(topK).concurrency(concurrency).build(),
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY
-        ).withProgressLogger(log);
-
-        nodeSimilarity.computeToGraph();
-
-        assertTrue(log.hasMessages(INFO));
-
-        assertTrue(log.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#prepare"));
-        assertTrue(log.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#prepare"));
-        assertTrue(log.containsMessage(TestLog.INFO, "NodeSimilarity#computeToStream"));
-
-        if (concurrency > 1) {
-            assertTrue(log.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#computeTopKMapParallel"));
-            assertTrue(log.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#computeTopKMapParallel"));
-        } else {
-            assertTrue(log.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#computeTopKMap"));
-            assertTrue(log.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#computeTopKMap"));
-        }
-
-        assertTrue(log.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#computeTopN(TopKMap)"));
-        assertTrue(log.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#computeTopN(TopKMap)"));
     }
 
     @Timeout(value = 10)
@@ -717,6 +695,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             RandomGraphGenerator.generate(10, 2),
             configBuilder().concurrency(1).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -832,6 +811,46 @@ final class NodeSimilarityTest extends AlgoTestBase {
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
     }
 
+    @ParameterizedTest(name = "topK = {0}, concurrency = {1}")
+    @MethodSource("topKAndConcurrencies")
+    void shouldLogMessages(int topK, int concurrency) {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .build()
+            .graph(NativeFactory.class);
+
+        TestProgressLogger progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity");
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
+            graph,
+            configBuilder().topN(100).topK(topK).concurrency(concurrency).build(),
+            Pools.DEFAULT,
+            progressLogger,
+            AllocationTracker.EMPTY
+        );
+
+        nodeSimilarity.computeToGraph();
+
+        assertTrue(progressLogger.hasMessages(INFO));
+
+        assertTrue(progressLogger.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#prepare"));
+        assertTrue(progressLogger.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#prepare"));
+        assertTrue(progressLogger.containsMessage(TestLog.INFO, "NodeSimilarity#computeToStream"));
+
+        if (concurrency > 1) {
+            assertTrue(progressLogger.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#computeTopKMapParallel"));
+            assertTrue(progressLogger.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#computeTopKMapParallel"));
+        } else {
+            assertTrue(progressLogger.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#computeTopKMap"));
+            assertTrue(progressLogger.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#computeTopKMap"));
+        }
+
+        assertTrue(progressLogger.containsMessage(TestLog.INFO, "Start :: NodeSimilarity#computeTopN(TopKMap)"));
+        assertTrue(progressLogger.containsMessage(TestLog.INFO, "Finish :: NodeSimilarity#computeTopN(TopKMap)"));
+    }
+
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1,2})
     void shouldLogProgress(int concurrency) {
@@ -843,62 +862,25 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .build()
             .graph(NativeFactory.class);
 
+        TestProgressLogger progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity");
+
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().degreeCutoff(0).concurrency(concurrency).build(),
             Pools.DEFAULT,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
-        TestProgressLogger progressLogger = new TestProgressLogger();
+        long comparisons = nodeSimilarity.computeToStream().count();
 
-        nodeSimilarity.withProgressLogger(progressLogger);
+        List<AtomicLong> progresses = progressLogger.getProgresses();
 
-        nodeSimilarity.computeToStream();
+        // Should log progress for prepare and actual comparisons
+        assertEquals(2, progresses.size());
 
-        List<Double> sortedPercentages = progressLogger.getPercentages().stream().sorted().collect(Collectors.toList());
-
-        assertFalse(sortedPercentages.stream().anyMatch(percentage -> percentage > 1.0));
-
-        assertEquals(
-            Arrays.asList(0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0),
-            sortedPercentages
-        );
-
-        if (concurrency == 1) {
-            assertEquals(
-                new ArrayList<>(progressLogger.getPercentages()),
-                sortedPercentages
-            );
-        }
-    }
-
-    @Test
-    void shouldLogProgressWithDegreeCutoff() {
-        Graph graph =  new StoreLoaderBuilder()
-            .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
-            .globalOrientation(NATURAL)
-            .build()
-            .graph(NativeFactory.class);
-
-        NodeSimilarity nodeSimilarity = new NodeSimilarity(
-            graph,
-            configBuilder().degreeCutoff(2).concurrency(1).build(),
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY
-        );
-
-        TestProgressLogger progressLogger = new TestProgressLogger();
-
-        nodeSimilarity.withProgressLogger(progressLogger);
-
-        nodeSimilarity.computeToStream();
-
-        List<Double> sortedPercentages = progressLogger.getPercentages().stream().sorted().collect(Collectors.toList());
-
-        assertFalse(sortedPercentages.stream().anyMatch(percentage -> percentage > 1.0));
+        assertEquals(graph.relationshipCount(), progresses.get(0).get());
+        assertEquals(concurrency == 1 ? comparisons / 2 : comparisons, progresses.get(1).get());
     }
 }
 

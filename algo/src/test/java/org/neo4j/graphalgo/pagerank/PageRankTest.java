@@ -27,27 +27,37 @@ import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagation;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
+import org.neo4j.logging.NullLog;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 
 final class PageRankTest extends AlgoTestBase {
 
@@ -61,45 +71,45 @@ final class PageRankTest extends AlgoTestBase {
     }
 
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (_:Label0 {name: '_'})" +
-            ", (a:Label1 {name: 'a'})" +
-            ", (b:Label1 {name: 'b'})" +
-            ", (c:Label1 {name: 'c'})" +
-            ", (d:Label1 {name: 'd'})" +
-            ", (e:Label1 {name: 'e'})" +
-            ", (f:Label1 {name: 'f'})" +
-            ", (g:Label1 {name: 'g'})" +
-            ", (h:Label1 {name: 'h'})" +
-            ", (i:Label1 {name: 'i'})" +
-            ", (j:Label1 {name: 'j'})" +
-            ", (k:Label2 {name: 'k'})" +
-            ", (l:Label2 {name: 'l'})" +
-            ", (m:Label2 {name: 'm'})" +
-            ", (n:Label2 {name: 'n'})" +
-            ", (o:Label2 {name: 'o'})" +
-            ", (p:Label2 {name: 'p'})" +
-            ", (q:Label2 {name: 'q'})" +
-            ", (r:Label2 {name: 'r'})" +
-            ", (s:Label2 {name: 's'})" +
-            ", (t:Label2 {name: 't'})" +
-            ", (b)-[:TYPE1]->(c)" +
-            ", (c)-[:TYPE1]->(b)" +
-            ", (d)-[:TYPE1]->(a)" +
-            ", (d)-[:TYPE1]->(b)" +
-            ", (e)-[:TYPE1]->(b)" +
-            ", (e)-[:TYPE1]->(d)" +
-            ", (e)-[:TYPE1]->(f)" +
-            ", (f)-[:TYPE1]->(b)" +
-            ", (f)-[:TYPE1]->(e)" +
-            ", (g)-[:TYPE2]->(b)" +
-            ", (g)-[:TYPE2]->(e)" +
-            ", (h)-[:TYPE2]->(b)" +
-            ", (h)-[:TYPE2]->(e)" +
-            ", (i)-[:TYPE2]->(b)" +
-            ", (i)-[:TYPE2]->(e)" +
-            ", (j)-[:TYPE2]->(e)" +
-            ", (k)-[:TYPE2]->(e)";
+        "CREATE" +
+        "  (_:Label0 {name: '_'})" +
+        ", (a:Label1 {name: 'a'})" +
+        ", (b:Label1 {name: 'b'})" +
+        ", (c:Label1 {name: 'c'})" +
+        ", (d:Label1 {name: 'd'})" +
+        ", (e:Label1 {name: 'e'})" +
+        ", (f:Label1 {name: 'f'})" +
+        ", (g:Label1 {name: 'g'})" +
+        ", (h:Label1 {name: 'h'})" +
+        ", (i:Label1 {name: 'i'})" +
+        ", (j:Label1 {name: 'j'})" +
+        ", (k:Label2 {name: 'k'})" +
+        ", (l:Label2 {name: 'l'})" +
+        ", (m:Label2 {name: 'm'})" +
+        ", (n:Label2 {name: 'n'})" +
+        ", (o:Label2 {name: 'o'})" +
+        ", (p:Label2 {name: 'p'})" +
+        ", (q:Label2 {name: 'q'})" +
+        ", (r:Label2 {name: 'r'})" +
+        ", (s:Label2 {name: 's'})" +
+        ", (t:Label2 {name: 't'})" +
+        ", (b)-[:TYPE1]->(c)" +
+        ", (c)-[:TYPE1]->(b)" +
+        ", (d)-[:TYPE1]->(a)" +
+        ", (d)-[:TYPE1]->(b)" +
+        ", (e)-[:TYPE1]->(b)" +
+        ", (e)-[:TYPE1]->(d)" +
+        ", (e)-[:TYPE1]->(f)" +
+        ", (f)-[:TYPE1]->(b)" +
+        ", (f)-[:TYPE1]->(e)" +
+        ", (g)-[:TYPE2]->(b)" +
+        ", (g)-[:TYPE2]->(e)" +
+        ", (h)-[:TYPE2]->(b)" +
+        ", (h)-[:TYPE2]->(e)" +
+        ", (i)-[:TYPE2]->(b)" +
+        ", (i)-[:TYPE2]->(e)" +
+        ", (j)-[:TYPE2]->(e)" +
+        ", (k)-[:TYPE2]->(e)";
 
     @BeforeEach
     void setupGraphDb() {
@@ -154,17 +164,17 @@ final class PageRankTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty())
-                .compute()
-                .result();
+            .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
+            .compute()
+            .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
+                expected.get(nodeId),
+                rankResult.score(i),
+                1e-2,
+                "Node#" + nodeId
             );
         });
     }
@@ -203,9 +213,9 @@ final class PageRankTest extends AlgoTestBase {
                     .graph(factoryType)
             );
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                    .create(graph, DEFAULT_CONFIG, LongStream.empty())
-                    .compute()
-                    .result();
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
+                .compute()
+                .result();
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)
@@ -216,18 +226,18 @@ final class PageRankTest extends AlgoTestBase {
                 .graph(factoryType);
 
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                    .create(graph, DEFAULT_CONFIG, LongStream.empty())
-                    .compute()
-                    .result();
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
+                .compute()
+                .result();
         }
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
+                expected.get(nodeId),
+                rankResult.score(i),
+                1e-2,
+                "Node#" + nodeId
             );
         });
     }
@@ -266,6 +276,8 @@ final class PageRankTest extends AlgoTestBase {
                 1,
                 null,
                 1,
+                NullLog.getInstance(),
+                progressLogger,
                 AllocationTracker.EMPTY
             )
             .compute();
@@ -293,32 +305,63 @@ final class PageRankTest extends AlgoTestBase {
         assertMemoryEstimation(nodeCount, concurrency);
     }
 
+    @Test
+    void shouldLogProgress() {
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(LABEL.name())
+            .addRelationshipType(RELATIONSHIP_TYPE)
+            .build()
+            .graph(NativeFactory.class);
+
+        TestProgressLogger testLogger = new TestProgressLogger(graph.relationshipCount(), "PageRank");
+
+        PageRank pageRank = PageRankAlgorithmType.NON_WEIGHTED.create(
+            graph,
+            ImmutablePageRankStreamConfig.builder().build(),
+            LongStream.empty(),
+            testLogger.getLog(),
+            testLogger
+        );
+
+        pageRank.compute();
+
+        List<AtomicLong> progresses = testLogger.getProgresses();
+
+        assertEquals(pageRank.iterations(), progresses.size());
+        progresses.forEach(progress -> assertEquals(graph.relationshipCount(), progress.get()));
+
+        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
+        LongStream.range(1, pageRank.iterations() + 1).forEach(iteration -> {
+            assertTrue(testLogger.containsMessage(TestLog.INFO, String.format("Iteration %d :: Start", iteration)));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, String.format("Iteration %d :: Start", iteration)));
+        });
+        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
+    }
+
     private void assertMemoryEstimation(final long nodeCount, final int concurrency) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
 
         final PageRankFactory<PageRankStreamConfig> pageRank = new PageRankFactory<>(PageRankAlgorithmType.NON_WEIGHTED);
 
-        long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
         final MemoryRange actual = pageRank
             .memoryEstimation(defaultConfigBuilder().build())
             .estimate(dimensions, concurrency)
             .memoryUsage();
-        final MemoryRange expected = MemoryRange.of(
-                96L /* PageRank.class */ +
-                32L /* ComputeSteps.class */ +
-                BitUtil.align(16 + concurrency * 4, 8) /* scores[] wrapper */ +
-                BitUtil.align(16 + concurrency * 8, 8) /* starts[] */ +
-                BitUtil.align(16 + concurrency * 8, 8) /* lengths[] */ +
-                BitUtil.align(16 + concurrency * 4, 8) /* list of computeSteps */ +
-                        /* ComputeStep */
-                concurrency * (
-                        120L /* NonWeightedComputeStep.class */ +
-                        BitUtil.align(16 + concurrency * 4, 8) /* nextScores[] wrapper */ +
-                        concurrency * BitUtil.align(16 + partitionSize * 4, 8) /* inner nextScores[][] */ +
-                        BitUtil.align(16 + partitionSize * 8, 8) /* pageRank[] */ +
-                        BitUtil.align(16 + partitionSize * 8, 8) /* deltas[] */
-                )
+
+        Map<Integer, Long> minByConcurrency = genericMap(
+            1, 2000424L,
+            4, 3201312L,
+            42, 18451296L
         );
-        assertEquals(expected, actual);
+
+        Map<Integer, Long> maxByConcurrency = genericMap(
+            1, 2000424L,
+            4, 3201312L,
+            42, 18451296L
+        );
+
+        assertEquals(minByConcurrency.get(concurrency), actual.min);
+        assertEquals(maxByConcurrency.get(concurrency), actual.max);
     }
 }

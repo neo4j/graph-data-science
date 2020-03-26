@@ -24,6 +24,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
@@ -35,8 +36,8 @@ final class ComputeStep implements Step {
     private final HugeLongArray existingLabels;
     private final PrimitiveLongIterable nodes;
     private final ProgressLogger progressLogger;
-    private final double maxNode;
     private final ComputeStepConsumer consumer;
+    private final Graph graph;
 
     ComputeStep(
             Graph graph,
@@ -46,7 +47,7 @@ final class ComputeStep implements Step {
             PrimitiveLongIterable nodes) {
         this.existingLabels = existingLabels;
         this.progressLogger = progressLogger;
-        this.maxNode = (double) graph.nodeCount() - 1L;
+        this.graph = graph;
         this.localRelationshipIterator = graph.concurrentCopy();
         this.nodes = nodes;
         this.consumer = new ComputeStepConsumer(nodeWeights, existingLabels);
@@ -76,7 +77,7 @@ final class ComputeStep implements Step {
         while (nodeIds.hasNext()) {
             long nodeId = nodeIds.next();
             didChange = compute(nodeId, didChange);
-            progressLogger.logProgress((double) nodeId, maxNode);
+            progressLogger.logProgress(graph.degree(nodeId));
         }
         return didChange;
     }

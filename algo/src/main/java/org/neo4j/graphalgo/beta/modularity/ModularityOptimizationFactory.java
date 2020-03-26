@@ -21,7 +21,10 @@ package org.neo4j.graphalgo.beta.modularity;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -67,16 +70,32 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
 
     @Override
     public ModularityOptimization build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
+        return build(
+            graph,
+            configuration,
+            configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null,
+            tracker,
+            log
+        );
+    }
+
+    public ModularityOptimization build(Graph graph, T configuration, NodeProperties seed, AllocationTracker tracker, Log log) {
+        ProgressLogger progressLogger = new BatchingProgressLogger(
+            log,
+            graph.relationshipCount(),
+            "ModularityOptimization"
+        );
+
         return new ModularityOptimization(
             graph,
             configuration.maxIterations(),
             configuration.tolerance(),
-            configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null,
+            seed,
             configuration.concurrency(),
             configuration.batchSize(),
             Pools.DEFAULT,
-            tracker,
-            log
+            progressLogger,
+            tracker
         );
     }
 }

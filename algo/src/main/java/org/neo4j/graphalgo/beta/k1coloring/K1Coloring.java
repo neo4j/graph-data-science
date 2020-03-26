@@ -23,11 +23,14 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.logging.Log;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -84,12 +87,14 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
         int minBatchSize,
         int concurrency,
         ExecutorService executor,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.minBatchSize = minBatchSize;
         this.concurrency = concurrency;
         this.executor = executor;
+        this.progressLogger = progressLogger;
         this.tracker = tracker;
 
         this.nodeCount = graph.nodeCount();
@@ -139,6 +144,8 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
 
     @Override
     public HugeLongArray compute() {
+        getProgressLogger().logMessage(":: Start");
+
         colors = HugeLongArray.newArray(nodeCount, tracker);
         colors.setAll((nodeId) -> ColoringStep.INITIAL_FORBIDDEN_COLORS);
 
@@ -146,15 +153,25 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
         nodesToColor.set(0, nodeCount);
 
         while (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
+            getProgressLogger().logMessage(String.format(":: Iteration %d :: Start", ranIterations + 1));
             assertRunning();
             runColoring();
+
             assertRunning();
             runValidation();
+
             ++ranIterations;
+
+            if (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
+                getProgressLogger().reset(nodesToColor.cardinality() * 2);
+            }
+
+            getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", ranIterations));
         }
 
         this.didConverge = ranIterations < maxIterations;
 
+        getProgressLogger().logMessage(":: Finished");
         return colors();
     }
 
@@ -180,7 +197,8 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
             nodesToColor,
             nodeCount,
             partition.startNode,
-            partition.startNode + partition.nodeCount
+            partition.nodeCount,
+            getProgressLogger()
         )).collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(concurrency, steps, executor);
@@ -199,7 +217,8 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
             nextNodesToColor,
             nodeCount,
             partition.startNode,
-            partition.startNode + partition.nodeCount
+            partition.nodeCount,
+            getProgressLogger()
         )).collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(concurrency, steps, executor);

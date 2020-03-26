@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 public class WeightedPageRankVariant implements PageRankVariant {
@@ -39,7 +40,8 @@ public class WeightedPageRankVariant implements PageRankVariant {
             int partitionCount,
             long start,
             DegreeCache aggregatedDegrees,
-            long nodeCount
+            long nodeCount,
+            ProgressLogger progressLogger
     ) {
         return new WeightedComputeStep(
                 dampingFactor,
@@ -48,7 +50,8 @@ public class WeightedPageRankVariant implements PageRankVariant {
                 tracker,
                 partitionCount,
                 start,
-                aggregatedDegrees
+                aggregatedDegrees,
+                progressLogger
         );
     }
 

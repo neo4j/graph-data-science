@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -46,11 +47,18 @@ final class WccProc {
         return new AlgorithmFactory<Wcc, CONFIG>() {
             @Override
             public Wcc build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
+                BatchingProgressLogger progressLogger = new BatchingProgressLogger(
+                    log,
+                    graph.relationshipCount(),
+                    "WCC"
+                );
+
                 return new Wcc(
                     graph,
                     Pools.DEFAULT,
                     ParallelUtil.DEFAULT_BATCH_SIZE,
                     configuration,
+                    progressLogger,
                     tracker
                 );
             }

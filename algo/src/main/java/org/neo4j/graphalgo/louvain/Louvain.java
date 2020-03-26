@@ -23,11 +23,16 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.beta.modularity.ImmutableModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimization;
+import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationFactory;
+import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -45,7 +50,6 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
     private final LouvainBaseConfig config;
     private final NodeProperties seedingValues;
     private final ExecutorService executorService;
-    private final Log log;
     private final AllocationTracker tracker;
 
     // results
@@ -57,51 +61,54 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         Graph graph,
         LouvainBaseConfig config,
         ExecutorService executorService,
-        Log log,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.config = config;
         this.rootGraph = graph;
-        this.log = log;
         this.seedingValues = Optional.ofNullable(config.seedProperty()).map(graph::nodeProperties).orElse(null);
         this.executorService = executorService;
         this.tracker = tracker;
         this.dendrograms = new HugeLongArray[config.maxLevels()];
         this.modularities = new double[config.maxLevels()];
+        this.progressLogger = progressLogger;
     }
 
     @Override
     public Louvain compute() {
+        getProgressLogger().logMessage(":: Start");
 
         Graph workingGraph = rootGraph;
         NodeProperties nextSeedingValues = seedingValues;
 
         long oldNodeCount = rootGraph.nodeCount();
         for (ranLevels = 0; ranLevels < config.maxLevels(); ranLevels++) {
-            try (ProgressTimer timer = ProgressTimer.start(millis -> log.info("Louvain - Level %d finished after %dms", ranLevels + 1, millis)))  {
+            getProgressLogger().logMessage(String.format("Level %d :: Start", ranLevels + 1));
 
-                assertRunning();
+            assertRunning();
 
-                ModularityOptimization modularityOptimization = runModularityOptimization(
-                    workingGraph,
-                    nextSeedingValues
-                );
-                modularityOptimization.release();
+            ModularityOptimization modularityOptimization = runModularityOptimization(
+                workingGraph,
+                nextSeedingValues
+            );
+            modularityOptimization.release();
 
-                modularities[ranLevels] = modularityOptimization.getModularity();
-                dendrograms[ranLevels] = HugeLongArray.newArray(rootGraph.nodeCount(), tracker);
-                long maxCommunityId = buildDendrogram(workingGraph, ranLevels, modularityOptimization);
+            modularities[ranLevels] = modularityOptimization.getModularity();
+            dendrograms[ranLevels] = HugeLongArray.newArray(rootGraph.nodeCount(), tracker);
+            long maxCommunityId = buildDendrogram(workingGraph, ranLevels, modularityOptimization);
 
-                workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
-                nextSeedingValues = new OriginalIdNodeProperties(workingGraph);
-            }
+            workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
+            nextSeedingValues = new OriginalIdNodeProperties(workingGraph);
+
+            getProgressLogger().logMessage(String.format("Level %d :: Finished", ranLevels + 1));
+
 
             if (workingGraph.nodeCount() == oldNodeCount
                 || workingGraph.nodeCount() == 1
                 || hasConverged()
             ) {
                 resizeResultArrays();
-                log.info("Louvain - Finished after %d levels", levels());
+                getProgressLogger().logMessage(":: Finished");
                 break;
             }
             oldNodeCount = workingGraph.nodeCount();
@@ -142,26 +149,33 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
     }
 
     private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodeProperties seed) {
-        ModularityOptimization modularityOptimization = new ModularityOptimization(
-            louvainGraph,
-            10,
-            config.tolerance(),
-            seed,
-            config.concurrency(),
-            DEFAULT_BATCH_SIZE,
-            executorService,
-            tracker,
-            log
-        )
-            .withProgressLogger(progressLogger)
-            .withTerminationFlag(terminationFlag);
+        ModularityOptimizationStreamConfig modularityOptimizationConfig = ImmutableModularityOptimizationStreamConfig
+            .builder()
+            .maxIterations(10)
+            .tolerance(config.tolerance())
+            .concurrency(config.concurrency())
+            .batchSize(DEFAULT_BATCH_SIZE)
+            .build();
+
+        ModularityOptimization modularityOptimization = new ModularityOptimizationFactory<>()
+            .build(
+                louvainGraph,
+                modularityOptimizationConfig,
+                seed,
+                tracker,
+                progressLogger.getLog()
+            ).withTerminationFlag(terminationFlag);
 
         modularityOptimization.compute();
 
         return modularityOptimization;
     }
 
-    private Graph summarizeGraph(Graph workingGraph, ModularityOptimization modularityOptimization, long maxCommunityId) {
+    private Graph summarizeGraph(
+        Graph workingGraph,
+        ModularityOptimization modularityOptimization,
+        long maxCommunityId
+    ) {
         HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             maxCommunityId,
             executorService,

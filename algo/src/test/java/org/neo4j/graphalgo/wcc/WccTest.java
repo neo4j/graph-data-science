@@ -29,6 +29,8 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -43,8 +45,11 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
@@ -123,6 +128,35 @@ class WccTest extends AlgoTestBase {
             }
             return true;
         });
+    }
+
+    @Test
+    void shouldLogProgress() {
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .addRelationshipType(RELATIONSHIP_TYPE.name())
+            .globalOrientation(Orientation.NATURAL)
+            .build()
+            .graph(NativeFactory.class);
+
+        TestProgressLogger testLogger = new TestProgressLogger(graph.relationshipCount(), "Wcc");
+
+        new Wcc(
+            graph,
+            Pools.DEFAULT,
+            communitySize() / 4,
+            ImmutableWccStreamConfig.builder().concurrency(2).build(),
+            testLogger,
+            AllocationTracker.EMPTY
+        ).compute();
+
+        List<AtomicLong> progresses = testLogger.getProgresses();
+        assertEquals(1, progresses.size());
+        assertEquals(graph.relationshipCount(), progresses.get(0).get());
+
+        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
     }
 
     @Test
@@ -238,6 +272,7 @@ class WccTest extends AlgoTestBase {
             Pools.DEFAULT,
             communitySize() / concurrency,
             config,
+            progressLogger,
             AllocationTracker.EMPTY
         ).compute();
     }

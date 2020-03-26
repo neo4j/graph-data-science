@@ -32,7 +32,10 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
@@ -101,8 +104,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
             1,
             10_000,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance()
+            progressLogger,
+            AllocationTracker.EMPTY
         );
 
         pmo.compute();
@@ -110,6 +113,25 @@ class ModularityOptimizationTest extends AlgoTestBase {
         assertEquals(0.12244, pmo.getModularity(), 0.001);
         assertCommunities(getCommunityIds(graph.nodeCount(), pmo), new long[]{0, 1, 2, 4}, new long[]{3, 5});
         assertTrue(pmo.getIterations() <= 3);
+    }
+
+    @Test
+    void foo() {
+        Graph graph = RandomGraphGenerator.generate(10000, 10, RelationshipDistribution.POWER_LAW);
+
+        ModularityOptimization pmo = new ModularityOptimization(
+            graph,
+            3,
+            TOLERANCE_DEFAULT,
+            null,
+            1,
+            10_000,
+            Pools.DEFAULT,
+            progressLogger,
+            AllocationTracker.EMPTY
+        );
+
+        pmo.compute();
     }
 
     @Test
@@ -131,8 +153,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
             3,
             2,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance()
+            progressLogger,
+            AllocationTracker.EMPTY
         );
 
         pmo.compute();
@@ -161,8 +183,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
             1,
             100,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance()
+            progressLogger,
+            AllocationTracker.EMPTY
         );
 
         pmo.compute();
@@ -193,8 +215,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
             1,
             100,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance()
+            progressLogger,
+            AllocationTracker.EMPTY
         );
 
         pmo.compute();
@@ -224,9 +246,12 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .build()
             .graph(NativeFactory.class);
 
-        TestLog log = new TestLog();
+        TestProgressLogger testLogger = new TestProgressLogger(
+            graph.relationshipCount(),
+            "ModularityOptimization"
+        );
 
-        ModularityOptimization pmo = new ModularityOptimization(
+        ModularityOptimization modularityOptimization = new ModularityOptimization(
             graph,
             3,
             TOLERANCE_DEFAULT,
@@ -234,15 +259,18 @@ class ModularityOptimizationTest extends AlgoTestBase {
             3,
             2,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            log
+            testLogger,
+            AllocationTracker.EMPTY
         );
 
-        pmo.compute();
+        modularityOptimization.compute();
 
-        assertTrue(log.containsMessage(INFO, "Modularity Optimization - Initialization finished"));
-        assertTrue(log.containsMessage(INFO, "Iteration 1"));
-        assertTrue(log.containsMessage(INFO, "Modularity Optimization - Finished"));
+        assertTrue(testLogger.containsMessage(INFO, ":: Start"));
+        assertTrue(testLogger.containsMessage(INFO, "Initialization :: Start"));
+        assertTrue(testLogger.containsMessage(INFO, "Initialization :: Finished"));
+        assertTrue(testLogger.containsMessage(INFO, "Iteration 1 :: Start"));
+        assertTrue(testLogger.containsMessage(INFO, "Iteration 1 :: Finished"));
+        assertTrue(testLogger.containsMessage(INFO, ":: Finished"));
     }
 
     @Test
@@ -265,8 +293,8 @@ class ModularityOptimizationTest extends AlgoTestBase {
                 3,
                 2,
                 Pools.DEFAULT,
-                AllocationTracker.EMPTY,
-                NullLog.getInstance()
+                progressLogger,
+                AllocationTracker.EMPTY
             )
         );
 
@@ -291,9 +319,9 @@ class ModularityOptimizationTest extends AlgoTestBase {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 5_614_088, 8_413_120),
-            arguments(4, 5_617_376, 14_413_384),
-            arguments(42, 5_659_024, 90_416_728)
+            arguments(1, 5614080, 8413112),
+            arguments(4, 5617368, 14413376),
+            arguments(42, 5659016, 90416720)
         );
     }
 }

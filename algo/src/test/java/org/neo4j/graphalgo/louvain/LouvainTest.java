@@ -149,9 +149,9 @@ class LouvainTest extends AlgoTestBase {
             graph,
             defaultConfigBuilder().build(),
             Pools.DEFAULT,
-            NullLog.getInstance(),
+            progressLogger,
             AllocationTracker.EMPTY
-        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+        ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
@@ -185,9 +185,9 @@ class LouvainTest extends AlgoTestBase {
             graph,
             defaultConfigBuilder().build(),
             Pools.DEFAULT,
-            NullLog.getInstance(),
+            progressLogger,
             AllocationTracker.EMPTY
-        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+        ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
@@ -223,9 +223,9 @@ class LouvainTest extends AlgoTestBase {
             graph,
             defaultConfigBuilder().seedProperty("seed").build(),
             Pools.DEFAULT,
-            NullLog.getInstance(),
+            progressLogger,
             AllocationTracker.EMPTY
-        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+        ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
@@ -262,9 +262,9 @@ class LouvainTest extends AlgoTestBase {
                 .concurrency(1)
                 .build(),
             Pools.DEFAULT,
-            NullLog.getInstance(),
+            progressLogger,
             AllocationTracker.EMPTY
-        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+        ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
@@ -285,9 +285,9 @@ class LouvainTest extends AlgoTestBase {
                 .concurrency(1)
                 .build(),
             Pools.DEFAULT,
-            NullLog.getInstance(),
+            progressLogger,
             AllocationTracker.EMPTY
-        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+        ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
@@ -370,10 +370,9 @@ class LouvainTest extends AlgoTestBase {
                 graph,
                 defaultConfigBuilder().concurrency(2).build(),
                 Pools.DEFAULT,
-                NullLog.getInstance(),
+                progressLogger,
                 AllocationTracker.EMPTY
             )
-                .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(terminationFlag)
                 .compute();
         }, 500, 1000);
@@ -383,30 +382,31 @@ class LouvainTest extends AlgoTestBase {
     void testLogging() {
         Graph graph = loadGraph(NativeFactory.class, DB_CYPHER);
 
-        TestLog log = new TestLog();
+        TestProgressLogger testLogger = new TestProgressLogger(0, "Louvain");
 
         Louvain louvain = new Louvain(
             graph,
             defaultConfigBuilder().build(),
             Pools.DEFAULT,
-            log,
+            testLogger,
             AllocationTracker.EMPTY
         );
 
         louvain.compute();
 
-        assertTrue(log.containsMessage(INFO, "Louvain - Level 1 finished after"));
-        assertTrue(log.containsMessage(INFO, "Louvain - Finished after"));
+        assertTrue(testLogger.containsMessage(INFO, ":: Start"));
+        assertTrue(testLogger.containsMessage(INFO, "Level 1 :: Finished"));
+        assertTrue(testLogger.containsMessage(INFO, ":: Finished"));
     }
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6414185, 13585992),
-            arguments(1, 10, 6414185, 20786352),
-            arguments(4, 1, 6417473, 19488312),
-            arguments(4, 10, 6417473, 26688672),
-            arguments(42, 1, 6459121, 95476728),
-            arguments(42, 10, 6459121, 102677088)
+            arguments(1, 1, 6414177, 13585984),
+            arguments(1, 10, 6414177, 20786344),
+            arguments(4, 1, 6417465, 19488304),
+            arguments(4, 10, 6417465, 26688664),
+            arguments(42, 1, 6459113, 95476720),
+            arguments(42, 10, 6459113, 102677080)
         );
     }
 

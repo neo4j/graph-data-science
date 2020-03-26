@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.pagerank;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
@@ -41,14 +42,16 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
-            DegreeCache degreeCache
+            DegreeCache degreeCache,
+            ProgressLogger progressLogger
     ) {
         super(dampingFactor,
                 sourceNodeIds,
                 graph,
                 tracker,
                 partitionSize,
-                startNode
+                startNode,
+                progressLogger
         );
         this.aggregatedDegrees = degreeCache.aggregatedDegrees();
     }
@@ -66,6 +69,7 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
                     rels.forEachRelationship(nodeId, DEFAULT_WEIGHT, this);
                 }
             }
+            progressLogger.logProgress(graph.degree(nodeId));
         }
     }
 

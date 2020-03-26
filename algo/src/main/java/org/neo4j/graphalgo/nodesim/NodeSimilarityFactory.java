@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -35,7 +36,13 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
 
     @Override
     public NodeSimilarity build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
-        return new NodeSimilarity(graph, configuration, Pools.DEFAULT, tracker);
+        BatchingProgressLogger progressLogger = new BatchingProgressLogger(
+            log,
+            graph.relationshipCount(),
+            "NodeSimilarity"
+        );
+
+        return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressLogger, tracker);
     }
 
     @Override

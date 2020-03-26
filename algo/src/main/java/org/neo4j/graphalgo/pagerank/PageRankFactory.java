@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.pagerank;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
@@ -50,12 +52,20 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends Algorith
         AllocationTracker tracker,
         Log log
     ) {
+        ProgressLogger progressLogger = new BatchingProgressLogger(
+            log,
+            (configuration.maxIterations() * 2) + 1,
+            getClass().getSimpleName()
+        );
+
         return algorithmType.create(
             graph,
             configuration.sourceNodeIds(),
             configuration,
             configuration.concurrency(),
             Pools.DEFAULT,
+            log,
+            progressLogger,
             tracker
         );
     }
