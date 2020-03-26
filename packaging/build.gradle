@@ -37,7 +37,7 @@ task versionsJson {
             [(it.neo4j): it]
         }
 
-        def shouldUpdateVersion = !project.version.toString().matches("(\\d\\.\\d\\.\\d+(-alpha\\d+|-beta\\d+))")
+        def shouldUpdateVersion = project.version.toString().matches("^(\\d+\\.){2}\\d+\$")
         if (shouldUpdateVersion) {
             indexedVersionsJson[ver.neo4j] = [
                     'neo4j': ver.neo4j,
