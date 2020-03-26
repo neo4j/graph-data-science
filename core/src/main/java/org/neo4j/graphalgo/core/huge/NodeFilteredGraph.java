@@ -105,6 +105,10 @@ public class NodeFilteredGraph extends FilterGraph {
         return consumer.target;
     }
 
+    public long getMappedNodeId(long nodeId) {
+        return filteredIdMap.toMappedNodeId(nodeId);
+    }
+
     @Override
     public boolean exists(long sourceNodeId, long targetNodeId) {
         return super.exists(filteredIdMap.toOriginalNodeId(sourceNodeId), filteredIdMap.toOriginalNodeId(targetNodeId));

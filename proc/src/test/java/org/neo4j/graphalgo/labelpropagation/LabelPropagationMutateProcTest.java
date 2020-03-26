@@ -23,9 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -56,6 +60,8 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             ", (b)-->({ communityId: 10 }) " +
             ", (b)-->({ communityId: 11 })";
     }
+
+    private static String DB_CYPHER_FILTERED = "CREATE (x:Ignore {id: -1, communityId: null}) " + DB_CYPHER;
 
     @Override
     public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationMutateConfig>> getProcedureClazz() {
@@ -109,6 +115,48 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
                     "p95", 2L,
                     "p75", 1L
                 ), row.get("communityDistribution"));
+            }
+        );
+    }
+
+    @Test
+    void testGraphMutationFiltered() throws Exception {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+        setupGraph(DB_CYPHER_FILTERED);
+        registerFunctions(NodePropertyFunc.class);
+
+
+        String graphName = "loadGraph";
+
+        String loadQuery = GdsCypher
+            .call()
+            .withNodeLabels("Ignore", "A", "B")
+            .withAnyRelationshipType()
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(loadQuery);
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation(graphName)
+            .algo("labelPropagation")
+            .mutateMode()
+            .addParameter("nodeLabels", Arrays.asList("A", "B"))
+            .addParameter("mutateProperty", mutateProperty())
+            .yields();
+
+        runQuery(query);
+
+        double[] expectedValues = new double[] {Double.NaN, 3, 8, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).getGraph();
+        mutatedGraph.forEachNode(nodeId -> {
+                assertEquals(
+                    mutatedGraph.nodeProperties("communityId").nodeProperty(nodeId),
+                    expectedValues[Math.toIntExact(nodeId)]
+                );
+                return true;
             }
         );
     }
