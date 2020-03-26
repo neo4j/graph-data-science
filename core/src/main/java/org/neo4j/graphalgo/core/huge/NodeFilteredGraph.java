@@ -34,7 +34,7 @@ import java.util.function.LongPredicate;
 
 public class NodeFilteredGraph extends FilterGraph {
 
-    public final IdMap filteredIdMap;
+    private final IdMap filteredIdMap;
 
     public NodeFilteredGraph(HugeGraph graph, IdMap filteredIdMap) {
         super(graph);
@@ -103,6 +103,10 @@ public class NodeFilteredGraph extends FilterGraph {
         HugeGraph.GetTargetConsumer consumer = new HugeGraph.GetTargetConsumer(index);
         forEachRelationship(sourceNodeId, consumer);
         return consumer.target;
+    }
+
+    public long getMappedNodeId(long nodeId) {
+        return filteredIdMap.toMappedNodeId(nodeId);
     }
 
     @Override

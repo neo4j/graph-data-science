@@ -71,7 +71,7 @@ public abstract class MutateProc<
                 NodeFilteredGraph filteredGraph = (NodeFilteredGraph) graph;
                 graphStore.addNodeProperty(
                     mutatePropertyConfig.mutateProperty(),
-                    nodeId -> !graph.contains(nodeId) ? Double.NaN : resultPropertyTranslator.toDouble(result, filteredGraph.filteredIdMap.toMappedNodeId(nodeId))
+                    nodeId -> !graph.contains(nodeId) ? Double.NaN : resultPropertyTranslator.toDouble(result, filteredGraph.getMappedNodeId(nodeId))
                 );
             }
             else {
