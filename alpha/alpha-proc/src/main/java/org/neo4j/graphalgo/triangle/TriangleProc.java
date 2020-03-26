@@ -76,11 +76,10 @@ public class TriangleProc extends TriangleBaseProc<TriangleStream, Stream<Triang
     protected AlgorithmFactory<TriangleStream, TriangleConfig> algorithmFactory(TriangleConfig config) {
        return new AlphaAlgorithmFactory<TriangleStream, TriangleConfig>() {
            @Override
-           public TriangleStream build(
+           public TriangleStream buildAlphaAlgo(
                Graph graph, TriangleConfig configuration, AllocationTracker tracker, Log log
            ) {
                return new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
-                   .withProgressLogger(ProgressLogger.wrap(log, "Triangle"))
                    .withTerminationFlag(TerminationFlag.wrap(transaction));
            }
        };

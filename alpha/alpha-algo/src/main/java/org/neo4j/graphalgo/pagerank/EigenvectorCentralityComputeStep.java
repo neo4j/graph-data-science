@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.pagerank;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
@@ -37,14 +38,16 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
-            long nodeCount
+            long nodeCount,
+            ProgressLogger progressLogger
     ) {
         super(dampingFactor,
                 sourceNodeIds,
                 graph,
                 tracker,
                 partitionSize,
-                startNode
+                startNode,
+                progressLogger
         );
         this.initialValue = 1.0 / nodeCount;
     }
@@ -67,6 +70,7 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
                     rels.forEachRelationship(nodeId, this);
                 }
             }
+            progressLogger.logProgress(graph.degree(nodeId));
         }
     }
 

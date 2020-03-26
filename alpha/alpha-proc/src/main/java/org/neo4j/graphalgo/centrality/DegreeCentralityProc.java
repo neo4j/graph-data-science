@@ -127,7 +127,7 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
     protected AlgorithmFactory<DegreeCentrality, DegreeCentralityConfig> algorithmFactory(DegreeCentralityConfig config) {
         return new AlphaAlgorithmFactory<DegreeCentrality, DegreeCentralityConfig>() {
             @Override
-            public DegreeCentrality build(
+            public DegreeCentrality buildAlphaAlgo(
                 Graph graph,
                 DegreeCentralityConfig configuration,
                 AllocationTracker tracker,

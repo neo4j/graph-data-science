@@ -135,7 +135,7 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
     ) {
         return new AlphaAlgorithmFactory<ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig>() {
             @Override
-            public ShortestPathDeltaStepping build(
+            public ShortestPathDeltaStepping buildAlphaAlgo(
                 Graph graph,
                 ShortestPathDeltaSteppingConfig configuration,
                 AllocationTracker tracker,

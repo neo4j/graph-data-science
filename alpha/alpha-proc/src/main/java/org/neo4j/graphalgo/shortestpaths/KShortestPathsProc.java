@@ -192,7 +192,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
     protected AlgorithmFactory<YensKShortestPaths, YensKShortestPathsConfig> algorithmFactory(YensKShortestPathsConfig config) {
         return new AlphaAlgorithmFactory<YensKShortestPaths, YensKShortestPathsConfig>() {
             @Override
-            public YensKShortestPaths build(
+            public YensKShortestPaths buildAlphaAlgo(
                 Graph graph,
                 YensKShortestPathsConfig configuration,
                 AllocationTracker tracker,

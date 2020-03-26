@@ -29,8 +29,10 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
+import org.neo4j.logging.NullLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -142,17 +144,22 @@ final class ArticleRankTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = LabsPageRankAlgorithmType.ARTICLE_RANK
-                .create(graph, DEFAULT_CONFIG, LongStream.empty())
-                .compute()
-                .result();
+            .create(
+                graph,
+                DEFAULT_CONFIG,
+                LongStream.empty(),
+                NullLog.getInstance(),
+                new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank")
+            ).compute()
+            .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
+                expected.get(nodeId),
+                rankResult.score(i),
+                1e-2,
+                "Node#" + nodeId
             );
         });
     }

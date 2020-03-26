@@ -23,15 +23,14 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.walking.RandomWalk;
 import org.neo4j.graphalgo.impl.walking.RandomWalkConfig;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -91,7 +90,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
     protected AlgorithmFactory<RandomWalk, RandomWalkConfig> algorithmFactory(RandomWalkConfig config) {
         return new AlphaAlgorithmFactory<RandomWalk, RandomWalkConfig>() {
             @Override
-            public RandomWalk build(Graph graph, RandomWalkConfig configuration, AllocationTracker tracker, Log log) {
+            public RandomWalk buildAlphaAlgo(Graph graph, RandomWalkConfig configuration, AllocationTracker tracker, Log log) {
                 Number returnParam = config.returnKey();
                 Number inOut = config.inOut();
 
@@ -117,7 +116,6 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
                     limit,
                     idStream
                 )
-                    .withProgressLogger(ProgressLogger.wrap(log, "RandomWalk"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction));
             }
         };

@@ -79,7 +79,7 @@ public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, Short
     protected AlgorithmFactory<ShortestPathAStar, ShortestPathAStarConfig> algorithmFactory(ShortestPathAStarConfig config) {
         return new AlphaAlgorithmFactory<ShortestPathAStar, ShortestPathAStarConfig>() {
             @Override
-            public ShortestPathAStar build(
+            public ShortestPathAStar buildAlphaAlgo(
                 Graph graph, ShortestPathAStarConfig configuration, AllocationTracker tracker, Log log
             ) {
                 return new ShortestPathAStar(

@@ -78,7 +78,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
     protected AlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig> algorithmFactory(AllShortestPathsConfig config) {
         return new AlphaAlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig>() {
             @Override
-            public MSBFSASPAlgorithm build(
+            public MSBFSASPAlgorithm buildAlphaAlgo(
                 Graph graph,
                 AllShortestPathsConfig configuration,
                 AllocationTracker tracker,
@@ -90,7 +90,6 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                         Pools.DEFAULT,
                         configuration.concurrency()
                     )
-                        .withProgressLogger(ProgressLogger.wrap(log, "WeightedAllShortestPaths)"))
                         .withTerminationFlag(TerminationFlag.wrap(transaction));
                 } else {
                     return new MSBFSAllShortestPaths(
@@ -99,7 +98,6 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
                         configuration.concurrency(),
                         Pools.DEFAULT
                     )
-                        .withProgressLogger(ProgressLogger.wrap(log, "AllShortestPaths(MultiSource)"))
                         .withTerminationFlag(TerminationFlag.wrap(transaction));
                 }
             }

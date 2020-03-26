@@ -163,7 +163,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
     protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountConfig> algorithmFactory(TriangleCountConfig config) {
         return new AlphaAlgorithmFactory<IntersectingTriangleCount, TriangleCountConfig>() {
             @Override
-            public IntersectingTriangleCount build(
+            public IntersectingTriangleCount buildAlphaAlgo(
                 Graph graph,
                 TriangleCountConfig configuration,
                 AllocationTracker tracker,
@@ -175,7 +175,6 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
                     configuration.concurrency(),
                     AllocationTracker.create()
                 )
-                    .withProgressLogger(ProgressLogger.wrap(log, "TriangleCount"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction));
             }
         };

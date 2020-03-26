@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 public class EigenvectorCentralityVariant implements PageRankVariant {
@@ -34,7 +35,8 @@ public class EigenvectorCentralityVariant implements PageRankVariant {
             int partitionCount,
             long start,
             DegreeCache degreeCache,
-            long nodeCount
+            long nodeCount,
+            ProgressLogger progressLogger
     ) {
         return new EigenvectorCentralityComputeStep(
                 dampingFactor,
@@ -43,7 +45,8 @@ public class EigenvectorCentralityVariant implements PageRankVariant {
                 tracker,
                 partitionCount,
                 start,
-                nodeCount
+                nodeCount,
+                progressLogger
         );
     }
 

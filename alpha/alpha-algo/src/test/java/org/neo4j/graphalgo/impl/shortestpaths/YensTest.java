@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -109,9 +108,8 @@ class YensTest extends AlgoTestBase {
             id("f"),
             42,
             10
-        )
-            .withProgressLogger(TestProgressLogger.INSTANCE)
-            .compute();
+        ).compute();
+
         List<WeightedPath> paths = yens.getPaths();
         DoubleConsumer mock = mock(DoubleConsumer.class);
         for (int i = 0; i < paths.size(); i++) {

@@ -87,7 +87,7 @@ abstract class SimilarityProc
     protected final AlgorithmFactory<ALGO, CONFIG> algorithmFactory(CONFIG config) {
         return new AlphaAlgorithmFactory<ALGO, CONFIG>() {
             @Override
-            public ALGO build(
+            public ALGO buildAlphaAlgo(
                 Graph graph,
                 CONFIG configuration,
                 AllocationTracker tracker,

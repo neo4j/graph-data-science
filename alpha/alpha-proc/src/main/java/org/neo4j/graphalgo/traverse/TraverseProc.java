@@ -84,7 +84,7 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
     protected AlgorithmFactory<Traverse, TraverseConfig> algorithmFactory(TraverseConfig config) {
         return new AlphaAlgorithmFactory<Traverse, TraverseConfig>() {
             @Override
-            public Traverse build(Graph graph, TraverseConfig configuration, AllocationTracker tracker, Log log) {
+            public Traverse buildAlphaAlgo(Graph graph, TraverseConfig configuration, AllocationTracker tracker, Log log) {
                 Traverse.ExitPredicate exitFunction;
                 Traverse.Aggregator aggregatorFunction;
                 // target node given; terminate if target is reached

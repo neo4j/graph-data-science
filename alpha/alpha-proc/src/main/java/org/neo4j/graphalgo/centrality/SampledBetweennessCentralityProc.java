@@ -162,7 +162,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
     ) {
         return new AlphaAlgorithmFactory<RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig>() {
             @Override
-            public RABrandesBetweennessCentrality build(
+            public RABrandesBetweennessCentrality buildAlphaAlgo(
                 Graph graph,
                 SampledBetweennessCentralityConfig configuration,
                 AllocationTracker tracker,
@@ -175,7 +175,6 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
                     strategy(configuration, graph),
                     configuration.undirected()
                 )
-                    .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction))
                     .withMaxDepth(configuration.maxDepth());
             }

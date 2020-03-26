@@ -30,8 +30,10 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.centrality.eigenvector.ImmutableEigenvectorCentralityConfig;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
+import org.neo4j.logging.NullLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -144,9 +146,15 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = LabsPageRankAlgorithmType.EIGENVECTOR_CENTRALITY
-                .create(graph, DEFAULT_EIGENVECTOR_CONFIG, LongStream.empty())
-                .compute()
-                .result();
+            .create(
+                graph,
+                DEFAULT_EIGENVECTOR_CONFIG,
+                LongStream.empty(),
+                NullLog.getInstance(),
+                new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank")
+            )
+            .compute()
+            .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);

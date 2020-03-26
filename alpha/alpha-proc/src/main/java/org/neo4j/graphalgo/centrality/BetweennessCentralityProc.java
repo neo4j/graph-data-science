@@ -155,7 +155,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
     ) {
         return new AlphaAlgorithmFactory<BetweennessCentrality, BetweennessCentralityConfig>() {
             @Override
-            public BetweennessCentrality build(
+            public BetweennessCentrality buildAlphaAlgo(
                 Graph graph,
                 BetweennessCentralityConfig configuration,
                 AllocationTracker tracker,
@@ -166,9 +166,7 @@ public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentralit
                     Pools.DEFAULT,
                     configuration.concurrency(),
                     configuration.undirected()
-                )
-                    .withProgressLogger(ProgressLogger.wrap(log, "BetweennessCentrality"))
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+                ).withTerminationFlag(TerminationFlag.wrap(transaction));
             }
         };
     }
