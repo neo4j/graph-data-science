@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.louvain.LouvainStatsProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
 
@@ -30,7 +31,12 @@ class LouvainDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {
-        return Arrays.asList(LouvainStreamProc.class, LouvainWriteProc.class, GraphCreateProc.class);
+        return Arrays.asList(
+            LouvainStreamProc.class,
+            LouvainWriteProc.class,
+            LouvainStatsProc.class,
+            GraphCreateProc.class
+        );
     }
 
     @Override
