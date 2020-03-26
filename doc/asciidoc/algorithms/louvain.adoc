@@ -163,6 +163,84 @@ include::common-configuration-anonymous-graph.adoc[]
 | intermediateCommunityIds  | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
 |===
 
+
+=== Stats mode
+
+.Run Louvain in stats mode on a named graph.
+[source, cypher]
+----
+CALL gds.louvain.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  communityCount: Integer,
+  modularity: Float,
+----
+
+include::common-parameters-named-graph.adoc[]
+
+.Run Louvain in stats mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.louvain.stats(configuration: Map)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  communityCount: Integer,
+  modularity: Float,
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+The configuration is the same as for the `write` mode.
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| createMillis          | Integer   | Milliseconds for loading data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
+| communityCount        | Integer   | The number of communities found.
+| ranLevels             | Integer   | The number of supersteps the algorithm actually ran.
+| modularity            | Float     | The final modularity score.
+| modularities          | Integer[] | The modularity scores for each level.
+| communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+
+
+=== Estimate mode
+
+The following will estimate the memory requirements for running the algorithm.
+The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
+
+.Run Louvain in estimate mode on a named graph.
+[source,cypher]
+----
+CALL gds.louvain.<mode>.estimate(
+  graphName: String,
+  configuration: Map
+)
+----
+
+include::common-parameters-named-graph.adoc[]
+
+.Run Louvain in estimate mode on an anonymous graph.
+[source,cypher]
+----
+CALL gds.louvain.<mode>.estimate(configuration: Map)
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-estimate-mode.adoc[]
+
+
 [[algorithms-louvain-examples]]
 == Examples
 
