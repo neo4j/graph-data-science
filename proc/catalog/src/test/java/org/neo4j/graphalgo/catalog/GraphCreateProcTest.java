@@ -1405,6 +1405,18 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
+    void failsOnNodeQueryWithNoResult() {
+        assertError(
+            "CALL gds.graph.create.cypher(" +
+            "  'not_exist'," +
+            "  'MATCH (n:NotExist) RETURN id(n) AS id'," +
+            "  'MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target'" +
+            ")",
+            "Node-Query returned no nodes"
+        );
+    }
+
+    @Test
     void failsOnInvalidAggregation() {
         Map<String, Object> relProjection = map("A", map(TYPE_KEY, "REL", AGGREGATION_KEY, "INVALID"));
 

@@ -98,6 +98,9 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     }
 
     void flush() {
+        if (rows == 0) {
+            throw new IllegalArgumentException("Node-Query returned no nodes");
+        }
         importer.importCypherNodes(buffer, cypherNodeProperties);
     }
 
