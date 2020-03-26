@@ -155,6 +155,79 @@ include::common-configuration-anonymous-graph.adoc[]
 | componentId | Integer | The component ID.
 |===
 
+=== Stats mode
+
+.Run WCC in stats mode on a named graph.
+[source, cypher]
+----
+CALL gds.wcc.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  componentCount: Integer,
+  componentDistribution: Map,
+----
+
+include::common-parameters-named-graph.adoc[]
+
+.Run WCC in stats mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.wcc.stats(configuration: Map)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  componentCount: Integer,
+  componentDistribution: Map,
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+The configuration is the same as for the `write` mode.
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| createMillis                  | Integer | Milliseconds for loading data.
+| computeMillis                 | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
+| componentCount                | Integer | The number of computed components.
+| componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| configuration                 | Map     | The configuration used for running the algorithm.
+|===
+
+
+=== Estimate mode
+
+The following will estimate the memory requirements for running the algorithm.
+The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
+
+.Run WCC in estimate mode on a named graph.
+[source,cypher]
+----
+CALL gds.wcc.<mode>.estimate(
+  graphName: String,
+  configuration: Map
+)
+----
+
+include::common-parameters-named-graph.adoc[]
+
+.Run WCC in estimate mode on an anonymous graph.
+[source,cypher]
+----
+CALL gds.wcc.<mode>.estimate(configuration: Map)
+----
+
+include::common-parameters-anonymous-graph.adoc[]
+
+include::common-estimate-mode.adoc[]
+
 
 [[algorithms-wcc-examples]]
 == Examples
