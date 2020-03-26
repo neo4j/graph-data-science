@@ -24,6 +24,7 @@ import org.neo4j.logging.Log;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
+@Deprecated
 public class ProgressLoggerAdapter implements ProgressLogger {
 
     private final Log log;
@@ -49,7 +50,7 @@ public class ProgressLoggerAdapter implements ProgressLogger {
     }
 
     @Override
-    public void log(Supplier<String> msgFactory) {
+    public void logMessage(Supplier<String> msgFactory) {
         doLog(100, msgFactory);
     }
 
@@ -64,5 +65,25 @@ public class ProgressLoggerAdapter implements ProgressLogger {
         } else {
             log.info("[%s] %s %d%% %s", Thread.currentThread().getName(), task, percent, message);
         }
+    }
+
+    @Override
+    public Log getLog() {
+        return this.log;
+    }
+
+    @Override
+    public void logProgress(Supplier<String> msgFactory) {
+        throw new UnsupportedOperationException("Use BatchingProgressLogger instead");
+    }
+
+    @Override
+    public void logProgress(long progress, Supplier<String> msgFactory) {
+        throw new UnsupportedOperationException("Use BatchingProgressLogger instead");
+    }
+
+    @Override
+    public void reset(long newTaskVolume) {
+        throw new UnsupportedOperationException("Use BatchingProgressLogger instead");
     }
 }

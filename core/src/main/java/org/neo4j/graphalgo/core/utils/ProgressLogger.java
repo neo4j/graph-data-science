@@ -22,54 +22,86 @@ package org.neo4j.graphalgo.core.utils;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public interface ProgressLogger {
 
-    ProgressLogger NULL_LOGGER = new ProgressLoggerAdapter(NullLog.getInstance(), "NULL");
+    ProgressLogger NULL_LOGGER = NullProgressLogger.INSTANCE;
+
     Supplier<String> NO_MESSAGE = () -> null;
 
-    static ProgressLogger wrap(Log log, String task) {
-        return new ProgressLoggerAdapter(log, task);
+    default void logProgress() {
+        logProgress(NO_MESSAGE);
+    };
+
+    void logProgress(Supplier<String> msgFactory);
+
+    default void logProgress(long progress) {
+        logProgress(progress, NO_MESSAGE);
+    };
+
+    void logProgress(long progress, Supplier<String> msgFactory);
+
+    void logMessage(Supplier<String> msg);
+
+    default void logMessage(String msg) {
+        logMessage(() -> msg);
     }
 
-    static ProgressLogger wrap(Log log, String task, long time, TimeUnit unit) {
-        if (log == null || log == NullLog.getInstance() || task == null) {
-            return ProgressLogger.NULL_LOGGER;
-        }
-        ProgressLoggerAdapter logger = new ProgressLoggerAdapter(log, task);
-        if (time > 0L) {
-            logger.withLogIntervalMillis((int) Math.min(unit.toMillis(time), Integer.MAX_VALUE));
-        }
-        return logger;
-    }
+    void reset(long newTaskVolume);
 
+    Log getLog();
+
+    @Deprecated
     void logProgress(double percentDone, Supplier<String> msg);
 
-    void log(Supplier<String> msg);
-
-    default void log(String msg) {
-        log(() -> msg);
-    }
-
-    default void logDone(Supplier<String> msg) {
-        log(msg);
-    }
-
+    @Deprecated
     default void logProgress(double numerator, double denominator, Supplier<String> msg) {
         logProgress(numerator / denominator, msg);
     }
 
+    @Deprecated
     default void logProgress(double numerator, double denominator) {
         logProgress(numerator, denominator, NO_MESSAGE);
     }
 
+    @Deprecated
     default void logProgress(double percentDone) {
         logProgress(percentDone, NO_MESSAGE);
     }
 
-    default void logDone() {
-        logDone(NO_MESSAGE);
-    }
+
+    enum NullProgressLogger implements ProgressLogger {
+        INSTANCE;
+
+        @Override
+        public void logProgress(Supplier<String> msgFactory) {
+
+        }
+
+        @Override
+        public void logProgress(long progress, Supplier<String> msgFactory) {
+
+        }
+
+        @Override
+        public void logMessage(Supplier<String> msg) {
+
+        }
+
+        @Override
+        public void reset(long newTaskVolume) {
+
+        }
+
+        @Override
+        public Log getLog() {
+            return NullLog.getInstance();
+        }
+
+        @Override
+        public void logProgress(double percentDone, Supplier<String> msg) {
+
+        }
+    };
 }

@@ -19,15 +19,26 @@
  */
 package org.neo4j.graphalgo;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
+import org.neo4j.logging.NullLog;
 
 import java.util.function.Consumer;
 
 public class AlgoTestBase {
 
     public GraphDbApi db;
+
+    public ProgressLogger progressLogger;
+
+    @BeforeEach
+    void resetProgressLogger() {
+        this.progressLogger = new BatchingProgressLogger(NullLog.getInstance(), 0, "Test");
+    }
 
     protected void runQuery(String query) {
         QueryRunner.runQuery(db, query);

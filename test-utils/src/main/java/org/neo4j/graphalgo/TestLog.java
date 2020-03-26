@@ -28,6 +28,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
 public class TestLog extends AbstractLog {
@@ -36,20 +39,25 @@ public class TestLog extends AbstractLog {
     public static String WARN = "warn";
     public static String ERROR = "error";
 
-    private final Map<String, List<String>> messages;
+    private final ConcurrentMap<String, ConcurrentLinkedQueue<String>> messages;
 
     public TestLog() {
-        messages = new HashMap<>(3);
+        messages = new ConcurrentHashMap<>(3);
     }
 
     public boolean containsMessage(String level, String fragment) {
-        List<String> messageList = messages.getOrDefault(level, Collections.emptyList());
+        ConcurrentLinkedQueue<String> messageList = messages.getOrDefault(level, new ConcurrentLinkedQueue<>());
         return messageList.stream().anyMatch((message) -> message.contains(fragment));
     }
 
     public boolean hasMessages(String level) {
-        return !messages.getOrDefault(level, Collections.emptyList()).isEmpty();
+        return !messages.getOrDefault(level, new ConcurrentLinkedQueue<>()).isEmpty();
     }
+
+    public ArrayList<String> getMessages(String level) {
+        return new ArrayList<>(messages.getOrDefault(level, new ConcurrentLinkedQueue<>()));
+    }
+
 
     public void printMessages() {
         System.out.println("TestLog Messages: " + messages);
@@ -87,10 +95,10 @@ public class TestLog extends AbstractLog {
 
     class TestLogger implements Logger {
         private final String level;
-        private final Map<String, List<String>> messages;
+        private final ConcurrentMap<String, ConcurrentLinkedQueue<String>> messages;
 
 
-        TestLogger(String level, Map<String, List<String>> messages) {
+        TestLogger(String level, ConcurrentMap<String, ConcurrentLinkedQueue<String>> messages) {
             this.level = level;
             this.messages = messages;
         }
@@ -116,7 +124,7 @@ public class TestLog extends AbstractLog {
         }
 
         private void logMessage(String message) {
-            List<String> messageList = messages.computeIfAbsent(level, (ignore) -> new ArrayList<>());
+            ConcurrentLinkedQueue<String> messageList = messages.computeIfAbsent(level, (ignore) -> new ConcurrentLinkedQueue<>());
             messageList.add(message);
         }
     }

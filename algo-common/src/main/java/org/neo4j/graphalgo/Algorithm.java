@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.logging.Log;
 
 public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implements TerminationFlag {
-
     protected ProgressLogger progressLogger = ProgressLogger.NULL_LOGGER;
 
     protected TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
@@ -39,10 +38,7 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
      */
     public abstract void release();
 
-    public ME withProgressLogger(Log log) {
-        return withProgressLogger(ProgressLogger.wrap(log, getClass().getSimpleName()));
-    }
-
+    @Deprecated
     public ME withProgressLogger(ProgressLogger progressLogger) {
         this.progressLogger = progressLogger;
         return me();
@@ -58,8 +54,8 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
     }
 
     public ProgressLogger getProgressLogger() {
-        return progressLogger;
-    }
+        return this.progressLogger;
+    };
 
     @Override
     public boolean running() {
