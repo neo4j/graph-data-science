@@ -14,6 +14,8 @@ This topic includes:
 ** <<algorithms-wcc-examples-unweighted, Unweighted>>
 ** <<algorithms-wcc-examples-weighted, Weighted>>
 ** <<algorithms-wcc-examples-seeding, Seeded components>>
+** <<algorithms-wcc-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-wcc-examples-stats, Stats>>
 
 
 [[algorithms-wcc-intro]]
@@ -520,3 +522,45 @@ YIELD nodePropertiesWritten, componentCount;
 If the `seedProperty` configuration parameter has the same value as `writeProperty`, the algorithm only writes properties for nodes where the component ID has changed.
 If they differ, the algorithm writes properties for all nodes.
 ====
+
+[[algorithms-wcc-examples-memory-estimation]]
+=== Memory Estimation
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.wcc.write.estimate('myGraph', {
+  writeProperty: 'communityId'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 7         | 5                 | 184      | 184      | "184 Bytes"
+|===
+--
+
+[[algorithms-wcc-examples-stats]]
+=== Stats
+
+[role=query-example]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+CALL gds.wcc.stats('myGraph')
+YIELD componentCount
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| componentCount
+| 2
+|===
+--
