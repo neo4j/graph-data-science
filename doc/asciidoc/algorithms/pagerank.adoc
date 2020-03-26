@@ -122,6 +122,32 @@ include::common-configuration-anonymous-graph.adoc[]
 |===
 
 
+=== Mutate mode
+
+.Run PageRank in mutate mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.pageRank.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general mutate return columns
+  ranIterations: Integer,
+  didConverge: Boolean
+----
+
+The configuration for the `mutate` mode is similar to the `write` mode.
+Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
+Also, specifying `writeConcurrency` is not possible in `mutate` mode.
+
+.The following will run the algorithm and store the results in `myGraph`:
+[source, cypher]
+----
+CALL gds.pageRank.mutate('myGraph', { mutateProperty: 'pagerank' })
+----
+
+
 === Stream mode
 
 .Run PageRank in stream mode on a graph stored in the catalog.

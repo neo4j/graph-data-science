@@ -35,50 +35,15 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 
 [[algorithms-modularity-optimization-syntax]]
 == Syntax
-.The following describes the API for running the algorithm and mutating the in-memory graph with the results:
-[source, cypher]
-----
-CALL gds.beta.modularityOptimization.mutate(graphName: String|Map, configuration: Map})
-YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, mutateMillis
-----
 
-include::../common-parameters.adoc[]
 
-include::../common-configuration.adoc[]
-
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name                           | Type    | Default     | Optional | Description
-| weightProperty                 | String  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
-| seedProperty                   | String  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| mutateProperty                 | String  | n/a         | yes      | The property name written back the ID of the partition particular node belongs to.
-| maxIterations                  | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
-| tolerance                      | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                  | Type      | Description
-| createMillis          | Integer   | Milliseconds for loading data.
-| computeMillis         | Integer   | Milliseconds for running the algorithm.
-| mutateMillis          | Integer   | Milliseconds for mutating the in-memory graph with the results.
-| postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
-| nodes                 | Integer   | The number of nodes considered.
-| didConverge           | Boolean   | True if the algorithm did converge to a stable modularity score within the provided number of maximum iterations.
-| ranIterations         | Integer   | The number of iterations run.
-| modularity            | Float     | The final modularity score.
-| communityCount        | Integer   | The number of communities found.
-| communityDistribution | Map       | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
-| configuration         | Map       | The configuration used for running the algorithm.
-|===
+=== Write mode
 
 .The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
 CALL gds.beta.modularityOptimization.write(graphName: String|Map, configuration: Map})
-YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, writeMillis
+YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, writeMillis, configuration
 ----
 
 include::../common-parameters.adoc[]
@@ -112,6 +77,29 @@ include::../common-configuration.adoc[]
 | communityDistribution | Map       | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
+
+
+=== Mutate mode
+
+.Run Modularity Optimization in mutate mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.beta.modularityOptimization.mutate(graphName: String|Map, configuration: Map})
+YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, mutateMillis, configuration
+----
+
+The configuration for the `mutate` mode is similar to the `write` mode.
+Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
+Also, specifying `writeConcurrency` is not possible in `mutate` mode.
+
+.The following will run the algorithm and store the results in `myGraph`:
+[source, cypher]
+----
+CALL gds.beta.modularityOptimization.mutate('myGraph', { mutateProperty: 'modularity' })
+----
+
+
+=== Stream mode
 
 .The following will run the algorithm and stream back results:
 [source, cypher]

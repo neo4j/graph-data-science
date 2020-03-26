@@ -96,9 +96,7 @@ CALL gds.nodeSimilarity.write(configuration: Map)
 YIELD
   // general write return columns
   nodesCompared: Integer,
-  relationshipsWritten: Integer,
-  writeRelationshipType: String,
-  writeProperty: String
+  relationshipsWritten: Integer
 ----
 
 include::common-parameters-anonymous-graph.adoc[]
@@ -131,6 +129,36 @@ include::common-configuration-anonymous-graph.adoc[]
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
+
+
+=== Mutate mode
+
+.Run Node Similarity in write mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.nodeSimilarity.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  // general mutate return columns
+  nodesCompared: Integer,
+  relationshipsWritten: Integer
+----
+
+The configuration for the `mutate` mode is similar to the `write` mode.
+Instead of specifying a `writeRelationshipType` and `writeProperty`,
+we need to specify a `mutateRelationshipType` and `mutateProperty`.
+Also, specifying `writeConcurrency` is not possible in `mutate` mode.
+
+.The following will run the algorithm and store the results in `myGraph`:
+[source, cypher]
+----
+CALL gds.nodeSimilarity.mutate('myGraph', {
+    mutateRelationshipType: 'SIMILAR',
+    mutateProperty: 'score'
+})
+----
 
 
 [[algorithms-node-similarity-syntax-stream]]
