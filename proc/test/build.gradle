@@ -1,0 +1,7 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Procedures :: Test'
+dependencies {
+    api project(':proc-common')
+    api project(':test-utils')
+}
