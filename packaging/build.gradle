@@ -5,8 +5,7 @@ description = 'Neo4j Graph Data Science :: Packaging'
 group = 'com.neo4j.gds'
 
 dependencies {
-    implementation project(path: ':proc-common')
-    implementation project(path: ':alpha-proc')
+    implementation project(path: ':proc')
 }
 
 task licenseFile {

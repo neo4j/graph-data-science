@@ -65,7 +65,7 @@ import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class ListProcTest extends BaseProcTest {
+class AlphaListProcTest extends BaseProcTest {
 
     private static final Collection<String> PROCEDURES = new HashSet<>(asList(
         "gds.alpha.allShortestPaths.stream",

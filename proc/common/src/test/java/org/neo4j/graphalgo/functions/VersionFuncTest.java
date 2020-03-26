@@ -53,7 +53,7 @@ class VersionFuncTest extends BaseProcTest {
     @Test
     void shouldReturnGradleVersion() throws IOException {
         // we find the current version in the gradle file
-        File file = new File("../gradle/version.gradle");
+        File file = new File("../../gradle/version.gradle");
         Optional<String> maybeVersion = findVersion(file);
 
         if (!maybeVersion.isPresent()) {

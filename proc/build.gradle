@@ -1,0 +1,27 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Procedures'
+dependencies {
+    annotationProcessor project(':annotations')
+
+    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
+    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+
+    api project(':proc-common')
+    api project(':alpha-proc')
+
+    implementation(
+        project(':neo4j-adapter')
+    )
+
+    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly group: 'org.neo4j',      name: 'neo4j',             version: ver.'neo4j'
+
+    testAnnotationProcessor project(':annotations')
+
+    testImplementation project(':test-utils')
+    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
+    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+}
