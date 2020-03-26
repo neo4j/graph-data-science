@@ -44,7 +44,8 @@ public final class PartitionUtils {
 
         List<Partition> tasks = new ArrayList<>(concurrency);
         for (long i = 0; i < nodeCount; i += adjustedBatchSize) {
-            tasks.add(new Partition(i, Math.min(nodeCount, i + adjustedBatchSize - 1)));
+            long actualBatchSize = i + adjustedBatchSize < nodeCount ? adjustedBatchSize : nodeCount - i;
+            tasks.add(new Partition(i, actualBatchSize));
         }
 
         return tasks;

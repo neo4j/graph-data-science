@@ -37,11 +37,11 @@ class PartitionUtilsTest {
     public class TestTask implements Runnable {
 
         public final long start;
-        public final long end;
+        public final long nodeCount;
 
-        TestTask(long start, long end) {
+        TestTask(long start, long nodeCount) {
             this.start = start;
-            this.end = end;
+            this.nodeCount = nodeCount;
         }
 
         @Override
@@ -51,7 +51,7 @@ class PartitionUtilsTest {
 
         @Override
         public String toString() {
-            return String.format("(%d, %d)", start, end);
+            return String.format("(%d, %d)", start, nodeCount);
         }
     }
 
@@ -74,12 +74,12 @@ class PartitionUtilsTest {
 
         assertEquals(2, tasks.size());
         assertTrue(
-            tasks.stream().anyMatch((t) -> t.start == 0 && t.end == 127),
-            String.format("Expected task with start %d and end %d, but found %s", 0, 127, tasks)
+            tasks.stream().anyMatch((t) -> t.start == 0 && t.nodeCount == 128),
+            String.format("Expected task with start %d and nodeCount %d, but found %s", 0, 128, tasks)
         );
         assertTrue(
-            tasks.stream().anyMatch((t) -> t.start == 128 && t.end == 200),
-            String.format("Expected task with start %d and end %d, but found %s", 128, 200, tasks)
+            tasks.stream().anyMatch((t) -> t.start == 128 && t.nodeCount == 72),
+            String.format("Expected task with start %d and nodeCount %d, but found %s", 128, 72, tasks)
         );
     }
 
