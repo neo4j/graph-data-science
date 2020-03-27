@@ -28,8 +28,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
-import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
+import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,7 +43,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
     }
 
     private void initDb(GraphDatabaseAPI db, String graphName) throws Exception {
-        registerProcedures(db, PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
+        registerProcedures(db, TestProc.class, GraphCreateProc.class);
         QueryRunner.runQuery(db, "CREATE (:A)");
         QueryRunner.runQuery(db, "CALL gds.graph.create(" + graphName + ", '*', '*')");
     }
@@ -57,7 +56,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
 
     @Test
     void shouldThrowOnTooHighConcurrency() {
-        String query = "CALL gds.pageRank.stream('myG', {concurrency: 10})";
+        String query = "CALL gds.testProc.test('myG', {concurrency: 10, writeProperty: 'p'})";
 
         assertError(
             query,
@@ -79,7 +78,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
 
     @Test
     void shouldThrowOnTooHighWriteConcurrency() {
-        String query = "CALL gds.pageRank.write('myG', {writeConcurrency: 12, writeProperty: 'p'})";
+        String query = "CALL gds.testProc.test('myG', {writeConcurrency: 12, writeProperty: 'p'})";
 
         assertError(
             query,
@@ -93,7 +92,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
         GraphDbApi unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 
-        String query = "CALL gds.pageRank.write('myG2', {concurrency: 10, writeProperty: 'p'}) " +
+        String query = "CALL gds.testProc.test('myG2', {concurrency: 10, writeProperty: 'p'}) " +
                        "YIELD configuration " +
                        "RETURN configuration.concurrency AS concurrency";
 
@@ -119,7 +118,7 @@ class ConcurrencyValidationTest extends BaseProcTest {
         GraphDbApi unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         initDb(unlimitedDb, "'myG2'");
 
-        String query = "CALL gds.pageRank.write('myG2', {writeConcurrency: 9, writeProperty: 'p'}) " +
+        String query = "CALL gds.testProc.test('myG2', {writeConcurrency: 9, writeProperty: 'p'}) " +
                        "YIELD configuration " +
                        "RETURN configuration.writeConcurrency AS concurrency";
 

@@ -43,7 +43,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.catalog.IterationsConfigTest;
+import org.neo4j.graphalgo.IterationsConfigTest;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;

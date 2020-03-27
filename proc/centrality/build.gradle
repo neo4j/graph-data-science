@@ -8,9 +8,6 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
     api project(':proc-common')
-    api project(':alpha-proc')
-    api project(':proc-similarity')
-    api project(':proc-centrality')
 
     implementation(
         project(':neo4j-adapter')
@@ -23,6 +20,7 @@ dependencies {
     testAnnotationProcessor project(':annotations')
 
     testImplementation project(':proc-test')
+    testImplementation project(':proc-common')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'

@@ -25,8 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
-import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
+import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,7 +36,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(GraphCreateProc.class, PageRankStreamProc.class, PageRankWriteProc.class);
+        registerProcedures(GraphCreateProc.class, TestProc.class);
     }
 
     @AfterEach
@@ -62,7 +61,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void additionalKeyForExplicitLoading() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.pageRank.stream('foo', {maxIterations: 1337, nodeProjection: '*'})")
+            () -> runQuery("CALL gds.testProc.test('foo', {nodeProjection: '*', writeProperty: 'p'})")
         );
 
         assertThat(
@@ -75,7 +74,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void additionalKeyForImplicitLoading() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.pageRank.stream({maxIterations: 1337, nodeProjection: '*', relationshipProjection: '*', some: 'key'})")
+            () -> runQuery("CALL gds.testProc.test({nodeProjection: '*', relationshipProjection: '*', writeProperty: 'p', some: 'key'})")
         );
 
         assertThat(
@@ -88,7 +87,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void misspelledProjectionKeyWithSuggestion() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.pageRank.write({nodeProjections: '*', relationshipProjection: '*'})")
+            () -> runQuery("CALL gds.testProc.test({nodeProjections: '*', relationshipProjection: '*'})")
         );
 
         assertThat(
@@ -101,7 +100,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void misspelledRequiredKeyWithSuggestion() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.pageRank.write({wirteProperty: 'foo', nodeProjection: '*', relationshipProjection: '*'})")
+            () -> runQuery("CALL gds.testProc.test({wirteProperty: 'foo', nodeProjection: '*', relationshipProjection: '*'})")
         );
 
         assertThat(
@@ -114,7 +113,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void misspelledOptionalKeyWithSuggestion() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.pageRank.stream({maxiterations: 1337, nodeProjection: '*', relationshipProjection: '*'})")
+            () -> runQuery("CALL gds.testProc.test({maxiterations: 1337, writeProperty: 'p', nodeProjection: '*', relationshipProjection: '*'})")
         );
 
         assertThat(

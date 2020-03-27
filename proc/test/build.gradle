@@ -2,6 +2,11 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Procedures :: Test'
 dependencies {
+    annotationProcessor project(':config-generator')
+    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    compileOnly project(':annotations')
+    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     api project(':proc-common')
     api project(':test-utils')
 }
