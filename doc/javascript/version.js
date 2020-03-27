@@ -1,11 +1,11 @@
 window.docMeta = (function () {
-  var version = '1.0-preview';
+  var version = '1.1-preview';
   var name = 'graph-data-science';
   var href = window.location.href;
   return {
     name: name,
     version: version,
-    availableDocVersions: ["1.0-preview"],
+    availableDocVersions: ['1.0', '1.1-preview'],
     thisPubBaseUri: href.substring(0, href.indexOf(name) + name.length) + '/' + version,
     unversionedDocBaseUri: href.substring(0, href.indexOf(name) + name.length) + '/',
     commonDocsBaseUri: href.substring(0, href.indexOf(name) - 1)
