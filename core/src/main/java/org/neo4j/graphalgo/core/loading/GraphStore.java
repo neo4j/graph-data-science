@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
@@ -180,7 +178,7 @@ public final class GraphStore {
             .sum();
     }
 
-    public Set<String> availableRelationshipPropertyKeys() {
+    public Set<String> relationshipPropertyKeys() {
         return relationshipProperties
             .values()
             .stream()
@@ -188,22 +186,8 @@ public final class GraphStore {
             .collect(Collectors.toSet());
     }
 
-    public Set<Pair<String, Optional<String>>> relationshipPropertyKeys() {
-        return this.relationshipTypes().stream().flatMap(relType -> {
-            if (relationshipProperties.containsKey(relType)) {
-                return relationshipProperties
-                    .get(relType)
-                    .keySet()
-                    .stream()
-                    .map(propertyKey -> Tuples.pair(relType, Optional.of(propertyKey)));
-            } else {
-                return Stream.of(Tuples.pair(relType, Optional.<String>empty()));
-            }
-        }).collect(Collectors.toSet());
-    }
-
     public Set<String> relationshipPropertyKeys(String relationshipType) {
-        return relationshipProperties.get(relationshipType).keySet();
+        return relationshipProperties.getOrDefault(relationshipType, Collections.emptyMap()).keySet();
     }
 
     public synchronized void addRelationshipType(String relationshipType, Optional<String> relationshipProperty, HugeGraph.Relationships relationships) {

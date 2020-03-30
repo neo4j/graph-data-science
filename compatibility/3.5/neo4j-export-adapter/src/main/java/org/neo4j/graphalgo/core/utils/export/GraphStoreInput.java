@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.export;
 
 import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -42,6 +43,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class GraphStoreInput implements Input {
 
@@ -139,13 +141,17 @@ public final class GraphStoreInput implements Input {
 
         RelationshipImporter(GraphStore graphStore, long nodeCount, int batchSize) {
             super(nodeCount, batchSize);
-            relationships = graphStore
-                .relationshipPropertyKeys()
-                .stream()
-                .collect(Collectors.toMap(
-                    relTypeAndProperty -> relTypeAndProperty,
-                    relTypeAndProperty -> graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
-                ));
+            relationships = graphStore.relationshipTypes().stream().flatMap(relType -> {
+                Set<String> relProperties = graphStore.relationshipPropertyKeys(relType);
+                if (relProperties.isEmpty()) {
+                    return Stream.of(Tuples.pair(relType, Optional.<String>empty()));
+                } else {
+                    return relProperties.stream().map(propertyKey -> Tuples.pair(relType, Optional.of(propertyKey)));
+                }
+            }).collect(Collectors.toMap(
+                relTypeAndProperty -> relTypeAndProperty,
+                relTypeAndProperty -> graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
+            ));
         }
 
         @Override

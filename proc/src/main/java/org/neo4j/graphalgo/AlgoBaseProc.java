@@ -286,7 +286,7 @@ public abstract class AlgoBaseProc<
             }
         }
         if (config instanceof RelationshipWeightConfig) {
-            Set<String> properties = graphStore.availableRelationshipPropertyKeys();
+            Set<String> properties = graphStore.relationshipPropertyKeys();
 
             String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
             if (weightProperty != null && !properties.contains(weightProperty)) {
