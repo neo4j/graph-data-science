@@ -43,15 +43,11 @@ class QueryConsumingTreeProcessorTest extends DocTestBase {
     }
 
     @Test
-    void runTest() {
+    void runTest() throws URISyntaxException {
         asciidoctor.javaExtensionRegistry().treeprocessor(defaultTreeProcessor());
-        try {
-            File file = Paths.get(getClass().getClassLoader().getResource("treeprocessor.adoc").toURI()).toFile();
-            assertTrue(file.exists() && file.canRead());
-            asciidoctor.loadFile(file, Collections.emptyMap());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        File file = Paths.get(getClass().getClassLoader().getResource("treeprocessor.adoc").toURI()).toFile();
+        assertTrue(file.exists() && file.canRead());
+        asciidoctor.loadFile(file, Collections.emptyMap());
     }
 
 }

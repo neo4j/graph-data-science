@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.SetupQueryConsumer;
 import org.neo4j.graphdb.Result;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ abstract class DocTestBase extends BaseProcTest {
     }
 
     @Test
-    void runTest() {
+    void runTest() throws URISyntaxException {
         asciidoctor.javaExtensionRegistry().treeprocessor(defaultTreeProcessor());
         File file = ASCIIDOC_PATH.resolve(adocFile()).toFile();
         assertTrue(file.exists() && file.canRead());
