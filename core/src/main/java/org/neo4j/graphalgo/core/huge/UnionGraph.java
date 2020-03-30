@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.core.loading.IdMap;
 
 import java.util.Collection;
 import java.util.Set;
@@ -180,6 +181,11 @@ public final class UnionGraph implements Graph {
         for (Graph graph : graphs) {
             graph.releaseProperties();
         }
+    }
+
+    @Override
+    public IdMap idMapping() {
+        return first.idMapping();
     }
 
     @Override

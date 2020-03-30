@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.core.loading.IdMap;
 
 import java.util.Collection;
 import java.util.Set;
@@ -43,6 +44,11 @@ public class NullGraph implements Graph {
 
     @Override
     public void releaseTopology() {}
+
+    @Override
+    public IdMap idMapping() {
+        throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.idMapping is not implemented.");
+    }
 
     @Override
     public long relationshipCount() {

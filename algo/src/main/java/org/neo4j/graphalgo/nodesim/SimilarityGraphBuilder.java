@@ -73,7 +73,7 @@ class SimilarityGraphBuilder {
         });
     }
 
-    private final HugeGraph baseGraph;
+    private final Graph baseGraph;
 
     SimilarityGraphBuilder(
         Graph baseGraph,
@@ -83,11 +83,7 @@ class SimilarityGraphBuilder {
         this.executorService = executorService;
         this.tracker = tracker;
 
-        if (baseGraph instanceof HugeGraph) {
-            this.baseGraph = (HugeGraph) baseGraph;
-        } else {
-            throw new IllegalArgumentException("Base graph must be a huge graph.");
-        }
+        this.baseGraph = baseGraph;
     }
 
     Graph build(Stream<SimilarityResult> stream) {

@@ -57,6 +57,11 @@ public class NodeFilteredGraph extends FilterGraph {
     }
 
     @Override
+    public IdMap idMapping() {
+        return filteredIdMap;
+    }
+
+    @Override
     public void forEachNode(LongPredicate consumer) {
         filteredIdMap.forEachNode(consumer);
     }
