@@ -114,7 +114,7 @@ public class GraphStoreExport {
             );
             importer.doImport(input);
         } catch (IOException e) {
-            e.printStackTrace();
+            // TODO: Please use a logger
         } finally {
             life.shutdown();
         }
