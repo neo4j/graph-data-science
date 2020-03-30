@@ -65,10 +65,7 @@ class TerminationTest extends BaseProcTest {
         kernelTransactions.activeTransactions()
             .stream()
             .filter(thx -> KernelTransactionsProxy.lastTransactionIdWhenStarted(thx) == txId)
-            .forEach(thx -> {
-                System.out.println("terminating transaction " + txId);
-                KernelTransactionsProxy.markForTermination(thx);
-            });
+            .forEach(KernelTransactionsProxy::markForTermination);
     }
 
     // get map of currently running queries and its IDs
@@ -95,7 +92,6 @@ class TerminationTest extends BaseProcTest {
             try {
                 runQuery(TerminationTest.QUERY);
             } catch (Exception e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         });
@@ -104,9 +100,7 @@ class TerminationTest extends BaseProcTest {
         runnables.add(() -> {
             try {
                 Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            } catch (InterruptedException e) {}
             terminateTransaction(findQueryTxId());
         });
 

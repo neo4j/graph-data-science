@@ -177,9 +177,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
 
         try {
             GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
-        } catch (Exception ke) {
-            ke.printStackTrace();
-        }
+        } catch (Exception ke) {}
 
         String createQuery = "CREATE" +
                              "  (a: Label { weight1: 0.0, weight2: 1.0 })" +

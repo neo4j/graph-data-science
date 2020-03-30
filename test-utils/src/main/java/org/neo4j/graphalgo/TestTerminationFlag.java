@@ -36,9 +36,7 @@ public class TestTerminationFlag implements TerminationFlag {
     public boolean running() {
         try {
             Thread.sleep(sleepMillis);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+        } catch (InterruptedException e) {}
         return !transaction.getReasonIfTerminated().isPresent() && transaction.isOpen();
     }
 }

@@ -396,7 +396,6 @@ final class HugeAtomicDoubleArrayTest {
      * the same test have no effect.
      */
     private static void threadRecordFailure(Throwable t) {
-        t.printStackTrace();
         threadFailure.compareAndSet(null, t);
     }
 
@@ -407,7 +406,6 @@ final class HugeAtomicDoubleArrayTest {
      */
     private static void threadUnexpectedException(Throwable t) {
         threadRecordFailure(t);
-        t.printStackTrace();
         if (t instanceof RuntimeException) {
             throw (RuntimeException) t;
         } else if (t instanceof Error) {

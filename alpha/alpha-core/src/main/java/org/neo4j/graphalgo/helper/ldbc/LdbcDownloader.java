@@ -199,7 +199,6 @@ public final class LdbcDownloader {
         Matcher matcher = REPLACE_SUFFIX.matcher(fileName);
         String targetFileName = matcher.replaceAll(".tar");
 
-        System.out.println("fileName = " + targetFileName);
         assert fileName.endsWith(".tgz");
         Path targetFile = inputFile
                 .getParent()

@@ -321,9 +321,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
         try {
             GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
-        } catch (Exception ke) {
-            ke.printStackTrace();
-        }
+        } catch (Exception ke) {}
 
         runQuery(db, CREATE_QUERY);
 

@@ -253,9 +253,7 @@ public class SimilarityStreamGenerator<T> {
     private  void put(BlockingQueue<SimilarityResult> queue, SimilarityResult items) {
         try {
             queue.put(items);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+        } catch (InterruptedException e) {}
     }
 
     private Stream<SimilarityResult> similarityParallelStreamTopK(T[] inputs, int[] sourceIndexIds, int[] targetIndexIds, int length, TerminationFlag terminationFlag, int concurrency, double cutoff, int topK, SimilarityComputer<T> computer, Supplier<RleDecoder> decoderFactory) {

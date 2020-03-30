@@ -115,8 +115,6 @@ class ProgressLoggingTest {
                         Translators.INT_ARRAY_TRANSLATOR
                 );
 
-        System.out.println(buffer);
-
         final String output = buffer.toString();
 
         assertTrue(output.length() > 0);

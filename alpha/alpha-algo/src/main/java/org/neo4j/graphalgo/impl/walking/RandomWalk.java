@@ -134,9 +134,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     private static <T> void put(BlockingQueue<T> queue, T items) {
         try {
             queue.put(items);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+        } catch (InterruptedException e) {}
     }
 
     public abstract static class NextNodeStrategy {
