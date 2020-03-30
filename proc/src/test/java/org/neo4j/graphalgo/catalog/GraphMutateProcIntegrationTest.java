@@ -146,9 +146,10 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .explicitCreation(TEST_GRAPH)
             .algo("labelPropagation")
             .mutateMode()
+            .addParameter("nodeWeightProperty", "pageRank")
             .addParameter("mutateProperty", "louvain")
             .yields();
-        String lovainQuery = GdsCypher
+        String louvainQuery = GdsCypher
             .call()
             .explicitCreation(TEST_GRAPH)
             .algo("louvain")
@@ -167,7 +168,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         runQuery(pageRankQuery);
         runQuery(wccQuery);
         runQuery(labelPropagationQuery);
-        runQuery(lovainQuery);
+        runQuery(louvainQuery);
         runQuery(nodeSimilarityQuery);
 
         assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion());

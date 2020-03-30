@@ -180,6 +180,14 @@ public final class GraphStore {
             .sum();
     }
 
+    public Set<String> availableRelationshipPropertyKeys() {
+        return relationshipProperties
+            .values()
+            .stream()
+            .flatMap(properties -> properties.keySet().stream())
+            .collect(Collectors.toSet());
+    }
+
     public Set<Pair<String, Optional<String>>> relationshipPropertyKeys() {
         return this.relationshipTypes().stream().flatMap(relType -> {
             if (relationshipProperties.containsKey(relType)) {
