@@ -1,11 +1,14 @@
 function tabTheSource($content) {
-    var storedLanguage = getCodeExampleLanguage();
     var LANGUAGES = {
-        'dotnet': 'C#',
-        'java': 'Java',
-        'javascript': 'JavaScript',
-        'python': 'Python'
+        'mutate': 'Mutate mode',
+        'stats': 'Stats mode',
+        'stream': 'Stream mode',
+        'write': 'Write mode'
     };
+    updateSelectedLanguageFromQueryParams(LANGUAGES);
+
+    var storedLanguage = getCodeExampleLanguage();
+
     var $UL = $('<ul class="nav nav-tabs" role="tablist"/>');
     var $LI = $('<li role="presentation"/>');
     var $A = $('<a role="tab" data-toggle="tab" style="text-decoration:none;"/>');
@@ -67,7 +70,6 @@ function tabTheSource($content) {
     for (var ix = 0; ix < snippets.length; ix++) {
         var snippet = snippets[ix];
         var languages = snippet.languages;
-        languages.sort();
         var $languageBlocks = snippet.$languageBlocks;
         var $exampleBlock = snippet.$exampleBlock;
         var idBase = 'tabbed-example-' + idNum++;
@@ -130,4 +132,28 @@ function storageAvailable(type) {
 
 function getCodeExampleLanguage() {
     return storageAvailable('sessionStorage') ? sessionStorage.getItem('code_example_language') || false : false;
+}
+
+function updateSelectedLanguageFromQueryParams(availableLanguages) {
+    var languageFromParams = getQueryParamsFromUrl()["language"];
+
+    if (languageFromParams && storageAvailable("sessionStorage")) {
+        sessionStorage.setItem("code_example_language", languageFromParams);
+    } else {
+        sessionStorage.setItem("code_example_language", Object.keys(availableLanguages)[0]);
+    }
+}
+
+function getQueryParamsFromUrl() {
+    var vars = [];
+    var hash = [];
+    var hashes = window.location.href
+      .slice(window.location.href.indexOf("?") + 1)
+      .split("&");
+    for (var i = 0; i < hashes.length; i++) {
+        hash = hashes[i].split("=");
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
 }
