@@ -4,25 +4,30 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.4'
 }
 
+ext {
+    gdsVersion = '1.1.0-alpha01'
+}
+
 description = 'Graph Data Science :: Pregel Training'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
     // We depend on the proc artifact of the GDS library
-    compileOnly 'org.neo4j.gds:proc:1.0.0'
+    compileOnly "org.neo4j.gds:proc:$gdsVersion"
+    compileOnly "org.neo4j.gds:algo-common:$gdsVersion"
 
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
     compileOnly 'org.neo4j:neo4j:3.5.16'
 
     // We need an annotation processor for our K1 configuration
-    annotationProcessor 'org.neo4j.gds:config-generator:1.0.0'
+    annotationProcessor "org.neo4j.gds:config-generator:$gdsVersion"
     compileOnly         'org.jetbrains:annotations:18.0.0'
 
     // We need to provide GDS for the test as well, along with some test helpers
-    testImplementation 'org.neo4j.gds:test-utils:1.0.0'
-    testImplementation 'org.neo4j.gds:proc:1.0.0'
+    testImplementation "org.neo4j.gds:test-utils:$gdsVersion"
+    testImplementation "org.neo4j.gds:proc:$gdsVersion"
 
     // Use JUnit Jupiter API for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
