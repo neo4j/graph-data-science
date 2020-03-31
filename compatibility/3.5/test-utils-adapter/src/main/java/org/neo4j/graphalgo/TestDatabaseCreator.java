@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -73,6 +74,7 @@ public final class TestDatabaseCreator {
     private static GraphDatabaseBuilder builder() {
         return new TestGraphDatabaseFactory()
             .addKernelExtension(new ConcurrencyControllerExtension())
+            .addKernelExtension(new GcListenerExtension())
             .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
             .setConfig(GraphDatabaseSettings.procedure_unrestricted, "gds.*");
     }
