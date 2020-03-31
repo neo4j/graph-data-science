@@ -2,7 +2,6 @@ allprojects { proj ->
     plugins.withType(JavaLibraryPlugin) {
         proj.apply plugin: 'de.thetaphi.forbiddenapis'
         proj.forbiddenApis {
-            bundledSignatures = ["jdk-system-out"]
             signaturesFiles = files("$publicDir/etc/forbidden-apis")
             failOnUnresolvableSignatures = false
             suppressAnnotations = ["org.neo4j.graphalgo.annotation.SuppressForbidden"]
