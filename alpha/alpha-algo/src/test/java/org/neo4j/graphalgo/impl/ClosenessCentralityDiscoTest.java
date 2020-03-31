@@ -93,7 +93,6 @@ class ClosenessCentralityDiscoTest extends AlgoTestBase {
         final DoubleConsumer mock = mock(DoubleConsumer.class);
         algo.compute();
         algo.resultStream()
-            .peek(System.out::println)
             .forEach(r -> mock.accept(r.centrality));
 
         verify(mock, times(3)).accept(eq(0.25, 0.01));

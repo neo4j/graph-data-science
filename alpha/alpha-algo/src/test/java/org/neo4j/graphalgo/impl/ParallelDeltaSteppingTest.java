@@ -58,32 +58,28 @@ class ParallelDeltaSteppingTest {
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
 
-        try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("setup took " + t + "ms"))) {
-            gridBuilder = GraphBuilder.create(db)
-                    .setLabel(LABEL)
-                    .setRelationship(RELATIONSHIP)
-                    .newGridBuilder()
-                    .createGrid(50, 50)
-                    .forEachRelInTx(rel -> {
-                        rel.setProperty(PROPERTY, Math.random() * 5); // (0-5)
-                    });
-            gridBuilder.close();
+        gridBuilder = GraphBuilder.create(db)
+            .setLabel(LABEL)
+            .setRelationship(RELATIONSHIP)
+            .newGridBuilder()
+            .createGrid(50, 50)
+            .forEachRelInTx(rel -> {
+                rel.setProperty(PROPERTY, Math.random() * 5); // (0-5)
+            });
+        gridBuilder.close();
 
-            rootNodeId = gridBuilder.getLineNodes()
-                    .get(0)
-                    .get(0)
-                    .getId();
-        }
+        rootNodeId = gridBuilder.getLineNodes()
+            .get(0)
+            .get(0)
+            .getId();
 
-        try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("load took " + t + "ms"))) {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(LABEL)
-                .addRelationshipType(RELATIONSHIP)
-                .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
-                .build()
-                .graph(NativeFactory.class);
-        }
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(LABEL)
+            .addRelationshipType(RELATIONSHIP)
+            .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
+            .build()
+            .graph(NativeFactory.class);
 
         reference = compute(1);
     }
@@ -96,14 +92,13 @@ class ParallelDeltaSteppingTest {
     @Test
     void testParallelBehaviour() {
         final int n = 20;
-        try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println(n + "x eval took " + t + "ms"))) {
-            for (int i = 0; i < n; i++) {
-                assertArrayEquals(
-                        reference,
-                        compute((n % 7) + 2),
-                        0.001,
-                        "error in iteration " + i);
-            }
+        for (int i = 0; i < n; i++) {
+            assertArrayEquals(
+                reference,
+                compute((n % 7) + 2),
+                0.001,
+                "error in iteration " + i
+            );
         }
     }
 

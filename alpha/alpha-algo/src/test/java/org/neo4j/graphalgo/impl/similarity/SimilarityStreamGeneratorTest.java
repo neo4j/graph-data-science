@@ -177,10 +177,6 @@ class SimilarityStreamGeneratorTest {
 
         List<SimilarityResult> rows = stream.collect(Collectors.toList());
 
-        for (SimilarityResult row : rows) {
-            System.out.println(row);
-        }
-
         assertEquals(6, rows.size());
 
         assertThat(rows, hasItems(similarityResult(1, 0, false, false)));
@@ -214,11 +210,7 @@ class SimilarityStreamGeneratorTest {
 
         List<SimilarityResult> rows = stream.collect(Collectors.toList());
 
-        for (SimilarityResult row : rows) {
-            System.out.println(row);
-        }
         assertEquals(2, rows.size());
-
 
         assertThat(rows, hasItems(similarityResult(1, 0, false, false)));
         assertThat(rows, hasItems(similarityResult(3, 0, false, false)));

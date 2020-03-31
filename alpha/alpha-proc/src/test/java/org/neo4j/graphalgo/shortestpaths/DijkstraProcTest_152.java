@@ -143,10 +143,7 @@ class DijkstraProcTest_152 extends BaseProcTest {
             "}}) " +
             "YIELD nodeId, cost with nodeId, cost MATCH(n) WHERE id(n) = nodeId RETURN n.name as name, cost;";
 
-        runQueryWithRowConsumer(cypher, row -> {
-            System.out.println(row.get("name") + ":" + row.get("cost"));
-            mock.accept(row.getNumber("cost").doubleValue());
-        });
+        runQueryWithRowConsumer(cypher, row -> mock.accept(row.getNumber("cost").doubleValue()));
 
         verify(mock, times(1)).accept(eq(0.0));
         verify(mock, times(1)).accept(eq(50.0));

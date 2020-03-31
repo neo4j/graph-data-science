@@ -58,7 +58,6 @@ final class PagedLongStackTest {
                 IntStream.iterate(values.length - 1, i -> i - 1)
                 .limit(values.length)
                 .mapToObj(i -> {
-                    System.out.println("i is " + i);
                     long value = values[i];
                     long actual = stack.pop();
                     return () -> assertEquals(actual, value, "Mismatch at index " + i);

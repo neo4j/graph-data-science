@@ -104,7 +104,6 @@ class DijkstraTest extends AlgoTestBase {
         edgeBlackList.clear();
         final WeightedPath weightedPath = dijkstra();
         assertEquals(5, weightedPath.size());
-        System.out.println("weightedPath = " + weightedPath);
     }
 
     @Test

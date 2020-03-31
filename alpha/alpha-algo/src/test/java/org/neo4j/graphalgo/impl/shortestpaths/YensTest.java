@@ -116,7 +116,6 @@ class YensTest extends AlgoTestBase {
         DoubleConsumer mock = mock(DoubleConsumer.class);
         for (int i = 0; i < paths.size(); i++) {
             final WeightedPath path = paths.get(i);
-            System.out.println("path " + path + " : " + path.getCost());
             mock.accept(path.getCost());
         }
         verify(mock, times(2)).accept(eq(3.0, DELTA));

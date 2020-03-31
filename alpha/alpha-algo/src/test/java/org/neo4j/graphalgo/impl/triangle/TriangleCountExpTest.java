@@ -87,9 +87,7 @@ class TriangleCountExpTest {
                 Pools.DEFAULT,
                 1,
                 AllocationTracker.EMPTY);
-        try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
-            algo.compute();
-        }
+        algo.compute();
         assertEquals(TRIANGLE_COUNT, algo.getTriangleCount());
         assertTriangles(algo.getTriangles());
         assertCoefficients(algo.getCoefficients());
@@ -104,9 +102,7 @@ class TriangleCountExpTest {
                 Pools.DEFAULT,
                 4,
                 AllocationTracker.EMPTY);
-        try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
-            algo.compute();
-        }
+        algo.compute();
         assertEquals(TRIANGLE_COUNT, algo.getTriangleCount());
         assertTriangles(algo.getTriangles());
         assertCoefficients(algo.getCoefficients());

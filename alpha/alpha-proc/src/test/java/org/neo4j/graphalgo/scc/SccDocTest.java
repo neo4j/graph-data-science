@@ -141,7 +141,6 @@ class SccDocTest extends BaseProcTest {
                        "YIELD nodeId, componentId " +
                        "RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component " +
                        "ORDER BY componentId DESC ";
-        System.out.println(query);
 
         String expected = "+-----------------------+\n" +
                           "| Name      | Component |\n" +

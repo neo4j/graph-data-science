@@ -146,7 +146,6 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
         dijkstra.compute(id("a"), id("f"));
 
         dijkstra.getFinalPath().forEach((IntProcedure) n -> path.append(name(n)));
-        System.out.println("path(BOTH) = " + path);
         assertEquals("adef", path.toString());
         assertEquals(3.0, dijkstra.getTotalCost(), 0.1);
         assertEquals(4, dijkstra.getPathLength());

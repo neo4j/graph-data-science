@@ -41,10 +41,7 @@ class WeightsTest {
         Number[] values = {Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 3);
-        System.out.println("actuals = " + Arrays.toString(actuals));
-        assertArrayEquals(new double[]{
-
-                Double.POSITIVE_INFINITY, 5.0, Double.NaN}, actuals, 0.01);
+        assertArrayEquals(new double[]{Double.POSITIVE_INFINITY, 5.0, Double.NaN}, actuals, 0.01);
     }
 
     @Test
@@ -52,7 +49,6 @@ class WeightsTest {
         Number[] values = {4.0, 4.0};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
-        System.out.println("actuals = " + Arrays.toString(actuals));
         assertArrayEquals(new double[]{Double.POSITIVE_INFINITY, 2.0, 4.0}, actuals, 0.01);
     }
 
@@ -61,7 +57,6 @@ class WeightsTest {
         Number[] values = {2.0, 2.0, 4.0, 4.0, 6.0, 6.0};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
-        System.out.println("actuals = " + Arrays.toString(actuals));
         assertArrayEquals(new double[]{
                 Double.POSITIVE_INFINITY, 2.0, 2.0,
                 Double.POSITIVE_INFINITY, 2.0, 4.0,
@@ -73,7 +68,6 @@ class WeightsTest {
         Number[] values = {2.0, 2.0, 4.0, 4.0, 4.0, 4.0, 6.0, 6.0};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
-        System.out.println("actuals = " + Arrays.toString(actuals));
         assertArrayEquals(new double[]{
                 Double.POSITIVE_INFINITY, 2.0, 2.0,
                 Double.POSITIVE_INFINITY, 4.0, 4.0,
@@ -85,7 +79,6 @@ class WeightsTest {
         Number[] values = {7.0, 2.0, 2.0, 4.0, 4.0, 6.0, 6.0, 7.0};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
-        System.out.println("actuals = " + Arrays.toString(actuals));
         assertArrayEquals(new double[]{
                 7.0,
                 Double.POSITIVE_INFINITY, 2.0, 2.0,

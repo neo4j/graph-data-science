@@ -130,12 +130,6 @@ class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCou
             assertEquals(9, nodeCount);
             assertEquals(9, p100);
         });
-
-        String request = "MATCH (n) WHERE exists(n.clusteringCoefficient) RETURN n.clusteringCoefficient as c";
-        runQueryWithRowConsumer(request, row -> {
-            double triangles = row.getNumber("c").doubleValue();
-            System.out.println("triangles = " + triangles);
-        });
     }
 
     interface TriangleCountConsumer {

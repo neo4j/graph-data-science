@@ -83,63 +83,29 @@ class TopKConsumerTest {
     void testFindTopKHeap4() {
         Collection<Item> topItems = TopKConsumer.topK(asList(ITEM1, ITEM3, ITEM2, ITEM4), 4, Item::compareTo);
         assertEquals(asList(ITEM4,ITEM3,ITEM2,ITEM1),topItems);
-        for (Item topItem : topItems) {
-            System.out.println(topItem);
-        }
     }
 
     @Test
     void testFindTopKHeap2of4() {
         Collection<Item> topItems = TopKConsumer.topK(asList(ITEM2, ITEM4), 4, Item::compareTo);
         assertEquals(asList(ITEM4,ITEM2),topItems);
-        for (Item topItem : topItems) {
-            System.out.println(topItem);
-        }
     }
     @Test
     void testFindTopKHeap4of3() {
         Collection<Item> topItems = TopKConsumer.topK(asList(ITEM2, ITEM1, ITEM4, ITEM3), 3, Item::compareTo);
         assertEquals(asList(ITEM4,ITEM3,ITEM2),topItems);
-        for (Item topItem : topItems) {
-            System.out.println(topItem);
-        }
     }
 
     @Test
     void testFindTopKHeap() {
         Collection<Item> topItems = TopKConsumer.topK(asList(ITEM1, ITEM3, ITEM2, ITEM4), 2, Item::compareTo);
         assertEquals(asList(ITEM4,ITEM3),topItems);
-        for (Item topItem : topItems) {
-            System.out.println(topItem);
-        }
     }
 
     @Test
     void testFindTopKHeap2() {
         List<Item> topItems = TopKConsumer.topK(asList(ITEM1, ITEM3, ITEM2, ITEM4), 2, Item::compareTo);
         assertEquals(asList(ITEM4,ITEM3),topItems);
-        for (Item topItem : topItems) {
-            System.out.println(topItem);
-        }
-    }
-
-    @Test
-    void testFindTopKHeapPerf() {
-        assumeTrue(System.getProperty("neo4j.graphalgo.benchmark")!=null, "benchmark disabled");
-        List<Item> items = createItems(COUNT);
-        List<Item> topItems = null;
-        for (int i = 0; i < RUNS/10; i++) {
-            topItems = TopKConsumer.topK(items, WINDOW_SIZE, Item::compareTo);
-        }
-        long time = System.currentTimeMillis();
-        for (int i = 0; i < RUNS; i++) {
-            topItems = TopKConsumer.topK(items, WINDOW_SIZE, Item::compareTo);
-        }
-        time = System.currentTimeMillis() - time;
-        System.out.println("array based time = " + time+" "+RUNS+" runs with "+COUNT+" items avg "+1.0*time/RUNS);
-        for (Item topItem : topItems) {
-            System.out.println(topItem);
-        }
     }
 
     @Test

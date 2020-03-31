@@ -74,25 +74,21 @@ class WeightedAllShortestPathsTest {
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
 
-        try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("setup took " + t + "ms"))) {
-            GraphBuilder.create(db)
-                .setLabel(LABEL)
-                .setRelationship(RELATIONSHIP)
-                .newGridBuilder()
-                .createGrid(width, height)
-                .forEachRelInTx(rel -> rel.setProperty(PROPERTY, 1.0))
-                .close();
-        }
+        GraphBuilder.create(db)
+            .setLabel(LABEL)
+            .setRelationship(RELATIONSHIP)
+            .newGridBuilder()
+            .createGrid(width, height)
+            .forEachRelInTx(rel -> rel.setProperty(PROPERTY, 1.0))
+            .close();
 
-        try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("load took " + t + "ms"))) {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(LABEL)
-                .addRelationshipType(RELATIONSHIP)
-                .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
-                .build()
-                .load(NativeFactory.class);
-        }
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(LABEL)
+            .addRelationshipType(RELATIONSHIP)
+            .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
+            .build()
+            .load(NativeFactory.class);
     }
 
     @AfterEach
@@ -107,7 +103,6 @@ class WeightedAllShortestPathsTest {
 
         new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4)
                 .compute()
-                .peek(System.out::println)
                 .forEach(r -> {
                     assertNotEquals(Double.POSITIVE_INFINITY, r.distance);
                     if (r.sourceNodeId == r.targetNodeId) {
