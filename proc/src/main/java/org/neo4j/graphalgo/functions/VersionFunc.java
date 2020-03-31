@@ -27,6 +27,6 @@ public class VersionFunc {
     @UserFunction("gds.version")
     @Description("RETURN gds.version() | Return the installed graph data science library version.")
     public String version() {
-        return "1.1.0-alpha02";
+        return "1.1.0-alpha03";
     }
 }
