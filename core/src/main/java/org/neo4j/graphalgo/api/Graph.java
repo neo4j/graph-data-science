@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.core.loading.IdMap;
-
 /**
  * Composition of often used source interfaces
  */
@@ -52,8 +50,6 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
      * Release only the properties associated with that graph.
      */
     default void releaseProperties() { }
-
-    IdMap idMapping();
 
     boolean isUndirected();
 

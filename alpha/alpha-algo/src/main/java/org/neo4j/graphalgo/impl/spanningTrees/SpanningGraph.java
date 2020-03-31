@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.core.loading.IdMap;
 
 import java.util.Arrays;
 
@@ -43,12 +42,6 @@ public class SpanningGraph extends FilterGraph {
         } else {
             return 1;
         }
-    }
-
-    @Override
-    public IdMap idMapping() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.impl.spanningTrees.SpanningGraph.idMapping is not implemented.");
     }
 
     @Override

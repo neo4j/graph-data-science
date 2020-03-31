@@ -90,11 +90,6 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public IdMap idMapping() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean hasRelationshipProperty() {
         return hasRelationshipProperty;
     }

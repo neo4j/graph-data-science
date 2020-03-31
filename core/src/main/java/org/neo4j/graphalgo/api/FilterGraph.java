@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.core.loading.IdMap;
 
 import java.util.Collection;
 import java.util.Set;
@@ -53,11 +52,6 @@ public abstract class FilterGraph implements Graph {
     @Override
     public void canRelease(boolean canRelease) {
         graph.canRelease(canRelease);
-    }
-
-    @Override
-    public IdMap idMapping() {
-        return graph.idMapping();
     }
 
     @Override

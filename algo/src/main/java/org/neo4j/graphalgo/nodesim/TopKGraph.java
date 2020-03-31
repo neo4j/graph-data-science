@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.core.loading.IdMap;
 
 public class TopKGraph extends FilterGraph {
 
@@ -38,11 +37,6 @@ public class TopKGraph extends FilterGraph {
     public int degree(long nodeId) {
         TopKMap.TopKList topKList = topKMap.get(nodeId);
         return topKList != null ? topKList.size() : 0;
-    }
-
-    @Override
-    public IdMap idMapping() {
-        throw new UnsupportedOperationException("org.neo4j.graphalgo.nodesim.TopKGraph.idMapping is not implemented.");
     }
 
     @Override
