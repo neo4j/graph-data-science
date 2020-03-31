@@ -9,4 +9,5 @@ dependencies {
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     api project(':proc-common')
     api project(':test-utils')
+    api project(':proc-catalog')
 }
