@@ -52,7 +52,6 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
-import org.neo4j.graphalgo.wcc.WccStatsProc;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -1194,7 +1193,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String graphName = "foo";
 
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class, WccStatsProc.class);
+        registerProcedures(localDb, GraphCreateProc.class, TestProc.class);
         runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
 
         String query = GdsCypher.call()
@@ -1211,23 +1210,18 @@ class GraphCreateProcTest extends BaseProcTest {
             }
         );
 
-        String algoQuery = GdsCypher.call()
-            .explicitCreation(graphName)
-            .algo("wcc")
-            .statsMode()
-            .addPlaceholder("relationshipTypes", "relType")
-            .yields("componentCount");
+        String algoQuery = "CALL gds.testProc.test('" + graphName + "', {writeProperty: 'p', relationshipTypes: $relType})";
 
         runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("X", "Y")), resultRow ->
-            assertEquals(4L, resultRow.getNumber("componentCount"))
+            assertEquals(8L, resultRow.getNumber("relationshipCount"))
         );
 
         runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("X")), resultRow ->
-            assertEquals(6L, resultRow.getNumber("componentCount"))
+            assertEquals(6L, resultRow.getNumber("relationshipCount"))
         );
 
         runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("Y")), resultRow ->
-            assertEquals(10L, resultRow.getNumber("componentCount"))
+            assertEquals(2L, resultRow.getNumber("relationshipCount"))
         );
     }
 

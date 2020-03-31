@@ -66,7 +66,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
 
     @Override
     protected AbstractResultBuilder<TestResult> resultBuilder(ComputationResult<TestAlgorithm, TestAlgorithm, TestConfig> computeResult) {
-        return new TestAlgoResultBuilder();
+        return new TestAlgoResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());
     }
 
     @Override
@@ -86,7 +86,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
             public TestAlgorithm build(
                 Graph graph, TestConfig configuration, AllocationTracker tracker, Log log
             ) {
-                return new TestAlgorithm();
+                return new TestAlgorithm(graph);
             }
 
             @Override
@@ -97,13 +97,22 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
     }
 
     static class TestAlgoResultBuilder extends AbstractResultBuilder<TestResult> {
+
+        long relationshipCount = 0;
+
         @Override
         public TestResult build() {
             return new TestResult(
                 createMillis,
                 computeMillis,
+                relationshipCount,
                 config.toMap()
             );
+        }
+
+        TestAlgoResultBuilder withRelationshipCount(long relationshipCount) {
+            this.relationshipCount = relationshipCount;
+            return this;
         }
     }
 
@@ -111,11 +120,13 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
 
         public long createMillis;
         public long computeMillis;
+        public long relationshipCount;
         public Map<String, Object> configuration;
 
-        TestResult(long createMillis, long computeMillis, Map<String, Object> configuration) {
+        TestResult(long createMillis, long computeMillis, long relationshipCount, Map<String, Object> configuration) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
+            this.relationshipCount = relationshipCount;
             this.configuration = configuration;
         }
     }

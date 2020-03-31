@@ -20,10 +20,20 @@
 package org.neo4j.graphalgo.test;
 
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.api.Graph;
 
 public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
+
+    private final Graph graph;
+    private long relationshipCount = 0;
+
+    TestAlgorithm(Graph graph) {
+        this.graph = graph;
+    }
+
     @Override
     public TestAlgorithm compute() {
+        this.relationshipCount = graph.relationshipCount();
         return this;
     }
 
@@ -34,4 +44,8 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
 
     @Override
     public void release() {}
+
+    long relationshipCount() {
+        return relationshipCount;
+    }
 }
