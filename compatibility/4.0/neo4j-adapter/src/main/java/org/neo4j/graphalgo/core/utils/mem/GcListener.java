@@ -75,11 +75,12 @@ final class GcListener implements NotificationListener, NotificationFilter {
         // The following map contains detailed memory information about not just the various heap spaces,
         //  but also about JVM internal pools like Metaspace or JIT-compiled code.
         // We have no control over those spaces, but they will use some available heap.
-        // We explicitly ignore those pools and only look at the usages from the managed pools.
-        // As a result, we will see more free memory that there probably is (it also depends on the GC on
-        //  whether or not those internal pools take space from the user heap).
-        // We will therefor err on the side of allowing things that might actually fail
-        //  instead of blocking things that could succeed.
+        // We explicitly ignore those pools and only look at the usages from the collected pools.
+        // As a result, we will see more free memory than there probably is.
+        // It also depends on the GC on whether or not those internal pools take space from the user heap.
+        // We want to err on the side of allowing things that might actually fail
+        //  instead of blocking things that could succeed,
+        //  and under this assumption only taking the collected pools into account is correct.
 
         Map<String, MemoryUsage> afterGc = null;
         try {
@@ -87,7 +88,7 @@ final class GcListener implements NotificationListener, NotificationFilter {
                 (Map<String, MemoryUsage>) getMemoryUsage.invoke(userData);
             afterGc = usage;
         } catch (Throwable throwable) {
-            // If we get an error while calling the method handles, we will very likely
+            // If we get an error while calling the MethodHandle, we will very likely
             //  get a similar error on all following invocations.
             // To prevent flooding the log with the same error message, we only log once per listener.
             if (this.reflectionWarningEmitted.compareAndSet(false, true)) {
@@ -95,7 +96,7 @@ final class GcListener implements NotificationListener, NotificationFilter {
             }
         }
 
-        // could be null if we have an error while calling the MethodHandle or if it actually returns null
+        // Could be null if we have an error while calling the MethodHandle or if it actually returns null.
         if (afterGc == null) {
             return;
         }
@@ -105,8 +106,8 @@ final class GcListener implements NotificationListener, NotificationFilter {
             MemoryUsage usageAfterGc = afterGc.get(poolName);
             if (usageAfterGc != null) {
                 long maxPoolSize = usageAfterGc.getMax();
-                // If the max size is -1, the pool is a variable sized subsection of some other pool and has no\
-                // own size. This is true, for example, for the Spaces Eden and Survivor of G1 GC.
+                // If the max size is -1, the pool is a variable sized subsection of some other pool and has no
+                // own size. This is true, for example, for the Spaces Eden and Survivor of the G1 GC.
                 // G1 has a single heap size, that of the Old Space, and Eden and Survivor use some regions of Old
                 // for their data. How many regions is adjusted dynamically by G1 to try to make
                 // collection pause times adhere to the target max pause time.

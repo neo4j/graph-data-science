@@ -69,7 +69,8 @@ final class HotSpotGcListener {
             // Implementing the listener requires calling private HotSpot methods in the com.sun package.
             // They are not part of the OpenJDK and we want to be good citizens,
             //  so we are installing the listener only if we can access the required methods reflectively.
-            // On different VMs, we don't install any listener and keep the initial free memory
+            // On different VMs, we don't install any listener. We would then never change the initial
+            //  value of free memory, which is the max available heap and therefore allow anything that fits.
 
             Class<?> gcNotifyClass = Class.forName("com.sun.management.GarbageCollectionNotificationInfo");
             MethodHandle notificationNameField = lookup.findStaticGetter(
@@ -79,15 +80,16 @@ final class HotSpotGcListener {
             );
 
             try {
-                // constant: GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION
+                // reading: GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION
                 gcNotificationName = String.valueOf(notificationNameField.invoke());
             } catch (Throwable ignored) {
                 // if we can't find the constant, we inline the default from the
-                //  HotSpot class. We would fail on parsing the
+                //  HotSpot class. If that changes at some point, i.e. the constant is gone,
+                //  we will very likely fail on creating the following method handles anyway.
                 gcNotificationName = "com.sun.management.gc.notification";
             }
 
-            // method: GarbageCollectionNotificationInfo.from(CompositeData userData)
+            // calling static method: GarbageCollectionNotificationInfo.from(CompositeData userData)
             MethodHandle infoMethod = lookup.findStatic(
                 gcNotifyClass,
                 "from",
@@ -95,7 +97,7 @@ final class HotSpotGcListener {
             );
 
             Class<?> gcInfoClass = Class.forName("com.sun.management.GcInfo");
-            // method: GcInfo GarbageCollectionNotificationInfo#getGcInfo()
+            // calling instance method: GcInfo GarbageCollectionNotificationInfo#getGcInfo()
             MethodHandle getGcInfo = lookup.findVirtual(
                 gcNotifyClass,
                 "getGcInfo",
@@ -105,21 +107,24 @@ final class HotSpotGcListener {
             // equivalent to: GcInfo info = GarbageCollectionNotificationInfo.from(userData).getGcInfo();
             getGcInfo = filterReturnValue(infoMethod, getGcInfo);
 
-            // method: Map<String, MemoryUsage> GcInfo#getMemoryUsageAfterGc()
+            // calling instance method: Map<String, MemoryUsage> GcInfo#getMemoryUsageAfterGc()
             MethodHandle getMemoryUsageAfterGc = lookup.findVirtual(
                 gcInfoClass,
                 "getMemoryUsageAfterGc",
                 MethodType.methodType(Map.class)
             );
 
-            // equivalent to: Map<String, MemoryUsage> afterGc =
-            //   GarbageCollectionNotificationInfo.from(userData).getGcInfo().getMemoryUsageAfterGc()
+            // equivalent to:
+            //   GcInfo info = GarbageCollectionNotificationInfo.from(userData).getGcInfo();
+            //   Map<String, MemoryUsage> afterGc = info.getMemoryUsageAfterGc()
             getMemoryUsageAfterGc = filterReturnValue(getGcInfo, getMemoryUsageAfterGc);
             getUsageAfterGc = getMemoryUsageAfterGc;
 
             enabled = true;
         } catch (NoSuchMethodException | IllegalAccessException | NoSuchFieldException | ClassNotFoundException ignored) {
-            // something class has changed signature, maybe because we're on
+            // The class internals have changed or we are running on a non-HotSpot VM.
+            // Instead of crashing the DB, we will not run in that case and just
+            //  keep the initial value for free memory.
         }
         GC_NOTIFICATION_NAME = gcNotificationName;
         GET_USAGE_AFTER_GC = getUsageAfterGc;
