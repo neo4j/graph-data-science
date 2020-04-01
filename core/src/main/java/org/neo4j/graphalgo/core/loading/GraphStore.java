@@ -255,6 +255,10 @@ public final class GraphStore {
         createdGraphs.forEach(graph -> graph.canRelease(canRelease));
     }
 
+    public void release() {
+        createdGraphs.forEach(Graph::release);
+    }
+
     public long nodeCount() {
         return nodes.nodeCount();
     }

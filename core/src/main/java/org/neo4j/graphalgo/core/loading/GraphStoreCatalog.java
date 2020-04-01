@@ -65,21 +65,16 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).exists(graphName);
     }
 
-    public static @Nullable Graph remove(String username, String graphName) {
-        return Optional
-            .ofNullable(getUserCatalog(username).remove(graphName))
-            .orElse(null);
-    }
-
     public static void remove(String username, String graphName, Consumer<GraphStoreWithConfig> graphRemovedConsumer) {
-        GraphStoreWithConfig graphStoreWithConfig = Optional.ofNullable(getUserCatalog(username).removeWithoutRelease(graphName))
+        GraphStoreWithConfig graphStoreWithConfig = Optional
+            .ofNullable(getUserCatalog(username).removeWithoutRelease(graphName))
             .orElseThrow(failOnNonExistentGraph(graphName));
 
         graphRemovedConsumer.accept(graphStoreWithConfig);
 
-        Graph graph = graphStoreWithConfig.getGraph();
-        graph.canRelease(true);
-        graph.release();
+        GraphStore graphStore = graphStoreWithConfig.graphStore();
+        graphStore.canRelease(true);
+        graphStore.release();
     }
 
     private static UserCatalog getUserCatalog(String username) {
@@ -155,21 +150,6 @@ public final class GraphStoreCatalog {
 
         boolean exists(String graphName) {
             return graphName != null && graphsByName.containsKey(graphName);
-        }
-
-        @Nullable
-        Graph remove(String graphName) {
-            if (!exists(graphName)) {
-                // remove is allowed to return null if the graph does not exist
-                // as it's being used by algo.graph.info or algo.graph.remove,
-                // that can deal with missing graphs
-                return null;
-            }
-            GraphStoreWithConfig graphStoreWithConfig = graphsByName.remove(graphName);
-            Graph graph = graphStoreWithConfig.getGraph();
-            graph.canRelease(true);
-            graph.release();
-            return graph;
         }
 
         @Nullable

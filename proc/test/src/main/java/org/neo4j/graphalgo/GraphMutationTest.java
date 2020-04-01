@@ -82,7 +82,7 @@ public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig,
                 })
         );
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).getGraph();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore().getUnion();
         TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
@@ -125,7 +125,7 @@ public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig,
                 })
         );
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).getGraph();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore().getUnion();
         TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
