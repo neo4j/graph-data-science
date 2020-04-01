@@ -24,13 +24,12 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.neo4j.graphalgo.utils.StringJoining.join;
-
 @ValueClass
-@Configuration("GraphWriteNodePropertyConfigImpl")
+@Configuration("GraphWriteNodePropertiesConfigImpl")
 @SuppressWarnings("immutables:subtype")
 public interface GraphWriteNodePropertiesConfig extends WriteConfig {
 
@@ -43,7 +42,7 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
         List<String> nodeProperties,
         CypherMapWrapper config
     ) {
-        return new GraphWriteNodePropertyConfigImpl(
+        return new GraphWriteNodePropertiesConfigImpl(
             nodeProperties,
             Optional.of(graphName),
             Optional.empty(),
@@ -55,11 +54,19 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
     @Configuration.Ignore
     default void validate(GraphStore graphStore) {
         nodeProperties().forEach(nodePropertyKey -> {
-            if (!graphStore.hasNodeProperty(nodePropertyKey)) {
+            boolean propertyExists = graphStore
+                .nodeLabels()
+                .stream()
+                .anyMatch(label -> graphStore.hasNodeProperty(Collections.singleton(label), nodePropertyKey));
+
+            if (!propertyExists) {
                 throw new IllegalArgumentException(String.format(
-                    "Node property key `%s` not found. Available keys: %s",
+                    "No node projection with property key `%s` found. Existing properties are: %s.",
                     nodePropertyKey,
-                    join(graphStore.nodePropertyKeys())
+                    graphStore.nodePropertyKeys().values().stream().reduce((lhs, rhs) -> {
+                        lhs.addAll(rhs);
+                        return lhs;
+                    }).orElseGet(Collections::emptySet)
                 ));
             }
         });
