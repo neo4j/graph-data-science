@@ -112,7 +112,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
         // Create explicit graphs with both projection variants
         runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
         runQuery(String.format(
-            "CALL gds.graph.create.cypher('%s', '%s', '%s', {nodeProperties: ['seed', 'weight']})",
+            "CALL gds.graph.create.cypher('%s', '%s', '%s', {})",
             TEST_CYPHER_GRAPH_NAME,
             nodeQuery,
             relQuery
