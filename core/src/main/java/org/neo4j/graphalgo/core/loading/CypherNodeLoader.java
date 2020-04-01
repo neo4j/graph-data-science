@@ -20,101 +20,88 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongObjectHashMap;
+import com.carrotsearch.hppc.LongObjectMap;
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 
 @Value.Enclosing
 class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
-    private static final int CYPHER_RESULT_PROPERTY_KEY = -2;
+    protected static final int CYPHER_RESULT_PROPERTY_KEY = -2;
 
     private final long nodeCount;
-    private final boolean hasExplicitPropertyMappings;
     private final GraphDimensions outerDimensions;
+    private final LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping;
 
     private HugeLongArrayBuilder builder;
     private NodeImporter importer;
-    private Map<PropertyMapping, NodePropertiesBuilder> nodePropertyBuilders;
     private long maxNodeId;
-    private boolean initializedFromResult;
+    private CypherNodePropertyImporter nodePropertyImporter;
 
     CypherNodeLoader(
         String nodeQuery,
         long nodeCount,
         GraphDatabaseAPI api,
+        GraphCreateConfig config,
         GraphSetup setup,
         GraphDimensions outerDimensions
     ) {
-        super(nodeQuery, nodeCount, api, setup);
+        super(nodeQuery, nodeCount, api, config, setup);
         this.nodeCount = nodeCount;
         this.outerDimensions = outerDimensions;
         this.maxNodeId = 0L;
-        this.hasExplicitPropertyMappings = setup.nodePropertyMappings().hasMappings();
-
-        if (hasExplicitPropertyMappings) {
-            initImporter(setup.nodePropertyMappings());
-        }
-    }
-
-    private void initImporter(PropertyMappings nodeProperties) {
-        nodePropertyBuilders = nodeProperties(nodeProperties);
-        builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());
-        importer = new NodeImporter(builder, new HashMap<>(), nodePropertyBuilders.values(), new LongObjectHashMap<>());
+        this.labelElementIdentifierMapping = new LongObjectHashMap<>();
+        this.builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());
+        this.importer = new NodeImporter(builder, new HashMap<>(), labelElementIdentifierMapping);
     }
 
     @Override
     BatchLoadResult loadSingleBatch(Transaction tx, int bufferSize) {
         Result queryResult = runLoadingQuery(tx);
 
-        Collection<String> propertyColumns = getPropertyColumns(queryResult);
-        if (!hasExplicitPropertyMappings && !initializedFromResult) {
-            PropertyMappings propertyMappings = PropertyMappings.of(propertyColumns
-                .stream()
-                .map(propertyColumn -> PropertyMapping.of(
-                    propertyColumn,
-                    propertyColumn,
-                    DEFAULT_FALLBACK_VALUE,
-                    Aggregation.DEFAULT
-                ))
-                .toArray(PropertyMapping[]::new));
+        List<String> propertyColumns = getPropertyColumns(queryResult);
 
-            initImporter(propertyMappings);
-            initializedFromResult = true;
-        } else if (!initializedFromResult) {
-            validatePropertyColumns(propertyColumns, outerDimensions.nodeProperties());
-            initializedFromResult = true;
-        }
+        nodePropertyImporter = new CypherNodePropertyImporter(
+                propertyColumns,
+                labelElementIdentifierMapping,
+                nodeCount,
+                config.readConcurrency()
+        );
 
         boolean hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);
 
         NodesBatchBuffer buffer = new NodesBatchBufferBuilder()
             .capacity(bufferSize)
             .hasLabelInformation(hasLabelInformation)
-            .readProperty(true)
+            .readProperty(propertyColumns.size() > 0)
             .build();
-        NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer, hasLabelInformation);
+
+        NodeRowVisitor visitor = new NodeRowVisitor(
+            buffer,
+            importer,
+            hasLabelInformation,
+            nodePropertyImporter
+        );
+
         queryResult.accept(visitor);
         visitor.flush();
         return new BatchLoadResult(visitor.rows(), visitor.maxId());
@@ -129,26 +116,29 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     @Override
     LoadResult result() {
-        IdMap idMap = IdMapBuilder.build(builder, importer.elementIdentifierBitSetMapping, maxNodeId, setup.concurrency(), setup.tracker());
-        Map<String, NodeProperties> nodeProperties = nodePropertyBuilders.entrySet().stream()
-            .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
-
-        ResolvedPropertyMappings nodePropertyMappings = ResolvedPropertyMappings.of(
-            nodePropertyBuilders
-                .keySet()
-                .stream()
-                .map(x -> x.resolveWith(NO_SUCH_PROPERTY_KEY))
-                .collect(Collectors.toList())
+        IdMap idMap = IdMapBuilder.build(
+            builder,
+            importer.elementIdentifierBitSetMapping,
+            maxNodeId,
+            setup.concurrency(),
+            setup.tracker()
         );
+        Map<ElementIdentifier, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter.result();
+
+        Map<String, Integer> propertyIds = nodeProperties
+            .values()
+            .stream()
+            .flatMap(properties -> properties.keySet().stream())
+            .collect(Collectors.toMap(PropertyMapping::propertyKey, (ignore) -> NO_SUCH_PROPERTY_KEY));
 
         GraphDimensions resultDimensions = ImmutableGraphDimensions.builder()
             .from(outerDimensions)
-            .nodeProperties(nodePropertyMappings)
+            .nodePropertyIds(propertyIds)
             .build();
 
         return ImmutableCypherNodeLoader.LoadResult.builder()
             .dimensions(resultDimensions)
-            .idsAndProperties(new IdsAndProperties(idMap, nodeProperties))
+            .idsAndProperties(IdsAndProperties.of(idMap, nodeProperties))
             .build();
     }
 
@@ -165,20 +155,6 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     @Override
     QueryType queryType() {
         return QueryType.NODE;
-    }
-
-    private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties(PropertyMappings propertyMappings) {
-        return propertyMappings.stream().collect(Collectors.toMap(
-            propertyMapping -> propertyMapping,
-            propertyMapping -> NodePropertiesBuilder.of(
-                nodeCount,
-                AllocationTracker.EMPTY,
-                propertyMapping.defaultValue(),
-                CYPHER_RESULT_PROPERTY_KEY,
-                propertyMapping.propertyKey(),
-                setup.concurrency()
-            )
-        ));
     }
 
     @ValueClass

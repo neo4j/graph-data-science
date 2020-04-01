@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -81,10 +82,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         String relationshipQuery,
         IdMap idMap,
         GraphDatabaseAPI api,
+        GraphCreateConfig config,
         GraphSetup setup,
         GraphDimensions dimensions
     ) {
-        super(relationshipQuery, idMap.nodeCount(), api, setup);
+        super(relationshipQuery, idMap.nodeCount(), api, config, setup);
         this.idMap = idMap;
         this.outerDimensions = dimensions;
         this.loaderContext = new Context();

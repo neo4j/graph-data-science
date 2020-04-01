@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -42,15 +43,14 @@ import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class CypherFactory extends GraphStoreFactory {
 
-    static final String LIMIT = "limit";
-    static final String SKIP = "skip";
-
     private final GraphDatabaseAPI api;
+    private final GraphCreateConfig graphCreateConfig;
     private final GraphSetup setup;
 
-    public CypherFactory(GraphDatabaseAPI api, GraphSetup setup) {
-        super(api, setup, false);
+    public CypherFactory(GraphDatabaseAPI api, GraphCreateConfig graphCreateConfig, GraphSetup setup) {
+        super(api, setup, graphCreateConfig, false);
         this.api = api;
+        this.graphCreateConfig = graphCreateConfig;
         this.setup = setup;
     }
 
@@ -58,8 +58,8 @@ public class CypherFactory extends GraphStoreFactory {
         BatchLoadResult nodeCount;
         BatchLoadResult relCount;
         try (Ktx ktx = setReadOnlySecurityContext()) {
-            nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, setup).load(ktx);
-            relCount = new CountingCypherRecordLoader(relationshipQuery(), RELATIONSHIP, api, setup).load(ktx);
+            nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, graphCreateConfig, setup).load(ktx);
+            relCount = new CountingCypherRecordLoader(relationshipQuery(), RELATIONSHIP, api, graphCreateConfig, setup).load(ktx);
         }
 
         GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
@@ -80,12 +80,13 @@ public class CypherFactory extends GraphStoreFactory {
     public ImportResult build() {
         // Temporarily override the security context to enforce read-only access during load
         try (Ktx ktx = setReadOnlySecurityContext()) {
-            BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, setup).load(ktx);
+            BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, graphCreateConfig, setup).load(ktx);
 
             CypherNodeLoader.LoadResult nodes = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
                 api,
+                graphCreateConfig,
                 setup,
                 dimensions
             ).load(ktx);
@@ -127,6 +128,7 @@ public class CypherFactory extends GraphStoreFactory {
             relationshipQuery,
             idsAndProperties.idMap(),
             api,
+            graphCreateConfig,
             setup,
             nodeLoadDimensions
         );

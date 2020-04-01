@@ -1,0 +1,118 @@
+package org.neo4j.graphalgo.core.loading;
+
+import com.carrotsearch.hppc.LongObjectMap;
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.core.loading.CypherNodeLoader.CYPHER_RESULT_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
+import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.IGNORE_LABEL;
+
+public class CypherNodePropertyImporter {
+
+    private final List<String> propertyColumns;
+    private final long nodeCount;
+    private final int concurrency;
+    private final LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping;
+    private final Map<ElementIdentifier, Map<String, NodePropertiesBuilder>> buildersByIdentifier;
+
+
+    public CypherNodePropertyImporter(
+            List<String> propertyColumns,
+            LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping,
+            long nodeCount,
+            int concurrency
+    ) {
+        this.propertyColumns = propertyColumns;
+        this.labelElementIdentifierMapping = labelElementIdentifierMapping;
+        this.nodeCount = nodeCount;
+        this.concurrency = concurrency;
+
+        this.buildersByIdentifier = new HashMap<>();
+    }
+
+    public List<String> propertyColumns() {
+        return propertyColumns;
+    }
+
+    public void registerPropertiesForLabels(List<String> labels) {
+        for (String label : labels) {
+            ElementIdentifier labelIdentifier = new ElementIdentifier(label);
+            Map<String, NodePropertiesBuilder> propertyBuilders = buildersByIdentifier.computeIfAbsent(labelIdentifier, (ignore) -> new HashMap<>());
+            for (String property : propertyColumns) {
+                propertyBuilders.computeIfAbsent(
+                        property,
+                        (ignore) -> NodePropertiesBuilder.of(
+                                nodeCount,
+                                AllocationTracker.EMPTY,
+                                Double.NaN,
+                                CYPHER_RESULT_PROPERTY_KEY,
+                                property,
+                                concurrency
+                        )
+                );
+            }
+        }
+    }
+
+    public int importProperties(long nodeId, long[] labels, int propertiesReference, List<Map<String, Number>> cypherNodeProperties) {
+        int propertiesImported = 0;
+
+        Map<String, Number> nodeProperties = cypherNodeProperties.get(propertiesReference);
+
+        // If there is a node projection for ANY label, then we need to consume the node properties regardless.
+        propertiesImported += setPropertyForLabel(PROJECT_ALL, nodeProperties, nodeId);
+
+        for (long label : labels) {
+            if (label == IGNORE_LABEL || label == ANY_LABEL) {
+                continue;
+            }
+
+            for(ElementIdentifier labelIdentifier : labelElementIdentifierMapping.get(label)) {
+                propertiesImported += setPropertyForLabel(labelIdentifier, nodeProperties, nodeId);
+            }
+        }
+
+        return propertiesImported;
+    }
+
+    public Map<ElementIdentifier, Map<PropertyMapping, NodeProperties>> result() {
+        return buildersByIdentifier
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
+                                builderEntry -> PropertyMapping.of(builderEntry.getKey(), Double.NaN),
+                                builderEntry -> builderEntry.getValue().build()
+                        ))
+                ));
+    }
+
+    private int setPropertyForLabel(ElementIdentifier labelIdentifier, Map<String, Number> nodeProperties, long nodeId) {
+        int propertiesImported = 0;
+
+        if (buildersByIdentifier.containsKey(labelIdentifier)) {
+            Map<String, NodePropertiesBuilder> buildersByProperty = buildersByIdentifier.get(labelIdentifier);
+
+            for (Map.Entry<String, Number> propertyEntry : nodeProperties.entrySet()) {
+                if (buildersByProperty.containsKey(propertyEntry.getKey())) {
+                    NodePropertiesBuilder builder = buildersByProperty.get(propertyEntry.getKey());
+                    builder.set(nodeId, propertyEntry.getValue().doubleValue());
+                    propertiesImported++;
+                }
+            }
+        }
+
+        return propertiesImported;
+    }
+
+}

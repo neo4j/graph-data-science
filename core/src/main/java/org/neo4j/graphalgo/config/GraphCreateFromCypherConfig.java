@@ -25,6 +25,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -35,11 +36,15 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 @ValueClass
@@ -72,6 +77,10 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         return RelationshipProjections.of();
     }
 
+    @Override
+    @Value.Default
+    default PropertyMappings nodeProperties() { return PropertyMappings.of(); }
+
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String nodeQuery();
 
@@ -92,13 +101,20 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     @Configuration.Ignore
     default GraphCreateFromCypherConfig inferProjections(GraphDimensions dimensions) {
+        List<PropertyMapping> nodeProperties = dimensions
+            .nodePropertyIds()
+            .keySet()
+            .stream()
+            .map(property -> PropertyMapping.of(property, Double.NaN))
+            .collect(Collectors.toList());
+
         NodeProjections nodeProjections = NodeProjections.builder()
             .putProjection(
                 PROJECT_ALL,
                 NodeProjection
                     .builder()
                     .label(PROJECT_ALL.name)
-                    .addPropertyMappings(PropertyMappings.of(dimensions.nodeProperties()))
+                    .addPropertyMappings(PropertyMappings.of(nodeProperties))
                     .build()
             ).build();
 
@@ -168,11 +184,10 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     }
 
     static void assertNoProjections(CypherMapWrapper config) {
-        if (config.containsKey(NODE_PROJECTION_KEY)) {
-            throw new IllegalArgumentException(String.format("Invalid key: %s", NODE_PROJECTION_KEY));
-        }
-        if (config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
-            throw new IllegalArgumentException(String.format("Invalid key: %s", RELATIONSHIP_PROJECTION_KEY));
+        for (String forbiddenKey : Arrays.asList(NODE_PROJECTION_KEY, RELATIONSHIP_PROJECTION_KEY, NODE_PROPERTIES_KEY)) {
+            if (config.containsKey(forbiddenKey)) {
+                throw new IllegalArgumentException(String.format("Invalid key: %s", forbiddenKey));
+            }
         }
     }
 }
