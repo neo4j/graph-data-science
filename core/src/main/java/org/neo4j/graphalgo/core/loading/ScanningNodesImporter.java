@@ -20,11 +20,9 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.LongObjectMap;
 import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -33,12 +31,14 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
 
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, IdsAndProperties> {
@@ -46,21 +46,21 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
     private final TerminationFlag terminationFlag;
-    private final PropertyMappings propertyMappings;
+    private final Map<ElementIdentifier, PropertyMappings> propertyMappings;
 
-    private Map<String, NodePropertiesBuilder> builders;
+    private NativeNodePropertyImporter nodePropertyImporter;
     private HugeLongArrayBuilder idMapBuilder;
     private Map<ElementIdentifier, BitSet> elementIdentifierBitSetMapping;
 
     ScanningNodesImporter(
-        GraphDatabaseAPI api,
-        GraphDimensions dimensions,
-        ProgressLogger progressLogger,
-        AllocationTracker tracker,
-        TerminationFlag terminationFlag,
-        ExecutorService threadPool,
-        int concurrency,
-        PropertyMappings propertyMappings
+            GraphDatabaseAPI api,
+            GraphDimensions dimensions,
+            ProgressLogger progressLogger,
+            AllocationTracker tracker,
+            TerminationFlag terminationFlag,
+            ExecutorService threadPool,
+            int concurrency,
+            Map<ElementIdentifier, PropertyMappings> propertyMappings
     ) {
         super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
         this.progressLogger = progressLogger;
@@ -71,29 +71,49 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     @Override
     InternalImporter.CreateScanner creator(
-        long nodeCount,
-        ImportSizing sizing,
-        AbstractStorePageCacheScanner<NodeRecord> scanner
+            long nodeCount,
+            ImportSizing sizing,
+            AbstractStorePageCacheScanner<NodeRecord> scanner
     ) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
 
-        elementIdentifierBitSetMapping = StreamSupport.stream(
-            dimensions
-                .labelElementIdentifierMapping()
-                .values()
-                .spliterator(),
-            false)
-            .flatMap(cursor -> cursor.value.stream())
-            .distinct()
-            .collect(Collectors.toMap(identifier -> identifier, s -> new BitSet(nodeCount)));
 
-        builders = propertyBuilders(nodeCount);
+        LongObjectMap<List<ElementIdentifier>> labelIdentifierMapping = dimensions.labelElementIdentifierMapping();
+
+        Supplier<Map<ElementIdentifier, BitSet>> initializeLabelBitSets = () ->
+            StreamSupport.stream(
+                labelIdentifierMapping.values().spliterator(),
+                false
+            )
+                .flatMap(cursor -> cursor.value.stream())
+                .distinct()
+                .collect(Collectors.toMap(identifier -> identifier, s -> new BitSet(nodeCount)));
+
+
+        elementIdentifierBitSetMapping = labelIdentifierMapping.size() == 1 && labelIdentifierMapping.containsKey(ANY_LABEL)
+            ? null
+            : initializeLabelBitSets.get();
+
+        nodePropertyImporter = NativeNodePropertyImporter
+            .builder()
+            .nodeCount(nodeCount)
+            .concurrency(concurrency)
+            .dimensions(dimensions)
+            .propertyMappings(propertyMappings)
+            .tracker(tracker)
+            .build();
+
         return NodesScanner.of(
             api,
             scanner,
             dimensions.nodeLabelIds(),
             progressLogger,
-            new NodeImporter(idMapBuilder, elementIdentifierBitSetMapping, builders.values(), dimensions.labelElementIdentifierMapping()),
+            new NodeImporter(
+                idMapBuilder,
+                elementIdentifierBitSetMapping,
+                labelIdentifierMapping
+            ),
+            nodePropertyImporter,
             terminationFlag
         );
     }
@@ -101,36 +121,13 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     @Override
     IdsAndProperties build() {
         IdMap hugeIdMap = IdMapBuilder.build(
-            idMapBuilder,
-            elementIdentifierBitSetMapping,
-            dimensions.highestNeoId(),
-            concurrency,
-            tracker
+                idMapBuilder,
+                elementIdentifierBitSetMapping,
+                dimensions.highestNeoId(),
+                concurrency,
+                tracker
         );
-        Map<String, NodeProperties> nodeProperties = new HashMap<>();
-        for (PropertyMapping propertyMapping : propertyMappings) {
-            NodePropertiesBuilder builder = builders.get(propertyMapping.propertyKey());
-            NodeProperties props = builder != null ? builder.build() : new NullPropertyMap(propertyMapping.defaultValue());
-            nodeProperties.put(propertyMapping.propertyKey(), props);
-        }
-        return new IdsAndProperties(hugeIdMap, Collections.unmodifiableMap(nodeProperties));
-    }
 
-    private Map<String, NodePropertiesBuilder> propertyBuilders(long nodeCount) {
-        Map<String, NodePropertiesBuilder> builders = new HashMap<>();
-        for (ResolvedPropertyMapping resolvedPropertyMapping : dimensions.nodeProperties()) {
-            if (resolvedPropertyMapping.exists()) {
-                NodePropertiesBuilder builder = NodePropertiesBuilder.of(
-                    nodeCount,
-                    tracker,
-                    resolvedPropertyMapping.defaultValue(),
-                    resolvedPropertyMapping.propertyKeyId(),
-                    resolvedPropertyMapping.propertyKey(),
-                    concurrency
-                );
-                builders.put(resolvedPropertyMapping.propertyKey(), builder);
-            }
-        }
-        return builders;
+        return IdsAndProperties.of(hugeIdMap, nodePropertyImporter.result());
     }
 }

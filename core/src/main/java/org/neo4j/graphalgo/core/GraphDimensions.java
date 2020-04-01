@@ -59,8 +59,8 @@ public interface GraphDimensions {
     LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping();
 
     @Value.Default
-    default ResolvedPropertyMappings nodeProperties() {
-        return ResolvedPropertyMappings.empty();
+    default Map<String, Integer> nodePropertyIds() {
+        return Collections.emptyMap();
     }
 
     @Value.Default

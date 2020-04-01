@@ -54,13 +54,13 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
         this.nodeLabelIds = nodeLabelIds.orElseGet(LongHashSet::new);
         this.hasLabelInformation = hasLabelInformation.orElse(false);
         this.properties = readProperty.orElse(false) ? new long[capacity] : null;
-        this.labelIds = this.hasLabelInformation ? new long[capacity][] : null;
+        this.labelIds = new long[capacity][];
     }
 
     @Override
     public void offer(final NodeRecord record) {
         if (nodeLabelIds.isEmpty()) {
-            add(record.getId(), record.getNextProp(), null);
+            add(record.getId(), record.getNextProp(), new long[]{ANY_LABEL});
         } else {
             boolean atLeastOneLabelFound = false;
             final long[] labels = NodeLabelsField.get(record, nodeStore);

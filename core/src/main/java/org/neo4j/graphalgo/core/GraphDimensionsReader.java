@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.compat.InternalReadOps;
 import org.neo4j.graphalgo.compat.StatementConstantsProxy;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
@@ -50,14 +51,17 @@ import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
     private final GraphSetup setup;
+    private final GraphCreateConfig graphCreateConfig;
     private final boolean readTokens;
 
     public GraphDimensionsReader(
             GraphDatabaseAPI api,
             GraphSetup setup,
+            GraphCreateConfig graphCreateConfig,
             boolean readTokens) {
         super(api);
         this.setup = setup;
+        this.graphCreateConfig = graphCreateConfig;
         this.readTokens = readTokens;
     }
 
@@ -97,7 +101,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         }
 
         RelationshipProjectionMappings relationshipProjectionMappings = mappingsBuilder.build();
-        ResolvedPropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings());
+        Map<String, Integer> nodePropertyIds = loadNodePropertyMapping(tokenRead);
         ResolvedPropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
 
         long nodeCount = labelElementIdentifierMappings.keyStream()
@@ -129,11 +133,25 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .relationshipCounts(relationshipCounts)
                 .nodeLabelIds(labelElementIdentifierMappings.keys())
                 .labelElementIdentifierMapping(labelElementIdentifierMappings.mappings())
-                .nodeProperties(nodeProperties)
+                .nodePropertyIds(nodePropertyIds)
                 .relationshipProjectionMappings(relationshipProjectionMappings)
                 .relationshipProperties(relProperties)
                 .build();
     }
+
+    private Map<String, Integer> loadNodePropertyMapping(TokenRead tokenRead) {
+        return graphCreateConfig.nodeProjections()
+            .projections()
+            .entrySet()
+            .stream()
+            .flatMap(nodeProjections -> nodeProjections.getValue().properties().stream())
+            .collect(Collectors.toMap(
+                PropertyMapping::neoPropertyKey,
+                propertyMapping -> propertyMapping.neoPropertyKey() != null ? tokenRead.propertyKey(propertyMapping.neoPropertyKey()) : TokenRead.NO_TOKEN,
+                (a, b) -> a
+            ));
+    }
+
 
     private ResolvedPropertyMappings loadPropertyMapping(TokenRead tokenRead, PropertyMappings propertyMappings) {
         ResolvedPropertyMappings.Builder builder = ResolvedPropertyMappings.builder();

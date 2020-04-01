@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.api.GraphSetup;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -41,7 +42,7 @@ public final class GraphDimensionsValidation {
     public static void validate(GraphDimensions dimensions, GraphSetup setup) {
         checkValidNodePredicate(dimensions, setup);
         checkValidRelationshipTypePredicate(dimensions, setup);
-        checkValidProperties("Node", dimensions.nodeProperties());
+        checkValidProperties("Node", dimensions.nodePropertyIds());
         checkValidProperties("Relationship", dimensions.relationshipProperties());
     }
 
@@ -70,6 +71,27 @@ public final class GraphDimensionsValidation {
         }
     }
 
+    private static void checkValidProperties(String recordType, Map<String, Integer> propertyIds) {
+        String missingProperties = propertyIds
+            .entrySet()
+            .stream()
+            .filter(mapping -> {
+                String propertyKey = mapping.getKey();
+                int id = mapping.getValue();
+                return isNotEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
+            })
+            .map(Map.Entry::getKey)
+            .collect(joining("', '"));
+
+        if (!missingProperties.isEmpty()) {
+            throw new IllegalArgumentException(String.format(
+                "%s properties not found: '%s'",
+                recordType,
+                missingProperties));
+        }
+    }
+
+    @Deprecated
     private static void checkValidProperties(String recordType, ResolvedPropertyMappings mappings) {
         List<ResolvedPropertyMapping> invalidProperties = mappings
             .stream()

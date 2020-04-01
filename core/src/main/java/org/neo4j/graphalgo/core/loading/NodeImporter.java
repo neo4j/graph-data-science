@@ -20,18 +20,13 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongObjectMap;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.values.storable.Value;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,45 +36,46 @@ import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
 public class NodeImporter {
 
     interface PropertyReader {
-        int readProperty(long nodeReference, long propertiesReference, long internalId);
+        int readProperty(long nodeReference, long[] labelIds, long propertiesReference, long internalId);
     }
 
     final Map<ElementIdentifier, BitSet> elementIdentifierBitSetMapping;
     final LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping;
 
     private final HugeLongArrayBuilder idMapBuilder;
-    private final IntObjectMap<NodePropertiesBuilder> buildersByPropertyId;
-    private final Collection<NodePropertiesBuilder> nodePropertyBuilders;
 
     public NodeImporter(HugeLongArrayBuilder idMapBuilder) {
-        this(idMapBuilder, null, null, null);
+        this(idMapBuilder, null, null);
     }
 
     public NodeImporter(
         HugeLongArrayBuilder idMapBuilder,
         Map<ElementIdentifier, BitSet> elementIdentifierBitSetMapping,
-        Collection<NodePropertiesBuilder> nodePropertyBuilders,
         LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping
     ) {
         this.idMapBuilder = idMapBuilder;
         this.elementIdentifierBitSetMapping = elementIdentifierBitSetMapping;
-        this.buildersByPropertyId = mapBuildersByPropertyId(nodePropertyBuilders);
-        this.nodePropertyBuilders = nodePropertyBuilders;
         this.labelElementIdentifierMapping = labelElementIdentifierMapping;
     }
 
-    boolean readsProperties() {
-        return buildersByPropertyId != null;
+    long importNodes(NodesBatchBuffer buffer, Read read, CursorFactory cursors, NativeNodePropertyImporter propertyImporter) {
+        return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
+            if (propertyImporter != null) {
+                return propertyImporter.importProperties(internalId, nodeReference, labelIds, propertiesReference, cursors, read);
+            } else {
+                return 0;
+            }
+        });
     }
 
-    long importNodes(NodesBatchBuffer buffer, Read read, CursorFactory cursors) {
-        return importNodes(buffer, (nodeReference, propertiesReference, internalId) ->
-            readProperty(nodeReference, propertiesReference, buildersByPropertyId, internalId, cursors, read));
-    }
-
-    long importCypherNodes(NodesBatchBuffer buffer, List<Map<String, Number>> cypherNodeProperties) {
-        return importNodes(buffer, (nodeReference, propertiesReference, internalId) ->
-            readCypherProperty(propertiesReference, internalId, cypherNodeProperties));
+    long importCypherNodes(NodesBatchBuffer buffer, List<Map<String, Number>> cypherNodeProperties, CypherNodePropertyImporter propertyImporter) {
+        return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
+            if (propertyImporter != null) {
+                return propertyImporter.importProperties(internalId, labelIds, (int) propertiesReference, cypherNodeProperties);
+            } else {
+                return 0;
+            }
+        });
     }
 
     public long importNodes(NodesBatchBuffer buffer, PropertyReader reader) {
@@ -114,6 +110,7 @@ public class NodeImporter {
                     int batchIndex = batchOffset + i;
                     importedProperties += reader.readProperty(
                         batch[batchIndex],
+                        buffer.labelIds()[i],
                         properties[batchIndex],
                         localIndex
                     );
@@ -142,60 +139,5 @@ public class NodeImporter {
         for (ElementIdentifier allProjectionIdentifier : labelElementIdentifierMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
             elementIdentifierBitSetMapping.get(allProjectionIdentifier).set(startIndex, startIndex + batchLength);
         }
-    }
-
-    private int readProperty(
-        long nodeReference,
-        long propertiesReference,
-        IntObjectMap<NodePropertiesBuilder> nodeProperties,
-        long internalId,
-        CursorFactory cursors,
-        Read read
-    ) {
-        try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
-            read.nodeProperties(nodeReference, propertiesReference, pc);
-            int nodePropertiesRead = 0;
-            while (pc.next()) {
-                NodePropertiesBuilder props = nodeProperties.get(pc.propertyKey());
-                if (props != null) {
-                    Value value = pc.propertyValue();
-                    double defaultValue = props.defaultValue();
-                    double propertyValue = ReadHelper.extractValue(value, defaultValue);
-                    props.set(internalId, propertyValue);
-                    nodePropertiesRead++;
-                }
-            }
-            return nodePropertiesRead;
-        }
-    }
-
-    private int readCypherProperty(
-        long propertiesReference,
-        long internalId,
-        List<Map<String, Number>> cypherNodeProperties
-    ) {
-        Map<String, Number> properties = cypherNodeProperties.get((int) propertiesReference);
-        int nodePropertiesRead = 0;
-        for (NodePropertiesBuilder props : nodePropertyBuilders) {
-            Number propertyValue = properties.get(props.propertyKey());
-            if (propertyValue != null) {
-                props.set(internalId, propertyValue.doubleValue());
-                nodePropertiesRead++;
-            }
-        }
-        return nodePropertiesRead;
-    }
-
-
-    private IntObjectMap<NodePropertiesBuilder> mapBuildersByPropertyId(Collection<NodePropertiesBuilder> builders) {
-        if (builders == null) {
-            return null;
-        }
-        IntObjectMap<NodePropertiesBuilder> map = new IntObjectHashMap<>(builders.size());
-        builders
-            .stream()
-            .filter(builder -> builder.propertyId() >= 0)
-            .forEach(builder -> map.put(builder.propertyId(), builder));
-        return map.isEmpty() ? null : map;
     }
 }
