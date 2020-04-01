@@ -26,7 +26,17 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.config.*;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.MutatePropertyConfig;
+import org.neo4j.graphalgo.config.MutateRelationshipConfig;
+import org.neo4j.graphalgo.config.NodeWeightConfig;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -48,7 +58,12 @@ import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -247,26 +262,27 @@ public abstract class AlgoBaseProc<
         if (graphCreateConfig instanceof GraphCreateFromCypherConfig) {
             return;
         }
+
+        Collection<ElementIdentifier> filterLabels = config.nodeLabelIdentifiers().contains(PROJECT_ALL)
+            ? graphStore.nodeLabels()
+            : config.nodeLabelIdentifiers();
         if (config instanceof SeedConfig) {
-            Set<String> nodeProperties = graphStore.nodePropertyKeys();
             String seedProperty = ((SeedConfig) config).seedProperty();
-            if (seedProperty != null && !nodeProperties.contains(seedProperty)) {
+            if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
                 throw new IllegalArgumentException(String.format(
                     "Seed property `%s` not found in graph with node properties: %s",
                     seedProperty,
-                    nodeProperties
+                    graphStore.nodePropertyKeys().values()
                 ));
             }
         }
         if (config instanceof NodeWeightConfig) {
-            Set<String> properties = graphStore.nodePropertyKeys();
-
             String weightProperty = ((NodeWeightConfig) config).nodeWeightProperty();
-            if (weightProperty != null && !properties.contains(weightProperty)) {
+            if (weightProperty != null && !graphStore.hasNodeProperty(filterLabels, weightProperty)) {
                 throw new IllegalArgumentException(String.format(
                     "Node weight property `%s` not found in graph with node properties: %s",
                     weightProperty,
-                    properties
+                    graphStore.nodePropertyKeys().values()
                 ));
             }
         }
@@ -286,10 +302,6 @@ public abstract class AlgoBaseProc<
         if (config instanceof MutatePropertyConfig) {
             MutatePropertyConfig mutateConfig = (MutatePropertyConfig) config;
             String mutateProperty = mutateConfig.mutateProperty();
-
-            Collection<ElementIdentifier> filterLabels = mutateConfig.nodeLabelIdentifiers().contains(PROJECT_ALL)
-                ? graphStore.nodeLabels()
-                : mutateConfig.nodeLabelIdentifiers();
 
             if (mutateProperty != null && graphStore.hasNodeProperty(filterLabels, mutateProperty)) {
                 throw new IllegalArgumentException(String.format(
