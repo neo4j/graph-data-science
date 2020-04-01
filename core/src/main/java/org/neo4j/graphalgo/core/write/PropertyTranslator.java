@@ -37,7 +37,11 @@ public interface PropertyTranslator<T> {
                 int propertyId,
                 T data,
                 long nodeId) {
-            return Values.doubleValue(toDouble(data, nodeId));
+            double doubleValue = toDouble(data, nodeId);
+            if (Double.isNaN(doubleValue)) {
+                return null;
+            }
+            return Values.doubleValue(doubleValue);
         }
     }
 
