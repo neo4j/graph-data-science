@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.apache.commons.compress.utils.Sets;
 import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphdb.Result;
 import org.neo4j.values.storable.Values;
 
@@ -33,6 +32,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private static final String ID_COLUMN = "id";
     static final String LABELS_COLUMN = "labels";
@@ -42,22 +43,28 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     private long rows;
     private long maxNeoId = 0;
-    private final Map<PropertyMapping, NodePropertiesBuilder> nodeProperties;
     private final NodesBatchBuffer buffer;
     private final List<Map<String, Number>> cypherNodeProperties;
     private final NodeImporter importer;
     private final boolean hasLabelInformation;
+    private final CypherNodePropertyImporter propertyImporter;
 
     private final Map<ElementIdentifier, Long> elementIdentifierLabelIdMapping;
     private long labelIdCounter = 0;
 
-    public NodeRowVisitor(Map<PropertyMapping, NodePropertiesBuilder> nodeProperties, NodesBatchBuffer buffer, NodeImporter importer, boolean hasLabelInformation) {
-        this.nodeProperties = nodeProperties;
+    public NodeRowVisitor(
+        NodesBatchBuffer buffer,
+        NodeImporter importer,
+        boolean hasLabelInformation,
+        CypherNodePropertyImporter propertyImporter
+    ) {
         this.buffer = buffer;
         this.importer = importer;
         this.cypherNodeProperties = new ArrayList<>(buffer.capacity());
         this.hasLabelInformation = hasLabelInformation;
+        this.propertyImporter = propertyImporter;
         this.elementIdentifierLabelIdMapping = new HashMap<>();
+
     }
 
     @Override
@@ -68,27 +75,11 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         }
         rows++;
 
-        long[] labelIds = getLabelIdsForRow(row, neoId);
+        List<String> labels = getLabels(row, neoId);
+        long[] labelIds = getLabelIds(labels);
 
+        int propRef = processProperties(row, labels);
 
-        HashMap<String, Number> weights = new HashMap<>();
-        for (Map.Entry<PropertyMapping, NodePropertiesBuilder> entry : nodeProperties.entrySet()) {
-            PropertyMapping key = entry.getKey();
-            Object value = CypherLoadingUtils.getProperty(row, entry.getKey().neoPropertyKey());
-            if (value instanceof Number) {
-                weights.put(key.propertyKey(), (Number) value);
-            } else if (null == value) {
-                weights.put(key.propertyKey(), key.defaultValue());
-            } else {
-                throw new IllegalArgumentException(String.format(
-                        "Unsupported type [%s] of value %s. Please use a numeric property.",
-                        Values.of(value).valueGroup(),
-                        value));
-            }
-        }
-
-        int propRef = cypherNodeProperties.size();
-        cypherNodeProperties.add(weights);
         buffer.add(neoId, propRef, labelIds);
         if (buffer.isFull()) {
             flush();
@@ -101,11 +92,10 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         if (rows == 0) {
             throw new IllegalArgumentException("Node-Query returned no nodes");
         }
-        importer.importCypherNodes(buffer, cypherNodeProperties);
+        importer.importCypherNodes(buffer, cypherNodeProperties, propertyImporter);
     }
 
-    private long[] getLabelIdsForRow(Result.ResultRow row, long neoId) {
-        long[] labelIds = null;
+    private List<String> getLabels(Result.ResultRow row, long neoId) {
         if (hasLabelInformation) {
             Object labelsObject = row.get(LABELS_COLUMN);
             if (!(labelsObject instanceof List)) {
@@ -117,9 +107,9 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 ));
             }
 
-            List<String> labelStrings = (List<String>) labelsObject;
+            List<String> labels = (List<String>) labelsObject;
 
-            if (labelStrings.isEmpty()) {
+            if (labels.isEmpty()) {
                 throw new IllegalArgumentException(String.format(
                     Locale.US,
                     "Node(%d) does not specify a label, but label column '%s' was specified.",
@@ -128,18 +118,50 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 ));
             }
 
-            labelIds = new long[labelStrings.size()];
+            return labels;
+        } else {
+            return Collections.singletonList(PROJECT_ALL.name);
+        }
+    }
 
-            for (int i = 0; i < labelStrings.size(); i++) {
-                ElementIdentifier labelString = ElementIdentifier.of(labelStrings.get(i));
-                long labelId = elementIdentifierLabelIdMapping.computeIfAbsent(labelString, (l) -> {
-                    importer.labelElementIdentifierMapping.put(labelIdCounter, Collections.singletonList(labelString));
-                    return labelIdCounter++;
-                });
-                labelIds[i] = labelId;
+    private long[] getLabelIds(List<String> labels) {
+        long[] labelIds = new long[labels.size()];
+
+        for (int i = 0; i < labels.size(); i++) {
+            ElementIdentifier labelString = ElementIdentifier.of(labels.get(i));
+            long labelId = elementIdentifierLabelIdMapping.computeIfAbsent(labelString, (l) -> {
+                importer.labelElementIdentifierMapping.put(labelIdCounter, Collections.singletonList(labelString));
+                return labelIdCounter++;
+            });
+            labelIds[i] = labelId;
+        }
+
+        return labelIds;
+    }
+
+    private int processProperties(Result.ResultRow row, List<String> labels) {
+        propertyImporter.registerPropertiesForLabels(labels);
+
+        Map<String, Number> weights = new HashMap<>();
+        for (String propertyKey : propertyImporter.propertyColumns()) {
+            Object value = CypherLoadingUtils.getProperty(row, propertyKey);
+            if (value instanceof Number) {
+                weights.put(propertyKey, (Number) value);
+            } else if (null == value) {
+                weights.put(propertyKey, Double.NaN);
+            } else {
+                throw new IllegalArgumentException(String.format(
+                    "Unsupported type [%s] of value %s. Please use a numeric property.",
+                    Values.of(value).valueGroup(),
+                    value
+                ));
             }
         }
-        return labelIds;
+
+        int propRef = cypherNodeProperties.size();
+        cypherNodeProperties.add(weights);
+
+        return propRef;
     }
 
     private void reset() {

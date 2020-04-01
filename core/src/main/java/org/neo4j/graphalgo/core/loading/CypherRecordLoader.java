@@ -23,6 +23,7 @@ import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
@@ -53,15 +54,19 @@ abstract class CypherRecordLoader<R> {
 
     static final long NO_COUNT = -1L;
 
-    private final String loadQuery;
-    protected final GraphDatabaseAPI api;
-    private final long recordCount;
+    final GraphCreateConfig config;
     final GraphSetup setup;
 
-    CypherRecordLoader(String loadQuery, long recordCount, GraphDatabaseAPI api, GraphSetup setup) {
+    protected final GraphDatabaseAPI api;
+
+    private final long recordCount;
+    private final String loadQuery;
+
+    CypherRecordLoader(String loadQuery, long recordCount, GraphDatabaseAPI api, GraphCreateConfig config, GraphSetup setup) {
         this.loadQuery = loadQuery;
         this.recordCount = recordCount;
         this.api = api;
+        this.config = config;
         this.setup = setup;
     }
 
@@ -91,7 +96,7 @@ abstract class CypherRecordLoader<R> {
 
     abstract Set<String> getReservedColumns();
 
-    Collection<String> getPropertyColumns(Result queryResult) {
+    List<String> getPropertyColumns(Result queryResult) {
         Predicate<String> contains = getReservedColumns()::contains;
         return queryResult
             .columns()
