@@ -162,6 +162,8 @@ public final class HugeGraphUtil {
             int numberOfPages = importSizing.numberOfPages();
 
             int[] propertyKeyIds = loadRelationshipProperty ? new int[]{DUMMY_PROPERTY_ID} : new int[0];
+            double[] defaultValues = loadRelationshipProperty ? new double[]{Double.NaN} : new double[0];
+            Aggregation[] aggregations = loadRelationshipProperty ? new Aggregation[]{Aggregation.NONE} : new Aggregation[0];
 
             this.relationshipsBuilder = new org.neo4j.graphalgo.core.loading.RelationshipsBuilder(
                 new Aggregation[]{aggregation},
@@ -176,7 +178,8 @@ public final class HugeGraphUtil {
                 tracker,
                 new LongAdder(),
                 propertyKeyIds,
-                new double[]{}
+                defaultValues,
+                aggregations
             );
 
             this.relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);

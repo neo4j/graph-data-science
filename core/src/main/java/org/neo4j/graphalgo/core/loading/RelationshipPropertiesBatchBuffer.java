@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.core.Aggregation;
+
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.BATCH_ENTRY_SHIFT_SIZE;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.BATCH_ENTRY_SIZE;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.PROPERTIES_REFERENCE_OFFSET;
@@ -43,6 +45,7 @@ public class RelationshipPropertiesBatchBuffer implements RelationshipImporter.P
         int batchLength,
         int[] propertyKeyIds,
         double[] defaultValues,
+        Aggregation[] aggregations,
         boolean atLeastOnePropertyToLoad
     ) {
         int relationshipCount = batchLength / BATCH_ENTRY_SIZE;

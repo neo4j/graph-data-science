@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.compat.StatementConstantsProxy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -81,6 +82,7 @@ class RelationshipImporter {
             batchLength,
             adjacencyBuilder.getPropertyKeyIds(),
             adjacencyBuilder.getDefaultValues(),
+            adjacencyBuilder.getAggregations(),
             adjacencyBuilder.atLeastOnePropertyToLoad()
         );
         int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder, tracker);
@@ -91,6 +93,7 @@ class RelationshipImporter {
             batchLength,
             adjacencyBuilder.getPropertyKeyIds(),
             adjacencyBuilder.getDefaultValues(),
+            adjacencyBuilder.getAggregations(),
             adjacencyBuilder.atLeastOnePropertyToLoad()
         );
         int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder, tracker);
@@ -110,6 +113,7 @@ class RelationshipImporter {
             batchLength,
             adjacencyBuilder.getPropertyKeyIds(),
             adjacencyBuilder.getDefaultValues(),
+            adjacencyBuilder.getAggregations(),
             adjacencyBuilder.atLeastOnePropertyToLoad()
         );
         int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder, tracker);
@@ -129,6 +133,7 @@ class RelationshipImporter {
             batchLength,
             adjacencyBuilder.getPropertyKeyIds(),
             adjacencyBuilder.getDefaultValues(),
+            adjacencyBuilder.getAggregations(),
             adjacencyBuilder.atLeastOnePropertyToLoad()
         );
         int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder, tracker);
@@ -144,6 +149,7 @@ class RelationshipImporter {
          * @param batchLength              number of valid entries in the batch data
          * @param propertyKeyIds           property key ids to load
          * @param defaultValues            default weight for each property key
+         * @param aggregations             the aggregation for each property
          * @param atLeastOnePropertyToLoad true iff there is at least one value in {@code propertyKeyIds} that is not {@link StatementConstantsProxy#NO_SUCH_PROPERTY_KEY} (-1).
          * @return list of property values per per relationship property id
          */
@@ -152,6 +158,7 @@ class RelationshipImporter {
             int batchLength,
             int[] propertyKeyIds,
             double[] defaultValues,
+            Aggregation[] aggregations,
             boolean atLeastOnePropertyToLoad
         );
     }
@@ -161,7 +168,7 @@ class RelationshipImporter {
     }
 
     PropertyReader storeBackedPropertiesReader(CursorFactory cursors, Read read) {
-        return (batch, batchLength, relationshipProperties, defaultPropertyValues, atLeastOnePropertyToLoad) -> {
+        return (batch, batchLength, relationshipProperties, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
             long[][] properties = new long[relationshipProperties.length][batchLength / BATCH_ENTRY_SIZE];
             if (atLeastOnePropertyToLoad) {
                 try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
@@ -170,7 +177,7 @@ class RelationshipImporter {
                         long relationshipReference = batch[RELATIONSHIP_REFERENCE_OFFSET + i];
                         long propertiesReference = batch[PROPERTIES_REFERENCE_OFFSET + i];
                         read.relationshipProperties(relationshipReference, propertiesReference, pc);
-                        ReadHelper.readProperties(pc, relationshipProperties, relProps, defaultPropertyValues);
+                        ReadHelper.readProperties(pc, relationshipProperties, defaultPropertyValues, aggregations, relProps);
                         int propertyPos = i / BATCH_ENTRY_SIZE;
                         for (int j = 0; j < relProps.length; j++) {
                             properties[j][propertyPos] = Double.doubleToLongBits(relProps[j]);
@@ -181,7 +188,8 @@ class RelationshipImporter {
                 for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
                     int propertyPos = i / BATCH_ENTRY_SIZE;
                     for (int j = 0; j < defaultPropertyValues.length; j++) {
-                        properties[j][propertyPos] = Double.doubleToLongBits(defaultPropertyValues[j]);
+                        double value = aggregations[j].normalizePropertyValue(defaultPropertyValues[j]);
+                        properties[j][propertyPos] = Double.doubleToLongBits(value);
                     }
                 }
             }
@@ -191,7 +199,7 @@ class RelationshipImporter {
 
 
     public static PropertyReader preLoadedPropertyReader() {
-        return (batch, batchLength, weightProperty, defaultWeight, atLeastOnePropertyToLoad) -> {
+        return (batch, batchLength, weightProperty, defaultWeight, aggregations, atLeastOnePropertyToLoad) -> {
             long[] properties = new long[batchLength / BATCH_ENTRY_SIZE];
             for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
                 long property = batch[PROPERTIES_REFERENCE_OFFSET + i];

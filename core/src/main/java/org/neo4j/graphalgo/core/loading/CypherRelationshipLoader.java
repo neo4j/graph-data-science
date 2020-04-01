@@ -300,7 +300,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 tracker,
                 relationshipCounter,
                 propertyKeyIds,
-                propertyDefaultValues
+                propertyDefaultValues,
+                aggregations
             );
 
             RelationshipImporter relationshipImporter = new RelationshipImporter(setup.tracker(), adjacencyBuilder);

@@ -67,12 +67,12 @@ class AdjacencyCompressionTest {
         return Stream.of(
             Arguments.of(
                 values(),
-                weights(),
+                countWeights(),
                 new Aggregation[]{
                     Aggregation.COUNT,
                     Aggregation.COUNT
                 },
-                new double[][]{{4d, 2d}, {4d, 2d}},
+                new double[][]{{4d, 2d}, {2d, 1d}},
                 "COUNT"
             ),
             Arguments.of(
@@ -123,6 +123,24 @@ class AdjacencyCompressionTest {
             doubleToLongBits(8),
             doubleToLongBits(8),
             doubleToLongBits(8)
+        }};
+    }
+
+    private static long[][] countWeights() {
+        return new long[][]{{
+            doubleToLongBits(1.0),
+            doubleToLongBits(1.0),
+            doubleToLongBits(1.0),
+            doubleToLongBits(1.0),
+            doubleToLongBits(1.0),
+            doubleToLongBits(1.0)
+        }, {
+            doubleToLongBits(1.0),
+            doubleToLongBits(0.0),
+            doubleToLongBits(1.0),
+            doubleToLongBits(0.0),
+            doubleToLongBits(1.0),
+            doubleToLongBits(0.0)
         }};
     }
 

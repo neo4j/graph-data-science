@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.compat.StatementConstantsProxy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Value;
@@ -32,22 +34,33 @@ public final class ReadHelper {
         throw new UnsupportedOperationException("No instances");
     }
 
-    public static double[] readProperties(PropertyCursor pc, int[] propertyIds, double[] defaultValues) {
-        double[] properties = new double[propertyIds.length];
-        readProperties(pc, propertyIds, defaultValues, properties);
-        return properties;
-    }
-
-    public static void readProperties(PropertyCursor pc, int[] propertyIds, double[] defaultValues, double[] properties) {
+    public static void readProperties(
+        PropertyCursor pc,
+        int[] propertyIds,
+        double[] defaultValues,
+        Aggregation[] aggregations,
+        double[] properties
+    ) {
+        Arrays.setAll(properties, indexOfPropertyId -> {
+            double defaultValue = defaultValues[indexOfPropertyId];
+            Aggregation aggregation = aggregations[indexOfPropertyId];
+            if (propertyIds[indexOfPropertyId] == StatementConstantsProxy.NO_SUCH_PROPERTY_KEY) {
+                // we are in `count(*)` mode, so we don't expect any loads on the property
+                // and need to return a valid count value, since we are just counting rows
+                return aggregation.normalizePropertyValue(defaultValue);
+            } else {
+                return aggregation.emptyValue(defaultValue);
+            }
+        });
         while (pc.next()) {
             // TODO: We used ArrayUtil#linearSearchIndex before which looks at four array positions in one loop iteration.
             //       We could do the same here and benchmark if it affects performance.
             for (int indexOfPropertyId = 0; indexOfPropertyId < propertyIds.length; indexOfPropertyId++) {
-                double defaultValue = defaultValues[indexOfPropertyId];
-                properties[indexOfPropertyId] = defaultValue;
                 if (propertyIds[indexOfPropertyId] == pc.propertyKey()) {
+                    Aggregation aggregation = aggregations[indexOfPropertyId];
                     Value value = pc.propertyValue();
-                    double propertyValue = extractValue(value, defaultValue);
+                    double defaultValue = defaultValues[indexOfPropertyId];
+                    double propertyValue = extractValue(aggregation, value, defaultValue);
                     properties[indexOfPropertyId] = propertyValue;
                 }
             }
@@ -55,20 +68,26 @@ public final class ReadHelper {
     }
 
     public static double extractValue(Value value, double defaultValue) {
+        return extractValue(Aggregation.NONE, value, defaultValue);
+    }
+
+    public static double extractValue(Aggregation aggregation, Value value, double defaultValue) {
         // slightly different logic than org.neo4j.values.storable.Values#coerceToDouble
         // b/c we want to fallback to the default value if the value is empty
         if (value instanceof NumberValue) {
-            return ((NumberValue) value).doubleValue();
+            double propertyValue = ((NumberValue) value).doubleValue();
+            return aggregation.normalizePropertyValue(propertyValue);
         }
         if (Values.NO_VALUE.equals(value)) {
-            return defaultValue;
+            return aggregation.emptyValue(defaultValue);
         }
 
         // TODO: We used to do be lenient and parse strings/booleans into doubles.
         //       Do we want to do so or is failing on non numeric properties ok?
         throw new IllegalArgumentException(String.format(
-                "Unsupported type [%s] of value %s. Please use a numeric property.",
-                value.valueGroup(),
-                value));
+            "Unsupported type [%s] of value %s. Please use a numeric property.",
+            value.valueGroup(),
+            value
+        ));
     }
 }

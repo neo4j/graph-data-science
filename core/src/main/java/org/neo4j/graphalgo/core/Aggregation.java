@@ -58,23 +58,35 @@ public enum Aggregation {
         }
     },
     COUNT {
+        /**
+         * We expect the loading part to write 0 and 1 values into the properties.
+         * To be more precise, we expect the values returned from
+         * {@link #normalizePropertyValue(double)} and {@link #emptyValue(double)} to be used.
+         * In that case, COUNT works the same as SUM
+         */
         public double merge(double runningTotal, double value) {
-            return runningTotal + 1.0;
+            return runningTotal + value;
         }
 
-        public long initialValue(long value) {
-            return Double.doubleToLongBits(1.0);
+        @Override
+        public double normalizePropertyValue(double value) {
+            return 1.0;
+        }
+
+        @Override
+        public double emptyValue(double mappingDefaultValue) {
+            return 0.0;
         }
     };
 
     public abstract double merge(double runningTotal, double value);
 
-    /**
-     * @param value a long bits representation of the initial double value
-     *              {@link Double#doubleToLongBits(double)}
-     */
-    public long initialValue(long value) {
+    public double normalizePropertyValue(double value) {
         return value;
+    }
+
+    public double emptyValue(double mappingDefaultValue) {
+        return mappingDefaultValue;
     }
 
     public static Aggregation lookup(String name) {

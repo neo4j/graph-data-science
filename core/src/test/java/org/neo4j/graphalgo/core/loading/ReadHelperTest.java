@@ -22,7 +22,9 @@ package org.neo4j.graphalgo.core.loading;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -33,12 +35,14 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
 
 class ReadHelperTest {
 
@@ -54,9 +58,47 @@ class ReadHelperTest {
         assertTrue(Double.isNaN(ReadHelper.extractValue(Values.doubleValue(Double.NaN), 0.0)));
     }
 
+    @ParameterizedTest
+    @EnumSource(value = Aggregation.class, names = "COUNT", mode = EnumSource.Mode.EXCLUDE)
+    void extractValueReadsAnyNumericTypeWithAggregationExceptCount(Aggregation aggregation) {
+        assertEquals(42.0, ReadHelper.extractValue(aggregation, Values.byteValue((byte) 42), 0.0));
+        assertEquals(42.0, ReadHelper.extractValue(aggregation, Values.shortValue((short) 42), 0.0));
+        assertEquals(42.0, ReadHelper.extractValue(aggregation, Values.intValue(42), 0.0));
+        assertEquals(42.0, ReadHelper.extractValue(aggregation, Values.longValue(42), 0.0));
+        assertEquals(42.0, ReadHelper.extractValue(aggregation, Values.floatValue(42.0F), 0.0));
+        assertEquals(42.0, ReadHelper.extractValue(aggregation, Values.doubleValue(42.0D), 0.0));
+        assertTrue(Double.isNaN(ReadHelper.extractValue(aggregation, Values.floatValue(Float.NaN), 0.0)));
+        assertTrue(Double.isNaN(ReadHelper.extractValue(aggregation, Values.doubleValue(Double.NaN), 0.0)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Aggregation.class, names = "COUNT", mode = EnumSource.Mode.INCLUDE)
+    void extractValueReadsAnyNumericTypeWithCountAggregation(Aggregation aggregation) {
+        assertEquals(1.0, ReadHelper.extractValue(aggregation, Values.byteValue((byte) 42), 0.0));
+        assertEquals(1.0, ReadHelper.extractValue(aggregation, Values.shortValue((short) 42), 0.0));
+        assertEquals(1.0, ReadHelper.extractValue(aggregation, Values.intValue(42), 0.0));
+        assertEquals(1.0, ReadHelper.extractValue(aggregation, Values.longValue(42), 0.0));
+        assertEquals(1.0, ReadHelper.extractValue(aggregation, Values.floatValue(42.0F), 0.0));
+        assertEquals(1.0, ReadHelper.extractValue(aggregation, Values.doubleValue(42.0D), 0.0));
+        assertEquals(1.0, ReadHelper.extractValue(aggregation, Values.floatValue(Float.NaN), 0.0));
+        assertEquals(1.0, ReadHelper.extractValue(aggregation, Values.doubleValue(Double.NaN), 0.0));
+    }
+
     @Test
-    void extractValueReturnsDefaultWhenValueDoesNotExistOrIsNaN() {
+    void extractValueReturnsDefaultWhenValueDoesNotExist() {
         assertEquals(42.0, ReadHelper.extractValue(Values.NO_VALUE, 42.0));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Aggregation.class, names = "COUNT", mode = EnumSource.Mode.EXCLUDE)
+    void extractValueReturnsDefaultWhenValueDoesNotExistForAggregationsExceptCount(Aggregation aggregation) {
+        assertEquals(42.0, ReadHelper.extractValue(aggregation, Values.NO_VALUE, 42.0));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Aggregation.class, names = "COUNT", mode = EnumSource.Mode.INCLUDE)
+    void extractValueReturnsZeroWhenValueDoesNotExistForCountAggregation(Aggregation aggregation) {
+        assertEquals(0.0, ReadHelper.extractValue(aggregation, Values.NO_VALUE, 42.0));
     }
 
     @ParameterizedTest
@@ -65,6 +107,21 @@ class ReadHelperTest {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> ReadHelper.extractValue(value, 42.0)
+        );
+        String expectedErrorMessage = String.format(
+                "Unsupported type [%s] of value %s. Please use a numeric property.",
+                typePart,
+                valuePart
+        );
+        assertEquals(expectedErrorMessage, exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidPropertyAndAnyAggregation")
+    void extractValueFailsForNonNumericTypesAndAggregation(Value value, String typePart, String valuePart, Aggregation aggregation) {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> ReadHelper.extractValue(aggregation, value, 42.0)
         );
         String expectedErrorMessage = String.format(
                 "Unsupported type [%s] of value %s. Please use a numeric property.",
@@ -102,5 +159,9 @@ class ReadHelperTest {
                         "ZONED_TIME",
                         "00:00:42Z")
         );
+    }
+
+    static Stream<Arguments> invalidPropertyAndAnyAggregation() {
+        return crossArguments(ReadHelperTest::invalidProperties, () -> Arrays.stream(Aggregation.values()).map(Arguments::of));
     }
 }

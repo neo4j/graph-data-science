@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.apache.lucene.util.LongsRef;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
@@ -51,7 +52,9 @@ public abstract class AdjacencyBuilder {
             AllocationTracker tracker,
             LongAdder relationshipCounter,
             int[] propertyKeyIds,
-            double[] defaultValues) {
+            double[] defaultValues,
+            Aggregation[] aggregations
+    ) {
         if (globalBuilder == null) {
             return NoAdjacency.INSTANCE;
         }
@@ -79,6 +82,7 @@ public abstract class AdjacencyBuilder {
             relationshipCounter,
             propertyKeyIds,
             defaultValues,
+            aggregations,
             atLeastOnePropertyToLoad
         );
         for (int idx = 0; idx < numPages; idx++) {
@@ -91,6 +95,8 @@ public abstract class AdjacencyBuilder {
     abstract int[] getPropertyKeyIds();
 
     abstract double[] getDefaultValues();
+
+    abstract Aggregation[] getAggregations();
 
     abstract boolean atLeastOnePropertyToLoad();
 
@@ -110,6 +116,7 @@ public abstract class AdjacencyBuilder {
         private final LongAdder relationshipCounter;
         private final int[] propertyKeyIds;
         private final double[] defaultValues;
+        private final Aggregation[] aggregations;
         private final boolean atLeastOnePropertyToLoad;
 
         private CompressingPagedAdjacency(
@@ -123,6 +130,7 @@ public abstract class AdjacencyBuilder {
             LongAdder relationshipCounter,
             int[] propertyKeyIds,
             double[] defaultValues,
+            Aggregation[] aggregations,
             boolean atLeastOnePropertyToLoad
         ) {
             this.globalBuilder = globalBuilder;
@@ -139,6 +147,7 @@ public abstract class AdjacencyBuilder {
             this.relationshipCounter = relationshipCounter;
             this.propertyKeyIds = propertyKeyIds;
             this.defaultValues = defaultValues;
+            this.aggregations = aggregations;
             this.atLeastOnePropertyToLoad = atLeastOnePropertyToLoad;
         }
 
@@ -269,6 +278,11 @@ public abstract class AdjacencyBuilder {
         }
 
         @Override
+        Aggregation[] getAggregations() {
+            return aggregations;
+        }
+
+        @Override
         boolean atLeastOnePropertyToLoad() {
             return atLeastOnePropertyToLoad;
         }
@@ -301,6 +315,11 @@ public abstract class AdjacencyBuilder {
         @Override
         double[] getDefaultValues() {
             return new double[0];
+        }
+
+        @Override
+        Aggregation[] getAggregations() {
+            return new Aggregation[0];
         }
 
         @Override

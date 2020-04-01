@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
@@ -112,16 +113,18 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     ) {
         int[] propertyKeyIds = dimensions.relationshipProperties().allPropertyKeyIds();
         double[] defaultValues = dimensions.relationshipProperties().allDefaultValues();
+        Aggregation[] aggregations = dimensions.relationshipProperties().allAggregations();
 
         LongAdder relationshipCounter = new LongAdder();
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
-                relationshipsBuilder,
-                numberOfPages,
-                pageSize,
-                tracker,
-                relationshipCounter,
-                propertyKeyIds,
-                defaultValues
+            relationshipsBuilder,
+            numberOfPages,
+            pageSize,
+            tracker,
+            relationshipCounter,
+            propertyKeyIds,
+            defaultValues,
+            aggregations
         );
 
         RelationshipImporter importer = new RelationshipImporter(setup.tracker(), adjacencyBuilder);

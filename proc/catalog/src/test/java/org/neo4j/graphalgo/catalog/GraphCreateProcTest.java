@@ -1198,6 +1198,95 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
+    void loadWithRelationshipPropertyCountAggregation() {
+        String testGraph =
+            "CREATE" +
+            "  (a: Node)" +
+            ", (b: Node)" +
+            ", (a)-[:TYPE {foo: 1337}]->(b)" +  // property hit, value != default
+            ", (a)-[:TYPE]->(b)" +              // no properties at all
+            ", (a)-[:TYPE {bar: 42}]->(b)" +    // different property
+            ", (a)-[:TYPE {foo: 42}]->(b)";     // property hit, value == default
+
+        runQuery(testGraph, Collections.emptyMap());
+
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("Node")
+            .withRelationshipProperty("count", "foo", 42, Aggregation.COUNT)
+            .withRelationshipType("TYPE")
+            .graphCreate("countGraph")
+            .yields("relationshipProjection");
+
+        runQueryWithRowConsumer(query, row -> {
+            Map<String, Object> relationshipProjections = (Map<String, Object>) row.get("relationshipProjection");
+            Map<String, Object> type1Projection = (Map<String, Object>) relationshipProjections.get("TYPE");
+            Map<String, Object> relProperties = (Map<String, Object>) type1Projection.get("properties");
+            assertEquals(1, relProperties.size());
+
+            Map<String, Object> countParams = (Map<String, Object>) relProperties.get("count");
+
+            assertEquals("foo", countParams.get("property").toString());
+            assertEquals("COUNT", countParams.get("aggregation").toString());
+            assertEquals(42.0, (Double) countParams.get("defaultValue"));
+
+        });
+
+        Graph actual = GraphStoreCatalog.get("", "countGraph", "TYPE", Optional.of("count"));
+        Graph expected = fromGdl("(a)-[{w:2.0D}]->(b)");
+        assertGraphEquals(expected, actual);
+    }
+
+    @Test
+    void loadWithRelationshipCountAggregationAndAnotherAggregation() {
+        String testGraph =
+            "CREATE" +
+            "  (a: Node)" +
+            ", (b: Node)" +
+            ", (a)-[:TYPE_1 {foo: 1337}]->(b)" +
+            ", (a)-[:TYPE_1 {foo: 1337}]->(b)" +
+            ", (a)-[:TYPE_2 {foo: 1337}]->(b)" +
+            ", (a)-[:TYPE_2 {foo: 1337}]->(b)";
+
+        runQuery(testGraph, Collections.emptyMap());
+
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("Node")
+            .withRelationshipProperty("count", "*", 42, Aggregation.COUNT)
+            .withRelationshipProperty("foo", "foo", 42, Aggregation.SUM)
+            .withRelationshipType("TYPE_1")
+            .graphCreate("countGraph")
+            .yields("relationshipProjection");
+
+        runQueryWithRowConsumer(query, row -> {
+            Map<String, Object> relationshipProjections = (Map<String, Object>) row.get("relationshipProjection");
+            Map<String, Object> type1Projection = (Map<String, Object>) relationshipProjections.get("TYPE_1");
+            Map<String, Object> relProperties = (Map<String, Object>) type1Projection.get("properties");
+            assertEquals(2, relProperties.size());
+
+            Map<String, Object> countParams = (Map<String, Object>) relProperties.get("count");
+            assertEquals("*", countParams.get("property").toString());
+            assertEquals("COUNT", countParams.get("aggregation").toString());
+            assertEquals(42.0, (Double) countParams.get("defaultValue"));
+
+            Map<String, Object> fooParams = (Map<String, Object>) relProperties.get("foo");
+            assertEquals("foo", fooParams.get("property").toString());
+            assertEquals("SUM", fooParams.get("aggregation").toString());
+            assertEquals(42.0, (Double) fooParams.get("defaultValue"));
+
+        });
+
+        Graph countActual = GraphStoreCatalog.get("", "countGraph", "TYPE_1", Optional.of("count"));
+        Graph countExpected = fromGdl("(a)-[{w:2.0D}]->(b)");
+        assertGraphEquals(countExpected, countActual);
+
+        Graph fooActual = GraphStoreCatalog.get("", "countGraph", "TYPE_1", Optional.of("foo"));
+        Graph fooExpected = fromGdl("(a)-[{w:2674.0D}]->(b)");
+        assertGraphEquals(fooExpected, fooActual);
+    }
+
+    @Test
     void preferRelationshipPropertiesForCypherLoading() {
         String relationshipQuery = "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target " +
                                    " , 23 AS foo, 42 AS bar, 1984 AS baz, r.weight AS weight";

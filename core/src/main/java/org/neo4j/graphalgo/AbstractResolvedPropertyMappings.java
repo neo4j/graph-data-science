@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.DataClass;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.CollectionUtil;
 
 import java.util.Iterator;
@@ -73,5 +74,11 @@ public abstract class AbstractResolvedPropertyMappings implements Iterable<Resol
         return stream()
             .mapToDouble(ResolvedPropertyMapping::defaultValue)
             .toArray();
+    }
+
+    public Aggregation[] allAggregations() {
+        return stream()
+            .map(ResolvedPropertyMapping::aggregation)
+            .toArray(Aggregation[]::new);
     }
 }
