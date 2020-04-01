@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConstants;
@@ -99,7 +100,7 @@ public final class GraphStore {
             );
         }
 
-        return GraphStore.of(graph.idMapping(), nodeProperties, topology, relationshipProperties, tracker);
+        return GraphStore.of(graph.idMap(), nodeProperties, topology, relationshipProperties, tracker);
     }
 
     private GraphStore(
@@ -247,11 +248,11 @@ public final class GraphStore {
         return nodes.nodeCount();
     }
 
-    private Graph createGraph(List<String> nodeLabels, String relationshipType, Optional<String> maybeRelationshipProperty) {
+    private IdMapGraph createGraph(List<String> nodeLabels, String relationshipType, Optional<String> maybeRelationshipProperty) {
         return createGraph(nodeLabels, singletonList(relationshipType), maybeRelationshipProperty, 1);
     }
 
-    private Graph createGraph(List<String> nodeLabels, List<String> relationshipTypes, Optional<String> maybeRelationshipProperty, int concurrency) {
+    private IdMapGraph createGraph(List<String> nodeLabels, List<String> relationshipTypes, Optional<String> maybeRelationshipProperty, int concurrency) {
         boolean loadAllRelationships = relationshipTypes.contains(PROJECT_ALL.name);
         boolean loadAllNodes = nodeLabels.contains(PROJECT_ALL.name);
 
@@ -269,7 +270,7 @@ public final class GraphStore {
             ? Optional.empty()
             : Optional.of(this.nodes.withFilteredLabels(combinedBitSet, concurrency));
 
-        List<Graph> filteredGraphs = relationships.entrySet().stream()
+        List<IdMapGraph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> {
                 HugeGraph initialGraph = HugeGraph.create(

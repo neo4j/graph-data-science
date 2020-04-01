@@ -24,7 +24,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -74,7 +74,7 @@ import java.util.function.LongPredicate;
  * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">more abount vlong</a>
  * @see <a href="https://shipilev.net/jvm-anatomy-park/4-tlab-allocation/">more abount TLAB allocation</a>
  */
-public class HugeGraph implements Graph {
+public class HugeGraph implements IdMapGraph {
 
     public static final double NO_PROPERTY_VALUE = Double.NaN;
     private static final int NO_SUCH_NODE = 0;
@@ -263,7 +263,8 @@ public class HugeGraph implements Graph {
         return idMapping.toOriginalNodeId(nodeId);
     }
 
-    public IdMap idMapping() {
+    @Override
+    public IdMap idMap() {
         return idMapping;
     }
 

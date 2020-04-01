@@ -22,22 +22,24 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.core.loading.IdMap;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
-public final class UnionGraph implements Graph {
+public final class UnionGraph implements IdMapGraph {
 
-    private final Graph first;
-    private final Collection<? extends Graph> graphs;
+    private final IdMapGraph first;
+    private final Collection<? extends IdMapGraph> graphs;
 
-    public static Graph of(Collection<? extends Graph> graphs) {
+    public static IdMapGraph of(Collection<? extends IdMapGraph> graphs) {
         if (graphs.isEmpty()) {
             throw new IllegalArgumentException("no graphs");
         }
@@ -47,7 +49,7 @@ public final class UnionGraph implements Graph {
         return new UnionGraph(graphs);
     }
 
-    private UnionGraph(Collection<? extends Graph> graphs) {
+    private UnionGraph(Collection<? extends IdMapGraph> graphs) {
         first = graphs.iterator().next();
         this.graphs = graphs;
     }
@@ -132,8 +134,8 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public Graph concurrentCopy() {
-        return of(graphs.stream().map(graph -> (Graph) graph.concurrentCopy()).collect(Collectors.toList()));
+    public IdMapGraph concurrentCopy() {
+        return of(graphs.stream().map(IdMapGraph::concurrentCopy).collect(Collectors.toList()));
     }
 
     @Override
@@ -180,6 +182,11 @@ public final class UnionGraph implements Graph {
         for (Graph graph : graphs) {
             graph.releaseProperties();
         }
+    }
+
+    @Override
+    public IdMap idMap() {
+        return first.idMap();
     }
 
     @Override

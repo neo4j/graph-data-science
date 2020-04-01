@@ -22,17 +22,17 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.FilterGraph;
+import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 
 import java.util.Collection;
 import java.util.function.LongPredicate;
 
-public class NodeFilteredGraph extends FilterGraph {
+public class NodeFilteredGraph extends FilterGraph implements IdMapGraph {
 
     private final IdMap filteredIdMap;
 
@@ -54,6 +54,11 @@ public class NodeFilteredGraph extends FilterGraph {
     @Override
     public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
         return filteredIdMap.batchIterables(batchSize);
+    }
+
+    @Override
+    public IdMap idMap() {
+        return filteredIdMap;
     }
 
     @Override
@@ -125,7 +130,7 @@ public class NodeFilteredGraph extends FilterGraph {
     }
 
     @Override
-    public RelationshipIterator concurrentCopy() {
+    public IdMapGraph concurrentCopy() {
         return new NodeFilteredGraph((HugeGraph) graph.concurrentCopy(), filteredIdMap);
     }
 
