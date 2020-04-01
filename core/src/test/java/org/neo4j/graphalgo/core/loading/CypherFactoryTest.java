@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -91,14 +93,12 @@ class CypherFactoryTest {
             id3 = row.getNumber("id3").intValue();
         });
 
-        String nodes = "MATCH (n) RETURN id(n) AS id, n.partition AS partition, n.foo AS foo";
+        String nodes = "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0.0) AS partition , COALESCE(n.foo, 5.0) AS foo";
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
 
         Graph graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
                 .nodeQuery(nodes)
                 .relationshipQuery(rels)
-                .addNodeProperty(PropertyMapping.of("partition", 0.0))
-                .addNodeProperty(PropertyMapping.of("foo", 5.0))
                 .addRelationshipProperty(PropertyMapping.of("weight", 0))
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
@@ -223,19 +223,14 @@ class CypherFactoryTest {
 
         Graph graph = TestGraphLoader
             .from(db)
-            .withNodeProperties(PropertyMappings.of(prop1, prop2, prop3), false)
+            .withNodeProperties(PropertyMappings.of(prop1, prop2, prop3))
             .graph(CypherFactory.class);
 
         String gdl = "(a {prop1: 1, prop2: 0, prop3: 0})" +
                      "(b {prop1: 0, prop2: 2, prop3: 0})" +
                      "(c {prop1: 0, prop2: 0, prop3: 3})";
 
-        String expectedGdl = gdl
-            .replaceAll(prop1.propertyKey(), addSuffix(prop1.propertyKey(), 0))
-            .replaceAll(prop2.propertyKey(), addSuffix(prop2.propertyKey(), 1))
-            .replaceAll(prop3.propertyKey(), addSuffix(prop3.propertyKey(), 2));
-
-        assertGraphEquals(fromGdl(expectedGdl), graph);
+        assertGraphEquals(fromGdl(gdl), graph);
     }
 
     @Test
@@ -261,12 +256,12 @@ class CypherFactoryTest {
             .graphStore(CypherFactory.class);
 
         String expectedGraph =
-            "(a)-[{w: %f}]->(b)" +
-            "(a)-[{w: %f}]->(b)" +
-            "(a)-[{w: %f}]->(b)";
+            "  (a)-[{w: %f}]->(b)" +
+            ", (a)-[{w: %f}]->(b)" +
+            ", (a)-[{w: %f}]->(b)";
 
         assertGraphEquals(
-            fromGdl(String.format(Locale.US, expectedGraph, 1.0, prop1.defaultValue(), prop1.defaultValue())),
+            fromGdl(String.format(Locale.US, expectedGraph, 1.0f, prop1.defaultValue(), prop1.defaultValue())),
             graphs.getGraph("*", Optional.of(addSuffix(prop1.propertyKey(), 0)))
         );
 
@@ -323,7 +318,7 @@ class CypherFactoryTest {
         GraphStore graphStore = applyInTransaction(db, tx -> loader.build(CypherFactory.class).build().graphStore());
 
         Function<List<String>, Graph> getGraph = (List<String> labels) -> graphStore.getGraph(
-            labels,
+            labels.stream().map(ElementIdentifier::of).collect(Collectors.toList()),
             Collections.singletonList("*"),
             Optional.empty(),
             1

@@ -48,7 +48,6 @@ public final class TestGraphLoader {
     private final Set<String> relTypes;
 
     private PropertyMappings nodeProperties = PropertyMappings.of();
-    private boolean addNodePropertiesToLoader;
     private PropertyMappings relProperties = PropertyMappings.of();
     private boolean addRelationshipPropertiesToLoader;
 
@@ -75,12 +74,7 @@ public final class TestGraphLoader {
     }
 
     public TestGraphLoader withNodeProperties(PropertyMappings nodeProperties) {
-        return withNodeProperties(nodeProperties, true);
-    }
-
-    public TestGraphLoader withNodeProperties(PropertyMappings nodeProperties, boolean addToLoader) {
         this.nodeProperties = nodeProperties;
-        this.addNodePropertiesToLoader = addToLoader;
         return this;
     }
 
@@ -105,7 +99,8 @@ public final class TestGraphLoader {
 
     public <T extends GraphStoreFactory> Graph graph(Class<T> graphStoreFactory) {
         try (Transaction ignored = db.beginTx()) {
-            return loader(graphStoreFactory).build(graphStoreFactory).build().graphStore().getUnion();
+            GraphStore graphStore = loader(graphStoreFactory).build(graphStoreFactory).build().graphStore();
+            return graphStore.getUnion();
         }
     }
 
@@ -131,8 +126,7 @@ public final class TestGraphLoader {
                 .map(l -> "n:" + l)
                 .collect(Collectors.joining(" OR ", "WHERE ", ""));
 
-        nodeProperties = getUniquePropertyMappings(nodeProperties);
-        String nodePropertiesString = getPropertiesString(nodeProperties, "n");
+        String nodePropertiesString = getNodePropertiesString(nodeProperties, "n");
 
         cypherLoaderBuilder.nodeQuery(String.format(nodeQueryTemplate, labelString, nodePropertiesString));
 
@@ -145,7 +139,7 @@ public final class TestGraphLoader {
             : join(relTypes, "|", ":", "");
 
         relProperties = getUniquePropertyMappings(relProperties);
-        String relPropertiesString = getPropertiesString(relProperties, "r");
+        String relPropertiesString = getRelationshipPropertiesString(relProperties, "r");
 
         cypherLoaderBuilder.relationshipQuery(String.format(
             relationshipQueryTemplate,
@@ -155,7 +149,6 @@ public final class TestGraphLoader {
 
         cypherLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));
         cypherLoaderBuilder.validateRelationships(false);
-        if (addNodePropertiesToLoader) cypherLoaderBuilder.nodeProperties(nodeProperties);
         if (addRelationshipPropertiesToLoader) cypherLoaderBuilder.relationshipProperties(relProperties);
 
         return cypherLoaderBuilder.build();
@@ -184,7 +177,7 @@ public final class TestGraphLoader {
             });
         }
         storeLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));
-        if (addNodePropertiesToLoader) storeLoaderBuilder.nodeProperties(nodeProperties);
+        if (!nodeProperties.mappings().isEmpty()) storeLoaderBuilder.nodeProperties(nodeProperties);
         if (addRelationshipPropertiesToLoader) storeLoaderBuilder.relationshipProperties(relProperties);
         return storeLoaderBuilder.build();
     }
@@ -202,7 +195,22 @@ public final class TestGraphLoader {
         );
     }
 
-    private String getPropertiesString(PropertyMappings propertyMappings, String entityVar) {
+    private String getNodePropertiesString(PropertyMappings propertyMappings, String entityVar) {
+        return propertyMappings.hasMappings()
+            ? propertyMappings
+            .stream()
+            .map(mapping -> String.format(
+                "COALESCE(%s.%s, %f) AS %s",
+                entityVar,
+                mapping.neoPropertyKey(),
+                mapping.defaultValue(),
+                mapping.propertyKey()
+            ))
+            .collect(Collectors.joining(", ", ", ", ""))
+            : "";
+    }
+
+    private String getRelationshipPropertiesString(PropertyMappings propertyMappings, String entityVar) {
         return propertyMappings.hasMappings()
             ? propertyMappings
             .stream()

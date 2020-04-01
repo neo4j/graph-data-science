@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -46,13 +47,15 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABELS;
 
 class GraphStoreCatalogTest {
 
+    public static final ElementIdentifier LABEL_A = ElementIdentifier.of("A");
+    public static final ElementIdentifier LABEL_B = ElementIdentifier.of("B");
     private GraphDbApi db;
 
     @BeforeEach
@@ -113,7 +116,7 @@ class GraphStoreCatalogTest {
 
         GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
-        Graph filteredGraph = GraphStoreCatalog.get("", "myGraph").graphStore().getGraph(Arrays.asList("A", "B"), relTypes, relProperty, 1);
+        Graph filteredGraph = GraphStoreCatalog.get("", "myGraph").graphStore().getGraph(Arrays.asList(LABEL_A, LABEL_B), relTypes, relProperty, 1);
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
     }
@@ -137,19 +140,19 @@ class GraphStoreCatalogTest {
         Graph filteredAGraph = GraphStoreCatalog
             .get("", "myGraph")
             .graphStore()
-            .getGraph(Collections.singletonList("A"), Collections.singletonList("*"), Optional.empty(), 1);
+            .getGraph(Collections.singletonList(LABEL_A), Collections.singletonList("*"), Optional.empty(), 1);
 
         assertGraphEquals(fromGdl("(a)"), filteredAGraph);
 
         Graph filteredAllGraph = GraphStoreCatalog
             .get("", "myGraph")
             .graphStore()
-            .getGraph(Collections.singletonList("All"), Collections.singletonList("*"), Optional.empty(), 1);
+            .getGraph(Collections.singletonList(ElementIdentifier.of("All")), Collections.singletonList("*"), Optional.empty(), 1);
 
         Graph nonFilteredGraph = GraphStoreCatalog
             .get("", "myGraph")
             .graphStore()
-            .getGraph(Collections.singletonList("*"), Collections.singletonList("*"), Optional.empty(), 1);
+            .getGraph(Collections.singletonList(PROJECT_ALL), Collections.singletonList("*"), Optional.empty(), 1);
 
         assertGraphEquals(filteredAllGraph, nonFilteredGraph);
     }
