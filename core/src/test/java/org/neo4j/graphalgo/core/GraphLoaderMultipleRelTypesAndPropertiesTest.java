@@ -21,45 +21,39 @@ package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestGraphLoader;
-import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.*;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
-import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.crossArguments;
-import static org.neo4j.graphalgo.TestSupport.toArguments;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllNodes;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllRelationships;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
-import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
-import static org.neo4j.graphalgo.core.Aggregation.MAX;
-import static org.neo4j.graphalgo.core.Aggregation.MIN;
-import static org.neo4j.graphalgo.core.Aggregation.NONE;
-import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
-import static org.neo4j.graphalgo.core.Aggregation.SUM;
+import static org.neo4j.graphalgo.TestSupport.*;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.*;
+import static org.neo4j.graphalgo.core.Aggregation.*;
 
 class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
@@ -84,6 +78,126 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
+    }
+
+    @Test
+    void nodeProjectionsWithExclusiveProperties() {
+        GraphCreateFromStoreConfig config = ImmutableGraphCreateFromStoreConfig.builder()
+            .nodeProjections(
+                NodeProjections.builder()
+                    .putProjection(
+                        ElementIdentifier.of("N1"),
+                        NodeProjection.of(
+                            "Node1",
+                            PropertyMappings.builder().addMapping(PropertyMapping.of("prop1", 0.0D)).build()
+                        )
+                    )
+                    .putProjection(
+                        ElementIdentifier.of("N2"),
+                        NodeProjection.of(
+                            "Node1",
+                            PropertyMappings.of()
+                        )
+                    )
+                    .putProjection(
+                        ElementIdentifier.of("N3"),
+                        NodeProjection.of(
+                            "Node2",
+                            PropertyMappings.builder().addMapping(PropertyMapping.of("prop2", 1.0D)).build()
+                        )
+                    )
+                    .build()
+            )
+            .relationshipProjections(RelationshipProjections.of())
+            .graphName("myGraph")
+            .build();
+
+        GraphStore graphStore = ImmutableGraphLoader.builder()
+            .api(db)
+            .createConfig(config)
+            .log(NullLog.getInstance())
+            .build()
+            .build(NativeFactory.class)
+            .build()
+            .graphStore();
+
+        assertEquals(Collections.singleton("prop1") , graphStore.nodePropertyKeys(ElementIdentifier.of("N1")));
+        assertEquals(Collections.emptySet() , graphStore.nodePropertyKeys(ElementIdentifier.of("N2")));
+        assertEquals(Collections.singleton("prop2") , graphStore.nodePropertyKeys(ElementIdentifier.of("N3")));
+
+        NodeProperties prop1 = graphStore.nodeProperty("prop1");
+        assertEquals(1.0D, prop1.nodeProperty(0));
+        assertTrue(Double.isNaN(prop1.nodeProperty(1)));
+
+        NodeProperties prop2 = graphStore.nodeProperty("prop2");
+        assertTrue(Double.isNaN(prop2.nodeProperty(0)));
+        assertEquals(2.0D, prop2.nodeProperty(1));
+    }
+
+    @Test
+    void nodeProjectionsWithAndWithoutLabel() {
+        ElementIdentifier allIdentifier = ElementIdentifier.of("ALL");
+
+        ElementIdentifier node2Identifier = ElementIdentifier.of("Node2");
+        GraphCreateFromStoreConfig config = ImmutableGraphCreateFromStoreConfig.builder()
+            .nodeProjections(
+                NodeProjections.builder()
+                    .putProjection(
+                        allIdentifier,
+                        NodeProjection.of(
+                            "*",
+                            PropertyMappings.builder()
+                                .addMapping(PropertyMapping.of("prop1", 42.0D))
+                                .addMapping(PropertyMapping.of("prop2", 8.0D))
+                                .build()
+                        )
+                    )
+                    .putProjection(
+                        node2Identifier,
+                        NodeProjection.of(
+                            "Node2",
+                            PropertyMappings.builder().addMapping(PropertyMapping.of("prop2", 8.0D)).build()
+                        )
+                    )
+                    .build()
+            )
+            .relationshipProjections(RelationshipProjections.of())
+            .graphName("myGraph")
+            .build();
+
+        GraphStore graphStore = ImmutableGraphLoader.builder()
+            .api(db)
+            .createConfig(config)
+            .log(NullLog.getInstance())
+            .build()
+            .build(NativeFactory.class)
+            .build()
+            .graphStore();
+
+        assertEquals(new HashSet<>(Arrays.asList("prop1", "prop2")), graphStore.nodePropertyKeys(allIdentifier));
+        assertEquals(Collections.singleton("prop2") , graphStore.nodePropertyKeys(node2Identifier));
+
+        NodeProperties allProp1 = graphStore.nodeProperty(allIdentifier, "prop1");
+        NodeProperties allProp2 = graphStore.nodeProperty(allIdentifier, "prop2");
+        NodeProperties node2Prop2 = graphStore.nodeProperty(node2Identifier, "prop2");
+
+        LongStream.range(0, 3).forEach(nodeId -> {
+            double allProp1Value = allProp1.nodeProperty(nodeId);
+            double allProp2Value = allProp2.nodeProperty(nodeId);
+            double node2Prop2Value = node2Prop2.nodeProperty(nodeId);
+
+            if (nodeId == 0) {
+                assertEquals(1.0, allProp1Value);
+                assertEquals(8.0, allProp2Value);
+            } else if (nodeId == 1) {
+                assertEquals(42.0, allProp1Value);
+                assertEquals(2.0, allProp2Value);
+                assertEquals(2.0, node2Prop2Value);
+            } else  {
+                assertEquals(42.0, allProp1Value);
+                assertEquals(8.0, allProp2Value);
+            }
+        });
     }
 
     @AllGraphTypesTest
