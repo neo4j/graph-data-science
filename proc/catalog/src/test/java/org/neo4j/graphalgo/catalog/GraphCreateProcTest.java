@@ -1175,9 +1175,9 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query, map("nodeQuery",
             ALL_NODES_QUERY, "relationshipQuery", relationshipQuery));
 
-        Graph foobarGraph = GraphStoreCatalog.get(getUsername(), "testGraph", "", Optional.of("foobar"));
-        Graph foobazGraph = GraphStoreCatalog.get(getUsername(), "testGraph", "", Optional.of("foobaz"));
-        Graph raboofGraph = GraphStoreCatalog.get(getUsername(), "testGraph", "", Optional.of("raboof"));
+        Graph foobarGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getGraph("", Optional.of("foobar"));
+        Graph foobazGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getGraph("", Optional.of("foobaz"));
+        Graph raboofGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getGraph("", Optional.of("raboof"));
 
         Graph expectedFoobarGraph = fromGdl("()-[{w: 23.0D}]->()");
         Graph expectedFoobazGraph = fromGdl("()-[{w: 1984.0D}]->()");
