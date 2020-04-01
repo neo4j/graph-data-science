@@ -36,7 +36,6 @@ dependencies {
     implementation group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.asciidoctorj
     implementation project(':test-utils')
     testImplementation project(':proc')
-    testImplementation project(':alpha-proc')
 
     testImplementation group: 'org.reflections',  name: 'reflections',       version: '0.9.11'
 }

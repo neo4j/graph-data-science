@@ -6,7 +6,6 @@ group = 'com.neo4j.gds'
 
 dependencies {
     implementation project(path: ':proc')
-    implementation project(path: ':alpha-proc')
 }
 
 task licenseFile {
