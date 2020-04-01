@@ -34,20 +34,24 @@ public final class ReadHelper {
 
     public static double[] readProperties(PropertyCursor pc, int[] propertyIds, double[] defaultValues) {
         double[] properties = new double[propertyIds.length];
-        Arrays.setAll(properties, i -> defaultValues[i]);
+        readProperties(pc, propertyIds, defaultValues, properties);
+        return properties;
+    }
+
+    public static void readProperties(PropertyCursor pc, int[] propertyIds, double[] defaultValues, double[] properties) {
         while (pc.next()) {
             // TODO: We used ArrayUtil#linearSearchIndex before which looks at four array positions in one loop iteration.
             //       We could do the same here and benchmark if it affects performance.
             for (int indexOfPropertyId = 0; indexOfPropertyId < propertyIds.length; indexOfPropertyId++) {
+                double defaultValue = defaultValues[indexOfPropertyId];
+                properties[indexOfPropertyId] = defaultValue;
                 if (propertyIds[indexOfPropertyId] == pc.propertyKey()) {
                     Value value = pc.propertyValue();
-                    double defaultValue = defaultValues[indexOfPropertyId];
                     double propertyValue = extractValue(value, defaultValue);
                     properties[indexOfPropertyId] = propertyValue;
                 }
             }
         }
-        return properties;
     }
 
     public static double extractValue(Value value, double defaultValue) {

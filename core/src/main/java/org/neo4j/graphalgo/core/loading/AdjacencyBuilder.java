@@ -62,22 +62,25 @@ public abstract class AdjacencyBuilder {
         long[][] globalAdjacencyOffsets = new long[numPages][];
 
         long[][][] globalWeightOffsets = new long[propertyKeyIds.length][][];
-        Arrays.setAll(globalWeightOffsets, i -> {
-            int weightProperty = propertyKeyIds[i];
-            return weightProperty != NO_SUCH_PROPERTY_KEY ? new long[numPages][] : null;
-        });
+        Arrays.setAll(globalWeightOffsets, i -> new long[numPages][]);
+
+        boolean atLeastOnePropertyToLoad = Arrays
+                .stream(propertyKeyIds)
+                .anyMatch(keyId -> keyId != NO_SUCH_PROPERTY_KEY);
 
         CompressingPagedAdjacency compressingPagedAdjacency = new CompressingPagedAdjacency(
-                globalBuilder,
-                localBuilders,
-                compressedAdjacencyLists,
-                buffers,
-                globalAdjacencyOffsets,
-                globalWeightOffsets,
-                pageSize,
-                relationshipCounter,
-                propertyKeyIds,
-                defaultValues);
+            globalBuilder,
+            localBuilders,
+            compressedAdjacencyLists,
+            buffers,
+            globalAdjacencyOffsets,
+            globalWeightOffsets,
+            pageSize,
+            relationshipCounter,
+            propertyKeyIds,
+            defaultValues,
+            atLeastOnePropertyToLoad
+        );
         for (int idx = 0; idx < numPages; idx++) {
             compressingPagedAdjacency.addAdjacencyImporter(tracker, idx);
         }
@@ -88,6 +91,8 @@ public abstract class AdjacencyBuilder {
     abstract int[] getPropertyKeyIds();
 
     abstract double[] getDefaultValues();
+
+    abstract boolean atLeastOnePropertyToLoad();
 
     private static final class CompressingPagedAdjacency extends AdjacencyBuilder {
 
@@ -105,18 +110,21 @@ public abstract class AdjacencyBuilder {
         private final LongAdder relationshipCounter;
         private final int[] propertyKeyIds;
         private final double[] defaultValues;
+        private final boolean atLeastOnePropertyToLoad;
 
         private CompressingPagedAdjacency(
-                RelationshipsBuilder globalBuilder,
-                ThreadLocalRelationshipsBuilder[] localBuilders,
-                CompressedLongArray[][] compressedAdjacencyLists,
-                LongsRef[] buffers,
-                long[][] globalAdjacencyOffsets,
-                long[][][] globalWeightOffsets,
-                int pageSize,
-                LongAdder relationshipCounter,
-                int[] propertyKeyIds,
-                double[] defaultValues) {
+            RelationshipsBuilder globalBuilder,
+            ThreadLocalRelationshipsBuilder[] localBuilders,
+            CompressedLongArray[][] compressedAdjacencyLists,
+            LongsRef[] buffers,
+            long[][] globalAdjacencyOffsets,
+            long[][][] globalWeightOffsets,
+            int pageSize,
+            LongAdder relationshipCounter,
+            int[] propertyKeyIds,
+            double[] defaultValues,
+            boolean atLeastOnePropertyToLoad
+        ) {
             this.globalBuilder = globalBuilder;
             this.localBuilders = localBuilders;
             this.compressedAdjacencyLists = compressedAdjacencyLists;
@@ -126,11 +134,12 @@ public abstract class AdjacencyBuilder {
             this.pageSize = pageSize;
             this.pageShift = Integer.numberOfTrailingZeros(pageSize);
             this.pageMask = pageSize - 1;
-            sizeOfLongPage = sizeOfLongArray(pageSize);
-            sizeOfObjectPage = sizeOfObjectArray(pageSize);
+            this.sizeOfLongPage = sizeOfLongArray(pageSize);
+            this.sizeOfObjectPage = sizeOfObjectArray(pageSize);
             this.relationshipCounter = relationshipCounter;
             this.propertyKeyIds = propertyKeyIds;
             this.defaultValues = defaultValues;
+            this.atLeastOnePropertyToLoad = atLeastOnePropertyToLoad;
         }
 
         void addAdjacencyImporter(AllocationTracker tracker, int pageIndex) {
@@ -141,17 +150,15 @@ public abstract class AdjacencyBuilder {
             buffers[pageIndex] = new LongsRef();
             long[] localAdjacencyOffsets = globalAdjacencyOffsets[pageIndex] = new long[pageSize];
 
-            long[][] localWeightOffsets = new long[propertyKeyIds.length][];
-            for (int i = 0; i < propertyKeyIds.length; i++) {
-                int weightProperty = propertyKeyIds[i];
-                if (weightProperty != NO_SUCH_PROPERTY_KEY) {
-                    localWeightOffsets[i] = globalWeightOffsets[i][pageIndex] = new long[pageSize];
-                }
+            long[][] localWeightOffsets = new long[globalWeightOffsets.length][];
+            for (int i = 0; i < globalWeightOffsets.length; i++) {
+                localWeightOffsets[i] = globalWeightOffsets[i][pageIndex] = new long[pageSize];
             }
 
             localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder(
                     localAdjacencyOffsets,
-                    localWeightOffsets);
+                    localWeightOffsets
+            );
             localBuilders[pageIndex].prepare();
         }
 
@@ -260,6 +267,11 @@ public abstract class AdjacencyBuilder {
         double[] getDefaultValues() {
             return defaultValues;
         }
+
+        @Override
+        boolean atLeastOnePropertyToLoad() {
+            return atLeastOnePropertyToLoad;
+        }
     }
 
     private static final class NoAdjacency extends AdjacencyBuilder {
@@ -289,6 +301,11 @@ public abstract class AdjacencyBuilder {
         @Override
         double[] getDefaultValues() {
             return new double[0];
+        }
+
+        @Override
+        boolean atLeastOnePropertyToLoad() {
+            return false;
         }
     }
 }

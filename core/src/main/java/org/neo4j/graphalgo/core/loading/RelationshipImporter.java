@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.compat.StatementConstantsProxy;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -76,18 +77,22 @@ class RelationshipImporter {
         int batchLength = buffer.length;
         long[] batch = buffer.sortBySource();
         long[][] outProperties = reader.readProperty(
-                batch,
-                batchLength,
-                adjacencyBuilder.getPropertyKeyIds(),
-                adjacencyBuilder.getDefaultValues());
+            batch,
+            batchLength,
+            adjacencyBuilder.getPropertyKeyIds(),
+            adjacencyBuilder.getDefaultValues(),
+            adjacencyBuilder.atLeastOnePropertyToLoad()
+        );
         int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder, tracker);
         batch = buffer.sortByTarget();
 
         long[][] inProperties = reader.readProperty(
-                batch,
-                batchLength,
-                adjacencyBuilder.getPropertyKeyIds(),
-                adjacencyBuilder.getDefaultValues());
+            batch,
+            batchLength,
+            adjacencyBuilder.getPropertyKeyIds(),
+            adjacencyBuilder.getDefaultValues(),
+            adjacencyBuilder.atLeastOnePropertyToLoad()
+        );
         int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder, tracker);
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
@@ -101,10 +106,12 @@ class RelationshipImporter {
         int batchLength = buffer.length;
         long[] batch = buffer.sortBySource();
         long[][] outProperties = propertyReader.readProperty(
-                batch,
-                batchLength,
-                adjacencyBuilder.getPropertyKeyIds(),
-                adjacencyBuilder.getDefaultValues());
+            batch,
+            batchLength,
+            adjacencyBuilder.getPropertyKeyIds(),
+            adjacencyBuilder.getDefaultValues(),
+            adjacencyBuilder.atLeastOnePropertyToLoad()
+        );
         int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder, tracker);
         return RawValues.combineIntInt(importedOut, importedOut);
     }
@@ -118,10 +125,12 @@ class RelationshipImporter {
         int batchLength = buffer.length;
         long[] batch = buffer.sortByTarget();
         long[][] inProperties = propertyReader.readProperty(
-                batch,
-                batchLength,
-                adjacencyBuilder.getPropertyKeyIds(),
-                adjacencyBuilder.getDefaultValues());
+            batch,
+            batchLength,
+            adjacencyBuilder.getPropertyKeyIds(),
+            adjacencyBuilder.getDefaultValues(),
+            adjacencyBuilder.atLeastOnePropertyToLoad()
+        );
         int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder, tracker);
         return RawValues.combineIntInt(importedIn, importedIn);
     }
@@ -131,13 +140,20 @@ class RelationshipImporter {
          * Load the relationship properties for the given batch of relationships.
          * Relationships are represented in the format produced by {@link RelationshipsBatchBuffer}.
          *
-         * @param batch relationship data
-         * @param batchLength number of valid entries in the batch data
-         * @param propertyKeyIds property key ids to load
-         * @param defaultValues default weight for each property key
+         * @param batch                    relationship data
+         * @param batchLength              number of valid entries in the batch data
+         * @param propertyKeyIds           property key ids to load
+         * @param defaultValues            default weight for each property key
+         * @param atLeastOnePropertyToLoad true iff there is at least one value in {@code propertyKeyIds} that is not {@link StatementConstantsProxy#NO_SUCH_PROPERTY_KEY} (-1).
          * @return list of property values per per relationship property id
          */
-        long[][] readProperty(long[] batch, int batchLength, int[] propertyKeyIds, double[] defaultValues);
+        long[][] readProperty(
+            long[] batch,
+            int batchLength,
+            int[] propertyKeyIds,
+            double[] defaultValues,
+            boolean atLeastOnePropertyToLoad
+        );
     }
 
     Collection<Runnable> flushTasks() {
@@ -145,17 +161,27 @@ class RelationshipImporter {
     }
 
     PropertyReader storeBackedPropertiesReader(CursorFactory cursors, Read read) {
-        return (batch, batchLength, relationshipProperties, defaultPropertyValues) -> {
+        return (batch, batchLength, relationshipProperties, defaultPropertyValues, atLeastOnePropertyToLoad) -> {
             long[][] properties = new long[relationshipProperties.length][batchLength / BATCH_ENTRY_SIZE];
-            try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
+            if (atLeastOnePropertyToLoad) {
+                try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
+                    double[] relProps = new double[relationshipProperties.length];
+                    for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
+                        long relationshipReference = batch[RELATIONSHIP_REFERENCE_OFFSET + i];
+                        long propertiesReference = batch[PROPERTIES_REFERENCE_OFFSET + i];
+                        read.relationshipProperties(relationshipReference, propertiesReference, pc);
+                        ReadHelper.readProperties(pc, relationshipProperties, relProps, defaultPropertyValues);
+                        int propertyPos = i / BATCH_ENTRY_SIZE;
+                        for (int j = 0; j < relProps.length; j++) {
+                            properties[j][propertyPos] = Double.doubleToLongBits(relProps[j]);
+                        }
+                    }
+                }
+            } else {
                 for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
-                    long relationshipReference = batch[RELATIONSHIP_REFERENCE_OFFSET + i];
-                    long propertiesReference = batch[PROPERTIES_REFERENCE_OFFSET + i];
-                    read.relationshipProperties(relationshipReference, propertiesReference, pc);
-                    double[] relProps = ReadHelper.readProperties(pc, relationshipProperties, defaultPropertyValues);
                     int propertyPos = i / BATCH_ENTRY_SIZE;
-                    for (int j = 0; j < relProps.length; j++) {
-                        properties[j][propertyPos] = Double.doubleToLongBits(relProps[j]);
+                    for (int j = 0; j < defaultPropertyValues.length; j++) {
+                        properties[j][propertyPos] = Double.doubleToLongBits(defaultPropertyValues[j]);
                     }
                 }
             }
@@ -165,7 +191,7 @@ class RelationshipImporter {
 
 
     public static PropertyReader preLoadedPropertyReader() {
-        return (batch, batchLength, weightProperty, defaultWeight) -> {
+        return (batch, batchLength, weightProperty, defaultWeight, atLeastOnePropertyToLoad) -> {
             long[] properties = new long[batchLength / BATCH_ENTRY_SIZE];
             for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
                 long property = batch[PROPERTIES_REFERENCE_OFFSET + i];
@@ -176,11 +202,11 @@ class RelationshipImporter {
     }
 
     private static int importRelationships(
-            RelationshipsBatchBuffer buffer,
-            long[] batch,
-            long[][] properties,
-            AdjacencyBuilder adjacency,
-            AllocationTracker tracker
+        RelationshipsBatchBuffer buffer,
+        long[] batch,
+        long[][] properties,
+        AdjacencyBuilder adjacency,
+        AllocationTracker tracker
     ) {
         int batchLength = buffer.length;
 
@@ -204,12 +230,12 @@ class RelationshipImporter {
         offsets[nodesLength++] = offset;
 
         adjacency.addAll(
-                batch,
-                targets,
-                properties,
-                offsets,
-                nodesLength,
-                tracker
+            batch,
+            targets,
+            properties,
+            offsets,
+            nodesLength,
+            tracker
         );
 
         return batchLength >> 2; // divide by 4

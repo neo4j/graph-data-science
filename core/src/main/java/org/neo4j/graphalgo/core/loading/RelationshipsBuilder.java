@@ -53,8 +53,6 @@ public class RelationshipsBuilder {
         adjacencyListBuilder = AdjacencyListBuilder.newBuilder(tracker);
         if (numberOfRelationshipProperties > 0) {
             propertyBuilders = new AdjacencyListBuilder[numberOfRelationshipProperties];
-            // TODO: can we avoid to create an allocator/complete adjacency list
-            //  if we know that the property does not exist?
             Arrays.setAll(propertyBuilders, i -> AdjacencyListBuilder.newBuilder(tracker));
         } else {
             propertyBuilders = EMPTY_WEIGHTS;
@@ -63,15 +61,17 @@ public class RelationshipsBuilder {
 
     final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder(
             long[] adjacencyOffsets,
-            long[][] weightOffsets) {
+            long[][] weightOffsets
+    ) {
         return new ThreadLocalRelationshipsBuilder(
             aggregations,
-                adjacencyListBuilder.newAllocator(),
-                Arrays.stream(propertyBuilders)
-                        .map(AdjacencyListBuilder::newAllocator)
-                        .toArray(AdjacencyListBuilder.Allocator[]::new),
-                adjacencyOffsets,
-                weightOffsets);
+            adjacencyListBuilder.newAllocator(),
+            Arrays.stream(propertyBuilders)
+                .map(AdjacencyListBuilder::newAllocator)
+                .toArray(AdjacencyListBuilder.Allocator[]::new),
+            adjacencyOffsets,
+            weightOffsets
+        );
     }
 
     final void setGlobalAdjacencyOffsets(AdjacencyOffsets globalAdjacencyOffsets) {

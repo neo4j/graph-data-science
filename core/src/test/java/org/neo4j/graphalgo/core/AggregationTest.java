@@ -33,7 +33,7 @@ class AggregationTest {
     @ParameterizedTest
     @CsvSource({"MAX, 1.4, 4.2", "MIN, 0.5, 0.5", "SINGLE, 1.4, 1.4", "SUM, 1.9, 6.1", "COUNT, 2.0, 3.0"})
     void testSuccessfulMultipleAggregation(Aggregation strategy, double expectedFirst, double expectedSecond) {
-        double initialValue = strategy.initialValue(inputs[0]);
+        double initialValue = Double.longBitsToDouble(strategy.initialValue(Double.doubleToLongBits(inputs[0])));
         double actualFirst = strategy.merge(initialValue, inputs[1]);
         assertEquals(expectedFirst, actualFirst);
         assertEquals(expectedSecond, strategy.merge(actualFirst, inputs[2]));

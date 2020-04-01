@@ -1163,17 +1163,17 @@ class GraphCreateProcTest extends BaseProcTest {
             "CREATE" +
             "  (a: Node)" +
             ", (b: Node)" +
-            ", (a)-[:TYPE_1]->(b)" +
-            ", (a)-[:TYPE_1]->(b)" +
-            ", (a)-[:TYPE_2]->(b)" +
-            ", (a)-[:TYPE_2]->(b)";
+            ", (a)-[:TYPE_1 {foo: 1337}]->(b)" +
+            ", (a)-[:TYPE_1 {foo: 1337}]->(b)" +
+            ", (a)-[:TYPE_2 {foo: 1337}]->(b)" +
+            ", (a)-[:TYPE_2 {foo: 1337}]->(b)";
 
         runQuery(testGraph, Collections.emptyMap());
 
         String query = GdsCypher
             .call()
             .withNodeLabel("Node")
-            .withRelationshipProperty("count", "*", Double.NaN, Aggregation.COUNT)
+            .withRelationshipProperty("count", "*", 42, Aggregation.COUNT)
             .withRelationshipType("TYPE_1")
             .graphCreate("countGraph")
             .yields("relationshipProjection");
@@ -1188,7 +1188,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
             assertEquals("*", countParams.get("property").toString());
             assertEquals("COUNT", countParams.get("aggregation").toString());
-            assertTrue(Double.isNaN((Double) countParams.get("defaultValue")));
+            assertEquals(42.0, (Double) countParams.get("defaultValue"));
 
         });
 

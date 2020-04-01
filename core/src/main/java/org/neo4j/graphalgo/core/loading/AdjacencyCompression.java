@@ -140,11 +140,11 @@ final class AdjacencyCompression {
 
         outValues[0] = values[firstSortIdx];
         for (int i = 0; i < weights.length; i++) {
-            outWeights[i][0] = weights[i][firstSortIdx];
+            Aggregation aggregation = aggregations[i];
+            outWeights[i][0] = aggregation.initialValue(weights[i][firstSortIdx]);
         }
 
         int in = 1, out = 1;
-        boolean firstTimeSeen = true;
         for (; in < length; ++in) {
             final int sortIdx = order[in];
             delta = values[sortIdx] - value;
@@ -152,24 +152,20 @@ final class AdjacencyCompression {
 
             if (delta > 0L || noAggregation) {
                 for (int i = 0; i < weights.length; i++) {
-                    outWeights[i][out] = weights[i][sortIdx];
+                    Aggregation aggregation = aggregations[i];
+                    outWeights[i][out] = aggregation.initialValue(weights[i][sortIdx]);
                 }
                 outValues[out++] = delta;
-                firstTimeSeen = true;
             } else {
                 for (int i = 0; i < weights.length; i++) {
                     Aggregation aggregation = aggregations[i];
                     int existingIdx = out - 1;
                     long[] outWeight = outWeights[i];
                     double existingWeight = Double.longBitsToDouble(outWeight[existingIdx]);
-                    if (firstTimeSeen) {
-                        existingWeight = aggregation.initialValue(existingWeight);
-                    }
                     double newWeight = Double.longBitsToDouble(weights[i][sortIdx]);
                     newWeight = aggregation.merge(existingWeight, newWeight);
                     outWeight[existingIdx] = Double.doubleToLongBits(newWeight);
                 }
-                firstTimeSeen = false;
             }
         }
         return out;

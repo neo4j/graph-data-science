@@ -62,14 +62,18 @@ public enum Aggregation {
             return runningTotal + 1.0;
         }
 
-        public double initialValue(double value) {
-            return 1.0;
+        public long initialValue(long value) {
+            return Double.doubleToLongBits(1.0);
         }
     };
 
     public abstract double merge(double runningTotal, double value);
 
-    public double initialValue(double value) {
+    /**
+     * @param value a long bits representation of the initial double value
+     *              {@link Double#doubleToLongBits(double)}
+     */
+    public long initialValue(long value) {
         return value;
     }
 

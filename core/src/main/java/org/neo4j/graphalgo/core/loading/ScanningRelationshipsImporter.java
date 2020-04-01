@@ -81,7 +81,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
 
-        boolean importWeights = dimensions.relationshipProperties().atLeastOneExists();
+        boolean importWeights = dimensions.relationshipProperties().hasMappings();
 
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
                 .entrySet()

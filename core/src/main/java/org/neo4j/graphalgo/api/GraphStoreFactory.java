@@ -136,7 +136,6 @@ public abstract class GraphStoreFactory implements Assessable {
                 Map<String, HugeGraph.PropertyCSR> propertyMap = dimensions
                     .relationshipProperties()
                     .enumerate()
-                    .filter(propertyIdAndMapping -> propertyIdAndMapping.getTwo().exists())
                     .collect(Collectors.toMap(
                         propertyIdAndMapping -> propertyIdAndMapping.getTwo().propertyKey(),
                         propertyIdAndMapping -> ImmutablePropertyCSR.of(
