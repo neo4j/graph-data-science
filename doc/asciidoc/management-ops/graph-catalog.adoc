@@ -29,9 +29,10 @@ This chapter explains the available graph catalog operations.
 | <<catalog-graph-create, gds.graph.create.cypher>>                      | Creates a graph in the catalog using a <<cypher-projection, Cypher projection>>.
 | <<catalog-graph-list, gds.graph.list>>                                 | Prints information about graphs that are currently stored in the catalog.
 | <<catalog-graph-exists, gds.graph.exists>>                             | Checks if a named graph is stored in the catalog.
-| <<catalog-graph-drop, gds.graph.drop>>                                 | Removes a named graph from the catalog.
 | <<catalog-graph-write-node-properties, gds.graph.writeNodeProperties>> | Writes node properties stored in a named graph to Neo4j.
 | <<catalog-graph-write-relationship, gds.graph.writeRelationship>>      | Writes relationships stored in a named graph to Neo4j.
+| <<catalog-graph-drop, gds.graph.drop>>                                 | Removes a named graph from the catalog.
+| <<catalog-graph-export, gds.alpha.graph.export>>                       | Exports a named graph into a new offline Neo4j database.
 |===
 
 [NOTE]
@@ -192,3 +193,37 @@ Once we have finished using the named graph we can remove it from the catalog to
 ----
 CALL gds.graph.drop('my-store-graph') YIELD graphName;
 ----
+
+
+[[catalog-graph-export]]
+== Create Neo4j databases from named graphs
+
+[NOTE]
+--
+*This procedure is in the alpha tier and could be changed or removed in a future release.*
+--
+
+We can create new Neo4j databases from named in-memory graphs stored in the graph catalog.
+All nodes, relationships and properties present in an in-memory graph are written to a new Neo4j database.
+This includes data that has been projected in `gds.graph.create` and data that has been added by running algorithms in `mutate` mode.
+After exporting the graph, the new database can be be used in a Neo4j installation by setting link:https://neo4j.com/docs/operations-manual/3.5/reference/configuration-settings/#config_dbms.active_database[`dbms.active_database`].
+
+The feature is useful in the following, exemplary scenarios:
+
+* Avoid heavy write load on the operational system by exporting the data instead of writing back.
+* Create an analytical view of the operational system that can be used as a basis for running algorithms.
+* Produce snapshots of analytical results and persistent them for archiving and inspection.
+* Share analytical results within the organization.
+
+.Export a named graph to a specific store directory:
+[source,cypher]
+----
+CALL gds.alpha.graph.export('my-graph', {
+   storeDir: '/path/to/database',
+   dbName: 'my-graph-db'
+})
+----
+
+Note that `storeDir` must exist in the local file system.
+The procedure yields information about the number of nodes, relationships and properties written.
+Optional parameters are `writeConcurrency`, `enableDebugLog` and `batchSize`.
