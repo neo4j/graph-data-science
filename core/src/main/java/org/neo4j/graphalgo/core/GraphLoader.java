@@ -95,9 +95,9 @@ public interface GraphLoader {
             GraphStoreFactory factory;
 
             if (CypherFactory.class.isAssignableFrom(factoryType)) {
-                factory = new CypherFactory(api(), setup);
+                factory = new CypherFactory(api(), createConfig(), setup);
             } else {
-                factory = new NativeFactory(api(), setup);
+                factory = new NativeFactory(api(), createConfig(), setup);
             }
 
             return factoryType.cast(factory);

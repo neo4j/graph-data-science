@@ -21,11 +21,13 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.StringUtils;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -48,8 +50,8 @@ import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 
 public final class NativeFactory extends GraphStoreFactory {
 
-    public NativeFactory(GraphDatabaseAPI api, GraphSetup setup) {
-        super(api, setup);
+    public NativeFactory(GraphDatabaseAPI api, GraphCreateConfig graphCreateConfig, GraphSetup setup) {
+        super(api, setup, graphCreateConfig);
     }
 
     @Override
@@ -71,10 +73,11 @@ public final class NativeFactory extends GraphStoreFactory {
             throw new IllegalArgumentException("No relationship projection was specified.");
         }
 
-        // node properties
-        for (ResolvedPropertyMapping resolvedPropertyMapping : dimensions.nodeProperties()) {
-            builder.add(resolvedPropertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
-        }
+        // nodes
+        dimensions
+            .nodePropertyIds()
+            .keySet()
+            .forEach(property -> builder.add(property, NodePropertyMap.memoryEstimation()));
 
         // relationships
         dimensions.relationshipProjectionMappings().stream().forEach(relationshipProjectionMapping -> {
@@ -145,6 +148,16 @@ public final class NativeFactory extends GraphStoreFactory {
     }
 
     private IdsAndProperties loadNodes(AllocationTracker tracker, int concurrency) {
+        Map<ElementIdentifier, PropertyMappings> labelToNodePropertyMappings = graphCreateConfig
+            .nodeProjections()
+            .projections()
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                entry -> entry.getKey(),
+                entry -> entry.getValue().properties()
+            ));
+
         return new ScanningNodesImporter(
             api,
             dimensions,
@@ -153,7 +166,7 @@ public final class NativeFactory extends GraphStoreFactory {
             setup.terminationFlag(),
             threadPool,
             concurrency,
-            setup.nodePropertyMappings()
+            labelToNodePropertyMappings
         ).call(setup.log());
     }
 

@@ -23,12 +23,14 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
+import org.neo4j.graphalgo.core.huge.ImmutableTopologyCSR;
 import org.neo4j.graphalgo.core.huge.ImmutableTopologyCSR;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
@@ -59,17 +61,20 @@ public abstract class GraphStoreFactory implements Assessable {
     protected final GraphDimensions dimensions;
     protected final Log log;
     protected final ProgressLogger progressLogger;
+    protected final GraphCreateConfig graphCreateConfig;
 
-    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup) {
-        this(api, setup, true);
+    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup, GraphCreateConfig graphCreateConfig) {
+        this(api, setup, graphCreateConfig, true);
     }
 
-    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup, boolean readTokens) {
+    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup, GraphCreateConfig graphCreateConfig, boolean readTokens) {
         this.threadPool = setup.executor();
         this.api = api;
         this.setup = setup;
         this.log = setup.log();
-        this.dimensions = new GraphDimensionsReader(api, setup, readTokens).call();
+        this.progressLogger = progressLogger(log, setup.logMillis());
+        this.graphCreateConfig = graphCreateConfig;
+        this.dimensions = new GraphDimensionsReader(api, setup, graphCreateConfig, readTokens).call();
         this.progressLogger = initProgressLogger();
     }
 

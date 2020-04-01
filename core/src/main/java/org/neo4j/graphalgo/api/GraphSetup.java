@@ -25,11 +25,11 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.logging.Log;
 
 import java.util.Collections;
@@ -119,28 +119,6 @@ public class GraphSetup {
         return createConfig.relationshipProjections().allProjections().stream().flatMap(
             f -> f.properties().defaultWeight().map(Stream::of).orElse(Stream.empty())
         ).findFirst();
-    }
-
-    /**
-     * @deprecated There is no global node property configuration anymore
-     */
-    @Deprecated
-    public PropertyMappings nodePropertyMappings() {
-        Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.nodeProjections()
-            .allProjections()
-            .stream()
-            .flatMap(e -> e.properties().stream())
-            .collect(Collectors.groupingBy(PropertyMapping::propertyKey));
-
-        PropertyMappings.Builder builder = PropertyMappings.builder();
-        groupedPropertyMappings.values().stream()
-            .map(l -> l.iterator().next())
-            .forEach(builder::addMapping);
-
-        // Necessary for Cypher projections
-        createConfig.nodeProperties().forEach(builder::addMapping);
-
-        return builder.build();
     }
 
     /**
