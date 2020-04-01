@@ -25,6 +25,9 @@ import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
@@ -61,27 +64,49 @@ public final class GraphDimensionsValidation {
             if (!missingTypes.isEmpty()) {
                 throw new IllegalArgumentException(String.format(
                     "Invalid relationship projection, one or more relationship types not found: '%s'",
-                    missingTypes));
+                    missingTypes
+                ));
             }
         }
     }
 
     private static void checkValidProperties(String recordType, ResolvedPropertyMappings mappings) {
-        String missingProperties = mappings
+        List<ResolvedPropertyMapping> invalidProperties = mappings
             .stream()
             .filter(mapping -> {
                 int id = mapping.propertyKeyId();
+                if (id != NO_SUCH_PROPERTY_KEY) {
+                    return false;
+                }
                 String propertyKey = mapping.neoPropertyKey();
-                return isNotEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
+                if (mapping.aggregation() == Aggregation.COUNT && "*".equals(propertyKey)) {
+                    return false;
+                }
+                return true;
             })
-            .map(ResolvedPropertyMapping::neoPropertyKey)
-            .collect(joining("', '"));
+            .collect(Collectors.toList());
 
-        if (!missingProperties.isEmpty()) {
+        if (!invalidProperties.isEmpty()) {
+            String missingPropertiesMessage = invalidProperties
+                .stream()
+                .map(mapping -> {
+                    String propertyKey = mapping.neoPropertyKey();
+                    if (mapping.aggregation() == Aggregation.COUNT &&
+                        propertyKey.equals(mapping.propertyKey())) {
+                        return String.format(
+                            "'%s' (if you meant to count parallel relationships, use `property:'*'`)",
+                            propertyKey
+                        );
+                    }
+                    return String.format("'%s'", propertyKey);
+                })
+                .collect(joining(","));
+
             throw new IllegalArgumentException(String.format(
-                "%s properties not found: '%s'",
+                "%s properties not found: %s.",
                 recordType,
-                missingProperties));
+                missingPropertiesMessage
+            ));
         }
     }
 }

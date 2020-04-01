@@ -1173,31 +1173,28 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = GdsCypher
             .call()
             .withNodeLabel("Node")
-            .withRelationshipType("TYPE", RelationshipProjection.of(
-                "TYPE_1",
-                Orientation.NATURAL,
-                Aggregation.COUNT
-            ))
+            .withRelationshipProperty("count", "*", Double.NaN, Aggregation.COUNT)
+            .withRelationshipType("TYPE_1")
             .graphCreate("countGraph")
             .yields("relationshipProjection");
 
         runQueryWithRowConsumer(query, row -> {
             Map<String, Object> relationshipProjections = (Map<String, Object>) row.get("relationshipProjection");
-            Map<String, Object> type1Projection = (Map<String, Object>) relationshipProjections.get("TYPE");
-            String aggregation = (String) type1Projection.get("aggregation");
-            assertEquals("COUNT", aggregation);
+            Map<String, Object> type1Projection = (Map<String, Object>) relationshipProjections.get("TYPE_1");
             Map<String, Object> relProperties = (Map<String, Object>) type1Projection.get("properties");
-            assertEquals(0, relProperties.size());
+            assertEquals(1, relProperties.size());
+
+            Map<String, Object> countParams = (Map<String, Object>) relProperties.get("count");
+
+            assertEquals("*", countParams.get("property").toString());
+            assertEquals("COUNT", countParams.get("aggregation").toString());
+            assertTrue(Double.isNaN((Double) countParams.get("defaultValue")));
+
         });
 
-        Graph actual = GraphStoreCatalog.get("", "countGraph").getGraph();
+        Graph actual = GraphStoreCatalog.get("", "countGraph", "TYPE_1", Optional.of("count"));
         Graph expected = fromGdl("(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
-
-        Graph countGraph = GraphStoreCatalog.get("", "countGraph", "TYPE", Optional.of("TYPE_count"));
-        assertTrue(countGraph.hasRelationshipProperty());
-        double countValue = countGraph.relationshipProperty(0, 1);
-        assertEquals(2.0, countValue);
     }
 
     @Test
@@ -1405,45 +1402,42 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void failsOnConflictingPropertyForCountAggregation() {
+    void failsOnMissingStarPropertyForCountAggregation() {
         String query =
             "CALL gds.graph.create('g', '*', " +
             "{" +
             "    B: {" +
             "        type: 'REL'," +
-            "        aggregation: 'COUNT'," +  // creates implicit property B_count
             "        properties: {" +
-            "            B_count: {" +
-            "                aggregation: 'MAX'" +
+            "            count: {" +
+            "                aggregation: 'COUNT'" +
             "            }" +
             "        }" +
             "    } " +
             "})";
 
-        assertError(query, "The property name `B_count` cannot be used since it's already defined from the COUNT aggregation on the relationship projection.");
+        assertError(query, "Relationship properties not found: 'count' (if you meant to count parallel relationships, use `property:'*'`).");
 
         assertGraphDoesNotExist("g");
     }
 
     @Test
-    void failsOnConflictingGlobalPropertyForCountAggregation() {
+    void failsOnMissingPropertyForCountAggregation() {
         String query =
             "CALL gds.graph.create('g', '*', " +
             "{" +
             "    B: {" +
             "        type: 'REL'," +
-            "        aggregation: 'COUNT'" +  // creates implicit property B_count
-            "    } " +
-            "}, " +
-            "{" +
-            "    relationshipProperties: {" +
-            "        B_count: {" +
-            "            aggregation: 'MAX'" +
+            "        properties: {" +
+            "            count: {" +
+            "                property: 'foo'," +
+            "                aggregation: 'COUNT'" +
+            "            }" +
             "        }" +
-            "    }" +
+            "    } " +
             "})";
 
-        assertError(query, "The property name `B_count` cannot be used since it's already defined from the COUNT aggregation on the relationship projection.");
+        assertError(query, "Relationship properties not found: 'foo'.");
 
         assertGraphDoesNotExist("g");
     }
