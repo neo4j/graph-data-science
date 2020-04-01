@@ -48,7 +48,7 @@ public class NodePropertyFunc {
 
         GraphStore graphStore = GraphStoreCatalog.get(username, graphName).graphStore();
 
-        if (!graphStore.hasNodeProperty(propertyKey)) {
+        if (!graphStore.hasNodeProperty(graphStore.nodeLabels(), propertyKey)) {
             throw new IllegalArgumentException(String.format("Node property with given name `%s` does not exist.", propertyKey));
         }
 
