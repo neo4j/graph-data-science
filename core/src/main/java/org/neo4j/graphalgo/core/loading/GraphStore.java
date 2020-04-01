@@ -97,7 +97,7 @@ public final class GraphStore {
             .collect(Collectors.toMap(property -> property, graph::nodeProperties));
 
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = Collections.emptyMap();
-        if (relationships.hasProperties() && relationshipProperty.isPresent()) {
+        if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
             relationshipProperties = singletonMap(
                 relationshipType,
                 singletonMap(relationshipProperty.get(), relationships.properties().get())
@@ -205,7 +205,7 @@ public final class GraphStore {
             if (!hasRelationshipType(relationshipType)) {
                 graphStore.relationships.put(relationshipType, relationships.topology());
 
-                if (relationshipProperty.isPresent() && relationships.hasProperties()) {
+                if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
                     HugeGraph.PropertyCSR propertyCSR = relationships.properties().get();
                     graphStore.relationshipProperties
                         .computeIfAbsent(relationshipType, ignore -> new HashMap<>())

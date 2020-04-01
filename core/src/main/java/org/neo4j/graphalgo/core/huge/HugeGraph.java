@@ -495,10 +495,6 @@ public class HugeGraph implements IdMapGraph {
 
         Optional<PropertyCSR> properties();
 
-        default boolean hasProperties() {
-            return properties().isPresent();
-        }
-
         static Relationships of(
             long relationshipCount,
             Orientation orientation,
