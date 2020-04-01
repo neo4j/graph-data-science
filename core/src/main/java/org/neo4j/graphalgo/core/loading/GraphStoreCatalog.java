@@ -90,8 +90,8 @@ public final class GraphStoreCatalog {
         userCatalogs.clear();
     }
 
-    public static Map<GraphCreateConfig, Graph> getLoadedGraphs(String username) {
-        return getUserCatalog(username).getLoadedGraphs();
+    public static Map<GraphCreateConfig, GraphStore> getGraphStores(String username) {
+        return getUserCatalog(username).getGraphStores();
     }
 
     private static Supplier<RuntimeException> failOnNonExistentGraph(String graphName) {
@@ -183,9 +183,9 @@ public final class GraphStoreCatalog {
             return graphsByName.remove(graphName);
         }
 
-        Map<GraphCreateConfig, Graph> getLoadedGraphs() {
+        Map<GraphCreateConfig, GraphStore> getGraphStores() {
             return graphsByName.values().stream().collect(Collectors.toMap(
-                GraphStoreWithConfig::config, GraphStoreWithConfig::getGraph
+                GraphStoreWithConfig::config, GraphStoreWithConfig::graphStore
             ));
         }
     }

@@ -384,22 +384,22 @@ public class BaseProcTest {
 
     protected Graph findLoadedGraph(String graphName) {
         return GraphStoreCatalog
-            .getLoadedGraphs("")
+            .getGraphStores("")
             .entrySet()
             .stream()
             .filter(e -> e.getKey().graphName().equals(graphName))
-            .map(Map.Entry::getValue)
+            .map(e -> e.getValue().getUnion())
             .findFirst()
             .orElseThrow(() -> new RuntimeException(String.format("Graph %s not found.", graphName)));
     }
 
     private Set<Graph> getLoadedGraphs(String graphName) {
         return GraphStoreCatalog
-            .getLoadedGraphs("")
+            .getGraphStores("")
             .entrySet()
             .stream()
             .filter(e -> e.getKey().graphName().equals(graphName))
-            .map(Map.Entry::getValue)
+            .map(e -> e.getValue().getUnion())
             .collect(Collectors.toSet());
     }
 

@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,6 +64,8 @@ public final class GraphStore {
     private final Set<Graph> createdGraphs;
 
     private final AllocationTracker tracker;
+
+    private LocalDateTime modificationTime;
 
     public static GraphStore of(
         IdMap nodes,
@@ -115,7 +119,12 @@ public final class GraphStore {
         this.relationships = relationships;
         this.relationshipProperties = relationshipProperties;
         this.createdGraphs = new HashSet<>();
+        this.modificationTime = LocalDateTime.now();
         this.tracker = tracker;
+    }
+
+    public LocalDateTime modificationTime() {
+        return modificationTime;
     }
 
     public IdMapping nodes() {
@@ -146,7 +155,7 @@ public final class GraphStore {
     }
 
     public void addNodeProperty(String propertyKey, NodeProperties nodeProperties) {
-        this.nodeProperties.putIfAbsent(propertyKey, nodeProperties);
+        updateGraphStore(graphStore -> graphStore.nodeProperties.putIfAbsent(propertyKey, nodeProperties));
     }
 
     public NodeProperties nodeProperty(String propertyKey) {
@@ -191,17 +200,19 @@ public final class GraphStore {
         return relationshipProperties.getOrDefault(relationshipType, Collections.emptyMap()).keySet();
     }
 
-    public synchronized void addRelationshipType(String relationshipType, Optional<String> relationshipProperty, HugeGraph.Relationships relationships) {
-        if (!hasRelationshipType(relationshipType)) {
-            this.relationships.put(relationshipType, relationships.topology());
+    public void addRelationshipType(String relationshipType, Optional<String> relationshipProperty, HugeGraph.Relationships relationships) {
+        updateGraphStore(graphStore -> {
+            if (!hasRelationshipType(relationshipType)) {
+                graphStore.relationships.put(relationshipType, relationships.topology());
 
-            if (relationshipProperty.isPresent() && relationships.hasProperties()) {
-                HugeGraph.PropertyCSR propertyCSR = relationships.properties().get();
-                this.relationshipProperties
-                    .computeIfAbsent(relationshipType, ignore -> new HashMap<>())
-                    .putIfAbsent(relationshipProperty.get(), propertyCSR);
+                if (relationshipProperty.isPresent() && relationships.hasProperties()) {
+                    HugeGraph.PropertyCSR propertyCSR = relationships.properties().get();
+                    graphStore.relationshipProperties
+                        .computeIfAbsent(relationshipType, ignore -> new HashMap<>())
+                        .putIfAbsent(relationshipProperty.get(), propertyCSR);
+                }
             }
-        }
+        });
     }
 
     public Graph getGraph(String... relationshipTypes) {
@@ -339,6 +350,11 @@ public final class GraphStore {
                 });
             });
         }
+    }
+
+    private synchronized void updateGraphStore(Consumer<GraphStore> updateFunction) {
+        updateFunction.accept(this);
+        this.modificationTime = LocalDateTime.now();
     }
 }
 

@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -46,21 +47,23 @@ public class GraphInfo {
     public final long relationshipCount;
     public final Map<String, Object> degreeDistribution;
     public final LocalDateTime creationTime;
+    public final LocalDateTime modificationTime;
 
-    GraphInfo(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
+    GraphInfo(GraphCreateConfig config, GraphStore graphStore, boolean computeHistogram) {
         this.graphName = config.graphName();
         this.nodeProjection = config.nodeProjections().toObject();
         this.relationshipProjection = config.relationshipProjections().toObject();
         this.creationTime = config.creationTime();
+        this.modificationTime = graphStore.modificationTime();
         this.nodeQuery = config instanceof GraphCreateFromCypherConfig
             ? ((GraphCreateFromCypherConfig) config).nodeQuery()
             : null;
         this.relationshipQuery = config instanceof GraphCreateFromCypherConfig
             ? ((GraphCreateFromCypherConfig) config).relationshipQuery()
             : null;
-        this.nodeCount = graph.nodeCount();
-        this.relationshipCount = graph.relationshipCount();
-        this.degreeDistribution = computeHistogram ? computeHistogram(graph) : emptyMap();
+        this.nodeCount = graphStore.nodeCount();
+        this.relationshipCount = graphStore.relationshipCount();
+        this.degreeDistribution = computeHistogram ? computeHistogram(graphStore.getUnion()) : emptyMap();
     }
 
     private Map<String, Object> computeHistogram(Graph graph) {
