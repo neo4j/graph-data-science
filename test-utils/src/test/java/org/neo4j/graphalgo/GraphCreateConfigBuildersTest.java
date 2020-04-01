@@ -23,16 +23,16 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Collections;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -221,18 +221,16 @@ class GraphCreateConfigBuildersTest {
             ),
             Arguments.arguments(
                 new CypherConfigBuilder().userName("foo").graphName("bar")
-                    .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
+                    .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id, COALESCE(n.nProp, 23.D) AS nProp")
                     .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
-                    .addNodeProperty(PropertyMapping.of("nProp", 23.0D))
                     .addRelationshipProperty(PropertyMapping.of("rProp", 42.0D))
                     .loadAnyRelationshipType()
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
-                    .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
+                    .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id, COALESCE(n.nProp, 23.D) AS nProp")
                     .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
                     .nodeProjections(NodeProjections.empty())
                     .relationshipProjections(RelationshipProjections.empty())
-                    .nodeProperties(PropertyMappings.of(PropertyMapping.of("nProp", 23.0D)))
                     .relationshipProperties(PropertyMappings.of(PropertyMapping.of("rProp", 42.0D)))
                     .build()
             ),

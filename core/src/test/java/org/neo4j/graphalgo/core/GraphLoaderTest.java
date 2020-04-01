@@ -30,8 +30,8 @@ import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
@@ -94,13 +94,13 @@ class GraphLoaderTest {
             .withLabels("Node1", "Node2")
             .withNodeProperties(properties)
             .graph(graphStoreFactory);
-        assertGraphEquals(graph, fromGdl("(a {prop1: 1.0})-->(b {prop1: 42.0})"));
+        assertGraphEquals(fromGdl("(a {prop1: 1.0})-->(b {prop1: 42.0})"), graph);
 
         graph = TestGraphLoader.from(db)
             .withLabels("Node1", "Node2")
             .withNodeProperties(multipleProperties)
             .graph(graphStoreFactory);
-        assertGraphEquals(graph, fromGdl("(a {prop1: 1.0, prop2: 42.0})-->(b {prop1: 42.0, prop2: 2.0})"));
+        assertGraphEquals(fromGdl("(a {prop1: 1.0, prop2: 42.0})-->(b {prop1: 42.0, prop2: 2.0})"), graph);
     }
 
     @AllGraphTypesTest

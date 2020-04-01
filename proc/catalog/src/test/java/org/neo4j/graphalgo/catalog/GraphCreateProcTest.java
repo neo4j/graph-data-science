@@ -50,6 +50,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -340,19 +341,18 @@ class GraphCreateProcTest extends BaseProcTest {
         assertThat(findLoadedGraph(name).availableNodeProperties(), contains(expectedProperties.keySet().toArray()));
     }
 
-    @ParameterizedTest(name = "properties = {0}")
-    @MethodSource(value = "nodeProperties")
-    void nodeQueryWithProperties(Object nodeProperties, Map<String, Object> expectedProperties) {
+    @Test
+    void nodeQueryWithProperties() {
         String name = "g";
 
+        Map<String, Object> expectedProperties = map("age", map("property", "age", "defaultValue", Double.NaN));
         Map<String, Object> expectedNodeProjection = map("*", map(LABEL_KEY, "*", PROPERTIES_KEY, expectedProperties));
 
         assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { nodeProperties: $nodeProperties })",
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", name,
                 "nodeQuery", "RETURN 0 AS id, 1 AS age",
-                "relationshipQuery", "RETURN 0 AS source, 0 AS target",
-                "nodeProperties", nodeProperties),
+                "relationshipQuery", "RETURN 0 AS source, 0 AS target"),
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, expectedNodeProjection,
@@ -1688,23 +1688,6 @@ class GraphCreateProcTest extends BaseProcTest {
             ")";
 
         assertError(query, "Relationship properties not found: 'foo', 'bar'. Available properties from the relationship query are: 'weight', 'bazz'");
-    }
-
-    @Test
-    void failsOnMismatchOfCypherNodeProperty() {
-        String query =
-            "CALL gds.graph.create.cypher(" +
-            "   'cypherGraph', " +
-            "   'RETURN 1 AS id, 2 AS weight, 3 AS bazz', " +
-            "   'RETURN 0 AS source, 1 AS target', " +
-            "   { " +
-            "       nodeProperties: ['foo', 'bar', 'weight'] " +
-            "   }" +
-            ")";
-
-        assertError(query, "Node properties not found: 'foo', 'bar'. Available properties from the node query are: 'weight', 'bazz'");
-
-        assertGraphDoesNotExist("cypherGraph");
     }
 
     @Test

@@ -134,7 +134,6 @@ final class GraphCreateConfigBuilders {
         Optional<String> graphName,
         Optional<String> nodeQuery,
         Optional<String> relationshipQuery,
-        List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relationshipProperties,
         @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
@@ -178,7 +177,6 @@ final class GraphCreateConfigBuilders {
             .nodeQuery(nodeQuery.orElse(ALL_NODES_QUERY))
             .relationshipQuery(relationshipQuery.orElse(ALL_RELATIONSHIPS_QUERY))
             .relationshipProjections(relationshipProjections)
-            .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
             .readConcurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
             .validateRelationships(validateRelationships.orElse(true))
