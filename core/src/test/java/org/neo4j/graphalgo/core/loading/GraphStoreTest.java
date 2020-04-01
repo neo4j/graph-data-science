@@ -39,23 +39,23 @@ class GraphStoreTest extends AlgoTestBase {
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
-        runQuery(
-            "CREATE (a)-[:REL]->(b)"
-        );
+        runQuery("CREATE (a)-[:REL]->(b)");
     }
 
     @Test
-    void testModificationDate() {
-        GraphStore graphStore = new StoreLoaderBuilder().api(db)
+    void testModificationDate() throws InterruptedException {
+        GraphStore graphStore = new StoreLoaderBuilder()
+            .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .build()
             .graphStore(NativeFactory.class);
 
         // add node properties
-        LocalDateTime initial = graphStore.modificationTime();
+        LocalDateTime initialTime = graphStore.modificationTime();
+        Thread.sleep(42);
         graphStore.addNodeProperty("foo", new NullPropertyMap(42.0));
-        LocalDateTime afterNodePropertyUpdate = graphStore.modificationTime();
+        LocalDateTime nodePropertyTime = graphStore.modificationTime();
 
         // add relationships
         HugeGraph.Relationships relationships = HugeGraph.Relationships.of(
@@ -67,11 +67,12 @@ class GraphStoreTest extends AlgoTestBase {
             null,
             42.0
         );
+        Thread.sleep(42);
         graphStore.addRelationshipType("BAR", Optional.empty(), relationships);
-        LocalDateTime afterRelationshipsUpdate = graphStore.modificationTime();
+        LocalDateTime relationshipTime = graphStore.modificationTime();
 
-        assertTrue(initial.isBefore(afterNodePropertyUpdate));
-        assertTrue(afterNodePropertyUpdate.isBefore(afterRelationshipsUpdate));
+        assertTrue(initialTime.isBefore(nodePropertyTime), "Node property update did not change modificationTime");
+        assertTrue(nodePropertyTime.isBefore(relationshipTime), "Relationship update did not change modificationTime");
     }
 
 }
