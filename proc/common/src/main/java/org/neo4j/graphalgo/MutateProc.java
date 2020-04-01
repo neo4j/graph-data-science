@@ -28,7 +28,10 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
+import java.util.Collection;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 
 public abstract class MutateProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -79,10 +82,17 @@ public abstract class MutateProc<
                 nodeProperties = nodeId -> resultPropertyTranslator.toDouble(result, nodeId);
             }
 
-            graphStore.addNodeProperty(
-                mutatePropertyConfig.mutateProperty(),
-                nodeProperties
-            );
+            Collection<ElementIdentifier> labels = mutatePropertyConfig.nodeLabelIdentifiers().contains(PROJECT_ALL)
+                ? graphStore.nodeLabels()
+                : mutatePropertyConfig.nodeLabelIdentifiers();
+
+            for (ElementIdentifier label : labels) {
+                graphStore.addNodeProperty(
+                    label,
+                    mutatePropertyConfig.mutateProperty(),
+                    nodeProperties
+                );
+            }
 
             resultBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
         }

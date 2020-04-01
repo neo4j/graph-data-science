@@ -26,17 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.MutatePropertyConfig;
-import org.neo4j.graphalgo.config.MutateRelationshipConfig;
-import org.neo4j.graphalgo.config.NodeWeightConfig;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
+import org.neo4j.graphalgo.config.*;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -58,12 +48,8 @@ import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
@@ -164,8 +150,8 @@ public abstract class AlgoBaseProc<
 
     private GraphCreateConfig filterGraphCreateConfig(CONFIG config, GraphCreateConfig graphCreateConfig) {
         NodeProjections nodeProjections = graphCreateConfig.nodeProjections();
-        List<String> nodeLabels = config.nodeLabels();
-        if (nodeLabels.contains(PROJECT_ALL.name)) {
+        List<ElementIdentifier> nodeLabels = config.nodeLabels().stream().map(ElementIdentifier::of).collect(Collectors.toList());
+        if (nodeLabels.contains(PROJECT_ALL)) {
             return graphCreateConfig;
         } else {
             NodeProjections.Builder builder = NodeProjections.builder();
@@ -173,7 +159,7 @@ public abstract class AlgoBaseProc<
                 .projections()
                 .entrySet()
                 .stream()
-                .filter(proj -> nodeLabels.contains(proj.getKey().name))
+                .filter(proj -> nodeLabels.contains(proj.getKey()))
                 .forEach(entry -> builder.putProjection(entry.getKey(), entry.getValue()));
             NodeProjections filteredNodeProjections = builder.build();
             return GraphCreateFromStoreConfig.of(
@@ -226,7 +212,7 @@ public abstract class AlgoBaseProc<
             ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
             : Optional.empty();
 
-        List<String> nodeLabels = config.nodeLabels();
+        List<ElementIdentifier> nodeLabels = config.nodeLabelIdentifiers();
         List<String> relationshipTypes = config.relationshipTypes();
 
         return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty, config.concurrency());
@@ -298,8 +284,14 @@ public abstract class AlgoBaseProc<
         }
 
         if (config instanceof MutatePropertyConfig) {
-            String mutateProperty = ((MutatePropertyConfig) config).mutateProperty();
-            if (mutateProperty != null && graphStore.hasNodeProperty(mutateProperty)) {
+            MutatePropertyConfig mutateConfig = (MutatePropertyConfig) config;
+            String mutateProperty = mutateConfig.mutateProperty();
+
+            Collection<ElementIdentifier> filterLabels = mutateConfig.nodeLabelIdentifiers().contains(PROJECT_ALL)
+                ? graphStore.nodeLabels()
+                : mutateConfig.nodeLabelIdentifiers();
+
+            if (mutateProperty != null && graphStore.hasNodeProperty(filterLabels, mutateProperty)) {
                 throw new IllegalArgumentException(String.format(
                     "Node property `%s` already exists in the in-memory graph.",
                     mutateProperty

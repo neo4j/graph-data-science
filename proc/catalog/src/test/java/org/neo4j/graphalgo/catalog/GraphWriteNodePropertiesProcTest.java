@@ -123,7 +123,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
         Throwable rootCause = rootCause(ex);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("`newNodeProp3` not found"));
-        assertThat(rootCause.getMessage(), containsString("['newNodeProp1', 'newNodeProp2']"));
+        assertThat(rootCause.getMessage(), containsString("No node projection with property key `newNodeProp3` found"));
+        assertThat(rootCause.getMessage(), containsString("[newNodeProp1, newNodeProp2]"));
     }
 }

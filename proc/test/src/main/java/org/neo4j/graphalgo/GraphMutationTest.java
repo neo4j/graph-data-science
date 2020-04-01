@@ -34,9 +34,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
@@ -114,7 +112,6 @@ public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig,
                             InvocationTargetException.class,
                             () -> mutateMethod.invoke(procedure, graphName, config)
                         );
-
 
                         Throwable expectedException = ExceptionUtil.rootCause(ex);
                         assertEquals(IllegalArgumentException.class, expectedException.getClass());
