@@ -332,11 +332,9 @@ class LouvainTest extends AlgoTestBase {
         GraphDimensions dimensionsWithoutProperties = dimensionsBuilder.build();
         GraphDimensions dimensionsWithOneProperty = dimensionsBuilder
             .relationshipProperties(oneProperty)
-            .nodeProperties(oneProperty)
             .build();
         GraphDimensions dimensionsWithTwoProperties = dimensionsBuilder
             .relationshipProperties(twoProperties)
-            .nodeProperties(twoProperties)
             .build();
 
         LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
@@ -438,8 +436,7 @@ class LouvainTest extends AlgoTestBase {
                 CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery(nodeStatement)
-                    .relationshipQuery(relStatement)
-                    .addNodeProperties(nodePropertyMappings);
+                    .relationshipQuery(relStatement);
                 if (loadRelationshipProperty) {
                     cypherLoaderBuilder.addRelationshipProperty(relationshipPropertyMapping);
                 }
