@@ -563,8 +563,8 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @EnumSource(Aggregation.class)
-    void relationshipProjectionPropertyPropagateAggregations(Aggregation aggregationParam) {
+    @CsvSource({"DEFAULT, 55", "NONE, 55", "MAX, 55", "MIN, 55", "SINGLE, 55", "SUM, 55", "COUNT, 1"})
+    void relationshipProjectionPropertyPropagateAggregations(Aggregation aggregationParam, int expectedValue) {
         String aggregation = aggregationParam.toString();
         String name = "g";
 
@@ -617,13 +617,13 @@ class GraphCreateProcTest extends BaseProcTest {
         assertGraphExists(name);
         Graph weightGraph = GraphStoreCatalog.get("", name).graphStore().getGraph("B", Optional.of("weight"));
         Graph fooGraph = GraphStoreCatalog.get("", name).graphStore().getGraph("B", Optional.of("foo"));
-        assertGraphEquals(fromGdl("(a)-[{w: 55}]->()"), weightGraph);
+        assertGraphEquals(fromGdl(String.format("(a)-[{w: %d}]->()", expectedValue)), weightGraph);
         assertGraphEquals(fromGdl("(a)-[{w: 55}]->()"), fooGraph);
     }
 
     @ParameterizedTest(name = "aggregation={0}")
-    @EnumSource(Aggregation.class)
-    void relationshipProjectionPropertyAggregations(Aggregation aggregationParam) {
+    @CsvSource({"DEFAULT, 55", "NONE, 55", "MAX, 55", "MIN, 55", "SINGLE, 55", "SUM, 55", "COUNT, 1"})
+    void relationshipProjectionPropertyAggregations(Aggregation aggregationParam, int expectedValue) {
         String aggregation = aggregationParam.toString();
         String name = "g";
 
@@ -657,7 +657,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         assertGraphExists(name);
         Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
-        assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
+        assertGraphEquals(fromGdl(String.format("()-[{w: %d}]->()", expectedValue)), graph);
     }
 
     @ParameterizedTest(name = "aggregation={0}")
@@ -1192,7 +1192,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         });
 
-        Graph actual = GraphStoreCatalog.get("", "countGraph", "TYPE_1", Optional.of("count"));
+        Graph actual = GraphStoreCatalog.get("", "countGraph").graphStore().getGraph("TYPE_1", Optional.of("count"));
         Graph expected = fromGdl("(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1232,7 +1232,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         });
 
-        Graph actual = GraphStoreCatalog.get("", "countGraph", "TYPE", Optional.of("count"));
+        Graph actual = GraphStoreCatalog.get("", "countGraph").graphStore().getGraph("TYPE", Optional.of("count"));
         Graph expected = fromGdl("(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1277,11 +1277,11 @@ class GraphCreateProcTest extends BaseProcTest {
 
         });
 
-        Graph countActual = GraphStoreCatalog.get("", "countGraph", "TYPE_1", Optional.of("count"));
+        Graph countActual = GraphStoreCatalog.get("", "countGraph").graphStore().getGraph("TYPE_1", Optional.of("count"));
         Graph countExpected = fromGdl("(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(countExpected, countActual);
 
-        Graph fooActual = GraphStoreCatalog.get("", "countGraph", "TYPE_1", Optional.of("foo"));
+        Graph fooActual = GraphStoreCatalog.get("", "countGraph").graphStore().getGraph("TYPE_1", Optional.of("foo"));
         Graph fooExpected = fromGdl("(a)-[{w:2674.0D}]->(b)");
         assertGraphEquals(fooExpected, fooActual);
     }
