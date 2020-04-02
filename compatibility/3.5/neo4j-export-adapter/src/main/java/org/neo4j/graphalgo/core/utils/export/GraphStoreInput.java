@@ -180,9 +180,7 @@ public final class GraphStoreInput implements Input {
 
         private final GraphStore graphStore;
 
-        NodeChunk(
-            GraphStore graphStore
-        ) {
+        NodeChunk(GraphStore graphStore) {
             this.graphStore = graphStore;
         }
 
