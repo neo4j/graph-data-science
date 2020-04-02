@@ -37,6 +37,10 @@ public final class GraphStoreCatalog {
 
     private GraphStoreCatalog() { }
 
+    public static GraphStoreWithConfig get(String username, String graphName) {
+        return getUserCatalog(username).get(graphName);
+    }
+
     public static void set(GraphCreateConfig config, GraphStore graphStore) {
         graphStore.canRelease(false);
         userCatalogs.compute(config.username(), (user, userCatalog) -> {
@@ -48,15 +52,6 @@ public final class GraphStoreCatalog {
         });
     }
 
-    public static Graph get(
-        String username,
-        String graphName,
-        String relationshipType,
-        Optional<String> maybeRelationshipProperty
-    ) {
-        return getUserCatalog(username).get(graphName, relationshipType, maybeRelationshipProperty);
-    }
-
     public static Optional<Graph> getUnion(String username, String graphName) {
         return getUserCatalog(username).getUnion(graphName);
     }
@@ -65,21 +60,16 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).exists(graphName);
     }
 
-    public static @Nullable Graph remove(String username, String graphName) {
-        return Optional
+    public static void remove(String username, String graphName, Consumer<GraphStoreWithConfig> removedGraphConsumer) {
+        GraphStoreWithConfig graphStoreWithConfig = Optional
             .ofNullable(getUserCatalog(username).remove(graphName))
-            .orElse(null);
-    }
-
-    public static void remove(String username, String graphName, Consumer<GraphStoreWithConfig> graphRemovedConsumer) {
-        GraphStoreWithConfig graphStoreWithConfig = Optional.ofNullable(getUserCatalog(username).removeWithoutRelease(graphName))
             .orElseThrow(failOnNonExistentGraph(graphName));
 
-        graphRemovedConsumer.accept(graphStoreWithConfig);
+        removedGraphConsumer.accept(graphStoreWithConfig);
 
-        Graph graph = graphStoreWithConfig.getGraph();
-        graph.canRelease(true);
-        graph.release();
+        GraphStore graphStore = graphStoreWithConfig.graphStore();
+        graphStore.canRelease(true);
+        graphStore.release();
     }
 
     private static UserCatalog getUserCatalog(String username) {
@@ -99,13 +89,6 @@ public final class GraphStoreCatalog {
             "Graph with name `%s` does not exist and can't be removed.",
             graphName
         ));
-    }
-
-    public static GraphStoreWithConfig get(
-        String username,
-        String graphName
-    ) {
-        return getUserCatalog(username).get(graphName);
     }
 
     private static class UserCatalog {
@@ -136,14 +119,6 @@ public final class GraphStoreCatalog {
             }
         }
 
-        @Deprecated
-        Graph get(String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
-            if (!exists(graphName)) {
-                throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", graphName));
-            }
-            return graphsByName.get(graphName).graphStore().getGraph(relationshipType, maybeRelationshipProperty);
-        }
-
         /**
          * A named graph is potentially split up into multiple sub-graphs.
          * Each sub-graph has the same node set and represents a unique relationship type / property combination.
@@ -158,22 +133,7 @@ public final class GraphStoreCatalog {
         }
 
         @Nullable
-        Graph remove(String graphName) {
-            if (!exists(graphName)) {
-                // remove is allowed to return null if the graph does not exist
-                // as it's being used by algo.graph.info or algo.graph.remove,
-                // that can deal with missing graphs
-                return null;
-            }
-            GraphStoreWithConfig graphStoreWithConfig = graphsByName.remove(graphName);
-            Graph graph = graphStoreWithConfig.getGraph();
-            graph.canRelease(true);
-            graph.release();
-            return graph;
-        }
-
-        @Nullable
-        GraphStoreWithConfig removeWithoutRelease(String graphName) {
+        GraphStoreWithConfig remove(String graphName) {
             if (!exists(graphName)) {
                 // remove is allowed to return null if the graph does not exist
                 // as it's being used by algo.graph.info or algo.graph.remove,

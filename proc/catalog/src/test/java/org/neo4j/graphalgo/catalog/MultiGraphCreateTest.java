@@ -60,10 +60,10 @@ class MultiGraphCreateTest {
         runQuery(db, "CREATE (a:Node2), (b:Node2), (b)-[:TYPE2]->(a)");
         runQuery(db, create2);
 
-        Graph graph1 = GraphStoreCatalog.get("", "graph1", "TYPE1", Optional.empty());
+        Graph graph1 = GraphStoreCatalog.get("", "graph1").graphStore().getGraph("TYPE1", Optional.empty());
         assertGraph(graph1);
 
-        Graph graph2 = GraphStoreCatalog.get("", "graph2", "TYPE2", Optional.empty());
+        Graph graph2 = GraphStoreCatalog.get("", "graph2").graphStore().getGraph("TYPE2", Optional.empty());
         assertGraph(graph2);
     }
 

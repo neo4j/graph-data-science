@@ -489,7 +489,7 @@ class GraphCreateProcTest extends BaseProcTest {
             ))
         );
 
-        Graph graph = GraphStoreCatalog.get("", name).getGraph();
+        Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[{w:55}]->()"), graph);
     }
 
@@ -521,7 +521,7 @@ class GraphCreateProcTest extends BaseProcTest {
             ))
         );
 
-        Graph graph = GraphStoreCatalog.get("", name).getGraph();
+        Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
@@ -558,7 +558,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph graph = GraphStoreCatalog.get("", name).getGraph();
+        Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
@@ -656,7 +656,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph graph = GraphStoreCatalog.get("", name).getGraph();
+        Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
@@ -696,7 +696,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph graph = GraphStoreCatalog.get("", name).getGraph();
+        Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
@@ -1100,7 +1100,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         runQuery(query, map());
 
-        Graph graph = GraphStoreCatalog.get("", "g").getGraph();
+        Graph graph = GraphStoreCatalog.get("", "g").graphStore().getUnion();
         Graph expected = fromGdl("({ fooProp: 42, barProp: 13.37D })" +
                                  "({ fooProp: 43, barProp: 13.38D })" +
                                  "({ fooProp: 44, barProp: 13.39D })" +
@@ -1152,7 +1152,7 @@ class GraphCreateProcTest extends BaseProcTest {
             assertEquals("MAX", maxCostParams.get("aggregation").toString());
         });
 
-        Graph actual = GraphStoreCatalog.get("", "aggGraph").getGraph();
+        Graph actual = GraphStoreCatalog.get("", "aggGraph").graphStore().getUnion();
         Graph expected = fromGdl("(a)-[{w:85.3D}]->(b),(a)-[{w:42.1D}]->(b),(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1175,9 +1175,9 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query, map("nodeQuery",
             ALL_NODES_QUERY, "relationshipQuery", relationshipQuery));
 
-        Graph foobarGraph = GraphStoreCatalog.get(getUsername(), "testGraph", "", Optional.of("foobar"));
-        Graph foobazGraph = GraphStoreCatalog.get(getUsername(), "testGraph", "", Optional.of("foobaz"));
-        Graph raboofGraph = GraphStoreCatalog.get(getUsername(), "testGraph", "", Optional.of("raboof"));
+        Graph foobarGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getGraph("", Optional.of("foobar"));
+        Graph foobazGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getGraph("", Optional.of("foobaz"));
+        Graph raboofGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getGraph("", Optional.of("raboof"));
 
         Graph expectedFoobarGraph = fromGdl("()-[{w: 23.0D}]->()");
         Graph expectedFoobazGraph = fromGdl("()-[{w: 1984.0D}]->()");

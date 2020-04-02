@@ -150,7 +150,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
         double[] expectedValues = new double[] {Double.NaN, 3, 8, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).getGraph();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore().getUnion();
         mutatedGraph.forEachNode(nodeId -> {
                 assertEquals(
                     mutatedGraph.nodeProperties("communityId").nodeProperty(nodeId),
