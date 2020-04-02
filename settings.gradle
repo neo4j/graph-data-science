@@ -49,8 +49,10 @@ def registerSubModules(File file) {
                 }
             }
             .forEach { moduleDir ->
-                include(moduleDir.name)
-                project(":${moduleDir.name}").projectDir = moduleDir
+                def parent = moduleDir.getParentFile();
+                def projectName = parent.name == "proc" ? ":proc-${moduleDir.name}" : ":${moduleDir.name}";
+                include(projectName)
+                project(projectName).projectDir = moduleDir
             }
 }
 
