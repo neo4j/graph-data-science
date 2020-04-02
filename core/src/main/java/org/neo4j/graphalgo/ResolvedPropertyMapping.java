@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.core.Aggregation;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 
 @ValueClass
+@Deprecated()
+// Now only used for Relationship importing. Can be removed after refactoring.
 public abstract class ResolvedPropertyMapping {
 
     /**

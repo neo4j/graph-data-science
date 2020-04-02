@@ -53,14 +53,14 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private Map<ElementIdentifier, BitSet> elementIdentifierBitSetMapping;
 
     ScanningNodesImporter(
-            GraphDatabaseAPI api,
-            GraphDimensions dimensions,
-            ProgressLogger progressLogger,
-            AllocationTracker tracker,
-            TerminationFlag terminationFlag,
-            ExecutorService threadPool,
-            int concurrency,
-            Map<ElementIdentifier, PropertyMappings> propertyMappings
+        GraphDatabaseAPI api,
+        GraphDimensions dimensions,
+        ProgressLogger progressLogger,
+        AllocationTracker tracker,
+        TerminationFlag terminationFlag,
+        ExecutorService threadPool,
+        int concurrency,
+        Map<ElementIdentifier, PropertyMappings> propertyMappings
     ) {
         super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
         this.progressLogger = progressLogger;
@@ -71,9 +71,9 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     @Override
     InternalImporter.CreateScanner creator(
-            long nodeCount,
-            ImportSizing sizing,
-            AbstractStorePageCacheScanner<NodeRecord> scanner
+        long nodeCount,
+        ImportSizing sizing,
+        AbstractStorePageCacheScanner<NodeRecord> scanner
     ) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
 
@@ -90,7 +90,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 .collect(Collectors.toMap(identifier -> identifier, s -> new BitSet(nodeCount)));
 
 
-        elementIdentifierBitSetMapping = labelIdentifierMapping.size() == 1 && labelIdentifierMapping.containsKey(ANY_LABEL)
+        elementIdentifierBitSetMapping = labelIdentifierMapping.size() == 1 && labelIdentifierMapping.containsKey(
+            ANY_LABEL)
             ? null
             : initializeLabelBitSets.get();
 
@@ -121,11 +122,11 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     @Override
     IdsAndProperties build() {
         IdMap hugeIdMap = IdMapBuilder.build(
-                idMapBuilder,
-                elementIdentifierBitSetMapping,
-                dimensions.highestNeoId(),
-                concurrency,
-                tracker
+            idMapBuilder,
+            elementIdentifierBitSetMapping,
+            dimensions.highestNeoId(),
+            concurrency,
+            tracker
         );
 
         return IdsAndProperties.of(hugeIdMap, nodePropertyImporter.result());
