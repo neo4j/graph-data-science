@@ -44,7 +44,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.writeRelationship", mode = WRITE)
     @Description("Writes the given relationship and an optional relationship property to an online Neo4j database.")
-    public Stream<Result> create(
+    public Stream<Result> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType,
         @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,

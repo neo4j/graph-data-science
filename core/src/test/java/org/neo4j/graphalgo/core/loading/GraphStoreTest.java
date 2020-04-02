@@ -19,10 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -32,6 +34,7 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GraphStoreTest extends AlgoTestBase {
@@ -39,11 +42,17 @@ class GraphStoreTest extends AlgoTestBase {
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
-        runQuery("CREATE (a)-[:REL]->(b)");
+    }
+
+    @AfterEach
+    void shutdown() {
+        db.shutdown();
     }
 
     @Test
     void testModificationDate() throws InterruptedException {
+        runQuery("CREATE (a)-[:REL]->(b)");
+
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
@@ -73,6 +82,23 @@ class GraphStoreTest extends AlgoTestBase {
 
         assertTrue(initialTime.isBefore(nodePropertyTime), "Node property update did not change modificationTime");
         assertTrue(nodePropertyTime.isBefore(relationshipTime), "Relationship update did not change modificationTime");
+    }
+
+    @Test
+    void testRemoveNodeProperty() {
+        runQuery("CREATE (a {nodeProp: 42})-[:REL]->(b {nodeProp: 23})");
+
+        GraphStore graphStore = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .addNodeProperty(PropertyMapping.of("nodeProp", 0D))
+            .loadAnyRelationshipType()
+            .build()
+            .graphStore(NativeFactory.class);
+
+        assertTrue(graphStore.hasNodeProperty("nodeProp"));
+        graphStore.removeNodeProperty("nodeProp");
+        assertFalse(graphStore.hasNodeProperty("nodeProp"));
     }
 
 }
