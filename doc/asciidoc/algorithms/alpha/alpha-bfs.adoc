@@ -1,10 +1,13 @@
 [[algorithms-bfs]]
+[.alpha]
 = Breadth First Search
 
 [abstract]
 --
 This section describes the Breadth First Search traversal algorithm in the Neo4j Graph Data Science library.
 --
+
+include::alpha-note.adoc[tag=alpha-note]
 
 This topic includes:
 
