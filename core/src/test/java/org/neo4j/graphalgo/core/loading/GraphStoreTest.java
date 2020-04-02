@@ -152,6 +152,39 @@ class GraphStoreTest {
         assertGraphEquals(filteredAllGraph, nonFilteredGraph);
     }
 
+    @Test
+    void testModificationDate() throws InterruptedException {
+        GraphStore graphStore = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .build()
+            .graphStore(NativeFactory.class);
+
+        // add node properties
+        LocalDateTime initialTime = graphStore.modificationTime();
+        Thread.sleep(42);
+        graphStore.addNodeProperty(PROJECT_ALL, "foo", new NullPropertyMap(42.0));
+        LocalDateTime nodePropertyTime = graphStore.modificationTime();
+
+        // add relationships
+        HugeGraph.Relationships relationships = HugeGraph.Relationships.of(
+            0L,
+            Orientation.NATURAL,
+            new AdjacencyList(new byte[0][0]),
+            AdjacencyOffsets.of(new long[0]),
+            null,
+            null,
+            42.0
+        );
+        Thread.sleep(42);
+        graphStore.addRelationshipType("BAR", Optional.empty(), relationships);
+        LocalDateTime relationshipTime = graphStore.modificationTime();
+
+        assertTrue(initialTime.isBefore(nodePropertyTime), "Node property update did not change modificationTime");
+        assertTrue(nodePropertyTime.isBefore(relationshipTime), "Relationship update did not change modificationTime");
+    }
+
     @NotNull
     private List<NodeProjection> nodeProjections() {
 
