@@ -171,7 +171,7 @@ CALL gds.pageRank.stats('myGraph', {nodeLabels: ['Person', 'City', '*']}) // equ
 CALL gds.pageRank.stats('myGraph') // equivalent
 
 // will use only nodes projected as 'Person' in 'myGraph'
-CALL gds.pageRank.stats('myGraph', {nodeLabels: ['Person']}) 
+CALL gds.pageRank.stats('myGraph', {nodeLabels: ['Person']})
 
 // will use nodes projected as 'Person' or 'City' in 'myGraph'
 CALL gds.pageRank.stats('myGraph', {nodeLabels: ['Person', 'City']})
@@ -322,8 +322,10 @@ The following map-like syntax shows the general way of defining relationship pro
     The specified value is applied to all property mappings that have no aggregation specified.
     The following values are allowed:
 *** `NONE`: parallel relationships are not aggregated (default)
-*** `MIN`, `MAX`, `SUM`, `COUNT`: applied to the numeric properties of parallel relationships
+*** `MIN`, `MAX`, `SUM`: applied to the numeric properties of parallel relationships
 *** `SINGLE`: a single, arbitrary relationship out of the parallel relationships is projected
+*** `COUNT`: counts the number of non-null numeric properties
+**** If the special property name `'*'` is used, `COUNT` will count parallel relationships
 ** `relationship-property-mappings` denotes a set of mappings between Neo4j and in-memory relationship properties
 
 
@@ -491,14 +493,17 @@ The following map-like syntax shows the general way of defining relationship pro
 ** `neo4j-property-key` denotes the name of the property in the Neo4j graph
 *** The property key must exist in the Neo4j database
 *** `neo4j-property-key` defaults to `property-key-i`
+*** The special property key `'*'` is allowed in combination with the `COUNT` aggregation
 ** `numeric-value` is used if the property does not exist for a relationship
 *** `numeric-value` defaults to `NaN`
 ** `aggregation-type` denotes how properties of parallel relationships are handled.
     The specified value overrides the aggregation type specified for the enclosing relationship projection.
     The following values are allowed:
 *** `NONE`: parallel relationships are not aggregated (default)
-*** `MIN`, `MAX`, `SUM`, `COUNT`: applied to the numeric properties of parallel relationships
+*** `MIN`, `MAX`, `SUM`: applied to the numeric properties of parallel relationships
 *** `SINGLE`: a single, arbitrary relationship out of the parallel relationships is projected
+*** `COUNT`: counts the number of non-null numeric properties
+**** If the special property name `'*'` is used, `COUNT` will count parallel relationships
 
 In the following example, we want to project `City` nodes and `ROAD` relationships.
 For nodes we project the `stateId` property.
