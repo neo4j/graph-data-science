@@ -154,11 +154,11 @@ public final class GraphStore {
     }
 
     public void addNodeProperty(ElementIdentifier label, String propertyKey, NodeProperties nodeProperties) {
-        this.nodeProperties.compute(label, (k, nodePropertyMap) -> {
+        updateGraphStore((graphStore) -> graphStore.nodeProperties.compute(label, (k, nodePropertyMap) -> {
             Map<String, NodeProperties> updatedPropertyMap = nodePropertyMap == null ? new HashMap<>() : nodePropertyMap;
             updatedPropertyMap.putIfAbsent(propertyKey, nodeProperties);
             return updatedPropertyMap;
-        });
+        }));
     }
 
     public void removeNodeProperty(String propertyKey) {
