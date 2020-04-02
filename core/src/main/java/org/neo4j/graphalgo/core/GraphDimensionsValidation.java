@@ -100,7 +100,7 @@ public final class GraphDimensionsValidation {
                     }
                     return String.format("'%s'", propertyKey);
                 })
-                .collect(joining(","));
+                .collect(joining(", "));
 
             throw new IllegalArgumentException(String.format(
                 "%s properties not found: %s.",
