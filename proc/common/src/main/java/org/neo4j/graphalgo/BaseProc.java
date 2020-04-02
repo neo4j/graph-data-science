@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -107,7 +108,7 @@ public abstract class BaseProc {
     }
 
     protected void validateMemoryUsage(MemoryTreeWithDimensions memoryTreeWithDimensions) {
-        validateMemoryUsage(memoryTreeWithDimensions, Runtime.getRuntime()::freeMemory);
+        validateMemoryUsage(memoryTreeWithDimensions, GcListenerExtension::freeMemory);
     }
 
     public void validateMemoryUsage(
