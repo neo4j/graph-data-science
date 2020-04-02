@@ -204,7 +204,7 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<alpha-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbours>>
 | `gds.alpha.ml.ann.stream`
 | `gds.alpha.ml.ann.write`
-.3+<.^|<<algorithms-triangle-count-clustering-coefficient, Triangle Count>>
+.4+<.^|<<algorithms-triangle-count-clustering-coefficient, Triangle Count>>
 | `gds.alpha.triangle.stream`
 | `gds.alpha.triangleCount.stats`
 | `gds.alpha.triangleCount.stream`
