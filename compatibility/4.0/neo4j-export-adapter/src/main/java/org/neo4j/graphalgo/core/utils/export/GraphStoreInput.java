@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.utils.export;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.internal.batchimport.InputIterable;
@@ -177,18 +178,24 @@ public final class GraphStoreInput implements Input {
     static class NodeChunk extends EntityChunk {
 
         private final GraphStore graphStore;
-        private final Set<String> nodeProperties;
 
         NodeChunk(GraphStore graphStore) {
             this.graphStore = graphStore;
-            this.nodeProperties = graphStore.nodePropertyKeys();
         }
 
         @Override
         public boolean next(InputEntityVisitor visitor) throws IOException {
             if (id < endId) {
                 visitor.id(id);
-                nodeProperties.forEach(p -> visitor.property(p, graphStore.nodeProperty(p).nodeProperty(id)));
+
+                graphStore.nodes().labels(id).forEach(label -> {
+                    graphStore
+                        .nodePropertyKeys(label).forEach(property -> {
+                        NodeProperties nodeProperties = graphStore.nodeProperty(label, property);
+                        visitor.property(property, nodeProperties.nodeProperty(id));
+                    });
+                });
+
                 visitor.endOfEntity();
                 id++;
                 return true;
