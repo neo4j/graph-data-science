@@ -19,9 +19,12 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -29,7 +32,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,7 +43,22 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleProc extends TriangleBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
+public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
+
+    static final String DESCRIPTION = "Triangle Stream streams the nodeIds of each triangle in the graph.";
+
+    @Override
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleConfig config) {
+        graphCreateConfig.relationshipProjections().projections().entrySet().stream()
+            .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
+            .forEach(entry -> {
+                throw new IllegalArgumentException(String.format(
+                    "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
+                    entry.getKey().name,
+                    entry.getValue().orientation()
+                ));
+            });
+    }
 
     @Procedure(name = "gds.alpha.triangle.stream", mode = READ)
     @Description(DESCRIPTION)

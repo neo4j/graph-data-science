@@ -24,55 +24,33 @@ import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
-import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
+import org.neo4j.graphalgo.impl.triangle.TriangleCountWriteConfig;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
+class TriangleCountWriteProcTest extends TriangleBaseProcTest<TriangleCountWriteConfig> {
 
     @Override
-    TriangleBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> newInstance() {
-        return new TriangleCountProc();
+    TriangleBaseProc<TriangleCountWriteConfig> newInstance() {
+        return new TriangleCountWriteProc();
     }
 
     @Override
-    TriangleCountConfig newConfig() {
-        return TriangleCountConfig.of(
+    TriangleCountWriteConfig newConfig() {
+        return TriangleCountWriteConfig.of(
             getUsername(),
             Optional.empty(),
             Optional.empty(),
             CypherMapWrapper.empty()
         );
-    }
-
-    @Test
-    void testStreaming() {
-        TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
-
-        String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds", "alpha", "triangleCount")
-            .streamMode()
-            .yields();
-
-        runQueryWithRowConsumer(query, row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
-            long triangles = row.getNumber("triangles").longValue();
-            double coefficient = row.getNumber("coefficient").doubleValue();
-            mock.consume(nodeId, triangles, coefficient);
-        });
-        verify(mock, times(5)).consume(anyLong(), eq(1L), AdditionalMatchers.eq(1.0, 0.1));
-        verify(mock, times(4)).consume(anyLong(), eq(1L), AdditionalMatchers.eq(0.333, 0.1));
     }
 
     @Test
@@ -130,9 +108,5 @@ class TriangleCountProcTest extends TriangleBaseProcTest<IntersectingTriangleCou
             assertEquals(9, nodeCount);
             assertEquals(9, p100);
         });
-    }
-
-    interface TriangleCountConsumer {
-        void consume(long nodeId, long triangles, double value);
     }
 }

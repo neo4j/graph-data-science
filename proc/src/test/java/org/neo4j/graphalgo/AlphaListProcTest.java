@@ -49,7 +49,8 @@ import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.traverse.TraverseProc;
-import org.neo4j.graphalgo.triangle.TriangleCountProc;
+import org.neo4j.graphalgo.triangle.TriangleCountStreamProc;
+import org.neo4j.graphalgo.triangle.TriangleCountWriteProc;
 import org.neo4j.graphalgo.triangle.TriangleProc;
 import org.neo4j.graphalgo.walking.RandomWalkProc;
 
@@ -170,7 +171,8 @@ class AlphaListProcTest extends BaseProcTest {
             SimilaritiesFunc.class,
             SccProc.class,
             TraverseProc.class,
-            TriangleCountProc.class,
+            TriangleCountStreamProc.class,
+            TriangleCountWriteProc.class,
             TriangleProc.class
         );
         registerFunctions(

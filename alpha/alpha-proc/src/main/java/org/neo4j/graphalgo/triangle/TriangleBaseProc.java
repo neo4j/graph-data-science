@@ -21,13 +21,22 @@
 package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
+import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
+import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
+import org.neo4j.logging.Log;
 
-public abstract class TriangleBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends TriangleConfig>
-    extends AlgoBaseProc<A, RESULT, CONFIG> {
+public abstract class TriangleBaseProc<CONFIG extends TriangleConfig>
+    extends AlgoBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, CONFIG> {
 
     static final String DESCRIPTION =
         "Triangle counting is a community detection graph algorithm that is used to " +
@@ -44,5 +53,27 @@ public abstract class TriangleBaseProc<A extends Algorithm<A, RESULT>, RESULT, C
                     entry.getValue().orientation()
                 ));
             });
+    }
+
+    @Override
+    protected AlgorithmFactory<IntersectingTriangleCount, CONFIG> algorithmFactory(
+        CONFIG config) {
+        return new AlphaAlgorithmFactory<IntersectingTriangleCount, CONFIG>() {
+            @Override
+            public IntersectingTriangleCount buildAlphaAlgo(
+                Graph graph,
+                CONFIG configuration,
+                AllocationTracker tracker,
+                Log log
+            ) {
+                return new IntersectingTriangleCount(
+                    graph,
+                    Pools.DEFAULT,
+                    configuration.concurrency(),
+                    AllocationTracker.create()
+                )
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+            }
+        };
     }
 }

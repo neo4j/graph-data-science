@@ -57,7 +57,7 @@ public class TriangleDocTest extends BaseProcTest {
     void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
 
-        registerProcedures(TriangleProc.class, TriangleCountProc.class);
+        registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);
     }

@@ -21,43 +21,27 @@ package org.neo4j.graphalgo.triangle;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
-import org.neo4j.graphalgo.impl.triangle.TriangleStream;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import java.util.HashSet;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.expectNodeById;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
-class TriangleProcTest extends TriangleBaseProcTest<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
-
-    @Override
-    TriangleBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> newInstance() {
-        return new TriangleProc();
-    }
-
-    @Override
-    TriangleConfig newConfig() {
-        return TriangleConfig.of(
-            getUsername(),
-            Optional.empty(),
-            Optional.empty(),
-            CypherMapWrapper.empty()
-        );
-    }
+class TriangleProcTest extends BaseProcTest {
 
     private static String[] idToName;
 
     @BeforeEach
     void setup() throws Exception {
-        super.setup();
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class);
+        runQuery(TriangleBaseProcTest.dbCypher());
         idToName = new String[9];
 
         runInTransaction(db, tx -> {

@@ -17,29 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.neo4j.graphalgo.triangle;
 
-import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountConfig;
+import org.neo4j.graphalgo.impl.triangle.TriangleCountWriteConfig;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -49,29 +43,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> {
-
-    @Procedure(name = "gds.alpha.triangleCount.stream", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<IntersectingTriangleCount.Result> stream(
-        @Name(value = "graphName") Object graphNameOrConfig,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> computationResult =
-            compute(graphNameOrConfig, configuration, false, false);
-
-        Graph graph = computationResult.graph();
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        return computationResult.algorithm().computeStream();
-    }
+public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteConfig> {
 
     @Procedure(value = "gds.alpha.triangleCount.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -79,11 +53,11 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountConfig> computationResult =
+        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountWriteConfig> computationResult =
             compute(graphNameOrConfig, configuration, false, false);
 
         AllocationTracker tracker = computationResult.tracker();
-        TriangleCountConfig config = computationResult.config();
+        TriangleCountWriteConfig config = computationResult.config();
         Graph graph = computationResult.graph();
         IntersectingTriangleCount algorithm = computationResult.algorithm();
 
@@ -150,34 +124,13 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
     }
 
     @Override
-    protected TriangleCountConfig newConfig(
+    protected TriangleCountWriteConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountConfig.of(username, graphName, maybeImplicitCreate, config);
-    }
-
-    @Override
-    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountConfig> algorithmFactory(TriangleCountConfig config) {
-        return new AlphaAlgorithmFactory<IntersectingTriangleCount, TriangleCountConfig>() {
-            @Override
-            public IntersectingTriangleCount buildAlphaAlgo(
-                Graph graph,
-                TriangleCountConfig configuration,
-                AllocationTracker tracker,
-                Log log
-            ) {
-                return new IntersectingTriangleCount(
-                    graph,
-                    Pools.DEFAULT,
-                    configuration.concurrency(),
-                    AllocationTracker.create()
-                )
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
-            }
-        };
+        return TriangleCountWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     public static class Result {

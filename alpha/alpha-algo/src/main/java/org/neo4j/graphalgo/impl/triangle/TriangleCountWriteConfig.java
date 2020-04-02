@@ -31,9 +31,9 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("TriangleCountConfigImpl")
+@Configuration("TriangleCountWriteConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface TriangleCountConfig extends TriangleConfig, WritePropertyConfig {
+public interface TriangleCountWriteConfig extends TriangleConfig, WritePropertyConfig {
 
     @Override
     @Value.Default
@@ -46,13 +46,13 @@ public interface TriangleCountConfig extends TriangleConfig, WritePropertyConfig
         return null;
     }
 
-    static TriangleCountConfig of(
+    static TriangleCountWriteConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new TriangleCountConfigImpl(
+        return new TriangleCountWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

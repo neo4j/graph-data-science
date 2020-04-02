@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.triangle;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjections;
@@ -30,16 +29,16 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends TriangleConfig> extends BaseProcTest {
+abstract class TriangleBaseProcTest<CONFIG extends TriangleConfig> extends BaseProcTest {
     /**
      *      (a)-- (b)--(d)--(e)
      *        \T1/       \T2/
@@ -47,7 +46,7 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
      *          \  /T3\
      *          (h)--(i)
      */
-    String dbCypher() {
+    public static String dbCypher() {
         return
             "CREATE " +
             "  (a:Node {name: 'a'})" +
@@ -75,7 +74,7 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(TriangleProc.class, TriangleCountProc.class);
+        registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class);
         runQuery(dbCypher());
     }
 
@@ -84,7 +83,7 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
         db.shutdown();
     }
 
-    abstract TriangleBaseProc<A, RESULT, CONFIG> newInstance();
+    abstract TriangleBaseProc<CONFIG> newInstance();
 
     abstract CONFIG newConfig();
 
@@ -105,7 +104,7 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
             CypherMapWrapper.empty()
         );
 
-        TriangleBaseProc<A, RESULT, CONFIG> proc = newInstance();
+        TriangleBaseProc<CONFIG> proc = newInstance();
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> proc.validateConfigs(graphCreateFromStoreConfig, newConfig()));
 
