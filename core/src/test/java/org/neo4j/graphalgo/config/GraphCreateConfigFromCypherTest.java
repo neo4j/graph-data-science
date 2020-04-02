@@ -59,7 +59,8 @@ class GraphCreateConfigFromCypherTest {
     static Stream<Arguments> invalidKeys() {
         return Stream.of(
             Arguments.of(GraphCreateFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.of()),
-            Arguments.of(GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.of())
+            Arguments.of(GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.of()),
+            Arguments.of(GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY, NodeProjections.of())
         );
     }
 

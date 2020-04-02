@@ -122,7 +122,7 @@ public final class GraphStore {
         return modificationTime;
     }
 
-    public IdMapping nodes() {
+    public IdMap nodes() {
         return this.nodes;
     }
 
@@ -180,18 +180,6 @@ public final class GraphStore {
 
     public NodeProperties nodeProperty(ElementIdentifier label, String propertyKey) {
         return this.nodeProperties.getOrDefault(label, Collections.emptyMap()).get(propertyKey);
-    }
-
-    // TODO this should rather be part of a MultipartiteGraph but is currently used by GraphExport
-    public Stream<ElementIdentifier> labels(long nodeId) {
-        return nodes.maybeLabelInformation
-            .map(elementIdentifierBitSetMap ->
-                elementIdentifierBitSetMap
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> entry.getValue().get(nodeId))
-                    .map(Map.Entry::getKey))
-            .orElseGet(() -> Stream.of(PROJECT_ALL));
     }
 
     public Set<String> relationshipTypes() {
@@ -274,7 +262,7 @@ public final class GraphStore {
         return createGraph(nodeLabels, relationshipTypes, maybeRelationshipProperty, concurrency);
     }
 
-    public Graph getUnion() {
+    public IdMapGraph getUnion() {
         return UnionGraph.of(relationships
             .keySet()
             .stream()
