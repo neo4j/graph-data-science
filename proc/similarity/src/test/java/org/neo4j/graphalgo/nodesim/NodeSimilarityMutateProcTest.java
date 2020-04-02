@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
@@ -154,4 +155,9 @@ class NodeSimilarityMutateProcTest
             );
         });
     }
+
+    @Override
+    @Test
+    @Disabled("This test does not work for NodeSimilarity")
+    public void testGraphMutationOnFilteredGraph() { }
 }
