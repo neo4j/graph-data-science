@@ -26,15 +26,20 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
@@ -82,6 +87,50 @@ public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig,
 
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore().getUnion();
         TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), mutatedGraph);
+    }
+
+    @Test
+    default void testGraphMutationOnFilteredGraph() {
+        runQuery(graphDb(),"MATCH (n) DETACH DELETE n" );
+        GraphStoreCatalog.removeAllLoadedGraphs();
+
+        runQuery(graphDb(),"CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
+        GraphStore graphStore = TestGraphLoader
+            .from(graphDb())
+            .withLabels("A", "B")
+            .withRelationshipTypes("REL")
+            .graphStore(NativeFactory.class);
+
+        String graphName = "myGraph";
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("", graphName), graphStore);
+
+        applyOnProcedure(procedure ->
+            getProcedureMethods(procedure)
+                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+                .forEach(mutateMethod -> {
+                    CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry("nodeLabels",
+                        Collections.singletonList("A")
+                    );
+
+                    Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
+                    try {
+                        mutateMethod.invoke(procedure, graphName, config);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                })
+        );
+
+        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore();
+        assertEquals(
+            Collections.singleton(mutateProperty()),
+            mutatedGraph.nodePropertyKeys(ElementIdentifier.of("A"))
+        );
+
+        assertEquals(
+            Collections.emptySet(),
+            mutatedGraph.nodePropertyKeys(ElementIdentifier.of("B"))
+        );
     }
 
     @Test
