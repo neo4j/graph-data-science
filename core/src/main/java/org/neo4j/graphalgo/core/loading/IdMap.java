@@ -36,6 +36,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongPredicate;
+import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
@@ -139,6 +142,17 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
             AllocationTracker.EMPTY
         );
         return new IdMap(newGraphIds, newNodeToGraphIds, newNodeCount);
+    }
+
+    public Stream<ElementIdentifier> labels(long nodeId) {
+        return maybeLabelInformation
+            .map(elementIdentifierBitSetMap ->
+                elementIdentifierBitSetMap
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue().get(nodeId))
+                    .map(Map.Entry::getKey))
+            .orElseGet(() -> Stream.of(PROJECT_ALL));
     }
 
     public static final class IdIterable implements PrimitiveLongIterable {

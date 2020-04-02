@@ -379,6 +379,10 @@ public final class TestGraph implements Graph {
                 if (value instanceof Number) {
                     builder.set(element.getId(), ((Number) value).doubleValue());
                     return builder;
+                // This is a temporary hack to support NaN in for of a String
+                } else if (value instanceof String && value.equals("NaN")) {
+                    builder.set(element.getId(), Double.NaN);
+                    return builder;
                 } else {
                     throw new IllegalArgumentException(String.format(
                             "%s property '%s' of must be of type Number, but was %s for %s.",
