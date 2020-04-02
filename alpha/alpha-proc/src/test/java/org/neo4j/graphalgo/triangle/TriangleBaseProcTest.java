@@ -74,7 +74,7 @@ abstract class TriangleBaseProcTest<CONFIG extends TriangleConfig> extends BaseP
     @BeforeEach
     void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class);
+        registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class, TriangleCountStatsProc.class);
         runQuery(dbCypher());
     }
 

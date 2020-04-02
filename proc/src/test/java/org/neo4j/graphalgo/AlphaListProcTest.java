@@ -49,6 +49,7 @@ import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.traverse.TraverseProc;
+import org.neo4j.graphalgo.triangle.TriangleCountStatsProc;
 import org.neo4j.graphalgo.triangle.TriangleCountStreamProc;
 import org.neo4j.graphalgo.triangle.TriangleCountWriteProc;
 import org.neo4j.graphalgo.triangle.TriangleProc;
@@ -105,6 +106,7 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.spanningTree.maximum.write",
         "gds.alpha.spanningTree.minimum.write",
         "gds.alpha.triangle.stream",
+        "gds.alpha.triangleCount.stats",
         "gds.alpha.triangleCount.write",
         "gds.alpha.triangleCount.stream",
         "gds.alpha.eigenvector.write",
@@ -171,6 +173,7 @@ class AlphaListProcTest extends BaseProcTest {
             SimilaritiesFunc.class,
             SccProc.class,
             TraverseProc.class,
+            TriangleCountStatsProc.class,
             TriangleCountStreamProc.class,
             TriangleCountWriteProc.class,
             TriangleProc.class

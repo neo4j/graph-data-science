@@ -145,6 +145,14 @@ YIELD createMillis, computeMillis, writeMillis, nodeCount, triangleCount, averag
 | clusteringCoefficientProperty | String  | The property name clustering coefficient of the node is written to.
 |===
 
+.The following will count the number of triangles that a node is a member of, without writing back or presenting the results. It will return the total triangle count and average clustering coefficient of the given graph:
+[source, cypher]
+----
+CALL gds.alpha.triangleCount.stats(configuration: Map)
+YIELD createMillis, computeMillis, nodeCount, triangleCount, averageClusteringCoefficient
+----
+
+The stats mode used above can be used for trial runs or when only global results are desired. It has the same configuration and results as the write mode, except `writeProperty`, `clusteringCoefficientProperty` and `writeMillis`.
 
 [[algorithms-triangle-count-clustering-coefficient-sample]]
 == Triangle Counting / Clustering Coefficient algorithm sample

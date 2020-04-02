@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.triangle;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -30,11 +29,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 class TriangleCountWriteProcTest extends TriangleBaseProcTest<TriangleCountWriteConfig> {
 

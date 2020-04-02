@@ -21,42 +21,35 @@ package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
-import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountWriteConfig;
+import org.neo4j.graphalgo.impl.triangle.TriangleCountStatsConfig;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteConfig> {
+public class TriangleCountStatsProc extends TriangleBaseProc<TriangleCountStatsConfig> {
 
-    @Procedure(value = "gds.alpha.triangleCount.write", mode = WRITE)
+    @Procedure(value = "gds.alpha.triangleCount.stats", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<Result> write(
+    public Stream<Result> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountWriteConfig> computationResult =
+        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountStatsConfig> computationResult =
             compute(graphNameOrConfig, configuration, false, false);
 
-        TriangleCountWriteConfig config = computationResult.config();
+        TriangleCountStatsConfig config = computationResult.config();
         Graph graph = computationResult.graph();
         IntersectingTriangleCount algorithm = computationResult.algorithm();
 
@@ -74,68 +67,33 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
             graph.release();
             return Stream.of(builder.buildResult());
         }
-        NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, algorithm.getTerminationFlag())
-            .withLog(log)
-            .parallel(Pools.DEFAULT, config.writeConcurrency())
-            .build();
 
         PagedAtomicIntegerArray triangles = algorithm.getTriangles();
-        String clusteringCoefficientProperty = config.clusteringCoefficientProperty();
-
-        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            if (clusteringCoefficientProperty != null) {
-                // huge with coefficients
-                exporter.write(
-                    Arrays.asList(
-                        ImmutableNodeProperty.of(
-                            config.writeProperty(),
-                            triangles,
-                            PagedAtomicIntegerArray.Translator.INSTANCE
-                        ),
-                        ImmutableNodeProperty.of(
-                            clusteringCoefficientProperty,
-                            algorithm.getCoefficients(),
-                            HugeDoubleArray.Translator.INSTANCE
-                        )
-                    )
-                );
-            } else {
-                // huge without coefficients
-                exporter.write(
-                    config.writeProperty(),
-                    triangles,
-                    PagedAtomicIntegerArray.Translator.INSTANCE
-                );
-            }
-        }
 
         return Stream.of(builder
             .withAverageClusteringCoefficient(algorithm.getAverageCoefficient())
             .withTriangleCount(algorithm.getTriangleCount())
-            .withClusteringCoefficientProperty(clusteringCoefficientProperty)
             .withCommunityFunction(triangles::get)
             .withConfig(config)
             .withCreateMillis(computationResult.createMillis())
             .withComputeMillis(computationResult.computeMillis())
-            .withNodePropertiesWritten(exporter.propertiesWritten())
             .build()
         );
     }
 
     @Override
-    protected TriangleCountWriteConfig newConfig(
+    protected TriangleCountStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return TriangleCountStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     public static class Result {
         public final long createMillis;
         public final long computeMillis;
-        public final long writeMillis;
         public final long postProcessingMillis;
         public final long nodeCount;
         public final long triangleCount;
@@ -150,14 +108,11 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
         public final long p95;
         public final long p99;
         public final long p100;
-        public final String writeProperty;
-        public final String clusteringCoefficientProperty;
 
         public Result(
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
-            long writeMillis,
             long nodeCount,
             long triangleCount,
             long p100,
@@ -170,14 +125,11 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
             long p10,
             long p5,
             long p1,
-            double averageClusteringCoefficient,
-            String writeProperty,
-            String clusteringCoefficientProperty
+            double averageClusteringCoefficient
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;
-            this.writeMillis = writeMillis;
             this.nodeCount = nodeCount;
             this.averageClusteringCoefficient = averageClusteringCoefficient;
             this.triangleCount = triangleCount;
@@ -191,8 +143,6 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
             this.p10 = p10;
             this.p5 = p5;
             this.p1 = p1;
-            this.writeProperty = writeProperty;
-            this.clusteringCoefficientProperty = clusteringCoefficientProperty;
         }
     }
 
@@ -200,7 +150,6 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
 
         private double averageClusteringCoefficient = .0;
         private long triangleCount = 0;
-        private String clusteringCoefficientProperty;
 
         public TriangleCountResultBuilder(ProcedureCallContext callContext, AllocationTracker tracker) {
             super(callContext, tracker);
@@ -227,17 +176,11 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
             return this;
         }
 
-        public TriangleCountResultBuilder withClusteringCoefficientProperty(String clusteringCoefficientProperty) {
-            this.clusteringCoefficientProperty = clusteringCoefficientProperty;
-            return this;
-        }
-
         @Override
         protected Result buildResult() {
             return new Result(
                 createMillis,
                 computeMillis,
-                writeMillis,
                 postProcessingDuration,
                 nodeCount,
                 triangleCount,
@@ -251,9 +194,7 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(10)).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(5)).orElse(0L),
                 maybeCommunityHistogram.map(h -> h.getValueAtPercentile(1)).orElse(0L),
-                averageClusteringCoefficient,
-                config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : "",
-                clusteringCoefficientProperty
+                averageClusteringCoefficient
             );
         }
     }
