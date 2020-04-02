@@ -158,6 +158,10 @@ public final class GraphStore {
         updateGraphStore(graphStore -> graphStore.nodeProperties.putIfAbsent(propertyKey, nodeProperties));
     }
 
+    public void removeNodeProperty(String propertyKey) {
+        updateGraphStore(graphStore -> graphStore.nodeProperties.remove(propertyKey));
+    }
+
     public NodeProperties nodeProperty(String propertyKey) {
         return this.nodeProperties.get(propertyKey);
     }

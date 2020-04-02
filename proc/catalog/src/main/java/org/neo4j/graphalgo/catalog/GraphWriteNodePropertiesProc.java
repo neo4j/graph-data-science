@@ -46,7 +46,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.writeNodeProperties", mode = WRITE)
     @Description("Writes the given node properties to an online Neo4j database.")
-    public Stream<Result> create(
+    public Stream<Result> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
