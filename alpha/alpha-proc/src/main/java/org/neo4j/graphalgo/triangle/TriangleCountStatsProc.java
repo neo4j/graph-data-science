@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountStatsConfig;
+import org.neo4j.graphalgo.impl.triangle.TriangleCountStreamConfig;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class TriangleCountStatsProc extends TriangleBaseProc<TriangleCountStatsConfig> {
+public class TriangleCountStatsProc extends TriangleBaseProc<TriangleCountStreamConfig> {
 
     @Procedure(value = "gds.alpha.triangleCount.stats", mode = WRITE)
     @Description(DESCRIPTION)
@@ -46,17 +46,14 @@ public class TriangleCountStatsProc extends TriangleBaseProc<TriangleCountStatsC
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountStatsConfig> computationResult =
+        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountStreamConfig> computationResult =
             compute(graphNameOrConfig, configuration, false, false);
 
-        TriangleCountStatsConfig config = computationResult.config();
+        TriangleCountStreamConfig config = computationResult.config();
         Graph graph = computationResult.graph();
         IntersectingTriangleCount algorithm = computationResult.algorithm();
 
-        TriangleCountResultBuilder builder = new TriangleCountResultBuilder(
-            callContext,
-            computationResult.tracker()
-        )
+        TriangleCountResultBuilder builder = new TriangleCountResultBuilder(callContext, computationResult.tracker())
             .buildCommunityCount(true)
             .buildHistogram(true);
 
@@ -82,13 +79,13 @@ public class TriangleCountStatsProc extends TriangleBaseProc<TriangleCountStatsC
     }
 
     @Override
-    protected TriangleCountStatsConfig newConfig(
+    protected TriangleCountStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return TriangleCountStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     public static class Result {

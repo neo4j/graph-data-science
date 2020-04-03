@@ -23,23 +23,23 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountStatsConfig;
+import org.neo4j.graphalgo.impl.triangle.TriangleCountStreamConfig;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class TriangleCountStatsProcTest extends TriangleBaseProcTest<TriangleCountStatsConfig> {
+class TriangleCountStatsProcTest extends TriangleBaseProcTest<TriangleCountStreamConfig> {
 
     @Override
-    TriangleBaseProc<TriangleCountStatsConfig> newInstance() {
+    TriangleBaseProc<TriangleCountStreamConfig> newInstance() {
         return new TriangleCountStatsProc();
     }
 
     @Override
-    TriangleCountStatsConfig newConfig() {
-        return TriangleCountStatsConfig.of(
+    TriangleCountStreamConfig newConfig() {
+        return TriangleCountStreamConfig.of(
             getUsername(),
             Optional.empty(),
             Optional.empty(),
