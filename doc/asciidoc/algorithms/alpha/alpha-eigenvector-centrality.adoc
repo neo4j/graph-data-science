@@ -1,4 +1,5 @@
 [[algorithms-eigenvector]]
+[.alpha]
 = Eigenvector Centrality
 
 [abstract]

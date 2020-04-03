@@ -1,4 +1,5 @@
 [[alpha-algorithms-linkprediction-adamic-adar]]
+[.alpha]
 = Adamic Adar
 
 [abstract]

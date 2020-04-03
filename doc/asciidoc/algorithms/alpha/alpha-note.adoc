@@ -1,6 +1,4 @@
 // tag::alpha-note[]
-[NOTE]
---
-*This algorithm is in the alpha tier and could be changed or removed in a future release.*
---
+[.tier-note]
+This algorithm is in the alpha tier. For more information on this tier of algorithm, see <<algorithms, here>>.
 // end::alpha-note[]

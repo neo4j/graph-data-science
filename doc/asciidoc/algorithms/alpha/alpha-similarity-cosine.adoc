@@ -1,5 +1,6 @@
 :procedure-name: Cosine Similarity
 [[alpha-algorithms-similarity-cosine]]
+[.alpha]
 = Cosine Similarity
 
 [abstract]

@@ -1,6 +1,7 @@
 :procedure-name: Euclidean Distance
 
 [[alpha-algorithms-similarity-euclidean]]
+[.alpha]
 = Euclidean Distance
 
 [abstract]
