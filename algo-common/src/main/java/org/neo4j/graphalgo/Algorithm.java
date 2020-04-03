@@ -39,6 +39,7 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
     public abstract void release();
 
     @Deprecated
+    // This is kept for alpha algorithms using the ProgressLoggerAdapter
     public ME withProgressLogger(ProgressLogger progressLogger) {
         this.progressLogger = progressLogger;
         return me();

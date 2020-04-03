@@ -54,7 +54,7 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends Algorith
     ) {
         ProgressLogger progressLogger = new BatchingProgressLogger(
             log,
-            (configuration.maxIterations() * 2) + 1,
+            graph.relationshipCount(),
             getClass().getSimpleName()
         );
 

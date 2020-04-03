@@ -116,25 +116,6 @@ class ModularityOptimizationTest extends AlgoTestBase {
     }
 
     @Test
-    void foo() {
-        Graph graph = RandomGraphGenerator.generate(10000, 10, RelationshipDistribution.POWER_LAW);
-
-        ModularityOptimization pmo = new ModularityOptimization(
-            graph,
-            3,
-            TOLERANCE_DEFAULT,
-            null,
-            1,
-            10_000,
-            Pools.DEFAULT,
-            progressLogger,
-            AllocationTracker.EMPTY
-        );
-
-        pmo.compute();
-    }
-
-    @Test
     void testWeighted() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)

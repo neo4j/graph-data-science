@@ -101,6 +101,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     public Stream<SimilarityResult> computeToStream() {
+        // Create a filter for which nodes to compare and calculate the neighborhood for each node
         prepare();
         assertRunning();
 

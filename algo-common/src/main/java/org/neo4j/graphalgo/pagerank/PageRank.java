@@ -437,8 +437,8 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         private void run(int iterations) {
             didConverge = false;
             ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
-            for (int i = 0; i < iterations && !didConverge; i++) {
-                getProgressLogger().logMessage(String.format(":: Iteration %d :: Start", i + 1));
+            for (ranIterations = 0; ranIterations < iterations && !didConverge; ranIterations++) {
+                getProgressLogger().logMessage(String.format(":: Iteration %d :: Start", ranIterations + 1));
                 // calculate scores
                 ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
 
@@ -451,13 +451,13 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
                 normalizeDeltas();
                 ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
 
-                ranIterations++;
-                if ((i < iterations - 1) && !didConverge) {
+                if ((ranIterations < iterations - 1) && !didConverge) {
                     getProgressLogger().reset(graph.relationshipCount());
                 }
 
-                getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", i + 1));
+                getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", ranIterations + 1));
             }
+            ranIterations++;
         }
 
         private boolean checkTolerance() {
