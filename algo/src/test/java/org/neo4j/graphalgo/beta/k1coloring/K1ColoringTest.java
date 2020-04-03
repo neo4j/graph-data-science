@@ -43,15 +43,9 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
-import org.neo4j.graphalgo.pagerank.ImmutablePageRankStreamConfig;
-import org.neo4j.graphalgo.pagerank.PageRank;
-import org.neo4j.graphalgo.pagerank.PageRankAlgorithmType;
 
 import java.util.Arrays;
 import java.util.HashSet;
