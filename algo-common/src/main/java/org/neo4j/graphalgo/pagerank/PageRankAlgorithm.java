@@ -38,7 +38,7 @@ public interface PageRankAlgorithm extends Assessable {
     /**
      * Forces sequential use. If you want parallelism, prefer
      *
-     * {@link #create(Graph, LongStream, PageRankBaseConfig, int, ExecutorService, int, Log, ProgressLogger, AllocationTracker)} }
+     * {@link #create(Graph, LongStream, PageRankBaseConfig, int, ExecutorService, int, ProgressLogger, AllocationTracker)} }
      */
     default PageRank create(
         Graph graph,
