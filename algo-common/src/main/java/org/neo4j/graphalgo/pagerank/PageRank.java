@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -113,7 +112,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     private final IdMapping idMapping;
     private final double dampingFactor;
     private final int maxIterations;
-    private final Log log;
     private int ranIterations;
     private boolean didConverge;
     private final double toleranceValue;
@@ -138,7 +136,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         int concurrency,
         ExecutorService executor,
         int batchSize,
-        Log log,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
@@ -146,7 +143,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         this.executor = executor;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
-        this.log = log;
         this.tracker = tracker;
         this.idMapping = graph;
         this.graph = graph;
@@ -233,7 +229,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
             long[] sourceNodeIds,
             List<Partition> partitions,
             ExecutorService pool) {
-        concurrency = findIdealConcurrency(nodeCount, partitions, concurrency, log);
+        concurrency = findIdealConcurrency(nodeCount, partitions, concurrency, progressLogger.getLog());
         final int expectedParallelism = Math.min(
                 concurrency,
                 partitions.size());

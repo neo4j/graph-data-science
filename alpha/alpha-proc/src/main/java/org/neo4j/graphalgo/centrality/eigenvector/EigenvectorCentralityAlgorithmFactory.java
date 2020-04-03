@@ -53,7 +53,6 @@ class EigenvectorCentralityAlgorithmFactory extends AlphaAlgorithmFactory<PageRa
                 configuration,
                 configuration.concurrency(),
                 Pools.DEFAULT,
-                log,
                 new BatchingProgressLogger(log, 0, "PageRank"),
                 tracker
             );

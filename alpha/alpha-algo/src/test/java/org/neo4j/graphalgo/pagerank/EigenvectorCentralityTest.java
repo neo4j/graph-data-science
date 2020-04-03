@@ -150,7 +150,6 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
                 graph,
                 DEFAULT_EIGENVECTOR_CONFIG,
                 LongStream.empty(),
-                NullLog.getInstance(),
                 new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank")
             )
             .compute()

@@ -64,7 +64,6 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends Algorith
             configuration,
             configuration.concurrency(),
             Pools.DEFAULT,
-            log,
             progressLogger,
             tracker
         );

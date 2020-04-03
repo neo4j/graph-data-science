@@ -44,10 +44,9 @@ public interface PageRankAlgorithm extends Assessable {
         Graph graph,
         PageRankBaseConfig algoConfig,
         LongStream sourceNodeIds,
-        Log log,
         ProgressLogger progressLogger
     ) {
-        return create(graph, sourceNodeIds, algoConfig, -1, null, ParallelUtil.DEFAULT_BATCH_SIZE, log, progressLogger, AllocationTracker.EMPTY);
+        return create(graph, sourceNodeIds, algoConfig, -1, null, ParallelUtil.DEFAULT_BATCH_SIZE, progressLogger, AllocationTracker.EMPTY);
     }
 
     default PageRank create(
@@ -56,7 +55,6 @@ public interface PageRankAlgorithm extends Assessable {
         PageRankBaseConfig algoConfig,
         int concurrency,
         ExecutorService executor,
-        Log log,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
@@ -67,7 +65,6 @@ public interface PageRankAlgorithm extends Assessable {
             concurrency,
             executor,
             ParallelUtil.DEFAULT_BATCH_SIZE,
-            log,
             progressLogger,
             tracker
         );
@@ -80,7 +77,6 @@ public interface PageRankAlgorithm extends Assessable {
         int concurrency,
         ExecutorService executor,
         int batchSize,
-        Log log,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
@@ -92,7 +88,6 @@ public interface PageRankAlgorithm extends Assessable {
             concurrency,
             executor,
             batchSize,
-            log,
             progressLogger,
             tracker
         );

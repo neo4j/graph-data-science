@@ -34,16 +34,12 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.labelpropagation.LabelPropagation;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
-import org.neo4j.logging.NullLog;
 
 import java.util.HashMap;
 import java.util.List;
@@ -164,7 +160,7 @@ final class PageRankTest extends AlgoTestBase {
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
-            .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
+            .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
             .compute()
             .result();
 
@@ -213,7 +209,7 @@ final class PageRankTest extends AlgoTestBase {
                     .graph(factoryType)
             );
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
                 .compute()
                 .result();
         } else {
@@ -226,7 +222,7 @@ final class PageRankTest extends AlgoTestBase {
                 .graph(factoryType);
 
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), NullLog.getInstance(), progressLogger)
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
                 .compute()
                 .result();
         }
@@ -268,7 +264,7 @@ final class PageRankTest extends AlgoTestBase {
         }
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
-        PageRank algorithm = PageRankAlgorithmType.NON_WEIGHTED
+        PageRankAlgorithmType.NON_WEIGHTED
             .create(
                 graph,
                 LongStream.range(0L, graph.nodeCount()),
@@ -276,7 +272,6 @@ final class PageRankTest extends AlgoTestBase {
                 1,
                 null,
                 1,
-                NullLog.getInstance(),
                 progressLogger,
                 AllocationTracker.EMPTY
             )
@@ -320,7 +315,6 @@ final class PageRankTest extends AlgoTestBase {
             graph,
             ImmutablePageRankStreamConfig.builder().build(),
             LongStream.empty(),
-            testLogger.getLog(),
             testLogger
         );
 
