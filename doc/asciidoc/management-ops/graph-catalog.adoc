@@ -150,12 +150,11 @@ CALL gds.graph.drop('my-store-graph') YIELD graphName;
 
 
 [[catalog-graph-export]]
+[.alpha]
 == Create Neo4j databases from named graphs
 
-[NOTE]
---
+[.tier-note]
 *This procedure is in the alpha tier and could be changed or removed in a future release.*
---
 
 We can create new Neo4j databases from named in-memory graphs stored in the graph catalog.
 All nodes, relationships and properties present in an in-memory graph are written to a new Neo4j database.
