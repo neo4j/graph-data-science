@@ -1,4 +1,5 @@
 [[graph-generation]]
+[.beta]
 = Graph Generation
 
 [abstract]
