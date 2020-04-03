@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
 import org.neo4j.graphalgo.core.huge.ImmutableTopologyCSR;
-import org.neo4j.graphalgo.core.huge.ImmutableTopologyCSR;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
@@ -72,7 +71,6 @@ public abstract class GraphStoreFactory implements Assessable {
         this.api = api;
         this.setup = setup;
         this.log = setup.log();
-        this.progressLogger = progressLogger(log, setup.logMillis());
         this.graphCreateConfig = graphCreateConfig;
         this.dimensions = new GraphDimensionsReader(api, setup, graphCreateConfig, readTokens).call();
         this.progressLogger = initProgressLogger();
