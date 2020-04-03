@@ -457,7 +457,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
 
                 getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", ranIterations + 1));
             }
-            ranIterations++;
         }
 
         private boolean checkTolerance() {

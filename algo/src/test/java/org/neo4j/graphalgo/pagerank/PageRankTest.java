@@ -322,7 +322,7 @@ final class PageRankTest extends AlgoTestBase {
 
         List<AtomicLong> progresses = testLogger.getProgresses();
 
-        assertEquals(pageRank.iterations(), progresses.size());
+        assertEquals(progresses.size(), pageRank.iterations());
         progresses.forEach(progress -> assertEquals(graph.relationshipCount(), progress.get()));
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
@@ -344,15 +344,15 @@ final class PageRankTest extends AlgoTestBase {
             .memoryUsage();
 
         Map<Integer, Long> minByConcurrency = genericMap(
-            1, 2000424L,
-            4, 3201312L,
-            42, 18451296L
+            1, 2000416L,
+            4, 3201304L,
+            42, 18451288L
         );
 
         Map<Integer, Long> maxByConcurrency = genericMap(
-            1, 2000424L,
-            4, 3201312L,
-            42, 18451296L
+            1, 2000416L,
+            4, 3201304L,
+            42, 18451288L
         );
 
         assertEquals(minByConcurrency.get(concurrency), actual.min);
