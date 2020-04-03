@@ -42,7 +42,7 @@ public final class GraphDimensionsValidation {
     public static void validate(GraphDimensions dimensions, GraphSetup setup) {
         checkValidNodePredicate(dimensions, setup);
         checkValidRelationshipTypePredicate(dimensions, setup);
-        checkValidProperties("Node", dimensions.nodePropertyIds());
+        checkValidPropertyTokens("Node", dimensions.nodePropertyTokens());
         checkValidProperties("Relationship", dimensions.relationshipProperties());
     }
 
@@ -71,7 +71,7 @@ public final class GraphDimensionsValidation {
         }
     }
 
-    private static void checkValidProperties(String recordType, Map<String, Integer> propertyIds) {
+    private static void checkValidPropertyTokens(String recordType, Map<String, Integer> propertyIds) {
         String missingProperties = propertyIds
             .entrySet()
             .stream()

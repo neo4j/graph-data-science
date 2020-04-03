@@ -71,7 +71,7 @@ public class NodeImporter {
     long importCypherNodes(NodesBatchBuffer buffer, List<Map<String, Number>> cypherNodeProperties, CypherNodePropertyImporter propertyImporter) {
         return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
             if (propertyImporter != null) {
-                return propertyImporter.importProperties(internalId, labelIds, (int) propertiesReference, cypherNodeProperties);
+                return propertyImporter.importProperties(internalId, labelIds, cypherNodeProperties.get((int) propertiesReference));
             } else {
                 return 0;
             }

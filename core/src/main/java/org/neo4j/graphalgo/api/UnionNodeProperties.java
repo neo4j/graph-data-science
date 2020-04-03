@@ -36,16 +36,21 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public double nodeProperty(long nodeId) {
-        ElementIdentifier label = elementIdentifierToBitSetMap
-            .entrySet()
-            .stream()
-            .filter(entry -> entry.getValue().get(nodeId))
-            .findFirst()
-            .map(Map.Entry::getKey)
-            .orElseThrow(() -> new IllegalArgumentException(String.format("Could not find label for node(%d)", nodeId)));
+        ElementIdentifier firstLabel = null;
 
-        if (labelNodePropertyMapping.containsKey(label)) {
-            return labelNodePropertyMapping.get(label).nodeProperty(nodeId);
+        for (ElementIdentifier label : elementIdentifierToBitSetMap.keySet()) {
+            if (elementIdentifierToBitSetMap.get(label).get(nodeId)) {
+                firstLabel = label;
+                break;
+            }
+        }
+
+        if (firstLabel == null) {
+            throw new IllegalArgumentException(String.format("Could not find label for node(%d)", nodeId));
+        }
+
+        if (labelNodePropertyMapping.containsKey(firstLabel)) {
+            return labelNodePropertyMapping.get(firstLabel).nodeProperty(nodeId);
         } else {
             return Double.NaN;
         }

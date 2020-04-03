@@ -75,7 +75,7 @@ public final class NativeFactory extends GraphStoreFactory {
 
         // nodes
         dimensions
-            .nodePropertyIds()
+            .nodePropertyTokens()
             .keySet()
             .forEach(property -> builder.add(property, NodePropertyMap.memoryEstimation()));
 

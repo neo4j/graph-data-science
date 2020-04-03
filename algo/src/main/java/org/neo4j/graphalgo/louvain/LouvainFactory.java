@@ -70,7 +70,7 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
                     .findFirst()
                     .map(prop -> dimensionsBuilder.relationshipProperties(ResolvedPropertyMappings.of(Collections.singletonList(prop))));
 
-                dimensionsBuilder.nodePropertyIds(graphDimensions.nodePropertyIds());
+                dimensionsBuilder.nodePropertyTokens(graphDimensions.nodePropertyTokens());
 
                 GraphDimensions sparseDimensions = dimensionsBuilder.build();
 
