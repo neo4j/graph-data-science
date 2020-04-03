@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,9 @@ import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.IGNORE_LABEL;
 
 public class CypherNodePropertyImporter {
 
-    private final List<String> propertyColumns;
+    public static final double NO_PROPERTY_VALUE = Double.NaN;
+
+    private final Collection<String> propertyColumns;
     private final long nodeCount;
     private final int concurrency;
     private final LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping;
@@ -45,10 +48,10 @@ public class CypherNodePropertyImporter {
 
 
     public CypherNodePropertyImporter(
-            List<String> propertyColumns,
-            LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping,
-            long nodeCount,
-            int concurrency
+        Collection<String> propertyColumns,
+        LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping,
+        long nodeCount,
+        int concurrency
     ) {
         this.propertyColumns = propertyColumns;
         this.labelElementIdentifierMapping = labelElementIdentifierMapping;
@@ -58,7 +61,7 @@ public class CypherNodePropertyImporter {
         this.buildersByIdentifier = new HashMap<>();
     }
 
-    public List<String> propertyColumns() {
+    public Collection<String> propertyColumns() {
         return propertyColumns;
     }
 
@@ -72,7 +75,7 @@ public class CypherNodePropertyImporter {
                         (ignore) -> NodePropertiesBuilder.of(
                                 nodeCount,
                                 AllocationTracker.EMPTY,
-                                Double.NaN,
+                            NO_PROPERTY_VALUE,
                                 CYPHER_RESULT_PROPERTY_KEY,
                                 property,
                                 concurrency
@@ -82,10 +85,8 @@ public class CypherNodePropertyImporter {
         }
     }
 
-    public int importProperties(long nodeId, long[] labels, int propertiesReference, List<Map<String, Number>> cypherNodeProperties) {
+    public int importProperties(long nodeId, long[] labels, Map<String, Number> nodeProperties) {
         int propertiesImported = 0;
-
-        Map<String, Number> nodeProperties = cypherNodeProperties.get(propertiesReference);
 
         // If there is a node projection for ANY label, then we need to consume the node properties regardless.
         propertiesImported += setPropertyForLabel(PROJECT_ALL, nodeProperties, nodeId);

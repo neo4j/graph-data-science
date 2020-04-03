@@ -46,11 +46,14 @@ import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.graphalgo.core.loading.CypherNodePropertyImporter.NO_PROPERTY_VALUE;
 
 @ValueClass
 @Configuration("GraphCreateFromCypherConfigImpl")
 @SuppressWarnings("immutables:subtype")
 public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
+
+    List<String> FORBIDDEN_KEYS = Arrays.asList(NODE_PROJECTION_KEY, RELATIONSHIP_PROJECTION_KEY, NODE_PROPERTIES_KEY);
 
     String NODE_QUERY_KEY = "nodeQuery";
     String RELATIONSHIP_QUERY_KEY = "relationshipQuery";
@@ -61,6 +64,25 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     @Configuration.Ignore
     default Class<? extends GraphStoreFactory> getGraphImpl() {
         return CypherFactory.class;
+    }
+
+
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    String nodeQuery();
+
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    String relationshipQuery();
+
+    @Value.Default
+    default Map<String, Object> parameters() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    @Value.Default
+    @Value.Parameter(false)
+    default boolean validateRelationships() {
+        return true;
     }
 
     @Override
@@ -81,31 +103,13 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     @Value.Default
     default PropertyMappings nodeProperties() { return PropertyMappings.of(); }
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
-    String nodeQuery();
-
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
-    String relationshipQuery();
-
-    @Value.Default
-    default Map<String, Object> parameters() {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    @Value.Default
-    @Value.Parameter(false)
-    default boolean validateRelationships() {
-        return true;
-    }
-
     @Configuration.Ignore
     default GraphCreateFromCypherConfig inferProjections(GraphDimensions dimensions) {
         List<PropertyMapping> nodeProperties = dimensions
-            .nodePropertyIds()
+            .nodePropertyTokens()
             .keySet()
             .stream()
-            .map(property -> PropertyMapping.of(property, Double.NaN))
+            .map(property -> PropertyMapping.of(property, NO_PROPERTY_VALUE))
             .collect(Collectors.toList());
 
         NodeProjections nodeProjections = NodeProjections.builder()
@@ -184,7 +188,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     }
 
     static void assertNoProjections(CypherMapWrapper config) {
-        for (String forbiddenKey : Arrays.asList(NODE_PROJECTION_KEY, RELATIONSHIP_PROJECTION_KEY, NODE_PROPERTIES_KEY)) {
+        for (String forbiddenKey : FORBIDDEN_KEYS) {
             if (config.containsKey(forbiddenKey)) {
                 throw new IllegalArgumentException(String.format("Invalid key: %s", forbiddenKey));
             }

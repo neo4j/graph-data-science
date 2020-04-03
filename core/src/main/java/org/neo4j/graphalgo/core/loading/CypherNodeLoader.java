@@ -35,6 +35,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,14 +47,14 @@ import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERT
 @Value.Enclosing
 class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
-    protected static final int CYPHER_RESULT_PROPERTY_KEY = -2;
+    static final int CYPHER_RESULT_PROPERTY_KEY = -2;
 
     private final long nodeCount;
     private final GraphDimensions outerDimensions;
     private final LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping;
 
-    private HugeLongArrayBuilder builder;
-    private NodeImporter importer;
+    private final HugeLongArrayBuilder builder;
+    private final NodeImporter importer;
     private long maxNodeId;
     private CypherNodePropertyImporter nodePropertyImporter;
 
@@ -78,7 +79,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     BatchLoadResult loadSingleBatch(Transaction tx, int bufferSize) {
         Result queryResult = runLoadingQuery(tx);
 
-        List<String> propertyColumns = getPropertyColumns(queryResult);
+        Collection<String> propertyColumns = getPropertyColumns(queryResult);
 
         nodePropertyImporter = new CypherNodePropertyImporter(
                 propertyColumns,
@@ -92,7 +93,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         NodesBatchBuffer buffer = new NodesBatchBufferBuilder()
             .capacity(bufferSize)
             .hasLabelInformation(hasLabelInformation)
-            .readProperty(propertyColumns.size() > 0)
+            .readProperty(!propertyColumns.isEmpty())
             .build();
 
         NodeRowVisitor visitor = new NodeRowVisitor(
@@ -133,7 +134,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
         GraphDimensions resultDimensions = ImmutableGraphDimensions.builder()
             .from(outerDimensions)
-            .nodePropertyIds(propertyIds)
+            .nodePropertyTokens(propertyIds)
             .build();
 
         return ImmutableCypherNodeLoader.LoadResult.builder()

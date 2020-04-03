@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
-import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABEL_IDENTIFIER;
+import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABEL_IDENTIFIERS;
 
 public final class GraphStore {
 
@@ -166,16 +166,16 @@ public final class GraphStore {
     }
 
     public NodeProperties nodeProperty(String propertyKey) {
-        if (this.nodes.maybeLabelInformation.isPresent()) {
+        if (nodes.maybeLabelInformation.isPresent()) {
             Map<ElementIdentifier, NodeProperties> properties = new HashMap<>();
             this.nodeProperties.forEach((labelIdentifier, propertyMap) -> {
                 if (propertyMap.containsKey(propertyKey)) {
                     properties.put(labelIdentifier, propertyMap.get(propertyKey));
                 }
             });
-            return new UnionNodeProperties(properties, this.nodes.maybeLabelInformation.get());
+            return new UnionNodeProperties(properties, nodes.maybeLabelInformation.get());
         }
-        return this.nodeProperties.get(PROJECT_ALL).get(propertyKey);
+        return nodeProperties.get(PROJECT_ALL).get(propertyKey);
     }
 
     public NodeProperties nodeProperty(ElementIdentifier label, String propertyKey) {
@@ -240,16 +240,16 @@ public final class GraphStore {
     }
 
     public Graph getGraph(String... relationshipTypes) {
-        return getGraph(ALL_NODE_LABEL_IDENTIFIER, Arrays.asList(relationshipTypes), Optional.empty(), 1);
+        return getGraph(ALL_NODE_LABEL_IDENTIFIERS, Arrays.asList(relationshipTypes), Optional.empty(), 1);
     }
 
     public Graph getGraph(String relationshipType, Optional<String> relationshipProperty) {
-        return getGraph(ALL_NODE_LABEL_IDENTIFIER, singletonList(relationshipType), relationshipProperty, 1);
+        return getGraph(ALL_NODE_LABEL_IDENTIFIERS, singletonList(relationshipType), relationshipProperty, 1);
     }
 
     public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         validateInput(relationshipTypes, maybeRelationshipProperty);
-        return createGraph(ALL_NODE_LABEL_IDENTIFIER, relationshipTypes, maybeRelationshipProperty, 1);
+        return createGraph(ALL_NODE_LABEL_IDENTIFIERS, relationshipTypes, maybeRelationshipProperty, 1);
     }
 
     public Graph getGraph(
@@ -272,9 +272,9 @@ public final class GraphStore {
                         .get(relationshipType)
                         .keySet()
                         .stream()
-                        .map(propertyKey -> createGraph(ALL_NODE_LABEL_IDENTIFIER, relationshipType, Optional.of(propertyKey)));
+                        .map(propertyKey -> createGraph(ALL_NODE_LABEL_IDENTIFIERS, relationshipType, Optional.of(propertyKey)));
                 } else {
-                    return Stream.of(createGraph(ALL_NODE_LABEL_IDENTIFIER, relationshipType, Optional.empty()));
+                    return Stream.of(createGraph(ALL_NODE_LABEL_IDENTIFIERS, relationshipType, Optional.empty()));
                 }
             })
             .collect(Collectors.toList()));

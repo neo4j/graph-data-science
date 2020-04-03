@@ -101,7 +101,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         }
 
         RelationshipProjectionMappings relationshipProjectionMappings = mappingsBuilder.build();
-        Map<String, Integer> nodePropertyIds = loadNodePropertyMapping(tokenRead);
+        Map<String, Integer> nodePropertyTokens = loadNodePropertyTokens(tokenRead);
         ResolvedPropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings());
 
         long nodeCount = labelElementIdentifierMappings.keyStream()
@@ -133,13 +133,13 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .relationshipCounts(relationshipCounts)
                 .nodeLabelIds(labelElementIdentifierMappings.keys())
                 .labelElementIdentifierMapping(labelElementIdentifierMappings.mappings())
-                .nodePropertyIds(nodePropertyIds)
+                .nodePropertyTokens(nodePropertyTokens)
                 .relationshipProjectionMappings(relationshipProjectionMappings)
                 .relationshipProperties(relProperties)
                 .build();
     }
 
-    private Map<String, Integer> loadNodePropertyMapping(TokenRead tokenRead) {
+    private Map<String, Integer> loadNodePropertyTokens(TokenRead tokenRead) {
         return graphCreateConfig.nodeProjections()
             .projections()
             .entrySet()
@@ -148,7 +148,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             .collect(Collectors.toMap(
                 PropertyMapping::neoPropertyKey,
                 propertyMapping -> propertyMapping.neoPropertyKey() != null ? tokenRead.propertyKey(propertyMapping.neoPropertyKey()) : TokenRead.NO_TOKEN,
-                (a, b) -> a
+                (sameKey1, sameKey2) -> sameKey1
             ));
     }
 

@@ -96,7 +96,7 @@ abstract class CypherRecordLoader<R> {
 
     abstract Set<String> getReservedColumns();
 
-    List<String> getPropertyColumns(Result queryResult) {
+    Collection<String> getPropertyColumns(Result queryResult) {
         Predicate<String> contains = getReservedColumns()::contains;
         return queryResult
             .columns()

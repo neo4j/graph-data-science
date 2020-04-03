@@ -194,7 +194,7 @@ public final class NativeNodePropertyImporter {
                         nodeCount,
                         tracker,
                         propertyMapping.defaultValue(),
-                        dimensions.nodePropertyIds().get(propertyMapping.neoPropertyKey()),
+                        dimensions.nodePropertyTokens().get(propertyMapping.neoPropertyKey()),
                         propertyMapping.propertyKey(),
                         concurrency
                     );
@@ -215,7 +215,7 @@ public final class NativeNodePropertyImporter {
                     buildersByLabelIdAndPropertyId.computeIfAbsent(labelId, (ignore) -> new HashMap<>());
 
                 builders.forEach((propertyMapping, builder) -> {
-                    int propertyId = dimensions.nodePropertyIds().get(propertyMapping.neoPropertyKey());
+                    int propertyId = dimensions.nodePropertyTokens().get(propertyMapping.neoPropertyKey());
 
                     List<NodePropertiesBuilder> builderList = buildersByPropertyId.computeIfAbsent(
                         propertyId,
