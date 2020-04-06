@@ -33,11 +33,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
 public class GraphRemoveNodePropertiesProc extends CatalogProc {
 
-    @Procedure(name = "gds.graph.removeNodeProperties", mode = WRITE)
+    @Procedure(name = "gds.graph.removeNodeProperties", mode = READ)
     @Description("Removes node properties from an in-memory graph.")
     public Stream<Result> run(
         @Name(value = "graphName") String graphName,
