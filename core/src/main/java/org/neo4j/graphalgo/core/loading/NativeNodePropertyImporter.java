@@ -46,7 +46,7 @@ public final class NativeNodePropertyImporter {
 
     private final Map<ElementIdentifier, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier;
     private final Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken;
-    private final Map<Integer, List<NodePropertiesBuilder>> anyLabelImporters;
+    private final boolean containsAnyLabelProjection;
 
     public static Builder builder() {
         return new Builder();
@@ -54,11 +54,12 @@ public final class NativeNodePropertyImporter {
 
     private NativeNodePropertyImporter(
         Map<ElementIdentifier, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier,
-        Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken
+        Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken,
+        boolean containsAnyLabelProjection
     ) {
         this.buildersByIdentifier = buildersByIdentifier;
         this.buildersByLabelIdAndPropertyToken = buildersByLabelIdAndPropertyToken;
-        this.anyLabelImporters = buildersByLabelIdAndPropertyToken.get((long) ANY_LABEL);
+        this.containsAnyLabelProjection = containsAnyLabelProjection;
     }
 
     int importProperties(
@@ -111,8 +112,8 @@ public final class NativeNodePropertyImporter {
             }
         }
 
-        if (anyLabelImporters != null) {
-            propertiesImported += setPropertyValue(nodeId, propertyCursor, propertyKey, anyLabelImporters);
+        if (containsAnyLabelProjection) {
+            propertiesImported += setPropertyValue(nodeId, propertyCursor, propertyKey, buildersByLabelIdAndPropertyToken.get((long) ANY_LABEL));
         }
 
         return propertiesImported;
@@ -188,7 +189,8 @@ public final class NativeNodePropertyImporter {
                 nodePropertyBuilders);
             return new NativeNodePropertyImporter(
                 nodePropertyBuilders,
-                buildersByLabelIdAndPropertyId
+                buildersByLabelIdAndPropertyId,
+                buildersByLabelIdAndPropertyId.containsKey((long) ANY_LABEL)
             );
         }
 
