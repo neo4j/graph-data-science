@@ -50,10 +50,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABEL_IDENTIFIERS;
 
 public final class GraphStore {
@@ -121,7 +123,7 @@ public final class GraphStore {
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties = new HashMap<>();
         nodeProperties.put(
             ALL_NODES,
-            graph.availableNodeProperties().stream().collect(Collectors.toMap(
+            graph.availableNodeProperties().stream().collect(toMap(
                 Function.identity(),
                 graph::nodeProperties
             ))
@@ -339,11 +341,24 @@ public final class GraphStore {
         });
     }
 
-    public void deleteRelationshipType(String relationshipType) {
+    public DeletionResult deleteRelationshipType(String relationshipType) {
+        ImmutableDeletionResult.Builder builder = ImmutableDeletionResult.builder();
         updateGraphStore(graphStore -> {
+            builder.deletedRelationships(graphStore.relationships.get(relationshipType).elementCount());
+            builder.deletedProperties(graphStore.relationshipProperties
+                .getOrDefault(relationshipType, RelationshipPropertyStore.empty())
+                .relationshipProperties()
+                .entrySet()
+                .stream()
+                .collect(toMap(
+                    entry -> entry.getValue().propertyKey(),
+                    entry -> entry.getValue().propertyValues().elementCount()
+                ))
+            );
             graphStore.relationships.remove(relationshipType);
             graphStore.relationshipProperties.remove(relationshipType);
         });
+        return builder.build();
     }
 
     public Graph getGraph(String... relationshipTypes) {
