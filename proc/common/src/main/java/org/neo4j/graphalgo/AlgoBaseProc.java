@@ -54,7 +54,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
@@ -68,6 +67,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -95,7 +95,14 @@ public abstract class AlgoBaseProc<
             GraphCreateConfig createConfig = GraphCreateConfig.createImplicit(getUsername(), config);
             maybeImplicitCreate = Optional.of(createConfig);
             allowedKeys.addAll(createConfig.configKeys());
-            config = config.withoutAny(allowedKeys);
+            CypherMapWrapper configWithoutCreateKeys = config.withoutAny(allowedKeys);
+            // check if we have an explicit configured sudo key, as this one is
+            // shared between create and algo configs
+            Boolean sudoValue = config.getChecked(SUDO_KEY, null, Boolean.class);
+            if (sudoValue != null) {
+                configWithoutCreateKeys = configWithoutCreateKeys.withBoolean(SUDO_KEY, sudoValue);
+            }
+            config = configWithoutCreateKeys;
         }
         CONFIG algoConfig = newConfig(getUsername(), graphName, maybeImplicitCreate, config);
         allowedKeys.addAll(algoConfig.configKeys());
@@ -438,17 +445,9 @@ public abstract class AlgoBaseProc<
         }
     }
 
-    protected void validateMemoryUsageIfImplemented(CONFIG config) {
-        MemoryTreeWithDimensions memoryTreeWithDimensions = null;
-        try {
-            memoryTreeWithDimensions = memoryEstimation(config);
-        } catch (MemoryEstimationNotImplementedException ignored) {
-        }
-        if (memoryTreeWithDimensions != null) {
-            validateMemoryUsage(memoryTreeWithDimensions);
-        }
+    private void validateMemoryUsageIfImplemented(CONFIG config) {
+        tryValidateMemoryUsage(config, this::memoryEstimation);
     }
-
 
     protected Stream<MemoryEstimateResult> computeEstimate(
         Object graphNameOrConfig,

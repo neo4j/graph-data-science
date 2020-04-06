@@ -32,11 +32,20 @@ import java.util.Map;
 @SuppressWarnings("immutables:subtype")
 public interface BaseConfig extends ConcurrencyValidation {
 
+    String SUDO_KEY = "sudo";
+
     @Configuration.Parameter
     @Value.Default
     default String username() {
         return AuthSubject.ANONYMOUS.username();
     };
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.Key(SUDO_KEY)
+    default boolean sudo() {
+        return false;
+    }
 
     @Configuration.Ignore
     default Class<? extends GraphStoreFactory> getGraphImpl() {
