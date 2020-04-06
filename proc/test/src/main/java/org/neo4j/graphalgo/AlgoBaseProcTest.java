@@ -200,7 +200,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             : GraphCreateFromCypherConfig.emptyWithName("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphStore graphStore = graphLoader(graphCreateConfig).build(graphStoreFactory).build().graphStore();
+            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore(graphStoreFactory);
             GraphStoreCatalog.set(
                 graphCreateConfig,
                 graphStore

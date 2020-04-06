@@ -99,7 +99,7 @@ public final class TestGraphLoader {
 
     public <T extends GraphStoreFactory> Graph graph(Class<T> graphStoreFactory) {
         try (Transaction ignored = db.beginTx()) {
-            GraphStore graphStore = loader(graphStoreFactory).build(graphStoreFactory).build().graphStore();
+            GraphStore graphStore = loader(graphStoreFactory).graphStore(graphStoreFactory);
             return graphStore.getUnion();
         }
     }
@@ -198,15 +198,15 @@ public final class TestGraphLoader {
     private String getNodePropertiesString(PropertyMappings propertyMappings, String entityVar) {
         return propertyMappings.hasMappings()
             ? propertyMappings
-            .stream()
-            .map(mapping -> String.format(
-                "COALESCE(%s.%s, %f) AS %s",
-                entityVar,
-                mapping.neoPropertyKey(),
-                mapping.defaultValue(),
-                mapping.propertyKey()
-            ))
-            .collect(Collectors.joining(", ", ", ", ""))
+                .stream()
+                .map(mapping -> String.format(
+                    "COALESCE(%s.%s, %f) AS %s",
+                    entityVar,
+                    mapping.neoPropertyKey(),
+                    mapping.defaultValue(),
+                    mapping.propertyKey()
+                ))
+                .collect(Collectors.joining(", ", ", ", ""))
             : "";
     }
 

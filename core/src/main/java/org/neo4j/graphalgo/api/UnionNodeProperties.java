@@ -26,11 +26,11 @@ import java.util.Map;
 
 public class UnionNodeProperties implements NodeProperties {
 
-    private final Map<ElementIdentifier, NodeProperties> labelNodePropertyMapping;
+    private final Map<ElementIdentifier, NodeProperties> labelToNodePropertiesMap;
     private final Map<ElementIdentifier, BitSet> elementIdentifierToBitSetMap;
 
-    public UnionNodeProperties(Map<ElementIdentifier, NodeProperties> labelNodePropertyMapping, Map<ElementIdentifier, BitSet> elementIdentifierToBitSetMap) {
-        this.labelNodePropertyMapping = labelNodePropertyMapping;
+    public UnionNodeProperties(Map<ElementIdentifier, NodeProperties> labelToNodePropertiesMap, Map<ElementIdentifier, BitSet> elementIdentifierToBitSetMap) {
+        this.labelToNodePropertiesMap = labelToNodePropertiesMap;
         this.elementIdentifierToBitSetMap = elementIdentifierToBitSetMap;
     }
 
@@ -49,8 +49,8 @@ public class UnionNodeProperties implements NodeProperties {
             throw new IllegalArgumentException(String.format("Could not find label for node(%d)", nodeId));
         }
 
-        if (labelNodePropertyMapping.containsKey(firstLabel)) {
-            return labelNodePropertyMapping.get(firstLabel).nodeProperty(nodeId);
+        if (labelToNodePropertiesMap.containsKey(firstLabel)) {
+            return labelToNodePropertiesMap.get(firstLabel).nodeProperty(nodeId);
         } else {
             return Double.NaN;
         }

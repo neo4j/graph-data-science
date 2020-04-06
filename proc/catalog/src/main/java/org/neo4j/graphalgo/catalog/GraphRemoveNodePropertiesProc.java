@@ -62,11 +62,20 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         long propertiesRemoved = runWithExceptionLogging(
             "Node property removal failed",
             () -> {
-                long sum = config.nodeProperties().stream()
+                long sum = config.nodeProperties()
+                    .stream()
                     .map(graphStore::nodeProperty)
                     .mapToLong(NodeProperties::size)
                     .sum();
-                config.nodeProperties().forEach(graphStore::removeNodeProperty);
+
+                config
+                    .nodeProperties()
+                    .forEach(property ->
+                        graphStore
+                            .nodeLabels()
+                            .forEach(label -> graphStore.removeNodeProperty(label, property))
+                    );
+
                 return sum;
             }
         );

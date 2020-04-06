@@ -154,7 +154,7 @@ public final class NativeFactory extends GraphStoreFactory {
             .entrySet()
             .stream()
             .collect(Collectors.toMap(
-                entry -> entry.getKey(),
+                Map.Entry::getKey,
                 entry -> entry.getValue().properties()
             ));
 
@@ -191,7 +191,7 @@ public final class NativeFactory extends GraphStoreFactory {
             dimensions,
             progressLogger,
             tracker,
-            idsAndProperties.hugeIdMap,
+            idsAndProperties.idMap,
             allBuilders,
             threadPool,
             concurrency

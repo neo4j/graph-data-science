@@ -68,18 +68,21 @@ public class CypherNodePropertyImporter {
     public void registerPropertiesForLabels(List<String> labels) {
         for (String label : labels) {
             ElementIdentifier labelIdentifier = new ElementIdentifier(label);
-            Map<String, NodePropertiesBuilder> propertyBuilders = buildersByIdentifier.computeIfAbsent(labelIdentifier, (ignore) -> new HashMap<>());
+            Map<String, NodePropertiesBuilder> propertyBuilders = buildersByIdentifier.computeIfAbsent(
+                labelIdentifier,
+                (ignore) -> new HashMap<>()
+            );
             for (String property : propertyColumns) {
                 propertyBuilders.computeIfAbsent(
+                    property,
+                    (ignore) -> NodePropertiesBuilder.of(
+                        nodeCount,
+                        AllocationTracker.EMPTY,
+                        NO_PROPERTY_VALUE,
+                        CYPHER_RESULT_PROPERTY_KEY,
                         property,
-                        (ignore) -> NodePropertiesBuilder.of(
-                                nodeCount,
-                                AllocationTracker.EMPTY,
-                            NO_PROPERTY_VALUE,
-                                CYPHER_RESULT_PROPERTY_KEY,
-                                property,
-                                concurrency
-                        )
+                        concurrency
+                    )
                 );
             }
         }
@@ -96,7 +99,7 @@ public class CypherNodePropertyImporter {
                 continue;
             }
 
-            for(ElementIdentifier labelIdentifier : labelElementIdentifierMapping.get(label)) {
+            for (ElementIdentifier labelIdentifier : labelElementIdentifierMapping.get(label)) {
                 propertiesImported += setPropertyForLabel(labelIdentifier, nodeProperties, nodeId);
             }
         }
@@ -106,18 +109,22 @@ public class CypherNodePropertyImporter {
 
     public Map<ElementIdentifier, Map<PropertyMapping, NodeProperties>> result() {
         return buildersByIdentifier
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
-                                builderEntry -> PropertyMapping.of(builderEntry.getKey(), Double.NaN),
-                                builderEntry -> builderEntry.getValue().build()
-                        ))
-                ));
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
+                    builderEntry -> PropertyMapping.of(builderEntry.getKey(), Double.NaN),
+                    builderEntry -> builderEntry.getValue().build()
+                ))
+            ));
     }
 
-    private int setPropertyForLabel(ElementIdentifier labelIdentifier, Map<String, Number> nodeProperties, long nodeId) {
+    private int setPropertyForLabel(
+        ElementIdentifier labelIdentifier,
+        Map<String, Number> nodeProperties,
+        long nodeId
+    ) {
         int propertiesImported = 0;
 
         if (buildersByIdentifier.containsKey(labelIdentifier)) {

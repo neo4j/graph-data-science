@@ -45,7 +45,7 @@ import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.IGNORE_LABEL;
 public final class NativeNodePropertyImporter {
 
     private final Map<ElementIdentifier, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier;
-    private final Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId;
+    private final Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken;
     private final Map<Integer, List<NodePropertiesBuilder>> anyLabelImporters;
 
     public static Builder builder() {
@@ -54,11 +54,11 @@ public final class NativeNodePropertyImporter {
 
     private NativeNodePropertyImporter(
         Map<ElementIdentifier, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier,
-        Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId
+        Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken
     ) {
         this.buildersByIdentifier = buildersByIdentifier;
-        this.buildersByLabelIdAndPropertyId = buildersByLabelIdAndPropertyId;
-        this.anyLabelImporters = buildersByLabelIdAndPropertyId.get((long) ANY_LABEL);
+        this.buildersByLabelIdAndPropertyToken = buildersByLabelIdAndPropertyToken;
+        this.anyLabelImporters = buildersByLabelIdAndPropertyToken.get((long) ANY_LABEL);
     }
 
     int importProperties(
@@ -101,33 +101,38 @@ public final class NativeNodePropertyImporter {
                 continue;
             }
 
-            if (buildersByLabelIdAndPropertyId.containsKey(label)) {
-                Map<Integer, List<NodePropertiesBuilder>> buildersByPropertyId = buildersByLabelIdAndPropertyId.get(
-                    label);
-                setPropertyValue(nodeId, propertyCursor, propertyKey, buildersByPropertyId);
+            if (buildersByLabelIdAndPropertyToken.containsKey(label)) {
+                propertiesImported += setPropertyValue(
+                    nodeId,
+                    propertyCursor,
+                    propertyKey,
+                    buildersByLabelIdAndPropertyToken.get(label)
+                );
             }
         }
 
         if (anyLabelImporters != null) {
-            setPropertyValue(nodeId, propertyCursor, propertyKey, anyLabelImporters);
+            propertiesImported += setPropertyValue(nodeId, propertyCursor, propertyKey, anyLabelImporters);
         }
 
         return propertiesImported;
     }
 
-    private void setPropertyValue(
+    private int setPropertyValue(
         long nodeId,
         PropertyCursor propertyCursor,
-        int propertyKey,
+        int propertyToken,
         Map<Integer, List<NodePropertiesBuilder>> buildersByPropertyId
     ) {
-        if (buildersByPropertyId.containsKey(propertyKey)) {
-            List<NodePropertiesBuilder> builders = buildersByPropertyId.get(propertyKey);
+        int propertiesImported = 0;
+        if (buildersByPropertyId.containsKey(propertyToken)) {
+            List<NodePropertiesBuilder> builders = buildersByPropertyId.get(propertyToken);
             Value value = propertyCursor.propertyValue();
 
             if (value instanceof NumberValue) {
                 for (NodePropertiesBuilder builder : builders) {
                     builder.set(nodeId, ((NumberValue) value).doubleValue());
+                    propertiesImported++;
                 }
             } else if (!Values.NO_VALUE.equals(value)) {
                 throw new IllegalArgumentException(String.format(
@@ -137,6 +142,8 @@ public final class NativeNodePropertyImporter {
                 ));
             }
         }
+
+        return propertiesImported;
     }
 
     public static final class Builder {
@@ -144,7 +151,7 @@ public final class NativeNodePropertyImporter {
         private Map<ElementIdentifier, PropertyMappings> propertyMappings;
         private GraphDimensions dimensions;
         private int concurrency;
-        private AllocationTracker tracker;
+        private AllocationTracker tracker = AllocationTracker.EMPTY;
 
 
         private Builder() {
@@ -188,17 +195,19 @@ public final class NativeNodePropertyImporter {
         private Map<ElementIdentifier, Map<PropertyMapping, NodePropertiesBuilder>> initializeNodePropertyBuilders() {
             Map<ElementIdentifier, Map<PropertyMapping, NodePropertiesBuilder>> builders = new HashMap<>();
             propertyMappings.forEach((nodeLabel, propertyMappings) -> {
-                builders.putIfAbsent(nodeLabel, new HashMap<>());
-                for (PropertyMapping propertyMapping : propertyMappings) {
-                    NodePropertiesBuilder builder = NodePropertiesBuilder.of(
-                        nodeCount,
-                        tracker,
-                        propertyMapping.defaultValue(),
-                        dimensions.nodePropertyTokens().get(propertyMapping.neoPropertyKey()),
-                        propertyMapping.propertyKey(),
-                        concurrency
-                    );
-                    builders.get(nodeLabel).put(propertyMapping, builder);
+                if (propertyMappings.numberOfMappings() > 0) {
+                    builders.putIfAbsent(nodeLabel, new HashMap<>());
+                    for (PropertyMapping propertyMapping : propertyMappings) {
+                        NodePropertiesBuilder builder = NodePropertiesBuilder.of(
+                            nodeCount,
+                            tracker,
+                            propertyMapping.defaultValue(),
+                            dimensions.nodePropertyTokens().get(propertyMapping.neoPropertyKey()),
+                            propertyMapping.propertyKey(),
+                            concurrency
+                        );
+                        builders.get(nodeLabel).put(propertyMapping, builder);
+                    }
                 }
             });
             return builders;

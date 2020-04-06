@@ -82,11 +82,11 @@ public abstract class MutateProc<
                 nodeProperties = nodeId -> resultPropertyTranslator.toDouble(result, nodeId);
             }
 
-            Collection<ElementIdentifier> labels = mutatePropertyConfig.nodeLabelIdentifiers().contains(PROJECT_ALL)
+            Collection<ElementIdentifier> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers().contains(PROJECT_ALL)
                 ? graphStore.nodeLabels()
                 : mutatePropertyConfig.nodeLabelIdentifiers();
 
-            for (ElementIdentifier label : labels) {
+            for (ElementIdentifier label : labelsToUpdate) {
                 graphStore.addNodeProperty(
                     label,
                     mutatePropertyConfig.mutateProperty(),
