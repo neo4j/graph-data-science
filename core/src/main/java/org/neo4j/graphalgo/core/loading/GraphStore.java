@@ -339,6 +339,13 @@ public final class GraphStore {
         });
     }
 
+    public void deleteRelationshipType(String relationshipType) {
+        updateGraphStore(graphStore -> {
+            graphStore.relationships.remove(relationshipType);
+            graphStore.relationshipProperties.remove(relationshipType);
+        });
+    }
+
     public Graph getGraph(String... relationshipTypes) {
         return getGraph(ALL_NODE_LABEL_IDENTIFIERS, Arrays.asList(relationshipTypes), Optional.empty(), 1);
     }

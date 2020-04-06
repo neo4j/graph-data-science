@@ -50,6 +50,10 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
@@ -207,6 +211,34 @@ class GraphStoreTest {
         assertFalse(graphStore.hasNodeProperty(Collections.singletonList(ALL_NODES), "nodeProp"));
     }
 
+    @Test
+    void deleteRelationshipTypeAndProperties() throws InterruptedException {
+        runQuery(db, "CREATE (a)-[:REL {p: 2}]->(b)");
+
+        GraphStore graphStore = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .addRelationshipType("REL")
+            .addRelationshipProperty(PropertyMapping.of("p", 3.14))
+            .build()
+            .graphStore(NativeFactory.class);
+
+        assertThat(graphStore.relationshipCount(), greaterThan(0L));
+        assertThat(graphStore.relationshipPropertyCount(), greaterThan(0L));
+
+        // add relationships
+        LocalDateTime initialTime = graphStore.modificationTime();
+        Thread.sleep(42);
+        graphStore.deleteRelationshipType("REL");
+        LocalDateTime deletionTime = graphStore.modificationTime();
+
+        assertTrue(initialTime.isBefore(deletionTime), "Relationship type deletion did not change modificationTime");
+        assertThat(graphStore.relationshipTypes(), empty());
+        assertFalse(graphStore.hasRelationshipType("REL"));
+        assertEquals(0, graphStore.relationshipCount());
+        assertEquals(0, graphStore.relationshipPropertyCount());
+        assertTrue(graphStore.relationshipPropertyKeys().isEmpty());
+    }
 
     @NotNull
     private static List<NodeProjection> nodeProjections() {
