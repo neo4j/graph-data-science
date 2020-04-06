@@ -22,8 +22,11 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongObjectMap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -32,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -48,6 +52,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private final TerminationFlag terminationFlag;
     private final Map<ElementIdentifier, PropertyMappings> propertyMappings;
 
+    @Nullable
     private NativeNodePropertyImporter nodePropertyImporter;
     private HugeLongArrayBuilder idMapBuilder;
     private Map<ElementIdentifier, BitSet> elementIdentifierBitSetMapping;
@@ -84,14 +89,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             ? null
             : initializeLabelBitSets(nodeCount, labelIdentifierMapping);
 
-        nodePropertyImporter = NativeNodePropertyImporter
-            .builder()
-            .nodeCount(nodeCount)
-            .concurrency(concurrency)
-            .dimensions(dimensions)
-            .propertyMappings(propertyMappings)
-            .tracker(tracker)
-            .build();
+        nodePropertyImporter = initializeNodePropertyImporter(nodeCount);
 
         return NodesScanner.of(
             api,
@@ -118,7 +116,11 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             tracker
         );
 
-        return IdsAndProperties.of(hugeIdMap, nodePropertyImporter.result());
+        Map<ElementIdentifier, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter == null
+            ? new HashMap<>()
+            : nodePropertyImporter.result();
+
+        return IdsAndProperties.of(hugeIdMap, nodeProperties);
     }
 
     @NotNull
@@ -133,5 +135,26 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             .flatMap(cursor -> cursor.value.stream())
             .distinct()
             .collect(Collectors.toMap(identifier -> identifier, s -> new BitSet(nodeCount)));
+    }
+
+    @Nullable
+    private NativeNodePropertyImporter initializeNodePropertyImporter(long nodeCount) {
+        boolean loadProperties = propertyMappings
+            .values()
+            .stream()
+            .anyMatch(mappings -> mappings.numberOfMappings() > 0);
+
+        if (loadProperties) {
+            return NativeNodePropertyImporter
+                .builder()
+                .nodeCount(nodeCount)
+                .concurrency(concurrency)
+                .dimensions(dimensions)
+                .propertyMappings(propertyMappings)
+                .tracker(tracker)
+                .build();
+        } else {
+            return null;
+        }
     }
 }
