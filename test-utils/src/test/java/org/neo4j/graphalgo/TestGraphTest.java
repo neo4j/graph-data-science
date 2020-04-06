@@ -58,10 +58,10 @@ class TestGraphTest {
 
     @Test
     void testInvariants() {
-        Graph graph = TestGraph.Builder.fromGdl("(a { foo: 42 }), (b { foo: 23 }), (a)-[{ weight: 42 }]->(b)");
+        Graph graph = TestGraph.Builder.fromGdl("(a { foo: 42, bar: NaN }), (b { foo: 23, bar: 42.0d }), (a)-[{ weight: 42 }]->(b)");
         assertEquals(2, graph.nodeCount());
         assertEquals(1, graph.relationshipCount());
-        assertEquals(Sets.newHashSet("foo"), graph.availableNodeProperties());
+        assertEquals(Sets.newHashSet("foo", "bar"), graph.availableNodeProperties());
         assertTrue(graph.hasRelationshipProperty());
         assertFalse(graph.isUndirected());
         assertFalse(graph.isEmpty());
