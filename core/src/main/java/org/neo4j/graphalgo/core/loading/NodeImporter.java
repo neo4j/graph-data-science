@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongObjectMap;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
@@ -58,7 +59,7 @@ public class NodeImporter {
         this.labelElementIdentifierMapping = labelElementIdentifierMapping;
     }
 
-    long importNodes(NodesBatchBuffer buffer, Read read, CursorFactory cursors, NativeNodePropertyImporter propertyImporter) {
+    long importNodes(NodesBatchBuffer buffer, Read read, CursorFactory cursors, @Nullable NativeNodePropertyImporter propertyImporter) {
         return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
             if (propertyImporter != null) {
                 return propertyImporter.importProperties(internalId, nodeReference, labelIds, propertiesReference, cursors, read);
