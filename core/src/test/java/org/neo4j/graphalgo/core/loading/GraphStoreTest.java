@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.NotNull;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,12 +47,13 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -61,6 +63,8 @@ import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.values.storable.NumberType.FLOATING_POINT;
+import static org.neo4j.graphalgo.TestSupport.mapEquals;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class GraphStoreTest {
 
@@ -213,31 +217,44 @@ class GraphStoreTest {
 
     @Test
     void deleteRelationshipTypeAndProperties() throws InterruptedException {
-        runQuery(db, "CREATE (a)-[:REL {p: 2}]->(b)");
+        runQuery(db, "CREATE ()-[:REL {p: 2}]->(), ()-[:LER {p: 1}]->(), ()-[:LER {p: 2}]->(), ()-[:LER {q: 2}]->()");
 
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
-            .addRelationshipType("REL")
-            .addRelationshipProperty(PropertyMapping.of("p", 3.14))
+            .addRelationshipProjection(RelationshipProjection.of("REL", Orientation.NATURAL)
+                .withProperties(
+                    PropertyMappings.of(PropertyMapping.of("p", 3.14))
+                )
+            )
+            .addRelationshipProjection(RelationshipProjection.of("LER", Orientation.NATURAL)
+                .withProperties(
+                    PropertyMappings.of(
+                        PropertyMapping.of("p", 3.14),
+                        PropertyMapping.of("q", 3.15)
+                    )
+                )
+            )
             .build()
             .graphStore(NativeFactory.class);
 
         assertThat(graphStore.relationshipCount(), greaterThan(0L));
         assertThat(graphStore.relationshipPropertyCount(), greaterThan(0L));
 
-        // add relationships
         LocalDateTime initialTime = graphStore.modificationTime();
         Thread.sleep(42);
-        graphStore.deleteRelationshipType("REL");
+        DeletionResult deletionResult = graphStore.deleteRelationshipType("LER");
         LocalDateTime deletionTime = graphStore.modificationTime();
 
         assertTrue(initialTime.isBefore(deletionTime), "Relationship type deletion did not change modificationTime");
-        assertThat(graphStore.relationshipTypes(), empty());
-        assertFalse(graphStore.hasRelationshipType("REL"));
-        assertEquals(0, graphStore.relationshipCount());
-        assertEquals(0, graphStore.relationshipPropertyCount());
-        assertTrue(graphStore.relationshipPropertyKeys().isEmpty());
+        assertEquals(new HashSet<>(singletonList("REL")), graphStore.relationshipTypes());
+        assertFalse(graphStore.hasRelationshipType("LER"));
+        assertEquals(1, graphStore.relationshipCount());
+        // should expect 1 instead of two, but currently properties are global across relationship types
+        assertEquals(2, graphStore.relationshipPropertyCount());
+
+        assertEquals(3, deletionResult.deletedRelationships());
+        assertThat(deletionResult.deletedProperties(), mapEquals(map("p", 3L, "q", 3L)));
     }
 
     @NotNull

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.procedure.Description;
@@ -61,16 +62,23 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
             ));
         }
 
-        graphStoreWithConfig.graphStore().deleteRelationshipType(relationshipType);
+        DeletionResult deletionResult = graphStoreWithConfig.graphStore().deleteRelationshipType(relationshipType);
 
-        return Stream.of(new Result());
+        return Stream.of(new Result(graphName, relationshipType, deletionResult));
     }
 
     public static class Result {
-        public String graphName;
-        public String relationshipType;
+        public final String graphName;
+        public final String relationshipType;
 
-        public long deletedRelationships;
-        public Map<String, Long> deletedProperties;
+        public final long deletedRelationships;
+        public final Map<String, Long> deletedProperties;
+
+        Result(String graphName, String relationshipType, DeletionResult deletionResult) {
+            this.graphName = graphName;
+            this.relationshipType = relationshipType;
+            this.deletedRelationships = deletionResult.deletedRelationships();
+            this.deletedProperties = deletionResult.deletedProperties();
+        }
     }
 }

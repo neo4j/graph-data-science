@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
+import java.util.Collections;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.compat.MapUtil.map;
@@ -81,6 +82,17 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
             "Deleting the last relationship type ('T2') from a graph ('g') is not supported. " +
             "Use `gds.graph.drop()` to drop the entire graph instead."
         );
+    }
+
+    @Test
+    void shouldDeleteRelationshipType() {
+        String query = "CALL gds.graph.deleteRelationshipType('g', 'T1')";
+        assertCypherResult(query, Collections.singletonList(map(
+            "graphName", "g",
+            "relationshipType", "T1",
+            "deletedRelationships", 1L,
+            "deletedProperties", map())
+        ));
     }
 
 }
