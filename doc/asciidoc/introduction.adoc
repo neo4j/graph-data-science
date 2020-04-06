@@ -25,6 +25,14 @@ Whenever possible, we've applied these optimizations.
 
 The Neo4j Graph Data Science library contains a large number of algorithms, which are detailed in the <<algorithms, Algorithms>> chapter.
 
+[[introduction-catalog]]
+== Graph Catalog
+
+In order to run the algorithms as efficient as possible, the Neo4j Graph Data Science library uses a specialized in-memory graph format to represent the graph data.
+It is therefore necessary to load the graph data from the Neo4j database into an in memory graph catalog.
+The amount of data loaded can be controlled by so called graph projections, which also allow, for example, filtering on node labels and relationship types, among other options.
+
+For more information see <<management-ops, Graph Management>>.
 
 [[introduction-editions]]
 == Editions
