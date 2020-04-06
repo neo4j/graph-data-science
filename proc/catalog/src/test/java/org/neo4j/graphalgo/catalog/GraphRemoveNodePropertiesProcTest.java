@@ -103,7 +103,8 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
         Throwable rootCause = rootCause(ex);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("`nodeProp3` not found"));
-        assertThat(rootCause.getMessage(), containsString("['nodeProp1', 'nodeProp2']"));
+        assertThat(rootCause.getMessage(), containsString("No node projection with property key `nodeProp3` found"));
+        assertThat(rootCause.getMessage(), containsString("nodeProp1"));
+        assertThat(rootCause.getMessage(), containsString("nodeProp2"));
     }
 }

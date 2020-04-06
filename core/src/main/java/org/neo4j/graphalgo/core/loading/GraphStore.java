@@ -161,8 +161,18 @@ public final class GraphStore {
         }));
     }
 
-    public void removeNodeProperty(String propertyKey) {
-        updateGraphStore(graphStore -> graphStore.nodeProperties.remove(propertyKey));
+    public void removeNodeProperty(ElementIdentifier label, String propertyKey) {
+        updateGraphStore(graphStore -> {
+            if (graphStore.nodeProperties.containsKey(label)) {
+                Map<String, NodeProperties> propertiesForLabel = graphStore.nodeProperties.get(label);
+
+                propertiesForLabel.remove(propertyKey);
+
+                if (propertiesForLabel.isEmpty()) {
+                    graphStore.nodeProperties.remove(label);
+                }
+            }
+        });
     }
 
     public NodeProperties nodeProperty(String propertyKey) {
@@ -391,7 +401,7 @@ public final class GraphStore {
             ));
     }
 
-    private void validateNodeLabelFilter(List<ElementIdentifier> nodeLabels, Map<ElementIdentifier, BitSet> labelInformation) {
+    private void validateNodeLabelFilter(Collection<ElementIdentifier> nodeLabels, Map<ElementIdentifier, BitSet> labelInformation) {
         List<ElementIdentifier> invalidLabels = nodeLabels
             .stream()
             .filter(label -> !new HashSet<>(labelInformation.keySet()).contains(label))
