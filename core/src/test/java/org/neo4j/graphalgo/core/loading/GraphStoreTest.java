@@ -67,15 +67,15 @@ class GraphStoreTest {
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(db, " CREATE (a:A {nodeProperty: 33, a: 33})" +
-                     " CREATE (b:B {nodeProperty: 42, b: 42})" +
-                     " CREATE (c:Ignore)" +
-                     " CREATE (a)-[:T1 {property1: 42, property2: 1337}]->(b)" +
-                     " CREATE (a)-[:T2 {property1: 43}]->(b)" +
-                     " CREATE (a)-[:T3 {property2: 1338}]->(b)" +
-                     " CREATE (a)-[:T1 {property1: 33}]->(c)" +
-                     " CREATE (c)-[:T1 {property1: 33}]->(a)" +
-                     " CREATE (b)-[:T1 {property1: 33}]->(c)" +
-                     " CREATE (c)-[:T1 {property1: 33}]->(b)");
+                     ", (b:B {nodeProperty: 42, b: 42})" +
+                     ", (c:Ignore)" +
+                     ", (a)-[:T1 {property1: 42, property2: 1337}]->(b)" +
+                     ", (a)-[:T2 {property1: 43}]->(b)" +
+                     ", (a)-[:T3 {property2: 1338}]->(b)" +
+                     ", (a)-[:T1 {property1: 33}]->(c)" +
+                     ", (c)-[:T1 {property1: 33}]->(a)" +
+                     ", (b)-[:T1 {property1: 33}]->(c)" +
+                     ", (c)-[:T1 {property1: 33}]->(b)");
     }
 
     @AfterEach
@@ -85,7 +85,12 @@ class GraphStoreTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validRelationshipFilterParameters")
-    void testFilteringGraphsByRelationships(String desc, List<String> relTypes, Optional<String> relProperty, String expectedGraph) {
+    void testFilteringGraphsByRelationships(
+        String desc,
+        List<String> relTypes,
+        Optional<String> relProperty,
+        String expectedGraph
+    ) {
         GraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
             .graphName("myGraph")
@@ -96,7 +101,7 @@ class GraphStoreTest {
 
         GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
 
-        Graph filteredGraph =graphStore.getGraph(relTypes, relProperty);
+        Graph filteredGraph = graphStore.getGraph(relTypes, relProperty);
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
     }
@@ -185,8 +190,26 @@ class GraphStoreTest {
         assertTrue(nodePropertyTime.isBefore(relationshipTime), "Relationship update did not change modificationTime");
     }
 
+    @Test
+    void testRemoveNodeProperty() {
+        runQuery(db, "CREATE (a {nodeProp: 42})-[:REL]->(b {nodeProp: 23})");
+
+        GraphStore graphStore = new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .addNodeProperty(PropertyMapping.of("nodeProp", 0D))
+            .loadAnyRelationshipType()
+            .build()
+            .graphStore(NativeFactory.class);
+
+        assertTrue(graphStore.hasNodeProperty(Collections.singletonList(PROJECT_ALL), "nodeProp"));
+        graphStore.removeNodeProperty(PROJECT_ALL, "nodeProp");
+        assertFalse(graphStore.hasNodeProperty(Collections.singletonList(PROJECT_ALL), "nodeProp"));
+    }
+
+
     @NotNull
-    private List<NodeProjection> nodeProjections() {
+    private static List<NodeProjection> nodeProjections() {
 
         List<PropertyMapping> bNodePropertyList = Arrays.asList(
             PropertyMapping.of("nodeProperty", -1D),
@@ -210,7 +233,7 @@ class GraphStoreTest {
     }
 
     @NotNull
-    private List<RelationshipProjection> relationshipProjections() {
+    private static List<RelationshipProjection> relationshipProjections() {
         RelationshipProjection t1Mapping = RelationshipProjection.builder()
             .type("T1")
             .orientation(Orientation.NATURAL)
@@ -284,7 +307,7 @@ class GraphStoreTest {
               This test should be adapted once the loader is capable of loading the correct projections.
              */
             Arguments.of(
-                "includeRelatiionshipTypesThatDoNotHaveTheProperty",
+                "includeRelationshipTypesThatDoNotHaveTheProperty",
                 singletonList("*"),
                 Optional.of("property1"),
                 "(a), (b), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b), (a)-[T3 {property1: 42.0}]->(b)"
@@ -316,57 +339,4 @@ class GraphStoreTest {
             )
         );
     }
-
-    @Test
-    void testModificationDate() throws InterruptedException {
-        runQuery("CREATE (a)-[:REL]->(b)");
-
-        GraphStore graphStore = new StoreLoaderBuilder()
-            .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
-            .build()
-            .graphStore(NativeFactory.class);
-
-        // add node properties
-        LocalDateTime initialTime = graphStore.modificationTime();
-        Thread.sleep(42);
-        graphStore.addNodeProperty("foo", new NullPropertyMap(42.0));
-        LocalDateTime nodePropertyTime = graphStore.modificationTime();
-
-        // add relationships
-        HugeGraph.Relationships relationships = HugeGraph.Relationships.of(
-            0L,
-            Orientation.NATURAL,
-            new AdjacencyList(new byte[0][0]),
-            AdjacencyOffsets.of(new long[0]),
-            null,
-            null,
-            42.0
-        );
-        Thread.sleep(42);
-        graphStore.addRelationshipType("BAR", Optional.empty(), relationships);
-        LocalDateTime relationshipTime = graphStore.modificationTime();
-
-        assertTrue(initialTime.isBefore(nodePropertyTime), "Node property update did not change modificationTime");
-        assertTrue(nodePropertyTime.isBefore(relationshipTime), "Relationship update did not change modificationTime");
-    }
-
-    @Test
-    void testRemoveNodeProperty() {
-        runQuery("CREATE (a {nodeProp: 42})-[:REL]->(b {nodeProp: 23})");
-
-        GraphStore graphStore = new StoreLoaderBuilder()
-            .api(db)
-            .loadAnyLabel()
-            .addNodeProperty(PropertyMapping.of("nodeProp", 0D))
-            .loadAnyRelationshipType()
-            .build()
-            .graphStore(NativeFactory.class);
-
-        assertTrue(graphStore.hasNodeProperty("nodeProp"));
-        graphStore.removeNodeProperty("nodeProp");
-        assertFalse(graphStore.hasNodeProperty("nodeProp"));
-    }
-
 }
