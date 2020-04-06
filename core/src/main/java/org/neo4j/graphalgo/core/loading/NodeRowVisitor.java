@@ -76,7 +76,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         rows++;
 
         List<String> labels = getLabels(row, neoId);
-        long[] labelIds = getLabelIds(labels);
+        long[] labelIds = computeLabelIds(labels);
 
         int propRef = processProperties(row, labels);
 
@@ -124,7 +124,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         }
     }
 
-    private long[] getLabelIds(List<String> labels) {
+    private long[] computeLabelIds(List<String> labels) {
         long[] labelIds = new long[labels.size()];
 
         for (int i = 0; i < labels.size(); i++) {
@@ -142,13 +142,13 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private int processProperties(Result.ResultRow row, List<String> labels) {
         propertyImporter.registerPropertiesForLabels(labels);
 
-        Map<String, Number> weights = new HashMap<>();
+        Map<String, Number> propertyValues = new HashMap<>();
         for (String propertyKey : propertyImporter.propertyColumns()) {
             Object value = CypherLoadingUtils.getProperty(row, propertyKey);
             if (value instanceof Number) {
-                weights.put(propertyKey, (Number) value);
+                propertyValues.put(propertyKey, (Number) value);
             } else if (null == value) {
-                weights.put(propertyKey, Double.NaN);
+                propertyValues.put(propertyKey, Double.NaN);
             } else {
                 throw new IllegalArgumentException(String.format(
                     "Unsupported type [%s] of value %s. Please use a numeric property.",
@@ -159,7 +159,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         }
 
         int propRef = cypherNodeProperties.size();
-        cypherNodeProperties.add(weights);
+        cypherNodeProperties.add(propertyValues);
 
         return propRef;
     }

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongObjectMap;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -34,7 +35,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -77,23 +77,12 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     ) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
 
-
         LongObjectMap<List<ElementIdentifier>> labelIdentifierMapping = dimensions.labelElementIdentifierMapping();
-
-        Supplier<Map<ElementIdentifier, BitSet>> initializeLabelBitSets = () ->
-            StreamSupport.stream(
-                labelIdentifierMapping.values().spliterator(),
-                false
-            )
-                .flatMap(cursor -> cursor.value.stream())
-                .distinct()
-                .collect(Collectors.toMap(identifier -> identifier, s -> new BitSet(nodeCount)));
-
 
         elementIdentifierBitSetMapping = labelIdentifierMapping.size() == 1 && labelIdentifierMapping.containsKey(
             ANY_LABEL)
             ? null
-            : initializeLabelBitSets.get();
+            : initializeLabelBitSets(nodeCount, labelIdentifierMapping);
 
         nodePropertyImporter = NativeNodePropertyImporter
             .builder()
@@ -130,5 +119,19 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
         );
 
         return IdsAndProperties.of(hugeIdMap, nodePropertyImporter.result());
+    }
+
+    @NotNull
+    private Map<ElementIdentifier, BitSet> initializeLabelBitSets(
+        long nodeCount,
+        LongObjectMap<List<ElementIdentifier>> labelIdentifierMapping
+    ) {
+        return StreamSupport.stream(
+            labelIdentifierMapping.values().spliterator(),
+            false
+        )
+            .flatMap(cursor -> cursor.value.stream())
+            .distinct()
+            .collect(Collectors.toMap(identifier -> identifier, s -> new BitSet(nodeCount)));
     }
 }

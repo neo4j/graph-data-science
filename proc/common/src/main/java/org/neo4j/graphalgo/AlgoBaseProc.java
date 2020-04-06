@@ -174,7 +174,7 @@ public abstract class AlgoBaseProc<
                 .projections()
                 .entrySet()
                 .stream()
-                .filter(proj -> nodeLabels.contains(proj.getKey()))
+                .filter(projection -> nodeLabels.contains(projection.getKey()))
                 .forEach(entry -> builder.putProjection(entry.getKey(), entry.getValue()));
             NodeProjections filteredNodeProjections = builder.build();
             return GraphCreateFromStoreConfig.of(

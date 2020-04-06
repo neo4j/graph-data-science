@@ -311,15 +311,15 @@ public final class GraphStore {
 
         Collection<ElementIdentifier> expandedLabels = loadAllNodes ? nodeLabels() : filteredLabels;
 
+        boolean containsAllNodes = true;
         BitSet combinedBitSet = BitSet.newInstance();
+
         if (this.nodes.maybeLabelInformation.isPresent() && !loadAllNodes) {
             Map<ElementIdentifier, BitSet> labelInformation = this.nodes.maybeLabelInformation.get();
-            validateNodeLabelFilter(filteredLabels, labelInformation);
-            filteredLabels.forEach(label -> combinedBitSet.union(
-                labelInformation.get(label)));
+            validateNodeLabelFilter(expandedLabels, labelInformation);
+            expandedLabels.forEach(label -> combinedBitSet.union(labelInformation.get(label)));
+            containsAllNodes = combinedBitSet.cardinality() == this.nodes.nodeCount();
         }
-
-        boolean containsAllNodes = combinedBitSet.cardinality() == this.nodes.nodeCount();
 
         Optional<IdMap> filteredNodes = loadAllNodes || !this.nodes.maybeLabelInformation.isPresent() || containsAllNodes
             ? Optional.empty()

@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 public class IdsAndProperties {
 
-    final IdMap hugeIdMap;
+    final IdMap idMap;
     private final Map<ElementIdentifier, Map<String, NodeProperties>> properties;
 
     public static IdsAndProperties of(
@@ -48,16 +48,13 @@ public class IdsAndProperties {
     }
 
 
-    public IdsAndProperties(
-        IdMap hugeIdMap,
-        Map<ElementIdentifier, Map<String, NodeProperties>> properties
-    ) {
-        this.hugeIdMap = hugeIdMap;
+    public IdsAndProperties(IdMap idMap, Map<ElementIdentifier, Map<String, NodeProperties>> properties) {
+        this.idMap = idMap;
         this.properties = properties;
     }
 
     public IdMap idMap() {
-        return hugeIdMap;
+        return idMap;
     }
 
     public Map<ElementIdentifier, Map<String, NodeProperties>> properties() {

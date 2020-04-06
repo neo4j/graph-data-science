@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,48 +83,35 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @Test
     void nodeProjectionsWithExclusiveProperties() {
-        GraphCreateFromStoreConfig config = ImmutableGraphCreateFromStoreConfig.builder()
-            .nodeProjections(
-                NodeProjections.builder()
-                    .putProjection(
-                        ElementIdentifier.of("N1"),
-                        NodeProjection.of(
-                            "Node1",
-                            PropertyMappings.builder().addMapping(PropertyMapping.of("prop1", 0.0D)).build()
-                        )
-                    )
-                    .putProjection(
-                        ElementIdentifier.of("N2"),
-                        NodeProjection.of(
-                            "Node1",
-                            PropertyMappings.of()
-                        )
-                    )
-                    .putProjection(
-                        ElementIdentifier.of("N3"),
-                        NodeProjection.of(
-                            "Node2",
-                            PropertyMappings.builder().addMapping(PropertyMapping.of("prop2", 1.0D)).build()
-                        )
-                    )
-                    .build()
-            )
-            .relationshipProjections(RelationshipProjections.of())
-            .graphName("myGraph")
-            .build();
-
-        GraphStore graphStore = ImmutableGraphLoader.builder()
+        GraphStore graphStore = new StoreLoaderBuilder()
+            .putNodeProjectionsWithIdentifier(
+                "N1",
+                NodeProjection.of(
+                    "Node1",
+                    PropertyMappings.builder().addMapping(PropertyMapping.of("prop1", 0.0D)).build()
+                )
+            ).putNodeProjectionsWithIdentifier(
+                "N2",
+                NodeProjection.of(
+                    "Node1",
+                    PropertyMappings.of()
+                )
+            ).putNodeProjectionsWithIdentifier(
+                "N3",
+                NodeProjection.of(
+                    "Node2",
+                    PropertyMappings.builder().addMapping(PropertyMapping.of("prop2", 1.0D)).build()
+                )
+            ).graphName("myGraph")
             .api(db)
-            .createConfig(config)
-            .log(NullLog.getInstance())
             .build()
             .build(NativeFactory.class)
             .build()
             .graphStore();
 
-        assertEquals(Collections.singleton("prop1") , graphStore.nodePropertyKeys(ElementIdentifier.of("N1")));
-        assertEquals(Collections.emptySet() , graphStore.nodePropertyKeys(ElementIdentifier.of("N2")));
-        assertEquals(Collections.singleton("prop2") , graphStore.nodePropertyKeys(ElementIdentifier.of("N3")));
+        assertEquals(Collections.singleton("prop1"), graphStore.nodePropertyKeys(ElementIdentifier.of("N1")));
+        assertEquals(Collections.emptySet(), graphStore.nodePropertyKeys(ElementIdentifier.of("N2")));
+        assertEquals(Collections.singleton("prop2"), graphStore.nodePropertyKeys(ElementIdentifier.of("N3")));
 
         NodeProperties prop1 = graphStore.nodeProperty("prop1");
         assertEquals(1.0D, prop1.nodeProperty(0));
@@ -137,45 +125,34 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @Test
     void nodeProjectionsWithAndWithoutLabel() {
         ElementIdentifier allIdentifier = ElementIdentifier.of("ALL");
-
         ElementIdentifier node2Identifier = ElementIdentifier.of("Node2");
-        GraphCreateFromStoreConfig config = ImmutableGraphCreateFromStoreConfig.builder()
-            .nodeProjections(
-                NodeProjections.builder()
-                    .putProjection(
-                        allIdentifier,
-                        NodeProjection.of(
-                            "*",
-                            PropertyMappings.builder()
-                                .addMapping(PropertyMapping.of("prop1", 42.0D))
-                                .addMapping(PropertyMapping.of("prop2", 8.0D))
-                                .build()
-                        )
-                    )
-                    .putProjection(
-                        node2Identifier,
-                        NodeProjection.of(
-                            "Node2",
-                            PropertyMappings.builder().addMapping(PropertyMapping.of("prop2", 8.0D)).build()
-                        )
-                    )
-                    .build()
-            )
-            .relationshipProjections(RelationshipProjections.of())
-            .graphName("myGraph")
-            .build();
 
-        GraphStore graphStore = ImmutableGraphLoader.builder()
+
+        GraphStore graphStore = new StoreLoaderBuilder()
+            .putNodeProjectionsWithIdentifier(
+                allIdentifier.name(),
+                NodeProjection.of(
+                    "*",
+                    PropertyMappings.builder()
+                        .addMapping(PropertyMapping.of("prop1", 42.0D))
+                        .addMapping(PropertyMapping.of("prop2", 8.0D))
+                        .build()
+                )
+            ).putNodeProjectionsWithIdentifier(
+                node2Identifier.name(),
+                NodeProjection.of(
+                    "Node2",
+                    PropertyMappings.builder().addMapping(PropertyMapping.of("prop2", 8.0D)).build()
+                )
+            ).graphName("myGraph")
             .api(db)
-            .createConfig(config)
-            .log(NullLog.getInstance())
             .build()
             .build(NativeFactory.class)
             .build()
             .graphStore();
 
-        assertEquals(new HashSet<>(Arrays.asList("prop1", "prop2")), graphStore.nodePropertyKeys(allIdentifier));
-        assertEquals(Collections.singleton("prop2") , graphStore.nodePropertyKeys(node2Identifier));
+        assertEquals(Sets.newHashSet("prop1", "prop2"), graphStore.nodePropertyKeys(allIdentifier));
+        assertEquals(Collections.singleton("prop2"), graphStore.nodePropertyKeys(node2Identifier));
 
         NodeProperties allProp1 = graphStore.nodeProperty(allIdentifier, "prop1");
         NodeProperties allProp2 = graphStore.nodeProperty(allIdentifier, "prop2");
@@ -193,7 +170,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 assertEquals(42.0, allProp1Value);
                 assertEquals(2.0, allProp2Value);
                 assertEquals(2.0, node2Prop2Value);
-            } else  {
+            } else {
                 assertEquals(42.0, allProp1Value);
                 assertEquals(8.0, allProp2Value);
             }
@@ -331,7 +308,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesTest
     void multipleProperties(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        runQuery(localDb,
+        runQuery(
+            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -386,7 +364,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesTest
     void multiplePropertiesWithDefaultValues(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        runQuery(localDb,
+        runQuery(
+            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -429,7 +408,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesTest
     void multiplePropertiesWithIncompatibleAggregations(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        runQuery(localDb,
+        runQuery(
+            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -461,7 +441,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesTest
     void singlePropertyWithAggregations(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        runQuery(localDb,
+        runQuery(
+            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -531,13 +512,13 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     ) {
         db = TestDatabaseCreator.createTestDatabase();
         runQuery(db, "" +
-                   "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
-                   "CREATE" +
-                   " (a)-[:REL {p1: 42, p2: 1337}]->(a)," +
-                   " (a)-[:REL {p1: 43, p2: 1338}]->(a)," +
-                   " (a)-[:REL {p1: 44, p2: 1339}]->(a)," +
-                   " (b)-[:REL {p1: 45, p2: 1340}]->(b)," +
-                   " (b)-[:REL {p1: 46, p2: 1341}]->(b)");
+                     "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
+                     "CREATE" +
+                     " (a)-[:REL {p1: 42, p2: 1337}]->(a)," +
+                     " (a)-[:REL {p1: 43, p2: 1338}]->(a)," +
+                     " (a)-[:REL {p1: 44, p2: 1339}]->(a)," +
+                     " (b)-[:REL {p1: 45, p2: 1340}]->(b)," +
+                     " (b)-[:REL {p1: 46, p2: 1341}]->(b)");
 
         GraphStore graphs = TestGraphLoader.from(db)
             .withDefaultAggregation(globalAggregation)
@@ -571,13 +552,15 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesTest
     void multipleTypesWithSameProperty(Class<? extends GraphStoreFactory> graphStoreFactory) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        runQuery(localDb,
+        runQuery(
+            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (a)-[:REL_1 {p1: 43}]->(a)" +
             ", (a)-[:REL_1 {p1: 84}]->(a)" +
             ", (a)-[:REL_2 {p1: 42}]->(a)" +
-            ", (a)-[:REL_3 {p1: 44}]->(a)");
+            ", (a)-[:REL_3 {p1: 44}]->(a)"
+        );
 
         GraphStore graphs = TestGraphLoader.from(localDb)
             .withRelationshipTypes("REL_1", "REL_2", "REL_3")
@@ -615,7 +598,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         double expectedNodeBP2
     ) {
         GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        runQuery(localDb,
+        runQuery(
+            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node) " +
@@ -623,7 +607,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (a)-[:REL {p1: 42, p2: 1337}]->(a)" +
             ", (a)-[:REL {p1: 44, p2: 1339}]->(a)" +
             ", (b)-[:REL {p1: 45, p2: 1340}]->(b)" +
-            ", (b)-[:REL {p1: 46, p2: 1341}]->(b)");
+            ", (b)-[:REL {p1: 46, p2: 1341}]->(b)"
+        );
         GraphStore graphs = TestGraphLoader.from(localDb)
             .withRelationshipProperties(
                 PropertyMapping.of("p1", "p1", 1.0, aggregation),
@@ -653,13 +638,15 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
     @AllGraphTypesTest
     void multiplePropertiesWithAggregation_SINGLE(Class<? extends GraphStoreFactory> graphStoreFactory) {
         db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db,
+        runQuery(
+            db,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node) " +
             ", (a)-[:REL {p1: 43, p2: 1338}]->(a)" +
             ", (a)-[:REL {p1: 42, p2: 1337}]->(a)" +
-            ", (b)-[:REL {p1: 46, p2: 1341}]->(b)");
+            ", (b)-[:REL {p1: 46, p2: 1341}]->(b)"
+        );
         GraphStore graphStore = TestGraphLoader.from(db)
             .withRelationshipProperties(
                 PropertyMapping.of("p1", "p1", 1.0, SINGLE),

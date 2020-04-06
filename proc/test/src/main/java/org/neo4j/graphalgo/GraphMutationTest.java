@@ -91,10 +91,10 @@ public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig,
 
     @Test
     default void testGraphMutationOnFilteredGraph() {
-        runQuery(graphDb(),"MATCH (n) DETACH DELETE n" );
+        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
         GraphStoreCatalog.removeAllLoadedGraphs();
 
-        runQuery(graphDb(),"CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
+        runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
         GraphStore graphStore = TestGraphLoader
             .from(graphDb())
             .withLabels("A", "B")
@@ -108,7 +108,8 @@ public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig,
             getProcedureMethods(procedure)
                 .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
                 .forEach(mutateMethod -> {
-                    CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry("nodeLabels",
+                    CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
+                        "nodeLabels",
                         Collections.singletonList("A")
                     );
 
