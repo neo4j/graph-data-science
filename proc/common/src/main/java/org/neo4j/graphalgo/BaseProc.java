@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -37,6 +38,7 @@ import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class BaseProc {
@@ -107,11 +109,30 @@ public abstract class BaseProc {
         }
     }
 
-    protected void validateMemoryUsage(MemoryTreeWithDimensions memoryTreeWithDimensions) {
-        validateMemoryUsage(memoryTreeWithDimensions, GcListenerExtension::freeMemory);
+    protected <C extends BaseConfig> void tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
+        tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
     }
 
-    public void validateMemoryUsage(
+    public <C extends BaseConfig> void tryValidateMemoryUsage(
+        C config,
+        Function<C, MemoryTreeWithDimensions> runEstimation,
+        AlgoBaseProc.FreeMemoryInspector inspector
+    ) {
+        if (config.sudo()) {
+            log.debug("Okay.  (sudo mode requested, won't check for available memory.)");
+            return;
+        }
+        MemoryTreeWithDimensions memoryTreeWithDimensions = null;
+        try {
+            memoryTreeWithDimensions = runEstimation.apply(config);
+        } catch (MemoryEstimationNotImplementedException ignored) {
+        }
+        if (memoryTreeWithDimensions != null) {
+            validateMemoryUsage(memoryTreeWithDimensions, inspector);
+        }
+    }
+
+    private void validateMemoryUsage(
         MemoryTreeWithDimensions memoryTreeWithDimensions,
         AlgoBaseProc.FreeMemoryInspector inspector
     ) {

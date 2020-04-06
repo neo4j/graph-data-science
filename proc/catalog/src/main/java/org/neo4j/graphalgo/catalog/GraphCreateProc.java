@@ -154,7 +154,7 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     private GraphCreateResult createGraph(GraphCreateConfig config, Class<? extends GraphStoreFactory> factoryClazz) {
-        validateMemoryUsage(memoryTreeWithDimensions(config, factoryClazz));
+        tryValidateMemoryUsage(config, c -> memoryTreeWithDimensions(c, factoryClazz));
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);

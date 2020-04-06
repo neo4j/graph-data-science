@@ -21,6 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
@@ -46,24 +47,33 @@ public interface HeapControlTest<CONFIG extends AlgoBaseConfig, RESULT> extends 
                        " (arya)-[:FRIENDS]->(karin)";
 
     @Test
-    default void shouldPassOnSufficientMemory () {
+    default void shouldPassOnSufficientMemory() {
         applyOnProcedure(proc -> {
-            MemoryTreeWithDimensions memoryTreeWithDimensions = proc.memoryEstimation(proc.newConfig(Optional.empty(), createMinimalImplicitConfig(CypherMapWrapper.empty())));
-            proc.validateMemoryUsage(memoryTreeWithDimensions, () -> 10000000);
+            CONFIG config = proc.newConfig(Optional.empty(), createMinimalImplicitConfig(CypherMapWrapper.empty()));
+            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 10000000);
         });
     }
 
     @Test
-    default void shouldFailOnInsufficientMemory () {
+    default void shouldFailOnInsufficientMemory() {
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             applyOnProcedure(proc -> {
-                MemoryTreeWithDimensions memoryTreeWithDimensions = proc.memoryEstimation(proc.newConfig(Optional.empty(), createMinimalImplicitConfig(CypherMapWrapper.empty())));
-                proc.validateMemoryUsage(memoryTreeWithDimensions, () -> 42);
+                CONFIG config = proc.newConfig(Optional.empty(), createMinimalImplicitConfig(CypherMapWrapper.empty()));
+                proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
             });
         });
 
         String message = ExceptionUtil.rootCause(exception).getMessage();
         assertTrue(message.matches(
             "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
+    }
+
+    @Test
+    default void shouldNotFailOnInsufficientMemoryIfInSudoMode() {
+        applyOnProcedure(proc -> {
+            CypherMapWrapper configMap = CypherMapWrapper.empty().withBoolean(BaseConfig.SUDO_KEY, true);
+            CONFIG config = proc.newConfig(Optional.empty(), createMinimalImplicitConfig(configMap));
+            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
+        });
     }
 }

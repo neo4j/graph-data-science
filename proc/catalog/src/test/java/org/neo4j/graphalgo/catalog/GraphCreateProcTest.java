@@ -90,6 +90,7 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
@@ -861,13 +862,28 @@ class GraphCreateProcTest extends BaseProcTest {
                         NODE_PROJECTION_KEY, "*",
                         RELATIONSHIP_PROJECTION_KEY, "*"))
                 );
-                proc.validateMemoryUsage(proc.memoryTreeWithDimensions(config, NativeFactory.class), () -> 42);
+                proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c, NativeFactory.class), () -> 42);
             });
         });
 
         String message = ExceptionUtil.rootCause(exception).getMessage();
         assertTrue(message.matches(
             "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
+    }
+
+    @Test
+    void shouldNotFailOnTooBigGraphIfInSudoModeNative() {
+        applyOnProcedure(proc -> {
+            GraphCreateConfig config = GraphCreateFromStoreConfig.fromProcedureConfig(
+                "",
+                CypherMapWrapper.create(MapUtil.map(
+                    NODE_PROJECTION_KEY, "*",
+                    RELATIONSHIP_PROJECTION_KEY, "*",
+                    SUDO_KEY, true
+                ))
+            );
+            proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c, NativeFactory.class), () -> 42);
+        });
     }
 
     @Test
@@ -880,13 +896,28 @@ class GraphCreateProcTest extends BaseProcTest {
                         NODE_QUERY_KEY, "MATCH (n) RETURN n",
                         RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r"))
                 );
-                proc.validateMemoryUsage(proc.memoryTreeWithDimensions(config, CypherFactory.class), () -> 42);
+                proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c, CypherFactory.class), () -> 42);
             });
         });
 
         String message = ExceptionUtil.rootCause(exception).getMessage();
         assertTrue(message.matches(
             "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
+    }
+
+    @Test
+    void shouldNotFailOnTooBigGraphIfInSudoModeCypher() {
+        applyOnProcedure(proc -> {
+            GraphCreateConfig config = GraphCreateFromCypherConfig.fromProcedureConfig(
+                "",
+                CypherMapWrapper.create(MapUtil.map(
+                    NODE_QUERY_KEY, "MATCH (n) RETURN n",
+                    RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r",
+                    SUDO_KEY, true
+                ))
+            );
+            proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c, CypherFactory.class), () -> 42);
+        });
     }
 
     void applyOnProcedure(Consumer<GraphCreateProc> func) {
