@@ -24,3 +24,15 @@ Fortunately, optimized algorithms exist that utilize certain structures of the g
 Whenever possible, we've applied these optimizations.
 
 The Neo4j Graph Data Science library contains a large number of algorithms, which are detailed in the <<algorithms, Algorithms>> chapter.
+
+
+[[introduction-editions]]
+== Editions
+
+The Neo4j Graph Data Science library is available in two editions.
+
+- The open source Community Edition includes all algorithms and features, but is limited to four CPU cores.
+- The Neo4j Graph Data Science Edition can run on an unlimited amount of CPU cores.
+
+For more information see <<system-requirements-cpu, System Requirements - CPU>>.
+
