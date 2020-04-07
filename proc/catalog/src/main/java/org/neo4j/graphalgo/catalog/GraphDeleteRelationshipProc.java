@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.catalog;
 
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
@@ -70,8 +70,8 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
         DeletionResult deletionResult = graphStoreWithConfig.graphStore().deleteRelationshipType(relationshipType);
 
         // We have to post-filter to hide the fact that we delete properties for other relationship projections
-        ElementIdentifier relType = ElementIdentifier.of(relationshipType);
-        Map<ElementIdentifier, RelationshipProjection> projectedRels = graphStoreWithConfig
+        RelationshipType relType = RelationshipType.of(relationshipType);
+        Map<RelationshipType, RelationshipProjection> projectedRels = graphStoreWithConfig
             .config()
             .relationshipProjections()
             .projections();
