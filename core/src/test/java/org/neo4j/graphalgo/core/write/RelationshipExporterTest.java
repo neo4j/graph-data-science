@@ -23,17 +23,24 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.values.storable.Values;
 
 import java.util.Collections;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
@@ -51,9 +58,9 @@ class RelationshipExporterTest {
         ", (d)";
 
     private static final String RELS_QUERY_PART =
-        ", (a)-[:BARFOO {weight: 4.2}]->(b)" +
-        ", (a)-[:BARFOO {weight: 1.0}]->(a)" +
-        ", (a)-[:BARFOO {weight: 2.3}]->(c)" +
+        ", (a)-[:BARFOO {weight: 4.2, weight2: 4}]->(b)" +
+        ", (a)-[:BARFOO {weight: 1.0, weight2: 5}]->(a)" +
+        ", (a)-[:BARFOO {weight: 2.3, weight2: 6}]->(c)" +
         ", (b)-[:BARFOO]->(c)" +
         ", (c)-[:THISISNOTTHETYPEYOUARELOOKINGFOR]->(d)";
 
@@ -79,6 +86,32 @@ class RelationshipExporterTest {
         RelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
         exporter.write("FOOBAR", "weight");
         validateWrittenGraph();
+    }
+
+    @Test
+    void exportRelationshipsWithLongProperties() {
+        db = TestDatabaseCreator.createTestDatabase();
+        runQuery(db, NODE_QUERY_PART + RELS_QUERY_PART);
+
+        GraphStore graphStore = new StoreLoaderBuilder().api(db)
+            .loadAnyLabel()
+            .putRelationshipProjectionsWithIdentifier(
+                "NEW_REL",
+                RelationshipProjection.of("BARFOO", Orientation.NATURAL)
+            )
+            .addRelationshipProperty("newWeight", "weight2", 0, Aggregation.NONE)
+            .build()
+            .graphStore(NativeFactory.class);
+
+        RelationshipExporter
+            .of(db, graphStore.getGraph("NEW_REL", Optional.of("newWeight")), RUNNING_TRUE)
+            .withRelationPropertyTranslator(relProperty -> Values.longValue((long) relProperty))
+            .build()
+            .write("NEW_REL", "newWeight");
+
+        runQueryWithRowConsumer(db,
+            "MATCH ()-[r:NEW_REL]->() RETURN r.newWeight AS newWeight",
+            row -> assertThat(row.get("newWeight"), isA(Long.class)));
     }
 
     @Test
