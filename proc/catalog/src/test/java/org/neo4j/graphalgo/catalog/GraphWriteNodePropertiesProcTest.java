@@ -24,8 +24,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -119,7 +119,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         GraphStoreCatalog
             .get(getUsername(), TEST_GRAPH_NAME)
             .graphStore()
-            .addNodeProperty(ElementIdentifier.of("*"), "newNodeProp3", NumberType.INTEGRAL, new NodeProperties() {
+            .addNodeProperty(NodeLabel.ALL_NODES, "newNodeProp3", NumberType.INTEGRAL, new NodeProperties() {
                 @Override
                 public double nodeProperty(long nodeId) {
                     return nodeId;

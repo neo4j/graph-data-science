@@ -79,7 +79,7 @@ public final class GraphStore {
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
     ) {
-        Map<ElementIdentifier, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
+        Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
         nodeProperties.forEach((nodeLabel, propertyMap) -> {
             NodePropertyStore.Builder builder = NodePropertyStore.builder();
             propertyMap.forEach((propertyKey, propertyValues) -> builder.putNodeProperty(
@@ -214,7 +214,7 @@ public final class GraphStore {
                 if (updatedNodePropertyStore.isEmpty()) {
                     graphStore.nodeProperties.remove(nodeLabel);
                 } else {
-                    graphStore.nodeProperties.replace(label, updatedNodePropertyStore);
+                    graphStore.nodeProperties.replace(nodeLabel, updatedNodePropertyStore);
                 }
             }
         });
@@ -455,7 +455,7 @@ public final class GraphStore {
         nodeProperties
             .entrySet()
             .stream()
-            .filter(entry -> labels.contains(entry.getKey()) || labels.contains(PROJECT_ALL))
+            .filter(entry -> labels.contains(entry.getKey()) || labels.contains(ALL_NODES))
             .forEach(entry -> entry.getValue().nodeProperties()
                 .forEach((propertyKey, nodeProperty) -> invertedNodeProperties
                     .computeIfAbsent(
