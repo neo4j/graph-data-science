@@ -46,6 +46,7 @@ public final class RelationshipExporter extends StatementApi {
 
     private final Graph graph;
     private final long nodeCount;
+    private final RelationshipPropertyTranslator propertyTranslator;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
     private final ExecutorService executorService;
@@ -61,10 +62,17 @@ public final class RelationshipExporter extends StatementApi {
     public static final class Builder extends ExporterBuilder<RelationshipExporter> {
 
         private final Graph graph;
+        private RelationshipPropertyTranslator propertyTranslator;
 
         Builder(GraphDatabaseAPI db, Graph graph, TerminationFlag terminationFlag) {
             super(db, graph, terminationFlag);
             this.graph = graph;
+            this.propertyTranslator = Values::doubleValue;
+        }
+
+        public Builder withRelationPropertyTranslator(RelationshipPropertyTranslator propertyTranslator) {
+            this.propertyTranslator = propertyTranslator;
+            return this;
         }
 
         @Override
@@ -76,6 +84,7 @@ public final class RelationshipExporter extends StatementApi {
             return new RelationshipExporter(
                 db,
                 graph,
+                propertyTranslator,
                 terminationFlag,
                 progressLogger
             );
@@ -85,12 +94,14 @@ public final class RelationshipExporter extends StatementApi {
     private RelationshipExporter(
         GraphDatabaseAPI db,
         Graph graph,
+        RelationshipPropertyTranslator propertyTranslator,
         TerminationFlag terminationFlag,
         ProgressLogger progressLogger
     ) {
         super(db);
         this.nodeCount = graph.nodeCount();
         this.graph = graph;
+        this.propertyTranslator = propertyTranslator;
         this.terminationFlag = terminationFlag;
         this.progressLogger = progressLogger;
         this.executorService = DEFAULT_SINGLE_THREAD_POOL;
@@ -146,7 +157,13 @@ public final class RelationshipExporter extends StatementApi {
             terminationFlag.assertRunning();
             long end = start + length;
             Write ops = stmt.dataWrite();
-            RelationshipWithPropertyConsumer writeConsumer = new WriteConsumer(graph, ops, relationshipToken, propertyToken);
+            RelationshipWithPropertyConsumer writeConsumer = new WriteConsumer(
+                graph,
+                ops,
+                propertyTranslator,
+                relationshipToken,
+                propertyToken
+            );
             if (afterWrite != null) {
                 writeConsumer = writeConsumer.andThen(afterWrite);
             }
@@ -177,12 +194,20 @@ public final class RelationshipExporter extends StatementApi {
 
         private final IdMapping idMapping;
         private final Write ops;
+        private final RelationshipPropertyTranslator propertyTranslator;
         private final int relTypeToken;
         private final int propertyToken;
 
-        WriteConsumer(IdMapping idMapping, Write ops, int relTypeToken, int propertyToken) {
+        WriteConsumer(
+            IdMapping idMapping,
+            Write ops,
+            RelationshipPropertyTranslator propertyTranslator,
+            int relTypeToken,
+            int propertyToken
+        ) {
             this.idMapping = idMapping;
             this.ops = ops;
+            this.propertyTranslator = propertyTranslator;
             this.relTypeToken = relTypeToken;
             this.propertyToken = propertyToken;
         }
@@ -199,7 +224,7 @@ public final class RelationshipExporter extends StatementApi {
                     ops.relationshipSetProperty(
                         relId,
                         propertyToken,
-                        Values.doubleValue(property)
+                        propertyTranslator.toValue(property)
                     );
                 }
             } catch (Exception e) {
