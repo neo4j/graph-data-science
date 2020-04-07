@@ -308,21 +308,34 @@ public final class GraphStore {
                 if (relationshipPropertyKey.isPresent()
                     && relationshipPropertyType.isPresent()
                     && relationships.properties().isPresent()) {
-                    HugeGraph.PropertyCSR propertyCSR = relationships.properties().get();
-
-                    graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
-                        RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
-                        if (propertyStore != null) {
-                             builder.from(propertyStore);
-                        }
-                        String propertyKey = relationshipPropertyKey.get();
-                        return builder.putIfAbsent(
-                            propertyKey,
-                            ImmutableRelationshipProperty.of(propertyKey, relationshipPropertyType.get(), propertyCSR)
-                        ).build();
-                    });
+                    addRelationshipProperty(
+                        relationshipType,
+                        relationshipPropertyKey.get(),
+                        relationshipPropertyType.get(),
+                        relationships.properties().get(),
+                        graphStore
+                    );
                 }
             }
+        });
+    }
+
+    private void addRelationshipProperty(
+        String relationshipType,
+        String propertyKey,
+        NumberType propertyType,
+        HugeGraph.PropertyCSR propertyCSR,
+        GraphStore graphStore
+    ) {
+        graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
+            RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
+            if (propertyStore != null) {
+                 builder.from(propertyStore);
+            }
+            return builder.putIfAbsent(
+                propertyKey,
+                ImmutableRelationshipProperty.of(propertyKey, propertyType, propertyCSR)
+            ).build();
         });
     }
 
@@ -583,6 +596,7 @@ public final class GraphStore {
         NumberType propertyType();
 
         NodeProperties propertyValues();
+
         static NodeProperty of(String propertyKey, NumberType propertyType, NodeProperties propertyValues) {
             return ImmutableNodeProperty.of(propertyKey, propertyType, propertyValues);
         }
