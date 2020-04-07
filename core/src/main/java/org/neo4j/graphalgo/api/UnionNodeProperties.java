@@ -36,7 +36,7 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public double nodeProperty(long nodeId) {
-        for (ElementIdentifier label : elementIdentifierToBitSetMap.keySet()) {
+        for (NodeLabel label : elementIdentifierToBitSetMap.keySet()) {
             if (elementIdentifierToBitSetMap.get(label).get(nodeId)) {
                 NodeProperties nodeProperties = labelToNodePropertiesMap.get(label);
                 if (nodeProperties != null) {
