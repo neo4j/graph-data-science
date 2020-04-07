@@ -1206,13 +1206,8 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query);
 
         Graph actual = relPropertyGraph("g", "TYPE", "agg");
-        if (Double.isNaN(expectedWeight)) {
-            double actualWeight = actual.relationshipProperty(0, 1, /* fallback */ 42);
-            assertTrue(Double.isNaN(actualWeight), String.format("Expected NaN weight, got %g instead", actualWeight));
-        } else {
-            Graph expected = fromGdl(String.format("(a)-[{w:%g}]->(b)", expectedWeight));
-            assertGraphEquals(expected, actual);
-        }
+        Graph expected = fromGdl(String.format("(a)-[{w:%g}]->(b)", expectedWeight));
+        assertGraphEquals(expected, actual);
     }
 
     @ParameterizedTest
