@@ -31,8 +31,6 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.NodeCursor;
 
 import java.util.Collection;
 import java.util.Map;
@@ -52,7 +50,7 @@ import java.util.function.LongPredicate;
  * <code>degree</code> ~ <code>targetId</code><sub><code>1</code></sub> ~ <code>targetId</code><sub><code>2</code></sub> ~ <code>targetId</code><sub><code>n</code></sub>
  * </blockquote>
  * The {@code degree} is stored as a fill-sized 4 byte long {@code int}
- * (the neo kernel api returns an int for {@link org.neo4j.internal.kernel.api.helpers.Nodes#countAll(NodeCursor, CursorFactory)}).
+ * (the neo kernel api returns an int for {@link org.neo4j.internal.kernel.api.helpers.Nodes#countAll}).
  * Every target ID is first sorted, then delta encoded, and finally written as variable-length vlongs.
  * The delta encoding does not write the actual value but only the difference to the previous value, which plays very nice with the vlong encoding.
  * <p>
