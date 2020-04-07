@@ -155,6 +155,20 @@ CALL gds.graph.removeNodeProperties('my-graph', ['pageRank', 'communityId'])
 ----
 
 
+[[catalog-graph-delete-rel-type]]
+== Removing relationship types from a named graph
+
+We can remove all relationships of a given type from a named graph in the catalog.
+This is useful to free up main memory or to remove accidentally created relationship types.
+
+.Remove all relationships of type T from a named graph:
+[source,cypher]
+----
+CALL gds.graph.deleteRelationshipType('my-graph', 'T')
+YIELD graphName, relationshipType, deletedRelationships, deletedProperties
+----
+
+
 [[catalog-graph-drop]]
 == Removing graphs from the catalog
 
