@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -50,12 +50,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
-import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABEL_IDENTIFIERS;
 
 public final class GraphStore {
@@ -342,23 +341,23 @@ public final class GraphStore {
     }
 
     public DeletionResult deleteRelationshipType(String relationshipType) {
-        ImmutableDeletionResult.Builder builder = ImmutableDeletionResult.builder();
-        updateGraphStore(graphStore -> {
-            builder.deletedRelationships(graphStore.relationships.get(relationshipType).elementCount());
-            builder.deletedProperties(graphStore.relationshipProperties
-                .getOrDefault(relationshipType, RelationshipPropertyStore.empty())
+        return DeletionResult.of(builder ->
+            updateGraphStore(graphStore -> {
+                builder.deletedRelationships(graphStore.relationships.get(relationshipType).elementCount());
+                builder.deletedProperties(graphStore.relationshipProperties
+                    .getOrDefault(relationshipType, RelationshipPropertyStore.empty())
                 .relationshipProperties()
-                .entrySet()
-                .stream()
-                .collect(toMap(
+                    .entrySet()
+                    .stream()
+                    .collect(toMap(
                     entry -> entry.getValue().propertyKey(),
                     entry -> entry.getValue().propertyValues().elementCount()
                 ))
-            );
-            graphStore.relationships.remove(relationshipType);
-            graphStore.relationshipProperties.remove(relationshipType);
-        });
-        return builder.build();
+                );
+                graphStore.relationships.remove(relationshipType);
+                graphStore.relationshipProperties.remove(relationshipType);
+            })
+        );
     }
 
     public Graph getGraph(String... relationshipTypes) {
