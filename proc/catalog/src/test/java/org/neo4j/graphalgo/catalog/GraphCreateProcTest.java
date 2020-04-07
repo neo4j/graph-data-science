@@ -614,8 +614,8 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph weightGraph = GraphStoreCatalog.get("", name).graphStore().getGraph("B", Optional.of("weight"));
-        Graph fooGraph = GraphStoreCatalog.get("", name).graphStore().getGraph("B", Optional.of("foo"));
+        Graph weightGraph = relPropertyGraph(name, "B", "weight");
+        Graph fooGraph = relPropertyGraph(name, "B", "foo");
         assertGraphEquals(fromGdl(String.format("(a)-[{w: %d}]->()", expectedValue)), weightGraph);
         assertGraphEquals(fromGdl("(a)-[{w: 55}]->()"), fooGraph);
     }
@@ -1156,6 +1156,87 @@ class GraphCreateProcTest extends BaseProcTest {
         assertGraphEquals(expected, actual);
     }
 
+    @ParameterizedTest
+    @CsvSource({"SUM, 1337", "MIN, 1337", "MAX, 1337", "COUNT, 1"})
+    void loadAndAggregateWithMissingPropertiesAndNanDefault(Aggregation aggregation, int expectedWeight) {
+        String testGraph =
+            "CREATE" +
+            "  (a: Node)" +
+            ", (b: Node)" +
+            ", (a)-[:TYPE {property: 1337}]->(b)" +   // property hit, value != default
+            ", (a)-[:TYPE]->(b)" +                    // no properties at all
+            ", (a)-[:TYPE {otherProperty: 42}]->(b)"; // different property
+        runQuery(testGraph);
+
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("Node")
+            .withRelationshipProperty("agg", "property", Double.NaN, aggregation)
+            .withRelationshipType("TYPE")
+            .graphCreate("g")
+            .yields();
+        runQuery(query);
+
+        Graph actual = relPropertyGraph("g", "TYPE", "agg");
+        Graph expected = fromGdl(String.format("(a)-[{w:%d}]->(b)", expectedWeight));
+        assertGraphEquals(expected, actual);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"SUM, NaN", "MIN, NaN", "MAX, NaN", "COUNT, 2"})
+    void loadAndAggregateWithMissingPropertiesAndExplicitNanValue(Aggregation aggregation, double expectedWeight) {
+        String testGraph =
+            "CREATE" +
+            "  (a: Node)" +
+            ", (b: Node)" +
+            ", (a)-[:TYPE {property: 1337}]->(b)" +     // property hit, value != default
+            ", (a)-[:TYPE]->(b)" +                      // no properties at all
+            ", (a)-[:TYPE {otherProperty: 42}]->(b)" +  // different property
+            ", (a)-[:TYPE {property: 0.0 / 0.0}]->(b)"; // property hit, value == NaN
+
+        runQuery(testGraph, Collections.emptyMap());
+
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("Node")
+            .withRelationshipProperty("agg", "property", Double.NaN, aggregation)
+            .withRelationshipType("TYPE")
+            .graphCreate("g")
+            .yields();
+        runQuery(query);
+
+        Graph actual = relPropertyGraph("g", "TYPE", "agg");
+        Graph expected = fromGdl(String.format("(a)-[{w:%g}]->(b)", expectedWeight));
+        assertGraphEquals(expected, actual);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"SUM, 1421", "MIN, 42", "MAX, 1337", "COUNT, 1"})
+    void loadAndAggregateWithMissingPropertiesWithNonNanDefault(Aggregation aggregation, int expectedWeight) {
+        String testGraph =
+            "CREATE" +
+            "  (a: Node)" +
+            ", (b: Node)" +
+            ", (a)-[:TYPE {property: 1337}]->(b)" +   // property hit, value != default
+            ", (a)-[:TYPE]->(b)" +                    // no properties at all
+            ", (a)-[:TYPE {otherProperty: 42}]->(b)"; // different property
+
+        runQuery(testGraph, Collections.emptyMap());
+
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("Node")
+            .withRelationshipProperty("agg", "property", 42, aggregation)
+            .withRelationshipType("TYPE")
+            .graphCreate("g")
+            .yields();
+        runQuery(query);
+
+        Graph actual = relPropertyGraph("g", "TYPE", "agg");
+        Graph expected = fromGdl(String.format("(a)-[{w:%d}]->(b)", expectedWeight));
+        assertGraphEquals(expected, actual);
+    }
+
     @Test
     void loadWithRelationshipCountAggregation() {
         String testGraph =
@@ -1191,7 +1272,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         });
 
-        Graph actual = GraphStoreCatalog.get("", "countGraph").graphStore().getGraph("TYPE_1", Optional.of("count"));
+        Graph actual = relPropertyGraph("countGraph", "TYPE_1", "count");
         Graph expected = fromGdl("(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1231,7 +1312,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         });
 
-        Graph actual = GraphStoreCatalog.get("", "countGraph").graphStore().getGraph("TYPE", Optional.of("count"));
+        Graph actual = relPropertyGraph("countGraph", "TYPE", "count");
         Graph expected = fromGdl("(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1276,11 +1357,11 @@ class GraphCreateProcTest extends BaseProcTest {
 
         });
 
-        Graph countActual = GraphStoreCatalog.get("", "countGraph").graphStore().getGraph("TYPE_1", Optional.of("count"));
+        Graph countActual = relPropertyGraph("countGraph", "TYPE_1", "count");
         Graph countExpected = fromGdl("(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(countExpected, countActual);
 
-        Graph fooActual = GraphStoreCatalog.get("", "countGraph").graphStore().getGraph("TYPE_1", Optional.of("foo"));
+        Graph fooActual = relPropertyGraph("countGraph", "TYPE_1", "foo");
         Graph fooExpected = fromGdl("(a)-[{w:2674.0D}]->(b)");
         assertGraphEquals(fooExpected, fooActual);
     }
@@ -1303,9 +1384,9 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query, map("nodeQuery",
             ALL_NODES_QUERY, "relationshipQuery", relationshipQuery));
 
-        Graph foobarGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getGraph("", Optional.of("foobar"));
-        Graph foobazGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getGraph("", Optional.of("foobaz"));
-        Graph raboofGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getGraph("", Optional.of("raboof"));
+        Graph foobarGraph = relPropertyGraph("testGraph", "", "foobar");
+        Graph foobazGraph = relPropertyGraph("testGraph", "", "foobaz");
+        Graph raboofGraph = relPropertyGraph("testGraph", "", "raboof");
 
         Graph expectedFoobarGraph = fromGdl("()-[{w: 23.0D}]->()");
         Graph expectedFoobazGraph = fromGdl("()-[{w: 1984.0D}]->()");
@@ -1742,6 +1823,13 @@ class GraphCreateProcTest extends BaseProcTest {
             .yields("nodeCount");
 
         assertError(query, emptyMap(), "Failed to load relationship with unknown source-node id");
+    }
+
+    private Graph relPropertyGraph(String graphName, String relationshipType, String property) {
+        return GraphStoreCatalog
+            .get(getUsername(), graphName)
+            .graphStore()
+            .getGraph(relationshipType, Optional.of(property));
     }
 
     // Arguments for parameterised tests

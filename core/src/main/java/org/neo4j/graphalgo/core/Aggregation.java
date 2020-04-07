@@ -46,15 +46,30 @@ public enum Aggregation {
         public double merge(double runningTotal, double value) {
             return runningTotal + value;
         }
+
+        @Override
+        public double emptyValue(double mappingDefaultValue) {
+            return Double.isNaN(mappingDefaultValue) ? 0 : mappingDefaultValue;
+        }
     },
     MIN {
         public double merge(double runningTotal, double value) {
             return Math.min(runningTotal, value);
         }
+
+        @Override
+        public double emptyValue(double mappingDefaultValue) {
+            return Double.isNaN(mappingDefaultValue) ? Double.POSITIVE_INFINITY : mappingDefaultValue;
+        }
     },
     MAX {
         public double merge(double runningTotal, double value) {
             return Math.max(runningTotal, value);
+        }
+
+        @Override
+        public double emptyValue(double mappingDefaultValue) {
+            return Double.isNaN(mappingDefaultValue) ? Double.NEGATIVE_INFINITY : mappingDefaultValue;
         }
     },
     COUNT {

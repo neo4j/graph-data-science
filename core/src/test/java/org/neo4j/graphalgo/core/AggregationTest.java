@@ -31,12 +31,32 @@ class AggregationTest {
     private static final double[] inputs = new double[]{1.4, 0.5, 4.2};
 
     @ParameterizedTest
-    @CsvSource({"MAX, 1.4, 4.2", "MIN, 0.5, 0.5", "SINGLE, 1.4, 1.4", "SUM, 1.9, 6.1", "COUNT, 1.9, 6.1"})
-    void testSuccessfulMultipleAggregation(Aggregation strategy, double expectedFirst, double expectedSecond) {
-        double initialValue = inputs[0];
-        double actualFirst = strategy.merge(initialValue, inputs[1]);
-        assertEquals(expectedFirst, actualFirst);
-        assertEquals(expectedSecond, strategy.merge(actualFirst, inputs[2]));
+    @CsvSource({"MAX, 1.4, 1.4, 4.2", "MIN, 1.4, 0.5, 0.5", "SINGLE, 1.4, 1.4, 1.4", "SUM, 1.4, 1.9, 6.1", "COUNT, 1.0, 2.0, 3.0"})
+    void testSuccessfulMultipleAggregation(Aggregation strategy, double expectedFirst, double expectedSecond, double expectedThird) {
+        double first = strategy.normalizePropertyValue(inputs[0]);
+        assertEquals(expectedFirst, first);
+        double second = strategy.merge(first, strategy.normalizePropertyValue(inputs[1]));
+        assertEquals(expectedSecond, second);
+        double third = strategy.merge(second, strategy.normalizePropertyValue(inputs[2]));
+        assertEquals(expectedThird, third);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"MAX, 42, 1337", "MIN, 42, 42", "SUM, 42, 1379", "COUNT, 0, 1"})
+    void testAggregationWithMissingValues(Aggregation strategy, double expectedFirst, double expectedSecond) {
+        double first = strategy.emptyValue(42);
+        assertEquals(expectedFirst, first);
+        double second = strategy.merge(first, strategy.normalizePropertyValue(1337));
+        assertEquals(expectedSecond, second);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"MAX, -Infinity, 42", "MIN, +Infinity, 42", "SUM, 0, 42", "COUNT, 0, 1"})
+    void testAggregationWithMissingValuesAndNanDefault(Aggregation strategy, double expectedFirst, double expectedSecond) {
+        double first = strategy.emptyValue(Double.NaN);
+        assertEquals(expectedFirst, first);
+        double second = strategy.merge(first, strategy.normalizePropertyValue(42));
+        assertEquals(expectedSecond, second);
     }
 
     @Test
