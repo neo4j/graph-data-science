@@ -25,6 +25,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
@@ -48,7 +49,7 @@ public interface GraphDimensions {
     }
 
     @Value.Default
-    default Map<String, Long> relationshipCounts() {
+    default Map<RelationshipType, Long> relationshipCounts() {
         return Collections.emptyMap();
     }
 

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.similarity;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
@@ -60,8 +61,8 @@ import java.util.stream.Stream;
 
 public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput> extends SimilarityAlgorithm<ApproxNearestNeighborsAlgorithm<INPUT>, INPUT> {
 
-    private static final String ANN_OUT_GRAPH = "ANN_OUT";
-    private static final String ANN_IN_GRAPH = "ANN_IN";
+    private static final RelationshipType ANN_OUT_GRAPH = RelationshipType.of("ANN_OUT");
+    private static final RelationshipType ANN_IN_GRAPH = RelationshipType.of("ANN_IN");
 
     private final ApproximateNearestNeighborsConfig config;
     private final SimilarityAlgorithm<?, INPUT> algorithm;
@@ -558,7 +559,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             HugeGraph.Relationships outRelationships = outImporter().build();
             HugeGraph.Relationships inRelationships = inImporter().build();
 
-            Map<String, HugeGraph.TopologyCSR> topology = new HashMap<>();
+            Map<RelationshipType, HugeGraph.TopologyCSR> topology = new HashMap<>();
             topology.put(ANN_OUT_GRAPH, outRelationships.topology());
             topology.put(ANN_IN_GRAPH, inRelationships.topology());
 

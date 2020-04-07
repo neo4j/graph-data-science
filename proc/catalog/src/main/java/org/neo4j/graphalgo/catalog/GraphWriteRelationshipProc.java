@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.catalog;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.GraphWriteRelationshipConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -85,7 +86,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         RelationshipExporter.Builder builder = RelationshipExporter
             .of(
                 api,
-                graphStore.getGraph(config.relationshipType(), config.relationshipProperty()),
+                graphStore.getGraph(RelationshipType.of(config.relationshipType()), config.relationshipProperty()),
                 TerminationFlag.wrap(transaction)
             );
 
@@ -106,7 +107,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
             .build()
             .write(config.relationshipType(), config.relationshipProperty());
 
-        return graphStore.relationshipCount(config.relationshipType());
+        return graphStore.relationshipCount(RelationshipType.of(config.relationshipType()));
     }
 
     public static class Result {

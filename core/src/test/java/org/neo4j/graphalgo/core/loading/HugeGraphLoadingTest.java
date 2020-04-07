@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -32,7 +33,6 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -139,7 +139,7 @@ final class HugeGraphLoadingTest {
 
     @Test
     void testParallelEdgeWithHugeOffsetLoading() {
-        RelationshipType fooRelType = RelationshipType.withName("FOO");
+        org.neo4j.graphdb.RelationshipType fooRelType = org.neo4j.graphdb.RelationshipType.withName("FOO");
         int nodeCount = 1_000;
         int parallelEdgeCount = 10;
 
@@ -195,16 +195,19 @@ final class HugeGraphLoadingTest {
             .build()
             .graphStore(NativeFactory.class);
 
-        Graph natural = graphStore.getGraph("TYPE_NATURAL");
+        Graph natural = graphStore.getGraph(RelationshipType.of("TYPE_NATURAL"));
         assertGraphEquals(fromGdl("({id: 0})-->({id: 1})"), natural);
 
-        Graph reverse = graphStore.getGraph("TYPE_REVERSE");
+        Graph reverse = graphStore.getGraph(RelationshipType.of("TYPE_REVERSE"));
         assertGraphEquals(fromGdl("({id: 1})-->({id: 0})"), reverse);
 
-        Graph undirected = graphStore.getGraph("TYPE_UNDIRECTED");
+        Graph undirected = graphStore.getGraph(RelationshipType.of("TYPE_UNDIRECTED"));
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), undirected);
 
-        Graph both = graphStore.getGraph(Arrays.asList("TYPE_NATURAL", "TYPE_REVERSE"), Optional.empty());
+        Graph both = graphStore.getGraph(Arrays.asList(
+            RelationshipType.of("TYPE_NATURAL"),
+            RelationshipType.of("TYPE_REVERSE")
+        ), Optional.empty());
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), both);
 
         Graph union = graphStore.getUnion();
