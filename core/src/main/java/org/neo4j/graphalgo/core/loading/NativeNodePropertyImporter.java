@@ -19,6 +19,10 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.LongObjectHashMap;
+import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.procedures.LongObjectProcedure;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -45,7 +49,7 @@ import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.IGNORE_LABEL;
 public final class NativeNodePropertyImporter {
 
     private final Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier;
-    private final Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken;
+    private final LongObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken;
     private final boolean containsAnyLabelProjection;
 
     public static Builder builder() {
@@ -54,7 +58,7 @@ public final class NativeNodePropertyImporter {
 
     private NativeNodePropertyImporter(
         Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier,
-        Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken,
+        LongObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken,
         boolean containsAnyLabelProjection
     ) {
         this.buildersByIdentifier = buildersByIdentifier;
@@ -102,12 +106,13 @@ public final class NativeNodePropertyImporter {
                 continue;
             }
 
-            if (buildersByLabelIdAndPropertyToken.containsKey(label)) {
+            IntObjectMap<List<NodePropertiesBuilder>> buildersByPropertyId = buildersByLabelIdAndPropertyToken.get(label);
+            if (buildersByPropertyId != null) {
                 propertiesImported += setPropertyValue(
                     nodeId,
                     propertyCursor,
                     propertyKey,
-                    buildersByLabelIdAndPropertyToken.get(label)
+                    buildersByPropertyId
                 );
             }
         }
@@ -123,11 +128,12 @@ public final class NativeNodePropertyImporter {
         long nodeId,
         PropertyCursor propertyCursor,
         int propertyToken,
-        Map<Integer, List<NodePropertiesBuilder>> buildersByPropertyId
+        IntObjectMap<List<NodePropertiesBuilder>> buildersByPropertyId
     ) {
         int propertiesImported = 0;
-        if (buildersByPropertyId.containsKey(propertyToken)) {
-            List<NodePropertiesBuilder> builders = buildersByPropertyId.get(propertyToken);
+
+        List<NodePropertiesBuilder> builders = buildersByPropertyId.get(propertyToken);
+        if (builders != null) {
             Value value = propertyCursor.propertyValue();
 
             if (value instanceof NumberValue) {
@@ -185,7 +191,7 @@ public final class NativeNodePropertyImporter {
 
         public NativeNodePropertyImporter build() {
             Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> nodePropertyBuilders = initializeNodePropertyBuilders();
-            Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId =
+            LongObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId =
                 buildersByLabelIdAndPropertyId(nodePropertyBuilders);
             return new NativeNodePropertyImporter(
                 nodePropertyBuilders,
@@ -215,23 +221,31 @@ public final class NativeNodePropertyImporter {
             return builders;
         }
 
-        private Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId(Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier) {
+        private LongObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId(Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier) {
             Map<NodeLabel, Long> inverseIdentifierIdMapping = inverseIdentifierIdMapping();
 
-            Map<Long, Map<Integer, List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId = new HashMap<>();
+            LongObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId = new LongObjectHashMap<>();
             buildersByIdentifier.forEach((labelIdentifier, builders) -> {
                 long labelId = inverseIdentifierIdMapping.get(labelIdentifier);
 
-                Map<Integer, List<NodePropertiesBuilder>> buildersByPropertyId =
-                    buildersByLabelIdAndPropertyId.computeIfAbsent(labelId, (ignore) -> new HashMap<>());
+                IntObjectMap<List<NodePropertiesBuilder>> buildersByPropertyToken;
+                if (buildersByLabelIdAndPropertyId.containsKey(labelId)) {
+                    buildersByPropertyToken = buildersByLabelIdAndPropertyId.get(labelId);
+                } else {
+                    buildersByPropertyToken = new IntObjectHashMap<>();
+                    buildersByLabelIdAndPropertyId.put(labelId, buildersByPropertyToken);
+                }
 
                 builders.forEach((propertyMapping, builder) -> {
-                    int propertyId = dimensions.nodePropertyTokens().get(propertyMapping.neoPropertyKey());
+                    int propertyToken = dimensions.nodePropertyTokens().get(propertyMapping.neoPropertyKey());
 
-                    List<NodePropertiesBuilder> builderList = buildersByPropertyId.computeIfAbsent(
-                        propertyId,
-                        (ignore) -> new ArrayList<>()
-                    );
+                    List<NodePropertiesBuilder> builderList;
+                    if (buildersByPropertyToken.containsKey(propertyToken)) {
+                        builderList = buildersByPropertyToken.get(propertyToken);
+                    } else {
+                        builderList = new ArrayList<>();
+                        buildersByPropertyToken.put(propertyToken, builderList);
+                    }
 
                     builderList.add(builder);
                 });
