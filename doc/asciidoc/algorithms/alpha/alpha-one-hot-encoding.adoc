@@ -1,4 +1,5 @@
 [[alpha-algorithms-one-hot-encoding]]
+[.alpha]
 = One Hot Encoding
 
 [abstract]

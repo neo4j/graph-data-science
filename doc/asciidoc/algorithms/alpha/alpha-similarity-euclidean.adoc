@@ -1,6 +1,7 @@
 :procedure-name: Euclidean Distance
 
 [[alpha-algorithms-similarity-euclidean]]
+[.alpha]
 = Euclidean Distance
 
 [abstract]
@@ -10,6 +11,7 @@ This section describes the Euclidean Distance algorithm in the Neo4j Graph Data 
 
 Euclidean distance measures the straight line distance between two points in n-dimensional space.
 
+[.alpha-note]
 include::alpha-note.adoc[tag=alpha-note]
 
 This section includes:

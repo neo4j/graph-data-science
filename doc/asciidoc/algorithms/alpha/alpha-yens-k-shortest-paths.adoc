@@ -1,4 +1,5 @@
 [[alpha-algorithms-yens-k-shortest-path]]
+[.alpha]
 = Yen's K-Shortest Paths
 
 [abstract]

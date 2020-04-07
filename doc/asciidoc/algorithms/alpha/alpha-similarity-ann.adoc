@@ -1,4 +1,5 @@
 [[alpha-algorithms-approximate-nearest-neighbors]]
+[.alpha]
 = Approximate Nearest Neighbors (ANN)
 
 [abstract]

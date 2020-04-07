@@ -1,6 +1,4 @@
 // tag::beta-note[]
-[NOTE]
---
-*This algorithm is in the beta tier and could be changed in a future release.*
---
+[.tier-note]
+This algorithm is in the beta tier. For more information on this tier of algorithm, see <<algorithms, here>>.
 // end::beta-note[]

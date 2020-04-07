@@ -1,4 +1,5 @@
 [[alpha-algorithms-linkprediction-same-community]]
+[.alpha]
 = Same Community
 
 [abstract]

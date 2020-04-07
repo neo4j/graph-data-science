@@ -1,4 +1,5 @@
 [[alpha-algorithms-a_star]]
+[.alpha]
 = A*
 
 [abstract]
