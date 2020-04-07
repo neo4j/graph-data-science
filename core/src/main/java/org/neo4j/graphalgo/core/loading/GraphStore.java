@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
+import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapGraph;
@@ -31,6 +33,7 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.values.storable.NumberType;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -57,7 +60,7 @@ public final class GraphStore {
 
     private final IdMap nodes;
 
-    private final Map<NodeLabel, Map<String, NodeProperties>> nodeProperties;
+    private final Map<NodeLabel, NodePropertyStore> nodeProperties;
 
     private final Map<String, HugeGraph.TopologyCSR> relationships;
 
@@ -76,9 +79,22 @@ public final class GraphStore {
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
     ) {
+        Map<ElementIdentifier, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
+
+        nodeProperties.forEach((elementIdentifier, propertyMap) -> {
+            NodePropertyStore.Builder builder = NodePropertyStore.builder();
+
+            propertyMap.forEach((propertyKey, propertyValues) -> builder.putNodeProperty(
+                propertyKey,
+                ImmutableNodeProperty.of(propertyKey, NumberType.FLOATING_POINT, propertyValues)
+            ));
+
+            nodePropertyStores.put(elementIdentifier, builder.build());
+        });
+
         return new GraphStore(
             nodes,
-            nodeProperties,
+            nodePropertyStores,
             relationships,
             relationshipProperties,
             tracker
@@ -117,7 +133,7 @@ public final class GraphStore {
 
     private GraphStore(
         IdMap nodes,
-        Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
+        Map<NodeLabel, NodePropertyStore> nodeProperties,
         Map<String, HugeGraph.TopologyCSR> relationships,
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
@@ -148,7 +164,7 @@ public final class GraphStore {
     }
 
     public Set<String> nodePropertyKeys(ElementIdentifier label) {
-        return new HashSet<>(nodeProperties.getOrDefault(label, new HashMap<>()).keySet());
+        return new HashSet<>(nodeProperties.getOrDefault(label, NodePropertyStore.empty()).keySet());
     }
 
     public Map<ElementIdentifier, Set<String>> nodePropertyKeys() {
@@ -157,7 +173,9 @@ public final class GraphStore {
 
     public long nodePropertyCount() {
         // TODO: This is not the correct value. We would need to look into the bitsets in order to retrieve the correct value.
-        return nodeProperties.values().stream().mapToLong(properties -> properties.keySet().size()).sum() * nodeCount();
+        return nodeProperties.values().stream()
+                   .mapToLong(nodePropertyStore -> nodePropertyStore.keySet().size())
+                   .sum() * nodeCount();
     }
 
     public boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey) {
@@ -167,22 +185,29 @@ public final class GraphStore {
     }
 
     public void addNodeProperty(NodeLabel nodeLabel, String propertyKey, NodeProperties nodeProperties) {
-        updateGraphStore((graphStore) -> graphStore.nodeProperties.compute(nodeLabel, (k, nodePropertyMap) -> {
-            Map<String, NodeProperties> updatedPropertyMap = nodePropertyMap == null ? new HashMap<>() : nodePropertyMap;
-            updatedPropertyMap.putIfAbsent(propertyKey, nodeProperties);
-            return updatedPropertyMap;
+        updateGraphStore((graphStore) -> graphStore.nodeProperties.compute(nodeLabel, (k, nodePropertyStore) -> {
+            NodePropertyStore.Builder storeBuilder = NodePropertyStore.builder();
+            if (nodePropertyStore != null) {
+                storeBuilder.from(nodePropertyStore);
+            }
+            // TODO: might wanna do a putIfAbsent here
+            storeBuilder.putNodeProperty(propertyKey, NodeProperty.of(propertyKey, NumberType.FLOATING_POINT, nodeProperties));
+            return storeBuilder.build();
         }));
     }
 
     public void removeNodeProperty(NodeLabel nodeLabel, String propertyKey) {
         updateGraphStore(graphStore -> {
             if (graphStore.nodeProperties.containsKey(nodeLabel)) {
-                Map<String, NodeProperties> propertiesForLabel = graphStore.nodeProperties.get(nodeLabel);
+                NodePropertyStore updatedNodePropertyStore = NodePropertyStore.builder()
+                    .from(graphStore.nodeProperties.get(nodeLabel))
+                    .removeProperty(propertyKey)
+                    .build();
 
-                propertiesForLabel.remove(propertyKey);
-
-                if (propertiesForLabel.isEmpty()) {
+                if (updatedNodePropertyStore.isEmpty()) {
                     graphStore.nodeProperties.remove(nodeLabel);
+                } else {
+                    graphStore.nodeProperties.replace(label, updatedNodePropertyStore);
                 }
             }
         });
@@ -191,18 +216,18 @@ public final class GraphStore {
     public NodeProperties nodeProperty(String propertyKey) {
         if (nodes.maybeLabelInformation.isPresent()) {
             Map<NodeLabel, NodeProperties> properties = new HashMap<>();
-            this.nodeProperties.forEach((labelIdentifier, propertyMap) -> {
-                if (propertyMap.containsKey(propertyKey)) {
-                    properties.put(labelIdentifier, propertyMap.get(propertyKey));
+            this.nodeProperties.forEach((labelIdentifier, nodePropertyStore) -> {
+                if (nodePropertyStore.containsKey(propertyKey)) {
+                    properties.put(labelIdentifier, nodePropertyStore.get(propertyKey).propertyValues());
                 }
             });
             return new UnionNodeProperties(properties, nodes.maybeLabelInformation.get());
         }
-        return nodeProperties.get(ALL_NODES).get(propertyKey);
+        return nodeProperties.get(ALL_NODES).get(propertyKey).propertyValues();
     }
 
     public NodeProperties nodeProperty(ElementIdentifier label, String propertyKey) {
-        return this.nodeProperties.getOrDefault(label, Collections.emptyMap()).get(propertyKey);
+        return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey).propertyValues();
     }
 
     public Set<String> relationshipTypes() {
@@ -351,9 +376,11 @@ public final class GraphStore {
         List<IdMapGraph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> {
+                Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(expandedLabels, nodes.maybeLabelInformation);
+
                 HugeGraph initialGraph = HugeGraph.create(
                     this.nodes,
-                    filterNodeProperties(expandedLabels, this.nodes.maybeLabelInformation),
+                    filteredNodeProperties,
                     relTypeAndCSR.getValue(),
                     maybeRelationshipProperty.map(propertyKey -> relationshipProperties
                         .get(relTypeAndCSR.getKey())
@@ -382,29 +409,23 @@ public final class GraphStore {
             return Collections.emptyMap();
         }
         if (labels.size() == 1 || !maybeElementIdentifierBitSetMap.isPresent()) {
-            return this.nodeProperties.get(labels.iterator().next());
+            return this.nodeProperties.get(labels.iterator().next()).nodePropertyValues();
         }
 
         Map<String, Map<NodeLabel, NodeProperties>> invertedNodeProperties = new HashMap<>();
         nodeProperties
             .entrySet()
             .stream()
-            .filter(entry -> labels.contains(entry.getKey()) || labels.contains(ALL_NODES))
-            .forEach(entry -> entry
-                .getValue()
-                .forEach((propertyKey, nodeProperty) -> invertedNodeProperties.compute(
-                    propertyKey,
-                    (k, innerMap) -> {
-                        Map<NodeLabel, NodeProperties> labelToNodePropertiesMap;
-                        if (innerMap == null) {
-                            labelToNodePropertiesMap = new HashMap<>();
-                        } else {
-                            labelToNodePropertiesMap = innerMap;
-                        }
-                        labelToNodePropertiesMap.put(entry.getKey(), nodeProperty);
-                        return labelToNodePropertiesMap;
-                    }
-                )));
+            .filter(entry -> labels.contains(entry.getKey()) || labels.contains(PROJECT_ALL))
+            .forEach(entry -> entry.getValue().nodeProperties()
+                .forEach((propertyKey, nodeProperty) -> invertedNodeProperties
+                    .computeIfAbsent(
+                        propertyKey,
+                        ignored -> new HashMap<>()
+                    )
+                    .put(entry.getKey(), nodeProperty.propertyValues())
+                ));
+
         return invertedNodeProperties
             .entrySet()
             .stream()
@@ -462,5 +483,66 @@ public final class GraphStore {
         updateFunction.accept(this);
         this.modificationTime = LocalDateTime.now();
     }
+
+    @ValueClass
+    public interface NodePropertyStore {
+
+        Map<String, NodeProperty> nodeProperties();
+
+        default Map<String, NodeProperties> nodePropertyValues() {
+            return nodeProperties()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().propertyValues()));
+        }
+
+        default NodeProperty get(String propertyKey) {
+            return nodeProperties().get(propertyKey);
+        }
+
+        default boolean isEmpty() {
+            return nodeProperties().isEmpty();
+        }
+
+        default Set<String> keySet() {
+            return nodeProperties().keySet();
+        }
+
+        default boolean containsKey(String propertyKey) {
+            return nodeProperties().containsKey(propertyKey);
+        }
+
+        static NodePropertyStore empty() {
+            return ImmutableNodePropertyStore.of(Collections.emptyMap());
+        }
+
+        static Builder builder() {
+            return new Builder();
+        }
+
+        @AccessibleFields
+        final class Builder extends ImmutableNodePropertyStore.Builder {
+
+            Builder removeProperty(String propertyKey) {
+                nodeProperties.remove(propertyKey);
+                return this;
+            }
+        }
+    }
+
+    @ValueClass
+    public interface NodeProperty {
+
+        String propertyKey();
+
+        NumberType propertyType();
+
+        NodeProperties propertyValues();
+        static NodeProperty of(String propertyKey, NumberType propertyType, NodeProperties propertyValues) {
+            return ImmutableNodeProperty.of(propertyKey, propertyType, propertyValues);
+        }
+    }
 }
+
+
 
