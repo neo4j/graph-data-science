@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -27,10 +28,17 @@ public interface PropertyTranslator<T> {
 
     Value toProperty(int propertyId, T data, long nodeId);
 
+    NumberType numberType();
+
     double toDouble(final T data, final long nodeId);
 
     interface OfDouble<T> extends PropertyTranslator<T> {
         double toDouble(final T data, final long nodeId);
+
+        @Override
+        default NumberType numberType() {
+            return NumberType.FLOATING_POINT;
+        }
 
         @Override
         default Value toProperty(
@@ -47,6 +55,11 @@ public interface PropertyTranslator<T> {
 
     interface OfInt<T> extends PropertyTranslator<T> {
         int toInt(final T data, final long nodeId);
+
+        @Override
+        default NumberType numberType() {
+            return NumberType.INTEGRAL;
+        }
 
         @Override
         default double toDouble(final T data, final long nodeId) {
@@ -67,6 +80,11 @@ public interface PropertyTranslator<T> {
         long toLong(final T data, final long nodeId);
 
         @Override
+        default NumberType numberType() {
+            return NumberType.INTEGRAL;
+        }
+
+        @Override
         default double toDouble(final T data, final long nodeId) {
             return toLong(data, nodeId);
         }
@@ -83,6 +101,11 @@ public interface PropertyTranslator<T> {
 
     interface OfLongArray<T> extends PropertyTranslator<T> {
         long[] toLongArray(final T data, final long nodeId);
+
+        @Override
+        default NumberType numberType() {
+            return NumberType.NO_NUMBER;
+        }
 
         @Override
         default double toDouble(final T data, final long nodeId) {
@@ -119,6 +142,11 @@ public interface PropertyTranslator<T> {
         @Override
         public double toDouble(final T data, final long nodeId) {
             return newPropertiesFn.getValue(data, nodeId);
+        }
+
+        @Override
+        public NumberType numberType() {
+            return NumberType.INTEGRAL;
         }
 
         @Override

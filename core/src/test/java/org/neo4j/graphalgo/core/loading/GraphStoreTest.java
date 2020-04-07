@@ -56,6 +56,7 @@ import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.values.storable.NumberType.FLOATING_POINT;
 
 class GraphStoreTest {
 
@@ -168,7 +169,7 @@ class GraphStoreTest {
         // add node properties
         LocalDateTime initialTime = graphStore.modificationTime();
         Thread.sleep(42);
-        graphStore.addNodeProperty(ALL_NODES, "foo", new NullPropertyMap(42.0));
+        graphStore.addNodeProperty(ALL_NODES, "foo", FLOATING_POINT, new NullPropertyMap(42.0));
         LocalDateTime nodePropertyTime = graphStore.modificationTime();
 
         // add relationships

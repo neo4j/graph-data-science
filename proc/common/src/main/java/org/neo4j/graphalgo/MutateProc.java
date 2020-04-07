@@ -90,6 +90,7 @@ public abstract class MutateProc<
                 graphStore.addNodeProperty(
                     label,
                     mutatePropertyConfig.mutateProperty(),
+                    resultPropertyTranslator.numberType(),
                     nodeProperties
                 );
             }

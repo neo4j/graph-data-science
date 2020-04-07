@@ -184,14 +184,14 @@ public final class GraphStore {
             .allMatch(label -> nodeProperties.containsKey(label) && nodeProperties.get(label).containsKey(propertyKey));
     }
 
-    public void addNodeProperty(NodeLabel nodeLabel, String propertyKey, NodeProperties nodeProperties) {
+    public void addNodeProperty(NodeLabel nodeLabel, String propertyKey, NumberType propertyType, NodeProperties propertyValues) {
         updateGraphStore((graphStore) -> graphStore.nodeProperties.compute(nodeLabel, (k, nodePropertyStore) -> {
             NodePropertyStore.Builder storeBuilder = NodePropertyStore.builder();
             if (nodePropertyStore != null) {
                 storeBuilder.from(nodePropertyStore);
             }
             // TODO: might wanna do a putIfAbsent here
-            storeBuilder.putNodeProperty(propertyKey, NodeProperty.of(propertyKey, NumberType.FLOATING_POINT, nodeProperties));
+            storeBuilder.putNodeProperty(propertyKey, NodeProperty.of(propertyKey, propertyType, propertyValues));
             return storeBuilder.build();
         }));
     }
