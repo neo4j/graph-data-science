@@ -150,7 +150,7 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
                     .stream()
                     .filter(entry -> entry.getValue().get(nodeId))
                     .map(Map.Entry::getKey))
-            .orElseGet(() -> Stream.of(NodeLabel.PROJECT_ALL_NODES));
+            .orElseGet(() -> Stream.of(NodeLabel.ALL_NODES));
     }
 
     public static final class IdIterable implements PrimitiveLongIterable {

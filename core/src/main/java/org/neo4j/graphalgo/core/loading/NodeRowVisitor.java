@@ -33,7 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private static final String ID_COLUMN = "id";
@@ -120,7 +120,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
             return labels;
         } else {
-            return Collections.singletonList(PROJECT_ALL_NODES.name);
+            return Collections.singletonList(ALL_NODES.name);
         }
     }
 

@@ -28,12 +28,12 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
 @DataClass
 public abstract class AbstractRelationshipProjection extends ElementProjection {
 
-    private static final RelationshipProjection ALL = of(PROJECT_ALL_RELATIONHIPS.name, Orientation.NATURAL);
+    private static final RelationshipProjection ALL = of(ALL_RELATIONSHIPS.name, Orientation.NATURAL);
 
     public abstract String type();
 
@@ -56,7 +56,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     @Override
     public boolean projectAll() {
-        return type().equals(PROJECT_ALL_RELATIONHIPS.name);
+        return type().equals(ALL_RELATIONSHIPS.name);
     }
 
     public static final String TYPE_KEY = "type";

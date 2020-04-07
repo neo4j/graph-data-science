@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -68,8 +68,8 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         if (StringUtils.isEmpty(typeString)) {
             create(emptyMap());
         }
-        if (typeString.equals(PROJECT_ALL_RELATIONHIPS.name)) {
-            return create(singletonMap(PROJECT_ALL_RELATIONHIPS, RelationshipProjection.all()));
+        if (typeString.equals(ALL_RELATIONSHIPS.name)) {
+            return create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.all()));
         }
 
         RelationshipType relationshipType = RelationshipType.of(typeString);
@@ -124,7 +124,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             throw new IllegalArgumentException(
                 "An empty relationship projection was given; at least one relationship type must be projected.");
         }
-        if (projections.size() > 1 && projections.containsKey(PROJECT_ALL_RELATIONHIPS)) {
+        if (projections.size() > 1 && projections.containsKey(ALL_RELATIONSHIPS)) {
             throw new IllegalArgumentException(
                 "A star projection (all relationships) cannot be combined with another projection.");
         }
@@ -153,7 +153,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         ));
         if (newProjections.isEmpty()) {
             newProjections.put(
-                PROJECT_ALL_RELATIONHIPS,
+                ALL_RELATIONSHIPS,
                 operator.apply(RelationshipProjection.all())
             );
         }

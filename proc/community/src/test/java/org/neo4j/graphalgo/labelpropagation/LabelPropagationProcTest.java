@@ -51,7 +51,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, LabelPropagation>,
@@ -140,7 +140,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
                 .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed", "weight")))
                 .relationshipProjections(RelationshipProjections.builder()
                     .putProjection(
-                        PROJECT_ALL_RELATIONHIPS,
+                        ALL_RELATIONSHIPS,
                         RelationshipProjection.builder()
                             .type("X")
                             .orientation(orientation)

@@ -67,7 +67,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -166,7 +166,7 @@ public abstract class AlgoBaseProc<
     private GraphCreateConfig filterGraphCreateConfig(CONFIG config, GraphCreateConfig graphCreateConfig) {
         NodeProjections nodeProjections = graphCreateConfig.nodeProjections();
         List<NodeLabel> nodeLabels = config.nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
-        if (nodeLabels.contains(PROJECT_ALL_NODES)) {
+        if (nodeLabels.contains(ALL_NODES)) {
             return graphCreateConfig;
         } else {
             NodeProjections.Builder builder = NodeProjections.builder();
@@ -263,7 +263,7 @@ public abstract class AlgoBaseProc<
             return;
         }
 
-        Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers().contains(PROJECT_ALL_NODES)
+        Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers().contains(ALL_NODES)
             ? graphStore.nodeLabels()
             : config.nodeLabelIdentifiers();
         if (config instanceof SeedConfig) {

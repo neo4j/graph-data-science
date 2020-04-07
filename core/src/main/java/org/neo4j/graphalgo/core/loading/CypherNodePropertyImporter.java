@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.core.loading.CypherNodeLoader.CYPHER_RESULT_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
 import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.IGNORE_LABEL;
@@ -93,7 +93,7 @@ public class CypherNodePropertyImporter {
         int propertiesImported = 0;
 
         // If there is a node projection for ANY label, then we need to consume the node properties regardless.
-        propertiesImported += setPropertyForLabel(PROJECT_ALL_NODES, nodeProperties, nodeId);
+        propertiesImported += setPropertyForLabel(ALL_NODES, nodeProperties, nodeId);
 
         for (long label : labels) {
             if (label == IGNORE_LABEL || label == ANY_LABEL) {

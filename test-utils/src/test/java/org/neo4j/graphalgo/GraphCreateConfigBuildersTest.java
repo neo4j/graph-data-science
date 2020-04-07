@@ -33,8 +33,8 @@ import java.util.Collections;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
@@ -55,10 +55,10 @@ class GraphCreateConfigBuildersTest {
                 new StoreConfigBuilder().loadAnyLabel().loadAnyRelationshipType().build(),
                 ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.builder()
-                        .putProjection(PROJECT_ALL_NODES, NodeProjection.all())
+                        .putProjection(ALL_NODES, NodeProjection.all())
                         .build())
                     .relationshipProjections(RelationshipProjections.builder()
-                        .putProjection(PROJECT_ALL_RELATIONHIPS, RelationshipProjection.all())
+                        .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.all())
                         .build())
                     .nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())
@@ -247,7 +247,7 @@ class GraphCreateConfigBuildersTest {
                     .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
                     .nodeProjections(NodeProjections.empty())
                     .relationshipProjections(RelationshipProjections.builder()
-                        .putProjection(PROJECT_ALL_RELATIONHIPS, RelationshipProjection.of("*", Orientation.NATURAL, Aggregation.MAX))
+                        .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.of("*", Orientation.NATURAL, Aggregation.MAX))
                         .build())
                     .nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of(PropertyMapping.of("foo", 42.0D, Aggregation.MAX)))

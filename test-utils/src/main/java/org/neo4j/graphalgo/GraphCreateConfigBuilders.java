@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
@@ -158,7 +158,7 @@ final class GraphCreateConfigBuilders {
             Aggregation aggregation = globalAggregation.get();
             relationshipProjections = RelationshipProjections.builder()
                 .putProjection(
-                    PROJECT_ALL_RELATIONHIPS,
+                    ALL_RELATIONSHIPS,
                     RelationshipProjection.of("*", Orientation.NATURAL, aggregation)
                 )
                 .build();

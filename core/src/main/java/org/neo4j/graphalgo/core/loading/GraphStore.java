@@ -49,8 +49,8 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABEL_IDENTIFIERS;
 
 public final class GraphStore {
@@ -97,7 +97,7 @@ public final class GraphStore {
 
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties = new HashMap<>();
         nodeProperties.put(
-            PROJECT_ALL_NODES,
+            ALL_NODES,
             graph.availableNodeProperties().stream().collect(Collectors.toMap(
                 Function.identity(),
                 graph::nodeProperties
@@ -144,7 +144,7 @@ public final class GraphStore {
             .nodes
             .maybeLabelInformation
             .map(Map::keySet)
-            .orElseGet(() -> Collections.singleton(PROJECT_ALL_NODES)));
+            .orElseGet(() -> Collections.singleton(ALL_NODES)));
     }
 
     public Set<String> nodePropertyKeys(ElementIdentifier label) {
@@ -198,7 +198,7 @@ public final class GraphStore {
             });
             return new UnionNodeProperties(properties, nodes.maybeLabelInformation.get());
         }
-        return nodeProperties.get(PROJECT_ALL_NODES).get(propertyKey);
+        return nodeProperties.get(ALL_NODES).get(propertyKey);
     }
 
     public NodeProperties nodeProperty(ElementIdentifier label, String propertyKey) {
@@ -329,8 +329,8 @@ public final class GraphStore {
         Optional<String> maybeRelationshipProperty,
         int concurrency
     ) {
-        boolean loadAllRelationships = relationshipTypes.contains(PROJECT_ALL_RELATIONHIPS.name);
-        boolean loadAllNodes = filteredLabels.contains(PROJECT_ALL_NODES);
+        boolean loadAllRelationships = relationshipTypes.contains(ALL_RELATIONSHIPS.name);
+        boolean loadAllNodes = filteredLabels.contains(ALL_NODES);
 
         Collection<NodeLabel> expandedLabels = loadAllNodes ? nodeLabels() : filteredLabels;
 
@@ -389,7 +389,7 @@ public final class GraphStore {
         nodeProperties
             .entrySet()
             .stream()
-            .filter(entry -> labels.contains(entry.getKey()) || labels.contains(PROJECT_ALL_NODES))
+            .filter(entry -> labels.contains(entry.getKey()) || labels.contains(ALL_NODES))
             .forEach(entry -> entry
                 .getValue()
                 .forEach((propertyKey, nodeProperty) -> invertedNodeProperties.compute(
@@ -436,7 +436,7 @@ public final class GraphStore {
             ));
         }
 
-        if (!relationshipTypes.contains(PROJECT_ALL_RELATIONHIPS.name)) {
+        if (!relationshipTypes.contains(ALL_RELATIONSHIPS.name)) {
             relationshipTypes.forEach(relationshipType -> {
                 if (!relationships.containsKey(relationshipType)) {
                     throw new IllegalArgumentException(String.format(

@@ -25,12 +25,12 @@ import org.neo4j.graphalgo.annotation.DataClass;
 
 import java.util.Map;
 
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 @DataClass
 public abstract class AbstractNodeProjection extends ElementProjection {
 
-    private static final NodeProjection ALL = of(PROJECT_ALL_NODES.name);
+    private static final NodeProjection ALL = of(ALL_NODES.name);
 
     public abstract String label();
 
@@ -42,7 +42,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
 
     @Override
     public boolean projectAll() {
-        return label().equals(PROJECT_ALL_NODES.name);
+        return label().equals(ALL_NODES.name);
     }
 
     public static final String LABEL_KEY = "label";

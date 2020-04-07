@@ -45,8 +45,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
 class GdsCypherTest {
 
@@ -54,8 +54,8 @@ class GdsCypherTest {
         ImmutableGraphCreateFromStoreConfig.of(
             "",
             "",
-            NodeProjections.fromString(PROJECT_ALL_NODES.name),
-            RelationshipProjections.fromString(PROJECT_ALL_RELATIONHIPS.name)
+            NodeProjections.fromString(ALL_NODES.name),
+            RelationshipProjections.fromString(ALL_RELATIONSHIPS.name)
         );
 
     private static final String STAR_PROJECTION_CYPHER_SYNTAX =

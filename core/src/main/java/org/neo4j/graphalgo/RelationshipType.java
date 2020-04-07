@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class RelationshipType extends ElementIdentifier {
 
-    public static final RelationshipType PROJECT_ALL_RELATIONHIPS = RelationshipType.of("*");
+    public static final RelationshipType ALL_RELATIONSHIPS = RelationshipType.of("*");
 
     public RelationshipType(String name) {
         super(name);
@@ -31,7 +31,7 @@ public class RelationshipType extends ElementIdentifier {
 
     @Override
     public ElementIdentifier projectAll() {
-        return PROJECT_ALL_RELATIONHIPS;
+        return ALL_RELATIONSHIPS;
     }
 
     public static RelationshipType of(@NotNull String name) {

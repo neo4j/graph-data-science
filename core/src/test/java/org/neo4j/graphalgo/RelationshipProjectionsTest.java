@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 
@@ -110,7 +110,7 @@ class RelationshipProjectionsTest {
         RelationshipProjections actual = RelationshipProjections.fromObject("*");
 
         RelationshipProjections expected = RelationshipProjections.builder()
-            .projections(singletonMap(PROJECT_ALL_RELATIONHIPS, RelationshipProjection.all()))
+            .projections(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.all()))
             .build();
 
         assertThat(actual, equalTo(expected));
