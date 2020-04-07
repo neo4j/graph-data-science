@@ -36,12 +36,15 @@ import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class GraphMutateProcIntegrationTest extends BaseProcTest {
 
     private static final String TEST_GRAPH = "testGraph";
+    private static final String TEST_GRAPH2 = "testGraph2";
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -57,7 +60,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         ", (j:Node { nodeId: 9 })" +
         ", (k:Node { nodeId: 10 })" +
         ", (l:Node { nodeId: 11 })" +
-        ", (a)-[:TYPE]->(b)" +
+        ", (a)-[:TYPE {p: 10}]->(b)" +
         ", (b)-[:TYPE]->(c)" +
         ", (c)-[:TYPE]->(d)" +
         ", (d)-[:TYPE]->(e)" +
@@ -117,8 +120,17 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .call()
             .withAnyLabel()
             .withNodeProperty("nodeId")
-            .withAnyRelationshipType()
+            .withRelationshipType("TYPE")
             .graphCreate(TEST_GRAPH)
+            .yields());
+
+        runQuery(GdsCypher
+            .call()
+            .withAnyLabel()
+            .withNodeProperty("nodeId")
+            .withRelationshipType("TYPE")
+            .withRelationshipProperty("p", 2.0)
+            .graphCreate(TEST_GRAPH2)
             .yields());
     }
 
@@ -217,14 +229,27 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
 
     @Test
     void shouldBeAbleToMutateAndDelete() {
-        IdMapGraph graphBefore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion();
+        IdMapGraph graphBefore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH2).graphStore().getUnion();
 
-        runQuery("CALL gds.nodeSimilarity.mutate('testGraph', {mutateRelationshipType: 'SIM', mutateProperty: 'foo'})");
-        IdMapGraph graphAfterMutate = GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion();
+        runQuery("CALL gds.nodeSimilarity.mutate('testGraph2', {mutateRelationshipType: 'SIM', mutateProperty: 'foo'})");
+        IdMapGraph graphAfterMutate = GraphStoreCatalog.get(getUsername(), TEST_GRAPH2).graphStore().getUnion();
         assertNotEquals(graphBefore.relationshipCount(), graphAfterMutate.relationshipCount());
 
-        runQuery("CALL gds.graph.deleteRelationshipType('testGraph', 'SIM')");
-        IdMapGraph graphAfterDelete = GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion();
+        assertCypherResult(
+            "CALL gds.graph.deleteRelationshipType('testGraph2', 'SIM') YIELD deletedProperties",
+            singletonList(map("deletedProperties", map("foo", 2L)))
+        );
+        IdMapGraph graphAfterDelete = GraphStoreCatalog.get(getUsername(), TEST_GRAPH2).graphStore().getUnion();
         TestSupport.assertGraphEquals(graphBefore, graphAfterDelete);
+    }
+
+    @Test
+    void shouldNotDeletePropertiesWhenNoneOnTheRelType() {
+        runQuery("CALL gds.nodeSimilarity.mutate('testGraph', {mutateRelationshipType: 'SIM', mutateProperty: 'foo'})");
+
+        assertCypherResult(
+            "CALL gds.graph.deleteRelationshipType('testGraph', 'TYPE') YIELD deletedProperties",
+            singletonList(map("deletedProperties", map()))
+        );
     }
 }
