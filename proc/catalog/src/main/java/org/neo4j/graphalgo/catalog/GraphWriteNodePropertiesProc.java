@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
 import java.util.List;
@@ -86,11 +87,25 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
             .build();
 
         Collection<NodePropertyExporter.NodeProperty<?>> nodeProperties = nodePropertyKeys.stream()
-            .map(nodePropertyKey -> ImmutableNodeProperty.of(
-                nodePropertyKey,
-                graphStore.nodeProperty(nodePropertyKey),
-                (PropertyTranslator.OfDouble<NodeProperties>) NodeProperties::nodeProperty
-            )).collect(Collectors.toList());
+            .map(nodePropertyKey -> {
+                NumberType propertyType = graphStore.nodePropertyType(nodePropertyKey);
+
+                if (propertyType == NumberType.FLOATING_POINT) {
+                    return ImmutableNodeProperty.of(
+                        nodePropertyKey,
+                        graphStore.nodeProperty(nodePropertyKey),
+                        (PropertyTranslator.OfDouble<NodeProperties>) NodeProperties::nodeProperty
+                    );
+                } else if (propertyType == NumberType.INTEGRAL) {
+                    return ImmutableNodeProperty.of(
+                        nodePropertyKey,
+                        graphStore.nodeProperty(nodePropertyKey),
+                        (PropertyTranslator.OfLong<NodeProperties>) (data, nodeId) -> (long) data.nodeProperty(nodeId)
+                    );
+                } else {
+                    throw new UnsupportedOperationException("Writing non-numeric data is not supported.");
+                }
+            }).collect(Collectors.toList());
 
         exporter.write(nodeProperties);
 

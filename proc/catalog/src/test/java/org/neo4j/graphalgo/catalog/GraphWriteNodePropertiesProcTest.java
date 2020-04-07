@@ -24,12 +24,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -75,7 +79,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     }
 
     @Test
-    void writeNodeProperties() {
+    void writeLoadedNodeProperties() {
         String graphWriteQuery = String.format(
             "CALL gds.graph.writeNodeProperties(" +
             "   '%s', " +
@@ -105,6 +109,55 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             map("newProp1", 3D, "newProp2", 45D),
             map("newProp1", 4D, "newProp2", 46D),
             map("newProp1", 5D, "newProp2", 47D)
+        ));
+    }
+
+    @Test
+    void writeMutatedNodeProperties() {
+        long expectedPropertyCount = 6;
+
+        GraphStoreCatalog
+            .get(getUsername(), TEST_GRAPH_NAME)
+            .graphStore()
+            .addNodeProperty(ElementIdentifier.of("*"), "newNodeProp3", NumberType.INTEGRAL, new NodeProperties() {
+                @Override
+                public double nodeProperty(long nodeId) {
+                    return nodeId;
+                }
+
+                @Override
+                public long size() {
+                    return expectedPropertyCount;
+                }
+            });
+
+        String graphWriteQuery = String.format(
+            "CALL gds.graph.writeNodeProperties(" +
+            "   '%s', " +
+            "   ['newNodeProp3']" +
+            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
+            TEST_GRAPH_NAME
+        );
+
+        runQueryWithRowConsumer(graphWriteQuery, row -> {
+            assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
+            assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
+            assertEquals(Collections.singletonList("newNodeProp3"), row.get("nodeProperties"));
+            assertEquals(expectedPropertyCount, row.getNumber("propertiesWritten").longValue());
+        });
+
+        String validationQuery =
+            "MATCH (n) " +
+            "RETURN n.newNodeProp3 AS newProp3 " +
+            "ORDER BY newProp3 ASC";
+
+        assertCypherResult(validationQuery, asList(
+            map("newProp3", 0L),
+            map("newProp3", 1L),
+            map("newProp3", 2L),
+            map("newProp3", 3L),
+            map("newProp3", 4L),
+            map("newProp3", 5L)
         ));
     }
 

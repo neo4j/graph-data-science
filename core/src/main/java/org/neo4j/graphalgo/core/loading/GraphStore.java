@@ -226,6 +226,14 @@ public final class GraphStore {
         return nodeProperties.get(ALL_NODES).get(propertyKey).propertyValues();
     }
 
+    public NumberType nodePropertyType(String propertyKey) {
+        return nodeProperties.values().stream()
+            .filter(propertyStore -> propertyStore.containsKey(propertyKey))
+            .map(propertyStore -> propertyStore.get(propertyKey).propertyType())
+            .findFirst()
+            .orElse(NumberType.NO_NUMBER);
+    }
+
     public NodeProperties nodeProperty(ElementIdentifier label, String propertyKey) {
         return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey).propertyValues();
     }
