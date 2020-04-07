@@ -32,7 +32,6 @@ import java.lang.annotation.Target;
     allParameters = true,
     builderVisibility = Value.Style.BuilderVisibility.SAME,
     clearBuilder = true,
-    deepImmutablesDetection = true,
     deferCollectionAllocation = true,
     depluralize = true,
     headerComments = true,
