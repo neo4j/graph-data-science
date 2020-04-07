@@ -1,4 +1,5 @@
 [[alpha-algorithms-random-walk]]
+[.alpha]
 = Random Walk
 
 [abstract]

@@ -1,4 +1,5 @@
 [[alpha-algorithms-linkprediction-preferential-attachment]]
+[.alpha]
 = Preferential Attachment
 
 [abstract]

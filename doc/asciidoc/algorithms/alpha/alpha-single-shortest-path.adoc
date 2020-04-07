@@ -1,4 +1,5 @@
 [[alpha-algorithms-single-source-shortest-path]]
+[.alpha]
 = Single Source Shortest Path
 
 [abstract]

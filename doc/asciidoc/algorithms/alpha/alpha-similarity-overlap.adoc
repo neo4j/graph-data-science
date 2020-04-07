@@ -1,4 +1,5 @@
 [[alpha-algorithms-similarity-overlap]]
+[.alpha]
 = Overlap Similarity
 
 [abstract]
