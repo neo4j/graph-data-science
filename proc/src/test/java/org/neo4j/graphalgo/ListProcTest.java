@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.graphalgo.catalog.GraphDeleteRelationshipProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
@@ -88,6 +89,7 @@ class ListProcTest extends BaseProcTest {
         "gds.graph.create.cypher",
         "gds.graph.create.cypher.estimate",
         "gds.graph.create.estimate",
+        "gds.graph.deleteRelationshipType",
         "gds.graph.drop",
         "gds.graph.exists",
         "gds.graph.list",
@@ -166,6 +168,7 @@ class ListProcTest extends BaseProcTest {
             GraphExistsProc.class,
             GraphListProc.class,
             GraphGenerateProc.class,
+            GraphDeleteRelationshipProc.class,
             K1ColoringMutateProc.class,
             K1ColoringWriteProc.class,
             K1ColoringStreamProc.class,

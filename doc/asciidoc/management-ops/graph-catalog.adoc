@@ -30,7 +30,7 @@ This chapter explains the available graph catalog operations.
 | <<catalog-graph-list, gds.graph.list>>                                   | Prints information about graphs that are currently stored in the catalog.
 | <<catalog-graph-exists, gds.graph.exists>>                               | Checks if a named graph is stored in the catalog.
 | <<catalog-graph-remove-node-properties, gds.graph.removeNodeProperties>> | Removes node properties from a named graph.
-| <<catalog-graph-delete-rel-type, gds.graph.deleteRelationshipType>>      | Removes relationships from a named graph.
+| <<catalog-graph-delete-rel-type, gds.graph.deleteRelationshipType>>      | Deletes relationships from a named graph.
 | <<catalog-graph-drop, gds.graph.drop>>                                   | Removes a named graph from the catalog.
 | <<catalog-graph-write-node-properties, gds.graph.writeNodeProperties>>   | Writes node properties stored in a named graph to Neo4j.
 | <<catalog-graph-write-relationship, gds.graph.writeRelationship>>        | Writes relationships stored in a named graph to Neo4j.
@@ -157,12 +157,12 @@ CALL gds.graph.removeNodeProperties('my-graph', ['pageRank', 'communityId'])
 
 
 [[catalog-graph-delete-rel-type]]
-== Removing relationship types from a named graph
+== Deleting relationship types from a named graph
 
-We can remove all relationships of a given type from a named graph in the catalog.
+We can delete all relationships of a given type from a named graph in the catalog.
 This is useful to free up main memory or to remove accidentally created relationship types.
 
-.Remove all relationships of type T from a named graph:
+.Delete all relationships of type T from a named graph:
 [source,cypher]
 ----
 CALL gds.graph.deleteRelationshipType('my-graph', 'T')
