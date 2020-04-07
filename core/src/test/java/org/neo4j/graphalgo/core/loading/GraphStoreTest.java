@@ -183,7 +183,7 @@ class GraphStoreTest {
             42.0
         );
         Thread.sleep(42);
-        graphStore.addRelationshipType("BAR", Optional.empty(), relationships);
+        graphStore.addRelationshipType("BAR", Optional.empty(), Optional.empty(), relationships);
         LocalDateTime relationshipTime = graphStore.modificationTime();
 
         assertTrue(initialTime.isBefore(nodePropertyTime), "Node property update did not change modificationTime");
