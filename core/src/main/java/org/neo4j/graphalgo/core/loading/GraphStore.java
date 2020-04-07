@@ -190,9 +190,9 @@ public final class GraphStore {
             if (nodePropertyStore != null) {
                 storeBuilder.from(nodePropertyStore);
             }
-            // TODO: might wanna do a putIfAbsent here
-            storeBuilder.putNodeProperty(propertyKey, NodeProperty.of(propertyKey, propertyType, propertyValues));
-            return storeBuilder.build();
+            return storeBuilder
+                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, propertyType, propertyValues))
+                .build();
         }));
     }
 
@@ -530,6 +530,11 @@ public final class GraphStore {
 
         @AccessibleFields
         final class Builder extends ImmutableNodePropertyStore.Builder {
+
+            Builder putIfAbsent(String propertyKey, NodeProperty nodeProperty) {
+                nodeProperties.putIfAbsent(propertyKey, nodeProperty);
+                return this;
+            }
 
             Builder removeProperty(String propertyKey) {
                 nodeProperties.remove(propertyKey);
