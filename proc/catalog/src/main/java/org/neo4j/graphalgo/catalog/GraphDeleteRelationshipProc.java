@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
@@ -28,8 +30,10 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toMap;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDeleteRelationshipProc extends CatalogProc {
@@ -64,7 +68,26 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
 
         DeletionResult deletionResult = graphStoreWithConfig.graphStore().deleteRelationshipType(relationshipType);
 
-        return Stream.of(new Result(graphName, relationshipType, deletionResult));
+        // We have to post-filter to hide the fact that we delete properties for other relationship projections
+        Set<String> declaredProperties = graphStoreWithConfig
+            .config()
+            .relationshipProjections()
+            .projections()
+            .get(ElementIdentifier.of(relationshipType)).properties().mappings()
+            .stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet());
+
+        DeletionResult filteredDeletionResult = DeletionResult.of(builder -> {
+            builder
+                .from(deletionResult)
+                .deletedProperties(deletionResult
+                    .deletedProperties()
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> declaredProperties.contains(entry.getKey()))
+                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        });
+
+        return Stream.of(new Result(graphName, relationshipType, filteredDeletionResult));
     }
 
     public static class Result {
