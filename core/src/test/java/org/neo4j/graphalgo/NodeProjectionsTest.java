@@ -37,7 +37,7 @@ import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class NodeProjectionsTest {
@@ -109,7 +109,7 @@ class NodeProjectionsTest {
         NodeProjections actual = NodeProjections.fromObject("*");
 
         NodeProjections expected = NodeProjections.builder().projections(singletonMap(
-            PROJECT_ALL_NODES,
+            ALL_NODES,
             NodeProjection
                 .builder()
                 .label("*")
@@ -121,7 +121,7 @@ class NodeProjectionsTest {
             actual,
             equalTo(expected)
         );
-        assertThat(actual.labelProjection(), equalTo(PROJECT_ALL_NODES.name));
+        assertThat(actual.labelProjection(), equalTo(ALL_NODES.name));
     }
 
     @Test

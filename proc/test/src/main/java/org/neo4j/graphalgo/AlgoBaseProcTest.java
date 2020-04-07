@@ -63,9 +63,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.BaseProcTest.anonymousGraphConfig;
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
@@ -143,11 +143,11 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
             NodeProjections expectedNodeProjections = NodeProjections
                 .builder()
-                .putProjection(PROJECT_ALL_NODES, NodeProjection.all())
+                .putProjection(ALL_NODES, NodeProjection.all())
                 .build();
             RelationshipProjections expectedRelationshipProjections = RelationshipProjections
                 .builder()
-                .putProjection(PROJECT_ALL_RELATIONHIPS, RelationshipProjection.all())
+                .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.all())
                 .build();
 
             assertEquals(expectedNodeProjections, actual.nodeProjections());
@@ -428,12 +428,12 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
     static Stream<Arguments> failingConfigurationMaps() {
         return Stream.of(
             Arguments.of(FAIL_ANY_CONFIG, MapUtil.map()),
-            Arguments.of("No value specified for the mandatory configuration parameter `relationshipProjection`", MapUtil.map(NODE_PROJECTION_KEY, PROJECT_ALL_NODES.name)),
-            Arguments.of("No value specified for the mandatory configuration parameter `nodeProjection`", MapUtil.map(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL_RELATIONHIPS.name)),
+            Arguments.of("No value specified for the mandatory configuration parameter `relationshipProjection`", MapUtil.map(NODE_PROJECTION_KEY, ALL_NODES.name)),
+            Arguments.of("No value specified for the mandatory configuration parameter `nodeProjection`", MapUtil.map(RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name)),
             Arguments.of("No value specified for the mandatory configuration parameter `relationshipQuery`", MapUtil.map(NODE_QUERY_KEY, ALL_NODES_QUERY)),
             Arguments.of("No value specified for the mandatory configuration parameter `nodeQuery`", MapUtil.map(RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
-            Arguments.of(FAIL_ANY_CONFIG, MapUtil.map(NODE_PROJECTION_KEY, PROJECT_ALL_NODES.name, RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
-            Arguments.of(FAIL_ANY_CONFIG, MapUtil.map(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL_RELATIONHIPS.name, NODE_QUERY_KEY, ALL_NODES_QUERY))
+            Arguments.of(FAIL_ANY_CONFIG, MapUtil.map(NODE_PROJECTION_KEY, ALL_NODES.name, RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)),
+            Arguments.of(FAIL_ANY_CONFIG, MapUtil.map(RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name, NODE_QUERY_KEY, ALL_NODES_QUERY))
         );
     }
 

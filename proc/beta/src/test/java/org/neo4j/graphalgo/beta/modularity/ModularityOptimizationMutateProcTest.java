@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GdsCypher.ExecutionModes.MUTATE;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
 class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements GraphMutationTest<ModularityOptimizationMutateConfig, ModularityOptimization> {
 
@@ -210,7 +210,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
                 .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed1", "seed2")))
                 .relationshipProjections(RelationshipProjections.builder()
                     .putProjection(
-                        PROJECT_ALL_RELATIONHIPS,
+                        ALL_RELATIONSHIPS,
                         RelationshipProjection.builder()
                             .type("TYPE")
                             .orientation(Orientation.UNDIRECTED)

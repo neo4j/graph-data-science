@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class NodeLabel extends ElementIdentifier {
 
-    public static final NodeLabel PROJECT_ALL_NODES = NodeLabel.of("*");
+    public static final NodeLabel ALL_NODES = NodeLabel.of("*");
 
     public NodeLabel(String name) {
         super(name);
@@ -31,7 +31,7 @@ public class NodeLabel extends ElementIdentifier {
 
     @Override
     public ElementIdentifier projectAll() {
-        return PROJECT_ALL_NODES;
+        return ALL_NODES;
     }
 
     public static NodeLabel of(@NotNull String name) {

@@ -50,9 +50,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
@@ -143,7 +143,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
         List<String> relationshipProperties = singletonList("a");
         Map<String, Object> tempConfig = map(
             "relationshipWeightProperty", "foo",
-            NODE_PROJECTION_KEY, PROJECT_ALL_NODES.name,
+            NODE_PROJECTION_KEY, ALL_NODES.name,
             RELATIONSHIP_PROJECTION_KEY, map(
                 "A", map(
                     "properties", relationshipProperties
@@ -284,7 +284,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             NODE_PROJECTION_KEY, NodeProjections.builder()
                 .putProjection(NodeLabel.of(labelString), NodeProjection.of(labelString, PropertyMappings.of()))
                 .build(),
-            RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL_RELATIONHIPS.name,
+            RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name,
             "relationshipProperties", "weight1"
         ));
         CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);

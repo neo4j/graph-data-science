@@ -28,14 +28,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 public interface AlgoBaseConfig extends BaseConfig {
 
     int DEFAULT_CONCURRENCY = 4;
     String NODE_LABELS_KEY = "nodeLabels";
-    List<String> ALL_NODE_LABELS = Collections.singletonList(PROJECT_ALL_NODES.name());
-    List<NodeLabel> ALL_NODE_LABEL_IDENTIFIERS = Collections.singletonList(PROJECT_ALL_NODES);
+    List<String> ALL_NODE_LABELS = Collections.singletonList(ALL_NODES.name());
+    List<NodeLabel> ALL_NODE_LABEL_IDENTIFIERS = Collections.singletonList(ALL_NODES);
 
     @Value.Default
     default int concurrency() {

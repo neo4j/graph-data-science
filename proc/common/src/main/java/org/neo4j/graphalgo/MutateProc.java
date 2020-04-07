@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 public abstract class MutateProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -82,7 +82,7 @@ public abstract class MutateProc<
                 nodeProperties = nodeId -> resultPropertyTranslator.toDouble(result, nodeId);
             }
 
-            Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers().contains(PROJECT_ALL_NODES)
+            Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers().contains(ALL_NODES)
                 ? graphStore.nodeLabels()
                 : mutatePropertyConfig.nodeLabelIdentifiers();
 

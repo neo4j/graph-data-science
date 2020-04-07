@@ -42,8 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
-import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
@@ -115,10 +115,10 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
         NodeProjections nodeProjections = NodeProjections.builder()
             .putProjection(
-                PROJECT_ALL_NODES,
+                ALL_NODES,
                 NodeProjection
                     .builder()
-                    .label(PROJECT_ALL_NODES.name)
+                    .label(ALL_NODES.name)
                     .addPropertyMappings(PropertyMappings.of(nodeProperties))
                     .build()
             ).build();
@@ -127,7 +127,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
         RelationshipProjections.Builder relProjectionBuilder = RelationshipProjections.builder();
         dimensions.relationshipProjectionMappings().stream().forEach(typeMapping -> {
-            String relationshipType = typeMapping.typeName().isEmpty() ? PROJECT_ALL_RELATIONHIPS.name : typeMapping.typeName();
+            String relationshipType = typeMapping.typeName().isEmpty() ? ALL_RELATIONSHIPS.name : typeMapping.typeName();
             relProjectionBuilder.putProjection(
                 RelationshipType.of(relationshipType),
                 RelationshipProjection

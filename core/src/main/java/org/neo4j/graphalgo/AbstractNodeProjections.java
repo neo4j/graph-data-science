@@ -32,7 +32,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
-import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -68,8 +68,8 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
         if (StringUtils.isEmpty(labelString)) {
             create(emptyMap());
         }
-        if (labelString.equals(PROJECT_ALL_NODES.name)) {
-            return create(singletonMap(PROJECT_ALL_NODES, NodeProjection.all()));
+        if (labelString.equals(ALL_NODES.name)) {
+            return create(singletonMap(ALL_NODES, NodeProjection.all()));
         }
 
         NodeLabel nodeLabel = new NodeLabel(labelString);
@@ -121,7 +121,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
             e -> e.getValue().withAdditionalPropertyMappings(mappings)
         ));
         if (newProjections.isEmpty()) {
-            newProjections.put(PROJECT_ALL_NODES, NodeProjection.all().withAdditionalPropertyMappings(mappings));
+            newProjections.put(ALL_NODES, NodeProjection.all().withAdditionalPropertyMappings(mappings));
         }
         return create(newProjections);
     }
