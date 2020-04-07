@@ -26,7 +26,9 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraph;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.louvain.LouvainMutateProc;
@@ -34,6 +36,7 @@ import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class GraphMutateProcIntegrationTest extends BaseProcTest {
@@ -102,6 +105,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             GraphDropProc.class,
             GraphWriteNodePropertiesProc.class,
             GraphWriteRelationshipProc.class,
+            GraphDeleteRelationshipProc.class,
             PageRankMutateProc.class,
             WccMutateProc.class,
             LabelPropagationMutateProc.class,
@@ -209,5 +213,18 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         );
 
         assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion());
+    }
+
+    @Test
+    void shouldBeAbleToMutateAndDelete() {
+        IdMapGraph graphBefore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion();
+
+        runQuery("CALL gds.nodeSimilarity.mutate('testGraph', {mutateRelationshipType: 'SIM', mutateProperty: 'foo'})");
+        IdMapGraph graphAfterMutate = GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion();
+        assertNotEquals(graphBefore.relationshipCount(), graphAfterMutate.relationshipCount());
+
+        runQuery("CALL gds.graph.deleteRelationshipType('testGraph', 'SIM')");
+        IdMapGraph graphAfterDelete = GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion();
+        TestSupport.assertGraphEquals(graphBefore, graphAfterDelete);
     }
 }
