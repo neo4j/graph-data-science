@@ -32,12 +32,13 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
 @DataClass
 @Value.Immutable(singleton = true)
-public abstract class AbstractRelationshipProjections extends AbstractProjections<RelationshipProjection> {
+public abstract class AbstractRelationshipProjections extends AbstractProjections<RelationshipType, RelationshipProjection> {
 
-    public abstract Map<ElementIdentifier, RelationshipProjection> projections();
+    public abstract Map<RelationshipType, RelationshipProjection> projections();
 
     public static RelationshipProjections fromObject(Object object) {
         if (object == null) {
@@ -67,22 +68,22 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         if (StringUtils.isEmpty(typeString)) {
             create(emptyMap());
         }
-        if (typeString.equals(PROJECT_ALL.name)) {
-            return create(singletonMap(PROJECT_ALL, RelationshipProjection.all()));
+        if (typeString.equals(ALL_RELATIONSHIPS.name)) {
+            return create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.all()));
         }
 
-        ElementIdentifier identifier = new ElementIdentifier(typeString);
+        RelationshipType relationshipType = RelationshipType.of(typeString);
         RelationshipProjection filter = RelationshipProjection.fromString(typeString);
-        return create(singletonMap(identifier, filter));
+        return create(singletonMap(relationshipType, filter));
     }
 
     public static RelationshipProjections fromMap(Map<String, ?> map) {
-        Map<ElementIdentifier, RelationshipProjection> projections = new LinkedHashMap<>();
+        Map<RelationshipType, RelationshipProjection> projections = new LinkedHashMap<>();
         map.forEach((name, spec) -> {
-            ElementIdentifier identifier = new ElementIdentifier(name);
-            RelationshipProjection filter = RelationshipProjection.fromObject(spec, identifier);
+            RelationshipType relationshipType = RelationshipType.of(name);
+            RelationshipProjection filter = RelationshipProjection.fromObject(spec, relationshipType);
             // sanity
-            if (projections.put(identifier, filter) != null) {
+            if (projections.put(relationshipType, filter) != null) {
                 throw new IllegalStateException(String.format("Duplicate key: %s", name));
             }
         });
@@ -90,7 +91,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
     }
 
     public static RelationshipProjections fromList(Iterable<?> items) {
-        Map<ElementIdentifier, RelationshipProjection> filters = new LinkedHashMap<>();
+        Map<RelationshipType, RelationshipProjection> filters = new LinkedHashMap<>();
         for (Object item : items) {
             RelationshipProjections relationshipProjections = fromObject(item);
             filters.putAll(relationshipProjections.projections());
@@ -98,42 +99,42 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         return create(filters);
     }
 
-    public static RelationshipProjections single(ElementIdentifier identifier, RelationshipProjection projection) {
+    public static RelationshipProjections single(RelationshipType relationshipType, RelationshipProjection projection) {
         return RelationshipProjections
             .builder()
-            .putProjection(identifier, projection)
+            .putProjection(relationshipType, projection)
             .build();
     }
 
     public static RelationshipProjections pair(
-        ElementIdentifier identifier1,
+        RelationshipType relationshipType1,
         RelationshipProjection projection1,
-        ElementIdentifier identifier2,
+        RelationshipType relationshipType2,
         RelationshipProjection projection2
     ) {
         return RelationshipProjections
             .builder()
-            .putProjection(identifier1, projection1)
-            .putProjection(identifier2, projection2)
+            .putProjection(relationshipType1, projection1)
+            .putProjection(relationshipType2, projection2)
             .build();
     }
 
-    private static RelationshipProjections create(Map<ElementIdentifier, RelationshipProjection> projections) {
+    private static RelationshipProjections create(Map<RelationshipType, RelationshipProjection> projections) {
         if (projections.isEmpty()) {
             throw new IllegalArgumentException(
                 "An empty relationship projection was given; at least one relationship type must be projected.");
         }
-        if (projections.size() > 1 && projections.containsKey(PROJECT_ALL)) {
+        if (projections.size() > 1 && projections.containsKey(ALL_RELATIONSHIPS)) {
             throw new IllegalArgumentException(
                 "A star projection (all relationships) cannot be combined with another projection.");
         }
         return RelationshipProjections.of(projections);
     }
 
-    public RelationshipProjection getFilter(ElementIdentifier identifier) {
-        RelationshipProjection filter = projections().get(identifier);
+    public RelationshipProjection getFilter(RelationshipType relationshipType) {
+        RelationshipProjection filter = projections().get(relationshipType);
         if (filter == null) {
-            throw new IllegalArgumentException("Relationship type identifier does not exist: " + identifier);
+            throw new IllegalArgumentException("Relationship type does not exist: " + relationshipType);
         }
         return filter;
     }
@@ -146,13 +147,13 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
     }
 
     private RelationshipProjections modifyProjections(UnaryOperator<RelationshipProjection> operator) {
-        Map<ElementIdentifier, RelationshipProjection> newProjections = projections().entrySet().stream().collect(toMap(
+        Map<RelationshipType, RelationshipProjection> newProjections = projections().entrySet().stream().collect(toMap(
             Map.Entry::getKey,
             e -> operator.apply(e.getValue())
         ));
         if (newProjections.isEmpty()) {
             newProjections.put(
-                PROJECT_ALL,
+                ALL_RELATIONSHIPS,
                 operator.apply(RelationshipProjection.all())
             );
         }

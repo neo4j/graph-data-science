@@ -27,9 +27,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.compat.MapConverter;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphdb.Direction;
 
 import java.util.AbstractMap;
@@ -45,7 +45,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
 class GdsCypherTest {
 
@@ -53,8 +54,8 @@ class GdsCypherTest {
         ImmutableGraphCreateFromStoreConfig.of(
             "",
             "",
-            NodeProjections.fromString(PROJECT_ALL.name),
-            RelationshipProjections.fromString(PROJECT_ALL.name)
+            NodeProjections.fromString(ALL_NODES.name),
+            RelationshipProjections.fromString(ALL_RELATIONSHIPS.name)
         );
 
     private static final String STAR_PROJECTION_CYPHER_SYNTAX =
@@ -155,7 +156,7 @@ class GdsCypherTest {
             .username("")
             .graphName("")
             .nodeProjections(NodeProjections.create(Collections.singletonMap(
-                new ElementIdentifier("FooNode"), fooNode
+                new NodeLabel("FooNode"), fooNode
             )))
             .nodeProperties(PropertyMappings.of(ImmutablePropertyMapping
                 .builder()
@@ -165,11 +166,11 @@ class GdsCypherTest {
             .relationshipProjections(RelationshipProjections
                 .builder()
                 .putProjection(
-                    new ElementIdentifier("Rel"),
+                    new RelationshipType("Rel"),
                     RelationshipProjection.builder().type("TYPE").build()
                 )
                 .putProjection(
-                    new ElementIdentifier("BarRel"),
+                    new RelationshipType("BarRel"),
                     barRel
                 )
                 .build()

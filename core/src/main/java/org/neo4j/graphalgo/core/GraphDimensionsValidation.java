@@ -26,12 +26,12 @@ import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_LABEL;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_PROPERTY_KEY;
 
@@ -59,7 +59,7 @@ public final class GraphDimensionsValidation {
         if (isNotEmpty(setup.relationshipType())) {
             String missingTypes = dimensions.relationshipProjectionMappings()
                 .stream()
-                .filter(m -> !m.exists() && !m.typeName().equals(PROJECT_ALL.name))
+                .filter(m -> !m.exists() && !m.typeName().equals(ALL_RELATIONSHIPS.name))
                 .map(RelationshipProjectionMapping::typeName)
                 .collect(joining("', '"));
             if (!missingTypes.isEmpty()) {

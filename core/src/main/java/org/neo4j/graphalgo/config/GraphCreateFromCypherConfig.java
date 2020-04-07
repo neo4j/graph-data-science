@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
@@ -42,7 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
@@ -114,10 +115,10 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
         NodeProjections nodeProjections = NodeProjections.builder()
             .putProjection(
-                PROJECT_ALL,
+                ALL_NODES,
                 NodeProjection
                     .builder()
-                    .label(PROJECT_ALL.name)
+                    .label(ALL_NODES.name)
                     .addPropertyMappings(PropertyMappings.of(nodeProperties))
                     .build()
             ).build();
@@ -126,9 +127,9 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
         RelationshipProjections.Builder relProjectionBuilder = RelationshipProjections.builder();
         dimensions.relationshipProjectionMappings().stream().forEach(typeMapping -> {
-            String relationshipType = typeMapping.typeName().isEmpty() ? PROJECT_ALL.name : typeMapping.typeName();
+            String relationshipType = typeMapping.typeName().isEmpty() ? ALL_RELATIONSHIPS.name : typeMapping.typeName();
             relProjectionBuilder.putProjection(
-                ElementIdentifier.of(relationshipType),
+                RelationshipType.of(relationshipType),
                 RelationshipProjection
                     .builder()
                     .type(relationshipType)

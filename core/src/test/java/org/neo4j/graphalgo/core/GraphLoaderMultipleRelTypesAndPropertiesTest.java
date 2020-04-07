@@ -26,18 +26,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.*;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestGraphLoader;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.GraphDbApi;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,12 +53,24 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
-import static org.neo4j.graphalgo.TestSupport.*;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.*;
-import static org.neo4j.graphalgo.core.Aggregation.*;
+import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.graphalgo.TestSupport.toArguments;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllNodes;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllRelationships;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
+import static org.neo4j.graphalgo.core.Aggregation.MAX;
+import static org.neo4j.graphalgo.core.Aggregation.MIN;
+import static org.neo4j.graphalgo.core.Aggregation.NONE;
+import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
+import static org.neo4j.graphalgo.core.Aggregation.SUM;
 
 class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
@@ -109,9 +125,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             .build()
             .graphStore();
 
-        assertEquals(Collections.singleton("prop1"), graphStore.nodePropertyKeys(ElementIdentifier.of("N1")));
-        assertEquals(Collections.emptySet(), graphStore.nodePropertyKeys(ElementIdentifier.of("N2")));
-        assertEquals(Collections.singleton("prop2"), graphStore.nodePropertyKeys(ElementIdentifier.of("N3")));
+        assertEquals(Collections.singleton("prop1"), graphStore.nodePropertyKeys(NodeLabel.of("N1")));
+        assertEquals(Collections.emptySet(), graphStore.nodePropertyKeys(NodeLabel.of("N2")));
+        assertEquals(Collections.singleton("prop2"), graphStore.nodePropertyKeys(NodeLabel.of("N3")));
 
         NodeProperties prop1 = graphStore.nodeProperty("prop1");
         assertEquals(1.0D, prop1.nodeProperty(0));
@@ -124,8 +140,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @Test
     void nodeProjectionsWithAndWithoutLabel() {
-        ElementIdentifier allIdentifier = ElementIdentifier.of("ALL");
-        ElementIdentifier node2Identifier = ElementIdentifier.of("Node2");
+        NodeLabel allIdentifier = NodeLabel.of("ALL");
+        NodeLabel node2Identifier = NodeLabel.of("Node2");
 
 
         GraphStore graphStore = new StoreLoaderBuilder()

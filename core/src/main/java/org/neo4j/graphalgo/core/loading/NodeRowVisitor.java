@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.apache.commons.compress.utils.Sets;
 import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphdb.Result;
 import org.neo4j.values.storable.Values;
 
@@ -32,14 +33,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private static final String ID_COLUMN = "id";
     static final String LABELS_COLUMN = "labels";
     static final Set<String> RESERVED_COLUMNS = Sets.newHashSet(ID_COLUMN, LABELS_COLUMN);
     static final Set<String> REQUIRED_COLUMNS = Sets.newHashSet(ID_COLUMN);
-
 
     private long rows;
     private long maxNeoId = 0;
@@ -120,7 +120,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
             return labels;
         } else {
-            return Collections.singletonList(PROJECT_ALL.name);
+            return Collections.singletonList(ALL_NODES.name);
         }
     }
 
@@ -128,9 +128,9 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         long[] labelIds = new long[labels.size()];
 
         for (int i = 0; i < labels.size(); i++) {
-            ElementIdentifier labelString = ElementIdentifier.of(labels.get(i));
-            long labelId = elementIdentifierLabelIdMapping.computeIfAbsent(labelString, (l) -> {
-                importer.labelElementIdentifierMapping.put(labelIdCounter, Collections.singletonList(labelString));
+            NodeLabel nodeLabel = NodeLabel.of(labels.get(i));
+            long labelId = elementIdentifierLabelIdMapping.computeIfAbsent(nodeLabel, (l) -> {
+                importer.labelTokenNodeLabelMapping.put(labelIdCounter, Collections.singletonList(nodeLabel));
                 return labelIdCounter++;
             });
             labelIds[i] = labelId;

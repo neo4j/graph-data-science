@@ -20,13 +20,14 @@
 package org.neo4j.graphalgo.config;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Collections;
@@ -48,7 +49,7 @@ class GraphCreateConfigFromStoreTest {
             .build();
 
         NodeProjections nodeProjections = NodeProjections.create(Collections.singletonMap(
-            ElementIdentifier.of("A"), NodeProjection.of("A", propertyMappings)
+            NodeLabel.of("A"), NodeProjection.of("A", propertyMappings)
         ));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
@@ -70,7 +71,7 @@ class GraphCreateConfigFromStoreTest {
             .build();
 
         RelationshipProjections relProjections = RelationshipProjections.single(
-            ElementIdentifier.of("A"),
+            RelationshipType.of("A"),
             RelationshipProjection.builder()
                 .type("A")
                 .orientation(Orientation.NATURAL)
@@ -101,7 +102,7 @@ class GraphCreateConfigFromStoreTest {
             .build();
 
         NodeProjections nodeProjections = NodeProjections.create(Collections.singletonMap(
-            ElementIdentifier.of("A"), NodeProjection.of("A", propertyMappings2)
+            NodeLabel.of("A"), NodeProjection.of("A", propertyMappings2)
         ));
 
         GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
@@ -128,7 +129,7 @@ class GraphCreateConfigFromStoreTest {
             .build();
 
         RelationshipProjections relProjections = RelationshipProjections.single(
-            ElementIdentifier.of("A"),
+            RelationshipType.of("A"),
             RelationshipProjection.builder()
                 .type("A")
                 .orientation(Orientation.NATURAL)

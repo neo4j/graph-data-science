@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -52,15 +52,14 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class GraphStoreTest {
 
-    public static final ElementIdentifier LABEL_A = ElementIdentifier.of("A");
-    public static final ElementIdentifier LABEL_B = ElementIdentifier.of("B");
+    public static final NodeLabel LABEL_A = NodeLabel.of("A");
     private GraphDbApi db;
 
     @BeforeEach
@@ -108,7 +107,7 @@ class GraphStoreTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validNodeFilterParameters")
-    void testFilteringGraphsByNodeLabels(String desc, List<ElementIdentifier> labels, String expectedGraph) {
+    void testFilteringGraphsByNodeLabels(String desc, List<NodeLabel> labels, String expectedGraph) {
         GraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
             .graphName("myGraph")
@@ -145,14 +144,14 @@ class GraphStoreTest {
         assertGraphEquals(fromGdl("(a)"), filteredAGraph);
 
         Graph filteredAllGraph = graphStore.getGraph(
-            Collections.singletonList(ElementIdentifier.of("All")),
+            Collections.singletonList(NodeLabel.of("All")),
             Collections.singletonList("*"),
             Optional.empty(),
             1
         );
 
         Graph nonFilteredGraph = graphStore
-            .getGraph(Collections.singletonList(PROJECT_ALL), Collections.singletonList("*"), Optional.empty(), 1);
+            .getGraph(Collections.singletonList(ALL_NODES), Collections.singletonList("*"), Optional.empty(), 1);
 
         assertGraphEquals(filteredAllGraph, nonFilteredGraph);
     }
@@ -169,7 +168,7 @@ class GraphStoreTest {
         // add node properties
         LocalDateTime initialTime = graphStore.modificationTime();
         Thread.sleep(42);
-        graphStore.addNodeProperty(PROJECT_ALL, "foo", new NullPropertyMap(42.0));
+        graphStore.addNodeProperty(ALL_NODES, "foo", new NullPropertyMap(42.0));
         LocalDateTime nodePropertyTime = graphStore.modificationTime();
 
         // add relationships
@@ -202,9 +201,9 @@ class GraphStoreTest {
             .build()
             .graphStore(NativeFactory.class);
 
-        assertTrue(graphStore.hasNodeProperty(Collections.singletonList(PROJECT_ALL), "nodeProp"));
-        graphStore.removeNodeProperty(PROJECT_ALL, "nodeProp");
-        assertFalse(graphStore.hasNodeProperty(Collections.singletonList(PROJECT_ALL), "nodeProp"));
+        assertTrue(graphStore.hasNodeProperty(Collections.singletonList(ALL_NODES), "nodeProp"));
+        graphStore.removeNodeProperty(ALL_NODES, "nodeProp");
+        assertFalse(graphStore.hasNodeProperty(Collections.singletonList(ALL_NODES), "nodeProp"));
     }
 
 
@@ -319,22 +318,22 @@ class GraphStoreTest {
         return Stream.of(
             Arguments.of(
                 "filterAllLabels",
-                singletonList(PROJECT_ALL),
+                singletonList(ALL_NODES),
                 "(a {nodeProperty: 33, a: 33, b: 'NaN'}), (b {nodeProperty: 42, a: 'NaN', b: 42}), (a)-[T1]->(b)"
             ),
             Arguments.of(
                 "filterAllTypesExplicit",
-                Arrays.asList(ElementIdentifier.of("A"), ElementIdentifier.of("B")),
+                Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B")),
                 "(a {nodeProperty: 33, a: 33, b: 'NaN'}), (b {nodeProperty: 42, a: 'NaN', b: 42}), (a)-[T1]->(b)"
             ),
             Arguments.of(
                 "FilterA",
-                singletonList(ElementIdentifier.of("A")),
+                singletonList(NodeLabel.of("A")),
                 "(a {nodeProperty: 33, a: 33})"
             ),
             Arguments.of(
                 "FilterB",
-                singletonList(ElementIdentifier.of("B")),
+                singletonList(NodeLabel.of("B")),
                 "(b {nodeProperty: 42, b: 42})"
             )
         );

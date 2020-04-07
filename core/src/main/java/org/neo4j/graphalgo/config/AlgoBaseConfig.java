@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.annotation.Configuration;
 
 import java.util.Collections;
@@ -28,14 +28,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 public interface AlgoBaseConfig extends BaseConfig {
 
     int DEFAULT_CONCURRENCY = 4;
     String NODE_LABELS_KEY = "nodeLabels";
-    List<String> ALL_NODE_LABELS = Collections.singletonList(PROJECT_ALL.name());
-    List<ElementIdentifier> ALL_NODE_LABEL_IDENTIFIERS = Collections.singletonList(PROJECT_ALL);
+    List<String> ALL_NODE_LABELS = Collections.singletonList(ALL_NODES.name());
+    List<NodeLabel> ALL_NODE_LABEL_IDENTIFIERS = Collections.singletonList(ALL_NODES);
 
     @Value.Default
     default int concurrency() {
@@ -56,8 +56,8 @@ public interface AlgoBaseConfig extends BaseConfig {
     }
 
     @Configuration.Ignore
-    default List<ElementIdentifier> nodeLabelIdentifiers() {
-        return nodeLabels().stream().map(ElementIdentifier::of).collect(Collectors.toList());
+    default List<NodeLabel> nodeLabelIdentifiers() {
+        return nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
     }
 
     @Configuration.Parameter

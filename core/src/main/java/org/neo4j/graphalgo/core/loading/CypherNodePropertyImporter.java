@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongObjectMap;
 import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.core.loading.CypherNodeLoader.CYPHER_RESULT_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
 import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.IGNORE_LABEL;
@@ -43,22 +44,22 @@ public class CypherNodePropertyImporter {
     private final Collection<String> propertyColumns;
     private final long nodeCount;
     private final int concurrency;
-    private final LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping;
-    private final Map<ElementIdentifier, Map<String, NodePropertiesBuilder>> buildersByIdentifier;
+    private final LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
+    private final Map<NodeLabel, Map<String, NodePropertiesBuilder>> buildersByNodeLabel;
 
 
     public CypherNodePropertyImporter(
         Collection<String> propertyColumns,
-        LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping,
+        LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         long nodeCount,
         int concurrency
     ) {
         this.propertyColumns = propertyColumns;
-        this.labelElementIdentifierMapping = labelElementIdentifierMapping;
+        this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.nodeCount = nodeCount;
         this.concurrency = concurrency;
 
-        this.buildersByIdentifier = new HashMap<>();
+        this.buildersByNodeLabel = new HashMap<>();
     }
 
     public Collection<String> propertyColumns() {
@@ -67,9 +68,9 @@ public class CypherNodePropertyImporter {
 
     public void registerPropertiesForLabels(List<String> labels) {
         for (String label : labels) {
-            ElementIdentifier labelIdentifier = new ElementIdentifier(label);
-            Map<String, NodePropertiesBuilder> propertyBuilders = buildersByIdentifier.computeIfAbsent(
-                labelIdentifier,
+            NodeLabel nodeLabel = new NodeLabel(label);
+            Map<String, NodePropertiesBuilder> propertyBuilders = buildersByNodeLabel.computeIfAbsent(
+                nodeLabel,
                 (ignore) -> new HashMap<>()
             );
             for (String property : propertyColumns) {
@@ -92,14 +93,14 @@ public class CypherNodePropertyImporter {
         int propertiesImported = 0;
 
         // If there is a node projection for ANY label, then we need to consume the node properties regardless.
-        propertiesImported += setPropertyForLabel(PROJECT_ALL, nodeProperties, nodeId);
+        propertiesImported += setPropertyForLabel(ALL_NODES, nodeProperties, nodeId);
 
         for (long label : labels) {
             if (label == IGNORE_LABEL || label == ANY_LABEL) {
                 continue;
             }
 
-            for (ElementIdentifier labelIdentifier : labelElementIdentifierMapping.get(label)) {
+            for (ElementIdentifier labelIdentifier : labelTokenNodeLabelMapping.get(label)) {
                 propertiesImported += setPropertyForLabel(labelIdentifier, nodeProperties, nodeId);
             }
         }
@@ -107,8 +108,8 @@ public class CypherNodePropertyImporter {
         return propertiesImported;
     }
 
-    public Map<ElementIdentifier, Map<PropertyMapping, NodeProperties>> result() {
-        return buildersByIdentifier
+    public Map<NodeLabel, Map<PropertyMapping, NodeProperties>> result() {
+        return buildersByNodeLabel
             .entrySet()
             .stream()
             .collect(Collectors.toMap(
@@ -127,8 +128,8 @@ public class CypherNodePropertyImporter {
     ) {
         int propertiesImported = 0;
 
-        if (buildersByIdentifier.containsKey(labelIdentifier)) {
-            Map<String, NodePropertiesBuilder> buildersByProperty = buildersByIdentifier.get(labelIdentifier);
+        if (buildersByNodeLabel.containsKey(labelIdentifier)) {
+            Map<String, NodePropertiesBuilder> buildersByProperty = buildersByNodeLabel.get(labelIdentifier);
 
             for (Map.Entry<String, Number> propertyEntry : nodeProperties.entrySet()) {
                 if (buildersByProperty.containsKey(propertyEntry.getKey())) {

@@ -25,12 +25,12 @@ import org.neo4j.graphalgo.annotation.DataClass;
 
 import java.util.Map;
 
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 @DataClass
 public abstract class AbstractNodeProjection extends ElementProjection {
 
-    private static final NodeProjection ALL = of(PROJECT_ALL.name);
+    private static final NodeProjection ALL = of(ALL_NODES.name);
 
     public abstract String label();
 
@@ -42,7 +42,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
 
     @Override
     public boolean projectAll() {
-        return label().equals(PROJECT_ALL.name);
+        return label().equals(ALL_NODES.name);
     }
 
     public static final String LABEL_KEY = "label";
@@ -55,13 +55,13 @@ public abstract class AbstractNodeProjection extends ElementProjection {
         return ALL;
     }
 
-    public static NodeProjection fromObject(Object object, ElementIdentifier identifier) {
+    public static NodeProjection fromObject(Object object, NodeLabel nodeLabel) {
         if (object instanceof String) {
             return NodeProjection.fromString((String) object);
         }
         if (object instanceof Map) {
             @SuppressWarnings("unchecked") Map<String, Object> map = (Map) object;
-            return fromMap(map, identifier);
+            return fromMap(map, nodeLabel);
         }
         throw new IllegalArgumentException(String.format(
             "Cannot construct a node filter out of a %s",
@@ -73,8 +73,8 @@ public abstract class AbstractNodeProjection extends ElementProjection {
         return NodeProjection.builder().label(label).build();
     }
 
-    public static NodeProjection fromMap(Map<String, Object> map, ElementIdentifier identifier) {
-        String label = String.valueOf(map.getOrDefault(LABEL_KEY, identifier.name));
+    public static NodeProjection fromMap(Map<String, Object> map, NodeLabel nodeLabel) {
+        String label = String.valueOf(map.getOrDefault(LABEL_KEY, nodeLabel.name));
         return create(map, properties -> NodeProjection.of(label, properties));
     }
 

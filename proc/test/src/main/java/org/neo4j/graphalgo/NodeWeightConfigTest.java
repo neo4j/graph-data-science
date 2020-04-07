@@ -55,7 +55,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
 
     NodeProjections MULTI_PROPERTY_NODE_PROJECTION = NodeProjections.builder()
         .putProjection(
-            ElementIdentifier.of("Label"),
+            NodeLabel.of("Label"),
             NodeProjection.builder()
                 .label("Label")
                 .properties(

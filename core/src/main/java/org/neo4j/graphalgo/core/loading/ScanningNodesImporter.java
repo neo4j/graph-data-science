@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongObjectMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -50,12 +50,12 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
     private final TerminationFlag terminationFlag;
-    private final Map<ElementIdentifier, PropertyMappings> propertyMappings;
+    private final Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel;
 
     @Nullable
     private NativeNodePropertyImporter nodePropertyImporter;
     private HugeLongArrayBuilder idMapBuilder;
-    private Map<ElementIdentifier, BitSet> elementIdentifierBitSetMapping;
+    private Map<NodeLabel, BitSet> nodeLabelBitSetMapping;
 
     ScanningNodesImporter(
         GraphDatabaseAPI api,
@@ -65,13 +65,13 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
         TerminationFlag terminationFlag,
         ExecutorService threadPool,
         int concurrency,
-        Map<ElementIdentifier, PropertyMappings> propertyMappings
+        Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
     ) {
         super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
         this.progressLogger = progressLogger;
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
-        this.propertyMappings = propertyMappings;
+        this.propertyMappingsByNodeLabel = propertyMappingsByNodeLabel;
     }
 
     @Override
@@ -82,12 +82,12 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     ) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
 
-        LongObjectMap<List<ElementIdentifier>> labelIdentifierMapping = dimensions.labelElementIdentifierMapping();
+        LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.labelTokenNodeLabelMapping();
 
-        elementIdentifierBitSetMapping = labelIdentifierMapping.size() == 1 && labelIdentifierMapping.containsKey(
+        nodeLabelBitSetMapping = labelTokenNodeLabelMapping.size() == 1 && labelTokenNodeLabelMapping.containsKey(
             ANY_LABEL)
             ? null
-            : initializeLabelBitSets(nodeCount, labelIdentifierMapping);
+            : initializeLabelBitSets(nodeCount, labelTokenNodeLabelMapping);
 
         nodePropertyImporter = initializeNodePropertyImporter(nodeCount);
 
@@ -98,8 +98,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             progressLogger,
             new NodeImporter(
                 idMapBuilder,
-                elementIdentifierBitSetMapping,
-                labelIdentifierMapping
+                nodeLabelBitSetMapping,
+                labelTokenNodeLabelMapping
             ),
             nodePropertyImporter,
             terminationFlag
@@ -110,13 +110,13 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     IdsAndProperties build() {
         IdMap hugeIdMap = IdMapBuilder.build(
             idMapBuilder,
-            elementIdentifierBitSetMapping,
+            nodeLabelBitSetMapping,
             dimensions.highestNeoId(),
             concurrency,
             tracker
         );
 
-        Map<ElementIdentifier, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter == null
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter == null
             ? new HashMap<>()
             : nodePropertyImporter.result();
 
@@ -124,12 +124,12 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     }
 
     @NotNull
-    private Map<ElementIdentifier, BitSet> initializeLabelBitSets(
+    private Map<NodeLabel, BitSet> initializeLabelBitSets(
         long nodeCount,
-        LongObjectMap<List<ElementIdentifier>> labelIdentifierMapping
+        LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
     ) {
         return StreamSupport.stream(
-            labelIdentifierMapping.values().spliterator(),
+            labelTokenNodeLabelMapping.values().spliterator(),
             false
         )
             .flatMap(cursor -> cursor.value.stream())
@@ -139,7 +139,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     @Nullable
     private NativeNodePropertyImporter initializeNodePropertyImporter(long nodeCount) {
-        boolean loadProperties = propertyMappings
+        boolean loadProperties = propertyMappingsByNodeLabel
             .values()
             .stream()
             .anyMatch(mappings -> mappings.numberOfMappings() > 0);
@@ -150,7 +150,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 .nodeCount(nodeCount)
                 .concurrency(concurrency)
                 .dimensions(dimensions)
-                .propertyMappings(propertyMappings)
+                .propertyMappings(propertyMappingsByNodeLabel)
                 .tracker(tracker)
                 .build();
         } else {

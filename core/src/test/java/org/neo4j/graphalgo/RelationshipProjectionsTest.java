@@ -37,10 +37,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 
@@ -65,11 +65,11 @@ class RelationshipProjectionsTest {
         RelationshipProjections projections = RelationshipProjections.fromObject(noProperties);
         assertThat(projections.allProjections(), hasSize(2));
         assertThat(
-            projections.getFilter(ElementIdentifier.of("MY_TYPE")),
+            projections.getFilter(RelationshipType.of("MY_TYPE")),
             equalTo(RelationshipProjection.of("T", Orientation.NATURAL, SINGLE))
         );
         assertThat(
-            projections.getFilter(ElementIdentifier.of("ANOTHER")),
+            projections.getFilter(RelationshipType.of("ANOTHER")),
             equalTo(RelationshipProjection
                 .builder()
                 .type("FOO")
@@ -91,7 +91,7 @@ class RelationshipProjectionsTest {
         RelationshipProjections actual = RelationshipProjections.fromObject(argument);
 
         RelationshipProjections expected = RelationshipProjections.builder().projections(singletonMap(
-            ElementIdentifier.of("T"),
+            RelationshipType.of("T"),
             RelationshipProjection
                 .builder()
                 .type("T")
@@ -110,7 +110,7 @@ class RelationshipProjectionsTest {
         RelationshipProjections actual = RelationshipProjections.fromObject("*");
 
         RelationshipProjections expected = RelationshipProjections.builder()
-            .projections(singletonMap(PROJECT_ALL, RelationshipProjection.all()))
+            .projections(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.all()))
             .build();
 
         assertThat(actual, equalTo(expected));
@@ -122,8 +122,8 @@ class RelationshipProjectionsTest {
         RelationshipProjections actual = RelationshipProjections.fromObject(Arrays.asList("A", "B"));
 
         RelationshipProjections expected = RelationshipProjections.builder()
-            .putProjection(ElementIdentifier.of("A"), RelationshipProjection.builder().type("A").build())
-            .putProjection(ElementIdentifier.of("B"), RelationshipProjection.builder().type("B").build())
+            .putProjection(RelationshipType.of("A"), RelationshipProjection.builder().type("A").build())
+            .putProjection(RelationshipType.of("B"), RelationshipProjection.builder().type("B").build())
             .build();
 
         assertThat(actual, equalTo(expected));
@@ -148,7 +148,7 @@ class RelationshipProjectionsTest {
 
         RelationshipProjections expected = RelationshipProjections.builder().projections(
             singletonMap(
-                ElementIdentifier.of("MY_TYPE"),
+                RelationshipType.of("MY_TYPE"),
                 RelationshipProjection
                     .builder()
                     .type("T")

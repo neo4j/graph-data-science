@@ -24,7 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
@@ -32,9 +31,10 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphdb.Result;
 
 import java.util.Arrays;
@@ -172,7 +172,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
                             .nodeProjections(NodeProjections.fromString("User"))
                             .relationshipProjections(RelationshipProjections.builder()
                                 .putProjection(
-                                    ElementIdentifier.of("LINK"),
+                                    RelationshipType.of("LINK"),
                                     RelationshipProjection.builder()
                                         .type("LINK")
                                         .orientation(Orientation.UNDIRECTED)
@@ -197,7 +197,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
                             .nodeProjections(NodeProjections.fromString("User"))
                             .relationshipProjections(RelationshipProjections.builder()
                                 .putProjection(
-                                    ElementIdentifier.of("LINK"),
+                                    RelationshipType.of("LINK"),
                                     RelationshipProjection.builder()
                                         .type("LINK")
                                         .orientation(Orientation.UNDIRECTED)
@@ -240,7 +240,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
                             .nodeProjections(NodeProjections.fromString("User"))
                             .relationshipProjections(RelationshipProjections.builder()
                                 .putProjection(
-                                    ElementIdentifier.of("LINK"),
+                                    RelationshipType.of("LINK"),
                                     RelationshipProjection.builder()
                                         .type("LINK")
                                         .orientation(Orientation.UNDIRECTED)

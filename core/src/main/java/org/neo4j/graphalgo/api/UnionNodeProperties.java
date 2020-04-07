@@ -20,25 +20,25 @@
 package org.neo4j.graphalgo.api;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 
 import java.util.Map;
 
 public class UnionNodeProperties implements NodeProperties {
 
-    private final Map<ElementIdentifier, NodeProperties> labelToNodePropertiesMap;
-    private final Map<ElementIdentifier, BitSet> elementIdentifierToBitSetMap;
+    private final Map<NodeLabel, NodeProperties> labelToNodePropertiesMap;
+    private final Map<NodeLabel, BitSet> elementIdentifierToBitSetMap;
 
-    public UnionNodeProperties(Map<ElementIdentifier, NodeProperties> labelToNodePropertiesMap, Map<ElementIdentifier, BitSet> elementIdentifierToBitSetMap) {
+    public UnionNodeProperties(Map<NodeLabel, NodeProperties> labelToNodePropertiesMap, Map<NodeLabel, BitSet> elementIdentifierToBitSetMap) {
         this.labelToNodePropertiesMap = labelToNodePropertiesMap;
         this.elementIdentifierToBitSetMap = elementIdentifierToBitSetMap;
     }
 
     @Override
     public double nodeProperty(long nodeId) {
-        ElementIdentifier firstLabel = null;
+        NodeLabel firstLabel = null;
 
-        for (ElementIdentifier label : elementIdentifierToBitSetMap.keySet()) {
+        for (NodeLabel label : elementIdentifierToBitSetMap.keySet()) {
             if (elementIdentifierToBitSetMap.get(label).get(nodeId)) {
                 firstLabel = label;
                 break;

@@ -23,13 +23,13 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.GraphDbApi;
@@ -119,7 +119,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
             .nodeProjections(NodeProjections.fromObject(map("Person", "Person", "Product", "Product")))
             .relationshipProjections(RelationshipProjections.builder()
                 .putProjection(
-                    ElementIdentifier.of("Product"),
+                    RelationshipType.of("Product"),
                     RelationshipProjection.builder()
                         .type("PURCHASED")
                         .orientation(Orientation.UNDIRECTED)
@@ -162,7 +162,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
             .nodeProjections(NodeProjections.fromObject(map("Person", "Person", "Product", "Product")))
             .relationshipProjections(RelationshipProjections.builder()
                 .putProjection(
-                    ElementIdentifier.of("Product"),
+                    RelationshipType.of("Product"),
                     RelationshipProjection.builder()
                         .type("PURCHASED")
                         .orientation(Orientation.UNDIRECTED)

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.LongObjectHashMap;
 import com.carrotsearch.hppc.LongObjectMap;
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -51,7 +51,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     private final long nodeCount;
     private final GraphDimensions outerDimensions;
-    private final LongObjectMap<List<ElementIdentifier>> labelElementIdentifierMapping;
+    private final LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final HugeLongArrayBuilder builder;
     private final NodeImporter importer;
@@ -70,9 +70,9 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.nodeCount = nodeCount;
         this.outerDimensions = outerDimensions;
         this.maxNodeId = 0L;
-        this.labelElementIdentifierMapping = new LongObjectHashMap<>();
+        this.labelTokenNodeLabelMapping = new LongObjectHashMap<>();
         this.builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());
-        this.importer = new NodeImporter(builder, new HashMap<>(), labelElementIdentifierMapping);
+        this.importer = new NodeImporter(builder, new HashMap<>(), labelTokenNodeLabelMapping);
     }
 
     @Override
@@ -82,10 +82,10 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         Collection<String> propertyColumns = getPropertyColumns(queryResult);
 
         nodePropertyImporter = new CypherNodePropertyImporter(
-                propertyColumns,
-                labelElementIdentifierMapping,
-                nodeCount,
-                config.readConcurrency()
+            propertyColumns,
+            labelTokenNodeLabelMapping,
+            nodeCount,
+            config.readConcurrency()
         );
 
         boolean hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);
@@ -119,12 +119,12 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     LoadResult result() {
         IdMap idMap = IdMapBuilder.build(
             builder,
-            importer.elementIdentifierBitSetMapping,
+            importer.nodeLabelBitSetMapping,
             maxNodeId,
             setup.concurrency(),
             setup.tracker()
         );
-        Map<ElementIdentifier, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter.result();
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter.result();
 
         Map<String, Integer> propertyIds = nodeProperties
             .values()
