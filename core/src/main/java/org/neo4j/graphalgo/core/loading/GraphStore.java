@@ -263,6 +263,14 @@ public final class GraphStore {
         return relationships.get(relationshipType).elementCount();
     }
 
+    public NumberType relationshipPropertyType(String propertyKey) {
+        return relationshipProperties.values().stream()
+            .filter(propertyStore -> propertyStore.containsKey(propertyKey))
+            .map(propertyStore -> propertyStore.get(propertyKey).propertyType())
+            .findFirst()
+            .orElse(NumberType.NO_NUMBER);
+    }
+
     public long relationshipPropertyCount() {
         return relationshipProperties
             .values()
@@ -610,7 +618,8 @@ public final class GraphStore {
         }
 
         static Builder builder() {
-            return new Builder();
+            // need to initialize with empty map due to `deferCollectionAllocation = true`
+            return new Builder().relationshipProperties(Collections.emptyMap());
         }
 
         @AccessibleFields

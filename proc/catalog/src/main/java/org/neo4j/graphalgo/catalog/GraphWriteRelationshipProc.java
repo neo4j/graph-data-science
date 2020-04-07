@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.values.storable.NumberType;
+import org.neo4j.values.storable.Values;
 
 import java.util.Map;
 import java.util.Optional;
@@ -80,16 +82,29 @@ public class GraphWriteRelationshipProc extends CatalogProc {
     }
 
     private long writeRelationshipType(GraphStore graphStore, GraphWriteRelationshipConfig config) {
-        RelationshipExporter exporter = RelationshipExporter
+        RelationshipExporter.Builder builder = RelationshipExporter
             .of(
                 api,
                 graphStore.getGraph(config.relationshipType(), config.relationshipProperty()),
                 TerminationFlag.wrap(transaction)
-            )
+            );
+
+        if (config.relationshipProperty().isPresent()) {
+            NumberType propertyType = graphStore.relationshipPropertyType(config.relationshipProperty().get());
+            if (propertyType == NumberType.INTEGRAL) {
+                builder.withRelationPropertyTranslator(relationshipProperty -> Values.longValue((long) relationshipProperty));
+            } else if (propertyType == NumberType.FLOATING_POINT) {
+                builder.withRelationPropertyTranslator(Values::doubleValue);
+            } else {
+                throw new UnsupportedOperationException("Writing non-numeric data is not supported.");
+            }
+        }
+
+        builder
             .withLog(log)
             .parallel(Pools.DEFAULT, config.writeConcurrency())
-            .build();
-        exporter.write(config.relationshipType(), config.relationshipProperty());
+            .build()
+            .write(config.relationshipType(), config.relationshipProperty());
 
         return graphStore.relationshipCount(config.relationshipType());
     }
