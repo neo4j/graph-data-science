@@ -21,7 +21,11 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.api.*;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapGraph;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
@@ -29,22 +33,31 @@ import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
+import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABEL_IDENTIFIERS;
 
 public final class GraphStore {
 
     private final IdMap nodes;
 
-    private final Map<ElementIdentifier, Map<String, NodeProperties>> nodeProperties;
+    private final Map<NodeLabel, Map<String, NodeProperties>> nodeProperties;
 
     private final Map<String, HugeGraph.TopologyCSR> relationships;
 
@@ -58,7 +71,7 @@ public final class GraphStore {
 
     public static GraphStore of(
         IdMap nodes,
-        Map<ElementIdentifier, Map<String, NodeProperties>> nodeProperties,
+        Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
         Map<String, HugeGraph.TopologyCSR> relationships,
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
@@ -82,9 +95,9 @@ public final class GraphStore {
 
         Map<String, HugeGraph.TopologyCSR> topology = singletonMap(relationshipType, relationships.topology());
 
-        Map<ElementIdentifier, Map<String, NodeProperties>> nodeProperties = new HashMap<>();
+        Map<NodeLabel, Map<String, NodeProperties>> nodeProperties = new HashMap<>();
         nodeProperties.put(
-            PROJECT_ALL,
+            PROJECT_ALL_NODES,
             graph.availableNodeProperties().stream().collect(Collectors.toMap(
                 Function.identity(),
                 graph::nodeProperties
@@ -104,7 +117,7 @@ public final class GraphStore {
 
     private GraphStore(
         IdMap nodes,
-        Map<ElementIdentifier, Map<String, NodeProperties>> nodeProperties,
+        Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
         Map<String, HugeGraph.TopologyCSR> relationships,
         Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
@@ -126,12 +139,12 @@ public final class GraphStore {
         return this.nodes;
     }
 
-    public Set<ElementIdentifier> nodeLabels() {
+    public Set<NodeLabel> nodeLabels() {
         return new HashSet<>(this
             .nodes
             .maybeLabelInformation
             .map(Map::keySet)
-            .orElseGet(() -> Collections.singleton(PROJECT_ALL)));
+            .orElseGet(() -> Collections.singleton(PROJECT_ALL_NODES)));
     }
 
     public Set<String> nodePropertyKeys(ElementIdentifier label) {
@@ -147,29 +160,29 @@ public final class GraphStore {
         return nodeProperties.values().stream().mapToLong(properties -> properties.keySet().size()).sum() * nodeCount();
     }
 
-    public boolean hasNodeProperty(Collection<ElementIdentifier> labels, String propertyKey) {
+    public boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey) {
         return labels
             .stream()
             .allMatch(label -> nodeProperties.containsKey(label) && nodeProperties.get(label).containsKey(propertyKey));
     }
 
-    public void addNodeProperty(ElementIdentifier label, String propertyKey, NodeProperties nodeProperties) {
-        updateGraphStore((graphStore) -> graphStore.nodeProperties.compute(label, (k, nodePropertyMap) -> {
+    public void addNodeProperty(NodeLabel nodeLabel, String propertyKey, NodeProperties nodeProperties) {
+        updateGraphStore((graphStore) -> graphStore.nodeProperties.compute(nodeLabel, (k, nodePropertyMap) -> {
             Map<String, NodeProperties> updatedPropertyMap = nodePropertyMap == null ? new HashMap<>() : nodePropertyMap;
             updatedPropertyMap.putIfAbsent(propertyKey, nodeProperties);
             return updatedPropertyMap;
         }));
     }
 
-    public void removeNodeProperty(ElementIdentifier label, String propertyKey) {
+    public void removeNodeProperty(NodeLabel nodeLabel, String propertyKey) {
         updateGraphStore(graphStore -> {
-            if (graphStore.nodeProperties.containsKey(label)) {
-                Map<String, NodeProperties> propertiesForLabel = graphStore.nodeProperties.get(label);
+            if (graphStore.nodeProperties.containsKey(nodeLabel)) {
+                Map<String, NodeProperties> propertiesForLabel = graphStore.nodeProperties.get(nodeLabel);
 
                 propertiesForLabel.remove(propertyKey);
 
                 if (propertiesForLabel.isEmpty()) {
-                    graphStore.nodeProperties.remove(label);
+                    graphStore.nodeProperties.remove(nodeLabel);
                 }
             }
         });
@@ -177,7 +190,7 @@ public final class GraphStore {
 
     public NodeProperties nodeProperty(String propertyKey) {
         if (nodes.maybeLabelInformation.isPresent()) {
-            Map<ElementIdentifier, NodeProperties> properties = new HashMap<>();
+            Map<NodeLabel, NodeProperties> properties = new HashMap<>();
             this.nodeProperties.forEach((labelIdentifier, propertyMap) -> {
                 if (propertyMap.containsKey(propertyKey)) {
                     properties.put(labelIdentifier, propertyMap.get(propertyKey));
@@ -185,7 +198,7 @@ public final class GraphStore {
             });
             return new UnionNodeProperties(properties, nodes.maybeLabelInformation.get());
         }
-        return nodeProperties.get(PROJECT_ALL).get(propertyKey);
+        return nodeProperties.get(PROJECT_ALL_NODES).get(propertyKey);
     }
 
     public NodeProperties nodeProperty(ElementIdentifier label, String propertyKey) {
@@ -263,7 +276,7 @@ public final class GraphStore {
     }
 
     public Graph getGraph(
-        List<ElementIdentifier> nodeLabels,
+        List<NodeLabel> nodeLabels,
         List<String> relationshipTypes,
         Optional<String> maybeRelationshipProperty,
         int concurrency
@@ -303,7 +316,7 @@ public final class GraphStore {
     }
 
     private IdMapGraph createGraph(
-        List<ElementIdentifier> nodeLabels,
+        List<NodeLabel> nodeLabels,
         String relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
@@ -311,21 +324,21 @@ public final class GraphStore {
     }
 
     private IdMapGraph createGraph(
-        List<ElementIdentifier> filteredLabels,
+        List<NodeLabel> filteredLabels,
         List<String> relationshipTypes,
         Optional<String> maybeRelationshipProperty,
         int concurrency
     ) {
-        boolean loadAllRelationships = relationshipTypes.contains(PROJECT_ALL.name);
-        boolean loadAllNodes = filteredLabels.contains(PROJECT_ALL);
+        boolean loadAllRelationships = relationshipTypes.contains(PROJECT_ALL_RELATIONHIPS.name);
+        boolean loadAllNodes = filteredLabels.contains(PROJECT_ALL_NODES);
 
-        Collection<ElementIdentifier> expandedLabels = loadAllNodes ? nodeLabels() : filteredLabels;
+        Collection<NodeLabel> expandedLabels = loadAllNodes ? nodeLabels() : filteredLabels;
 
         boolean containsAllNodes = true;
         BitSet combinedBitSet = BitSet.newInstance();
 
         if (this.nodes.maybeLabelInformation.isPresent() && !loadAllNodes) {
-            Map<ElementIdentifier, BitSet> labelInformation = this.nodes.maybeLabelInformation.get();
+            Map<NodeLabel, BitSet> labelInformation = this.nodes.maybeLabelInformation.get();
             validateNodeLabelFilter(expandedLabels, labelInformation);
             expandedLabels.forEach(label -> combinedBitSet.union(labelInformation.get(label)));
             containsAllNodes = combinedBitSet.cardinality() == this.nodes.nodeCount();
@@ -362,8 +375,8 @@ public final class GraphStore {
     }
 
     private Map<String, NodeProperties> filterNodeProperties(
-        Collection<ElementIdentifier> labels,
-        Optional<Map<ElementIdentifier, BitSet>> maybeElementIdentifierBitSetMap
+        Collection<NodeLabel> labels,
+        Optional<Map<NodeLabel, BitSet>> maybeElementIdentifierBitSetMap
     ) {
         if (this.nodeProperties.isEmpty()) {
             return Collections.emptyMap();
@@ -372,17 +385,17 @@ public final class GraphStore {
             return this.nodeProperties.get(labels.iterator().next());
         }
 
-        Map<String, Map<ElementIdentifier, NodeProperties>> invertedNodeProperties = new HashMap<>();
+        Map<String, Map<NodeLabel, NodeProperties>> invertedNodeProperties = new HashMap<>();
         nodeProperties
             .entrySet()
             .stream()
-            .filter(entry -> labels.contains(entry.getKey()) || labels.contains(PROJECT_ALL))
+            .filter(entry -> labels.contains(entry.getKey()) || labels.contains(PROJECT_ALL_NODES))
             .forEach(entry -> entry
                 .getValue()
                 .forEach((propertyKey, nodeProperty) -> invertedNodeProperties.compute(
                     propertyKey,
                     (k, innerMap) -> {
-                        Map<ElementIdentifier, NodeProperties> labelToNodePropertiesMap;
+                        Map<NodeLabel, NodeProperties> labelToNodePropertiesMap;
                         if (innerMap == null) {
                             labelToNodePropertiesMap = new HashMap<>();
                         } else {
@@ -401,7 +414,7 @@ public final class GraphStore {
             ));
     }
 
-    private void validateNodeLabelFilter(Collection<ElementIdentifier> nodeLabels, Map<ElementIdentifier, BitSet> labelInformation) {
+    private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, Map<NodeLabel, BitSet> labelInformation) {
         List<ElementIdentifier> invalidLabels = nodeLabels
             .stream()
             .filter(label -> !new HashSet<>(labelInformation.keySet()).contains(label))
@@ -423,7 +436,7 @@ public final class GraphStore {
             ));
         }
 
-        if (!relationshipTypes.contains(PROJECT_ALL.name)) {
+        if (!relationshipTypes.contains(PROJECT_ALL_RELATIONHIPS.name)) {
             relationshipTypes.forEach(relationshipType -> {
                 if (!relationships.containsKey(relationshipType)) {
                     throw new IllegalArgumentException(String.format(

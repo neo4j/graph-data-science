@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.StringUtils;
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
@@ -148,7 +148,7 @@ public final class NativeFactory extends GraphStoreFactory {
     }
 
     private IdsAndProperties loadNodes(AllocationTracker tracker, int concurrency) {
-        Map<ElementIdentifier, PropertyMappings> labelToNodePropertyMappings = graphCreateConfig
+        Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel = graphCreateConfig
             .nodeProjections()
             .projections()
             .entrySet()
@@ -166,7 +166,7 @@ public final class NativeFactory extends GraphStoreFactory {
             setup.terminationFlag(),
             threadPool,
             concurrency,
-            labelToNodePropertyMappings
+            propertyMappingsByNodeLabel
         ).call(setup.log());
     }
 

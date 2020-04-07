@@ -22,17 +22,18 @@ package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 
 import java.util.Collections;
 import java.util.Map;
@@ -94,7 +95,7 @@ public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
     default NodeProjections nodeProjections() {
         return NodeProjections.builder()
             .putProjection(
-                ElementIdentifier.of(nodeCount() + "_Nodes"),
+                NodeLabel.of(nodeCount() + "_Nodes"),
                 NodeProjection.of(nodeCount() + "_Nodes"))
             .build();
     }
@@ -103,7 +104,7 @@ public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
     default RelationshipProjections relationshipProjections() {
         return RelationshipProjections.builder()
             .putProjection(
-                ElementIdentifier.of(relationshipDistribution().name()),
+                RelationshipType.of(relationshipDistribution().name()),
                 RelationshipProjection.of(relationshipDistribution().name(), orientation(), aggregation())
             )
             .build();

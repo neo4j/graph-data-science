@@ -24,11 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class AbstractProjections<P extends ElementProjection> {
+public abstract class AbstractProjections<I extends ElementIdentifier, P extends ElementProjection> {
 
-    public static final ElementIdentifier PROJECT_ALL = ElementIdentifier.of("*");
-
-    public abstract Map<ElementIdentifier, P> projections();
+    public abstract Map<I, P> projections();
 
     public Set<String> allProperties() {
         return projections()

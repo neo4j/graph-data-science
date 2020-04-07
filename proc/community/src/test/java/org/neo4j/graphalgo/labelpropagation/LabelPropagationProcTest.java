@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
+import org.neo4j.graphalgo.IterationsConfigTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.NodeWeightConfigTest;
@@ -38,7 +39,6 @@ import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.IterationsConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -51,6 +51,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
 
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<CONFIG, LabelPropagation>,
@@ -139,7 +140,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
                 .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed", "weight")))
                 .relationshipProjections(RelationshipProjections.builder()
                     .putProjection(
-                        RelationshipProjections.PROJECT_ALL,
+                        PROJECT_ALL_RELATIONHIPS,
                         RelationshipProjection.builder()
                             .type("X")
                             .orientation(orientation)

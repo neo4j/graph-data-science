@@ -125,12 +125,12 @@ public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig,
         GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore();
         assertEquals(
             Collections.singleton(mutateProperty()),
-            mutatedGraph.nodePropertyKeys(ElementIdentifier.of("A"))
+            mutatedGraph.nodePropertyKeys(NodeLabel.of("A"))
         );
 
         assertEquals(
             Collections.emptySet(),
-            mutatedGraph.nodePropertyKeys(ElementIdentifier.of("B"))
+            mutatedGraph.nodePropertyKeys(NodeLabel.of("B"))
         );
     }
 

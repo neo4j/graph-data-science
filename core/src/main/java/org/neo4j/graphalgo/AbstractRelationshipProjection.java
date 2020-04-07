@@ -28,12 +28,12 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
 
 @DataClass
 public abstract class AbstractRelationshipProjection extends ElementProjection {
 
-    private static final RelationshipProjection ALL = of(PROJECT_ALL.name, Orientation.NATURAL);
+    private static final RelationshipProjection ALL = of(PROJECT_ALL_RELATIONHIPS.name, Orientation.NATURAL);
 
     public abstract String type();
 
@@ -56,16 +56,16 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     @Override
     public boolean projectAll() {
-        return type().equals(PROJECT_ALL.name);
+        return type().equals(PROJECT_ALL_RELATIONHIPS.name);
     }
 
     public static final String TYPE_KEY = "type";
     public static final String ORIENTATION_KEY = "orientation";
     public static final String AGGREGATION_KEY = "aggregation";
 
-    public static RelationshipProjection fromMap(Map<String, Object> map, ElementIdentifier identifier) {
+    public static RelationshipProjection fromMap(Map<String, Object> map, RelationshipType relationshipType) {
         RelationshipProjection.Builder builder = RelationshipProjection.builder();
-        String type = String.valueOf(map.getOrDefault(TYPE_KEY, identifier.name));
+        String type = String.valueOf(map.getOrDefault(TYPE_KEY, relationshipType.name));
         builder.type(type);
         if (map.containsKey(ORIENTATION_KEY)) {
             builder.orientation(Orientation.of(nonEmptyString(map, ORIENTATION_KEY)));
@@ -93,7 +93,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         return RelationshipProjection.builder().type(type).build();
     }
 
-    public static RelationshipProjection fromObject(Object object, ElementIdentifier identifier) {
+    public static RelationshipProjection fromObject(Object object, RelationshipType relationshipType) {
         if (object == null) {
             return all();
         }
@@ -102,7 +102,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         }
         if (object instanceof Map) {
             @SuppressWarnings("unchecked") Map<String, Object> map = (Map) object;
-            return fromMap(map, identifier);
+            return fromMap(map, relationshipType);
         }
         throw new IllegalArgumentException(String.format(
             "Cannot construct a relationship filter out of a %s",

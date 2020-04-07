@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 
@@ -29,11 +29,11 @@ import java.util.stream.Collectors;
 public class IdsAndProperties {
 
     final IdMap idMap;
-    private final Map<ElementIdentifier, Map<String, NodeProperties>> properties;
+    private final Map<NodeLabel, Map<String, NodeProperties>> properties;
 
     public static IdsAndProperties of(
         IdMap hugeIdMap,
-        Map<ElementIdentifier, Map<PropertyMapping, NodeProperties>> properties
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties
     ) {
         return new IdsAndProperties(
             hugeIdMap,
@@ -48,7 +48,7 @@ public class IdsAndProperties {
     }
 
 
-    public IdsAndProperties(IdMap idMap, Map<ElementIdentifier, Map<String, NodeProperties>> properties) {
+    public IdsAndProperties(IdMap idMap, Map<NodeLabel, Map<String, NodeProperties>> properties) {
         this.idMap = idMap;
         this.properties = properties;
     }
@@ -57,7 +57,7 @@ public class IdsAndProperties {
         return idMap;
     }
 
-    public Map<ElementIdentifier, Map<String, NodeProperties>> properties() {
+    public Map<NodeLabel, Map<String, NodeProperties>> properties() {
         return properties;
     }
 }

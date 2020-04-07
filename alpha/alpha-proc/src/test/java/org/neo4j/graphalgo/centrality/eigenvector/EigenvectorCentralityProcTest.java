@@ -25,12 +25,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
@@ -179,7 +179,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             .graphName("eigenvectorImplicitNorm")
             .nodeProjections(NodeProjections.fromString("Character"))
             .relationshipProjections(RelationshipProjections.single(
-                ElementIdentifier.of("INTERACTS_SEASON1"),
+                RelationshipType.of("INTERACTS_SEASON1"),
                 RelationshipProjection.builder()
                     .type("INTERACTS_SEASON1")
                     .orientation(Orientation.UNDIRECTED)
@@ -248,7 +248,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             .graphName("eigenvectorImplicitNorm")
             .nodeProjections(NodeProjections.fromString("Character"))
             .relationshipProjections(RelationshipProjections.single(
-                ElementIdentifier.of("INTERACTS_SEASON1"),
+                RelationshipType.of("INTERACTS_SEASON1"),
                 RelationshipProjection.builder()
                     .type("INTERACTS_SEASON1")
                     .orientation(Orientation.UNDIRECTED)
@@ -372,7 +372,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                     .graphName("eigenvectorImplicitTest")
                     .nodeProjections(NodeProjections.fromString("Character"))
                     .relationshipProjections(RelationshipProjections.single(
-                        ElementIdentifier.of("INTERACTS_SEASON1"),
+                        RelationshipType.of("INTERACTS_SEASON1"),
                         RelationshipProjection.builder()
                             .type("INTERACTS_SEASON1")
                             .orientation(Orientation.UNDIRECTED)
