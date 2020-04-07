@@ -235,7 +235,7 @@ public abstract class AlgoBaseProc<
             : Optional.empty();
 
         List<NodeLabel> nodeLabels = config.nodeLabelIdentifiers();
-        List<String> relationshipTypes = config.relationshipTypes();
+        List<RelationshipType> relationshipTypes = config.relationshipTypeIdentifiers();
 
         return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty, config.concurrency());
     }
@@ -320,7 +320,7 @@ public abstract class AlgoBaseProc<
 
         if (config instanceof MutateRelationshipConfig) {
             String mutateRelationshipType = ((MutateRelationshipConfig) config).mutateRelationshipType();
-            if (mutateRelationshipType != null && graphStore.hasRelationshipType(mutateRelationshipType)) {
+            if (mutateRelationshipType != null && graphStore.hasRelationshipType(RelationshipType.of(mutateRelationshipType))) {
                 throw new IllegalArgumentException(String.format(
                     "Relationship type `%s` already exists in the in-memory graph.",
                     mutateRelationshipType

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.compat.InternalReadOps;
@@ -82,8 +83,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         RelationshipProjectionMappings.Builder mappingsBuilder = new RelationshipProjectionMappings.Builder();
         if (readTokens) {
-            setup.relationshipProjections().projections().forEach((key, relationshipProjection) -> {
-                String elementIdentifier = key.name;
+            setup.relationshipProjections().projections().forEach((relationshipType, relationshipProjection) -> {
 
                 String typeName = relationshipProjection.type();
                 Orientation orientation = relationshipProjection.orientation();
@@ -91,7 +91,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 RelationshipProjectionMapping mapping = relationshipProjection.projectAll()
                     ? RelationshipProjectionMapping.all(orientation)
                     : RelationshipProjectionMapping.of(
-                        elementIdentifier,
+                        relationshipType,
                         typeName,
                         orientation,
                         tokenRead.relationshipType(typeName)
@@ -112,11 +112,11 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             ? allNodesCount
             : Math.min(nodeCount, allNodesCount);
         // TODO: this will double count relationships between distinct labels
-        Map<String, Long> relationshipCounts = relationshipProjectionMappings
+        Map<RelationshipType, Long> relationshipCounts = relationshipProjectionMappings
             .stream()
             .filter(RelationshipProjectionMapping::exists)
             .collect(Collectors.toMap(
-                RelationshipProjectionMapping::elementIdentifier,
+                RelationshipProjectionMapping::relationshipType,
                 relationshipProjectionMapping -> labelIdNodeLabelMappings.keyStream()
                     .mapToLong(labelId -> maxRelCountForLabelAndType(
                         dataRead,

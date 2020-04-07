@@ -21,6 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_RELATIONSHIP_TYPE;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_RELATIONSHIP_TYPE;
 
@@ -34,14 +35,14 @@ public interface RelationshipProjectionMapping {
     static RelationshipProjectionMapping all(Orientation orientation) {
         return ImmutableRelationshipProjectionMapping.builder()
             .typeName("")
-            .elementIdentifier("")
+            .relationshipType(ALL_RELATIONSHIPS)
             .orientation(orientation)
             .typeId(ANY_RELATIONSHIP_TYPE)
             .exists(true)
             .build();
     }
 
-    String elementIdentifier();
+    RelationshipType relationshipType();
 
     String typeName();
 
@@ -52,17 +53,17 @@ public interface RelationshipProjectionMapping {
     boolean exists();
 
     static RelationshipProjectionMapping of(String typeName, int typeId) {
-        return of(typeName, typeName, Orientation.NATURAL, typeId);
+        return of(RelationshipType.of(typeName), typeName, Orientation.NATURAL, typeId);
     }
 
     static RelationshipProjectionMapping of(
-        String elementIdentifier,
+        RelationshipType relationshipType,
         String typeName,
         Orientation orientation,
         int typeId
     ) {
         return ImmutableRelationshipProjectionMapping.builder()
-            .elementIdentifier(elementIdentifier)
+            .relationshipType(relationshipType)
             .typeName(typeName)
             .orientation(orientation)
             .typeId(typeId)

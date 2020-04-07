@@ -23,12 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.RelationshipProjectionMappings;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NativeFactoryTest {
 
@@ -51,11 +52,11 @@ class NativeFactoryTest {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
             .relationshipProjectionMappings(RelationshipProjectionMappings.of(
-                RelationshipProjectionMapping.of("TYPE1", "TYPE1", Orientation.NATURAL, -1),
-                RelationshipProjectionMapping.of("TYPE2", "TYPE2", Orientation.REVERSE, -1)
+                RelationshipProjectionMapping.of(RelationshipType.of("TYPE1"), "TYPE1", Orientation.NATURAL, -1),
+                RelationshipProjectionMapping.of(RelationshipType.of("TYPE2"), "TYPE2", Orientation.REVERSE, -1)
             ))
-            .putRelationshipCount("TYPE1", 250_000_000L)
-            .putRelationshipCount("TYPE2", 250_000_000L)
+            .putRelationshipCount(RelationshipType.of("TYPE1"), 250_000_000L)
+            .putRelationshipCount(RelationshipType.of("TYPE2"), 250_000_000L)
             .build();
 
         MemoryTree estimate = NativeFactory.getMemoryEstimation(dimensions).estimate(dimensions, 1);

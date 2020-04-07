@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
@@ -85,6 +86,7 @@ import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
@@ -615,8 +617,8 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph weightGraph = relPropertyGraph(name, "B", "weight");
-        Graph fooGraph = relPropertyGraph(name, "B", "foo");
+        Graph weightGraph = relPropertyGraph(name, RelationshipType.of("B"), "weight");
+        Graph fooGraph = relPropertyGraph(name, RelationshipType.of("B"), "foo");
         assertGraphEquals(fromGdl(String.format("(a)-[{w: %d}]->()", expectedValue)), weightGraph);
         assertGraphEquals(fromGdl("(a)-[{w: 55}]->()"), fooGraph);
     }
@@ -1208,7 +1210,7 @@ class GraphCreateProcTest extends BaseProcTest {
             .yields();
         runQuery(query);
 
-        Graph actual = relPropertyGraph("g", "TYPE", "agg");
+        Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
         Graph expected = fromGdl(String.format("(a)-[{w:%d}]->(b)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
@@ -1236,7 +1238,7 @@ class GraphCreateProcTest extends BaseProcTest {
             .yields();
         runQuery(query);
 
-        Graph actual = relPropertyGraph("g", "TYPE", "agg");
+        Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
         Graph expected = fromGdl(String.format("(a)-[{w:%g}]->(b)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
@@ -1263,7 +1265,7 @@ class GraphCreateProcTest extends BaseProcTest {
             .yields();
         runQuery(query);
 
-        Graph actual = relPropertyGraph("g", "TYPE", "agg");
+        Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
         Graph expected = fromGdl(String.format("(a)-[{w:%d}]->(b)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
@@ -1303,7 +1305,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         });
 
-        Graph actual = relPropertyGraph("countGraph", "TYPE_1", "count");
+        Graph actual = relPropertyGraph("countGraph", RelationshipType.of("TYPE_1"), "count");
         Graph expected = fromGdl("(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1343,7 +1345,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         });
 
-        Graph actual = relPropertyGraph("countGraph", "TYPE", "count");
+        Graph actual = relPropertyGraph("countGraph", RelationshipType.of("TYPE"), "count");
         Graph expected = fromGdl("(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1388,11 +1390,11 @@ class GraphCreateProcTest extends BaseProcTest {
 
         });
 
-        Graph countActual = relPropertyGraph("countGraph", "TYPE_1", "count");
+        Graph countActual = relPropertyGraph("countGraph", RelationshipType.of("TYPE_1"), "count");
         Graph countExpected = fromGdl("(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(countExpected, countActual);
 
-        Graph fooActual = relPropertyGraph("countGraph", "TYPE_1", "foo");
+        Graph fooActual = relPropertyGraph("countGraph", RelationshipType.of("TYPE_1"), "foo");
         Graph fooExpected = fromGdl("(a)-[{w:2674.0D}]->(b)");
         assertGraphEquals(fooExpected, fooActual);
     }
@@ -1415,9 +1417,9 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query, map("nodeQuery",
             ALL_NODES_QUERY, "relationshipQuery", relationshipQuery));
 
-        Graph foobarGraph = relPropertyGraph("testGraph", "", "foobar");
-        Graph foobazGraph = relPropertyGraph("testGraph", "", "foobaz");
-        Graph raboofGraph = relPropertyGraph("testGraph", "", "raboof");
+        Graph foobarGraph = relPropertyGraph("testGraph", ALL_RELATIONSHIPS, "foobar");
+        Graph foobazGraph = relPropertyGraph("testGraph", ALL_RELATIONSHIPS, "foobaz");
+        Graph raboofGraph = relPropertyGraph("testGraph", ALL_RELATIONSHIPS, "raboof");
 
         Graph expectedFoobarGraph = fromGdl("()-[{w: 23.0D}]->()");
         Graph expectedFoobazGraph = fromGdl("()-[{w: 1984.0D}]->()");
@@ -1456,11 +1458,11 @@ class GraphCreateProcTest extends BaseProcTest {
             assertEquals(8L, resultRow.getNumber("relationshipCount"))
         );
 
-        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("X")), resultRow ->
+        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", singletonList("X")), resultRow ->
             assertEquals(6L, resultRow.getNumber("relationshipCount"))
         );
 
-        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("Y")), resultRow ->
+        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", singletonList("Y")), resultRow ->
             assertEquals(2L, resultRow.getNumber("relationshipCount"))
         );
     }
@@ -1856,7 +1858,7 @@ class GraphCreateProcTest extends BaseProcTest {
         assertError(query, emptyMap(), "Failed to load relationship with unknown source-node id");
     }
 
-    private Graph relPropertyGraph(String graphName, String relationshipType, String property) {
+    private Graph relPropertyGraph(String graphName, RelationshipType relationshipType, String property) {
         return GraphStoreCatalog
             .get(getUsername(), graphName)
             .graphStore()

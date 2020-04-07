@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.api;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -87,7 +88,7 @@ public abstract class GraphStoreFactory implements Assessable {
     protected ProgressLogger initProgressLogger() {
         long relationshipCount = dimensions.relationshipProjectionMappings().stream()
             .mapToLong(mapping -> {
-                Long typeCount = dimensions.relationshipCounts().get(mapping.elementIdentifier());
+                Long typeCount = dimensions.relationshipCounts().get(mapping.relationshipType());
                 return mapping.orientation() == Orientation.UNDIRECTED
                     ? typeCount * 2
                     : typeCount;
@@ -108,8 +109,8 @@ public abstract class GraphStoreFactory implements Assessable {
         GraphDimensions dimensions
     ) {
         int relTypeCount = dimensions.relationshipProjectionMappings().numberOfMappings();
-        Map<String, HugeGraph.TopologyCSR> relationships = new HashMap<>(relTypeCount);
-        Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
+        Map<RelationshipType, HugeGraph.TopologyCSR> relationships = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
 
         relationshipImportResult.builders().forEach((relationshipProjectionMapping, relationshipsBuilder) -> {
             AdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
@@ -117,7 +118,7 @@ public abstract class GraphStoreFactory implements Assessable {
             long relationshipCount = relationshipImportResult.counts().getOrDefault(relationshipProjectionMapping, 0L);
 
             relationships.put(
-                relationshipProjectionMapping.elementIdentifier(),
+                relationshipProjectionMapping.relationshipType(),
                 ImmutableTopologyCSR.of(
                     adjacencyList,
                     adjacencyOffsets,
@@ -140,7 +141,7 @@ public abstract class GraphStoreFactory implements Assessable {
                             propertyIdAndMapping.getTwo().defaultValue()
                         )
                     ));
-                relationshipProperties.put(relationshipProjectionMapping.elementIdentifier(), propertyMap);
+                relationshipProperties.put(relationshipProjectionMapping.relationshipType(), propertyMap);
             }
         });
 

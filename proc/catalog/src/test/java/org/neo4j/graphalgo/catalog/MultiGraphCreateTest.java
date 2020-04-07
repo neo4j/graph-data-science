@@ -23,10 +23,11 @@ package org.neo4j.graphalgo.catalog;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
@@ -60,10 +61,16 @@ class MultiGraphCreateTest {
         runQuery(db, "CREATE (a:Node2), (b:Node2), (b)-[:TYPE2]->(a)");
         runQuery(db, create2);
 
-        Graph graph1 = GraphStoreCatalog.get("", "graph1").graphStore().getGraph("TYPE1", Optional.empty());
+        Graph graph1 = GraphStoreCatalog
+            .get("", "graph1")
+            .graphStore()
+            .getGraph(RelationshipType.of("TYPE1"), Optional.empty());
         assertGraph(graph1);
 
-        Graph graph2 = GraphStoreCatalog.get("", "graph2").graphStore().getGraph("TYPE2", Optional.empty());
+        Graph graph2 = GraphStoreCatalog
+            .get("", "graph2")
+            .graphStore()
+            .getGraph(RelationshipType.of("TYPE2"), Optional.empty());
         assertGraph(graph2);
     }
 
