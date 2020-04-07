@@ -64,7 +64,7 @@ public final class GraphStore {
 
     private final Map<String, HugeGraph.TopologyCSR> relationships;
 
-    private final Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties;
+    private final Map<String, RelationshipPropertyStore> relationshipProperties;
 
     private final Set<Graph> createdGraphs;
 
@@ -80,23 +80,30 @@ public final class GraphStore {
         AllocationTracker tracker
     ) {
         Map<ElementIdentifier, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
-
-        nodeProperties.forEach((elementIdentifier, propertyMap) -> {
+        nodeProperties.forEach((nodeLabel, propertyMap) -> {
             NodePropertyStore.Builder builder = NodePropertyStore.builder();
-
             propertyMap.forEach((propertyKey, propertyValues) -> builder.putNodeProperty(
                 propertyKey,
                 ImmutableNodeProperty.of(propertyKey, NumberType.FLOATING_POINT, propertyValues)
             ));
+            nodePropertyStores.put(nodeLabel, builder.build());
+        });
 
-            nodePropertyStores.put(elementIdentifier, builder.build());
+        Map<String, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>();
+        relationshipProperties.forEach((relationshipType, propertyMap) -> {
+            RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
+            propertyMap.forEach((propertyKey, propertyValues) -> builder.putRelationshipProperty(
+                propertyKey,
+                ImmutableRelationshipProperty.of(propertyKey, NumberType.FLOATING_POINT, propertyValues)
+            ));
+            relationshipPropertyStores.put(relationshipType, builder.build());
         });
 
         return new GraphStore(
             nodes,
             nodePropertyStores,
             relationships,
-            relationshipProperties,
+            relationshipPropertyStores,
             tracker
         );
     }
@@ -135,7 +142,7 @@ public final class GraphStore {
         IdMap nodes,
         Map<NodeLabel, NodePropertyStore> nodeProperties,
         Map<String, HugeGraph.TopologyCSR> relationships,
-        Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
+        Map<String, RelationshipPropertyStore> relationshipProperties,
         AllocationTracker tracker
     ) {
         this.nodes = nodes;
@@ -260,7 +267,11 @@ public final class GraphStore {
         return relationshipProperties
             .values()
             .stream()
-            .flatMapToLong(map -> map.values().stream().mapToLong(HugeGraph.PropertyCSR::elementCount))
+            .flatMapToLong(relationshipPropertyStore -> relationshipPropertyStore
+                .values()
+                .stream()
+                .map(RelationshipProperty::propertyValues)
+                .mapToLong(HugeGraph.PropertyCSR::elementCount))
             .sum();
     }
 
@@ -268,12 +279,12 @@ public final class GraphStore {
         return relationshipProperties
             .values()
             .stream()
-            .flatMap(properties -> properties.keySet().stream())
+            .flatMap(relationshipPropertyStore -> relationshipPropertyStore.keySet().stream())
             .collect(Collectors.toSet());
     }
 
     public Set<String> relationshipPropertyKeys(String relationshipType) {
-        return relationshipProperties.getOrDefault(relationshipType, Collections.emptyMap()).keySet();
+        return relationshipProperties.getOrDefault(relationshipType, RelationshipPropertyStore.empty()).keySet();
     }
 
     public void addRelationshipType(
@@ -287,9 +298,18 @@ public final class GraphStore {
 
                 if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
                     HugeGraph.PropertyCSR propertyCSR = relationships.properties().get();
-                    graphStore.relationshipProperties
-                        .computeIfAbsent(relationshipType, ignore -> new HashMap<>())
-                        .putIfAbsent(relationshipProperty.get(), propertyCSR);
+
+                    graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
+                        RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
+                        if (propertyStore != null) {
+                             builder.from(propertyStore);
+                        }
+                        String propertyKey = relationshipProperty.get();
+                        return builder.putIfAbsent(
+                            propertyKey,
+                            ImmutableRelationshipProperty.of(propertyKey, NumberType.FLOATING_POINT, propertyCSR)
+                        ).build();
+                    });
                 }
             }
         });
@@ -392,7 +412,7 @@ public final class GraphStore {
                     relTypeAndCSR.getValue(),
                     maybeRelationshipProperty.map(propertyKey -> relationshipProperties
                         .get(relTypeAndCSR.getKey())
-                        .get(propertyKey)),
+                        .get(propertyKey).propertyValues()),
                     tracker
                 );
 
@@ -525,7 +545,8 @@ public final class GraphStore {
         }
 
         static Builder builder() {
-            return new Builder();
+            // need to initialize with empty map due to `deferCollectionAllocation = true`
+            return new Builder().nodeProperties(Collections.emptyMap());
         }
 
         @AccessibleFields
@@ -553,6 +574,64 @@ public final class GraphStore {
         NodeProperties propertyValues();
         static NodeProperty of(String propertyKey, NumberType propertyType, NodeProperties propertyValues) {
             return ImmutableNodeProperty.of(propertyKey, propertyType, propertyValues);
+        }
+    }
+
+    @ValueClass
+    public interface RelationshipPropertyStore {
+
+        Map<String, RelationshipProperty> relationshipProperties();
+
+        default RelationshipProperty get(String propertyKey) {
+            return relationshipProperties().get(propertyKey);
+        }
+
+        default boolean isEmpty() {
+            return relationshipProperties().isEmpty();
+        }
+
+        default Set<String> keySet() {
+            return relationshipProperties().keySet();
+        }
+
+        default Collection<RelationshipProperty> values() {
+            return relationshipProperties().values();
+        }
+
+        default boolean containsKey(String propertyKey) {
+            return relationshipProperties().containsKey(propertyKey);
+        }
+
+        static RelationshipPropertyStore empty() {
+            return ImmutableRelationshipPropertyStore.of(Collections.emptyMap());
+        }
+
+        static Builder builder() {
+            return new Builder();
+        }
+
+        @AccessibleFields
+        final class Builder extends ImmutableRelationshipPropertyStore.Builder {
+
+            Builder putIfAbsent(String propertyKey, RelationshipProperty relationshipProperty) {
+                relationshipProperties.putIfAbsent(propertyKey, relationshipProperty);
+                return this;
+            }
+        }
+
+    }
+
+    @ValueClass
+    public interface RelationshipProperty {
+
+        String propertyKey();
+
+        NumberType propertyType();
+
+        HugeGraph.PropertyCSR propertyValues();
+
+        static RelationshipProperty of(String propertyKey, NumberType propertyType, HugeGraph.PropertyCSR propertyValues) {
+            return ImmutableRelationshipProperty.of(propertyKey, propertyType, propertyValues);
         }
     }
 }
