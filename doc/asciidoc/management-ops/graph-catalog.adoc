@@ -142,6 +142,31 @@ CALL gds.graph.exists('my-store-graph') YIELD exists;
 ----
 
 
+[[catalog-graph-remove-node-properties]]
+== Removing node properties from a named graph
+
+We can remove node properties from a named graph in the catalog.
+This is useful to free up main memory or to remove accidentally created node properties.
+
+.Remove multiple node properties from a named graph:
+[source,cypher]
+----
+CALL gds.graph.removeNodeProperties('my-graph', ['pageRank', 'communityId'])
+----
+
+
+[[catalog-graph-drop]]
+== Removing graphs from the catalog
+
+Once we have finished using the named graph we can remove it from the catalog to free up memory.
+
+.Remove a graph from the catalog:
+[source,cypher]
+----
+CALL gds.graph.drop('my-store-graph') YIELD graphName;
+----
+
+
 [[catalog-graph-write-node-properties]]
 == Write node properties to Neo4j
 
@@ -181,31 +206,6 @@ To write relationship properties, these have to be explicitly specified.
 [source,cypher]
 ----
 CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO', 'similarityScore')
-----
-
-
-[[catalog-graph-drop]]
-== Removing graphs from the catalog
-
-Once we have finished using the named graph we can remove it from the catalog to free up memory.
-
-.Remove a graph from the catalog:
-[source,cypher]
-----
-CALL gds.graph.drop('my-store-graph') YIELD graphName;
-----
-
-
-[[catalog-graph-remove-node-properties]]
-== Removing node properties from a named graph
-
-We can remove node properties from a named graph in the catalog.
-This is useful to free up main memory or to remove accidentally created node properties.
-
-.Remove multiple node properties from a named graph:
-[source,cypher]
-----
-CALL gds.graph.removeNodeProperties('my-graph', ['pageRank', 'communityId'])
 ----
 
 
