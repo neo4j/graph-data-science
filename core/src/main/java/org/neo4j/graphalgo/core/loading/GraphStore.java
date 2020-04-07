@@ -172,7 +172,7 @@ public final class GraphStore {
             .orElseGet(() -> Collections.singleton(ALL_NODES)));
     }
 
-    public Set<String> nodePropertyKeys(ElementIdentifier label) {
+    public Set<String> nodePropertyKeys(NodeLabel label) {
         return new HashSet<>(nodeProperties.getOrDefault(label, NodePropertyStore.empty()).keySet());
     }
 
@@ -423,7 +423,7 @@ public final class GraphStore {
         Optional<String> maybeRelationshipProperty,
         int concurrency
     ) {
-        boolean loadAllRelationships = relationshipTypes.contains(ALL_RELATIONSHIPS.name);
+        boolean loadAllRelationships = relationshipTypes.contains(ALL_RELATIONSHIPS);
         boolean loadAllNodes = filteredLabels.contains(ALL_NODES);
 
         Collection<NodeLabel> expandedLabels = loadAllNodes ? nodeLabels() : filteredLabels;
@@ -526,7 +526,7 @@ public final class GraphStore {
             ));
         }
 
-        if (!relationshipTypes.contains(ALL_RELATIONSHIPS.name)) {
+        if (!relationshipTypes.contains(ALL_RELATIONSHIPS)) {
             relationshipTypes.forEach(relationshipType -> {
                 if (!relationships.containsKey(relationshipType)) {
                     throw new IllegalArgumentException(String.format(

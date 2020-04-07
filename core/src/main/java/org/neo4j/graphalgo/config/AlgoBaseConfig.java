@@ -55,7 +55,7 @@ public interface AlgoBaseConfig extends BaseConfig {
 
     @Configuration.Ignore
     default List<RelationshipType> relationshipTypeIdentifiers() {
-        return Collections.singletonList(ALL_RELATIONSHIPS);
+        return relationshipTypes().stream().map(RelationshipType::of).collect(Collectors.toList());
     }
 
     @Value.Default
