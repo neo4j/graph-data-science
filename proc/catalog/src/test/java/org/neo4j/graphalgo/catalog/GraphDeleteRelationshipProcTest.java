@@ -35,7 +35,7 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     private final String DB_CYPHER =
         "CREATE (:A)-[:T1]->(:A), " +
-        "       (:A)-[:T2]->(:A) ";
+        "       (:A)-[:T2 {p: 1}]->(:A) ";
 
     private final String graphName = "g";
     private final Map<String, Object> params = map("graphName", this.graphName);
@@ -45,7 +45,7 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphDeleteRelationshipProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
-        runQuery("CALL gds.graph.create($graphName, 'A', ['T1', 'T2'])", params);
+        runQuery("CALL gds.graph.create($graphName, 'A', ['T1', { T2: { properties: 'p'}}])", params);
     }
 
     @AfterEach
@@ -92,6 +92,17 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
             "relationshipType", "T1",
             "deletedRelationships", 1L,
             "deletedProperties", map())
+        ));
+    }
+
+    @Test
+    void shouldDeleteRelationshipTypeWithProperties() {
+        String query = "CALL gds.graph.deleteRelationshipType('g', 'T2')";
+        assertCypherResult(query, Collections.singletonList(map(
+            "graphName", "g",
+            "relationshipType", "T2",
+            "deletedRelationships", 1L,
+            "deletedProperties", map("p", 1L))
         ));
     }
 
