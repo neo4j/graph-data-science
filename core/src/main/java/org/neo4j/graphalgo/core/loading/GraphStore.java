@@ -33,6 +33,9 @@ import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.graphalgo.core.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.core.schema.NodeSchema;
+import org.neo4j.graphalgo.core.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.utils.StringJoining;
@@ -53,6 +56,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
@@ -519,7 +523,7 @@ public final class GraphStore {
             .entrySet()
             .stream()
             .collect(Collectors.toMap(
-                Map.Entry::getKey,
+                Entry::getKey,
                 entry -> new UnionNodeProperties(entry.getValue(), maybeElementIdentifierBitSetMap.get())
             ));
     }
@@ -569,6 +573,40 @@ public final class GraphStore {
     private synchronized void updateGraphStore(Consumer<GraphStore> updateFunction) {
         updateFunction.accept(this);
         this.modificationTime = TimeUtil.now();
+    }
+
+    public GraphStoreSchema schema() {
+        Map<ElementIdentifier, Map<String, NumberType>> nodeProps = nodeLabels()
+            .stream()
+            .collect(Collectors.toMap(Function.identity(), eid -> emptyMap()));
+        Map<ElementIdentifier, Map<String, NumberType>> givenNodeProps = nodeProperties
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                Entry::getKey,
+                entry -> entry
+                    .getValue()
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Entry::getKey, innerEntry -> NumberType.FLOATING_POINT))
+            ));
+        nodeProps.putAll(givenNodeProps);
+        Map<ElementIdentifier, Map<String, NumberType>> relProps = relationshipTypes()
+            .stream()
+            .collect(Collectors.toMap(ElementIdentifier::of, type -> emptyMap()));
+        Map<ElementIdentifier, Map<String, NumberType>> givenRelProps = relationshipProperties
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                entry -> ElementIdentifier.of(entry.getKey()),
+                entry -> entry
+                    .getValue()
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Entry::getKey, innerEntry -> NumberType.FLOATING_POINT))
+            ));
+        relProps.putAll(givenRelProps);
+        return GraphStoreSchema.of(NodeSchema.of(nodeProps), RelationshipSchema.of(relProps));
     }
 
     public enum PropertyState {
