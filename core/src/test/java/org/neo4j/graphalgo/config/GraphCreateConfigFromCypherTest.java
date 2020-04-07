@@ -42,7 +42,7 @@ class GraphCreateConfigFromCypherTest {
 
     @ParameterizedTest
     @MethodSource("invalidKeys")
-    void testThrowForInvalidProcedureConfigKeys(String invalidKey, AbstractProjections<?> projections) {
+    void testThrowForInvalidProcedureConfigKeys(String invalidKey, AbstractProjections<?, ?> projections) {
         CypherMapWrapper config = CypherMapWrapper.empty()
             .withString(NODE_QUERY_KEY, ALL_NODES_QUERY)
             .withString(RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)

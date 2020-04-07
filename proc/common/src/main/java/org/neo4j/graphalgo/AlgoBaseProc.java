@@ -67,7 +67,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
 
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -165,8 +165,8 @@ public abstract class AlgoBaseProc<
 
     private GraphCreateConfig filterGraphCreateConfig(CONFIG config, GraphCreateConfig graphCreateConfig) {
         NodeProjections nodeProjections = graphCreateConfig.nodeProjections();
-        List<ElementIdentifier> nodeLabels = config.nodeLabels().stream().map(ElementIdentifier::of).collect(Collectors.toList());
-        if (nodeLabels.contains(PROJECT_ALL)) {
+        List<NodeLabel> nodeLabels = config.nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
+        if (nodeLabels.contains(PROJECT_ALL_NODES)) {
             return graphCreateConfig;
         } else {
             NodeProjections.Builder builder = NodeProjections.builder();
@@ -227,7 +227,7 @@ public abstract class AlgoBaseProc<
             ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
             : Optional.empty();
 
-        List<ElementIdentifier> nodeLabels = config.nodeLabelIdentifiers();
+        List<NodeLabel> nodeLabels = config.nodeLabelIdentifiers();
         List<String> relationshipTypes = config.relationshipTypes();
 
         return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty, config.concurrency());
@@ -263,7 +263,7 @@ public abstract class AlgoBaseProc<
             return;
         }
 
-        Collection<ElementIdentifier> filterLabels = config.nodeLabelIdentifiers().contains(PROJECT_ALL)
+        Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers().contains(PROJECT_ALL_NODES)
             ? graphStore.nodeLabels()
             : config.nodeLabelIdentifiers();
         if (config instanceof SeedConfig) {

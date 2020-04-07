@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public final class ElementIdentifier {
+public abstract class ElementIdentifier {
 
     public final @NotNull String name;
 
@@ -38,6 +38,8 @@ public final class ElementIdentifier {
     public String name() {
         return this.name;
     }
+
+    public abstract ElementIdentifier projectAll();
 
     @Override
     public boolean equals(Object o) {
@@ -54,12 +56,8 @@ public final class ElementIdentifier {
 
     @Override
     public String toString() {
-        return "ElementIdentifier{" +
+        return String.format("%s{" +
                "name='" + name + '\'' +
-               '}';
-    }
-
-    public static ElementIdentifier of(@NotNull String name) {
-        return new ElementIdentifier(name);
+               '}', this.getClass().getSimpleName());
     }
 }

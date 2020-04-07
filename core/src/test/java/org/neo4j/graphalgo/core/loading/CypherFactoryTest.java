@@ -24,7 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -318,7 +318,7 @@ class CypherFactoryTest {
         GraphStore graphStore = applyInTransaction(db, tx -> loader.build(CypherFactory.class).build().graphStore());
 
         Function<List<String>, Graph> getGraph = (List<String> labels) -> graphStore.getGraph(
-            labels.stream().map(ElementIdentifier::of).collect(Collectors.toList()),
+            labels.stream().map(NodeLabel::of).collect(Collectors.toList()),
             Collections.singletonList("*"),
             Optional.empty(),
             1

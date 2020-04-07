@@ -36,8 +36,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class NodeProjectionsTest {
@@ -48,7 +48,7 @@ class NodeProjectionsTest {
         NodeProjections actual = NodeProjections.fromObject(argument);
 
         NodeProjections expected = NodeProjections.builder().projections(singletonMap(
-            ElementIdentifier.of("A"),
+            NodeLabel.of("A"),
             NodeProjection.builder().label("A").properties(PropertyMappings.of()).build()
         )).build();
 
@@ -71,7 +71,7 @@ class NodeProjectionsTest {
         ));
 
         NodeProjections expected = NodeProjections.builder().projections(singletonMap(
-            ElementIdentifier.of("MY_LABEL"),
+            NodeLabel.of("MY_LABEL"),
             NodeProjection
                 .builder()
                 .label("A")
@@ -96,8 +96,8 @@ class NodeProjectionsTest {
         NodeProjections actual = NodeProjections.fromObject(Arrays.asList("A", "B"));
 
         NodeProjections expected = NodeProjections.builder()
-            .putProjection(ElementIdentifier.of("A"), NodeProjection.builder().label("A").build())
-            .putProjection(ElementIdentifier.of("B"), NodeProjection.builder().label("B").build())
+            .putProjection(NodeLabel.of("A"), NodeProjection.builder().label("A").build())
+            .putProjection(NodeLabel.of("B"), NodeProjection.builder().label("B").build())
             .build();
 
         assertThat(actual, equalTo(expected));
@@ -109,7 +109,7 @@ class NodeProjectionsTest {
         NodeProjections actual = NodeProjections.fromObject("*");
 
         NodeProjections expected = NodeProjections.builder().projections(singletonMap(
-            PROJECT_ALL,
+            PROJECT_ALL_NODES,
             NodeProjection
                 .builder()
                 .label("*")
@@ -121,7 +121,7 @@ class NodeProjectionsTest {
             actual,
             equalTo(expected)
         );
-        assertThat(actual.labelProjection(), equalTo(PROJECT_ALL.name));
+        assertThat(actual.labelProjection(), equalTo(PROJECT_ALL_NODES.name));
     }
 
     @Test

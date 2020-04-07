@@ -26,20 +26,19 @@ import org.neo4j.graphalgo.annotation.DataClass;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
+import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
 
 @DataClass
 @Value.Immutable(singleton = true)
-public abstract class AbstractNodeProjections extends AbstractProjections<NodeProjection> {
+public abstract class AbstractNodeProjections extends AbstractProjections<NodeLabel, NodeProjection> {
 
-    public abstract Map<ElementIdentifier, NodeProjection> projections();
+    public abstract Map<NodeLabel, NodeProjection> projections();
 
     public static NodeProjections fromObject(Object object) {
         if (object == null) {
@@ -69,22 +68,22 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
         if (StringUtils.isEmpty(labelString)) {
             create(emptyMap());
         }
-        if (labelString.equals(PROJECT_ALL.name)) {
-            return create(singletonMap(PROJECT_ALL, NodeProjection.all()));
+        if (labelString.equals(PROJECT_ALL_NODES.name)) {
+            return create(singletonMap(PROJECT_ALL_NODES, NodeProjection.all()));
         }
 
-        ElementIdentifier identifier = new ElementIdentifier(labelString);
+        NodeLabel nodeLabel = new NodeLabel(labelString);
         NodeProjection projection = NodeProjection.fromString(labelString);
-        return create(singletonMap(identifier, projection));
+        return create(singletonMap(nodeLabel, projection));
     }
 
     private static NodeProjections fromMap(Map<String, ?> map) {
-        Map<ElementIdentifier, NodeProjection> projections = new LinkedHashMap<>();
+        Map<NodeLabel, NodeProjection> projections = new LinkedHashMap<>();
         map.forEach((name, spec) -> {
-            ElementIdentifier identifier = new ElementIdentifier(name);
-            NodeProjection projection = NodeProjection.fromObject(spec, identifier);
+            NodeLabel nodeLabel = new NodeLabel(name);
+            NodeProjection projection = NodeProjection.fromObject(spec, nodeLabel);
             // sanity
-            if (projections.put(identifier, projection) != null) {
+            if (projections.put(nodeLabel, projection) != null) {
                 throw new IllegalStateException(String.format("Duplicate key: %s", name));
             }
         });
@@ -92,7 +91,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
     }
 
     private static NodeProjections fromList(Iterable<?> items) {
-        Map<ElementIdentifier, NodeProjection> projections = new LinkedHashMap<>();
+        Map<NodeLabel, NodeProjection> projections = new LinkedHashMap<>();
         for (Object item : items) {
             NodeProjections nodeProjections = fromObject(item);
             projections.putAll(nodeProjections.projections());
@@ -100,7 +99,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
         return create(projections);
     }
 
-    public static NodeProjections create(Map<ElementIdentifier, NodeProjection> projections) {
+    public static NodeProjections create(Map<NodeLabel, NodeProjection> projections) {
         if (projections.isEmpty()) {
             throw new IllegalArgumentException(
                 "An empty node projection was given; at least one node label must be projected."
@@ -117,12 +116,12 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodePr
         if (!mappings.hasMappings()) {
             return NodeProjections.copyOf(this);
         }
-        Map<ElementIdentifier, NodeProjection> newProjections = projections().entrySet().stream().collect(toMap(
+        Map<NodeLabel, NodeProjection> newProjections = projections().entrySet().stream().collect(toMap(
             Map.Entry::getKey,
             e -> e.getValue().withAdditionalPropertyMappings(mappings)
         ));
         if (newProjections.isEmpty()) {
-            newProjections.put(PROJECT_ALL, NodeProjection.all().withAdditionalPropertyMappings(mappings));
+            newProjections.put(PROJECT_ALL_NODES, NodeProjection.all().withAdditionalPropertyMappings(mappings));
         }
         return create(newProjections);
     }

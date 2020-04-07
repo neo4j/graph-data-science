@@ -45,7 +45,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
@@ -492,7 +491,7 @@ public abstract class GdsCypher {
         @Override
         public ImplicitCreationBuildStage withNodeLabels(Map<String, NodeProjection> nodeProjections) {
             nodeProjections.forEach((label, nodeProjection) -> graphCreateBuilder().putNodeProjection(
-                ElementIdentifier.of(label),
+                NodeLabel.of(label),
                 nodeProjection
             ));
             return this;
@@ -503,7 +502,7 @@ public abstract class GdsCypher {
             String type,
             RelationshipProjection relationshipProjection
         ) {
-            graphCreateBuilder().putRelProjection(ElementIdentifier.of(type), relationshipProjection);
+            graphCreateBuilder().putRelProjection(RelationshipType.of(type), relationshipProjection);
             return this;
         }
 
@@ -634,8 +633,8 @@ public abstract class GdsCypher {
     @Builder.Factory
     static GraphCreateConfig inlineGraphCreateConfig(
         Optional<String> graphName,
-        Map<ElementIdentifier, NodeProjection> nodeProjections,
-        Map<ElementIdentifier, RelationshipProjection> relProjections,
+        Map<NodeLabel, NodeProjection> nodeProjections,
+        Map<RelationshipType, RelationshipProjection> relProjections,
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relProperties
     ) {
@@ -714,19 +713,19 @@ public abstract class GdsCypher {
         }
     }
 
-    private static <P extends ElementProjection> MinimalObject toMinimalObject(
-        AbstractProjections<P> allProjections
+    private static <I extends ElementIdentifier, P extends ElementProjection> MinimalObject toMinimalObject(
+        AbstractProjections<I, P> allProjections
     ) {
-        Map<ElementIdentifier, P> projections = allProjections.projections();
+        Map<I, P> projections = allProjections.projections();
         if (projections.isEmpty()) {
             return MinimalObject.empty();
         }
         if (projections.size() == 1) {
-            Map.Entry<ElementIdentifier, P> entry = projections.entrySet().iterator().next();
-            ElementIdentifier identifier = entry.getKey();
+            Map.Entry<I, P> entry = projections.entrySet().iterator().next();
+            I identifier = entry.getKey();
             P projection = entry.getValue();
-            if (PROJECT_ALL.equals(identifier) && isAllDefault(projection)) {
-                return MinimalObject.string(PROJECT_ALL.name);
+            if (identifier.projectAll().equals(identifier) && isAllDefault(projection)) {
+                return MinimalObject.string(identifier.projectAll().name);
             }
             MinimalObject projectionObject = toMinimalObject(projection, identifier);
             return projectionObject.map(m -> MinimalObject.map(identifier.name, m));

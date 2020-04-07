@@ -24,11 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -92,7 +92,7 @@ abstract class TriangleBaseProcTest<A extends Algorithm<A, RESULT>, RESULT, CONF
     void testValidateUndirectedProjection() {
         RelationshipProjections invalidRelationshipProjections = RelationshipProjections.builder()
             .putProjection(
-                ElementIdentifier.of("TYPE"),
+                RelationshipType.of("TYPE"),
                 RelationshipProjection.of("TYPE", Orientation.NATURAL, Aggregation.DEFAULT)
             )
             .build();

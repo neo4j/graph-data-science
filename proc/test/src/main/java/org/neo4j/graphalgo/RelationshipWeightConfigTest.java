@@ -50,8 +50,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.AbstractProjections.PROJECT_ALL;
+import static org.neo4j.graphalgo.NodeLabel.PROJECT_ALL_NODES;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.RelationshipType.PROJECT_ALL_RELATIONHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
@@ -63,7 +64,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
     RelationshipProjections MULTI_RELATIONSHIPS_PROJECTION = RelationshipProjections.builder()
         .putProjection(
-            ElementIdentifier.of("TYPE"),
+            RelationshipType.of("TYPE"),
             RelationshipProjection.builder()
                 .type("TYPE")
                 .properties(
@@ -75,7 +76,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
                 .build()
         )
         .putProjection(
-            ElementIdentifier.of("TYPE1"),
+            RelationshipType.of("TYPE1"),
             RelationshipProjection.builder()
                 .type("TYPE1")
                 .build()
@@ -84,11 +85,11 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
     NodeProjections MULTI_NODES_PROJECTION = NodeProjections.builder()
         .putProjection(
-            ElementIdentifier.of("Label"),
+            NodeLabel.of("Label"),
             NodeProjection.of("Label", PropertyMappings.of())
         )
         .putProjection(
-            ElementIdentifier.of("Ignore"),
+            NodeLabel.of("Ignore"),
             NodeProjection.of("Ignore", PropertyMappings.of())
         )
         .build();
@@ -142,7 +143,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
         List<String> relationshipProperties = singletonList("a");
         Map<String, Object> tempConfig = map(
             "relationshipWeightProperty", "foo",
-            NODE_PROJECTION_KEY, PROJECT_ALL.name,
+            NODE_PROJECTION_KEY, PROJECT_ALL_NODES.name,
             RELATIONSHIP_PROJECTION_KEY, map(
                 "A", map(
                     "properties", relationshipProperties
@@ -281,9 +282,9 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
 
         CypherMapWrapper weightConfig = CypherMapWrapper.create(map(
             NODE_PROJECTION_KEY, NodeProjections.builder()
-                .putProjection(ElementIdentifier.of(labelString), NodeProjection.of(labelString, PropertyMappings.of()))
+                .putProjection(NodeLabel.of(labelString), NodeProjection.of(labelString, PropertyMappings.of()))
                 .build(),
-            RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL.name,
+            RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL_RELATIONHIPS.name,
             "relationshipProperties", "weight1"
         ));
         CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
