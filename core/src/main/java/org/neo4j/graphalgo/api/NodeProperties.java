@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.values.storable.NumberType;
+
 import java.util.OptionalLong;
 
 @FunctionalInterface
@@ -59,5 +62,15 @@ public interface NodeProperties {
      */
     default long size() {
         return 0;
+    }
+
+    static PropertyTranslator<NodeProperties> translatorFor(NumberType numberType) {
+        if (numberType == NumberType.FLOATING_POINT) {
+            return (PropertyTranslator.OfDouble<NodeProperties>) NodeProperties::nodeProperty;
+        } else if (numberType == NumberType.INTEGRAL) {
+            return (PropertyTranslator.OfLong<NodeProperties>) (data, nodeId) -> (long) data.nodeProperty(nodeId);
+        } else {
+            throw new UnsupportedOperationException("Can not provide a property translator for non-numeric types.");
+        }
     }
 }
