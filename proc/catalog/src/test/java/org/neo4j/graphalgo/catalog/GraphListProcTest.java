@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -55,7 +56,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIO
 
 class GraphListProcTest extends BaseProcTest {
 
-    private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
+    private static final String DB_CYPHER = "CREATE (:A {foo: 1})-[:REL {bar: 2}]->(:A)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -95,6 +96,11 @@ class GraphListProcTest extends BaseProcTest {
                         "properties", emptyMap()
                     )
                 ),
+                "schema", map(
+                    "nodes", map("A", map()),
+                    "relationships", map("REL", map()
+                    )
+                ),
                 "nodeQuery", null,
                 "relationshipQuery", null,
                 "nodeCount", 2L,
@@ -117,11 +123,31 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @Test
-    void listASingleCypherProjection() {
+    void listASingleLabelRelationshipTypeProjectionWithProperties() {
+        String name = "name";
+        runQuery(
+            "CALL gds.graph.create($name, 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})",
+            map("name", name)
+        );
+
+        assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
+            map(
+                "schema", map("nodeLabels", singletonList("A"),
+                    "nodePropertyKeys", singletonList("foo"),
+                    "relationshipTypes", singletonList("REL"),
+                    "relationshipPropertiesMap", map("REL", singletonList("bar"))
+                )
+            )
+        ));
+    }
+
+    @Test
+    void listCypherProjection() {
         String name = "name";
         runQuery(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
-            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY));
+            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY)
+        );
 
         assertCypherResult("CALL gds.graph.list()", singletonList(
             map(
@@ -139,6 +165,11 @@ class GraphListProcTest extends BaseProcTest {
                         "aggregation", "DEFAULT",
                         "properties", emptyMap()
                     )
+                ),
+                "schema", map("nodeLabels", emptyList(),
+                    "nodePropertyKeys", Collections.emptyList(),
+                    "relationshipTypes", singletonList(""),
+                    "relationshipPropertiesMap", map()
                 ),
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
@@ -162,30 +193,79 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @Test
+    void listCypherProjectionWithProperties() {
+        String name = "name";
+        runQuery(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            map(
+                "name", name,
+                "nodeQuery", "MATCH (n) RETURN id(n) AS id, n.foo as foo, labels(n) as labels",
+                "relationshipQuery", "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, r.bar as bar, type(r) as type"
+            )
+        );
+
+        assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
+            map(
+                "schema", map("nodeLabels", singletonList("A"),
+                    "nodePropertyKeys", singletonList("foo"),
+                    "relationshipTypes", singletonList("REL"),
+                    "relationshipPropertiesMap", map("REL", singletonList("bar"))
+                )
+            )
+        ));
+    }
+
+    @Test
+    void listCypherProjectionProjectAllWithProperties() {
+        String name = "name";
+        runQuery(
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
+            map(
+                "name", name,
+                "nodeQuery", "MATCH (n) RETURN id(n) AS id, n.foo as foo",
+                "relationshipQuery", "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, r.bar as bar"
+            )
+        );
+
+        assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
+            map(
+                "schema", map("nodeLabels", emptyList(),
+                    "nodePropertyKeys", singletonList("foo"),
+                    "relationshipTypes", singletonList(""),
+                    "relationshipPropertiesMap", map("", singletonList("bar"))
+                )
+            )
+        ));
+    }
+
+    @Test
     void degreeDistributionComputationIsOptOut() {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
 
-        assertCypherResult("CALL gds.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodeCount, relationshipCount", singletonList(
-            map(
-                "graphName", name,
-                "nodeProjection", map(
-                    "A", map(
-                        "label", "A",
-                        "properties", emptyMap()
-                    )
-                ),
-                "relationshipProjection", map(
-                    "REL", map(
-                        "type", "REL",
-                        "orientation", "NATURAL",
-                        "aggregation", "DEFAULT",
-                        "properties", emptyMap()
-                    )),
-                "nodeCount", 2L,
-                "relationshipCount", 1L
+        assertCypherResult(
+            "CALL gds.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodeCount, relationshipCount",
+            singletonList(
+                map(
+                    "graphName", name,
+                    "nodeProjection", map(
+                        "A", map(
+                            "label", "A",
+                            "properties", emptyMap()
+                        )
+                    ),
+                    "relationshipProjection", map(
+                        "REL", map(
+                            "type", "REL",
+                            "orientation", "NATURAL",
+                            "aggregation", "DEFAULT",
+                            "properties", emptyMap()
+                        )),
+                    "nodeCount", 2L,
+                    "relationshipCount", 1L
+                )
             )
-        ));
+        );
     }
 
     @Test
