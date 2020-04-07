@@ -289,14 +289,17 @@ public final class GraphStore {
 
     public void addRelationshipType(
         String relationshipType,
-        Optional<String> relationshipProperty,
+        Optional<String> relationshipPropertyKey,
+        Optional<NumberType> relationshipPropertyType,
         HugeGraph.Relationships relationships
     ) {
         updateGraphStore(graphStore -> {
             if (!hasRelationshipType(relationshipType)) {
                 graphStore.relationships.put(relationshipType, relationships.topology());
 
-                if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
+                if (relationshipPropertyKey.isPresent()
+                    && relationshipPropertyType.isPresent()
+                    && relationships.properties().isPresent()) {
                     HugeGraph.PropertyCSR propertyCSR = relationships.properties().get();
 
                     graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
@@ -304,10 +307,10 @@ public final class GraphStore {
                         if (propertyStore != null) {
                              builder.from(propertyStore);
                         }
-                        String propertyKey = relationshipProperty.get();
+                        String propertyKey = relationshipPropertyKey.get();
                         return builder.putIfAbsent(
                             propertyKey,
-                            ImmutableRelationshipProperty.of(propertyKey, NumberType.FLOATING_POINT, propertyCSR)
+                            ImmutableRelationshipProperty.of(propertyKey, relationshipPropertyType.get(), propertyCSR)
                         ).build();
                     });
                 }

@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Collections;
 import java.util.Map;
@@ -134,6 +135,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
                 .addRelationshipType(
                     config.mutateRelationshipType(),
                     Optional.of(config.mutateProperty()),
+                    Optional.of(NumberType.FLOATING_POINT),
                     resultRelationships
                 );
         }
