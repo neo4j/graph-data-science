@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.catalog;
 
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
@@ -69,25 +70,31 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
         DeletionResult deletionResult = graphStoreWithConfig.graphStore().deleteRelationshipType(relationshipType);
 
         // We have to post-filter to hide the fact that we delete properties for other relationship projections
-        Set<String> declaredProperties = graphStoreWithConfig
+        ElementIdentifier relType = ElementIdentifier.of(relationshipType);
+        Map<ElementIdentifier, RelationshipProjection> projectedRels = graphStoreWithConfig
             .config()
             .relationshipProjections()
-            .projections()
-            .get(ElementIdentifier.of(relationshipType)).properties().mappings()
-            .stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet());
+            .projections();
+        // we only have to post-filter when an originally projected rel-type is being removed
+        if (projectedRels.containsKey(relType)) {
+            Set<String> declaredProperties = projectedRels
+                .get(relType).properties().mappings()
+                .stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet());
 
-        DeletionResult filteredDeletionResult = DeletionResult.of(builder -> {
-            builder
-                .from(deletionResult)
-                .deletedProperties(deletionResult
-                    .deletedProperties()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> declaredProperties.contains(entry.getKey()))
-                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        });
+            DeletionResult filteredDeletionResult = DeletionResult.of(builder -> {
+                builder
+                    .from(deletionResult)
+                    .deletedProperties(deletionResult
+                        .deletedProperties()
+                        .entrySet()
+                        .stream()
+                        .filter(entry -> declaredProperties.contains(entry.getKey()))
+                        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            });
+            return Stream.of(new Result(graphName, relationshipType, filteredDeletionResult));
+        }
 
-        return Stream.of(new Result(graphName, relationshipType, filteredDeletionResult));
+        return Stream.of(new Result(graphName, relationshipType, deletionResult));
     }
 
     public static class Result {
