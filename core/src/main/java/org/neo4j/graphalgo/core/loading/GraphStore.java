@@ -559,40 +559,38 @@ public final class GraphStore {
     }
 
     public GraphStoreSchema schema() {
-        Map<NodeLabel, Map<String, NumberType>> nodeProps = nodeLabels()
-            .stream()
-            .collect(Collectors.toMap(Function.identity(), eid -> emptyMap()));
+        NodeSchema.Builder nodePropsBuilder = NodeSchema.builder();
 
-        nodeProperties
-            .forEach((label, propertyStore) ->
-                nodeProps.put(
-                    label,
-                    propertyStore
-                        .nodeProperties()
-                        .entrySet()
-                        .stream()
-                        .collect(Collectors.toMap(Entry::getKey, innerEntry -> innerEntry.getValue().propertyType()))
-                ));
+        nodeProperties.forEach((label, propertyStore) -> {
+            propertyStore.nodeProperties().forEach((propertyName, nodeProperty) -> {
+                nodePropsBuilder.addPropertyAndTypeForLabel(label, propertyName, nodeProperty.propertyType());
+            });
+        });
 
-        Map<RelationshipType, Map<String, NumberType>> relProps = relationshipTypes()
-            .stream()
+        for (NodeLabel nodeLabel : nodeLabels()) {
+            nodePropsBuilder.addEmptyMapForLabelWithoutProperties(nodeLabel);
+        }
+
+
+        Map<RelationshipType, Map<String, NumberType>> relProps = new HashMap<>();
+
+        relationshipProperties.forEach((type, propertyStore) -> {
+            Map<String, NumberType> propertyTypes = new HashMap<>();
+            propertyStore.relationshipProperties().forEach((propertyName, relationshipProperty) -> {
+                propertyTypes.put(propertyName, relationshipProperty.propertyType());
+            });
             // TODO: remove if "" as a rel-type is impossible
-            .map(type -> type.isEmpty() ? "*" : type)
-            .collect(Collectors.toMap(RelationshipType::of, type -> emptyMap()));
+            RelationshipType relationshipType = RelationshipType.of(type.isEmpty() ? "*" : type);
+            relProps.put(relationshipType, propertyTypes);
+        });
 
-        relationshipProperties
-            .forEach((type, propertyStore) ->
-                relProps.put(
-                    // TODO: remove if "" as a rel-type is impossible
-                    RelationshipType.of(type.isEmpty() ? "*" : type),
-                    propertyStore
-                        .relationshipProperties()
-                        .entrySet()
-                        .stream()
-                        .collect(Collectors.toMap(Entry::getKey, innerEntry -> innerEntry.getValue().propertyType())
-                        )
-                ));
-        return GraphStoreSchema.of(NodeSchema.of(nodeProps), RelationshipSchema.of(relProps));
+        for (String type : relationshipTypes()) {
+            // TODO: remove if "" as a rel-type is impossible
+            RelationshipType relationshipType = RelationshipType.of(type.isEmpty() ? "*" : type);
+            relProps.putIfAbsent(relationshipType, emptyMap());
+        }
+
+        return GraphStoreSchema.of(nodePropsBuilder.build(), RelationshipSchema.of(relProps));
     }
 
     @ValueClass
