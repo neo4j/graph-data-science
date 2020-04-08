@@ -562,20 +562,18 @@ public final class GraphStore {
         Map<NodeLabel, Map<String, NumberType>> nodeProps = nodeLabels()
             .stream()
             .collect(Collectors.toMap(Function.identity(), eid -> emptyMap()));
-        Map<NodeLabel, Map<String, NumberType>> givenNodeProps = nodeProperties
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(
-                Entry::getKey,
-                entry -> entry
-                    .getValue()
-                    .nodePropertyValues()
-                    .entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(Entry::getKey, innerEntry -> NumberType.FLOATING_POINT))
-            ));
 
-        nodeProps.putAll(givenNodeProps);
+        nodeProperties
+            .forEach((label, propertyStore) ->
+                nodeProps.put(
+                    label,
+                    propertyStore
+                        .nodeProperties()
+                        .entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Entry::getKey, innerEntry -> innerEntry.getValue().propertyType()))
+                ));
+
         Map<RelationshipType, Map<String, NumberType>> relProps = relationshipTypes()
             .stream()
             // TODO: remove if "" as a rel-type is impossible
@@ -583,17 +581,16 @@ public final class GraphStore {
             .collect(Collectors.toMap(RelationshipType::of, type -> emptyMap()));
 
         relationshipProperties
-            .entrySet()
-            .stream()
-            .forEach(entry ->
+            .forEach((type, propertyStore) ->
                 relProps.put(
                     // TODO: remove if "" as a rel-type is impossible
-                    RelationshipType.of(entry.getKey().isEmpty() ? "*" : entry.getKey()),
-                    entry.getValue()
+                    RelationshipType.of(type.isEmpty() ? "*" : type),
+                    propertyStore
                         .relationshipProperties()
                         .entrySet()
                         .stream()
-                        .collect(Collectors.toMap(Entry::getKey, innerEntry -> NumberType.FLOATING_POINT))
+                        .collect(Collectors.toMap(Entry::getKey, innerEntry -> innerEntry.getValue().propertyType())
+                        )
                 ));
         return GraphStoreSchema.of(NodeSchema.of(nodeProps), RelationshipSchema.of(relProps));
     }
