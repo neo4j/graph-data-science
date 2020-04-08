@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.catalog;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.config.DeleteRelationshipsConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
@@ -29,11 +31,13 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.filtering;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -41,38 +45,35 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
 
     private static final String DESCRIPTION = "";
 
-    @Procedure(name = "gds.graph.deleteRelationshipType", mode = READ)
+    @Procedure(name = "gds.graph.deleteRelationships", mode = READ)
     @Description(DESCRIPTION)
     public Stream<Result> delete(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
+
         GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(getUsername(), graphName);
-        Set<String> relationshipTypes = graphStoreWithConfig.graphStore().relationshipTypes();
 
-        if (relationshipTypes.size() == 1) {
-            throw new IllegalArgumentException(String.format(
-                "Deleting the last relationship type ('%s') from a graph ('%s') is not supported. " +
-                "Use `gds.graph.drop()` to drop the entire graph instead.",
-                relationshipType,
-                graphName
-            ));
-        }
+        DeleteRelationshipsConfig.of(graphName, relationshipType).validate(graphStoreWithConfig.graphStore());
 
-        if (!relationshipTypes.contains(relationshipType)) {
-            throw new IllegalArgumentException(String.format(
-                "No relationship type '%s' found in graph '%s'.",
-                relationshipType,
-                graphName
-            ));
-        }
+        DeletionResult deletionResult = graphStoreWithConfig.graphStore().deleteRelationships(relationshipType);
 
-        DeletionResult deletionResult = graphStoreWithConfig.graphStore().deleteRelationshipType(relationshipType);
+        return Stream.of(new Result(
+            graphName,
+            relationshipType,
+            filterDeletionResult(deletionResult, relationshipType, graphStoreWithConfig.config())
+        ));
+    }
 
+    @Deprecated
+    private DeletionResult filterDeletionResult(
+        DeletionResult deletionResult,
+        String relationshipType,
+        GraphCreateConfig config
+    ) {
         // We have to post-filter to hide the fact that we delete properties for other relationship projections
         RelationshipType relType = RelationshipType.of(relationshipType);
-        Map<RelationshipType, RelationshipProjection> projectedRels = graphStoreWithConfig
-            .config()
+        Map<RelationshipType, RelationshipProjection> projectedRels = config
             .relationshipProjections()
             .projections();
         // we only have to post-filter when an originally projected rel-type is being removed
@@ -81,20 +82,16 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
                 .get(relType).properties().mappings()
                 .stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet());
 
-            DeletionResult filteredDeletionResult = DeletionResult.of(builder -> {
-                builder
-                    .from(deletionResult)
-                    .deletedProperties(deletionResult
-                        .deletedProperties()
-                        .entrySet()
-                        .stream()
-                        .filter(entry -> declaredProperties.contains(entry.getKey()))
-                        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            return DeletionResult.of(builder -> {
+                builder.deletedRelationships(deletionResult.deletedRelationships());
+                deletionResult.deletedProperties()
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> declaredProperties.contains(entry.getKey()))
+                    .forEach(builder::putDeletedProperty);
             });
-            return Stream.of(new Result(graphName, relationshipType, filteredDeletionResult));
         }
-
-        return Stream.of(new Result(graphName, relationshipType, deletionResult));
+        return deletionResult;
     }
 
     public static class Result {

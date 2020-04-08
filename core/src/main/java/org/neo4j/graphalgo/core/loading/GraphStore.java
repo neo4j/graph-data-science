@@ -340,20 +340,15 @@ public final class GraphStore {
         });
     }
 
-    public DeletionResult deleteRelationshipType(String relationshipType) {
+    public DeletionResult deleteRelationships(String relationshipType) {
         return DeletionResult.of(builder ->
             updateGraphStore(graphStore -> {
                 builder.deletedRelationships(graphStore.relationships.get(relationshipType).elementCount());
-                builder.deletedProperties(graphStore.relationshipProperties
+                graphStore.relationshipProperties
                     .getOrDefault(relationshipType, RelationshipPropertyStore.empty())
-                .relationshipProperties()
-                    .entrySet()
-                    .stream()
-                    .collect(toMap(
-                    entry -> entry.getValue().propertyKey(),
-                    entry -> entry.getValue().propertyValues().elementCount()
-                ))
-                );
+                    .relationshipProperties().values().forEach(property -> {
+                    builder.putDeletedProperty(property.propertyKey(), property.propertyValues().elementCount());
+                });
                 graphStore.relationships.remove(relationshipType);
                 graphStore.relationshipProperties.remove(relationshipType);
             })

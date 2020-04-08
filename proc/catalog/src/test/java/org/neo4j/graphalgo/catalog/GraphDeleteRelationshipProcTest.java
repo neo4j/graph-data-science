@@ -56,26 +56,20 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     @Test
     void failWhenNoSuchGraph() {
-        String query =
-            "CALL gds.graph.deleteRelationshipType('foo', 'bar')";
-
-        assertError(query, "Cannot find graph with name 'foo'");
+        assertError("CALL gds.graph.deleteRelationships('foo', 'bar')", "Cannot find graph with name 'foo'");
     }
 
     @Test
     void failWhenNoSuchRelType() {
-        String query =
-            "CALL gds.graph.deleteRelationshipType('g', 'bar')";
-
-        assertError(query, "No relationship type 'bar' found in graph 'g'.");
+        assertError("CALL gds.graph.deleteRelationships('g', 'bar')", "No relationship type 'bar' found in graph 'g'.");
     }
 
     @Test
     void failWhenDeletingLastRelType() {
         // deleting one is fine
-        runQuery("CALL gds.graph.deleteRelationshipType('g', 'T1')");
+        runQuery("CALL gds.graph.deleteRelationships('g', 'T1')");
 
-        String query2 = "CALL gds.graph.deleteRelationshipType('g', 'T2')";
+        String query2 = "CALL gds.graph.deleteRelationships('g', 'T2')";
 
         assertError(
             query2,
@@ -86,7 +80,7 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     @Test
     void shouldDeleteRelationshipType() {
-        String query = "CALL gds.graph.deleteRelationshipType('g', 'T1')";
+        String query = "CALL gds.graph.deleteRelationships('g', 'T1')";
         assertCypherResult(query, Collections.singletonList(map(
             "graphName", "g",
             "relationshipType", "T1",
@@ -97,7 +91,7 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     @Test
     void shouldDeleteRelationshipTypeWithProperties() {
-        String query = "CALL gds.graph.deleteRelationshipType('g', 'T2')";
+        String query = "CALL gds.graph.deleteRelationships('g', 'T2')";
         assertCypherResult(query, Collections.singletonList(map(
             "graphName", "g",
             "relationshipType", "T2",

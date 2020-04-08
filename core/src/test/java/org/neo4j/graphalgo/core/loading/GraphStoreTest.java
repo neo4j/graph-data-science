@@ -54,6 +54,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -216,7 +217,7 @@ class GraphStoreTest {
     }
 
     @Test
-    void deleteRelationshipTypeAndProperties() throws InterruptedException {
+    void deleteRelationshipsAndProperties() throws InterruptedException {
         runQuery(db, "CREATE ()-[:REL {p: 2}]->(), ()-[:LER {p: 1}]->(), ()-[:LER {p: 2}]->(), ()-[:LER {q: 2}]->()");
 
         GraphStore graphStore = new StoreLoaderBuilder()
@@ -238,15 +239,13 @@ class GraphStoreTest {
             .build()
             .graphStore(NativeFactory.class);
 
-        assertThat(graphStore.relationshipCount(), greaterThan(0L));
-        assertThat(graphStore.relationshipPropertyCount(), greaterThan(0L));
+        assertThat(graphStore.relationshipCount(), equalTo(4L));
+        // should be 7, change this when we have fixed the issue with
+        // relationshipTypes containing properties from other relationshipTypes
+        assertThat(graphStore.relationshipPropertyCount(), equalTo(8L));
 
-        LocalDateTime initialTime = graphStore.modificationTime();
-        Thread.sleep(42);
-        DeletionResult deletionResult = graphStore.deleteRelationshipType("LER");
-        LocalDateTime deletionTime = graphStore.modificationTime();
+        DeletionResult deletionResult = graphStore.deleteRelationships("LER");
 
-        assertTrue(initialTime.isBefore(deletionTime), "Relationship type deletion did not change modificationTime");
         assertEquals(new HashSet<>(singletonList("REL")), graphStore.relationshipTypes());
         assertFalse(graphStore.hasRelationshipType("LER"));
         assertEquals(1, graphStore.relationshipCount());
