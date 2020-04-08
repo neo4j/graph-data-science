@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.config;
 
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -49,7 +50,7 @@ public interface DeleteRelationshipsConfig {
     @Configuration.Ignore
     default void validate(GraphStore graphStore) {
 
-        Set<String> relationshipTypes = graphStore.relationshipTypes();
+        Set<RelationshipType> relationshipTypes = graphStore.relationshipTypes();
 
         if (relationshipTypes.size() == 1) {
             throw new IllegalArgumentException(String.format(
@@ -60,7 +61,7 @@ public interface DeleteRelationshipsConfig {
             ));
         }
 
-        if (!relationshipTypes.contains(relationshipType())) {
+        if (!relationshipTypes.contains(RelationshipType.of(relationshipType()))) {
             throw new IllegalArgumentException(String.format(
                 "No relationship type '%s' found in graph '%s'.",
                 relationshipType(),
