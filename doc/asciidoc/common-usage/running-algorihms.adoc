@@ -53,7 +53,7 @@ This execution mode is especially useful in three scenarios:
 
 * Algorithms can depend on the results of previous algorithms without the need to write to Neo4j.
 * Algorithm results can be written altogether (see <<catalog-graph-write-node-properties, write node properties>> and <<catalog-graph-write-relationship, write relationships>>).
-* Algorithm results can be queried via Cypher without the need to write to Neo4j at all (see `gds.util.nodeProperty`).
+* Algorithm results can be queried via Cypher without the need to write to Neo4j at all (see `<<utility-functions-catalog, gds.util.nodeProperty>>`).
 
 A statistical summary of the computation is returned as a Cypher result row.
 As for the `write` mode, mutated data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
