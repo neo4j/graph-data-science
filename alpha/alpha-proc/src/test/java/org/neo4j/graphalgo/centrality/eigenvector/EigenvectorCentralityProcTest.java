@@ -38,16 +38,13 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Label;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
@@ -149,25 +146,8 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         createExplicitGraph(EXPLICIT_GRAPH_NAME);
     }
 
-    @Override
-    protected void assertMapEquals(Map<Long, Double> expected, Map<Long, Double> actual) {
-        assertEquals(expected.size(), actual.size(), "number of elements");
-        Collection<Long> expectedKeys = new HashSet<>(expected.keySet());
-        for (Map.Entry<Long, Double> entry : actual.entrySet()) {
-            assertTrue(
-                expectedKeys.remove(entry.getKey()),
-                "unknown key " + entry.getKey()
-            );
-            assertEquals(
-                expected.get(entry.getKey()),
-                entry.getValue(),
-                0.1,
-                "value for " + entry.getKey()
-            );
-        }
-        for (Long expectedKey : expectedKeys) {
-            fail("missing key " + expectedKey);
-        }
+    private void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual) {
+        super.assertMapEqualsWithTolerance(expected, actual, 0.1);
     }
 
     @ParameterizedTest(name = "Normalization: {0}")
@@ -192,7 +172,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                 (Double) row.get("score")
             )
         );
-        assertMapEquals(expected, actual);
+        assertMapEqualsWithTolerance(expected, actual);
     }
 
     @ParameterizedTest(name = "Normalization: {0}")
@@ -227,7 +207,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                 (Double) row.get("score")
             )
         );
-        assertMapEquals(expected, actual);
+        assertMapEqualsWithTolerance(expected, actual);
     }
 
     @ParameterizedTest(name = "Normalization: {0}")
@@ -260,7 +240,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             )
         );
 
-        assertMapEquals(expected, actual);
+        assertMapEqualsWithTolerance(expected, actual);
     }
 
     @ParameterizedTest(name = "Normalization: {0}")
@@ -297,7 +277,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             )
         );
 
-        assertMapEquals(expected, actual);
+        assertMapEqualsWithTolerance(expected, actual);
     }
 
     @ParameterizedTest(name = "Graph Creation: {0}")
@@ -318,7 +298,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                 (Double) row.get("score")
             )
         );
-        assertMapEquals(noNormExpected, actual);
+        assertMapEqualsWithTolerance(noNormExpected, actual);
     }
 
     @ParameterizedTest(name = "Graph Creation: {0}")
@@ -369,7 +349,7 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
                 actual.put(nodeId, (Double) row.get("score"));
             }
         );
-        assertMapEquals(noNormExpected, actual);
+        assertMapEqualsWithTolerance(noNormExpected, actual);
     }
 
     static Stream<Arguments> normalizations() {

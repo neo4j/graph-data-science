@@ -107,6 +107,10 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         return expected;
     }
 
+    private void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual) {
+        super.assertMapEqualsWithTolerance(expected, actual, 0.1);
+    }
+
     @Test
     void personalizedPageRankOnImplicitGraph() {
         List<Node> startNodes = new ArrayList<>();
@@ -144,7 +148,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
             )
         );
 
-        assertMapEquals(expected, actual);
+        assertMapEqualsWithTolerance(expected, actual);
     }
 
     @Test
@@ -236,7 +240,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
             )
         );
 
-        assertMapEquals(expected, actual);
+        assertMapEqualsWithTolerance(expected, actual);
     }
 
     @Test
@@ -285,7 +289,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
                 )
             );
 
-            assertMapEquals(expected, actual);
+            assertMapEqualsWithTolerance(expected, actual);
         } finally {
             db.shutdown();
             GraphStoreCatalog.removeAllLoadedGraphs();
