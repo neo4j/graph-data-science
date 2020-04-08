@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Map;
 import java.util.Optional;
@@ -51,7 +52,12 @@ class NodeSimilarityMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig>> getProcedureClazz() {
+    public NumberType mutatePropertyType() {
+        return NumberType.FLOATING_POINT;
+    }
+
+    @Override
+    public Class<? extends AlgoBaseProc<?, NodeSimilarityResult, NodeSimilarityMutateConfig>> getProcedureClazz() {
         return NodeSimilarityMutateProc.class;
     }
 

@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.values.storable.NumberType;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.List;
@@ -44,6 +45,11 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     @Override
     public String mutateProperty() {
         return "communityId";
+    }
+
+    @Override
+    public NumberType mutatePropertyType() {
+        return NumberType.INTEGRAL;
     }
 
     @Override

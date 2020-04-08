@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Optional;
 
@@ -47,7 +48,12 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig>> getProcedureClazz() {
+    public NumberType mutatePropertyType() {
+        return NumberType.INTEGRAL;
+    }
+
+    @Override
+    public Class<? extends AlgoBaseProc<?, DisjointSetStruct, WccMutateConfig>> getProcedureClazz() {
         return WccMutateProc.class;
     }
 
