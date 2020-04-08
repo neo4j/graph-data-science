@@ -52,29 +52,20 @@ public interface RelationshipSchema {
     }
 
     static Builder builder() {
-        return new RelationshipSchema.Builder();
+        return new Builder().properties(new LinkedHashMap<>());
     }
 
     @AccessibleFields
     class Builder extends ImmutableRelationshipSchema.Builder {
 
         public void addPropertyAndTypeForRelationshipType(String type, String propertyName, NumberType relationshipProperty) {
-            if (this.properties == null) {
-                this.properties = new LinkedHashMap<>();
-            }
-            RelationshipType relationshipType = toRelationshipType(type);
             this.properties
-                .computeIfAbsent(relationshipType, ignore -> new LinkedHashMap<>())
+                .computeIfAbsent(toRelationshipType(type), ignore -> new LinkedHashMap<>())
                 .put(propertyName, relationshipProperty);
         }
 
         public void addEmptyMapForRelationshipTypeWithoutProperties(String type) {
-            RelationshipType relationshipType = toRelationshipType(type);
-            if (this.properties == null) {
-                this.putProperty(relationshipType, Collections.emptyMap());
-            } else {
-                this.properties.putIfAbsent(relationshipType, Collections.emptyMap());
-            }
+            this.properties.putIfAbsent(toRelationshipType(type), Collections.emptyMap());
         }
 
         // TODO: remove if "" as a rel-type is impossible
