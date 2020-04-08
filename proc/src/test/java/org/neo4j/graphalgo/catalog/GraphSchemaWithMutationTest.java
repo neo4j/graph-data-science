@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.wcc.WccMutateProc;
 import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-public class GraphSchemaWithMutationTest extends BaseProcTest {
+class GraphSchemaWithMutationTest extends BaseProcTest {
 
     private static final String DB_CYPHER = "CREATE (:A {foo: 1})-[:REL {bar: 2}]->(:A)";
 
