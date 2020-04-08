@@ -22,13 +22,18 @@ package org.neo4j.graphalgo.core.schema;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.values.storable.NumberType;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 @ValueClass
 public interface GraphStoreSchema {
-    Map<String, Object> TYPE_NAMES = map(NumberType.FLOATING_POINT, "Float", NumberType.INTEGRAL, "Integer");
+    Map<NumberType, Object> TYPE_NAMES = new HashMap<NumberType, Object>() {{
+        put(NumberType.FLOATING_POINT, "Float");
+        put(NumberType.INTEGRAL, "Integer");
+    }};
+
     NodeSchema nodeSchema();
     RelationshipSchema relationshipSchema();
 
@@ -47,6 +52,6 @@ public interface GraphStoreSchema {
     }
 
     static String fromNumberType(NumberType nt) {
-        return TYPE_NAMES.get(nt.name()).toString();
+        return TYPE_NAMES.get(nt).toString();
     }
 }

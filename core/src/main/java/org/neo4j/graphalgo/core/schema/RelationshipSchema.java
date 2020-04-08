@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.schema;
 
-import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.values.storable.NumberType;
 
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 @ValueClass
 public interface RelationshipSchema {
-    Map<ElementIdentifier, Map<String, NumberType>> properties();
+    Map<RelationshipType, Map<String, NumberType>> properties();
 
     default Map<String, Object> toMap() {
         return properties().entrySet().stream().collect(Collectors.toMap(
@@ -44,7 +44,7 @@ public interface RelationshipSchema {
         ));
     }
 
-    static RelationshipSchema of(Map<ElementIdentifier, Map<String, NumberType>> properties) {
+    static RelationshipSchema of(Map<RelationshipType, Map<String, NumberType>> properties) {
         return ImmutableRelationshipSchema.builder().properties(properties).build();
     }
 }
