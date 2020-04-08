@@ -78,7 +78,7 @@ public final class AdjacencyList {
     public static MemoryEstimation compressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
         return MemoryEstimations.setup("", dimensions -> {
             long nodeCount = dimensions.nodeCount();
-            long relCountForType = relationshipType != ALL_RELATIONSHIPS
+            long relCountForType = !relationshipType.equals(ALL_RELATIONSHIPS) && !relationshipType.equals(RelationshipType.of(""))
                 ? dimensions.relationshipCounts().getOrDefault(relationshipType, 0L)
                 : dimensions.maxRelCount();
             long relCount = undirected ? relCountForType * 2 : relCountForType;
