@@ -28,13 +28,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 public class GraphSchemaWithMutationTest extends BaseProcTest {
@@ -72,10 +66,9 @@ public class GraphSchemaWithMutationTest extends BaseProcTest {
 
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
-                "schema", map("nodeLabels", singletonList("A"),
-                    "nodePropertyKeys", Arrays.asList("foo", "baz"),
-                    "relationshipTypes", singletonList("REL"),
-                    "relationshipPropertiesMap", map("REL", singletonList("bar"))
+                "schema", map(
+                    "nodes", map("A", map("foo", "Float", "baz", "Float")),
+                    "relationships", map("REL", map("bar", "Float"))
                 )
             )
         ));
@@ -83,27 +76,21 @@ public class GraphSchemaWithMutationTest extends BaseProcTest {
 
     @Test
     void listWithMutatedRelationshipProperty() {
-        String name = "name";
-        runQuery(
-            "CALL gds.graph.create($name, 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})",
-            map("name", name)
-        );
-        runQuery(
-            "CALL gds.nodeSimilarity.mutate($name, {mutateProperty: 'faz', mutateRelationshipType: 'BOO'})",
-            map("name", name)
-        );
+        runQuery("CALL gds.graph.create('graph', 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})");
+        runQuery("CALL gds.nodeSimilarity.mutate('graph', {mutateProperty: 'faz', mutateRelationshipType: 'BOO'})");
 
-        runQueryWithRowConsumer("CALL gds.graph.list() YIELD schema RETURN schema.nodeLabels AS nodeLabels, " +
-                                "schema.nodePropertyKeys AS nodePropertyKeys, " +
-                                "schema.relationshipTypes AS relationshipTypes, " +
-                                "schema.relationshipPropertiesMap AS relationshipPropertiesMap",
-            resultRow -> {
-                assertEquals(resultRow.get("nodeLabels"), singletonList("A"));
-                assertEquals(resultRow.get("nodePropertyKeys"), singletonList("foo"));
-                Set<String> relationshipTypes = new HashSet<>((List<String>) resultRow.get("relationshipTypes"));
-                assertEquals(new HashSet<>(Arrays.asList("BOO", "REL")), relationshipTypes);
-                assertEquals(resultRow.get("relationshipPropertiesMap"), map("REL", singletonList("bar"), "BOO", singletonList("faz")));
-            }
+        assertCypherResult("CALL gds.graph.list() YIELD schema",
+            singletonList(
+                map(
+                    "schema",
+                    map("nodes",
+                        map("A", map("foo", "Float")),
+                        "relationships",
+                        map("BOO", map("faz", "Float"),
+                            "REL", map("bar", "Float"))
+                    )
+                )
+            )
         );
     }
 
