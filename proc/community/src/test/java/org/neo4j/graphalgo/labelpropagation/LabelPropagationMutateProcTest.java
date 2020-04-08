@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.functions.NodePropertyFunc;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -42,6 +43,11 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     @Override
     public String mutateProperty() {
         return "communityId";
+    }
+
+    @Override
+    public NumberType mutatePropertyType() {
+        return NumberType.INTEGRAL;
     }
 
     @Override

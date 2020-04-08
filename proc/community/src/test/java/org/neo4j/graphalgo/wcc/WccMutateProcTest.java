@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Optional;
 
@@ -38,6 +39,11 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
     @Override
     public String mutateProperty() {
         return "componentId";
+    }
+
+    @Override
+    public NumberType mutatePropertyType() {
+        return NumberType.INTEGRAL;
     }
 
     @Override

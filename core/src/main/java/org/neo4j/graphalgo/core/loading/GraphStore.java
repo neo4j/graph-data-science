@@ -577,11 +577,11 @@ public final class GraphStore {
     }
 
     private RelationshipSchema relationshipTypeSchema() {
-        RelationshipSchema.Builder relationshipPropsBuild = RelationshipSchema.builder();
+        RelationshipSchema.Builder relationshipPropsBuilder = RelationshipSchema.builder();
 
         relationshipProperties.forEach((type, propertyStore) -> {
             propertyStore.relationshipProperties().forEach((propertyName, relationshipProperty) -> {
-                relationshipPropsBuild.addPropertyAndTypeForRelationshipType(
+                relationshipPropsBuilder.addPropertyAndTypeForRelationshipType(
                     type,
                     propertyName,
                     relationshipProperty.propertyType()
@@ -590,9 +590,9 @@ public final class GraphStore {
         });
 
         for (RelationshipType type : relationshipTypes()) {
-            relationshipPropsBuild.addEmptyMapForRelationshipTypeWithoutProperties(type);
+            relationshipPropsBuilder.addEmptyMapForRelationshipTypeWithoutProperties(type);
         }
-        return relationshipPropsBuild.build();
+        return relationshipPropsBuilder.build();
     }
 
     @ValueClass
