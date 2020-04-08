@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -133,10 +132,9 @@ class GraphListProcTest extends BaseProcTest {
 
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
-                "schema", map("nodeLabels", singletonList("A"),
-                    "nodePropertyKeys", singletonList("foo"),
-                    "relationshipTypes", singletonList("REL"),
-                    "relationshipPropertiesMap", map("REL", singletonList("bar"))
+                "schema", map(
+                    "nodes", map("A", map("foo", "Float")),
+                    "relationships", map("REL", map("bar", "Float"))
                 )
             )
         ));
@@ -155,10 +153,9 @@ class GraphListProcTest extends BaseProcTest {
                 "graphName", name,
                 "nodeProjection", null,
                 "relationshipProjection", null,
-                "schema", map("nodeLabels", emptyList(),
-                    "nodePropertyKeys", Collections.emptyList(),
-                    "relationshipTypes", singletonList(""),
-                    "relationshipPropertiesMap", map()
+                "schema", map(
+                    "nodes", map("*", map()),
+                    "relationships", map("*", map())
                 ),
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
@@ -197,10 +194,9 @@ class GraphListProcTest extends BaseProcTest {
 
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
-                "schema", map("nodeLabels", singletonList("A"),
-                    "nodePropertyKeys", singletonList("foo"),
-                    "relationshipTypes", singletonList("REL"),
-                    "relationshipPropertiesMap", map("REL", singletonList("bar"))
+                "schema", map(
+                    "nodes", map("A", map("foo", "Float")),
+                    "relationships", map("REL", map("bar", "Float"))
                 )
             )
         ));
@@ -220,10 +216,9 @@ class GraphListProcTest extends BaseProcTest {
 
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
-                "schema", map("nodeLabels", emptyList(),
-                    "nodePropertyKeys", singletonList("foo"),
-                    "relationshipTypes", singletonList(""),
-                    "relationshipPropertiesMap", map("", singletonList("bar"))
+                "schema", map(
+                    "nodes", map("*", map("foo", "Float")),
+                    "relationships", map("*", map("bar", "Float"))
                 )
             )
         ));
@@ -430,6 +425,42 @@ class GraphListProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer("alice", listQuery, resultRow -> Assertions.assertEquals("aliceGraph", resultRow.getString("name")));
         runQueryWithRowConsumer("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
+    }
+
+    @Test
+    void shouldShowSchemaForNativeProjectedGraph() {
+        String loadQuery = "CALL gds.graph.create('graph', '*', '*')";
+
+        runQuery(loadQuery);
+
+        assertCypherResult("CALL gds.graph.list() YIELD schema",
+            Collections.singletonList(map(
+                "schema", map(
+                    "nodes", map("*", map()),
+                    "relationships", map("*", map())
+            )))
+        );
+    }
+
+    // TODO: enable if only specified properties are loaded
+    @Disabled
+    void shouldShowSchemaForMultipleProjections() {
+        runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
+
+        String loadQuery = "CALL gds.graph.create(" +
+                           "    'graph', " +
+                           "    {all: {label: '*', properties: 'foo'}, B: {properties: 'age'}}, " +
+                           "    {all: {type:  '*', properties: 'since'}, REL: {properties: 'bar'}})";
+
+        runQuery(loadQuery);
+
+        assertCypherResult("CALL gds.graph.list() YIELD schema",
+            Collections.singletonList(map(
+                "schema", map(
+                    "nodes", map("all", map("foo", "Float"), "B", map("age", "Float")),
+                    "relationships",  map("all", map("since", "Float"), "REL", map("bar", "Float"))
+                )))
+        );
     }
 
     @Test
