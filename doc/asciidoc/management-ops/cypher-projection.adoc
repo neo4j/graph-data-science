@@ -67,6 +67,8 @@ CALL gds.graph.create.cypher(
 | parameters             | Map     | empty map      | A map of user-defined query parameters that are passed into the node and relationship query.
 |===
 
+To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
+
 
 [[cypher-projection-query-constraints]]
 == Query constraints

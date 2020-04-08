@@ -119,36 +119,16 @@ YIELD graphName, nodeProjection, relationshipProjection, nodeQuery, relationship
       nodeCount, relationshipCount, schema, degreeDistribution, creationTime, modificationTime;
 ----
 
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                   | Type          | Description
-| graphName              | String        | The name of a graph stored in the catalog.
-| nodeProjection         | Map           | The node projection(s) used for native creation.
-| relationshipProjection | Map           | The relationship projection(s) used for native creation.
-| nodeQuery              | String        | The node query used to create the graph.
-| relationshipQuery      | String        | The relationship query used to create the graph.
-| nodeCount              | Integer       | The number of nodes in the graph.
-| relationshipCount      | Integer       | The number of relationships in the graph.
-| schema                 | Map           | The schema of the graph, see below.
-| degreeDistribution     | Map           | Statistical information about the degrees of nodes in the graph.
-| creationTime           | LocalDateTime | The time at which the graph was originally created in memory.
-| modificationTime       | LocalDateTime | The time at which the graph was updated by an algorithm running in `mutate` mode.
-|===
-
-The `nodeProjection` and `relationshipProjection` columns are primarily applicable to <<native-projection, native projection>>).
-For cypher created graphs, the projections are constructed after the fact in a best effort manner.
-
-The `nodeQuery` and `relationshipQuery` columns are applicable only to <<cypher-projection, cypher projection>> and are `null` for graphs created with native projection.
+The `nodeProjection` and `relationshipProjection` columns are primarily applicable to <<native-projection, Native projection>>.
+The `nodeQuery` and `relationshipQuery` columns are applicable only to <<cypher-projection, Cypher projection>> and are `null` for graphs created with Native projection.
 
 The `degreeDistribution` is more time-consuming to compute than the other return columns.
 It is however only computed when included in the `YIELD` subclause,
 
-The `schema` consists of information about the available node and relationship schema.
-This information is represented as a map with keys `nodes` and `relationships`.
-For each node label, `nodes` maps the label to its property keys along with the data type of the property.
-Similarly, `relationships` maps the relationship types to their property names and data types.
-The data type is either `Integer` or `Float`.
+The `schema` consists of information about the nodes and relationships stored in the graph.
+For each node label, the schema maps the label to its property keys and their corresponding property types.
+Similarly, the schema maps the relationship types to their property keys and property types.
+The property type is either `Integer` or `Float`.
 
 
 .List information about the degree distribution of a specific graph:
