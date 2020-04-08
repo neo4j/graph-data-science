@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
@@ -138,7 +139,7 @@ public final class GraphStoreInput implements Input {
     }
 
     static class RelationshipImporter extends GraphImporter {
-        private final Map<Pair<String, Optional<String>>, Graph> relationships;
+        private final Map<Pair<RelationshipType, Optional<String>>, Graph> relationships;
 
         RelationshipImporter(GraphStore graphStore, long nodeCount, int batchSize) {
             super(nodeCount, batchSize);
@@ -206,24 +207,24 @@ public final class GraphStoreInput implements Input {
 
     static class RelationshipChunk extends EntityChunk {
 
-        private final Map<Pair<String, Optional<String>>, Graph> relationships;
+        private final Map<Pair<RelationshipType, Optional<String>>, Graph> relationships;
 
-        RelationshipChunk(Map<Pair<String, Optional<String>>, Graph> relationships) {
+        RelationshipChunk(Map<Pair<RelationshipType, Optional<String>>, Graph> relationships) {
             this.relationships = relationships;
         }
 
         @Override
         public boolean next(InputEntityVisitor visitor) {
             if (id < endId) {
-                for (Map.Entry<Pair<String, Optional<String>>, Graph> relationship : relationships.entrySet()) {
-                    String relType = relationship.getKey().getOne();
+                for (Map.Entry<Pair<RelationshipType, Optional<String>>, Graph> relationship : relationships.entrySet()) {
+                    RelationshipType relType = relationship.getKey().getOne();
                     Optional<String> relProperty = relationship.getKey().getTwo();
                     RelationshipIterator iterator = relationship.getValue();
 
                     iterator.forEachRelationship(id, Double.NaN, (s, t, propertyValue) -> {
                         visitor.startId(s);
                         visitor.endId(t);
-                        visitor.type(relType);
+                        visitor.type(relType.name);
                         relProperty.ifPresent(value -> visitor.property(value, propertyValue));
                         try {
                             visitor.endOfEntity();

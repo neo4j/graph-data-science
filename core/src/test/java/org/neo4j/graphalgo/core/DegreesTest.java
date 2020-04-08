@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -159,13 +160,16 @@ class DegreesTest extends AlgoTestBase {
             .graphStore(NativeFactory.class);
 
         if (orientation == Orientation.NATURAL) {
-            graph = graphStore.getGraph("TYPE_OUT");
+            graph = graphStore.getGraph(RelationshipType.of("TYPE_OUT"));
         } else if (orientation == Orientation.REVERSE) {
-            graph = graphStore.getGraph("TYPE_IN");
+            graph = graphStore.getGraph(RelationshipType.of("TYPE_IN"));
         } else if (orientation == Orientation.UNDIRECTED) {
-            graph = graphStore.getGraph("TYPE_UNDIRECTED");
+            graph = graphStore.getGraph(RelationshipType.of("TYPE_UNDIRECTED"));
         } else if (orientation == null) { // BOTH case
-            graph = graphStore.getGraph(Arrays.asList("TYPE_OUT", "TYPE_IN"), Optional.empty());
+            graph = graphStore.getGraph(
+                Arrays.asList(RelationshipType.of("TYPE_OUT"), RelationshipType.of("TYPE_IN")),
+                Optional.empty()
+            );
         }
     }
 

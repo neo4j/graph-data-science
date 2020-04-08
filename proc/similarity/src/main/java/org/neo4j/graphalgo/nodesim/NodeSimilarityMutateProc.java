@@ -23,6 +23,7 @@ import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -133,7 +134,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
             computationResult
                 .graphStore()
                 .addRelationshipType(
-                    config.mutateRelationshipType(),
+                    RelationshipType.of(config.mutateRelationshipType()),
                     Optional.of(config.mutateProperty()),
                     Optional.of(NumberType.FLOATING_POINT),
                     resultRelationships

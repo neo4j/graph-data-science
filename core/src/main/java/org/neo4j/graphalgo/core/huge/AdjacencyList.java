@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -26,8 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
-import java.util.Optional;
-
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
@@ -72,14 +72,14 @@ public final class AdjacencyList {
     }
 
     public static MemoryEstimation compressedMemoryEstimation(boolean undirected) {
-        return compressedMemoryEstimation(Optional.empty(), undirected);
+        return compressedMemoryEstimation(ALL_RELATIONSHIPS, undirected);
     }
 
-    public static MemoryEstimation compressedMemoryEstimation(Optional<String> relationshipType, boolean undirected) {
+    public static MemoryEstimation compressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
         return MemoryEstimations.setup("", dimensions -> {
             long nodeCount = dimensions.nodeCount();
-            long relCountForType = relationshipType.isPresent()
-                ? dimensions.relationshipCounts().getOrDefault(relationshipType.get(), 0L)
+            long relCountForType = !relationshipType.equals(ALL_RELATIONSHIPS) && !relationshipType.equals(RelationshipType.of(""))
+                ? dimensions.relationshipCounts().getOrDefault(relationshipType, 0L)
                 : dimensions.maxRelCount();
             long relCount = undirected ? relCountForType * 2 : relCountForType;
             long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
@@ -88,17 +88,17 @@ public final class AdjacencyList {
     }
 
     public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {
-        return uncompressedMemoryEstimation(Optional.empty(), undirected);
+        return uncompressedMemoryEstimation(ALL_RELATIONSHIPS, undirected);
     }
 
-    public static MemoryEstimation uncompressedMemoryEstimation(Optional<String> relationshipType, boolean undirected) {
+    public static MemoryEstimation uncompressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
 
         return MemoryEstimations
             .builder(AdjacencyList.class)
             .perGraphDimension("pages", (dimensions, concurrency) -> {
                 long nodeCount = dimensions.nodeCount();
-                long relCountForType = relationshipType.isPresent()
-                    ? dimensions.relationshipCounts().getOrDefault(relationshipType.get(), 0L)
+                long relCountForType = relationshipType != ALL_RELATIONSHIPS
+                    ? dimensions.relationshipCounts().getOrDefault(relationshipType, 0L)
                     : dimensions.maxRelCount();
                 long relCount = undirected ? relCountForType * 2 : relCountForType;
 

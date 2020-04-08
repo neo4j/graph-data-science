@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapGraph;
@@ -63,9 +64,9 @@ public final class GraphStore {
 
     private final Map<NodeLabel, NodePropertyStore> nodeProperties;
 
-    private final Map<String, HugeGraph.TopologyCSR> relationships;
+    private final Map<RelationshipType, HugeGraph.TopologyCSR> relationships;
 
-    private final Map<String, RelationshipPropertyStore> relationshipProperties;
+    private final Map<RelationshipType, RelationshipPropertyStore> relationshipProperties;
 
     private final Set<Graph> createdGraphs;
 
@@ -76,8 +77,8 @@ public final class GraphStore {
     public static GraphStore of(
         IdMap nodes,
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
-        Map<String, HugeGraph.TopologyCSR> relationships,
-        Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
+        Map<RelationshipType, HugeGraph.TopologyCSR> relationships,
+        Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
         AllocationTracker tracker
     ) {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
@@ -90,7 +91,7 @@ public final class GraphStore {
             nodePropertyStores.put(nodeLabel, builder.build());
         });
 
-        Map<String, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>();
+        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>();
         relationshipProperties.forEach((relationshipType, propertyMap) -> {
             RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
             propertyMap.forEach((propertyKey, propertyValues) -> builder.putRelationshipProperty(
@@ -117,7 +118,7 @@ public final class GraphStore {
     ) {
         HugeGraph.Relationships relationships = graph.relationships();
 
-        Map<String, HugeGraph.TopologyCSR> topology = singletonMap(relationshipType, relationships.topology());
+        Map<RelationshipType, HugeGraph.TopologyCSR> topology = singletonMap(RelationshipType.of(relationshipType), relationships.topology());
 
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties = new HashMap<>();
         nodeProperties.put(
@@ -128,10 +129,10 @@ public final class GraphStore {
             ))
         );
 
-        Map<String, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = Collections.emptyMap();
+        Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = Collections.emptyMap();
         if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
             relationshipProperties = singletonMap(
-                relationshipType,
+                RelationshipType.of(relationshipType),
                 singletonMap(relationshipProperty.get(), relationships.properties().get())
             );
         }
@@ -142,8 +143,8 @@ public final class GraphStore {
     private GraphStore(
         IdMap nodes,
         Map<NodeLabel, NodePropertyStore> nodeProperties,
-        Map<String, HugeGraph.TopologyCSR> relationships,
-        Map<String, RelationshipPropertyStore> relationshipProperties,
+        Map<RelationshipType, HugeGraph.TopologyCSR> relationships,
+        Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
         AllocationTracker tracker
     ) {
         this.nodes = nodes;
@@ -171,7 +172,7 @@ public final class GraphStore {
             .orElseGet(() -> Collections.singleton(ALL_NODES)));
     }
 
-    public Set<String> nodePropertyKeys(ElementIdentifier label) {
+    public Set<String> nodePropertyKeys(NodeLabel label) {
         return new HashSet<>(nodeProperties.getOrDefault(label, NodePropertyStore.empty()).keySet());
     }
 
@@ -242,15 +243,15 @@ public final class GraphStore {
             .orElse(NumberType.NO_NUMBER);
     }
 
-    public NodeProperties nodeProperty(ElementIdentifier label, String propertyKey) {
+    public NodeProperties nodeProperty(NodeLabel label, String propertyKey) {
         return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey).propertyValues();
     }
 
-    public Set<String> relationshipTypes() {
+    public Set<RelationshipType> relationshipTypes() {
         return relationships.keySet();
     }
 
-    public boolean hasRelationshipType(String relationshipType) {
+    public boolean hasRelationshipType(RelationshipType relationshipType) {
         return relationships.containsKey(relationshipType);
     }
 
@@ -260,7 +261,7 @@ public final class GraphStore {
             .sum();
     }
 
-    public long relationshipCount(String relationshipType) {
+    public long relationshipCount(RelationshipType relationshipType) {
         return relationships.get(relationshipType).elementCount();
     }
 
@@ -292,12 +293,12 @@ public final class GraphStore {
             .collect(Collectors.toSet());
     }
 
-    public Set<String> relationshipPropertyKeys(String relationshipType) {
+    public Set<String> relationshipPropertyKeys(RelationshipType relationshipType) {
         return relationshipProperties.getOrDefault(relationshipType, RelationshipPropertyStore.empty()).keySet();
     }
 
     public void addRelationshipType(
-        String relationshipType,
+        RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
         HugeGraph.Relationships relationships
@@ -322,7 +323,7 @@ public final class GraphStore {
     }
 
     private void addRelationshipProperty(
-        String relationshipType,
+        RelationshipType relationshipType,
         String propertyKey,
         NumberType propertyType,
         HugeGraph.PropertyCSR propertyCSR,
@@ -340,7 +341,7 @@ public final class GraphStore {
         });
     }
 
-    public DeletionResult deleteRelationships(String relationshipType) {
+    public DeletionResult deleteRelationships(RelationshipType relationshipType) {
         return DeletionResult.of(builder ->
             updateGraphStore(graphStore -> {
                 builder.deletedRelationships(graphStore.relationships.get(relationshipType).elementCount());
@@ -355,22 +356,22 @@ public final class GraphStore {
         );
     }
 
-    public Graph getGraph(String... relationshipTypes) {
+    public Graph getGraph(RelationshipType... relationshipTypes) {
         return getGraph(ALL_NODE_LABEL_IDENTIFIERS, Arrays.asList(relationshipTypes), Optional.empty(), 1);
     }
 
-    public Graph getGraph(String relationshipType, Optional<String> relationshipProperty) {
+    public Graph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty) {
         return getGraph(ALL_NODE_LABEL_IDENTIFIERS, singletonList(relationshipType), relationshipProperty, 1);
     }
 
-    public Graph getGraph(List<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    public Graph getGraph(List<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         validateInput(relationshipTypes, maybeRelationshipProperty);
         return createGraph(ALL_NODE_LABEL_IDENTIFIERS, relationshipTypes, maybeRelationshipProperty, 1);
     }
 
     public Graph getGraph(
         List<NodeLabel> nodeLabels,
-        List<String> relationshipTypes,
+        List<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty,
         int concurrency
     ) {
@@ -410,7 +411,7 @@ public final class GraphStore {
 
     private IdMapGraph createGraph(
         List<NodeLabel> nodeLabels,
-        String relationshipType,
+        RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
         return createGraph(nodeLabels, singletonList(relationshipType), maybeRelationshipProperty, 1);
@@ -418,11 +419,11 @@ public final class GraphStore {
 
     private IdMapGraph createGraph(
         List<NodeLabel> filteredLabels,
-        List<String> relationshipTypes,
+        List<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty,
         int concurrency
     ) {
-        boolean loadAllRelationships = relationshipTypes.contains(ALL_RELATIONSHIPS.name);
+        boolean loadAllRelationships = relationshipTypes.contains(ALL_RELATIONSHIPS);
         boolean loadAllNodes = filteredLabels.contains(ALL_NODES);
 
         Collection<NodeLabel> expandedLabels = loadAllNodes ? nodeLabels() : filteredLabels;
@@ -517,7 +518,7 @@ public final class GraphStore {
         }
     }
 
-    private void validateInput(Collection<String> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    private void validateInput(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         if (relationshipTypes.isEmpty()) {
             throw new IllegalArgumentException(String.format(
                 "The parameter '%s' should not be empty. Use '*' to load all relationship types.",
@@ -525,7 +526,7 @@ public final class GraphStore {
             ));
         }
 
-        if (!relationshipTypes.contains(ALL_RELATIONSHIPS.name)) {
+        if (!relationshipTypes.contains(ALL_RELATIONSHIPS)) {
             relationshipTypes.forEach(relationshipType -> {
                 if (!relationships.containsKey(relationshipType)) {
                     throw new IllegalArgumentException(String.format(

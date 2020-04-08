@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.config;
 
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -26,6 +27,7 @@ import org.neo4j.graphalgo.core.loading.GraphStore;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
@@ -59,15 +61,15 @@ public interface GraphWriteRelationshipConfig extends WriteConfig {
 
     @Configuration.Ignore
     default void validate(GraphStore graphStore) {
-        if (!graphStore.hasRelationshipType(relationshipType())) {
+        if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType()))) {
             throw new IllegalArgumentException(String.format(
                 "Relationship type `%s` not found. Available types: %s",
                 relationshipType(),
-                join(graphStore.relationshipTypes())
+                join(graphStore.relationshipTypes().stream().map(RelationshipType::name).collect(Collectors.toSet()))
             ));
         }
         if (relationshipProperty().isPresent()) {
-            Set<String> availableProperties = graphStore.relationshipPropertyKeys(relationshipType());
+            Set<String> availableProperties = graphStore.relationshipPropertyKeys(RelationshipType.of(relationshipType()));
             String relProperty = relationshipProperty().get();
             if (!availableProperties.contains(relProperty)) {
                 throw new IllegalArgumentException(String.format(

@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
@@ -52,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestGraphLoader.addSuffix;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -262,17 +264,17 @@ class CypherFactoryTest {
 
         assertGraphEquals(
             fromGdl(String.format(Locale.US, expectedGraph, 1.0f, prop1.defaultValue(), prop1.defaultValue())),
-            graphs.getGraph("*", Optional.of(addSuffix(prop1.propertyKey(), 0)))
+            graphs.getGraph(RelationshipType.of("*"), Optional.of(addSuffix(prop1.propertyKey(), 0)))
         );
 
         assertGraphEquals(
             fromGdl(String.format(Locale.US, expectedGraph, prop2.defaultValue(), 2.0, prop2.defaultValue())),
-            graphs.getGraph("*", Optional.of(addSuffix(prop2.propertyKey(), 1)))
+            graphs.getGraph(RelationshipType.of("*"), Optional.of(addSuffix(prop2.propertyKey(), 1)))
         );
 
         assertGraphEquals(
             fromGdl(String.format(Locale.US, expectedGraph, prop3.defaultValue(), prop3.defaultValue(), 3.0)),
-            graphs.getGraph("*", Optional.of(addSuffix(prop3.propertyKey(), 2)))
+            graphs.getGraph(RelationshipType.of("*"), Optional.of(addSuffix(prop3.propertyKey(), 2)))
         );
     }
 
@@ -319,7 +321,7 @@ class CypherFactoryTest {
 
         Function<List<String>, Graph> getGraph = (List<String> labels) -> graphStore.getGraph(
             labels.stream().map(NodeLabel::of).collect(Collectors.toList()),
-            Collections.singletonList("*"),
+            Collections.singletonList(ALL_RELATIONSHIPS),
             Optional.empty(),
             1
         );

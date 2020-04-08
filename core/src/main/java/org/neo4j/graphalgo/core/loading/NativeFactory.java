@@ -20,11 +20,11 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -42,7 +42,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -81,30 +80,27 @@ public final class NativeFactory extends GraphStoreFactory {
 
         // relationships
         dimensions.relationshipProjectionMappings().stream().forEach(relationshipProjectionMapping -> {
-            Optional<String> neoType = StringUtils.isBlank(relationshipProjectionMapping.typeName())
-                ? Optional.empty()
-                : Optional.of(relationshipProjectionMapping.typeName());
-            String elementIdentifier = relationshipProjectionMapping.elementIdentifier();
+            RelationshipType relationshipType = relationshipProjectionMapping.relationshipType();
 
             boolean undirected = relationshipProjectionMapping.orientation() == Orientation.UNDIRECTED;
 
             // adjacency list
             builder.add(
-                String.format("adjacency list for '%s'", elementIdentifier),
-                AdjacencyList.compressedMemoryEstimation(neoType, undirected)
+                String.format("adjacency list for '%s'", relationshipType),
+                AdjacencyList.compressedMemoryEstimation(relationshipType, undirected)
             );
             builder.add(
-                String.format("adjacency offsets for '%s'", elementIdentifier),
+                String.format("adjacency offsets for '%s'", relationshipType),
                 AdjacencyOffsets.memoryEstimation()
             );
             // all properties per projection
             dimensions.relationshipProperties().mappings().forEach(resolvedPropertyMapping -> {
                 builder.add(
-                    String.format("property '%s.%s", elementIdentifier, resolvedPropertyMapping.propertyKey()),
-                    AdjacencyList.uncompressedMemoryEstimation(neoType, undirected)
+                    String.format("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
+                    AdjacencyList.uncompressedMemoryEstimation(relationshipType, undirected)
                 );
                 builder.add(
-                    String.format("property offset '%s.%s", elementIdentifier, resolvedPropertyMapping.propertyKey()),
+                    String.format("property offset '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
                     AdjacencyOffsets.memoryEstimation()
                 );
             });
@@ -119,7 +115,7 @@ public final class NativeFactory extends GraphStoreFactory {
             .map(entry -> {
                 Long relCount = entry.getKey().name.equals("*")
                      ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
-                     : dimensions.relationshipCounts().getOrDefault(entry.getKey().name, 0L);
+                     : dimensions.relationshipCounts().getOrDefault(entry.getKey(), 0L);
 
                 return entry.getValue().orientation() == Orientation.UNDIRECTED
                     ? relCount * 2

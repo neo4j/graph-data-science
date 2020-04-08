@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.NotNull;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +32,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -46,16 +46,14 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -63,9 +61,10 @@ import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.values.storable.NumberType.FLOATING_POINT;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_RELATIONSHIP_TYPE_IDENTIFIERS;
+import static org.neo4j.values.storable.NumberType.FLOATING_POINT;
 
 class GraphStoreTest {
 
@@ -96,7 +95,7 @@ class GraphStoreTest {
     @MethodSource("validRelationshipFilterParameters")
     void testFilteringGraphsByRelationships(
         String desc,
-        List<String> relTypes,
+        List<RelationshipType> relTypes,
         Optional<String> relProperty,
         String expectedGraph
     ) {
@@ -127,7 +126,7 @@ class GraphStoreTest {
 
         GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
 
-        Graph filteredGraph = graphStore.getGraph(labels, singletonList("*"), Optional.empty(), 1);
+        Graph filteredGraph = graphStore.getGraph(labels, ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.empty(), 1);
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
     }
@@ -146,7 +145,7 @@ class GraphStoreTest {
 
         Graph filteredAGraph = graphStore.getGraph(
             Collections.singletonList(LABEL_A),
-            Collections.singletonList("*"),
+            ALL_RELATIONSHIP_TYPE_IDENTIFIERS,
             Optional.empty(),
             1
         );
@@ -155,13 +154,13 @@ class GraphStoreTest {
 
         Graph filteredAllGraph = graphStore.getGraph(
             Collections.singletonList(NodeLabel.of("All")),
-            Collections.singletonList("*"),
+            ALL_RELATIONSHIP_TYPE_IDENTIFIERS,
             Optional.empty(),
             1
         );
 
         Graph nonFilteredGraph = graphStore
-            .getGraph(Collections.singletonList(ALL_NODES), Collections.singletonList("*"), Optional.empty(), 1);
+            .getGraph(Collections.singletonList(ALL_NODES), ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.empty(), 1);
 
         assertGraphEquals(filteredAllGraph, nonFilteredGraph);
     }
@@ -192,7 +191,7 @@ class GraphStoreTest {
             42.0
         );
         Thread.sleep(42);
-        graphStore.addRelationshipType("BAR", Optional.empty(), Optional.empty(), relationships);
+        graphStore.addRelationshipType(RelationshipType.of("BAR"), Optional.empty(), Optional.empty(), relationships);
         LocalDateTime relationshipTime = graphStore.modificationTime();
 
         assertTrue(initialTime.isBefore(nodePropertyTime), "Node property update did not change modificationTime");
@@ -244,10 +243,10 @@ class GraphStoreTest {
         // relationshipTypes containing properties from other relationshipTypes
         assertThat(graphStore.relationshipPropertyCount(), equalTo(8L));
 
-        DeletionResult deletionResult = graphStore.deleteRelationships("LER");
+        DeletionResult deletionResult = graphStore.deleteRelationships(RelationshipType.of("LER"));
 
-        assertEquals(new HashSet<>(singletonList("REL")), graphStore.relationshipTypes());
-        assertFalse(graphStore.hasRelationshipType("LER"));
+        assertEquals(new HashSet<>(singletonList(RelationshipType.of("REL"))), graphStore.relationshipTypes());
+        assertFalse(graphStore.hasRelationshipType(RelationshipType.of("LER")));
         assertEquals(1, graphStore.relationshipCount());
         // should expect 1 instead of two, but currently properties are global across relationship types
         assertEquals(2, graphStore.relationshipPropertyCount());
@@ -320,31 +319,31 @@ class GraphStoreTest {
         return Stream.of(
             Arguments.of(
                 "filterByRelationshipType",
-                singletonList("T1"),
+                singletonList(RelationshipType.of("T1")),
                 Optional.empty(),
                 "(a), (b), (a)-[T1]->(b)"
             ),
             Arguments.of(
                 "filterByMultipleRelationshipTypes",
-                Arrays.asList("T1", "T2"),
+                Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2")),
                 Optional.empty(),
                 "(a), (b), (a)-[T1]->(b), (a)-[T2]->(b)"
             ),
             Arguments.of(
                 "filterByAnyRelationshipType",
-                singletonList("*"),
+                singletonList(RelationshipType.of("*")),
                 Optional.empty(),
                 "(a), (b), (a)-[T1]->(b), (a)-[T2]->(b), (a)-[T3]->(b)"
             ),
             Arguments.of(
                 "filterByRelationshipProperty",
-                Arrays.asList("T1", "T2"),
+                Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2")),
                 Optional.of("property1"),
                 "(a), (b), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b)"
             ),
             Arguments.of(
                 "filterByRelationshipTypeAndProperty",
-                singletonList("T1"),
+                singletonList(RelationshipType.of("T1")),
                 Optional.of("property1"),
                 "(a), (b), (a)-[T1 {property1: 42}]->(b)"
             ),
@@ -356,7 +355,7 @@ class GraphStoreTest {
              */
             Arguments.of(
                 "includeRelationshipTypesThatDoNotHaveTheProperty",
-                singletonList("*"),
+                singletonList(RelationshipType.of("*")),
                 Optional.of("property1"),
                 "(a), (b), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b), (a)-[T3 {property1: 42.0}]->(b)"
             )

@@ -53,7 +53,9 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
 
         DeleteRelationshipsConfig.of(graphName, relationshipType).validate(graphStoreWithConfig.graphStore());
 
-        DeletionResult deletionResult = graphStoreWithConfig.graphStore().deleteRelationships(relationshipType);
+        DeletionResult deletionResult = graphStoreWithConfig
+            .graphStore()
+            .deleteRelationships(RelationshipType.of(relationshipType));
 
         return Stream.of(new Result(
             graphName,

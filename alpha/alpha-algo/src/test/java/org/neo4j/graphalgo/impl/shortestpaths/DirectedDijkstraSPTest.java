@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -113,7 +114,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testOutgoing() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
-        Graph graph = graphStore.getGraph("REL_OUT", Optional.of("cost"));
+        Graph graph = graphStore.getGraph(RelationshipType.of("REL_OUT"), Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -127,7 +128,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testIncoming() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
-        Graph graph = graphStore.getGraph("REL_IN", Optional.of("cost"));
+        Graph graph = graphStore.getGraph(RelationshipType.of("REL_IN"), Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -141,7 +142,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testBoth() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
-        Graph graph = graphStore.getGraph("REL_BOTH", Optional.of("cost"));
+        Graph graph = graphStore.getGraph(RelationshipType.of("REL_BOTH"), Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute(id("a"), id("f"));
 
@@ -155,7 +156,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testUnreachableOutgoing() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
-        Graph graph = graphStore.getGraph("REL_OUT", Optional.of("cost"));
+        Graph graph = graphStore.getGraph(RelationshipType.of("REL_OUT"), Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -169,7 +170,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testUnreachableIncoming() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
-        Graph graph = graphStore.getGraph("REL_IN", Optional.of("cost"));
+        Graph graph = graphStore.getGraph(RelationshipType.of("REL_IN"), Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
@@ -183,7 +184,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     void testUnreachableBoth() {
         StringBuilder path = new StringBuilder();
         DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
-        Graph graph = graphStore.getGraph("REL_BOTH", Optional.of("cost"));
+        Graph graph = graphStore.getGraph(RelationshipType.of("REL_BOTH"), Optional.of("cost"));
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
         dijkstra.compute();
 
