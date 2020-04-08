@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -104,7 +105,7 @@ class RelationshipExporterTest {
             .graphStore(NativeFactory.class);
 
         RelationshipExporter
-            .of(db, graphStore.getGraph("NEW_REL", Optional.of("newWeight")), RUNNING_TRUE)
+            .of(db, graphStore.getGraph(RelationshipType.of("NEW_REL"), Optional.of("newWeight")), RUNNING_TRUE)
             .withRelationPropertyTranslator(relProperty -> Values.longValue((long) relProperty))
             .build()
             .write("NEW_REL", "newWeight");
