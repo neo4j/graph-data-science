@@ -31,14 +31,11 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.filtering;
-import static java.util.stream.Collectors.toMap;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDeleteRelationshipProc extends CatalogProc {
