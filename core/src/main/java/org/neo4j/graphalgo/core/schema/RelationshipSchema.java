@@ -58,19 +58,19 @@ public interface RelationshipSchema {
     @AccessibleFields
     class Builder extends ImmutableRelationshipSchema.Builder {
 
-        public void addPropertyAndTypeForRelationshipType(String type, String propertyName, NumberType relationshipProperty) {
+        public void addPropertyAndTypeForRelationshipType(RelationshipType type, String propertyName, NumberType relationshipProperty) {
             this.properties
-                .computeIfAbsent(toRelationshipType(type), ignore -> new LinkedHashMap<>())
+                .computeIfAbsent(fixRelationshipType(type), ignore -> new LinkedHashMap<>())
                 .put(propertyName, relationshipProperty);
         }
 
-        public void addEmptyMapForRelationshipTypeWithoutProperties(String type) {
-            this.properties.putIfAbsent(toRelationshipType(type), Collections.emptyMap());
+        public void addEmptyMapForRelationshipTypeWithoutProperties(RelationshipType type) {
+            this.properties.putIfAbsent(fixRelationshipType(type), Collections.emptyMap());
         }
 
         // TODO: remove if "" as a rel-type is impossible
-        private RelationshipType toRelationshipType(String type) {
-            return RelationshipType.of(type.isEmpty() ? "*" : type);
+        private RelationshipType fixRelationshipType(RelationshipType type) {
+            return type.name.isEmpty() ? RelationshipType.ALL_RELATIONSHIPS : type;
         }
     }
 }

@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapGraph;
@@ -606,7 +607,7 @@ public final class GraphStore {
             });
         });
 
-        for (String type : relationshipTypes()) {
+        for (RelationshipType type : relationshipTypes()) {
             relationshipPropsBuild.addEmptyMapForRelationshipTypeWithoutProperties(type);
         }
         return relationshipPropsBuild.build();
