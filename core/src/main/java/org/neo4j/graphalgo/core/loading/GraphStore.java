@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.BitSet;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapGraph;
@@ -57,7 +56,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
@@ -577,6 +575,10 @@ public final class GraphStore {
     }
 
     public GraphStoreSchema schema() {
+        return GraphStoreSchema.of(nodeSchema(), relationshipTypeSchema());
+    }
+
+    private NodeSchema nodeSchema() {
         NodeSchema.Builder nodePropsBuilder = NodeSchema.builder();
 
         nodeProperties.forEach((label, propertyStore) -> {
@@ -588,27 +590,26 @@ public final class GraphStore {
         for (NodeLabel nodeLabel : nodeLabels()) {
             nodePropsBuilder.addEmptyMapForLabelWithoutProperties(nodeLabel);
         }
+        return nodePropsBuilder.build();
+    }
 
-
-        Map<RelationshipType, Map<String, NumberType>> relProps = new HashMap<>();
+    private RelationshipSchema relationshipTypeSchema() {
+        RelationshipSchema.Builder relationshipPropsBuild = RelationshipSchema.builder();
 
         relationshipProperties.forEach((type, propertyStore) -> {
-            Map<String, NumberType> propertyTypes = new HashMap<>();
             propertyStore.relationshipProperties().forEach((propertyName, relationshipProperty) -> {
-                propertyTypes.put(propertyName, relationshipProperty.propertyType());
+                relationshipPropsBuild.addPropertyAndTypeForRelationshipType(
+                    type,
+                    propertyName,
+                    relationshipProperty.propertyType()
+                );
             });
-            // TODO: remove if "" as a rel-type is impossible
-            RelationshipType relationshipType = RelationshipType.of(type.isEmpty() ? "*" : type);
-            relProps.put(relationshipType, propertyTypes);
         });
 
         for (String type : relationshipTypes()) {
-            // TODO: remove if "" as a rel-type is impossible
-            RelationshipType relationshipType = RelationshipType.of(type.isEmpty() ? "*" : type);
-            relProps.putIfAbsent(relationshipType, emptyMap());
+            relationshipPropsBuild.addEmptyMapForRelationshipTypeWithoutProperties(type);
         }
-
-        return GraphStoreSchema.of(nodePropsBuilder.build(), RelationshipSchema.of(relProps));
+        return relationshipPropsBuild.build();
     }
 
     public enum PropertyState {

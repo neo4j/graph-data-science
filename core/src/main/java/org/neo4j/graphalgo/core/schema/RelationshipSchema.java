@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.values.storable.NumberType;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,38 @@ public interface RelationshipSchema {
     }
 
     static RelationshipSchema of(Map<RelationshipType, Map<String, NumberType>> properties) {
-        return ImmutableRelationshipSchema.builder().properties(properties).build();
+        return RelationshipSchema.builder().properties(properties).build();
+    }
+
+    static Builder builder() {
+        return new RelationshipSchema.Builder();
+    }
+
+    @org.immutables.builder.Builder.AccessibleFields
+    class Builder extends ImmutableRelationshipSchema.Builder {
+
+        public void addPropertyAndTypeForRelationshipType(String type, String propertyName, NumberType relationshipProperty) {
+            if (this.properties == null) {
+                this.properties = new LinkedHashMap<>();
+            }
+            RelationshipType relationshipType = toRelationshipType(type);
+            this.properties
+                .computeIfAbsent(relationshipType, ignore -> new LinkedHashMap<>())
+                .put(propertyName, relationshipProperty);
+        }
+
+        public void addEmptyMapForRelationshipTypeWithoutProperties(String type) {
+            RelationshipType relationshipType = toRelationshipType(type);
+            if (this.properties == null) {
+                this.putProperty(relationshipType, Collections.emptyMap());
+            } else {
+                this.properties.putIfAbsent(relationshipType, Collections.emptyMap());
+            }
+        }
+
+        // TODO: remove if "" as a rel-type is impossible
+        private RelationshipType toRelationshipType(String type) {
+            return RelationshipType.of(type.isEmpty() ? "*" : type);
+        }
     }
 }
