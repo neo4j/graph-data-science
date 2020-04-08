@@ -237,6 +237,26 @@ public class BaseProcTest {
         assertThat(actual, mapEquals(expected));
     }
 
+    protected void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual, Double tolerance) {
+        assertEquals(expected.size(), actual.size(), "number of elements");
+        Collection<Long> expectedKeys = new HashSet<>(expected.keySet());
+        for (Map.Entry<Long, Double> entry : actual.entrySet()) {
+            assertTrue(
+                expectedKeys.remove(entry.getKey()),
+                "unknown key " + entry.getKey()
+            );
+            assertEquals(
+                expected.get(entry.getKey()),
+                entry.getValue(),
+                tolerance,
+                "value for " + entry.getKey()
+            );
+        }
+        for (Long expectedKey : expectedKeys) {
+            fail("missing key " + expectedKey);
+        }
+    }
+
     protected void assertResult(String scoreProperty, Map<Long, Double> expected) {
         runInTransaction(db, tx -> {
             for (Map.Entry<Long, Double> entry : expected.entrySet()) {

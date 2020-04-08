@@ -52,6 +52,10 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         return PageRankStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 
+    private void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual) {
+        super.assertMapEqualsWithTolerance(expected, actual, 0.1);
+    }
+
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testPageRankParallelExecution(ModeBuildStage queryBuilder, String testName) {
@@ -64,7 +68,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
                 actual.put(nodeId, (Double) row.get("score"));
             }
         );
-        assertMapEquals(expected, actual);
+        assertMapEqualsWithTolerance(expected, actual);
     }
 
     @ParameterizedTest(name = "{1}")
@@ -79,7 +83,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         runQueryWithRowConsumer(query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(expected, actual);
+        assertMapEqualsWithTolerance(expected, actual);
     }
 
     @ParameterizedTest(name = "{1}")
@@ -129,7 +133,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         runQueryWithRowConsumer(query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(weightedExpected, actual);
+        assertMapEqualsWithTolerance(weightedExpected, actual);
     }
 
     @ParameterizedTest(name = "{1}")
@@ -144,7 +148,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         runQueryWithRowConsumer(query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(expected, actual);
+        assertMapEqualsWithTolerance(expected, actual);
     }
 
     @ParameterizedTest(name = "{1}")
@@ -159,7 +163,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         runQueryWithRowConsumer(query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(weightedExpected, actual);
+        assertMapEqualsWithTolerance(weightedExpected, actual);
     }
 
     @ParameterizedTest(name = "{1}")
