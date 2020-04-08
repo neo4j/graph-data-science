@@ -19,24 +19,26 @@
  */
 package org.neo4j.graphalgo.doc;
 
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
+import org.neo4j.graphalgo.functions.NodePropertyFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
+import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 class UtilityDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> functions() {
-        return Arrays.asList(GetNodeFunc.class, VersionFunc.class, IsFiniteFunc.class);
+        return Arrays.asList(GetNodeFunc.class, VersionFunc.class, IsFiniteFunc.class, NodePropertyFunc.class);
     }
 
     @Override
     List<Class<?>> procedures() {
-        return Collections.emptyList();
+        return Arrays.asList(GraphCreateProc.class, PageRankMutateProc.class);
     }
 
     @Override
