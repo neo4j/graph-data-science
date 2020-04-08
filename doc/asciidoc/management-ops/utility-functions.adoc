@@ -4,7 +4,7 @@
 This section describes the utility functions and shows their usage in concrete examples.
 
 [[utility-functions-table]]
-[opts=header,cols="1m,1m"]
+[opts=header,cols="1m,1"]
 |===
 | Name                | Description
 | gds.version         | Return the version of the installed Neo4j Graph Data Science library.
@@ -26,11 +26,13 @@ RETURN gds.version() AS version
 |===
 --
 
+
+[[utility-functions-numeric]]
 == Numeric Functions
 
 .Numeric Functions
 [[Numeric-functions-table]]
-[opts=header,cols="1m,1m"]
+[opts=header,cols="1m,1"]
 |===
 | Name                | Description
 | gds.util.NaN        | Returns NaN as a Cypher value.
@@ -42,7 +44,7 @@ RETURN gds.version() AS version
 === Syntax
 
 [[Numeric-functions-syntax-table]]
-[opts=header,cols="1m,1m"]
+[opts=header,cols="1m,1"]
 |===
 | Name                                  | Parameter
 | gds.util.NaN()                        | -
@@ -94,6 +96,8 @@ RETURN gds.util.isInfinite(value) AS isInfinite
 The utility function `gds.util.NaN` can be used as an default value for input parameters, as shown in the examples of <<algorithms-similarity-cosine-procedure-sample, cosine similarity>>.
 A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering streamed results, as for instance seen in the examples of <<algorithm-all-pairs-shortest-path-sample, `gds.alpha.allShortestPaths`>>.
 
+
+[[utility-functions-node-path]]
 == Node and Path Functions
 
 .Node and Path Functions
@@ -108,7 +112,7 @@ A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering
 === Syntax
 
 [[Node-and-Path-functions-syntax-table]]
-[opts=header,cols="1m,1m"]
+[opts=header,cols="1m,1"]
 |===
 | Name                                                                                      | Parameters
 | gds.util.asNode(nodeId: NUMBER)                                                           | nodeId of a node in the neo4j-graph
@@ -167,3 +171,60 @@ RETURN [x in gds.util.asNodes(nodeIds)| x.name] AS nodes
 --
 
 As many algorithms streaming mode only return the node id, `gds.util.asNode` and `gds.util.asNodes` can be used to retrieve the whole node from the neo4j database.
+
+
+[[utility-functions-catalog]]
+== Catalog Functions
+
+Catalog functions allow accessing in-memory graphs directly from a Cypher query.
+
+.Catalog Functions
+[opts=header,cols="1m,1"]
+|===
+| Name                  | Description
+| gds.util.nodeProperty | Allows accessing a node property stored in a named graph.
+|===
+
+=== Syntax
+
+[opts=header,cols="1m,1"]
+|===
+| Name                                                                           | Description
+| gds.util.nodeProperty(graphName: STRING, nodeId: INTEGER, propertyKey: STRING) | Named graph in the catalog, Neo4j node id and node property key present in the named-graph.
+|===
+
+=== Examples
+
+.Create a graph in the catalog:
+[source, cypher, role=setup-query]
+----
+CALL gds.graph.create('my-graph', 'User', 'LINK');
+----
+
+.Run an algorithm that updates the named-graph:
+[source, cypher, role=setup-query]
+----
+CALL gds.pageRank.mutate('my-graph', { mutateProperty: 'score' })
+----
+
+We can now access the property `score` without writing the data to Neo4j.
+
+[role=query-example]
+--
+.Access a property node property for Alice:
+[source, cypher]
+----
+MATCH (alice:User)
+WHERE alice.name = 'Alice'
+RETURN
+  alice.name AS name,
+  gds.util.nodeProperty('my-graph', id(alice), 'score') AS score
+----
+
+.Results
+[opts="header",cols="2"]
+|===
+| name    | score
+| "Alice" | 0.15000000000000002
+|===
+--
