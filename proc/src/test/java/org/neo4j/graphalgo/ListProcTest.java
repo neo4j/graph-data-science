@@ -89,7 +89,7 @@ class ListProcTest extends BaseProcTest {
         "gds.graph.create.cypher",
         "gds.graph.create.cypher.estimate",
         "gds.graph.create.estimate",
-        "gds.graph.deleteRelationshipType",
+        "gds.graph.deleteRelationships",
         "gds.graph.drop",
         "gds.graph.exists",
         "gds.graph.list",

@@ -53,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.TestSupport.mapEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
@@ -233,23 +234,7 @@ public class BaseProcTest {
     }
 
     protected void assertMapEquals(Map<Long, Double> expected, Map<Long, Double> actual) {
-        assertEquals(expected.size(), actual.size(), "number of elements");
-        Collection<Long> expectedKeys = new HashSet<>(expected.keySet());
-        for (Map.Entry<Long, Double> entry : actual.entrySet()) {
-            assertTrue(
-                expectedKeys.remove(entry.getKey()),
-                "unknown key " + entry.getKey()
-            );
-            assertEquals(
-                expected.get(entry.getKey()),
-                entry.getValue(),
-                0.1,
-                "value for " + entry.getKey()
-            );
-        }
-        for (Long expectedKey : expectedKeys) {
-            fail("missing key " + expectedKey);
-        }
+        assertThat(actual, mapEquals(expected));
     }
 
     protected void assertResult(String scoreProperty, Map<Long, Double> expected) {

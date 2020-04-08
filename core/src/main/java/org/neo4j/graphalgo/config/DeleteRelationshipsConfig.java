@@ -21,34 +21,51 @@ package org.neo4j.graphalgo.config;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 @ValueClass
-@Configuration("GraphRemoveNodePropertiesConfigImpl")
+@Configuration("DeleteRelationshipsConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface GraphRemoveNodePropertiesConfig extends GraphWriteNodePropertiesConfig {
+public interface DeleteRelationshipsConfig {
 
-    static GraphRemoveNodePropertiesConfig of(
-        String userName,
+    @Configuration.Parameter
+    String graphName();
+
+    @Configuration.Parameter
+    String relationshipType();
+
+    static DeleteRelationshipsConfig of(
         String graphName,
-        List<String> nodeProperties,
-        CypherMapWrapper config
+        String relationshipType
     ) {
-        return new GraphRemoveNodePropertiesConfigImpl(
-            nodeProperties,
-            Optional.of(graphName),
-            Optional.empty(),
-            userName,
-            config
+        return new DeleteRelationshipsConfigImpl(
+            graphName,
+            relationshipType
         );
     }
 
     @Configuration.Ignore
     default void validate(GraphStore graphStore) {
 
+        Set<String> relationshipTypes = graphStore.relationshipTypes();
+
+        if (relationshipTypes.size() == 1) {
+            throw new IllegalArgumentException(String.format(
+                "Deleting the last relationship type ('%s') from a graph ('%s') is not supported. " +
+                "Use `gds.graph.drop()` to drop the entire graph instead.",
+                relationshipType(),
+                graphName()
+            ));
+        }
+
+        if (!relationshipTypes.contains(relationshipType())) {
+            throw new IllegalArgumentException(String.format(
+                "No relationship type '%s' found in graph '%s'.",
+                relationshipType(),
+                graphName()
+            ));
+        }
     }
 }
