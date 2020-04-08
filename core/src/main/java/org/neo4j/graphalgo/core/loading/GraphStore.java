@@ -91,7 +91,7 @@ public final class GraphStore {
             nodePropertyStores.put(nodeLabel, builder.build());
         });
 
-        Map<String, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>();
+        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>();
         relationshipProperties.forEach((relationshipType, propertyMap) -> {
             RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
             propertyMap.forEach((propertyKey, propertyValues) -> builder.putRelationshipProperty(
@@ -323,7 +323,7 @@ public final class GraphStore {
     }
 
     private void addRelationshipProperty(
-        String relationshipType,
+        RelationshipType relationshipType,
         String propertyKey,
         NumberType propertyType,
         HugeGraph.PropertyCSR propertyCSR,
