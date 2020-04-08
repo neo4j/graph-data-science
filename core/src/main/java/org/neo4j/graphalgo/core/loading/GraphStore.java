@@ -23,8 +23,8 @@ import com.carrotsearch.hppc.BitSet;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -341,7 +341,7 @@ public final class GraphStore {
         });
     }
 
-    public DeletionResult deleteRelationships(String relationshipType) {
+    public DeletionResult deleteRelationships(RelationshipType relationshipType) {
         return DeletionResult.of(builder ->
             updateGraphStore(graphStore -> {
                 builder.deletedRelationships(graphStore.relationships.get(relationshipType).elementCount());
