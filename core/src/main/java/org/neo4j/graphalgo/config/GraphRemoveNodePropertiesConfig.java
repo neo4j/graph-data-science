@@ -46,9 +46,4 @@ public interface GraphRemoveNodePropertiesConfig extends GraphWriteNodePropertie
             config
         );
     }
-
-    @Configuration.Ignore
-    default void validate(GraphStore graphStore) {
-
-    }
 }
