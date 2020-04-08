@@ -52,27 +52,20 @@ public interface NodeSchema {
     }
 
     static Builder builder() {
-        return new Builder();
+        return new Builder().properties(new LinkedHashMap<>());
     }
 
     @AccessibleFields
     class Builder extends ImmutableNodeSchema.Builder {
 
         public void addPropertyAndTypeForLabel(NodeLabel key, String propertyName, NumberType type) {
-            if (this.properties == null) {
-                this.properties = new LinkedHashMap<>();
-            }
             this.properties
                 .computeIfAbsent(key, ignore -> new LinkedHashMap<>())
                 .put(propertyName, type);
         }
 
         public void addEmptyMapForLabelWithoutProperties(NodeLabel key) {
-            if (this.properties == null) {
-                this.putProperty(key, Collections.emptyMap());
-            } else {
-                this.properties.putIfAbsent(key, Collections.emptyMap());
-            }
+            this.properties.putIfAbsent(key, Collections.emptyMap());
         }
     }
 }
