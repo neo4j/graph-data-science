@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.LogProvider;
 
@@ -36,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-@IdenticalCompat
 final class GcListenerInstaller extends LifecycleAdapter {
     private final LogProvider logProvider;
     private final List<GarbageCollectorMXBean> gcBeans;

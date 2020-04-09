@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.logging.LogProvider;
 
 import javax.management.NotificationBroadcaster;
@@ -34,7 +33,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.invoke.MethodHandles.filterReturnValue;
 
-@IdenticalCompat
 final class HotSpotGcListener {
     private static final boolean ENABLED;
     private static final String GC_NOTIFICATION_NAME;

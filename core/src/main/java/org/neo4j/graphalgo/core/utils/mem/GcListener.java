@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import org.neo4j.graphalgo.annotation.IdenticalCompat;
 import org.neo4j.logging.Log;
 
 import javax.management.Notification;
@@ -32,7 +31,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-@IdenticalCompat
 final class GcListener implements NotificationListener, NotificationFilter {
     // NotificationFilter is Serializable
     private static final long serialVersionUID = 133742;
