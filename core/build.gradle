@@ -16,7 +16,6 @@ dependencies {
 
     api(
         project(":annotations"),
-        project(':cypher-printer'),
         project(':neo4j-adapter'),
         [group: 'com.carrotsearch',           name: 'hppc',               version: ver.'hppc']
     )

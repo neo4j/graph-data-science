@@ -10,7 +10,6 @@ pluginManagement {
 ext {
     neo4jMajorVersion = properties.getOrDefault('neo4jVersion', '4.0').toString().split('\\.')[0..1].join('.')
     compatibilityModules = [
-            "cypher-printer",
             "neo4j-adapter",
             "test-utils-adapter"
     ]

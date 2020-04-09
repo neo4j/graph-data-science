@@ -64,7 +64,6 @@ def product = [
     ':annotations',
     ':config-generator',
     ':core',
-    ':cypher-printer',
     ':neo4j-adapter',
     ':packaging',
     ':proc',

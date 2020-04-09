@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.cypher.CypherPrinter;
+import org.neo4j.graphalgo.utils.cypher.CypherPrinter;
 
 import java.util.Arrays;
 import java.util.Collection;
