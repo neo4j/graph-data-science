@@ -109,10 +109,7 @@ class GraphDropProcTest extends BaseProcTest {
                         "p999", 1L
                     ),
                     "creationTime", isA(LocalDateTime.class),
-                    "modificationTime", isA(LocalDateTime.class),
-                    "schema", map(
-                        "nodes", map("A", emptyMap()),
-                        "relationships", map("REL", emptyMap()))
+                    "modificationTime", isA(LocalDateTime.class)
                 )
             )
         );

@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,11 +54,6 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     @Override
     public String mutateProperty() {
         return "community";
-    }
-
-    @Override
-    public NumberType mutatePropertyType() {
-        return NumberType.INTEGRAL;
     }
 
     @BeforeEach

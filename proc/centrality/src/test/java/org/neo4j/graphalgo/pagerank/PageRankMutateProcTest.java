@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -61,11 +60,6 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
     @Override
     public String mutateProperty() {
         return "score";
-    }
-
-    @Override
-    public NumberType mutatePropertyType() {
-        return NumberType.FLOATING_POINT;
     }
 
     @BeforeEach

@@ -107,29 +107,21 @@ Once we have created graphs in the catalog, we can list information about either
 [source,cypher]
 ----
 CALL gds.graph.list()
-YIELD graphName, nodeProjection, relationshipProjection, nodeQuery, relationshipQuery,
-      nodeCount, relationshipCount, schema, degreeDistribution, creationTime, modificationTime;
+YIELD graphName, nodeCount, relationshipCount;
 ----
 
 .List information about a named graph in the catalog:
 [source,cypher]
 ----
-CALL gds.graph.list(graphName)
-YIELD graphName, nodeProjection, relationshipProjection, nodeQuery, relationshipQuery,
-      nodeCount, relationshipCount, schema, degreeDistribution, creationTime, modificationTime;
+CALL gds.graph.list('my-cypher-graph')
+YIELD graphName, nodeQuery, relationshipQuery, nodeCount, relationshipCount, creationTime, modificationTime;
 ----
 
-The `nodeProjection` and `relationshipProjection` columns are primarily applicable to <<native-projection, Native projection>>.
-The `nodeQuery` and `relationshipQuery` columns are applicable only to <<cypher-projection, Cypher projection>> and are `null` for graphs created with Native projection.
-
-The `degreeDistribution` is more time-consuming to compute than the other return columns.
-It is however only computed when included in the `YIELD` subclause,
-
-The `schema` consists of information about the nodes and relationships stored in the graph.
-For each node label, the schema maps the label to its property keys and their corresponding property types.
-Similarly, the schema maps the relationship types to their property keys and property types.
-The property type is either `Integer` or `Float`.
-
+The information contains basic statistics about the graph, e.g., the node and relationship count.
+The result field `creationTime` indicates when the graph was created in memory.
+The result field `modificationTime` indicates when the graph was updated by an algorithm running in `mutate` mode.
+The procedure can also compute information about degree distributions, i.e., the number of relationships per node.
+To skip computing the distribution values, use the `YIELD` subclause and omit the `degreeDistribution` column.
 
 .List information about the degree distribution of a specific graph:
 [source,cypher]

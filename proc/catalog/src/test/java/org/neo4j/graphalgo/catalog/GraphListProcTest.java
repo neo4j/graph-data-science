@@ -55,7 +55,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIO
 
 class GraphListProcTest extends BaseProcTest {
 
-    private static final String DB_CYPHER = "CREATE (:A {foo: 1})-[:REL {bar: 2}]->(:A)";
+    private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -95,11 +95,6 @@ class GraphListProcTest extends BaseProcTest {
                         "properties", emptyMap()
                     )
                 ),
-                "schema", map(
-                    "nodes", map("A", map()),
-                    "relationships", map("REL", map()
-                    )
-                ),
                 "nodeQuery", null,
                 "relationshipQuery", null,
                 "nodeCount", 2L,
@@ -122,30 +117,11 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @Test
-    void listASingleLabelRelationshipTypeProjectionWithProperties() {
-        String name = "name";
-        runQuery(
-            "CALL gds.graph.create($name, 'A', 'REL', {nodeProperties: 'foo', relationshipProperties: 'bar'})",
-            map("name", name)
-        );
-
-        assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
-            map(
-                "schema", map(
-                    "nodes", map("A", map("foo", "Float")),
-                    "relationships", map("REL", map("bar", "Float"))
-                )
-            )
-        ));
-    }
-
-    @Test
-    void listCypherProjection() {
+    void listASingleCypherProjection() {
         String name = "name";
         runQuery(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
-            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY)
-        );
+            map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY));
 
         assertCypherResult("CALL gds.graph.list()", singletonList(
             map(
@@ -163,10 +139,6 @@ class GraphListProcTest extends BaseProcTest {
                         "aggregation", "DEFAULT",
                         "properties", emptyMap()
                     )
-                ),
-                "schema", map(
-                    "nodes", map("*", map()),
-                    "relationships", map("*", map())
                 ),
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
@@ -190,77 +162,30 @@ class GraphListProcTest extends BaseProcTest {
     }
 
     @Test
-    void listCypherProjectionWithProperties() {
-        String name = "name";
-        runQuery(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
-            map(
-                "name", name,
-                "nodeQuery", "MATCH (n) RETURN id(n) AS id, n.foo as foo, labels(n) as labels",
-                "relationshipQuery", "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, r.bar as bar, type(r) as type"
-            )
-        );
-
-        assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
-            map(
-                "schema", map(
-                    "nodes", map("A", map("foo", "Float")),
-                    "relationships", map("REL", map("bar", "Float"))
-                )
-            )
-        ));
-    }
-
-    @Test
-    void listCypherProjectionProjectAllWithProperties() {
-        String name = "name";
-        runQuery(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
-            map(
-                "name", name,
-                "nodeQuery", "MATCH (n) RETURN id(n) AS id, n.foo as foo",
-                "relationshipQuery", "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, r.bar as bar"
-            )
-        );
-
-        assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
-            map(
-                "schema", map(
-                    "nodes", map("*", map("foo", "Float")),
-                    "relationships", map("*", map("bar", "Float"))
-                )
-            )
-        ));
-    }
-
-    @Test
     void degreeDistributionComputationIsOptOut() {
         String name = "name";
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
 
-        assertCypherResult(
-            "CALL gds.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodeCount, relationshipCount",
-            singletonList(
-                map(
-                    "graphName", name,
-                    "nodeProjection", map(
-                        "A", map(
-                            "label", "A",
-                            "properties", emptyMap()
-                        )
-                    ),
-                    "relationshipProjection", map(
-                        "REL", map(
-                            "type", "REL",
-                            "orientation", "NATURAL",
-                            "aggregation", "DEFAULT",
-                            "properties", emptyMap()
-                        )),
-                    "nodeCount", 2L,
-                    "relationshipCount", 1L
-                )
+        assertCypherResult("CALL gds.graph.list() YIELD graphName, nodeProjection, relationshipProjection, nodeCount, relationshipCount", singletonList(
+            map(
+                "graphName", name,
+                "nodeProjection", map(
+                    "A", map(
+                        "label", "A",
+                        "properties", emptyMap()
+                    )
+                ),
+                "relationshipProjection", map(
+                    "REL", map(
+                        "type", "REL",
+                        "orientation", "NATURAL",
+                        "aggregation", "DEFAULT",
+                        "properties", emptyMap()
+                    )),
+                "nodeCount", 2L,
+                "relationshipCount", 1L
             )
-        );
+        ));
     }
 
     @Test
@@ -422,42 +347,6 @@ class GraphListProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer("alice", listQuery, resultRow -> Assertions.assertEquals("aliceGraph", resultRow.getString("name")));
         runQueryWithRowConsumer("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
-    }
-
-    @Test
-    void shouldShowSchemaForNativeProjectedGraph() {
-        String loadQuery = "CALL gds.graph.create('graph', '*', '*')";
-
-        runQuery(loadQuery);
-
-        assertCypherResult("CALL gds.graph.list() YIELD schema",
-            Collections.singletonList(map(
-                "schema", map(
-                    "nodes", map("*", map()),
-                    "relationships", map("*", map())
-            )))
-        );
-    }
-
-    // TODO: enable if only specified properties are loaded
-    @Disabled
-    void shouldShowSchemaForMultipleProjections() {
-        runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
-
-        String loadQuery = "CALL gds.graph.create(" +
-                           "    'graph', " +
-                           "    {all: {label: '*', properties: 'foo'}, B: {properties: 'age'}}, " +
-                           "    {all: {type:  '*', properties: 'since'}, REL: {properties: 'bar'}})";
-
-        runQuery(loadQuery);
-
-        assertCypherResult("CALL gds.graph.list() YIELD schema",
-            Collections.singletonList(map(
-                "schema", map(
-                    "nodes", map("all", map("foo", "Float"), "B", map("age", "Float")),
-                    "relationships",  map("all", map("since", "Float"), "REL", map("bar", "Float"))
-                )))
-        );
     }
 
     @Test

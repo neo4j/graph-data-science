@@ -29,9 +29,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.core.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
-import org.neo4j.values.storable.NumberType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -40,7 +38,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
@@ -51,8 +48,6 @@ public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig,
     }
 
     String mutateProperty();
-
-    NumberType mutatePropertyType();
 
     @Override
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
@@ -90,20 +85,8 @@ public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig,
                 })
         );
 
-        GraphStore graphStore = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore();
-        TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), graphStore.getUnion());
-
-        GraphStoreSchema schema = graphStore.schema();
-        boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema().properties());
-        boolean relationshipsContainMutateProperty = containsMutateProperty(schema.relationshipSchema().properties());
-        assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);
-    }
-
-    default boolean containsMutateProperty(Map<?, Map<String, NumberType>> entitySchema) {
-        return entitySchema
-            .values()
-            .stream()
-            .anyMatch(props -> props.containsKey(mutateProperty()) && props.get(mutateProperty()) == mutatePropertyType());
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore().getUnion();
+        TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
     @Test
