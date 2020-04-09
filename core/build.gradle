@@ -7,7 +7,7 @@ dependencies {
     annotationProcessor project(':config-generator')
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
-    annotationProcessor group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
+    annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
 
     compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
