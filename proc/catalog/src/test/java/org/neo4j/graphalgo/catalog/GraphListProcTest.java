@@ -442,9 +442,9 @@ class GraphListProcTest extends BaseProcTest {
         );
     }
 
-    // TODO: enable if only specified properties are loaded
-    @Disabled
-    void shouldShowSchemaForMultipleProjections() {
+    @Disabled("Until the graph store has rel-type aware properties")
+    @Test
+    void shouldShowSchemaForMultipleProjectionsWithStar() {
         runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
 
         String loadQuery = "CALL gds.graph.create(" +
@@ -459,6 +459,48 @@ class GraphListProcTest extends BaseProcTest {
                 "schema", map(
                     "nodes", map("all", map("foo", "Float"), "B", map("age", "Float")),
                     "relationships",  map("all", map("since", "Float"), "REL", map("bar", "Float"))
+                )))
+        );
+    }
+
+    @Disabled("Until the graph store has rel-type aware properties")
+    @Test
+    void shouldShowSchemaForMultipleProjectionsWithTwoRenamedStars() {
+        runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
+
+        String loadQuery = "CALL gds.graph.create(" +
+                           "    'graph', " +
+                           "    {all: {label: '*', properties: 'foo'}, B: {label: '*', properties: 'age'}}, " +
+                           "    {all: {type:  '*', properties: 'since'}, REL: {type: '*', properties: 'bar'}})";
+
+        runQuery(loadQuery);
+
+        assertCypherResult("CALL gds.graph.list() YIELD schema",
+            Collections.singletonList(map(
+                "schema", map(
+                    "nodes", map("all", map("foo", "Float"), "B", map("age", "Float")),
+                    "relationships",  map("all", map("since", "Float"), "REL", map("bar", "Float"))
+                )))
+        );
+    }
+
+    @Disabled("Until the graph store has rel-type aware properties")
+    @Test
+    void shouldShowSchemaForMultipleProjections() {
+        runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
+
+        String loadQuery = "CALL gds.graph.create(" +
+                           "    'graph', " +
+                           "    {A: {properties: 'foo'}, B: {properties: 'age'}}, " +
+                           "    {LIKES: {properties: 'since'}, REL: {properties: 'bar'}})";
+
+        runQuery(loadQuery);
+
+        assertCypherResult("CALL gds.graph.list() YIELD schema",
+            Collections.singletonList(map(
+                "schema", map(
+                    "nodes", map("A", map("foo", "Float"), "B", map("age", "Float")),
+                    "relationships",  map("LIKES", map("since", "Float"), "REL", map("bar", "Float"))
                 )))
         );
     }
