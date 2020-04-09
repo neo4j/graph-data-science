@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 public interface BfsSources extends PrimitiveLongIterator {
 

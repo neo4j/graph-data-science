@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2019 "Neo4j,"
+ * Copyright (c) 2017-2020 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.collection.primitive;
+package org.neo4j.graphalgo.core.utils.collection.primitive;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.collection.primitive.PrimitiveLongCollections.PrimitiveLongBaseIterator;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
@@ -147,14 +147,14 @@ class PrimitiveLongCollectionsTest {
         long[] deduped = PrimitiveLongCollections.deduplicate(array);
 
         // THEN
-        assertArrayEquals(new long[]{1L, 2L, 5L, 6L}, deduped);
+        Assertions.assertArrayEquals(new long[]{1L, 2L, 5L, 6L}, deduped);
     }
 
     @Test
     void shouldNotContinueToCallNextOnHasNextFalse() {
         // GIVEN
         AtomicLong count = new AtomicLong(2);
-        PrimitiveLongIterator iterator = new PrimitiveLongBaseIterator() {
+        PrimitiveLongIterator iterator = new PrimitiveLongCollections.PrimitiveLongBaseIterator() {
             @Override
             protected boolean fetchNext() {
                 return count.decrementAndGet() >= 0 && next(count.get());
@@ -175,7 +175,7 @@ class PrimitiveLongCollectionsTest {
 
     private static void assertNoMoreItems(PrimitiveLongIterator iterator) {
         assertFalse(iterator.hasNext(), iterator + " should have no more items");
-        assertThrows(NoSuchElementException.class, iterator::next);
+        Assertions.assertThrows(NoSuchElementException.class, iterator::next);
     }
 
     private static void assertNextEquals(long expected, PrimitiveLongIterator iterator) {

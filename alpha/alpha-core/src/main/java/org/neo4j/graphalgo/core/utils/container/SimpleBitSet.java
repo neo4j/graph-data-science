@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.container;
 
-import org.neo4j.collection.primitive.PrimitiveIntIterable;
-import org.neo4j.collection.primitive.PrimitiveIntIterator;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveIntIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveIntIterator;
 
 import java.util.Arrays;
 import java.util.concurrent.locks.StampedLock;

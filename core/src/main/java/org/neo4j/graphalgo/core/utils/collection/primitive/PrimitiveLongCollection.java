@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2019 "Neo4j,"
+ * Copyright (c) 2017-2020 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -17,17 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.collection.primitive;
+package org.neo4j.graphalgo.core.utils.collection.primitive;
 
-import java.util.function.LongPredicate;
+public interface PrimitiveLongCollection extends PrimitiveCollection, PrimitiveLongIterable {
 
-public interface PrimitiveLongSet extends PrimitiveLongCollection, LongPredicate {
-
-    boolean add(long value);
-
-    boolean addAll(PrimitiveLongIterator values);
-
-    boolean contains(long value);
-
-    boolean remove(long value);
+    /**
+     * Visit the keys of this collection, until all have been visited or the visitor returns 'true'.
+     */
+    <E extends Exception> void visitKeys(PrimitiveLongVisitor<E> visitor) throws E;
 }

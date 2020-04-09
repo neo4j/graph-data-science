@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2019 "Neo4j,"
+ * Copyright (c) 2017-2020 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -17,18 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.collection.primitive;
+package org.neo4j.graphalgo.core.utils.collection.primitive;
 
-@FunctionalInterface
-public interface PrimitiveIntVisitor<E extends Exception> {
+public interface PrimitiveIntCollection extends PrimitiveCollection, PrimitiveIntIterable {
 
     /**
-     * Visit the given entry.
-     *
-     * @param value A distinct value from the set.
-     * @return 'true' to signal that the iteration should be stopped, 'false' to signal that the iteration should
-     *     continue if there are more entries to look at.
-     * @throws E any thrown exception of type 'E' will bubble up through the 'visit' method.
+     * Visit the keys of this collection, until all have been visited or the visitor returns 'true'.
      */
-    boolean visited(int value) throws E;
+    <E extends Exception> void visitKeys(PrimitiveIntVisitor<E> visitor) throws E;
 }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
-import org.neo4j.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;

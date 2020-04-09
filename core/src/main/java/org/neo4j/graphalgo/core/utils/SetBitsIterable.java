@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
