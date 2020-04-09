@@ -50,7 +50,11 @@ allprojects {
             targetCompatibility = '1.8'
             options.warnings = true
             options.encoding = 'UTF-8'
-            options.compilerArgs += ['-parameters', '-Xlint:all,-cast,-deprecation,-processing,-serial,-try,-unchecked,-varargs']
+            options.compilerArgs += [
+                    '-parameters',
+                    '-Xlint:all,-cast,-deprecation,-processing,-serial,-try,-unchecked,-varargs',
+                    '-Xmaxerrs', '1337'
+            ]
         }
     }
 }
