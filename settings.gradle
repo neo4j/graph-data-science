@@ -12,7 +12,6 @@ ext {
     compatibilityModules = [
             "cypher-printer",
             "neo4j-adapter",
-            "neo4j-export-adapter",
             "neo4j-collections",
             "test-utils-adapter"
     ]
