@@ -19,12 +19,18 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.LongObjectHashMap;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class IdMapTest {
@@ -50,5 +56,20 @@ class IdMapTest {
         dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000_000L).highestNeoId(100_000_000_000L).build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(32L + 800_000_040L + 898_077_656L, 32L + 800_000_040L + 800_488_297_688L), memRec.memoryUsage());
+
+
+        LongObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMappings = new LongObjectHashMap<List<NodeLabel>>();
+        labelTokenNodeLabelMappings.put(1, singletonList(NodeLabel.of("A")));
+
+        dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestNeoId(100L)
+            .labelTokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
+        memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
+        assertEquals(MemoryRange.of(32L + 840L + 32832L + 56L), memRec.memoryUsage());
+
+        labelTokenNodeLabelMappings.put(2, Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B")));
+        dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestNeoId(100L)
+            .labelTokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
+        memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
+        assertEquals(MemoryRange.of(32L + 840L + 32832L + 112L), memRec.memoryUsage());
     }
 }
