@@ -48,10 +48,12 @@ import static java.util.Collections.singletonMap;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_VALUE_KEY;
 import static org.neo4j.graphalgo.PropertyMapping.PROPERTY_KEY;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE, depluralize = true, deepImmutablesDetection = true)
@@ -100,7 +102,7 @@ public abstract class GdsCypher {
         default QueryBuilder loadEverything(Orientation orientation) {
             return this
                 .withNodeLabel("*", NodeProjection.all())
-                .withRelationshipType("*", RelationshipProjection.all().withOrientation(orientation));
+                .withRelationshipType(ALL_RELATIONSHIPS.name, RelationshipProjection.all().withOrientation(orientation));
         }
 
         default ImplicitCreationBuildStage withAnyLabel() {
@@ -725,7 +727,7 @@ public abstract class GdsCypher {
             I identifier = entry.getKey();
             P projection = entry.getValue();
             if (identifier.projectAll().equals(identifier) && isAllDefault(projection)) {
-                return MinimalObject.string(identifier.projectAll().name);
+                return MinimalObject.string(PROJECT_ALL);
             }
             MinimalObject projectionObject = toMinimalObject(projection, identifier);
             return projectionObject.map(m -> MinimalObject.map(identifier.name, m));

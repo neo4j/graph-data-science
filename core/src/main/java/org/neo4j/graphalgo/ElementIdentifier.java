@@ -28,10 +28,10 @@ public abstract class ElementIdentifier {
     public final @NotNull String name;
 
     public ElementIdentifier(@NotNull String name) {
-//        TODO: We need to disable this until we have found a solution for handling * vs empty String
-//        if (StringUtils.isEmpty(name)) {
-//            throw new IllegalArgumentException("name cannot be empty");
-//        }
+        // TODO: forbid name == "*"
+        if (StringUtils.isEmpty(name)) {
+            throw new IllegalArgumentException("name cannot be empty");
+        }
         this.name = name;
     }
 

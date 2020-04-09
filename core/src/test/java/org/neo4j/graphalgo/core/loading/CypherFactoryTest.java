@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestGraph;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
@@ -217,17 +216,17 @@ class CypherFactoryTest extends BaseTest {
 
         assertGraphEquals(
             fromGdl(String.format(Locale.US, expectedGraph, 1.0f, prop1.defaultValue(), prop1.defaultValue())),
-            graphs.getGraph(RelationshipType.of("*"), Optional.of(addSuffix(prop1.propertyKey(), 0)))
+            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(addSuffix(prop1.propertyKey(), 0)))
         );
 
         assertGraphEquals(
             fromGdl(String.format(Locale.US, expectedGraph, prop2.defaultValue(), 2.0, prop2.defaultValue())),
-            graphs.getGraph(RelationshipType.of("*"), Optional.of(addSuffix(prop2.propertyKey(), 1)))
+            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(addSuffix(prop2.propertyKey(), 1)))
         );
 
         assertGraphEquals(
             fromGdl(String.format(Locale.US, expectedGraph, prop3.defaultValue(), prop3.defaultValue(), 3.0)),
-            graphs.getGraph(RelationshipType.of("*"), Optional.of(addSuffix(prop3.propertyKey(), 2)))
+            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(addSuffix(prop3.propertyKey(), 2)))
         );
     }
 

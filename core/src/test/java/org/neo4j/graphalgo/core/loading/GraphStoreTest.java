@@ -60,7 +60,6 @@ import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
-import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_RELATIONSHIP_TYPE_IDENTIFIERS;
 import static org.neo4j.values.storable.NumberType.FLOATING_POINT;
 
 class GraphStoreTest extends BaseTest {
@@ -116,7 +115,7 @@ class GraphStoreTest extends BaseTest {
 
         GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
 
-        Graph filteredGraph = graphStore.getGraph(labels, ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.empty(), 1);
+        Graph filteredGraph = graphStore.getGraph(labels, graphStore.relationshipTypes(), Optional.empty(), 1);
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
     }
@@ -135,7 +134,7 @@ class GraphStoreTest extends BaseTest {
 
         Graph filteredAGraph = graphStore.getGraph(
             Collections.singletonList(LABEL_A),
-            ALL_RELATIONSHIP_TYPE_IDENTIFIERS,
+            graphStore.relationshipTypes(),
             Optional.empty(),
             1
         );
@@ -144,13 +143,13 @@ class GraphStoreTest extends BaseTest {
 
         Graph filteredAllGraph = graphStore.getGraph(
             Collections.singletonList(NodeLabel.of("All")),
-            ALL_RELATIONSHIP_TYPE_IDENTIFIERS,
+            graphStore.relationshipTypes(),
             Optional.empty(),
             1
         );
 
         Graph nonFilteredGraph = graphStore
-            .getGraph(Collections.singletonList(ALL_NODES), ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.empty(), 1);
+            .getGraph(Collections.singletonList(ALL_NODES), graphStore.relationshipTypes(), Optional.empty(), 1);
 
         assertGraphEquals(filteredAllGraph, nonFilteredGraph);
     }
@@ -321,7 +320,7 @@ class GraphStoreTest extends BaseTest {
             ),
             Arguments.of(
                 "filterByAnyRelationshipType",
-                singletonList(RelationshipType.of("*")),
+                Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2"), RelationshipType.of("T3")),
                 Optional.empty(),
                 "(a), (b), (a)-[T1]->(b), (a)-[T2]->(b), (a)-[T3]->(b)"
             ),
@@ -345,7 +344,7 @@ class GraphStoreTest extends BaseTest {
              */
             Arguments.of(
                 "includeRelationshipTypesThatDoNotHaveTheProperty",
-                singletonList(RelationshipType.of("*")),
+                Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2"), RelationshipType.of("T3")),
                 Optional.of("property1"),
                 "(a), (b), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b), (a)-[T3 {property1: 42.0}]->(b)"
             )

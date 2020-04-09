@@ -21,6 +21,9 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
+import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_RELATIONSHIP_TYPE;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_RELATIONSHIP_TYPE;
 
@@ -33,8 +36,8 @@ public interface RelationshipProjectionMapping {
 
     static RelationshipProjectionMapping all(Orientation orientation) {
         return ImmutableRelationshipProjectionMapping.builder()
-            .typeName("")
-            .relationshipType(RelationshipType.of(""))
+            .relationshipType(RelationshipType.ALL_RELATIONSHIPS)
+            .typeName(PROJECT_ALL)
             .orientation(orientation)
             .typeId(ANY_RELATIONSHIP_TYPE)
             .exists(true)

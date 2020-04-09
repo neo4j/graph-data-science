@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
 @DataClass
@@ -68,8 +70,8 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         if (StringUtils.isEmpty(typeString)) {
             create(emptyMap());
         }
-        if (typeString.equals(ALL_RELATIONSHIPS.name)) {
-            return create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.all()));
+        if (typeString.equals(PROJECT_ALL)) {
+            return create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL));
         }
 
         RelationshipType relationshipType = RelationshipType.of(typeString);
@@ -92,10 +94,24 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
 
     public static RelationshipProjections fromList(Iterable<?> items) {
         Map<RelationshipType, RelationshipProjection> filters = new LinkedHashMap<>();
+
         for (Object item : items) {
-            RelationshipProjections relationshipProjections = fromObject(item);
-            filters.putAll(relationshipProjections.projections());
+            if (item instanceof String) {
+                if (item.equals(ALL_RELATIONSHIPS.name())) {
+                    throw new IllegalArgumentException(String.format(
+                        Locale.US,
+                        "%s is a reserved relationship type and my not be used",
+                        ALL_RELATIONSHIPS.name()
+                    ));
+                }
+
+                RelationshipProjections relationshipProjections = fromString((String) item);
+                filters.putAll(relationshipProjections.projections());
+            } else {
+                throw new IllegalArgumentException("`relationshipProjection` list items must be of type `String`.");
+            }
         }
+
         return create(filters);
     }
 
@@ -124,10 +140,10 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             throw new IllegalArgumentException(
                 "An empty relationship projection was given; at least one relationship type must be projected.");
         }
-        if (projections.size() > 1 && projections.containsKey(ALL_RELATIONSHIPS)) {
-            throw new IllegalArgumentException(
-                "A star projection (all relationships) cannot be combined with another projection.");
+        if (projections.containsKey(RelationshipType.of(PROJECT_ALL))) {
+            throw new IllegalArgumentException("A relationship projection with the name `*` is not allowed");
         }
+
         return RelationshipProjections.of(projections);
     }
 

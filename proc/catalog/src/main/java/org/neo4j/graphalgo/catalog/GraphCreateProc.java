@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
@@ -44,9 +44,11 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphCreateProc extends CatalogProc {
@@ -203,6 +205,7 @@ public class GraphCreateProc extends CatalogProc {
                 .nodeCount(config.nodeCount())
                 .highestNeoId(config.nodeCount())
                 .relationshipProjectionMappings(RelationshipProjectionMappings.all())
+                .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, config.relationshipCount()))
                 .maxRelCount(Math.max(config.relationshipCount(), 0))
                 .build();
         }

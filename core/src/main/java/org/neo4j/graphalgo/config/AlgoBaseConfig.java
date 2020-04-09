@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
 public interface AlgoBaseConfig extends BaseConfig {
 
@@ -38,7 +37,6 @@ public interface AlgoBaseConfig extends BaseConfig {
     String NODE_LABELS_KEY = "nodeLabels";
     List<String> ALL_NODE_LABELS = Collections.singletonList(ALL_NODES.name());
     List<NodeLabel> ALL_NODE_LABEL_IDENTIFIERS = Collections.singletonList(ALL_NODES);
-    List<RelationshipType> ALL_RELATIONSHIP_TYPE_IDENTIFIERS = Collections.singletonList(ALL_RELATIONSHIPS);
 
     @Value.Default
     default int concurrency() {

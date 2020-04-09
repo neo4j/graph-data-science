@@ -78,9 +78,7 @@ public final class AdjacencyList {
     public static MemoryEstimation compressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
         return MemoryEstimations.setup("", dimensions -> {
             long nodeCount = dimensions.nodeCount();
-            long relCountForType = !relationshipType.equals(ALL_RELATIONSHIPS) && !relationshipType.equals(RelationshipType.of(""))
-                ? dimensions.relationshipCounts().getOrDefault(relationshipType, 0L)
-                : dimensions.maxRelCount();
+            long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
             long relCount = undirected ? relCountForType * 2 : relCountForType;
             long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
             return AdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
@@ -97,9 +95,7 @@ public final class AdjacencyList {
             .builder(AdjacencyList.class)
             .perGraphDimension("pages", (dimensions, concurrency) -> {
                 long nodeCount = dimensions.nodeCount();
-                long relCountForType = relationshipType != ALL_RELATIONSHIPS
-                    ? dimensions.relationshipCounts().getOrDefault(relationshipType, 0L)
-                    : dimensions.maxRelCount();
+                long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
                 long relCount = undirected ? relCountForType * 2 : relCountForType;
 
                 long uncompressedAdjacencySize = relCount * Long.BYTES + nodeCount * Integer.BYTES;

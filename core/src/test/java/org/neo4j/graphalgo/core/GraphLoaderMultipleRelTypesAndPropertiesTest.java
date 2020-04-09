@@ -59,7 +59,6 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
-import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_RELATIONSHIP_TYPE_IDENTIFIERS;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
 import static org.neo4j.graphalgo.core.Aggregation.MAX;
 import static org.neo4j.graphalgo.core.Aggregation.MIN;
@@ -338,7 +337,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             )
             .graphStore(graphStoreFactory);
 
-        Graph p1Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("agg1"));
+        Graph p1Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("agg1"));
         Graph expectedP1Graph = fromGdl(
             "(a)-[{w: 42}]->(a)" +
             "(a)-[{w: 43}]->(a)" +
@@ -348,7 +347,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         );
         assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("agg2"));
+        Graph p2Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("agg2"));
         Graph expectedP2Graph = fromGdl(
             "(a)-[{w: 1337}]->(a)" +
             "(a)-[{w: 1338}]->(a)" +
@@ -358,7 +357,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         );
         assertGraphEquals(expectedP2Graph, p2Graph);
 
-        Graph p3Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("agg3"));
+        Graph p3Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("agg3"));
         Graph expectedP3Graph = fromGdl(
             "(a)-[{w: 2}]->(a)" +
             "(a)-[{w: 10}]->(a)" +
@@ -390,21 +389,21 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             )
             .graphStore(graphStoreFactory);
 
-        Graph p1Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("agg1"));
+        Graph p1Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("agg1"));
         Graph expectedP1Graph = fromGdl(
             "(a)-[{w: 1.0d}]->(a)" +
             "(b)-[{w: 1.0d}]->(b)"
         );
         assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("agg2"));
+        Graph p2Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("agg2"));
         Graph expectedP2Graph = fromGdl(
             "(a)-[{w: 51.0d}]->(a)" +
             "(b)-[{w: 50.0d}]->(b)"
         );
         assertGraphEquals(expectedP2Graph, p2Graph);
 
-        Graph p3Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("agg3"));
+        Graph p3Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("agg3"));
         Graph expectedP3Graph = fromGdl(
             "(a)-[{w: 93.0d}]->(a)" +
             "(b)-[{w: 48.0d}]->(b)"
@@ -465,14 +464,14 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             )
             .graphStore(graphStoreFactory);
 
-        Graph p1Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("agg1"));
+        Graph p1Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("agg1"));
         Graph expectedP1Graph = fromGdl(
             "(a)-[{w: 44.0d}]->(a)" +
             "(b)-[{w: 46.0d}]->(b)"
         );
         assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("agg2"));
+        Graph p2Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("agg2"));
         Graph expectedP2Graph = fromGdl(
             "(a)-[{w: 42.0d}]->(a)" +
             "(b)-[{w: 45.0d}]->(b)"
@@ -533,7 +532,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             )
             .graphStore(graphStoreFactory);
 
-        Graph p1Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("p1"));
+        Graph p1Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("p1"));
         Graph expectedP1Graph = fromGdl(String.format(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)" +
@@ -543,7 +542,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         ));
         assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("p2"));
+        Graph p2Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("p2"));
         Graph expectedP2Graph = fromGdl(String.format(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)" +
@@ -574,7 +573,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             )
             .graphStore(graphStoreFactory);
 
-        Graph graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("agg"));
+        Graph graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("agg"));
         assertEquals(3L, graph.relationshipCount());
         Graph expectedGraph = fromGdl(
             "(a)-[{w: 42.0d}]->(a)" +
@@ -619,7 +618,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             )
             .graphStore(graphStoreFactory);
 
-        Graph p1Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("p1"));
+        Graph p1Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("p1"));
         Graph expectedP1Graph = fromGdl(String.format(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)",
@@ -628,7 +627,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         ));
         assertGraphEquals(expectedP1Graph, p1Graph);
 
-        Graph p2Graph = graphs.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("p2"));
+        Graph p2Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("p2"));
         Graph expectedP2Graph = fromGdl(String.format(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)",
@@ -660,12 +659,12 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)";
 
-        Graph p1Graph = graphStore.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("p1"));
+        Graph p1Graph = graphStore.getGraph(graphStore.relationshipTypes(), Optional.of("p1"));
         Graph expectedP1GraphOption1 = fromGdl(String.format(expectedGraphTemplate, 43D, 46D));
         Graph expectedP1GraphOption2 = fromGdl(String.format(expectedGraphTemplate, 42D, 46D));
         assertGraphEquals(Arrays.asList(expectedP1GraphOption1, expectedP1GraphOption2), p1Graph);
 
-        Graph p2Graph = graphStore.getGraph(ALL_RELATIONSHIP_TYPE_IDENTIFIERS, Optional.of("p2"));
+        Graph p2Graph = graphStore.getGraph(graphStore.relationshipTypes(), Optional.of("p2"));
         Graph expectedP2GraphOption1 = fromGdl(String.format(expectedGraphTemplate, 1338D, 1341D));
         Graph expectedP2GraphOption2 = fromGdl(String.format(expectedGraphTemplate, 1337D, 1341D));
         assertGraphEquals(Arrays.asList(expectedP2GraphOption1, expectedP2GraphOption2), p2Graph);

@@ -90,7 +90,7 @@ final class GraphCreateConfigBuilders {
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
 
         if (tempRP.isEmpty() && anyRelationshipType == AnyRelationshipType.LOAD) {
-            tempRP.put("*", RelationshipProjection.builder()
+            tempRP.put(ALL_RELATIONSHIPS.name, RelationshipProjection.builder()
                 .type("*")
                 .orientation(orientation)
                 .aggregation(aggregation)

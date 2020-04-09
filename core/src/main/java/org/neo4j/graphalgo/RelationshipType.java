@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class RelationshipType extends ElementIdentifier {
 
-    public static final RelationshipType ALL_RELATIONSHIPS = RelationshipType.of("*");
+    public static final RelationshipType ALL_RELATIONSHIPS = RelationshipType.of("__ALL__");
 
     public RelationshipType(String name) {
         super(name);

@@ -66,6 +66,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 
@@ -235,7 +236,9 @@ public abstract class AlgoBaseProc<
             : Optional.empty();
 
         List<NodeLabel> nodeLabels = config.nodeLabelIdentifiers();
-        List<RelationshipType> relationshipTypes = config.relationshipTypeIdentifiers();
+        Collection<RelationshipType> relationshipTypes = config.relationshipTypes().contains(PROJECT_ALL)
+            ? graphStore.relationshipTypes()
+            : config.relationshipTypeIdentifiers();
 
         return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty, config.concurrency());
     }

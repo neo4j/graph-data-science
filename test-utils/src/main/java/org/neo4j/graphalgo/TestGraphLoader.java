@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.Orientation.NATURAL;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
@@ -164,7 +165,7 @@ public final class TestGraphLoader {
 
         if (relTypes.isEmpty()) {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(
-                "*",
+                ALL_RELATIONSHIPS.name,
                 RelationshipProjection.all().withAggregation(maybeAggregation.orElse(DEFAULT))
             );
         } else {

@@ -55,7 +55,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABEL_IDENTIFIERS;
 
 public final class GraphStore {
@@ -364,14 +363,14 @@ public final class GraphStore {
         return getGraph(ALL_NODE_LABEL_IDENTIFIERS, singletonList(relationshipType), relationshipProperty, 1);
     }
 
-    public Graph getGraph(List<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    public Graph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         validateInput(relationshipTypes, maybeRelationshipProperty);
         return createGraph(ALL_NODE_LABEL_IDENTIFIERS, relationshipTypes, maybeRelationshipProperty, 1);
     }
 
     public Graph getGraph(
         List<NodeLabel> nodeLabels,
-        List<RelationshipType> relationshipTypes,
+        Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty,
         int concurrency
     ) {
@@ -419,11 +418,10 @@ public final class GraphStore {
 
     private IdMapGraph createGraph(
         List<NodeLabel> filteredLabels,
-        List<RelationshipType> relationshipTypes,
+        Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty,
         int concurrency
     ) {
-        boolean loadAllRelationships = relationshipTypes.contains(ALL_RELATIONSHIPS);
         boolean loadAllNodes = filteredLabels.contains(ALL_NODES);
 
         Collection<NodeLabel> expandedLabels = loadAllNodes ? nodeLabels() : filteredLabels;
@@ -443,7 +441,7 @@ public final class GraphStore {
             : Optional.of(this.nodes.withFilteredLabels(combinedBitSet, concurrency));
 
         List<IdMapGraph> filteredGraphs = relationships.entrySet().stream()
-            .filter(relTypeAndCSR -> loadAllRelationships || relationshipTypes.contains(relTypeAndCSR.getKey()))
+            .filter(relTypeAndCSR -> relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> {
                 Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(expandedLabels, nodes.maybeLabelInformation);
 
@@ -526,26 +524,24 @@ public final class GraphStore {
             ));
         }
 
-        if (!relationshipTypes.contains(ALL_RELATIONSHIPS)) {
-            relationshipTypes.forEach(relationshipType -> {
-                if (!relationships.containsKey(relationshipType)) {
+        relationshipTypes.forEach(relationshipType -> {
+            if (!relationships.containsKey(relationshipType)) {
+                throw new IllegalArgumentException(String.format(
+                    "No relationships have been loaded for relationship type '%s'",
+                    relationshipType
+                ));
+            }
+
+            maybeRelationshipProperty.ifPresent(relationshipProperty -> {
+                if (!relationshipProperties.get(relationshipType).containsKey(relationshipProperty)) {
                     throw new IllegalArgumentException(String.format(
-                        "No relationships have been loaded for relationship type '%s'",
-                        relationshipType
+                        "No relationships have been loaded for relationship type '%s' and relationship property '%s'.",
+                        relationshipType,
+                        maybeRelationshipProperty.get()
                     ));
                 }
-
-                maybeRelationshipProperty.ifPresent(relationshipProperty -> {
-                    if (!relationshipProperties.get(relationshipType).containsKey(relationshipProperty)) {
-                        throw new IllegalArgumentException(String.format(
-                            "No relationships have been loaded for relationship type '%s' and relationship property '%s'.",
-                            relationshipType,
-                            maybeRelationshipProperty.get()
-                        ));
-                    }
-                });
             });
-        }
+        });
     }
 
     private synchronized void updateGraphStore(Consumer<GraphStore> updateFunction) {

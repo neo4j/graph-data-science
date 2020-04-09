@@ -32,10 +32,10 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
@@ -166,21 +166,12 @@ class RelationshipProjectionsTest {
     }
 
     @Test
-    void shouldNotAllowCombiningStarWithStandard() {
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> RelationshipProjections.fromObject(Arrays.asList("*", "T"))
-        );
-        assertThat(ex.getMessage(), matchesPattern("A star projection .* cannot be combined.*"));
-    }
-
-    @Test
     void shouldFailOnUnsupportedType() {
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
             () -> RelationshipProjections.fromObject(Arrays.asList("T", 42))
         );
-        assertThat(ex.getMessage(), matchesPattern("Cannot construct a relationship projection out of a java.lang.Integer"));
+        assertThat(ex.getMessage(), containsString("must be of type `String`"));
     }
 
     static Stream<Arguments> syntacticSugarsSimple() {

@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongObjectHashMap;
 import com.carrotsearch.hppc.LongObjectMap;
 import com.carrotsearch.hppc.LongSet;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -42,12 +43,15 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_RELATIONSHIP_TYPE;
 import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
@@ -113,20 +117,11 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             : Math.min(nodeCount, allNodesCount);
 
         // TODO: this will double count relationships between distinct labels
-        Map<RelationshipType, Long> relationshipCounts = relationshipProjectionMappings
-            .stream()
-            .filter(RelationshipProjectionMapping::exists)
-            .collect(Collectors.toMap(
-                RelationshipProjectionMapping::relationshipType,
-                relationshipProjectionMapping ->
-                    labelTokenNodeLabelMappings
-                        .keyStream()
-                        .mapToLong(labelId -> maxRelCountForLabelAndType(
-                            dataRead,
-                            labelId,
-                            relationshipProjectionMapping.typeId()
-                        )).sum()
-            ));
+        Map<RelationshipType, Long> relationshipCounts = getRelationshipCountsByType(
+            dataRead,
+            labelTokenNodeLabelMappings,
+            relationshipProjectionMappings
+        );
         long maxRelCount = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
 
         return ImmutableGraphDimensions.builder()
@@ -140,6 +135,32 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .relationshipProjectionMappings(relationshipProjectionMappings)
                 .relationshipProperties(relProperties)
                 .build();
+    }
+
+    @NotNull
+    private Map<RelationshipType, Long> getRelationshipCountsByType(
+        Read dataRead,
+        LabelTokenNodeLabelMappings labelTokenNodeLabelMappings,
+        RelationshipProjectionMappings relationshipProjectionMappings
+    ) {
+        Map<RelationshipType, Long> relationshipCountsByType = new HashMap<>();
+        relationshipProjectionMappings
+            .forEach(relationshipProjectionMapping -> {
+                if (relationshipProjectionMapping.exists()) {
+                    long numberOfRelationships = labelTokenNodeLabelMappings
+                        .keyStream()
+                        .mapToLong(labelToken -> {
+                            int typeToken = relationshipProjectionMapping.typeName().equals(PROJECT_ALL)
+                                ? ANY_RELATIONSHIP_TYPE
+                                : relationshipProjectionMapping.typeId();
+                            return maxRelCountForLabelAndType(dataRead, labelToken, typeToken);
+                        }).sum();
+
+                    relationshipCountsByType.put(relationshipProjectionMapping.relationshipType(), numberOfRelationships);
+                }
+            });
+
+        return relationshipCountsByType;
     }
 
     private Map<String, Integer> loadNodePropertyTokens(TokenRead tokenRead) {
