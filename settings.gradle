@@ -9,10 +9,7 @@ pluginManagement {
 
 ext {
     neo4jMajorVersion = properties.getOrDefault('neo4jVersion', '4.0').toString().split('\\.')[0..1].join('.')
-    compatibilityModules = [
-            "neo4j-adapter",
-            "test-utils-adapter"
-    ]
+    compatibilityModules = ["neo4j-adapter"]
 }
 
 rootProject.name = 'graph-data-science'
