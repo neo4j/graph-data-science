@@ -23,19 +23,21 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 public interface AlgoBaseConfig extends BaseConfig {
 
     int DEFAULT_CONCURRENCY = 4;
     String NODE_LABELS_KEY = "nodeLabels";
-    List<String> ALL_NODE_LABELS = Collections.singletonList(ALL_NODES.name());
     List<NodeLabel> ALL_NODE_LABEL_IDENTIFIERS = Collections.singletonList(ALL_NODES);
 
     @Value.Default
@@ -48,7 +50,7 @@ public interface AlgoBaseConfig extends BaseConfig {
 
     @Value.Default
     default List<String> relationshipTypes() {
-        return Collections.singletonList("*");
+        return Collections.singletonList(PROJECT_ALL);
     }
 
     @Configuration.Ignore
@@ -58,12 +60,14 @@ public interface AlgoBaseConfig extends BaseConfig {
 
     @Value.Default
     default List<String> nodeLabels() {
-        return ALL_NODE_LABELS;
+        return Collections.singletonList(PROJECT_ALL);
     }
 
     @Configuration.Ignore
-    default List<NodeLabel> nodeLabelIdentifiers() {
-        return nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
+    default Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
+        return nodeLabels().contains(PROJECT_ALL)
+            ? graphStore.nodeLabels()
+            : nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
     }
 
     @Configuration.Parameter

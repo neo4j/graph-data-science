@@ -24,13 +24,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+
 public abstract class ElementIdentifier {
 
     public final @NotNull String name;
 
-    public ElementIdentifier(@NotNull String name) {
-        // TODO: forbid name == "*"
-        if (StringUtils.isEmpty(name)) {
+    ElementIdentifier(@NotNull String name) {
+        if (name.equals(PROJECT_ALL)) {
+            throw new IllegalArgumentException("name cannot be `*`");
+        } else if (StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("name cannot be empty");
         }
         this.name = name;

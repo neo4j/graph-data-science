@@ -124,13 +124,13 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "graphName", name,
                 "nodeProjection", map(
-                    "*", map(
+                    "__ALL__", map(
                         "label", "*",
                         "properties", emptyMap()
                     )
                 ),
                 "relationshipProjection", map(
-                    "*", map(
+                    "__ALL__", map(
                         "type", "*",
                         "orientation", "NATURAL",
                         "aggregation", "DEFAULT",

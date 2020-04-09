@@ -130,9 +130,6 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             throw new IllegalArgumentException(
                 "An empty relationship projection was given; at least one relationship type must be projected.");
         }
-        if (projections.containsKey(RelationshipType.of(PROJECT_ALL))) {
-            throw new IllegalArgumentException("A relationship projection with the name `*` is not allowed");
-        }
 
         return RelationshipProjections.of(projections);
     }

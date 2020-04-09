@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -74,7 +75,7 @@ final class GraphCreateConfigBuilders {
         nodeProjectionsWithIdentifier.forEach(tempNP::put);
 
         if (tempNP.isEmpty() && anyLabel == AnyLabel.LOAD) {
-            tempNP.put("*", NodeProjection.all());
+            tempNP.put(ALL_NODES.name, NodeProjection.all());
         }
 
         // Relationship projections

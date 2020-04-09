@@ -81,6 +81,7 @@ import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -161,13 +162,13 @@ class GraphCreateProcTest extends BaseProcTest {
             singletonList(map(
                 "graphName", graphName,
                 NODE_PROJECTION_KEY, map(
-                    "*", map(
+                    ALL_NODES.name, map(
                         LABEL_KEY, "*",
                         PROPERTIES_KEY, emptyMap()
                     )
                 ),
                 RELATIONSHIP_PROJECTION_KEY, map(
-                    "*", map(
+                    ALL_RELATIONSHIPS.name, map(
                         TYPE_KEY, "*",
                         ORIENTATION_KEY, Orientation.NATURAL.name(),
                         AGGREGATION_KEY, Aggregation.DEFAULT.name(),
@@ -195,7 +196,7 @@ class GraphCreateProcTest extends BaseProcTest {
             singletonList(map(
                 "graphName", name,
                 NODE_PROJECTION_KEY, map(
-                    "*", map(
+                    ALL_NODES.name, map(
                         LABEL_KEY, "*",
                         PROPERTIES_KEY, emptyMap()
                     )
@@ -229,13 +230,13 @@ class GraphCreateProcTest extends BaseProcTest {
             singletonList(map(
                 "graphName", graphName,
                 NODE_PROJECTION_KEY, map(
-                    "*", map(
+                    ALL_NODES.name, map(
                         LABEL_KEY, "*",
                         PROPERTIES_KEY, emptyMap()
                     )
                 ),
                 RELATIONSHIP_PROJECTION_KEY, map(
-                    "*", map(
+                    ALL_RELATIONSHIPS.name, map(
                         TYPE_KEY, "*",
                         ORIENTATION_KEY, Orientation.NATURAL.name(),
                         AGGREGATION_KEY, Aggregation.DEFAULT.name(),
@@ -325,7 +326,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String name = "g";
 
         Map<String, Object> expectedProperties = map("age", map("property", "age", "defaultValue", Double.NaN));
-        Map<String, Object> expectedNodeProjection = map("*", map(LABEL_KEY, "*", PROPERTIES_KEY, expectedProperties));
+        Map<String, Object> expectedNodeProjection = map(ALL_NODES.name, map(LABEL_KEY, "*", PROPERTIES_KEY, expectedProperties));
 
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
@@ -358,7 +359,7 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, map("*", map(
+                NODE_PROJECTION_KEY, map(ALL_NODES.name, map(
                     LABEL_KEY, "*",
                     PROPERTIES_KEY, map("age", map(
                         "property", "age",
@@ -488,7 +489,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, map(
-                    "*", map("type", "*",
+                    ALL_RELATIONSHIPS.name, map("type", "*",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
                         PROPERTIES_KEY, expectedProperties
@@ -517,7 +518,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, map(
-                    "*", map(
+                    ALL_RELATIONSHIPS.name, map(
                         "type", "*",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
@@ -656,7 +657,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, map(
-                    "*",
+                    ALL_RELATIONSHIPS.name,
                     map("type", "*",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",

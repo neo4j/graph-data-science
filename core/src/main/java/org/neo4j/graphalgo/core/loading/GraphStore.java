@@ -55,7 +55,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABEL_IDENTIFIERS;
 
 public final class GraphStore {
 
@@ -356,20 +355,20 @@ public final class GraphStore {
     }
 
     public Graph getGraph(RelationshipType... relationshipTypes) {
-        return getGraph(ALL_NODE_LABEL_IDENTIFIERS, Arrays.asList(relationshipTypes), Optional.empty(), 1);
+        return getGraph(nodeLabels(), Arrays.asList(relationshipTypes), Optional.empty(), 1);
     }
 
     public Graph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty) {
-        return getGraph(ALL_NODE_LABEL_IDENTIFIERS, singletonList(relationshipType), relationshipProperty, 1);
+        return getGraph(nodeLabels(), singletonList(relationshipType), relationshipProperty, 1);
     }
 
     public Graph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         validateInput(relationshipTypes, maybeRelationshipProperty);
-        return createGraph(ALL_NODE_LABEL_IDENTIFIERS, relationshipTypes, maybeRelationshipProperty, 1);
+        return createGraph(nodeLabels(), relationshipTypes, maybeRelationshipProperty, 1);
     }
 
     public Graph getGraph(
-        List<NodeLabel> nodeLabels,
+        Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty,
         int concurrency
@@ -388,9 +387,9 @@ public final class GraphStore {
                         .get(relationshipType)
                         .keySet()
                         .stream()
-                        .map(propertyKey -> createGraph(ALL_NODE_LABEL_IDENTIFIERS, relationshipType, Optional.of(propertyKey)));
+                        .map(propertyKey -> createGraph(nodeLabels(), relationshipType, Optional.of(propertyKey)));
                 } else {
-                    return Stream.of(createGraph(ALL_NODE_LABEL_IDENTIFIERS, relationshipType, Optional.empty()));
+                    return Stream.of(createGraph(nodeLabels(), relationshipType, Optional.empty()));
                 }
             })
             .collect(Collectors.toList()));
@@ -409,7 +408,7 @@ public final class GraphStore {
     }
 
     private IdMapGraph createGraph(
-        List<NodeLabel> nodeLabels,
+        Collection<NodeLabel> nodeLabels,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
@@ -417,22 +416,20 @@ public final class GraphStore {
     }
 
     private IdMapGraph createGraph(
-        List<NodeLabel> filteredLabels,
+        Collection<NodeLabel> filteredLabels,
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty,
         int concurrency
     ) {
-        boolean loadAllNodes = filteredLabels.contains(ALL_NODES);
-
-        Collection<NodeLabel> expandedLabels = loadAllNodes ? nodeLabels() : filteredLabels;
+        boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
 
         boolean containsAllNodes = true;
         BitSet combinedBitSet = BitSet.newInstance();
 
         if (this.nodes.maybeLabelInformation.isPresent() && !loadAllNodes) {
             Map<NodeLabel, BitSet> labelInformation = this.nodes.maybeLabelInformation.get();
-            validateNodeLabelFilter(expandedLabels, labelInformation);
-            expandedLabels.forEach(label -> combinedBitSet.union(labelInformation.get(label)));
+            validateNodeLabelFilter(filteredLabels, labelInformation);
+            filteredLabels.forEach(label -> combinedBitSet.union(labelInformation.get(label)));
             containsAllNodes = combinedBitSet.cardinality() == this.nodes.nodeCount();
         }
 
@@ -443,7 +440,7 @@ public final class GraphStore {
         List<IdMapGraph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> {
-                Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(expandedLabels, nodes.maybeLabelInformation);
+                Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels, nodes.maybeLabelInformation);
 
                 HugeGraph initialGraph = HugeGraph.create(
                     this.nodes,

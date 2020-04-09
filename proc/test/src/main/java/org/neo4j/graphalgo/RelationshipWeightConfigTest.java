@@ -50,7 +50,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
@@ -143,7 +143,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
         List<String> relationshipProperties = singletonList("a");
         Map<String, Object> tempConfig = map(
             "relationshipWeightProperty", "foo",
-            NODE_PROJECTION_KEY, ALL_NODES.name,
+            NODE_PROJECTION_KEY, PROJECT_ALL,
             RELATIONSHIP_PROJECTION_KEY, map(
                 "A", map(
                     "properties", relationshipProperties

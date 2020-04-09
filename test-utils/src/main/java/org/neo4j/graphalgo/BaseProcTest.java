@@ -49,8 +49,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
@@ -76,10 +75,10 @@ public class BaseProcTest extends BaseTest {
 
     protected static Map<String, Object> anonymousGraphConfig(Map<String, Object> baseMap) {
         if (!baseMap.containsKey(NODE_PROJECTION_KEY) && !baseMap.containsKey(NODE_QUERY_KEY)) {
-            baseMap.put(NODE_PROJECTION_KEY, ALL_NODES.name);
+            baseMap.put(NODE_PROJECTION_KEY, PROJECT_ALL);
         }
         if (!baseMap.containsKey(RELATIONSHIP_PROJECTION_KEY) && !baseMap.containsKey(RELATIONSHIP_QUERY_KEY)) {
-            baseMap.put(RELATIONSHIP_PROJECTION_KEY, "*");
+            baseMap.put(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL);
         }
         return baseMap;
     }

@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -32,6 +33,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 @DataClass
@@ -68,7 +70,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
         if (StringUtils.isEmpty(labelString)) {
             create(emptyMap());
         }
-        if (labelString.equals(ALL_NODES.name)) {
+        if (labelString.equals(PROJECT_ALL)) {
             return create(singletonMap(ALL_NODES, NodeProjection.all()));
         }
 
@@ -93,8 +95,20 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
     private static NodeProjections fromList(Iterable<?> items) {
         Map<NodeLabel, NodeProjection> projections = new LinkedHashMap<>();
         for (Object item : items) {
-            NodeProjections nodeProjections = fromObject(item);
-            projections.putAll(nodeProjections.projections());
+            if (item instanceof String) {
+                if (item.equals(ALL_NODES.name())) {
+                    throw new IllegalArgumentException(String.format(
+                        Locale.US,
+                        "%s is a reserved node label and my not be used",
+                        ALL_NODES.name()
+                    ));
+                }
+
+                NodeProjections nodeProjections = fromString((String) item);
+                projections.putAll(nodeProjections.projections());
+            } else {
+                throw new IllegalArgumentException("`relationshipProjection` list items must be of type `String`.");
+            }
         }
         return create(projections);
     }

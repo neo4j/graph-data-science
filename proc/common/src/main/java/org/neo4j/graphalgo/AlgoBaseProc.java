@@ -67,7 +67,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 
 public abstract class AlgoBaseProc<
@@ -173,10 +172,10 @@ public abstract class AlgoBaseProc<
 
     private GraphCreateConfig filterGraphCreateConfig(CONFIG config, GraphCreateConfig graphCreateConfig) {
         NodeProjections nodeProjections = graphCreateConfig.nodeProjections();
-        List<NodeLabel> nodeLabels = config.nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
-        if (nodeLabels.contains(ALL_NODES)) {
+        if (config.nodeLabels().contains(PROJECT_ALL)) {
             return graphCreateConfig;
         } else {
+            List<NodeLabel> nodeLabels = config.nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
             NodeProjections.Builder builder = NodeProjections.builder();
             nodeProjections
                 .projections()
@@ -235,7 +234,7 @@ public abstract class AlgoBaseProc<
             ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
             : Optional.empty();
 
-        List<NodeLabel> nodeLabels = config.nodeLabelIdentifiers();
+        Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
         Collection<RelationshipType> relationshipTypes = config.relationshipTypes().contains(PROJECT_ALL)
             ? graphStore.relationshipTypes()
             : config.relationshipTypeIdentifiers();
@@ -273,9 +272,7 @@ public abstract class AlgoBaseProc<
             return;
         }
 
-        Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers().contains(ALL_NODES)
-            ? graphStore.nodeLabels()
-            : config.nodeLabelIdentifiers();
+        Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
         if (config instanceof SeedConfig) {
             String seedProperty = ((SeedConfig) config).seedProperty();
             if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {

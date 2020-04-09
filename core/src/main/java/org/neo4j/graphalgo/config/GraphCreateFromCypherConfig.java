@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
@@ -118,7 +119,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
                 ALL_NODES,
                 NodeProjection
                     .builder()
-                    .label(ALL_NODES.name)
+                    .label(PROJECT_ALL)
                     .addPropertyMappings(PropertyMappings.of(nodeProperties))
                     .build()
             ).build();
@@ -127,12 +128,13 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
         RelationshipProjections.Builder relProjectionBuilder = RelationshipProjections.builder();
         dimensions.relationshipProjectionMappings().stream().forEach(typeMapping -> {
-            String relationshipType = typeMapping.typeName().isEmpty() ? ALL_RELATIONSHIPS.name : typeMapping.typeName();
+            String neoType = typeMapping.typeName();
+            String relationshipType = neoType.isEmpty() || neoType.equals(PROJECT_ALL) ? ALL_RELATIONSHIPS.name : neoType;
             relProjectionBuilder.putProjection(
                 RelationshipType.of(relationshipType),
                 RelationshipProjection
                     .builder()
-                    .type(relationshipType)
+                    .type(neoType)
                     .addPropertyMappings(relationshipPropertyMappings)
                     .build()
             );

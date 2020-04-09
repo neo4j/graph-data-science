@@ -50,6 +50,7 @@ import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_VALUE_KEY;
 import static org.neo4j.graphalgo.PropertyMapping.PROPERTY_KEY;
@@ -101,12 +102,12 @@ public abstract class GdsCypher {
          */
         default QueryBuilder loadEverything(Orientation orientation) {
             return this
-                .withNodeLabel("*", NodeProjection.all())
+                .withNodeLabel(ALL_NODES.name, NodeProjection.all())
                 .withRelationshipType(ALL_RELATIONSHIPS.name(), RelationshipProjection.all().withOrientation(orientation));
         }
 
         default ImplicitCreationBuildStage withAnyLabel() {
-            return withNodeLabel("*", NodeProjection.all());
+            return withNodeLabel(ALL_NODES.name, NodeProjection.all());
         }
 
         default ImplicitCreationBuildStage withNodeLabel(String label) {

@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class NodeLabel extends ElementIdentifier {
 
-    public static final NodeLabel ALL_NODES = NodeLabel.of("*");
+    public static final NodeLabel ALL_NODES = NodeLabel.of("__ALL__");
 
     public NodeLabel(String name) {
         super(name);

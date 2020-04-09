@@ -148,8 +148,7 @@ class GraphStoreTest extends BaseTest {
             1
         );
 
-        Graph nonFilteredGraph = graphStore
-            .getGraph(Collections.singletonList(ALL_NODES), graphStore.relationshipTypes(), Optional.empty(), 1);
+        Graph nonFilteredGraph = graphStore.getUnion();
 
         assertGraphEquals(filteredAllGraph, nonFilteredGraph);
     }
@@ -355,7 +354,7 @@ class GraphStoreTest extends BaseTest {
         return Stream.of(
             Arguments.of(
                 "filterAllLabels",
-                singletonList(ALL_NODES),
+                Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("Ignore")),
                 "(a {nodeProperty: 33, a: 33, b: 'NaN'}), (b {nodeProperty: 42, a: 'NaN', b: 42}), (a)-[T1]->(b)"
             ),
             Arguments.of(
