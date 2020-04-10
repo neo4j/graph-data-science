@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.util.Collections;
@@ -42,7 +41,6 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphDeleteRelationshipProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
         runQuery("CALL gds.graph.create($graphName, 'A', ['T1', { T2: { properties: 'p'}}])", params);
@@ -50,7 +48,6 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

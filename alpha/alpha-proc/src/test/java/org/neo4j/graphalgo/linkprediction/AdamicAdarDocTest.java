@@ -21,11 +21,9 @@
 package org.neo4j.graphalgo.linkprediction;
 
 import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -49,14 +47,8 @@ class AdamicAdarDocTest extends BaseProcTest {
                              " (michael)-[:WORKS_WITH]->(karin)," +
                              " (arya)-[:FRIENDS]->(karin)";
 
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(createGraph);
         registerFunctions(LinkPredictionFunc.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

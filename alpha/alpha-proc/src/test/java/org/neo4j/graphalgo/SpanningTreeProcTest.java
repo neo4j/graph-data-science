@@ -19,13 +19,17 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.SettingImpl;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -43,11 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  */
 public class SpanningTreeProcTest extends BaseProcTest {
 
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
-    }
-
     @BeforeEach
     void setup() throws Exception {
         String cypher = "CREATE(a:Node {start: true}) " +
@@ -62,12 +61,18 @@ public class SpanningTreeProcTest extends BaseProcTest {
                         "CREATE (b)-[:TYPE {cost:4.0}]->(d) " +
                         "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
                         "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
-
-        ClassLoader classLoader = SpanningTreeProcTest.class.getClassLoader();
-        File file = new File(classLoader.getResource("transport-nodes.csv").getFile());
-        db = TestDatabaseCreator.createTestDatabaseWithCustomLoadCsvRoot(file.getParent());
         runQuery(cypher);
         registerProcedures(SpanningTreeProc.class, GraphCreateProc.class);
+    }
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        ClassLoader classLoader = SpanningTreeProcTest.class.getClassLoader();
+        String root = new File(classLoader.getResource("transport-nodes.csv").getFile()).getParent();
+        Path fileRoot = (((SettingImpl<Path>) GraphDatabaseSettings.load_csv_file_url_root)).parse(root);
+        builder.setConfig(GraphDatabaseSettings.load_csv_file_url_root, fileRoot);
     }
 
     private long getStartNodeId() {

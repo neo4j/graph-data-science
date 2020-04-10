@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -72,9 +71,6 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
 
     @BeforeEach
     void setupGraph() throws Exception {
-
-        db = TestDatabaseCreator.createTestDatabase();
-
         @Language("Cypher") String cypher =
             "CREATE" +
             "  (a:Label1 {name: 'a'})" +
@@ -181,7 +177,6 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
 
     @AfterEach
     void clearCommunities() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

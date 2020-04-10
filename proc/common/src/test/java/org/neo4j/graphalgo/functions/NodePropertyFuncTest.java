@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
@@ -35,7 +34,6 @@ class NodePropertyFuncTest  extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphCreateProc.class);
         registerFunctions(NodePropertyFunc.class);
         runQuery("CREATE (n { prop: 42.0 })");
@@ -50,7 +48,6 @@ class NodePropertyFuncTest  extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

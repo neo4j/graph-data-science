@@ -21,13 +21,11 @@ package org.neo4j.graphalgo.similarity;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.functions.GetNodeFunc;
 
 import java.util.Map;
 
@@ -71,19 +69,11 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
         ", (periperi)-[:TYPE]->(portuguese) " +
         ", (periperi)-[:TYPE]->(indian) ";
 
-    private static final String NL = System.lineSeparator();
-
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ApproxNearestNeighborsProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

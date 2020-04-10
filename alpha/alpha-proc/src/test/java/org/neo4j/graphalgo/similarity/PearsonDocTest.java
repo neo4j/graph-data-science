@@ -21,13 +21,11 @@
 package org.neo4j.graphalgo.similarity;
 
 import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -76,16 +74,10 @@ class PearsonDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(PearsonProc.class);
         registerFunctions(GetNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
         registerAggregationFunctions(SimilaritiesFunc.class);
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

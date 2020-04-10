@@ -36,14 +36,8 @@ class DegreeCentralityProcIssue848Test extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
         registerProcedures(DegreeCentralityProc.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

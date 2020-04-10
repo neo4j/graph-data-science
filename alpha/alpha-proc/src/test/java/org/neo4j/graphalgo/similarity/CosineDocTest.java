@@ -72,15 +72,9 @@ class CosineDocTest extends BaseProcTest {
                              "CREATE (karin)-[:LIKES {score: 7}]->(italian)" +
                              "CREATE (karin)-[:LIKES {score: 10}]->(portuguese)";
 
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(createGraph);
         registerProcedures(CosineProc.class, GraphCreateProc.class);
         registerFunctions(GetNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

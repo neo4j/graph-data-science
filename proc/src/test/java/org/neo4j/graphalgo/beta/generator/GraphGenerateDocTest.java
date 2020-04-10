@@ -25,7 +25,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 
@@ -37,13 +36,11 @@ final class GraphGenerateDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphGenerateProc.class);
     }
 
     @AfterEach
     void clearCommunities() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

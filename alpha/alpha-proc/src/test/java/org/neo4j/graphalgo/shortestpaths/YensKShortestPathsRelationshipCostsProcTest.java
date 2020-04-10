@@ -43,7 +43,6 @@ class YensKShortestPathsRelationshipCostsProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -54,11 +53,6 @@ class YensKShortestPathsRelationshipCostsProcTest extends BaseProcTest {
 
         runQuery(cypher);
         registerProcedures(KShortestPathsProc.class);
-    }
-
-    @AfterEach
-    void teardownGraph() {
-        db.shutdown();
     }
 
     @Test

@@ -122,14 +122,12 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(GraphCreateProc.class, TestProc.class);
         runQuery(DB_CYPHER);
     }
 
     @AfterEach
     void tearDown() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

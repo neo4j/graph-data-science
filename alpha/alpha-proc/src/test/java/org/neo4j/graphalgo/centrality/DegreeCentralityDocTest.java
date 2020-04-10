@@ -25,9 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphdb.Result;
 
 import java.util.stream.Stream;
@@ -56,8 +55,6 @@ public class DegreeCentralityDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-
         registerProcedures(DegreeCentralityProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);
@@ -65,7 +62,6 @@ public class DegreeCentralityDocTest extends BaseProcTest {
 
     @AfterEach
     void clearCommunities() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

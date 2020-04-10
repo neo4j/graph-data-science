@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
@@ -42,7 +41,6 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
     }
 
     private void setup(boolean runSetupQuery) throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             LabelPropagationStreamProc.class,
             PageRankStreamProc.class,
@@ -67,7 +65,6 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
 
     @AfterEach
     void shutdown() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
@@ -357,9 +354,8 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
     }
 
     @Test
-    void loadMultipleRelationshipTypesWithDifferentProjectionAndRunPageRank() throws Exception {
-        db.shutdown();
-        setup(false);
+    void loadMultipleRelationshipTypesWithDifferentProjectionAndRunPageRank() {
+        runQuery("MATCH (n) DETACH DELETE (n)");
 
         String dbQuery = "CREATE (alice:Person {name: 'Alice'})\n" +
                          "CREATE (bob:Person {name: 'Bob'})\n" +
@@ -405,9 +401,9 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
         expected = "+------------------------------+\n" +
                    "| nodeId | score               |\n" +
                    "+------------------------------+\n" +
-                   "| 0      | 0.15000000000000002 |\n" +
-                   "| 1      | 1.4087054309435185  |\n" +
-                   "| 2      | 1.3424577686004342  |\n" +
+                   "| 4      | 0.15000000000000002 |\n" +
+                   "| 5      | 1.4087054309435185  |\n" +
+                   "| 6      | 1.3424577686004342  |\n" +
                    "+------------------------------+\n" +
                    "3 rows\n";
 
@@ -418,9 +414,9 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
         expected = "+------------------------------+\n" +
                    "| nodeId | score               |\n" +
                    "+------------------------------+\n" +
-                   "| 0      | 0.33463097699113864 |\n" +
-                   "| 1      | 0.43443150687467097 |\n" +
-                   "| 2      | 0.33463097699113864 |\n" +
+                   "| 4      | 0.33463097699113864 |\n" +
+                   "| 5      | 0.43443150687467097 |\n" +
+                   "| 6      | 0.33463097699113864 |\n" +
                    "+------------------------------+\n" +
                    "3 rows\n";
 
@@ -431,9 +427,9 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
         expected = "+-----------------------------+\n" +
                    "| nodeId | score              |\n" +
                    "+-----------------------------+\n" +
-                   "| 0      | 0.5474859261652454 |\n" +
-                   "| 1      | 1.408705436484888  |\n" +
-                   "| 2      | 0.944971852330491  |\n" +
+                   "| 4      | 0.5474859261652454 |\n" +
+                   "| 5      | 1.408705436484888  |\n" +
+                   "| 6      | 0.944971852330491  |\n" +
                    "+-----------------------------+\n" +
                    "3 rows\n";
 

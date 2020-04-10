@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.shortestpaths;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
@@ -49,7 +47,6 @@ class DijkstraProcTest_152 extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Loc{name:'A'}), " +
                 "(b:Loc{name:'B'}), " +
@@ -75,11 +72,6 @@ class DijkstraProcTest_152 extends BaseProcTest {
             startNodeId = findNode(db, tx, Label.label("Loc"), "name", "A").getId();
             endNodeId = findNode(db, tx, Label.label("Loc"), "name", "F").getId();
         });
-    }
-
-    @AfterEach
-    void teardownGraph() {
-        db.shutdown();
     }
 
     @Test

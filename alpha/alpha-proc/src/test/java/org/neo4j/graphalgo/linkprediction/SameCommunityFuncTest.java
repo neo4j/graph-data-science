@@ -43,14 +43,8 @@ class SameCommunityFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerFunctions(LinkPredictionFunc.class);
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

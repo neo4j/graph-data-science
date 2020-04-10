@@ -37,8 +37,6 @@ class ConcurrencyValidationTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        // we start a non-EE database
-        db = TestDatabaseCreator.createTestDatabase();
         initDb(db, "'myG'");
     }
 
@@ -51,7 +49,6 @@ class ConcurrencyValidationTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-        db.shutdown();
     }
 
     @Test

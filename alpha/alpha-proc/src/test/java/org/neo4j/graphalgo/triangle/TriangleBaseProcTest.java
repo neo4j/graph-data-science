@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -28,7 +27,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -40,11 +38,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 abstract class TriangleBaseProcTest<CONFIG extends TriangleConfig> extends BaseProcTest {
     /**
-     *      (a)-- (b)--(d)--(e)
-     *        \T1/       \T2/
-     *        (c)   (g)  (f)
-     *          \  /T3\
-     *          (h)--(i)
+     * (a)-- (b)--(d)--(e)
+     * \T1/       \T2/
+     * (c)   (g)  (f)
+     * \  /T3\
+     * (h)--(i)
      */
     public static String dbCypher() {
         return
@@ -73,14 +71,13 @@ abstract class TriangleBaseProcTest<CONFIG extends TriangleConfig> extends BaseP
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class, TriangleCountStatsProc.class);
+        registerProcedures(
+            TriangleProc.class,
+            TriangleCountStreamProc.class,
+            TriangleCountWriteProc.class,
+            TriangleCountStatsProc.class
+        );
         runQuery(dbCypher());
-    }
-
-    @AfterEach
-    void shutdownGraph() {
-        db.shutdown();
     }
 
     abstract TriangleBaseProc<CONFIG> newInstance();
@@ -106,7 +103,10 @@ abstract class TriangleBaseProcTest<CONFIG extends TriangleConfig> extends BaseP
 
         TriangleBaseProc<CONFIG> proc = newInstance();
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> proc.validateConfigs(graphCreateFromStoreConfig, newConfig()));
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> proc.validateConfigs(graphCreateFromStoreConfig, newConfig())
+        );
 
         assertThat(ex.getMessage(), containsString("Projection for `TYPE` uses orientation `NATURAL`"));
     }

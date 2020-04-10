@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
@@ -78,14 +77,8 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ShortestPathDeltaSteppingProc.class);
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void shutdownGraph() {
-        db.shutdown();
     }
 
     @Test

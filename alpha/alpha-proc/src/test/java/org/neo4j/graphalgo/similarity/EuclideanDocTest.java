@@ -24,10 +24,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -72,8 +71,6 @@ public class EuclideanDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-
         registerProcedures(EuclideanProc.class);
         registerFunctions(GetNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
         runQuery(DB_CYPHER);
@@ -81,7 +78,6 @@ public class EuclideanDocTest extends BaseProcTest {
 
     @AfterEach
     void clearCommunities() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

@@ -55,9 +55,6 @@ public class BetweennessCentralityProcTest2 extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        ;
-
         DefaultBuilder builder = GraphBuilder.create(db)
             .setLabel("Node")
             .setRelationship(TYPE);
@@ -86,11 +83,6 @@ public class BetweennessCentralityProcTest2 extends BaseProcTest {
         registerProcedures(BetweennessCentralityProc.class);
         when(consumer.consume(anyLong(), anyDouble()))
             .thenReturn(true);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

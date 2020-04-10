@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -84,7 +83,6 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             NodeSimilarityWriteProc.class,
             NodeSimilarityStreamProc.class,
@@ -106,6 +104,11 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
                 .yields();
             runQuery(createQuery);
         });
+    }
+
+    @AfterEach
+    void teardown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     static Stream<Arguments> allGraphVariations() {
@@ -138,12 +141,6 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
                 "implicit graph - " + orientation
             )
         );
-    }
-
-    @AfterEach
-    void teardown() {
-        db.shutdown();
-        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Override

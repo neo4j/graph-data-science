@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.shortestpaths;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -84,18 +82,12 @@ final class WeightedAllShortestPathsProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
         registerProcedures(AllShortestPathsProc.class);
         runInTransaction(db, tx -> {
             startNodeId = findNode(db, tx, Label.label("Node"), "name", "s").getId();
             targetNodeId = findNode(db, tx, Label.label("Node"), "name", "x").getId();
         });
-    }
-
-    @AfterEach
-    void shutdownGraph() {
-        db.shutdown();
     }
 
     @Test

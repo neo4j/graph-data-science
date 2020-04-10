@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -82,16 +81,18 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
     @BeforeEach
     void setupGraph() throws Exception {
-
-        db = TestDatabaseCreator.createTestDatabase();
-
-        registerProcedures(WccStreamProc.class, WccWriteProc.class, WccStatsProc.class, WccMutateProc.class, GraphCreateProc.class);
+        registerProcedures(
+            WccStreamProc.class,
+            WccWriteProc.class,
+            WccStatsProc.class,
+            WccMutateProc.class,
+            GraphCreateProc.class
+        );
         runQuery(DB_CYPHER);
     }
 
     @AfterEach
     void clearCommunities() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.ArticleRankProc;
@@ -145,7 +144,6 @@ class AlphaListProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             AllShortestPathsProc.class,
             ApproxNearestNeighborsProc.class,
@@ -182,11 +180,6 @@ class AlphaListProcTest extends BaseProcTest {
             LinkPredictionFunc.class,
             SimilaritiesFunc.class
         );
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

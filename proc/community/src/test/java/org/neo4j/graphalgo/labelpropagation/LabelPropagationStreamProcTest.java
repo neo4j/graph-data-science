@@ -24,8 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -35,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,13 +68,13 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
     }
 
     @Test
-    void testStreamWithFilteredNodes() throws Exception {
-        db.shutdown();
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(GraphCreateProc.class, LabelPropagationStreamProc.class);
-
-        String queryWithIgnore = "CREATE (c:Ignore {id:12, seed: 0}) " + DB_CYPHER + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)";
-        runQuery(queryWithIgnore);
+    void testStreamWithFilteredNodes() {
+        AtomicLong nodeCount = new AtomicLong();
+        runQueryWithRowConsumer(
+            "MATCH (n) RETURN count(n) AS count",
+            row -> nodeCount.set(row.getNumber("count").longValue()));
+        runQuery("MATCH (n) DETACH DELETE n");
+        runQuery("CREATE (c:Ignore {id:12, seed: 0}) " + DB_CYPHER + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)");
 
         String graphCreateQuery = GdsCypher
             .call()
@@ -101,9 +100,9 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
 
         List<Long> actualCommunities = new ArrayList<>();
         runQueryWithRowConsumer(query, row -> {
-            int id = row.getNumber("nodeId").intValue();
+            int id = row.getNumber("nodeId").intValue() - (int) nodeCount.get();
             long community = row.getNumber("communityId").longValue();
-            actualCommunities.add(id - 1, community - 1);
+            actualCommunities.add(id - 1, community - 1 - nodeCount.get());
         });
 
         assertEquals(actualCommunities, RESULT);

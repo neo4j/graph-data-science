@@ -26,8 +26,6 @@ import org.neo4j.graphalgo.CommunityHelper;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -116,13 +114,9 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
     }
 
     @Test
-    void testStreamRunsOnLoadedGraphWithNodeLabelFilter() throws Exception {
-        db.shutdown();
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(GraphCreateProc.class, WccStreamProc.class);
-
-        String queryWithIgnore = "CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)";
-        runQuery(queryWithIgnore);
+    void testStreamRunsOnLoadedGraphWithNodeLabelFilter() {
+        runQuery("MATCH (n) DETACH DELETE n");
+        runQuery("CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)");
 
         String graphCreateQuery = GdsCypher
             .call()

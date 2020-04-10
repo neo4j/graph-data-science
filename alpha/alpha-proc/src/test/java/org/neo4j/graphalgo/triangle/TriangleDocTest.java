@@ -55,8 +55,6 @@ public class TriangleDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-
         registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);
@@ -64,7 +62,6 @@ public class TriangleDocTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

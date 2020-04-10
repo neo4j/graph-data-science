@@ -28,10 +28,9 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphdb.Label;
 
 import java.util.function.DoubleConsumer;
@@ -94,7 +93,6 @@ final class ShortestPathsProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(ShortestPathsProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
         runInTransaction(db, tx -> {
@@ -122,7 +120,6 @@ final class ShortestPathsProcTest extends BaseProcTest {
     @AfterEach
     void shutdownGraph() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-        db.shutdown();
     }
 
     @Test

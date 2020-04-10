@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
@@ -79,9 +78,6 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
 
     @BeforeEach
     void setupGraph() throws Exception {
-
-        db = TestDatabaseCreator.createTestDatabase();
-
         registerProcedures(
             LouvainStreamProc.class,
             LouvainWriteProc.class,
@@ -162,7 +158,6 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
 
     @AfterEach
     void clearCommunities() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

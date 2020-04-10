@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
@@ -44,9 +43,6 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-
-        db = TestDatabaseCreator.createTestDatabase();
-
         registerProcedures(
             AllShortestPathsProc.class,
             BetweennessCentralityProc.class,
@@ -63,13 +59,6 @@ class EmptyGraphProcTest extends BaseProcTest {
             TriangleProc.class
         );
     }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
-    }
-
-    private String graphImpl = "huge";
 
     @Test
     void testSccStream() {

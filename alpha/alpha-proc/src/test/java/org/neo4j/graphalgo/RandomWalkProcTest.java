@@ -62,14 +62,8 @@ class RandomWalkProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(RandomWalkProc.class);
         runQuery(DB_CYPHER, Collections.singletonMap("count", NODE_COUNT - 4));
-    }
-
-    @AfterEach
-    void shutdown() {
-        db.shutdown();
     }
 
     @Test

@@ -37,12 +37,14 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Arrays;
 import java.util.List;
@@ -67,10 +69,11 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     static final String TEST_GRAPH_NAME = "myGraph";
     static final String TEST_CYPHER_GRAPH_NAME = "myCypherGraph";
 
-    private static final String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.weight AS weight, n.seed AS seed";
-    private static final String relQuery = "MATCH (s)-[:X]->(t) RETURN id(s) AS source, id(t) AS target";
+    static final String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.weight AS weight, n.seed AS seed";
+    static final String relQuery = "MATCH (s)-[:X]->(t) RETURN id(s) AS source, id(t) AS target";
 
-    protected static final @Language("Cypher") String DB_CYPHER =
+    @Language("Cypher")
+    static final String DB_CYPHER =
         "CREATE" +
         "  (a:A {id: 0, seed: 42}) " +
         ", (b:B {id: 1, seed: 42}) " +
@@ -94,13 +97,6 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
 
     @BeforeEach
     void setupGraph() throws Exception {
-        setupGraph(DB_CYPHER);
-    }
-
-    protected void setupGraph(String cypher) throws Exception {
-
-        db = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
-
         registerProcedures(
             LabelPropagationStreamProc.class,
             LabelPropagationWriteProc.class,
@@ -108,8 +104,18 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
             LabelPropagationMutateProc.class,
             GraphCreateProc.class
         );
-        runQuery(cypher);
+        setupGraph(DB_CYPHER);
+    }
 
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        builder.setConfig(SettingsProxy.unlimitedCores(), true);
+    }
+
+    void setupGraph(String cypher) {
+        runQuery(cypher);
         // Create explicit graphs with both projection variants
         runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
         runQuery(String.format(
@@ -122,7 +128,6 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
 
     @AfterEach
     void clearCommunities() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

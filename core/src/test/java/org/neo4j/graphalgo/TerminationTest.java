@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.KernelTransactionsProxy;
@@ -50,14 +49,8 @@ class TerminationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(TerminateProcedure.class);
         kernelTransactions = resolveDependency(KernelTransactions.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     // terminate a transaction by its id

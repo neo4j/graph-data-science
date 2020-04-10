@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
@@ -29,7 +28,11 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphDeleteRelationshipProc;
+import org.neo4j.graphalgo.catalog.GraphDropProc;
+import org.neo4j.graphalgo.catalog.GraphExistsProc;
+import org.neo4j.graphalgo.catalog.GraphListProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
@@ -41,10 +44,6 @@ import org.neo4j.graphalgo.louvain.LouvainMutateProc;
 import org.neo4j.graphalgo.louvain.LouvainStatsProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.catalog.GraphDropProc;
-import org.neo4j.graphalgo.catalog.GraphExistsProc;
-import org.neo4j.graphalgo.catalog.GraphListProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
@@ -161,7 +160,6 @@ class ListProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphCreateProc.class,
             GraphDropProc.class,
@@ -201,11 +199,6 @@ class ListProcTest extends BaseProcTest {
             GetNodeFunc.class,
             VersionFunc.class
         );
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

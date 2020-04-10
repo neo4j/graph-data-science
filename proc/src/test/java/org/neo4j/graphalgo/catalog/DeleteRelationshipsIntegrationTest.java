@@ -65,10 +65,7 @@ public class DeleteRelationshipsIntegrationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-
         registerProcedures(GraphCreateProc.class, NodeSimilarityMutateProc.class, GraphDeleteRelationshipProc.class);
-
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher
@@ -92,7 +89,6 @@ public class DeleteRelationshipsIntegrationTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
-        db.shutdown();
     }
 
     @Test

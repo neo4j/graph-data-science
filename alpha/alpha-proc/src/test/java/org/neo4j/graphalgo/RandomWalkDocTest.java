@@ -61,7 +61,6 @@ public class RandomWalkDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(RandomWalkProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);
@@ -69,7 +68,6 @@ public class RandomWalkDocTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

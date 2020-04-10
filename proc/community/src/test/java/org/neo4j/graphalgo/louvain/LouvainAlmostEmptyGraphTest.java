@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
@@ -39,7 +38,6 @@ final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(LouvainStreamProc.class, GraphCreateProc.class);
         runQuery("CREATE (:Node)");
         runQuery(GdsCypher.call()
@@ -51,7 +49,6 @@ final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
 
     @AfterEach
     void clearCommunities() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

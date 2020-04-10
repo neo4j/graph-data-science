@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.centrality;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -53,14 +51,8 @@ class BetweennessCentralityProcTest_148 extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(BetweennessCentralityProc.class);
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     private String name(long id) {

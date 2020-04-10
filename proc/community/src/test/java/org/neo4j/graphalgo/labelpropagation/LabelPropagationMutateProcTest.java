@@ -27,10 +27,12 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -60,8 +62,6 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             ", (b)-->({ communityId: 10 }) " +
             ", (b)-->({ communityId: 11 })";
     }
-
-    private static String DB_CYPHER_FILTERED = "CREATE (x:Ignore {id: -1, communityId: null}) " + DB_CYPHER;
 
     @Override
     public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationMutateConfig>> getProcedureClazz() {
@@ -120,11 +120,13 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     }
 
     @Test
-    void testGraphMutationFiltered() throws Exception {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-        setupGraph(DB_CYPHER_FILTERED);
-        registerFunctions(NodePropertyFunc.class);
-
+    void testGraphMutationFiltered() {
+        AtomicLong nodeCount = new AtomicLong();
+        runQueryWithRowConsumer(
+            "MATCH (n) RETURN count(n) AS count",
+            row -> nodeCount.set(row.getNumber("count").longValue()));
+        runQuery("MATCH (n) DETACH DELETE n");
+        runQuery("CREATE (x:Ignore {id: -1, communityId: null}) " + DB_CYPHER);
 
         String graphName = "loadGraph";
 
@@ -148,17 +150,18 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
         runQuery(query);
 
-        double[] expectedValues = new double[] {Double.NaN, 3, 8, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+        List<Double> expectedValueList = new ArrayList<>(RESULT.size() + 1);
+        expectedValueList.add(Double.NaN);
+        RESULT.forEach(component -> expectedValueList.add((double) component + nodeCount.get() + 1));
 
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore().getUnion();
         mutatedGraph.forEachNode(nodeId -> {
-                assertEquals(
-                    mutatedGraph.nodeProperties("communityId").nodeProperty(nodeId),
-                    expectedValues[Math.toIntExact(nodeId)]
+            assertEquals(
+                    expectedValueList.get(Math.toIntExact(nodeId)),
+                    mutatedGraph.nodeProperties("communityId").nodeProperty(nodeId)
                 );
                 return true;
             }
         );
     }
-
 }

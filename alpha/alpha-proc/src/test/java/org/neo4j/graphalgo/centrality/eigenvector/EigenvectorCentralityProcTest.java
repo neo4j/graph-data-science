@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.SettingImpl;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjections;
@@ -31,13 +33,16 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.SpanningTreeProcTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Label;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -55,20 +60,20 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
     private static final Map<Long, Double> maxNormExpected = new HashMap<>();
     private static final Map<Long, Double> l2NormExpected = new HashMap<>();
     private static final Map<Long, Double> l1NormExpected = new HashMap<>();
-    public static final String EXPLICIT_GRAPH_NAME = "eigenvectorTest";
+    private static final String EXPLICIT_GRAPH_NAME = "eigenvectorTest";
 
-    @AfterEach
-    void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-        db.shutdown();
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        ClassLoader classLoader = SpanningTreeProcTest.class.getClassLoader();
+        String root = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile()).getParent();
+        Path fileRoot = (((SettingImpl<Path>) GraphDatabaseSettings.load_csv_file_url_root)).parse(root);
+        builder.setConfig(GraphDatabaseSettings.load_csv_file_url_root, fileRoot);
     }
 
     @BeforeEach
     void setup() throws Exception {
-        ClassLoader classLoader = EigenvectorCentralityProcTest.class.getClassLoader();
-        File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
-        db = TestDatabaseCreator.createTestDatabaseWithCustomLoadCsvRoot(file.getParent());
-
         runQuery("CREATE CONSTRAINT ON (c:Character)\n" +
                  "ASSERT c.id IS UNIQUE;");
 
@@ -144,6 +149,11 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         });
 
         createExplicitGraph(EXPLICIT_GRAPH_NAME);
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     private void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual) {

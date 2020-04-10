@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.shortestpaths;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Node;
 
 import java.util.ArrayList;
@@ -81,14 +79,8 @@ class ShortestPathAStarProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(DB_CYPHER);
         registerProcedures(ShortestPathAStarProc.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
+        runQuery(DB_CYPHER);
     }
 
     @Test

@@ -19,14 +19,12 @@
  */
 package org.neo4j.graphalgo.centrality;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;
@@ -60,14 +58,8 @@ class DegreeCentralityProcTest extends BaseProcTest {
         ", (a)-[:TYPE1 {foo: 2.1}]->(c)" +
         ", (a)-[:TYPE2 {foo: 7.1}]->(c)";
 
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
-    }
-
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
         registerProcedures(DegreeCentralityProc.class);
 

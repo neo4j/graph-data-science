@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -35,7 +34,6 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -51,11 +49,6 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
         registerProcedures(KSpanningTreeProc.class);
         runQuery(cypher);
-    }
-
-    @AfterEach
-    void teardownGraph() {
-        db.shutdown();
     }
 
     private long id(String name) {

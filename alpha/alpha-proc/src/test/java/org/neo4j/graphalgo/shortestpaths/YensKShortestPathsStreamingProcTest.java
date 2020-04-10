@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.shortestpaths;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
@@ -55,7 +53,6 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -73,11 +70,6 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
         runQuery(cypher);
         runQuery("MATCH (c:Node {name: 'c'}) DELETE c");
         registerProcedures(KShortestPathsProc.class);
-    }
-
-    @AfterEach
-    void teardownGraph() {
-        db.shutdown();
     }
 
     @Test

@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.wcc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
@@ -131,13 +129,9 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
     }
 
     @Test
-    void testWriteWithNodeLabelFilter() throws Exception {
-        db.shutdown();
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(GraphCreateProc.class, WccWriteProc.class);
-
-        String queryWithIgnore = "CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)";
-        runQuery(queryWithIgnore);
+    void testWriteWithNodeLabelFilter() {
+        runQuery("MATCH (n) DETACH DELETE n");
+        runQuery("CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)");
 
         String graphCreateQuery = GdsCypher
             .call()

@@ -45,19 +45,16 @@ class GraphDropProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphCreateProc.class,
             GraphExistsProc.class,
             GraphDropProc.class
         );
-
         runQuery(DB_CYPHER);
     }
 
     @AfterEach
     void tearDown() {
-        db.shutdown();
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 

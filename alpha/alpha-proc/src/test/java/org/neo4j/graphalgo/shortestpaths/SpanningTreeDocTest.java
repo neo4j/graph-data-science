@@ -53,18 +53,11 @@ class SpanningTreeDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             SpanningTreeProc.class,
             KSpanningTreeProc.class
         );
-
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

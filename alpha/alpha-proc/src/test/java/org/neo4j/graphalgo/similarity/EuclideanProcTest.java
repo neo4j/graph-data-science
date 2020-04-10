@@ -19,12 +19,13 @@
  */
 package org.neo4j.graphalgo.similarity;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.graphdb.Result;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Collections;
 import java.util.Map;
@@ -90,14 +91,15 @@ class EuclideanProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
         registerProcedures(EuclideanProc.class);
         runQuery(buildDatabaseQuery());
     }
 
-    @AfterEach
-    void teardown() {
-        db.shutdown();
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        builder.setConfig(SettingsProxy.unlimitedCores(), true);
     }
 
     private void buildRandomDB(int size) {

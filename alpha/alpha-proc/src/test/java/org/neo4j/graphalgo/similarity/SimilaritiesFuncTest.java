@@ -19,17 +19,15 @@
  */
 package org.neo4j.graphalgo.similarity;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SimilaritiesFuncTest extends BaseProcTest {
+class SimilaritiesFuncTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE (java:Skill{name:'Java'})\n" +
@@ -57,14 +55,8 @@ public class SimilaritiesFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerFunctions(SimilaritiesFunc.class);
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test
