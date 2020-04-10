@@ -19,18 +19,16 @@
  */
 package org.neo4j.graphalgo.beta.pregel.examples;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphdb.Label;
@@ -73,7 +71,6 @@ class StronglyConnectedComponentsPregelTest extends AlgoTestBase {
 
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(TEST_GRAPH);
         graph = new StoreLoaderBuilder()
             .api(db)
@@ -81,11 +78,6 @@ class StronglyConnectedComponentsPregelTest extends AlgoTestBase {
             .loadAnyRelationshipType()
             .build()
             .load(NativeFactory.class);
-    }
-
-    @AfterEach
-    void shutdown() {
-        db.shutdown();
     }
 
     @Test

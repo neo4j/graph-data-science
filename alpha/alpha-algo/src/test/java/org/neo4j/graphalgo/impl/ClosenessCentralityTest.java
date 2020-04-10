@@ -19,19 +19,17 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
-
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
@@ -79,13 +77,7 @@ class ClosenessCentralityTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraph() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void shutdown() {
-        db.shutdown();
     }
 
     private Graph graph;

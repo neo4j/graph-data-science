@@ -19,14 +19,12 @@
  */
 package org.neo4j.graphalgo.impl.spanningTree;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
@@ -65,13 +63,7 @@ class KSpanningTreeTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraph() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void shutdown() {
-        db.shutdown();
     }
 
     private Graph graph;

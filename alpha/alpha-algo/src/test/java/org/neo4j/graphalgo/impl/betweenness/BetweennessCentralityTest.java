@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.betweenness;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -28,10 +27,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -67,13 +65,7 @@ class BetweennessCentralityTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void shutdownGraphDb() {
-        db.shutdown();
     }
 
     void verifyMock(TestConsumer mock) {

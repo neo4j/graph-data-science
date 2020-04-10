@@ -59,13 +59,7 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraphDB() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void shutdownGraphDb() {
-        db.shutdown();
     }
 
     Graph loadGraph(Class<? extends GraphStoreFactory> graphImpl) {

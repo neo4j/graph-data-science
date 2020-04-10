@@ -23,15 +23,12 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
-import net.jqwik.api.constraints.LongRange;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -43,7 +40,6 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -61,7 +57,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 final class LabelPropagationTest extends AlgoTestBase {
 
@@ -86,16 +81,8 @@ final class LabelPropagationTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
     }
-
-    @AfterEach
-    void shutdownGraphDb() {
-        db.shutdown();
-    }
-
-    private final Log log = new TestLog();
 
     Graph loadGraph(Class<? extends GraphStoreFactory> graphImpl) {
         GraphLoader graphLoader;

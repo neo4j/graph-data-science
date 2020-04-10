@@ -19,12 +19,10 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.result.CentralityResult;
@@ -91,13 +89,7 @@ final class PageRankWikiTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void shutdownGraphDb() {
-        if (db != null) db.shutdown();
     }
 
     @Test

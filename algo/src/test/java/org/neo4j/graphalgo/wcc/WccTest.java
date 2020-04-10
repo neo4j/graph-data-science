@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.wcc;
 
 import com.carrotsearch.hppc.BitSet;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,14 +27,13 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
@@ -74,15 +72,9 @@ class WccTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
         int[] setSizes = new int[SETS_COUNT];
         Arrays.fill(setSizes, SET_SIZE);
         createTestGraph(setSizes);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     int communitySize() {

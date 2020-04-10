@@ -19,16 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.shortestpaths;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.compat.NodeProxy;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -111,15 +109,9 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraph() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
         runQuery(DB_CYPHER2);
         runQuery(DB_CYPHER_599);
-    }
-
-    @AfterEach
-    void teardownGraph() {
-        db.shutdown();
     }
 
     @Test

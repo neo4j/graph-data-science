@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.traverse;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
@@ -28,7 +27,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -59,7 +57,6 @@ class TraverseTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraph() {
-        db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -89,11 +86,6 @@ class TraverseTest extends AlgoTestBase {
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
             .graphStore(NativeFactory.class);
-    }
-
-    @AfterEach
-    void teardownGraph() {
-        db.shutdown();
     }
 
     private long id(String name) {

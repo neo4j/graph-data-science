@@ -19,15 +19,12 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
@@ -71,16 +68,6 @@ class DegreesTest extends AlgoTestBase {
         ", (c)-[:TYPE]->(a)" +
         ", (b)-[:TYPE]->(c)" +
         ", (c)-[:TYPE]->(b)";
-
-    @BeforeEach
-    void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
-    }
-
-    @AfterEach
-    void clearDb() {
-        db.shutdown();
-    }
 
     private Graph graph;
 

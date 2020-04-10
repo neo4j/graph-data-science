@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Node;
@@ -91,7 +89,6 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
 
                 " (x)-[:TYPE {cost:2}]->(s)"; // create cycle
 
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(cypher);
 
         head = getNode("s").getId();
@@ -104,11 +101,6 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
             .graph(NativeFactory.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

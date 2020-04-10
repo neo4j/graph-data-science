@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.impl.shortestpaths;
 
 import com.carrotsearch.hppc.procedures.IntProcedure;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
@@ -29,7 +28,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -76,8 +74,6 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
 
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-
         runQuery(DB_CYPHER);
 
         graphStore = new StoreLoaderBuilder()
@@ -89,12 +85,6 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
             .graphStore(NativeFactory.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
-        graphStore = null;
     }
 
     private long id(String name) {

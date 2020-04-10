@@ -20,18 +20,16 @@
 package org.neo4j.graphalgo.wcc;
 
 import com.carrotsearch.hppc.BitSet;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -60,7 +58,6 @@ class IncrementalWccTest extends AlgoTestBase {
      */
     @BeforeEach
     void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
         runInTransaction(db, tx -> {
             for (int i = 0; i < COMMUNITY_COUNT; i = i + 2) {
                 long community1 = createLineGraph(db, tx);
@@ -68,11 +65,6 @@ class IncrementalWccTest extends AlgoTestBase {
                 createConnection(db, tx, community1, community2);
             }
         });
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     private static void createConnection(

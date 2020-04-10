@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.modularity;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,7 +29,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -73,13 +71,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void shutdownGraphDb() {
-        db.shutdown();
     }
 
     @Test

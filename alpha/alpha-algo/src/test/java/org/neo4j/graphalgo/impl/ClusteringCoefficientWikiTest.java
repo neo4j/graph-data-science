@@ -19,16 +19,14 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 
@@ -55,8 +53,6 @@ class ClusteringCoefficientWikiTest extends AlgoTestBase {
 
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -78,12 +74,6 @@ class ClusteringCoefficientWikiTest extends AlgoTestBase {
             .build()
             .graph(NativeFactory.class);
     }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
-    }
-
 
     @Test
     void test() {

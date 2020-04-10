@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.wcc;
 
 import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -31,11 +30,10 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
@@ -72,13 +70,7 @@ class WccThresholdTest extends AlgoTestBase {
             ",(nF)-[:TYPE]->(nG)" +
             // {H, I}
             ",(nH)-[:TYPE]->(nI)";
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(cypher);
-    }
-
-    @AfterEach
-    void teardown() {
-        db.shutdown();
     }
 
     @ParameterizedTest

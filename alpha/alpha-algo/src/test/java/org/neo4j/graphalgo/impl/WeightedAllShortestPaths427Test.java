@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -27,11 +26,10 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CostEvaluator;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
@@ -396,13 +394,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
 
     @BeforeEach
     void setupGraph() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void teardownGraph() {
-        db.shutdown();
     }
 
     @Test

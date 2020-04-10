@@ -20,13 +20,11 @@
 
 package org.neo4j.graphalgo.impl.traverse;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
@@ -67,7 +65,6 @@ class TraverseMaxCostTest extends AlgoTestBase {
     @BeforeEach
     void setup() {
         testLog = new TestLog();
-        db = TestDatabaseCreator.createTestDatabase();
         String cypher = "CREATE (a:Place {name: 'a', id:'1'})\n" +
                         "CREATE (b:Place {name: 'b', id:'2'})\n" +
                         "CREATE (c:Place {name: 'c', id:'3'})\n" +
@@ -101,11 +98,6 @@ class TraverseMaxCostTest extends AlgoTestBase {
             testLog.debug("Aggregator: " + name(s) + " -(" + (w + v) + ")-> " + name(t));
             return w + v;
         };
-    }
-
-    @AfterEach
-    void cleanup() {
-        db.shutdown();
     }
 
     @Test

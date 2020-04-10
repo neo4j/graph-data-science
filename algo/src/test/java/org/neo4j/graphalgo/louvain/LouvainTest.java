@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.louvain;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -35,8 +33,6 @@ import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.ResolvedPropertyMapping;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -54,7 +50,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -130,16 +125,6 @@ class LouvainTest extends AlgoTestBase {
         ", (k)-[:TYPE {weight: 1.0}]->(l)" +
         ", (l)-[:TYPE {weight: 1.0}]->(n)" +
         ", (m)-[:TYPE {weight: 1.0}]->(n)";
-
-    @BeforeEach
-    void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
-    }
-
-    @AfterEach
-    void shutdownGraphDb() {
-        if (db != null) db.shutdown();
-    }
 
     @AllGraphTypesTest
     void unweightedLouvain(Class<? extends GraphStoreFactory> graphImpl) {
