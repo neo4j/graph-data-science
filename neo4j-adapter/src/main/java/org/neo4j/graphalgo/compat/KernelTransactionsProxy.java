@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 

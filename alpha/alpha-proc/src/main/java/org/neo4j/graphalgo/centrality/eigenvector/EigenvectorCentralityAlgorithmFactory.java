@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 
 class EigenvectorCentralityAlgorithmFactory extends AlphaAlgorithmFactory<PageRank, EigenvectorCentralityConfig> {
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.linkprediction;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphdb.Direction;

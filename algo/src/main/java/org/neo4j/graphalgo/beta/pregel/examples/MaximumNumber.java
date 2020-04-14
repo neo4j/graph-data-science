@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.beta.pregel.examples;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 
-import java.util.Arrays;
 import java.util.Queue;
 
 public class MaximumNumber implements PregelComputation {

@@ -21,18 +21,11 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.logging.AbstractLog;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class TestProgressLogger extends TestLog implements ProgressLogger {

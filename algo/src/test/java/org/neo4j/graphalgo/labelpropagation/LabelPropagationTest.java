@@ -43,7 +43,6 @@ import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.logging.Log;
 
 import java.util.Arrays;
 import java.util.List;

@@ -31,12 +31,9 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.logging.Log;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;

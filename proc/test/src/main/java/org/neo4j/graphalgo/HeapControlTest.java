@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 
 import java.util.Optional;

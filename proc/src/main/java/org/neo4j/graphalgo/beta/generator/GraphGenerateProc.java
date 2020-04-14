@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.beta.generator;
 
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;

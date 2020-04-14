@@ -24,10 +24,7 @@ import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.NullLog;
-import org.neo4j.test.extension.ImpermanentDbmsExtension;
-import org.neo4j.test.extension.Inject;
 
 import java.util.function.Consumer;
 
