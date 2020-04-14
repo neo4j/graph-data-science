@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,6 +32,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.beta.k1coloring.K1ColoringProc.K1_COLORING_DESCRIPTION;
@@ -74,6 +76,11 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
     @Override
     protected StreamResult streamResult(long originalNodeId, double value) {
         return new StreamResult(originalNodeId, (long) value);
+    }
+
+    @Override
+    protected PropertyTranslator<HugeLongArray> nodePropertyTranslator(ComputationResult<K1Coloring, HugeLongArray, K1ColoringStreamConfig> computationResult) {
+        return K1ColoringProc.nodePropertyTranslator();
     }
 
     public static class StreamResult {

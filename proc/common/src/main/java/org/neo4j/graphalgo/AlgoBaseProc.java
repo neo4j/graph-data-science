@@ -408,7 +408,7 @@ public abstract class AlgoBaseProc<
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         throw new UnsupportedOperationException(
-            "Write procedures needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
+            "Procedure needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
     }
 
     protected void writeNodeProperties(

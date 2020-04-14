@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -77,6 +78,11 @@ public class PageRankStreamProc extends StreamProc<PageRank, PageRank, PageRankS
     @Override
     protected AlgorithmFactory<PageRank, PageRankStreamConfig> algorithmFactory(PageRankStreamConfig config) {
         return PageRankProc.algorithmFactory(config);
+    }
+
+    @Override
+    protected PropertyTranslator<PageRank> nodePropertyTranslator(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {
+        return PageRankProc.ScoresTranslator.INSTANCE;
     }
 
     public static final class StreamResult {
