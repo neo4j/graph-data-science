@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -201,27 +202,26 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     static String graphCreateQuery() {
+        GraphCreateFromStoreConfig config = ImmutableGraphCreateFromStoreConfig
+            .builder()
+            .graphName("")
+            .nodeProjections(NodeProjections.of())
+            .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed1", "seed2")))
+            .relationshipProjections(RelationshipProjections.builder()
+                .putProjection(
+                    ALL_RELATIONSHIPS,
+                    RelationshipProjection.builder()
+                        .type("TYPE")
+                        .orientation(Orientation.UNDIRECTED)
+                        .properties(PropertyMappings.of(
+                            Collections.singletonList(PropertyMapping.of("weight", 1D))))
+                        .build()
+                ).build()
+            ).build();
+
         return GdsCypher
             .call()
-            .implicitCreation(ImmutableGraphCreateFromStoreConfig
-                .builder()
-                .graphName("")
-                .nodeProjections(NodeProjections.of())
-                .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed1", "seed2")))
-                .relationshipProjections(RelationshipProjections.builder()
-                    .putProjection(
-                        ALL_RELATIONSHIPS,
-                        RelationshipProjection.builder()
-                            .type("TYPE")
-                            .orientation(Orientation.UNDIRECTED)
-                            .properties(PropertyMappings.of(
-                                Collections.singletonList(PropertyMapping.of("weight", 1D))))
-                            .build()
-                    )
-                    .build()
-                )
-                .build()
-            )
+            .implicitCreation(config)
             .graphCreate(TEST_GRAPH_NAME)
             .yields();
     }

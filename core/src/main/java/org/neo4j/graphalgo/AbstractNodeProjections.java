@@ -67,6 +67,8 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
     }
 
     public static NodeProjections fromString(@Nullable String labelString) {
+        validateIdentifierName(labelString);
+
         if (StringUtils.isEmpty(labelString)) {
             create(emptyMap());
         }
@@ -95,20 +97,8 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
     private static NodeProjections fromList(Iterable<?> items) {
         Map<NodeLabel, NodeProjection> projections = new LinkedHashMap<>();
         for (Object item : items) {
-            if (item instanceof String) {
-                if (item.equals(ALL_NODES.name())) {
-                    throw new IllegalArgumentException(String.format(
-                        Locale.US,
-                        "%s is a reserved node label and my not be used",
-                        ALL_NODES.name()
-                    ));
-                }
-
-                NodeProjections nodeProjections = fromString((String) item);
-                projections.putAll(nodeProjections.projections());
-            } else {
-                throw new IllegalArgumentException("`relationshipProjection` list items must be of type `String`.");
-            }
+            NodeProjections nodeProjections = fromObject(item);
+            projections.putAll(nodeProjections.projections());
         }
         return create(projections);
     }
@@ -162,5 +152,15 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
             value.put(identifier.name, projection.toObject());
         });
         return value;
+    }
+
+    private static void validateIdentifierName(String identifier) {
+        if (identifier.equals(ALL_NODES.name())) {
+            throw new IllegalArgumentException(String.format(
+                Locale.US,
+                "%s is a reserved node label and my not be used",
+                ALL_NODES.name()
+            ));
+        }
     }
 }

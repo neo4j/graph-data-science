@@ -121,7 +121,6 @@ class NodeProjectionsTest {
             actual,
             equalTo(expected)
         );
-        assertThat(actual.labelProjection(), equalTo(ALL_NODES.name));
     }
 
     @Test
