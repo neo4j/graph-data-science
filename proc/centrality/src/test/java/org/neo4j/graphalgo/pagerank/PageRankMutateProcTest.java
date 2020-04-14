@@ -33,7 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements GraphMutationTest<PageRankMutateConfig, PageRank> {
+class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements GraphMutationTest<PageRank, PageRankMutateConfig, PageRank> {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -94,7 +94,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<?, PageRank, PageRankMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRank, PageRank, PageRankMutateConfig>> getProcedureClazz() {
         return PageRankMutateProc.class;
     }
 

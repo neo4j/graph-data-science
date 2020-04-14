@@ -33,7 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMutationTest<WccMutateConfig, DisjointSetStruct> {
+class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMutationTest<Wcc, WccMutateConfig, DisjointSetStruct> {
 
     @Override
     public String mutateProperty() {
@@ -41,7 +41,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<?, DisjointSetStruct, WccMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig>> getProcedureClazz() {
         return WccMutateProc.class;
     }
 

@@ -42,10 +42,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropagationWriteConfig> implements
-    WritePropertyConfigTest<LabelPropagationWriteConfig, LabelPropagation> {
+    WritePropertyConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation> {
 
     @Override
-    public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig>> getProcedureClazz() {
         return LabelPropagationWriteProc.class;
     }
 

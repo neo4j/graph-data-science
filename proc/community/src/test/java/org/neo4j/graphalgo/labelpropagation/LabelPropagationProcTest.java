@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.IterationsConfigTest;
@@ -56,13 +57,14 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<CONFIG, LabelPropagation>,
-    SeedConfigTest<CONFIG, LabelPropagation>,
-    IterationsConfigTest<CONFIG, LabelPropagation>,
-    NodeWeightConfigTest<CONFIG, LabelPropagation>,
-    RelationshipWeightConfigTest<CONFIG, LabelPropagation>,
-    MemoryEstimateTest<CONFIG, LabelPropagation>,
-    HeapControlTest<CONFIG, LabelPropagation>
+    AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagation>,
+    SeedConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
+    ConsecutiveIdsConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
+    IterationsConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
+    NodeWeightConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
+    RelationshipWeightConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
+    MemoryEstimateTest<LabelPropagation, CONFIG, LabelPropagation>,
+    HeapControlTest<LabelPropagation, CONFIG, LabelPropagation>
 {
 
     static final List<Long> RESULT = Arrays.asList(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);

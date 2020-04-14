@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements GraphMutationTest<LabelPropagationMutateConfig, LabelPropagation> {
+public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements GraphMutationTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagation> {
 
     @Override
     public String mutateProperty() {
@@ -64,7 +64,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig>> getProcedureClazz() {
         return LabelPropagationMutateProc.class;
     }
 

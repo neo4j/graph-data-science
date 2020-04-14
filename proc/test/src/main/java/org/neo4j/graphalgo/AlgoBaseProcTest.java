@@ -82,7 +82,7 @@ import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
  * the database returned by {@link AlgoBaseProcTest#graphDb} and
  * clears the data after each test.
  */
-public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
+public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> {
 
     String TEST_USERNAME = AuthSubject.ANONYMOUS.username();
 
@@ -91,7 +91,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    Class<? extends AlgoBaseProc<?, RESULT, CONFIG>> getProcedureClazz();
+    Class<? extends AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> getProcedureClazz();
 
     GraphDatabaseAPI graphDb();
 
@@ -107,9 +107,9 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
         return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper.toMap())));
     }
 
-    default void applyOnProcedure(Consumer<? super AlgoBaseProc<?, RESULT, CONFIG>> func) {
+    default void applyOnProcedure(Consumer<? super AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> func) {
         try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(graphDb())) {
-            AlgoBaseProc<?, RESULT, CONFIG> proc;
+            AlgoBaseProc<ALGORITHM, RESULT, CONFIG> proc;
             try {
                 proc = getProcedureClazz().getDeclaredConstructor().newInstance();
             } catch (ReflectiveOperationException e) {

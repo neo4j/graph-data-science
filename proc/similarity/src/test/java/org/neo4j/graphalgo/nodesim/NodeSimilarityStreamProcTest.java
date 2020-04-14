@@ -44,7 +44,7 @@ import static org.neo4j.graphalgo.Orientation.REVERSE;
 class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarityStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<?, NodeSimilarityResult, NodeSimilarityStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig>> getProcedureClazz() {
         return NodeSimilarityStreamProc.class;
     }
 

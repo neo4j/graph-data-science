@@ -44,10 +44,10 @@ import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 
 class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implements
-    WritePropertyConfigTest<LouvainWriteConfig, Louvain> {
+    WritePropertyConfigTest<Louvain, LouvainWriteConfig, Louvain> {
 
     @Override
-    public Class<? extends AlgoBaseProc<?, Louvain, LouvainWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainWriteConfig>> getProcedureClazz() {
         return LouvainWriteProc.class;
     }
 

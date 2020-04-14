@@ -33,7 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements GraphMutationTest<LouvainMutateConfig, Louvain> {
+public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements GraphMutationTest<Louvain, LouvainMutateConfig, Louvain> {
 
     @Override
     public String mutateProperty() {
@@ -92,7 +92,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<?, Louvain, LouvainMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainMutateConfig>> getProcedureClazz() {
         return LouvainMutateProc.class;
     }
 
