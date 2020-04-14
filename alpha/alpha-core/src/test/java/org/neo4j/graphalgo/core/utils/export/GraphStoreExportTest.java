@@ -22,14 +22,16 @@ package org.neo4j.graphalgo.core.utils.export;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import java.io.File;
 
@@ -76,12 +78,17 @@ class GraphStoreExportTest extends AlgoTestBase {
         GraphStoreExport graphStoreExport = new GraphStoreExport(inputGraphStore, config);
         graphStoreExport.runFromTests();
 
-        GraphDbApi exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
-        GraphStore outputGraphStore = loaderBuilder.api(exportDb).build().graphStore(NativeFactory.class);
+        DatabaseManagementService testDbms = new TestDatabaseManagementServiceBuilder(tempDir)
+            .setConfig(GraphDatabaseSettings.fail_on_missing_files, false)
+            .build();
+        GraphStore outputGraphStore = loaderBuilder
+            .api((GraphDatabaseAPI) testDbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
+            .build()
+            .graphStore(NativeFactory.class);
 
         assertGraphEquals(inputGraphStore.getUnion(), outputGraphStore.getUnion());
 
-        exportDb.shutdown();
+        testDbms.shutdown();
     }
 
     @Test
@@ -104,11 +111,16 @@ class GraphStoreExportTest extends AlgoTestBase {
         GraphStoreExport graphStoreExport = new GraphStoreExport(inputGraphStore, config);
         graphStoreExport.runFromTests();
 
-        GraphDbApi exportDb = TestDatabaseCreator.createEmbeddedDatabase(tempDir);
-        GraphStore outputGraphStore = loaderBuilder.api(exportDb).build().graphStore(NativeFactory.class);
+        DatabaseManagementService testDbms = new TestDatabaseManagementServiceBuilder(tempDir)
+            .setConfig(GraphDatabaseSettings.fail_on_missing_files, false)
+            .build();
+        GraphStore outputGraphStore = loaderBuilder
+            .api((GraphDatabaseAPI) testDbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
+            .build()
+            .graphStore(NativeFactory.class);
 
         assertGraphEquals(inputGraphStore.getUnion(), outputGraphStore.getUnion());
 
-        exportDb.shutdown();
+        testDbms.shutdown();
     }
 }

@@ -20,43 +20,20 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-
-import java.io.File;
 
 import static java.util.Collections.singletonList;
 
 public final class TestDatabaseCreator {
 
     public static GraphDbApi createTestDatabase() {
-        return new GraphDbApi(createDefault());
-    }
-
-    public static GraphDbApi createEmbeddedDatabase(File storeDir) {
-        return new GraphDbApi(createEmbedded(storeDir));
-    }
-
-    private static DatabaseManagementService createDefault() {
-        return builder().build();
-    }
-
-    private static DatabaseManagementService createEmbedded(File storeDir) {
-        return anyDbBuilder(storeDir)
-            .setConfig(GraphDatabaseSettings.fail_on_missing_files, false)
-            .build();
-    }
-
-    private static TestDatabaseManagementServiceBuilder builder() {
-        return anyDbBuilder(null).impermanent();
-    }
-
-    private static TestDatabaseManagementServiceBuilder anyDbBuilder(File testDir) {
-        return new TestDatabaseManagementServiceBuilder(testDir)
-            .addExtension(new ConcurrencyControllerExtension())
-            .setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"));
+        return new GraphDbApi(
+            new TestDatabaseManagementServiceBuilder()
+                .addExtension(new ConcurrencyControllerExtension())
+                .setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*")).impermanent().build()
+        );
     }
 
     private TestDatabaseCreator() {}
