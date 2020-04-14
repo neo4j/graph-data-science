@@ -23,13 +23,15 @@ import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.ast.Cell;
 import org.asciidoctor.ast.Row;
 import org.hamcrest.Matcher;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.QueryExampleConsumer;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.SetupQueryConsumer;
+import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphdb.Result;
 
 import java.io.File;
@@ -73,6 +75,11 @@ abstract class DocTestBase extends BaseProcTest {
         Class<?>[] clazzArray = new Class<?>[0];
         registerProcedures(procedures().toArray(clazzArray));
         registerFunctions(functions().toArray(clazzArray));
+    }
+
+    @AfterAll
+    static void clearLoadedGraphs() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     abstract List<Class<?>> procedures();

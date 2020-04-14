@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.AfterAll;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
@@ -73,11 +72,6 @@ public class BaseProcTest extends BaseTest {
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
         builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"));
-    }
-
-    @AfterAll
-    static void clearLoadedGraphs() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     protected static Map<String, Object> anonymousGraphConfig(Object... objects) {
