@@ -21,14 +21,12 @@
 package org.neo4j.graphalgo.similarity;
 
 import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
