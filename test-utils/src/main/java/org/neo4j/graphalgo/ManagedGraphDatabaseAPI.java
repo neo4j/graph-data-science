@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.GraphDatabaseSettings;
@@ -40,13 +40,13 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public final class GraphDbApi implements GraphDatabaseAPI {
+public final class ManagedGraphDatabaseAPI implements GraphDatabaseAPI {
     private static final String DB_NAME = GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
     private final GraphDatabaseAPI api;
     private final DatabaseManagementService dbms;
 
-    public GraphDbApi(DatabaseManagementService dbms) {
+    public ManagedGraphDatabaseAPI(DatabaseManagementService dbms) {
         this.api = (GraphDatabaseAPI) dbms.database(DB_NAME);
         this.dbms = dbms;
     }
@@ -161,9 +161,5 @@ public final class GraphDbApi implements GraphDatabaseAPI {
     @Override
     public String databaseName() {
         return api.databaseName();
-    }
-
-    public GraphDatabaseAPI api() {
-        return api;
     }
 }
