@@ -20,15 +20,13 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.LongObjectMap;
-import com.carrotsearch.hppc.cursors.ObjectCursor;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -37,12 +35,8 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
@@ -53,22 +47,21 @@ import java.util.stream.Stream;
 public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
-            .builder(IdMap.class)
-            .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
-            .rangePerGraphDimension(
-                    "Mapping from Neo4j identifiers to internal identifiers",
-                    (dimensions, concurrency) -> SparseNodeMapping.memoryEstimation(dimensions.highestNeoId(), dimensions.nodeCount()))
-            .perGraphDimension("Node Label BitSets", (dimensions, concurrency) -> {
-                Set<NodeLabel> uniqueNodeLabels = new HashSet<>();
-                Optional<LongObjectMap<List<NodeLabel>>> labelMappings = Optional.ofNullable(dimensions.labelTokenNodeLabelMapping());
-                labelMappings.ifPresent(mappings ->
-                    mappings
-                        .values()
-                        .forEach((Consumer<? super ObjectCursor<List<NodeLabel>>>) l -> uniqueNodeLabels.addAll(l.value)));
-
-                return MemoryRange.of(uniqueNodeLabels.size() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()));
-            })
-            .build();
+        .builder(IdMap.class)
+        .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
+        .rangePerGraphDimension(
+            "Mapping from Neo4j identifiers to internal identifiers",
+            (dimensions, concurrency) -> SparseNodeMapping.memoryEstimation(
+                dimensions.highestNeoId(),
+                dimensions.nodeCount()
+            )
+        )
+        .perGraphDimension(
+            "Node Label BitSets",
+            (dimensions, concurrency) ->
+                MemoryRange.of(dimensions.nodeLabels().size() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
+        )
+        .build();
 
     protected long nodeCount;
     protected HugeLongArray graphIds;

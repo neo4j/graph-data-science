@@ -30,8 +30,10 @@ import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @ValueClass
 public interface GraphDimensions {
@@ -72,6 +74,16 @@ public interface GraphDimensions {
     @Value.Default
     default RelationshipProjectionMappings relationshipProjectionMappings() {
         return RelationshipProjectionMappings.all();
+    }
+
+    default Set<NodeLabel> nodeLabels() {
+        var nodeLabels = new HashSet<NodeLabel>();
+        if (labelTokenNodeLabelMapping() != null) {
+            for (var tokenToLabels : labelTokenNodeLabelMapping()) {
+                nodeLabels.addAll(tokenToLabels.value);
+            }
+        }
+        return nodeLabels;
     }
 
     default Aggregation[] aggregations(Aggregation defaultAggregation) {
