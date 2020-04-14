@@ -24,14 +24,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.QueryRunner;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConcurrencyValidationTest extends BaseProcTest {
 
@@ -82,46 +78,5 @@ class ConcurrencyValidationTest extends BaseProcTest {
             "The configured concurrency value is too high. " +
             "The maximum allowed concurrency value is 4 but 12 was configured."
         );
-    }
-
-    @Test
-    void shouldAllowHighConcurrencyForEE() throws Exception {
-        GraphDbApi unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
-        initDb(unlimitedDb, "'myG2'");
-
-        String query = "CALL gds.testProc.test('myG2', {concurrency: 10, writeProperty: 'p'}) " +
-                       "YIELD configuration " +
-                       "RETURN configuration.concurrency AS concurrency";
-
-        QueryRunner.runQueryWithRowConsumer(unlimitedDb, query,
-            row -> assertEquals(10, row.getNumber("concurrency"))
-        );
-        unlimitedDb.shutdown();
-    }
-
-    @Test
-    void shouldAllowHighReadConcurrencyForEE() throws Exception {
-        GraphDbApi unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
-        initDb(unlimitedDb, "'myG2'");
-
-        String query = "CALL gds.graph.create('myG3', '*', '*', {readConcurrency: 12})";
-
-        QueryRunner.runQuery(unlimitedDb, query);
-        unlimitedDb.shutdown();
-    }
-
-    @Test
-    void shouldAllowHighWriteConcurrencyForEE() throws Exception {
-        GraphDbApi unlimitedDb = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
-        initDb(unlimitedDb, "'myG2'");
-
-        String query = "CALL gds.testProc.test('myG2', {writeConcurrency: 9, writeProperty: 'p'}) " +
-                       "YIELD configuration " +
-                       "RETURN configuration.writeConcurrency AS concurrency";
-
-        QueryRunner.runQueryWithRowConsumer(unlimitedDb, query,
-            row -> assertEquals(9, row.getNumber("concurrency"))
-        );
-        unlimitedDb.shutdown();
     }
 }

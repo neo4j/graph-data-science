@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphalgo.compat.GraphDbApi;
-import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
@@ -36,22 +35,12 @@ public final class TestDatabaseCreator {
         return new GraphDbApi(createDefault());
     }
 
-    public static GraphDbApi createUnlimitedConcurrencyTestDatabase() {
-        return new GraphDbApi(createUnlimited());
-    }
-
     public static GraphDbApi createEmbeddedDatabase(File storeDir) {
         return new GraphDbApi(createEmbedded(storeDir));
     }
 
     private static DatabaseManagementService createDefault() {
         return builder().build();
-    }
-
-    private static DatabaseManagementService createUnlimited() {
-        return builder()
-            .setConfig(SettingsProxy.unlimitedCores(), true)
-            .build();
     }
 
     private static DatabaseManagementService createEmbedded(File storeDir) {
