@@ -46,8 +46,8 @@ allprojects {
         }
 
         tasks.withType(JavaCompile) {
-            sourceCompatibility = '1.8'
-            targetCompatibility = '1.8'
+            sourceCompatibility = JavaVersion.VERSION_11
+            targetCompatibility = JavaVersion.VERSION_11
             options.warnings = true
             options.encoding = 'UTF-8'
             options.compilerArgs += ['-parameters', '-Xlint:all,-cast,-deprecation,-processing,-serial,-try,-unchecked,-varargs']

@@ -9,8 +9,6 @@ ext {
 }
 
 description = 'Graph Data Science :: Pregel Training'
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 dependencies {
     // We depend on the proc artifact of the GDS library
