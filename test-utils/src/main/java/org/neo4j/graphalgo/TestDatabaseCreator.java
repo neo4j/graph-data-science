@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.configuration.SettingImpl;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.compat.SettingsProxy;
@@ -28,8 +27,6 @@ import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.util.UUID;
 
 import static java.util.Collections.singletonList;
 
@@ -37,10 +34,6 @@ public final class TestDatabaseCreator {
 
     public static GraphDbApi createTestDatabase() {
         return new GraphDbApi(createDefault());
-    }
-
-    public static GraphDbApi createTestDatabaseWithCustomLoadCsvRoot(String value) {
-        return new GraphDbApi(createWithCustomLoadCsvRoot(value));
     }
 
     public static GraphDbApi createUnlimitedConcurrencyTestDatabase() {
@@ -53,13 +46,6 @@ public final class TestDatabaseCreator {
 
     private static DatabaseManagementService createDefault() {
         return builder().build();
-    }
-
-    private static DatabaseManagementService createWithCustomLoadCsvRoot(String value) {
-        Path fileRoot = (((SettingImpl<Path>) GraphDatabaseSettings.load_csv_file_url_root)).parse(value);
-        return builder()
-            .setConfig(GraphDatabaseSettings.load_csv_file_url_root, fileRoot)
-            .build();
     }
 
     private static DatabaseManagementService createUnlimited() {
@@ -75,8 +61,7 @@ public final class TestDatabaseCreator {
     }
 
     private static TestDatabaseManagementServiceBuilder builder() {
-        File testDir = new File(UUID.randomUUID().toString());
-        return anyDbBuilder(testDir).impermanent();
+        return anyDbBuilder(null).impermanent();
     }
 
     private static TestDatabaseManagementServiceBuilder anyDbBuilder(File testDir) {
