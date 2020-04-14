@@ -20,15 +20,17 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
@@ -45,13 +47,21 @@ import java.util.stream.Stream;
 public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
-            .builder(IdMap.class)
-            .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
-            .rangePerGraphDimension(
-                    "Mapping from Neo4j identifiers to internal identifiers",
-                    (dimensions, concurrency) -> SparseNodeMapping.memoryEstimation(dimensions.highestNeoId(), dimensions.nodeCount()))
-        // TODO memory estimation for labelInformation
-            .build();
+        .builder(IdMap.class)
+        .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
+        .rangePerGraphDimension(
+            "Mapping from Neo4j identifiers to internal identifiers",
+            (dimensions, concurrency) -> SparseNodeMapping.memoryEstimation(
+                dimensions.highestNeoId(),
+                dimensions.nodeCount()
+            )
+        )
+        .perGraphDimension(
+            "Node Label BitSets",
+            (dimensions, concurrency) ->
+                MemoryRange.of(dimensions.nodeLabels().size() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
+        )
+        .build();
 
     protected long nodeCount;
     protected HugeLongArray graphIds;
