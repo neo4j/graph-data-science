@@ -25,16 +25,8 @@ import org.neo4j.kernel.api.query.ExecutingQuery;
 
 public final class KernelTransactionsProxy {
 
-    public static long lastTransactionIdWhenStarted(KernelTransaction ktx) {
-        return ktx.lastTransactionIdWhenStarted();
-    }
-
     public static long lastTransactionIdWhenStarted(KernelTransactionHandle ktx) {
         return ktx.lastTransactionTimestampWhenStarted();
-    }
-
-    public static void markForTermination(KernelTransaction ktx) {
-        ktx.markForTermination(Transactions.markedAsFailed());
     }
 
     public static void markForTermination(KernelTransactionHandle ktx) {
