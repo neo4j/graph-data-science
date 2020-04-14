@@ -45,6 +45,21 @@ final class ModularityOptimizationProc {
 
     }
 
+    static <CONFIG extends ModularityOptimizationConfig> PropertyTranslator<ModularityOptimization> nodePropertyTranslator(
+        AlgoBaseProc.ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computationResult
+    ) {
+        if (computationResult.config().consecutiveIds()) {
+            return new PropertyTranslator.ConsecutivePropertyTranslator<>(
+                computationResult.result(),
+                ModularityOptimizationTranslator.INSTANCE,
+                computationResult.graph().nodeCount(),
+                computationResult.tracker()
+            );
+        } else {
+            return ModularityOptimizationTranslator.INSTANCE;
+        }
+    }
+
     static final class ModularityOptimizationTranslator implements PropertyTranslator.OfLong<ModularityOptimization> {
         public static final ModularityOptimizationTranslator INSTANCE = new ModularityOptimizationTranslator();
 

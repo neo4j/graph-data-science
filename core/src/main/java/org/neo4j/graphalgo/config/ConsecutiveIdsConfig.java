@@ -20,18 +20,10 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.annotation.Configuration;
 
-public interface SeedConfig {
+public interface ConsecutiveIdsConfig {
     @Value.Default
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
-    default @Nullable String seedProperty() {
-        return null;
-    }
-
-    @Configuration.Ignore
-    default boolean isIncremental() {
-        return seedProperty() != null;
+    default boolean consecutiveIds() {
+        return false;
     }
 }

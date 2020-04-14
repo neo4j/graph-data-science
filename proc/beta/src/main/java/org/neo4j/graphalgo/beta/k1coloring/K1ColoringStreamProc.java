@@ -72,10 +72,8 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
     }
 
     @Override
-    protected StreamResult streamResult(
-        long nodeId, long originalNodeId, HugeLongArray computationResult
-    ) {
-        return new StreamResult(originalNodeId, computationResult.get(nodeId));
+    protected StreamResult streamResult(long originalNodeId, double value) {
+        return new StreamResult(originalNodeId, (long) value);
     }
 
     public static class StreamResult {

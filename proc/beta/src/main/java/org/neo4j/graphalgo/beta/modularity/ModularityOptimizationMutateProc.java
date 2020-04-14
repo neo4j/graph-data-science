@@ -60,8 +60,10 @@ public class ModularityOptimizationMutateProc extends MutateProc<ModularityOptim
     }
 
     @Override
-    protected PropertyTranslator<ModularityOptimization> nodePropertyTranslator(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig> computationResult) {
-        return ModularityOptimizationProc.ModularityOptimizationTranslator.INSTANCE;
+    protected PropertyTranslator<ModularityOptimization> nodePropertyTranslator(
+        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig> computationResult
+    ) {
+        return ModularityOptimizationProc.nodePropertyTranslator(computationResult);
     }
 
     @Override

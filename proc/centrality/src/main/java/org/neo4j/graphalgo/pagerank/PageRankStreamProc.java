@@ -60,8 +60,8 @@ public class PageRankStreamProc extends StreamProc<PageRank, PageRank, PageRankS
     }
 
     @Override
-    protected StreamResult streamResult(long nodeId, long originalNodeId, PageRank computationResult) {
-        return new StreamResult(originalNodeId, computationResult.result().score(nodeId));
+    protected StreamResult streamResult(long originalNodeId, double value) {
+        return new StreamResult(originalNodeId, value);
     }
 
     @Override

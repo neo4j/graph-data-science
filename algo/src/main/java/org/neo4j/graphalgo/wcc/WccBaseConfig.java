@@ -22,24 +22,15 @@ package org.neo4j.graphalgo.wcc;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
-public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, RelationshipWeightConfig {
-
-    @Value.Default
-    default boolean consecutiveIds() {
-        return false;
-    }
+public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, ConsecutiveIdsConfig, RelationshipWeightConfig {
 
     @Value.Default
     default double threshold() {
         return 0D;
-    }
-
-    @Configuration.Ignore
-    default boolean isIncremental() {
-        return seedProperty() != null;
     }
 
     @Value.Check

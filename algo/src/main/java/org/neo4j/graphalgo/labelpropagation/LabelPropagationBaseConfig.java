@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.labelpropagation;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
@@ -29,6 +30,7 @@ import org.neo4j.graphalgo.config.SeedConfig;
 public interface LabelPropagationBaseConfig extends
     AlgoBaseConfig,
     SeedConfig,
+    ConsecutiveIdsConfig,
     RelationshipWeightConfig,
     NodeWeightConfig,
     IterationsConfig {
@@ -37,5 +39,12 @@ public interface LabelPropagationBaseConfig extends
     @Override
     default int maxIterations() {
         return 10;
+    }
+
+    @Value.Check
+    default void validate(){
+        if (isIncremental() && consecutiveIds()) {
+            throw new IllegalArgumentException("Seeding and the `consecutiveIds` option cannot be used at the same time.");
+        }
     }
 }

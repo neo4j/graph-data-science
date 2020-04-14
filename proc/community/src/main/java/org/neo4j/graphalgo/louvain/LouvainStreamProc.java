@@ -20,10 +20,13 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,7 +36,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.louvain.LouvainProc.LOUVAIN_DESCRIPTION;
@@ -75,10 +80,29 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
     }
 
     @Override
-    protected StreamResult streamResult(long nodeId, long originalNodeId, Louvain computationResult) {
-        boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
-        long[] communities = includeIntermediateCommunities ? computationResult.getCommunities(nodeId) : null;
-        return new StreamResult(originalNodeId, communities, computationResult.getCommunity(nodeId));
+    protected Stream<StreamResult> stream(AlgoBaseProc.ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
+        Graph graph = computationResult.graph();
+
+        return LongStream
+            .range(0, graph.nodeCount())
+            .boxed()
+            .map((nodeId) -> {
+                boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
+                Louvain louvain = computationResult.result();
+                long[] communities = includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
+
+                return new StreamResult(graph.toOriginalNodeId(nodeId), communities, louvain.getCommunity(nodeId));
+            });
+    }
+
+    @Override
+    protected PropertyTranslator<Louvain> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
+        return LouvainProc.nodePropertyTranslator(computationResult, UUID.randomUUID().toString());
+    }
+
+    @Override
+    protected StreamResult streamResult(long originalNodeId, double value) {
+        throw new UnsupportedOperationException("Louvain handles result building individually.");
     }
 
     public static final class StreamResult {

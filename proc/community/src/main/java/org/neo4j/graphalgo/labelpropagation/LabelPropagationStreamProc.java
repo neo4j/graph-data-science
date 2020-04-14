@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,6 +31,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.labelpropagation.LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION;
@@ -56,8 +58,8 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
     }
 
     @Override
-    protected StreamResult streamResult(long nodeId, long originalNodeId, LabelPropagation computationResult) {
-        return new StreamResult(originalNodeId, computationResult.labels().get(nodeId));
+    protected StreamResult streamResult(long originalNodeId, double value) {
+        return new StreamResult(originalNodeId, (long) value);
     }
 
     @Override
@@ -75,6 +77,11 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
         LabelPropagationStreamConfig config
     ) {
         return new LabelPropagationFactory<>(config);
+    }
+
+    @Override
+    protected PropertyTranslator<LabelPropagation> nodePropertyTranslator(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult) {
+        return LabelPropagationProc.nodePropertyTranslator(computationResult, UUID.randomUUID().toString());
     }
 
     public static final class StreamResult {

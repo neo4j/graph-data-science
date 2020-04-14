@@ -38,21 +38,33 @@ final class LabelPropagationProc {
         AlgoBaseProc.ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult,
         String resultProperty
     ) {
-        CONFIG config = computationResult.config();
+        var config = computationResult.config();
 
-        boolean resultPropertyEqualsSeedProperty = config.seedProperty() != null && resultProperty.equals(config.seedProperty());
+        var consecutiveIds = config.consecutiveIds();
+        var isIncremental = config.isIncremental();
+        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
 
-        if (resultPropertyEqualsSeedProperty) {
-            NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
-            return new PropertyTranslator.OfLongIfChanged<>(
-                seedProperties,
-                (data, nodeId) -> data.labels().get(nodeId)
-            );
-        }
-
-        return (PropertyTranslator.OfLong<LabelPropagation>) (data, nodeId) -> data
+        PropertyTranslator.OfLong<LabelPropagation> nonSeedingTranslator = (data, nodeId) -> data
             .labels()
             .get(nodeId);
+
+        var seedingTranslator = new PropertyTranslator.OfLongIfChanged<LabelPropagation>(
+            computationResult.graph().nodeProperties(config.seedProperty()),
+            (data, nodeId) -> data.labels().get(nodeId)
+        );
+
+        if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
+            return seedingTranslator;
+        } else if (config.consecutiveIds() && !isIncremental) {
+            return new PropertyTranslator.ConsecutivePropertyTranslator<>(
+                computationResult.result(),
+                nonSeedingTranslator,
+                computationResult.graph().nodeCount(),
+                computationResult.tracker()
+            );
+        } else {
+            return nonSeedingTranslator;
+        }
     }
 
     static <PROC_RESULT, CONFIG extends LabelPropagationBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -64,10 +65,15 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
     }
 
     @Override
-    protected StreamResult streamResult(
-        long nodeId, long originalNodeId, ModularityOptimization computationResult
+    protected StreamResult streamResult(long originalNodeId, double value) {
+        return new StreamResult(originalNodeId, (long) value);
+    }
+
+    @Override
+    protected PropertyTranslator<ModularityOptimization> nodePropertyTranslator(
+        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationStreamConfig> computationResult
     ) {
-        return new StreamResult(originalNodeId, computationResult.getCommunityId(originalNodeId));
+        return ModularityOptimizationProc.nodePropertyTranslator(computationResult);
     }
 
     @Override
