@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -38,6 +37,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -173,7 +173,7 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
     }
 
     default void loadExplicitGraphWithNodeWeights(String graphName, NodeProjections nodeProjections) {
-        GraphDbApi db = TestDatabaseCreator.createTestDatabase();
+        GraphDatabaseAPI db = emptyDb();
 
         try {
             GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
@@ -198,6 +198,5 @@ public interface NodeWeightConfigTest<CONFIG extends NodeWeightConfig & AlgoBase
             .graphStore();
 
         GraphStoreCatalog.set(graphCreateConfig, graphStore);
-        db.shutdown();
     }
 }

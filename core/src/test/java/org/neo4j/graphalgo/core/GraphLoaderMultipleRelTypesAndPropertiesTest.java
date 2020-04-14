@@ -20,28 +20,25 @@
 package org.neo4j.graphalgo.core;
 
 import org.apache.commons.compress.utils.Sets;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,7 +53,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -73,7 +69,7 @@ import static org.neo4j.graphalgo.core.Aggregation.NONE;
 import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 import static org.neo4j.graphalgo.core.Aggregation.SUM;
 
-class GraphLoaderMultipleRelTypesAndPropertiesTest {
+class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -85,17 +81,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         ", (n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)" +
         ", (n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3)";
 
-    private GraphDbApi db;
-
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, DB_CYPHER);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
+        runQuery(DB_CYPHER);
     }
 
     @Test
@@ -330,9 +318,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesTest
     void multipleProperties(Class<? extends GraphStoreFactory> graphStoreFactory) {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        clearDb();
         runQuery(
-            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -345,7 +332,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (b)-[:REL {p1: 46, p2: 1341, p3: 10}]->(d)"
         );
 
-        GraphStore graphs = TestGraphLoader.from(localDb)
+        GraphStore graphs = TestGraphLoader.from(db)
             .withRelationshipProperties(
                 PropertyMapping.of("agg1", "p1", 1.0, Aggregation.NONE),
                 PropertyMapping.of("agg2", "p2", 2.0, Aggregation.NONE),
@@ -386,9 +373,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesTest
     void multiplePropertiesWithDefaultValues(Class<? extends GraphStoreFactory> graphStoreFactory) {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        clearDb();
         runQuery(
-            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -398,7 +384,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (b)-[:REL {p1: 45}]->(b)" +
             ", (b)-[:REL]->(b)"
         );
-        GraphStore graphs = TestGraphLoader.from(localDb)
+        GraphStore graphs = TestGraphLoader.from(db)
             .withRelationshipProperties(
                 PropertyMapping.of("agg1", "p1", 1.0, MIN),
                 PropertyMapping.of("agg2", "p1", 50.0, MAX),
@@ -430,9 +416,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesTest
     void multiplePropertiesWithIncompatibleAggregations(Class<? extends GraphStoreFactory> graphStoreFactory) {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        clearDb();
         runQuery(
-            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -446,7 +431,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         );
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            TestGraphLoader.from(localDb)
+            TestGraphLoader.from(db)
                 .withRelationshipProperties(
                     PropertyMapping.of("p1", "p1", 1.0, Aggregation.NONE),
                     PropertyMapping.of("p2", "p2", 2.0, SUM)
@@ -463,9 +448,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesTest
     void singlePropertyWithAggregations(Class<? extends GraphStoreFactory> graphStoreFactory) {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        clearDb();
         runQuery(
-            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -476,7 +460,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (b)-[:REL {p1: 46}]->(b)"
         );
 
-        GraphStore graphs = TestGraphLoader.from(localDb)
+        GraphStore graphs = TestGraphLoader.from(db)
             .withRelationshipProperties(
                 PropertyMapping.of("agg1", "p1", 1.0, MAX),
                 PropertyMapping.of("agg2", "p1", 2.0, MIN)
@@ -533,8 +517,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         double expectedNodeAP2,
         double expectedNodeBP2
     ) {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, "" +
+        clearDb();
+        runQuery("" +
                      "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
                      "CREATE" +
                      " (a)-[:REL {p1: 42, p2: 1337}]->(a)," +
@@ -574,9 +558,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesTest
     void multipleTypesWithSameProperty(Class<? extends GraphStoreFactory> graphStoreFactory) {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        clearDb();
         runQuery(
-            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (a)-[:REL_1 {p1: 43}]->(a)" +
@@ -585,7 +568,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (a)-[:REL_3 {p1: 44}]->(a)"
         );
 
-        GraphStore graphs = TestGraphLoader.from(localDb)
+        GraphStore graphs = TestGraphLoader.from(db)
             .withRelationshipTypes("REL_1", "REL_2", "REL_3")
             .withDefaultAggregation(MAX)
             .withRelationshipProperties(
@@ -620,9 +603,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         double expectedNodeAP2,
         double expectedNodeBP2
     ) {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
+        clearDb();
         runQuery(
-            localDb,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node) " +
@@ -632,7 +614,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
             ", (b)-[:REL {p1: 45, p2: 1340}]->(b)" +
             ", (b)-[:REL {p1: 46, p2: 1341}]->(b)"
         );
-        GraphStore graphs = TestGraphLoader.from(localDb)
+        GraphStore graphs = TestGraphLoader.from(db)
             .withRelationshipProperties(
                 PropertyMapping.of("p1", "p1", 1.0, aggregation),
                 PropertyMapping.of("p2", "p2", 2.0, aggregation)
@@ -660,9 +642,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     @AllGraphTypesTest
     void multiplePropertiesWithAggregation_SINGLE(Class<? extends GraphStoreFactory> graphStoreFactory) {
-        db = TestDatabaseCreator.createTestDatabase();
+        clearDb();
         runQuery(
-            db,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node) " +

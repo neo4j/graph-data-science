@@ -19,16 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.write.ExporterBuilder;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
@@ -43,21 +41,17 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ProgressLoggingTest {
+class ProgressLoggingTest extends BaseTest {
 
     private static final String PROPERTY = "property";
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private static GraphDbApi DB;
-
     private Graph graph;
 
-    @BeforeAll
-    static void setup() {
-        DB = TestDatabaseCreator.createTestDatabase();
-
-        GraphBuilder.create(DB)
+    @BeforeEach
+    void setup() {
+        GraphBuilder.create(db)
             .setLabel(LABEL)
             .setRelationship(RELATIONSHIP)
             .newGridBuilder()
@@ -68,17 +62,12 @@ class ProgressLoggingTest {
             .close();
     }
 
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) DB.shutdown();
-    }
-
     @Test
     void testLoad() {
         final StringWriter buffer = new StringWriter();
 
         graph = new StoreLoaderBuilder()
-            .api(DB)
+            .api(db)
             .log(testLogger(buffer))
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
@@ -94,7 +83,7 @@ class ProgressLoggingTest {
     @Test
     void testWrite() {
         graph = new StoreLoaderBuilder()
-            .api(DB)
+            .api(db)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
@@ -106,7 +95,7 @@ class ProgressLoggingTest {
         final int[] ints = new int[(int) graph.nodeCount()];
         Arrays.fill(ints, -1);
 
-        NodePropertyExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE)
+        NodePropertyExporter.of(db, graph, TerminationFlag.RUNNING_TRUE)
                 .withLog(testLogger(buffer))
                 .build()
                 .write(

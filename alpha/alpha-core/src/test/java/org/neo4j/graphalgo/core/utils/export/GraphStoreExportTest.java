@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -33,10 +33,9 @@ import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.io.File;
 
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-class GraphStoreExportTest {
+class GraphStoreExportTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -54,17 +53,9 @@ class GraphStoreExportTest {
     @TempDir
     File tempDir;
 
-    private GraphDbApi db;
-
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(db, DB_CYPHER);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

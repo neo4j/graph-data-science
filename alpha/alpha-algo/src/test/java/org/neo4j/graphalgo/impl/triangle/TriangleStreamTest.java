@@ -19,16 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
@@ -40,7 +38,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class TriangleStreamTest {
+class TriangleStreamTest extends AlgoTestBase {
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
@@ -49,13 +47,11 @@ class TriangleStreamTest {
     private static long centerId;
 
     private static Graph graph;
-    private static GraphDbApi DB;
 
-    @BeforeAll
-    static void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
+    @BeforeEach
+    void setupGraphDb() {
         RelationshipType type = RelationshipType.withName(RELATIONSHIP);
-        DefaultBuilder builder = GraphBuilder.create(DB)
+        DefaultBuilder builder = GraphBuilder.create(db)
             .setLabel(LABEL)
             .setRelationship(RELATIONSHIP)
             .newDefaultBuilder();
@@ -65,11 +61,6 @@ class TriangleStreamTest {
             .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
             .close();
         centerId = center.getId();
-    }
-
-    @AfterAll
-    static void shutdownGraphDb() {
-        if (DB != null) DB.shutdown();
     }
 
     @Test
@@ -105,7 +96,7 @@ class TriangleStreamTest {
 
     private Graph loadGraph() {
         return new StoreLoaderBuilder()
-            .api(DB)
+            .api(db)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .globalOrientation(Orientation.UNDIRECTED)

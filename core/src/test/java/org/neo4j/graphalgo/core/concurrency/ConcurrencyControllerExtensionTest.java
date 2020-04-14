@@ -19,26 +19,23 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.graphalgo.compat.SettingsProxy;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ConcurrencyControllerExtensionTest {
 
-    private GraphDbApi db;
-
-    @AfterEach
-    void reset() {
-        db.shutdown();
-    }
-
     @Test
     void shouldSetMonitorFalse() {
-        db = TestDatabaseCreator.createTestDatabase();
+        new TestDatabaseManagementServiceBuilder()
+            .addExtension(new ConcurrencyControllerExtension())
+            .impermanent()
+            .build()
+            .database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);
 
         assertFalse(ConcurrencyMonitor.instance().isUnlimited());
         assertTrue(ConcurrencyMonitor.instance().isLimited());
@@ -46,7 +43,12 @@ class ConcurrencyControllerExtensionTest {
 
     @Test
     void shouldSetMonitorTrue() {
-        db = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
+        new TestDatabaseManagementServiceBuilder()
+            .addExtension(new ConcurrencyControllerExtension())
+            .setConfig(SettingsProxy.unlimitedCores(), true)
+            .impermanent()
+            .build()
+            .database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);
 
         assertTrue(ConcurrencyMonitor.instance().isUnlimited());
         assertFalse(ConcurrencyMonitor.instance().isLimited());

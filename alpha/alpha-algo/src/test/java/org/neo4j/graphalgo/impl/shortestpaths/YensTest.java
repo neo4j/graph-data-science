@@ -65,7 +65,6 @@ class YensTest extends AlgoTestBase {
 
     @BeforeEach
     void setupGraph() {
-        db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                 "CREATE (b:Node {name:'b'})\n" +
@@ -171,7 +170,10 @@ class YensTest extends AlgoTestBase {
 
     private int id(String name) {
         final Node[] node = new Node[1];
-        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
+        runQueryWithRowConsumer(
+            "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
+            row -> node[0] = row.getNode("n")
+        );
         return Math.toIntExact(graph.toMappedNodeId(node[0].getId()));
     }
 }

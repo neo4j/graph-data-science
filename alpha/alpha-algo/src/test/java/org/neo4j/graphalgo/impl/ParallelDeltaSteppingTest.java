@@ -19,16 +19,13 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.graphbuilder.GridBuilder;
 
@@ -42,13 +39,12 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
  * against the result of several parallel computations to provoke
  * concurrency errors if any.
  */
-class ParallelDeltaSteppingTest {
+class ParallelDeltaSteppingTest extends AlgoTestBase {
 
     private static final String PROPERTY = "property";
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private static GraphDbApi db;
     private static GridBuilder gridBuilder;
     private static Graph graph;
     private static double[] reference;
@@ -56,8 +52,6 @@ class ParallelDeltaSteppingTest {
 
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-
         gridBuilder = GraphBuilder.create(db)
             .setLabel(LABEL)
             .setRelationship(RELATIONSHIP)
@@ -82,11 +76,6 @@ class ParallelDeltaSteppingTest {
             .graph(NativeFactory.class);
 
         reference = compute(1);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

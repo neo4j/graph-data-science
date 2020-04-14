@@ -355,7 +355,7 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
 
     @Test
     void loadMultipleRelationshipTypesWithDifferentProjectionAndRunPageRank() {
-        runQuery("MATCH (n) DETACH DELETE (n)");
+        clearDb();
 
         String dbQuery = "CREATE (alice:Person {name: 'Alice'})\n" +
                          "CREATE (bob:Person {name: 'Bob'})\n" +

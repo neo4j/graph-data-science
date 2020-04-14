@@ -19,24 +19,18 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Optional;
 
-class WeightedSimilarityAlgorithmTest {
-    private GraphDatabaseAPI db;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-    @BeforeEach
-    void setupGraph() {
-        db = TestDatabaseCreator.createTestDatabase();
-    }
+class WeightedSimilarityAlgorithmTest extends AlgoTestBase {
 
     @Test
     void prepareInputsShouldThrowWhenColumnMissing() {

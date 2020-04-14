@@ -19,18 +19,15 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
@@ -38,25 +35,12 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
-final class HugeGraphLoadingTest {
-
-    private GraphDbApi db;
-
-    @BeforeEach
-    void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-    }
-
-    @AfterEach
-    void teardown() {
-        db.shutdown();
-    }
+final class HugeGraphLoadingTest extends BaseTest {
 
     @Test
     void testDefaultPropertyLoading() {
@@ -171,10 +155,10 @@ final class HugeGraphLoadingTest {
 
     @Test
     void testMultipleRelationshipProjectionsOnTheSameType() {
-        runQuery(db, "CREATE" +
-                     "  (a:Node {id: 0})" +
-                     ", (b:Node {id: 1})" +
-                     ", (a)-[:TYPE]->(b)");
+        runQuery("CREATE" +
+                 "  (a:Node {id: 0})" +
+                 ", (b:Node {id: 1})" +
+                 ", (a)-[:TYPE]->(b)");
 
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)

@@ -20,23 +20,20 @@
 package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
-final class LoadingTest {
+final class LoadingTest extends BaseTest {
 
     public static final String DB_CYPHER =
         "CREATE " +
@@ -54,22 +51,13 @@ final class LoadingTest {
         ", (b)-[:TYPE2 {prop:7}]->(e)" +
         ", (a)-[:TYPE2 {prop:8}]->(e)";
 
-    private GraphDbApi db;
-
     @BeforeEach
     void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, DB_CYPHER);
-    }
-
-    @AfterEach
-    void clearDb() {
-        db.shutdown();
+        runQuery(DB_CYPHER);
     }
 
     @Test
     void testBasicLoading() {
-
         Graph graph = new StoreLoaderBuilder()
                 .api(db)
                 .executorService(Pools.DEFAULT)

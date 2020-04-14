@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
@@ -46,8 +45,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -524,12 +521,10 @@ final class NodeSimilarityTest extends AlgoTestBase {
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
     void shouldComputeToGraphWithUnusedNodesInInputGraph(Orientation orientation, int concurrency) {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        runQuery(localDb, "UNWIND range(0, 1024) AS unused CREATE (:Unused)");
-        runQuery(localDb, DB_CYPHER);
+        runQuery("UNWIND range(0, 1024) AS unused CREATE (:Unused)");
 
         Graph graph =  new StoreLoaderBuilder()
-            .api(localDb)
+            .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .globalOrientation(orientation)
@@ -555,9 +550,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
         );
 
         Graph resultGraph = similarityGraphResult.similarityGraph();
-        String expected = orientation == REVERSE ? resultString(1029, 1030, 1.00000) : resultString(
-            1025,
-            1028,
+        String expected = orientation == REVERSE ? resultString(4, 5, 1.00000) : resultString(
+            0,
+            3,
             1.00000
         );
 

@@ -95,6 +95,12 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     GraphDatabaseAPI graphDb();
 
+    default GraphDatabaseAPI emptyDb() {
+        GraphDatabaseAPI db = graphDb();
+        runQuery(db, "MATCH (n) DETACH DELETE n");
+        return db;
+    }
+
     CONFIG createConfig(CypherMapWrapper mapWrapper);
 
     void assertResultEquals(RESULT result1, RESULT result2);

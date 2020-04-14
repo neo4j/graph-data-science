@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,11 +68,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
 
     @Test
     void testStreamWithFilteredNodes() {
-        AtomicLong nodeCount = new AtomicLong();
-        runQueryWithRowConsumer(
-            "MATCH (n) RETURN count(n) AS count",
-            row -> nodeCount.set(row.getNumber("count").longValue()));
-        runQuery("MATCH (n) DETACH DELETE n");
+        long deletedNodes = clearDb();
         runQuery("CREATE (c:Ignore {id:12, seed: 0}) " + DB_CYPHER + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)");
 
         String graphCreateQuery = GdsCypher
@@ -100,9 +95,9 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
 
         List<Long> actualCommunities = new ArrayList<>();
         runQueryWithRowConsumer(query, row -> {
-            int id = row.getNumber("nodeId").intValue() - (int) nodeCount.get();
+            int id = row.getNumber("nodeId").intValue() - (int) deletedNodes;
             long community = row.getNumber("communityId").longValue();
-            actualCommunities.add(id - 1, community - 1 - nodeCount.get());
+            actualCommunities.add(id - 1, community - 1 - deletedNodes);
         });
 
         assertEquals(actualCommunities, RESULT);

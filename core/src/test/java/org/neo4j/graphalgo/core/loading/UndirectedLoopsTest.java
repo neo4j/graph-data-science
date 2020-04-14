@@ -22,20 +22,16 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
-final class UndirectedLoopsTest {
-
-    private GraphDatabaseAPI db;
+final class UndirectedLoopsTest extends BaseTest {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -56,8 +52,7 @@ final class UndirectedLoopsTest {
 
     @BeforeEach
     void setUp() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, DB_CYPHER);
+        runQuery(DB_CYPHER);
     }
 
     @Test

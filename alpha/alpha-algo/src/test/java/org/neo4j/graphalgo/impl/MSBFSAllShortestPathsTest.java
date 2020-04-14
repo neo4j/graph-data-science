@@ -19,16 +19,14 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
@@ -57,19 +55,16 @@ import static org.mockito.Mockito.verify;
  * v    v
  * (8)->(9)
  */
-class MSBFSAllShortestPathsTest {
+class MSBFSAllShortestPathsTest extends AlgoTestBase {
 
     private static final int width = 2, height = 5;
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private static GraphDbApi DB;
-
-    @BeforeAll
-    static void setup() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        GraphBuilder.create(DB)
+    @BeforeEach
+    void setup() {
+        GraphBuilder.create(db)
             .setLabel(LABEL)
             .setRelationship(RELATIONSHIP)
             .newGridBuilder()
@@ -77,15 +72,10 @@ class MSBFSAllShortestPathsTest {
             .close();
     }
 
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) DB.shutdown();
-    }
-
     @Test
     void testResults() {
         Graph graph = new StoreLoaderBuilder()
-            .api(DB)
+            .api(db)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .build()

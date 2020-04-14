@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +42,6 @@ class YensKSharedPrefixMaxDepthProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         String cypher =
             "CREATE (a:Node {name:'a'})\n" +
             "CREATE (b:Node {name:'b'})\n" +

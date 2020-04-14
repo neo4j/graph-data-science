@@ -75,21 +75,18 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     @Test
     @Timeout(value = 5)
     void shouldLoadSparseNodes() {
-        GraphDbApi largerGraph = buildGraph(PageUtil.pageSizeFor(Long.BYTES) << 1);
-        try {
-            Graph sparseGraph = load(largerGraph, l -> l.addNodeLabel("Label2"));
-            runInTransaction(largerGraph, tx -> {
-                findNodes(largerGraph, tx, Label.label("Label2"))
-                    .stream().forEach(n -> {
-                        long graphId = sparseGraph.toMappedNodeId(n.getId());
-                        assertNotEquals(-1, graphId, n + " not mapped");
-                        long neoId = sparseGraph.toOriginalNodeId(graphId);
-                        assertEquals(n.getId(), neoId, n + " mapped wrongly");
-                });
+        clearDb();
+        buildGraph(PageUtil.pageSizeFor(Long.BYTES) << 1);
+        Graph sparseGraph = load(db, l -> l.addNodeLabel("Label2"));
+        runInTransaction(db, tx -> {
+            findNodes(db, tx, Label.label("Label2"))
+                .stream().forEach(n -> {
+                long graphId = sparseGraph.toMappedNodeId(n.getId());
+                assertNotEquals(-1, graphId, n + " not mapped");
+                long neoId = sparseGraph.toOriginalNodeId(graphId);
+                assertEquals(n.getId(), neoId, n + " mapped wrongly");
             });
-        } finally {
-            largerGraph.shutdown();
-        }
+        });
     }
 
     @Test

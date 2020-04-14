@@ -19,10 +19,8 @@
  */
 package org.neo4j.graphalgo.linkprediction;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -36,19 +34,14 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.expectNodeById;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
-public class NeighborsFinderTest extends AlgoTestBase {
+class NeighborsFinderTest extends AlgoTestBase {
 
-    public static final RelationshipType FRIEND = RelationshipType.withName("FRIEND");
-    public static final RelationshipType COLLEAGUE = RelationshipType.withName("COLLEAGUE");
-    public static final RelationshipType FOLLOWS = RelationshipType.withName("FOLLOWS");
-
-    @BeforeEach
-    public void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-    }
+    private static final RelationshipType FRIEND = RelationshipType.withName("FRIEND");
+    private static final RelationshipType COLLEAGUE = RelationshipType.withName("COLLEAGUE");
+    private static final RelationshipType FOLLOWS = RelationshipType.withName("FOLLOWS");
 
     @Test
-    public void excludeDirectRelationships() {
+    void excludeDirectRelationships() {
         runInTransaction(db, tx -> {
             Node node1 = createNode(db, tx);
             Node node2 = createNode(db, tx);
@@ -67,7 +60,7 @@ public class NeighborsFinderTest extends AlgoTestBase {
     }
 
     @Test
-    public void sameNodeHasNoCommonNeighbors() {
+    void sameNodeHasNoCommonNeighbors() {
         runInTransaction(db, tx -> {
             Node node1 = createNode(db, tx);
             Node node2 = createNode(db, tx);
@@ -85,7 +78,7 @@ public class NeighborsFinderTest extends AlgoTestBase {
     }
 
     @Test
-    public void findNeighborsExcludingDirection() {
+    void findNeighborsExcludingDirection() {
         runInTransaction(db, tx -> {
             Node node1 = createNode(db, tx);
             Node node2 = createNode(db, tx);
@@ -110,7 +103,7 @@ public class NeighborsFinderTest extends AlgoTestBase {
     }
 
     @Test
-    public void findOutgoingNeighbors() {
+    void findOutgoingNeighbors() {
         runInTransaction(db, tx -> {
             Node node1 = createNode(db, tx);
             Node node2 = createNode(db, tx);
@@ -132,7 +125,7 @@ public class NeighborsFinderTest extends AlgoTestBase {
     }
 
     @Test
-    public void findIncomingNeighbors() {
+    void findIncomingNeighbors() {
         runInTransaction(db, tx -> {
             Node node1 = createNode(db, tx);
             Node node2 = createNode(db, tx);
@@ -154,7 +147,7 @@ public class NeighborsFinderTest extends AlgoTestBase {
     }
 
     @Test
-    public void findNeighborsOfSpecificRelationshipType() {
+    void findNeighborsOfSpecificRelationshipType() {
         runInTransaction(db, tx -> {
             Node node1 = createNode(db, tx);
             Node node2 = createNode(db, tx);
@@ -179,7 +172,7 @@ public class NeighborsFinderTest extends AlgoTestBase {
     }
 
     @Test
-    public void dontCountDuplicates() {
+    void dontCountDuplicates() {
         runInTransaction(db, tx -> {
             Node[] nodes = new Node[4];
             nodes[0] = createNode(db, tx);
@@ -201,7 +194,7 @@ public class NeighborsFinderTest extends AlgoTestBase {
     }
 
     @Test
-    public void otherNodeCountsAsNeighbor() {
+    void otherNodeCountsAsNeighbor() {
         runInTransaction(db, tx -> {
             Node[] nodes = new Node[2];
             nodes[0] = createNode(db, tx);
@@ -219,7 +212,7 @@ public class NeighborsFinderTest extends AlgoTestBase {
     }
 
     @Test
-    public void otherNodeCountsAsOutgoingNeighbor() {
+    void otherNodeCountsAsOutgoingNeighbor() {
         Node[] nodes = new Node[2];
         runInTransaction(db, tx -> {
             nodes[0] = createNode(db, tx);

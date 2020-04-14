@@ -93,7 +93,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
 
     private String name(long id) {
         String[] name = {""};
-        runQuery(
+        runQueryWithRowConsumer(
             String.format("MATCH (n:Node) WHERE id(n)=%d RETURN n.name as name", id),
             row -> name[0] = row.getString("name")
         );

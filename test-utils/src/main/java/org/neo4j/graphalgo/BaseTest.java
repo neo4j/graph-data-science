@@ -32,6 +32,7 @@ import org.neo4j.test.extension.ImpermanentDbmsExtension;
 import org.neo4j.test.extension.Inject;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -49,8 +50,11 @@ public abstract class BaseTest {
         builder.addExtension(new ConcurrencyControllerExtension());
     }
 
-    protected void clearDb() {
-        runQuery("MATCH (n) DETACH DELETE n");
+    protected long clearDb() {
+        var deletedNodes = new AtomicLong();
+        runQueryWithRowConsumer("MATCH (n) DETACH DELETE n RETURN count(n)",
+            row -> deletedNodes.set(row.getNumber("count(n)").longValue()));
+        return deletedNodes.get();
     }
 
     protected void runQueryWithRowConsumer(

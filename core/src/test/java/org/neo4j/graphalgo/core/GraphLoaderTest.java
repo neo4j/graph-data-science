@@ -19,27 +19,24 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 
-class GraphLoaderTest {
+class GraphLoaderTest extends BaseTest {
 
     public static final String DB_CYPHER =
         "CREATE" +
@@ -51,17 +48,9 @@ class GraphLoaderTest {
         ", (n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)" +
         ", (n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3)";
 
-    private GraphDbApi db;
-
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, DB_CYPHER);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
+        runQuery(DB_CYPHER);
     }
 
     @AllGraphTypesTest

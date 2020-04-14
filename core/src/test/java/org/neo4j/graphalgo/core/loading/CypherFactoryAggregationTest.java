@@ -19,26 +19,23 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.Aggregation;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
-import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
-class CypherFactoryAggregationTest {
+class CypherFactoryAggregationTest extends BaseTest {
 
     public static final String DB_CYPHER = "MERGE (n1 {id: 1})" +
                                            "MERGE (n2 {id: 2}) " +
@@ -46,23 +43,15 @@ class CypherFactoryAggregationTest {
                                            "CREATE (n2)-[:REL {weight: 10}]->(n1) " +
                                            "RETURN id(n1) AS id1, id(n2) AS id2";
 
-    private GraphDbApi db;
-
     private static int id1;
     private static int id2;
 
     @BeforeEach
     void setUp() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQueryWithRowConsumer(db, DB_CYPHER, row -> {
+        runQueryWithRowConsumer(DB_CYPHER, row -> {
             id1 = row.getNumber("id1").intValue();
             id2 = row.getNumber("id2").intValue();
         });
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

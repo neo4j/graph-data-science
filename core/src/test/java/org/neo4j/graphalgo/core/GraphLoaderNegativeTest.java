@@ -33,7 +33,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
         assertThrows(
             IllegalArgumentException.class,
             () -> new StoreLoaderBuilder()
-                .api(RandomGraphTestCase.db)
+                .api(db)
                 .addNodeLabel("foo")
                 .build()
                 .load(NativeFactory.class),
@@ -46,7 +46,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
         assertThrows(
             IllegalArgumentException.class,
             () -> new StoreLoaderBuilder()
-                .api(RandomGraphTestCase.db)
+                .api(db)
                 .addRelationshipType("foo")
                 .build()
                 .load(NativeFactory.class),
@@ -58,7 +58,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
     void shouldThrowForNonExistingNodeProperty() {
         assertThrows(
             IllegalArgumentException.class,
-            () -> new StoreLoaderBuilder().api(RandomGraphTestCase.db)
+            () -> new StoreLoaderBuilder().api(db)
                 .addNodeProperty(PropertyMapping.of("foo", 0.0))
                 .build().load(NativeFactory.class),
             "Node properties not found: 'foo'"

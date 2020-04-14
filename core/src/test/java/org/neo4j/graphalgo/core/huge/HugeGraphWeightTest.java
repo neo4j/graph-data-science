@@ -19,16 +19,13 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Relationship;
@@ -42,21 +39,9 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
-final class HugeGraphWeightTest {
+final class HugeGraphWeightTest extends BaseTest {
 
-    public static final RelationshipType TYPE = RelationshipType.withName("TYPE");
-
-    private GraphDbApi db;
-
-    @BeforeEach
-    void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-    }
-
-    @AfterEach
-    void teardown() {
-        db.shutdown();
-    }
+    private static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
     @Test
     void shouldLoadCorrectWeights() {

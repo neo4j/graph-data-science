@@ -135,7 +135,10 @@ final class ShortestPathDeltaSteppingTest extends AlgoTestBase {
 
     Node getNode(String name) {
         final Node[] node = new Node[1];
-        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
+        runQueryWithRowConsumer(
+            "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
+            row -> node[0] = row.getNode("n")
+        );
         return node[0];
     }
 }

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import java.util.HashSet;
 
@@ -39,7 +38,6 @@ class TriangleProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class);
         runQuery(TriangleBaseProcTest.dbCypher());
         idToName = new String[9];

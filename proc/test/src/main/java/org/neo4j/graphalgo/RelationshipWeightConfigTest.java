@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -38,6 +37,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 import java.util.List;
@@ -318,7 +318,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
     }
 
     default void loadExplicitGraphWithRelationshipWeights(String graphName, NodeProjections nodeProjections, RelationshipProjections relationshipProjections) {
-        GraphDbApi db = TestDatabaseCreator.createTestDatabase();
+        GraphDatabaseAPI db = emptyDb();
 
         try {
             GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
@@ -338,7 +338,6 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             .graphStore();
 
         GraphStoreCatalog.set(graphCreateConfig, graphStore);
-        db.shutdown();
     }
 
     default CypherMapWrapper createMinimalConfigWithFilteredNodes(CypherMapWrapper config) {

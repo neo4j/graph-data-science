@@ -26,12 +26,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.QueryRunner;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphDropProc;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -97,22 +93,21 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
             ")";
 
         int idOffset = 100;
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, NodeSimilarityStreamProc.class, GraphCreateProc.class, GraphDropProc.class);
-        QueryRunner.runQuery(localDb, "MATCH (n) DETACH DELETE n");
-        QueryRunner.runQuery(localDb, String.format("UNWIND range(1, %d) AS i CREATE (:IncrementIdSpace)", idOffset));
-        QueryRunner.runQuery(localDb, DB_CYPHER);
-        QueryRunner.runQuery(localDb, "CALL gds.graph.drop('myGraphNATURAL')");
-        QueryRunner.runQuery(localDb, graphCreate);
-        QueryRunner.runQuery(localDb, "MATCH (n:IncrementIdSpace) DELETE n");
+        long deletedNodes = clearDb();
+        registerProcedures(GraphDropProc.class);
+        runQuery(String.format("UNWIND range(1, %d) AS i CREATE (:IncrementIdSpace)", idOffset));
+        runQuery(DB_CYPHER);
+        runQuery("CALL gds.graph.drop('myGraphNATURAL')");
+        runQuery(graphCreate);
+        runQuery("MATCH (n:IncrementIdSpace) DELETE n");
 
         HashSet<String> expected = Sets.newHashSet(
-            resultString(idOffset + 0, idOffset + 1, 2 / 3.0),
-            resultString(idOffset + 0, idOffset + 2, 1 / 3.0),
-            resultString(idOffset + 1, idOffset + 2, 0.0),
-            resultString(idOffset + 1, idOffset + 0, 2 / 3.0),
-            resultString(idOffset + 2, idOffset + 0, 1 / 3.0),
-            resultString(idOffset + 2, idOffset + 1, 0.0)
+            resultString(idOffset + deletedNodes + 0, idOffset + deletedNodes + 1, 2 / 3.0),
+            resultString(idOffset + deletedNodes + 0, idOffset + deletedNodes + 2, 1 / 3.0),
+            resultString(idOffset + deletedNodes + 1, idOffset + deletedNodes + 2, 0.0),
+            resultString(idOffset + deletedNodes + 1, idOffset + deletedNodes + 0, 2 / 3.0),
+            resultString(idOffset + deletedNodes + 2, idOffset + deletedNodes + 0, 1 / 3.0),
+            resultString(idOffset + deletedNodes + 2, idOffset + deletedNodes + 1, 0.0)
         );
 
         String query = queryBuilder
@@ -122,7 +117,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
             .yields("node1", "node2", "similarity");
 
         Collection<String> result = new HashSet<>();
-        runQueryWithRowConsumer(localDb, query, row -> {
+        runQueryWithRowConsumer(query, row -> {
                 long node1 = row.getNumber("node1").longValue();
                 long node2 = row.getNumber("node2").longValue();
                 double similarity = row.getNumber("similarity").doubleValue();

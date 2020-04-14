@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -30,9 +31,7 @@ import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -82,10 +81,14 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(PageRankStreamProc.class, PageRankWriteProc.class, GraphCreateProc.class);
         runQuery(DB_CYPHER);
         expected = createExpectedResults(db);
+    }
+
+    @AfterEach
+    void cleanup() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     Map<Long, Double> createExpectedResults(final GraphDatabaseService db) {
@@ -244,55 +247,48 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
     }
 
     @Test
-    void testStreamRunsOnLoadedGraphWithNodeLabelFilter() throws Exception {
-        GraphDbApi db = TestDatabaseCreator.createTestDatabase();
-        try {
-            registerProcedures(db, GraphCreateProc.class, PageRankStreamProc.class);
+    void testStreamRunsOnLoadedGraphWithNodeLabelFilter() {
+        clearDb();
+        String queryWithIgnore = "CREATE (nXX:IgnoreAlso {nodeId: 1337}), (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(a), (a)-[:X]->(nX), (nX)-[:X]->(e), (e)-[:X]->(nX)";
+        QueryRunner.runQuery(db, queryWithIgnore);
 
-            String queryWithIgnore = "CREATE (nXX:IgnoreAlso {nodeId: 1337}), (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(a), (a)-[:X]->(nX), (nX)-[:X]->(e), (e)-[:X]->(nX)";
-            QueryRunner.runQuery(db, queryWithIgnore);
+        Map<Long, Double> expected = createExpectedResults(db);
 
-            Map<Long, Double> expected = createExpectedResults(db);
+        List<Node> startNodes = new ArrayList<>();
+        runInTransaction(db, tx -> startNodes.add(findNode(db, tx, PERSON_LABEL, "name", "John")));
 
-            List<Node> startNodes = new ArrayList<>();
-            runInTransaction(db, tx -> startNodes.add(findNode(db, tx, PERSON_LABEL, "name", "John")));
+        QueryRunner.runQuery(
+            db,
+            "CALL  gds.graph.create('personalisedGraph', " +
+            "  ['Ignore', 'Person', 'Product']," +
+            "  {" +
+            "      Product:{" +
+            "        type:'PURCHASED'," +
+            "        orientation:'UNDIRECTED'," +
+            "        aggregation: 'DEFAULT'" +
+            "      }" +
+            "  }" +
+            ")"
+        );
 
-            QueryRunner.runQuery(
-                db,
-                "CALL  gds.graph.create('personalisedGraph', " +
-                "  ['Ignore', 'Person', 'Product']," +
-                "  {" +
-                "      Product:{" +
-                "        type:'PURCHASED'," +
-                "        orientation:'UNDIRECTED'," +
-                "        aggregation: 'DEFAULT'" +
-                "      }" +
-                "  }" +
-                ")"
-            );
+        String query = GdsCypher.call().explicitCreation("personalisedGraph")
+            .algo("pageRank").streamMode()
+            .addPlaceholder("sourceNodes", "startNodes")
+            .addParameter("nodeLabels", Arrays.asList("Person", "Product"))
+            .yields("nodeId", "score");
 
-            String query = GdsCypher.call().explicitCreation("personalisedGraph")
-                .algo("pageRank").streamMode()
-                .addPlaceholder("sourceNodes", "startNodes")
-                .addParameter("nodeLabels", Arrays.asList("Person", "Product"))
-                .yields("nodeId", "score");
+        Map<Long, Double> actual = new HashMap<>();
 
-            Map<Long, Double> actual = new HashMap<>();
+        runQueryWithRowConsumer(
+            db,
+            query,
+            map("startNodes", startNodes),
+            row -> actual.put(
+                (Long) row.get("nodeId"),
+                (Double) row.get("score")
+            )
+        );
 
-            runQueryWithRowConsumer(
-                db,
-                query,
-                map("startNodes", startNodes),
-                row -> actual.put(
-                    (Long) row.get("nodeId"),
-                    (Double) row.get("score")
-                )
-            );
-
-            assertMapEqualsWithTolerance(expected, actual);
-        } finally {
-            db.shutdown();
-            GraphStoreCatalog.removeAllLoadedGraphs();
-        }
+        assertMapEqualsWithTolerance(expected, actual);
     }
 }

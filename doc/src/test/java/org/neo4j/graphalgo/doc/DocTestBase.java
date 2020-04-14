@@ -27,7 +27,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.QueryExampleConsumer;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.SetupQueryConsumer;
@@ -71,7 +70,6 @@ abstract class DocTestBase extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         Class<?>[] clazzArray = new Class<?>[0];
         registerProcedures(procedures().toArray(clazzArray));
         registerFunctions(functions().toArray(clazzArray));

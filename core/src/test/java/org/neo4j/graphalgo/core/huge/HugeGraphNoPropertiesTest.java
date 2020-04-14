@@ -19,24 +19,19 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
-final class HugeGraphNoPropertiesTest {
-
-    private GraphDbApi db;
+final class HugeGraphNoPropertiesTest extends BaseTest {
 
     private static final String DB_CYPHER =
             "CREATE " +
@@ -56,13 +51,7 @@ final class HugeGraphNoPropertiesTest {
 
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, DB_CYPHER);
-    }
-
-    @AfterEach
-    void teardown() {
-        db.shutdown();
+        runQuery(DB_CYPHER);
     }
 
     @ParameterizedTest

@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.core.write;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
@@ -38,21 +36,15 @@ import java.util.concurrent.ExecutorService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 
-class NodePropertyExporterTest {
+class NodePropertyExporterTest extends BaseTest {
 
-    private static GraphDbApi DB;
-
-    @BeforeAll
-    static void setup() {
-        DB = TestDatabaseCreator.createUnlimitedConcurrencyTestDatabase();
+    @BeforeEach
+    void setup() {
         runQuery(
-            DB,
             "CREATE " +
             "  (n1:Node {prop1: 1, prop2: 42})" +
             ", (n2:Node {prop1: 2, prop2: 42})" +
@@ -64,25 +56,20 @@ class NodePropertyExporterTest {
         );
     }
 
-    @AfterAll
-    static void tearDown() {
-        if (DB != null) DB.shutdown();
-    }
-
     @Test
     void exportSingleNodeProperty() {
-        Graph graph = new StoreLoaderBuilder().api(DB)
+        Graph graph = new StoreLoaderBuilder().api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .addNodeProperty("newProp1", "prop1", 42.0, Aggregation.NONE)
             .build()
             .graph(NativeFactory.class);
 
-        NodePropertyExporter exporter = NodePropertyExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE).build();
+        NodePropertyExporter exporter = NodePropertyExporter.of(db, graph, TerminationFlag.RUNNING_TRUE).build();
 
         exporter.write("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR);
 
-        Graph updatedGraph = new StoreLoaderBuilder().api(DB)
+        Graph updatedGraph = new StoreLoaderBuilder().api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .addNodeProperty("prop1", "prop1", 42.0, Aggregation.NONE)
@@ -105,7 +92,7 @@ class NodePropertyExporterTest {
 
     @Test
     void exportMultipleNodeProperties() {
-        Graph graph = new StoreLoaderBuilder().api(DB)
+        Graph graph = new StoreLoaderBuilder().api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .addNodeProperty("newProp1", "prop1", 42.0, Aggregation.NONE)
@@ -113,7 +100,7 @@ class NodePropertyExporterTest {
             .build()
             .graph(NativeFactory.class);
 
-        NodePropertyExporter exporter = NodePropertyExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE).build();
+        NodePropertyExporter exporter = NodePropertyExporter.of(db, graph, TerminationFlag.RUNNING_TRUE).build();
 
         List<NodePropertyExporter.NodeProperty<?>> nodeProperties = Arrays.asList(
             ImmutableNodeProperty.of("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR),
@@ -122,7 +109,7 @@ class NodePropertyExporterTest {
 
         exporter.write(nodeProperties);
 
-        Graph updatedGraph = new StoreLoaderBuilder().api(DB)
+        Graph updatedGraph = new StoreLoaderBuilder().api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .addNodeProperty("prop1", "prop1", 42.0, Aggregation.NONE)
@@ -156,13 +143,13 @@ class NodePropertyExporterTest {
 
     private void transactionTerminationTest(ExecutorService executorService) {
         TerminationFlag terminationFlag = () -> false;
-        NodePropertyExporter exporter = NodePropertyExporter.of(DB, new DirectIdMapping(3), terminationFlag)
+        NodePropertyExporter exporter = NodePropertyExporter.of(db, new DirectIdMapping(3), terminationFlag)
             .parallel(executorService, 4)
             .build();
 
         assertTransactionTermination(() -> exporter.write("foo", 42.0, new DoublePropertyTranslator()));
 
-        runQueryWithRowConsumer(DB, "MATCH (n) WHERE n.foo IS NOT NULL RETURN COUNT(*) AS count", row -> {
+        runQueryWithRowConsumer(db, "MATCH (n) WHERE n.foo IS NOT NULL RETURN COUNT(*) AS count", row -> {
             Number count = row.getNumber("count");
             assertNotNull(count);
             assertEquals(0, count.intValue());

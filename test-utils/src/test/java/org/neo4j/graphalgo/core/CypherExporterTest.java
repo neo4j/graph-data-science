@@ -19,15 +19,12 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.io.PrintWriter;
@@ -35,9 +32,7 @@ import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class CypherExporterTest {
-
-    private static GraphDbApi db;
+final class CypherExporterTest extends BaseTest {
 
     @BeforeEach
     void setup() {
@@ -52,13 +47,7 @@ final class CypherExporterTest {
                 "  (nB)-[:TYPE2]->(nC),\n" +
                 "  (nC)-[:TYPE]->(nD)";
 
-        db = TestDatabaseCreator.createTestDatabase();
-        QueryRunner.runQuery(db, createGraph);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
+        runQuery(createGraph);
     }
 
     @Test

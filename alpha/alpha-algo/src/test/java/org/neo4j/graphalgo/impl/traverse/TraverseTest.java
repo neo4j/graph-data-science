@@ -90,13 +90,16 @@ class TraverseTest extends AlgoTestBase {
 
     private long id(String name) {
         final Node[] node = new Node[1];
-        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
+        runQueryWithRowConsumer(
+            "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
+            row -> node[0] = row.getNode("n")
+        );
         return node[0].getId();
     }
 
     private String name(long id) {
         final String[] node = new String[1];
-        runQuery(
+        runQueryWithRowConsumer(
             "MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name",
             row -> node[0] = row.getString("name")
         );

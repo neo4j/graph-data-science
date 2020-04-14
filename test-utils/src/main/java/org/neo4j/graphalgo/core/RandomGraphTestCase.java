@@ -24,20 +24,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
-import org.neo4j.graphalgo.QueryRunner;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.compat.GraphDbApi;
+import org.neo4j.graphalgo.BaseTest;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
 @ExtendWith(RandomGraphTestCase.TestWatcherExtension.class)
-public abstract class RandomGraphTestCase {
+public abstract class RandomGraphTestCase extends BaseTest {
 
     private static boolean hasFailures = false;
-
-    protected static GraphDbApi db;
 
     static final int NODE_COUNT = 100;
 
@@ -64,8 +60,7 @@ public abstract class RandomGraphTestCase {
 
     @BeforeEach
     void setupGraph() {
-        db = TestDatabaseCreator.createTestDatabase();
-        db = buildGraph(NODE_COUNT);
+        buildGraph(NODE_COUNT);
     }
 
     @AfterEach
@@ -80,23 +75,20 @@ public abstract class RandomGraphTestCase {
                 System.err.println("Error exporting graph "+e.getMessage());
             }
         }
-        db.shutdown();
     }
 
-    static GraphDbApi buildGraph(int nodeCount) {
+    void buildGraph(int nodeCount) {
         String createGraph = String.format(RANDOM_GRAPH_TPL, nodeCount);
         List<String> cyphers = Arrays.asList(createGraph, RANDOM_LABELS);
 
-        final GraphDbApi db = TestDatabaseCreator.createTestDatabase();
         for (String cypher : cyphers) {
             try {
-                QueryRunner.runQuery(db, cypher);
+                runQuery(cypher);
             } catch (Exception e) {
                 markFailure();
                 throw e;
             }
         }
-        return db;
     }
 
     static void markFailure() {

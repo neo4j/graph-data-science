@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -121,11 +120,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
     @Test
     void testGraphMutationFiltered() {
-        AtomicLong nodeCount = new AtomicLong();
-        runQueryWithRowConsumer(
-            "MATCH (n) RETURN count(n) AS count",
-            row -> nodeCount.set(row.getNumber("count").longValue()));
-        runQuery("MATCH (n) DETACH DELETE n");
+        long deletedNodes = clearDb();
         runQuery("CREATE (x:Ignore {id: -1, communityId: null}) " + DB_CYPHER);
 
         String graphName = "loadGraph";
@@ -152,7 +147,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
         List<Double> expectedValueList = new ArrayList<>(RESULT.size() + 1);
         expectedValueList.add(Double.NaN);
-        RESULT.forEach(component -> expectedValueList.add((double) component + nodeCount.get() + 1));
+        RESULT.forEach(component -> expectedValueList.add((double) component + deletedNodes + 1));
 
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore().getUnion();
         mutatedGraph.forEachNode(nodeId -> {

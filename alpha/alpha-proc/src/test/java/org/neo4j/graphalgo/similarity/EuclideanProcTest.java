@@ -103,7 +103,7 @@ class EuclideanProcTest extends BaseProcTest {
     }
 
     private void buildRandomDB(int size) {
-        runQuery("MATCH (n) DETACH DELETE n");
+        clearDb();
         runQuery("UNWIND range(1,$size/10) AS _ CREATE (:Person) CREATE (:Item) ", singletonMap("size", size));
         String statement =
             "MATCH (p:Person) WITH collect(p) AS people " +

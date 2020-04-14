@@ -20,21 +20,18 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;
 
 import java.util.Collections;
@@ -43,13 +40,11 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.core.utils.TerminationFlag.RUNNING_TRUE;
 
-class RelationshipExporterTest {
+class RelationshipExporterTest extends BaseTest {
 
     private static final String NODE_QUERY_PART =
         "CREATE" +
@@ -69,17 +64,9 @@ class RelationshipExporterTest {
     private static final double PROPERTY_VALUE_IF_MISSING = 2.0;
     private static final double PROPERTY_VALUE_IF_NOT_WRITTEN = 1337.0;
 
-    private GraphDbApi db;
-
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, DB_CYPHER);
-    }
-
-    @AfterEach
-    void shutdown() {
-        db.shutdown();
+        runQuery(DB_CYPHER);
     }
 
     @Test
@@ -91,8 +78,8 @@ class RelationshipExporterTest {
 
     @Test
     void exportRelationshipsWithLongProperties() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, NODE_QUERY_PART + RELS_QUERY_PART);
+        clearDb();
+        runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
 
         GraphStore graphStore = new StoreLoaderBuilder().api(db)
             .loadAnyLabel()
@@ -125,7 +112,7 @@ class RelationshipExporterTest {
             db,
             "MATCH ()-[r:FOOBAR]->() RETURN sum(size(keys(r))) AS keyCount",
             Collections.emptyMap(),
-            (tx, row) -> assertEquals(0L, row.getNumber("keyCount").longValue())
+            row -> assertEquals(0L, row.getNumber("keyCount").longValue())
         );
 
     }
@@ -156,11 +143,11 @@ class RelationshipExporterTest {
 
     private RelationshipExporter setupExportTest(boolean includeProperties) {
         // create graph to export
-        GraphDatabaseAPI fromDb = TestDatabaseCreator.createTestDatabase();
-        runQuery(fromDb, NODE_QUERY_PART + RELS_QUERY_PART);
+        clearDb();
+        runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
 
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
-            .api(fromDb)
+            .api(db)
             .loadAnyLabel()
             .addRelationshipType("BARFOO");
         if (includeProperties) {

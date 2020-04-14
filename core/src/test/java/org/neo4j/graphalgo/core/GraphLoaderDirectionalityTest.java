@@ -19,25 +19,21 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.GraphHelper.assertRelationships;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
-class GraphLoaderDirectionalityTest {
+class GraphLoaderDirectionalityTest extends BaseTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -60,18 +56,6 @@ class GraphLoaderDirectionalityTest {
         "UNION ALL " +
         "MATCH (n)<--(m) " +
         "RETURN id(n) AS source, id(m) AS target";
-
-    private GraphDbApi db;
-
-    @BeforeEach
-    void setUp() {
-        db = TestDatabaseCreator.createTestDatabase();
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
-    }
 
     @AllGraphTypesTest
     void loadUndirected(Class<? extends GraphStoreFactory> graphImpl) {
@@ -250,7 +234,7 @@ class GraphLoaderDirectionalityTest {
         Orientation orientation,
         Aggregation aggregation
     ) {
-        runQuery(db, dbQuery);
+        runQuery(dbQuery);
 
         GraphLoader graphLoader;
 

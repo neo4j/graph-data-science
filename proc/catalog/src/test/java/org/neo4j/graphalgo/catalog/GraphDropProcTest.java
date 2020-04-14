@@ -170,8 +170,8 @@ class GraphDropProcTest extends BaseProcTest {
 
     @Test
     void removeGraphWithMultipleRelationshipTypes() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(GraphCreateProc.class, GraphExistsProc.class, GraphDropProc.class, GraphListProc.class);
+        clearDb();
+        registerProcedures(GraphListProc.class);
 
         String testGraph =
             "CREATE" +

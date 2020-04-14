@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
@@ -54,13 +53,9 @@ import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -103,22 +98,6 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 class GraphCreateProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER = "CREATE (:A {age: 2})-[:REL {weight: 55}]->(:A)";
-    private static final String DB_CYPHER_ESTIMATE =
-        "CREATE" +
-        "  (a:A {id: 0, partition: 42})" +
-        ", (b:B {id: 1, partition: 42})" +
-
-        ", (a)-[:X { weight: 1.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
-        ", (a)-[:X { weight: 1.0 }]->(:A {id: 3,  weight: 2.0, partition: 1})" +
-        ", (a)-[:X { weight: 1.0 }]->(:A {id: 4,  weight: 1.0, partition: 1})" +
-        ", (a)-[:Y { weight: 1.0 }]->(:A {id: 5,  weight: 1.0, partition: 1})" +
-        ", (a)-[:Z { weight: 1.0 }]->(:A {id: 6,  weight: 8.0, partition: 2})" +
-
-        ", (b)-[:X { weight: 42.0 }]->(:B {id: 7,  weight: 1.0, partition: 1})" +
-        ", (b)-[:X { weight: 42.0 }]->(:B {id: 8,  weight: 2.0, partition: 1})" +
-        ", (b)-[:X { weight: 42.0 }]->(:B {id: 9,  weight: 1.0, partition: 1})" +
-        ", (b)-[:Y { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
-        ", (b)-[:Z { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
 
     @BeforeEach
     void setup() throws Exception {
@@ -828,31 +807,6 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void estimateHeapPercentageForNativeProjection() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        Map<String, Object> relProjection = map(
-            "B",
-            map("type", "REL")
-        );
-        String query = "CALL gds.graph.create.estimate('*', $relProjection)";
-        double expectedPercentage = BigDecimal.valueOf(303504)
-            .divide(BigDecimal.valueOf(Runtime.getRuntime().maxMemory()), 1, RoundingMode.UP)
-            .doubleValue();
-
-        runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
-            row -> {
-                assertEquals(303552, row.getNumber("bytesMax").longValue());
-                assertEquals(303552, row.getNumber("bytesMin").longValue());
-                assertEquals(expectedPercentage, row.getNumber("heapPercentageMin").doubleValue());
-                assertEquals(expectedPercentage, row.getNumber("heapPercentageMax").doubleValue());
-            }
-        );
-    }
-
-    @Test
     void shouldFailOnTooBigGraphNative() {
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             applyOnProcedure(proc -> {
@@ -931,154 +885,6 @@ class GraphCreateProcTest extends BaseProcTest {
 
             func.accept(proc);
         }
-    }
-
-    @Test
-    void virtualEstimateHeapPercentage() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        Map<String, Object> relProjection = map(
-            "B",
-            map("type", "REL")
-        );
-        String query = "CALL gds.graph.create.estimate('*', $relProjection, {nodeCount: 1000000})";
-
-        double expectedPercentage = BigDecimal.valueOf(30190200L)
-            .divide(BigDecimal.valueOf(Runtime.getRuntime().maxMemory()), 1, RoundingMode.UP)
-            .doubleValue();
-
-        runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
-            row -> {
-                assertEquals(30315240, row.getNumber("bytesMin").longValue());
-                assertEquals(30315240, row.getNumber("bytesMax").longValue());
-                assertEquals(expectedPercentage, row.getNumber("heapPercentageMin").doubleValue());
-                assertEquals(expectedPercentage, row.getNumber("heapPercentageMax").doubleValue());
-            }
-        );
-    }
-
-    @Test
-    void computeMemoryEstimationForNativeProjectionWithProperties() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        Map<String, Object> relProjection = map(
-            "B",
-            map("type", "REL", "properties", "weight")
-        );
-        String query = "CALL gds.graph.create.estimate('*', $relProjection)";
-
-        runQueryWithRowConsumer(localDb, query, map("relProjection", relProjection),
-            row -> {
-                assertEquals(573984, row.getNumber("bytesMin").longValue());
-                assertEquals(573984, row.getNumber("bytesMax").longValue());
-            }
-        );
-    }
-
-    @Test
-    void computeMemoryEstimationForCypherProjection() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        String nodeQuery = "MATCH (n) RETURN id(n) AS id";
-        String relationshipQuery = "MATCH (n)-[:REL]->(m) RETURN id(n) AS source, id(m) AS target";
-        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery)";
-        runQueryWithRowConsumer(localDb,
-            query,
-            map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
-            row -> {
-                assertEquals(303504, row.getNumber("bytesMin").longValue());
-                assertEquals(303504, row.getNumber("bytesMax").longValue());
-            }
-        );
-    }
-
-    @Test
-    void computeMemoryEstimationForCypherProjectionWithProperties() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        String nodeQuery = "MATCH (n) RETURN id(n) AS id";
-        String relationshipQuery = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
-        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery, {relationshipProperties: 'weight'})";
-        runQueryWithRowConsumer(localDb,
-            query,
-            map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
-            row -> {
-                assertEquals(573936, row.getNumber("bytesMin").longValue());
-                assertEquals(573936, row.getNumber("bytesMax").longValue());
-            }
-        );
-    }
-
-    @Test
-    void computeMemoryEstimationForVirtualGraph() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-
-        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
-        runQueryWithRowConsumer(localDb, query,
-            row -> {
-                assertEquals(303792, row.getNumber("bytesMin").longValue());
-                assertEquals(303792, row.getNumber("bytesMax").longValue());
-                assertEquals(42, row.getNumber("nodeCount").longValue());
-                assertEquals(1337, row.getNumber("relationshipCount").longValue());
-            }
-        );
-    }
-
-    @Test
-    void computeMemoryEstimationForVirtualGraphNonEmptyGraph() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
-        runQueryWithRowConsumer(localDb, query,
-            row -> {
-                assertEquals(303792, row.getNumber("bytesMin").longValue());
-                assertEquals(303792, row.getNumber("bytesMax").longValue());
-                assertEquals(42, row.getNumber("nodeCount").longValue());
-                assertEquals(1337, row.getNumber("relationshipCount").longValue());
-            }
-        );
-    }
-
-    @Test
-    void computeMemoryEstimationForVirtualGraphWithProperties() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-
-        String query = "CALL gds.graph.create.estimate('*', {`*`: {type: '', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
-        runQueryWithRowConsumer(localDb, query,
-            row -> {
-                assertEquals(574224, row.getNumber("bytesMin").longValue());
-                assertEquals(574224, row.getNumber("bytesMax").longValue());
-            }
-        );
-    }
-
-    @Test
-    void computeMemoryEstimationForVirtualGraphWithLargeValues() throws Exception {
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 5000000000, relationshipCount: 20000000000})";
-        runQueryWithRowConsumer(localDb, query,
-            row -> {
-                assertEquals(171461586832L, row.getNumber("bytesMin").longValue());
-                assertEquals(231466207480L, row.getNumber("bytesMax").longValue());
-                assertEquals(5000000000L, row.getNumber("nodeCount").longValue());
-                assertEquals(20000000000L, row.getNumber("relationshipCount").longValue());
-            }
-        );
     }
 
     @Test
@@ -1428,80 +1234,6 @@ class GraphCreateProcTest extends BaseProcTest {
         assertGraphEquals(expectedRaboofGraph, raboofGraph);
     }
 
-    @Test
-    void multiUseLoadedGraphWithMultipleRelationships() throws Exception {
-        String graphName = "foo";
-
-        GraphDatabaseAPI localDb = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(localDb, GraphCreateProc.class, TestProc.class);
-        runQuery(localDb, DB_CYPHER_ESTIMATE, emptyMap());
-
-        String query = GdsCypher.call()
-            .withAnyLabel()
-            .withRelationshipType("X")
-            .withRelationshipType("Y")
-            .graphCreate(graphName)
-            .yields("nodeCount", "relationshipCount", "graphName");
-
-        runQueryWithRowConsumer(localDb, query, map(), resultRow -> {
-                assertEquals(12L, resultRow.getNumber("nodeCount"));
-                assertEquals(8L, resultRow.getNumber("relationshipCount"));
-                assertEquals(graphName, resultRow.getString("graphName"));
-            }
-        );
-
-        String algoQuery = "CALL gds.testProc.test('" + graphName + "', {writeProperty: 'p', relationshipTypes: $relType})";
-
-        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", Arrays.asList("X", "Y")), resultRow ->
-            assertEquals(8L, resultRow.getNumber("relationshipCount"))
-        );
-
-        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", singletonList("X")), resultRow ->
-            assertEquals(6L, resultRow.getNumber("relationshipCount"))
-        );
-
-        runQueryWithRowConsumer(localDb, algoQuery, singletonMap("relType", singletonList("Y")), resultRow ->
-            assertEquals(2L, resultRow.getNumber("relationshipCount"))
-        );
-    }
-
-    @Test
-    void silentlyDropRelsWithUnloadedNodesForCypherCreation() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(db, GraphCreateProc.class);
-        runQuery(DB_CYPHER_ESTIMATE, emptyMap());
-
-        String query = "CALL gds.graph.create.cypher(" +
-                       "'g', " +
-                       "'MATCH (n:A) Return id(n) as id', " +
-                       "'MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target'," +
-                       "{validateRelationships: false})" +
-                       "YIELD nodeCount, relationshipCount";
-
-        runQueryWithRowConsumer(query, resultRow -> {
-            assertEquals(resultRow.getNumber("nodeCount"), 6L);
-            assertEquals(resultRow.getNumber("relationshipCount"), 5L);
-        });
-    }
-
-    @Test
-    void silentlyDropRelsWithUnloadedNodes() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(db, GraphCreateProc.class);
-        runQuery(DB_CYPHER_ESTIMATE, emptyMap());
-
-        String query = GdsCypher.call()
-            .withNodeLabel("A")
-            .withAnyRelationshipType()
-            .graphCreate("'g'")
-            .yields("nodeCount", "relationshipCount");
-
-        runQueryWithRowConsumer(query, resultRow -> {
-            assertEquals(resultRow.getNumber("nodeCount"), 6L);
-            assertEquals(resultRow.getNumber("relationshipCount"), 5L);
-        });
-    }
-
     // Failure cases
 
     @ParameterizedTest(name = "projections: {0}")
@@ -1823,37 +1555,6 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphDoesNotExist(name);
-    }
-
-    @Test
-    void failCypherCreationWitIncompleteNodeQuery() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(db, GraphCreateProc.class);
-        runQuery(DB_CYPHER_ESTIMATE, emptyMap());
-
-        String query = "CALL gds.graph.create.cypher(" +
-                       "'g', " +
-                       "'MATCH (n:A) Return id(n) as id', " +
-                       "'MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target')" +
-                       "YIELD nodeCount, relationshipCount";
-
-        assertError(query, emptyMap(), "Failed to load relationship with unknown source-node id");
-    }
-
-    @Test
-    void failCreationWitIncompleteNodeQuery() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
-        registerProcedures(db, GraphCreateProc.class);
-        runQuery(DB_CYPHER_ESTIMATE, emptyMap());
-
-        String query = GdsCypher.call()
-            .withNodeLabel("A")
-            .withAnyRelationshipType()
-            .graphCreate("'g'")
-            .addParameter("validateRelationships", true)
-            .yields("nodeCount");
-
-        assertError(query, emptyMap(), "Failed to load relationship with unknown source-node id");
     }
 
     private Graph relPropertyGraph(String graphName, RelationshipType relationshipType, String property) {

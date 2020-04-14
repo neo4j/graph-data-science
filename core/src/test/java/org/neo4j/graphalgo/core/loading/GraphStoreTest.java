@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
@@ -34,9 +34,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -58,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
@@ -66,29 +63,22 @@ import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_RELATIONSHIP_TYPE_IDENTIFIERS;
 import static org.neo4j.values.storable.NumberType.FLOATING_POINT;
 
-class GraphStoreTest {
+class GraphStoreTest extends BaseTest {
 
-    public static final NodeLabel LABEL_A = NodeLabel.of("A");
-    private GraphDbApi db;
+    private static final NodeLabel LABEL_A = NodeLabel.of("A");
 
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, " CREATE (a:A {nodeProperty: 33, a: 33})" +
-                     ", (b:B {nodeProperty: 42, b: 42})" +
-                     ", (c:Ignore)" +
-                     ", (a)-[:T1 {property1: 42, property2: 1337}]->(b)" +
-                     ", (a)-[:T2 {property1: 43}]->(b)" +
-                     ", (a)-[:T3 {property2: 1338}]->(b)" +
-                     ", (a)-[:T1 {property1: 33}]->(c)" +
-                     ", (c)-[:T1 {property1: 33}]->(a)" +
-                     ", (b)-[:T1 {property1: 33}]->(c)" +
-                     ", (c)-[:T1 {property1: 33}]->(b)");
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
+        runQuery(" CREATE (a:A {nodeProperty: 33, a: 33})" +
+                 ", (b:B {nodeProperty: 42, b: 42})" +
+                 ", (c:Ignore)" +
+                 ", (a)-[:T1 {property1: 42, property2: 1337}]->(b)" +
+                 ", (a)-[:T2 {property1: 43}]->(b)" +
+                 ", (a)-[:T3 {property2: 1338}]->(b)" +
+                 ", (a)-[:T1 {property1: 33}]->(c)" +
+                 ", (c)-[:T1 {property1: 33}]->(a)" +
+                 ", (b)-[:T1 {property1: 33}]->(c)" +
+                 ", (c)-[:T1 {property1: 33}]->(b)");
     }
 
     @ParameterizedTest(name = "{0}")
@@ -200,7 +190,7 @@ class GraphStoreTest {
 
     @Test
     void testRemoveNodeProperty() {
-        runQuery(db, "CREATE (a {nodeProp: 42})-[:REL]->(b {nodeProp: 23})");
+        runQuery("CREATE (a {nodeProp: 42})-[:REL]->(b {nodeProp: 23})");
 
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
@@ -216,8 +206,8 @@ class GraphStoreTest {
     }
 
     @Test
-    void deleteRelationshipsAndProperties() throws InterruptedException {
-        runQuery(db, "CREATE ()-[:REL {p: 2}]->(), ()-[:LER {p: 1}]->(), ()-[:LER {p: 2}]->(), ()-[:LER {q: 2}]->()");
+    void deleteRelationshipsAndProperties() {
+        runQuery("CREATE ()-[:REL {p: 2}]->(), ()-[:LER {p: 1}]->(), ()-[:LER {p: 2}]->(), ()-[:LER {q: 2}]->()");
 
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)

@@ -121,7 +121,7 @@ class SccTest extends AlgoTestBase {
     private long getMappedNodeId(String name) {
         final Node[] node = new Node[1];
 
-        runQuery(
+        runQueryWithRowConsumer(
             "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
             row -> node[0] = row.getNode("n")
         );

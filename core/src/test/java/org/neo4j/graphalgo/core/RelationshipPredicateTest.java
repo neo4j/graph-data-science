@@ -19,21 +19,17 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphdb.Label;
 
-import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
@@ -43,7 +39,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
  *       ^           |
  *       °-----------°
  */
-class RelationshipPredicateTest {
+class RelationshipPredicateTest extends BaseTest {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -60,12 +56,9 @@ class RelationshipPredicateTest {
     private static long nodeB;
     private static long nodeC;
 
-    private GraphDbApi db;
-
     @BeforeEach
     void setupGraph() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, DB_CYPHER);
+        runQuery(DB_CYPHER);
         runInTransaction(db,tx -> {
             nodeA = findNode(db, tx, LABEL, "name", "a").getId();
             nodeB = findNode(db, tx, LABEL, "name", "b").getId();
@@ -73,14 +66,8 @@ class RelationshipPredicateTest {
         });
     }
 
-    @AfterEach
-    void shutdown() {
-        db.shutdown();
-    }
-
     @Test
     void testOutgoing() {
-
         final Graph graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()

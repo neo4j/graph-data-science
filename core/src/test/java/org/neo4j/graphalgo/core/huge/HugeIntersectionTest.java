@@ -21,15 +21,14 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.PrimitiveIterator;
@@ -39,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 
-final class HugeIntersectionTest {
+final class HugeIntersectionTest extends AlgoTestBase {
 
     private static final int DEGREE = 25;
     public static final RelationshipType TYPE = RelationshipType.withName("TYPE");
@@ -48,11 +47,8 @@ final class HugeIntersectionTest {
     private static long START2;
     private static long[] TARGETS;
 
-    private GraphDatabaseAPI db;
-
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
         Random random = new Random(0L);
         long[] neoStarts = new long[2];
         long[] neoTargets = applyInTransaction(db, tx -> {

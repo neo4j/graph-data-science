@@ -19,18 +19,15 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
@@ -43,7 +40,7 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TriangleCountExpTest {
+class TriangleCountExpTest extends AlgoTestBase {
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
@@ -52,13 +49,10 @@ class TriangleCountExpTest {
 
     private static long centerId;
 
-    private static GraphDbApi DB;
-
-    @BeforeAll
-    static void setup() {
-        DB = TestDatabaseCreator.createTestDatabase();
+    @BeforeEach
+    void setup() {
         RelationshipType type = RelationshipType.withName(RELATIONSHIP);
-        DefaultBuilder builder = GraphBuilder.create(DB)
+        DefaultBuilder builder = GraphBuilder.create(db)
             .setLabel(LABEL)
             .setRelationship(RELATIONSHIP)
             .newDefaultBuilder();
@@ -68,13 +62,6 @@ class TriangleCountExpTest {
             .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
             .close();
         centerId = center.getId();
-    }
-
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) {
-            DB.shutdown();
-        }
     }
 
     private Graph graph;
@@ -181,7 +168,7 @@ class TriangleCountExpTest {
 
     private void loadGraph() {
         graph = new StoreLoaderBuilder()
-            .api(DB)
+            .api(db)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .globalOrientation(Orientation.UNDIRECTED)

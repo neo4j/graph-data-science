@@ -41,14 +41,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
-public final class ShortestPathsTest extends AlgoTestBase {
+final class ShortestPathsTest extends AlgoTestBase {
 
     private Graph graph;
 
     private static long head, tail, outstanding;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         String cypher =
                 "CREATE (s:Node {name:'s'})\n" +
                 "CREATE (a:Node {name:'a'})\n" +
@@ -104,7 +104,7 @@ public final class ShortestPathsTest extends AlgoTestBase {
     }
 
     @Test
-    public void testPaths() {
+    void testPaths() {
 
         final ShortestPaths sssp = new ShortestPaths(graph, head);
 
@@ -115,9 +115,12 @@ public final class ShortestPathsTest extends AlgoTestBase {
         assertEquals(Double.POSITIVE_INFINITY, sp.get(Math.toIntExact(graph.toMappedNodeId(outstanding))),0.1);
     }
 
-    public Node getNode(String name) {
+    Node getNode(String name) {
         final Node[] node = new Node[1];
-        runQuery("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n", row -> node[0] = row.getNode("n"));
+        runQueryWithRowConsumer(
+            "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
+            row -> node[0] = row.getNode("n")
+        );
         return node[0];
     }
 }

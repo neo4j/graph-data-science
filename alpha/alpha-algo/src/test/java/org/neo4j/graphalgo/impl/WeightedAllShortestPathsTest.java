@@ -19,17 +19,14 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
 
@@ -59,7 +56,7 @@ import static org.mockito.Mockito.verify;
  *   v    v
  *  (8)->(9)
  */
-class WeightedAllShortestPathsTest {
+class WeightedAllShortestPathsTest extends AlgoTestBase {
 
     private static final int width = 2, height = 5;
 
@@ -67,13 +64,10 @@ class WeightedAllShortestPathsTest {
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private GraphDbApi db;
     private Graph graph;
 
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-
         GraphBuilder.create(db)
             .setLabel(LABEL)
             .setRelationship(RELATIONSHIP)
@@ -89,11 +83,6 @@ class WeightedAllShortestPathsTest {
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
             .build()
             .load(NativeFactory.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
     }
 
     @Test

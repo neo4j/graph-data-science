@@ -138,7 +138,7 @@ class BetweennessCentralityTest2 extends AlgoTestBase {
 
     private String name(long id) {
         String[] name = {""};
-        runQuery(
+        runQueryWithRowConsumer(
             "MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name",
             row -> name[0] = row.getString("name")
         );

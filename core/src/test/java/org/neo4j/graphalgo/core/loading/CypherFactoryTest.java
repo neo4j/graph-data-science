@@ -20,22 +20,20 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.eclipse.collections.api.block.function.Function;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestGraph;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,50 +48,30 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestGraphLoader.addSuffix;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
-class CypherFactoryTest {
+class CypherFactoryTest extends BaseTest {
 
     private static final int COUNT = 10_000;
     private static final String DB_CYPHER = "UNWIND range(1, $count) AS id " +
                                             "CREATE (n {id: id})-[:REL {prop: id % 10}]->(n)";
 
-    private GraphDbApi db;
-
-    private static int id1;
-    private static int id2;
-    private static int id3;
-
     @BeforeEach
     void setUp() {
-        db = TestDatabaseCreator.createTestDatabase();
-        runQuery(db, DB_CYPHER, MapUtil.map("count", COUNT));
-    }
-
-    @AfterEach
-    void tearDown() {
-        db.shutdown();
+        runQuery(DB_CYPHER, MapUtil.map("count", COUNT));
     }
 
     @Test
     void testLoadCypher() {
-        db = TestDatabaseCreator.createTestDatabase();
-
+        clearDb();
         String query = " CREATE (n1 {partition: 6})-[:REL {prop: 1}]->(n2 {foo: 4})-[:REL {prop: 2}]->(n3)" +
                        " CREATE (n1)-[:REL {prop: 3}]->(n3)" +
                        " RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3";
-        runQueryWithRowConsumer(db, query, row -> {
-            id1 = row.getNumber("id1").intValue();
-            id2 = row.getNumber("id2").intValue();
-            id3 = row.getNumber("id3").intValue();
-        });
+        runQuery(query);
 
         String nodes = "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0.0) AS partition , COALESCE(n.foo, 5.0) AS foo";
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
@@ -106,37 +84,14 @@ class CypherFactoryTest {
                 .build()
                 .load(CypherFactory.class));
 
-        long node1 = graph.toMappedNodeId(id1);
-        long node2 = graph.toMappedNodeId(id2);
-        long node3 = graph.toMappedNodeId(id3);
-
-        assertEquals(3, graph.nodeCount());
-        assertEquals(2, graph.degree(node1));
-        assertEquals(1, graph.degree(node2));
-        assertEquals(0, graph.degree(node3));
-        AtomicInteger total = new AtomicInteger();
-        graph.forEachNode(n -> {
-            graph.forEachRelationship(n, Double.NaN, (s, t, w) -> {
-                String rel = "(" + s + ")-->(" + t + ")";
-                if (s == id1 && t == id2) {
-                    assertEquals(1.0, w, "weight of " + rel);
-                } else if (s == id2 && t == id3) {
-                    assertEquals(2.0, w, "weight of " + rel);
-                } else if (s == id1 && t == id3) {
-                    assertEquals(3.0, w, "weight of " + rel);
-                } else {
-                    fail("Unexpected relationship " + rel);
-                }
-                total.addAndGet((int) w);
-                return true;
-            });
-            return true;
-        });
-        assertEquals(6, total.get());
-
-        assertEquals(6.0D, graph.nodeProperties("partition").nodeProperty(node1), 0.01);
-        assertEquals(5.0D, graph.nodeProperties("foo").nodeProperty(node1), 0.01);
-        assertEquals(4.0D, graph.nodeProperties("foo").nodeProperty(node2), 0.01);
+        assertGraphEquals(TestGraph.Builder.fromGdl(
+            "(a {partition: 6.0, foo: 5.0})" +
+            "(b {partition: 0.0, foo: 4.0})" +
+            "(c {partition: 0.0, foo: 5.0})" +
+            "(a)-[{w:1.0}]->(b)" +
+            "(a)-[{w:3.0}]->(c)" +
+            "(b)-[{w:2.0}]->(c)"
+        ), graph);
     }
 
     @Test
@@ -211,9 +166,8 @@ class CypherFactoryTest {
 
     @Test
     void testInitNodePropertiesFromQuery() {
-        GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
+        clearDb();
         runQuery(
-            db,
             "CREATE" +
             "  ({prop1: 1})" +
             ", ({prop2: 2})" +
@@ -237,9 +191,8 @@ class CypherFactoryTest {
 
     @Test
     void testInitRelationshipPropertiesFromQuery() {
-        GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
+        clearDb();
         runQuery(
-            db,
             "CREATE" +
             "  (n1)" +
             ", (n2)" +
@@ -294,8 +247,7 @@ class CypherFactoryTest {
 
     @Test
     void testLoadingGraphWithLabelInformation() {
-        db = TestDatabaseCreator.createTestDatabase();
-
+        clearDb();
         String query = "CREATE" +
                        "  (a:A)" +
                        ", (b:B)" +
@@ -308,7 +260,7 @@ class CypherFactoryTest {
                        ", (c)-[:REL]->(a)";
 
 
-        runQuery(db, query);
+        runQuery(query);
 
         GraphLoader loader = new CypherLoaderBuilder()
             .api(db)

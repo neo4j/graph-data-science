@@ -115,7 +115,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
     @Test
     void testStreamRunsOnLoadedGraphWithNodeLabelFilter() {
-        runQuery("MATCH (n) DETACH DELETE n");
+        clearDb();
         runQuery("CREATE (nX:Ignore {nodeId: 42}) " + DB_CYPHER + " CREATE (nX)-[:X]->(nA), (nA)-[:X]->(nX), (nX)-[:X]->(nE), (nE)-[:X]->(nX)");
 
         String graphCreateQuery = GdsCypher

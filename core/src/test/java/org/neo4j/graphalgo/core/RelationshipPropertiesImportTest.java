@@ -19,18 +19,15 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,23 +36,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
-class RelationshipPropertiesImportTest {
+class RelationshipPropertiesImportTest extends BaseTest {
 
     private Graph graph;
-
-    private GraphDbApi db;
-
-    @BeforeEach
-    void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
-    }
-
-    @AfterEach
-    void shutdownGraphDb() {
-        db.shutdown();
-    }
 
     @Test
     void testPropertiesOfInterconnectedNodesWithOutgoing() {
@@ -109,7 +93,7 @@ class RelationshipPropertiesImportTest {
     }
 
     private void setup(String cypher, Orientation orientation) {
-        runQuery(db, cypher);
+        runQuery(cypher);
 
         graph = new StoreLoaderBuilder()
             .api(db)

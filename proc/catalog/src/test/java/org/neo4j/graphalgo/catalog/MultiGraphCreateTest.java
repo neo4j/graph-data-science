@@ -20,29 +20,29 @@
 
 package org.neo4j.graphalgo.catalog;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
-class MultiGraphCreateTest {
+class MultiGraphCreateTest extends BaseProcTest {
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(GraphCreateProc.class);
+    }
 
     @Test
-    void testMultipleGraphLoadsAfterDbChange() throws Exception {
-        GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
-        GraphDatabaseApiProxy.registerProcedures(db, GraphCreateProc.class);
-
+    void testMultipleGraphLoadsAfterDbChange() {
         String create1 = GdsCypher.call()
             .withNodeLabel("Node1")
             .withRelationshipType("TYPE1", Orientation.UNDIRECTED)
@@ -55,11 +55,11 @@ class MultiGraphCreateTest {
             .graphCreate("graph2")
             .yields();
 
-        runQuery(db, "CREATE (a:Node1), (b:Node1), (a)-[:TYPE1]->(b)");
-        runQuery(db, create1);
+        runQuery("CREATE (a:Node1), (b:Node1), (a)-[:TYPE1]->(b)");
+        runQuery(create1);
 
-        runQuery(db, "CREATE (a:Node2), (b:Node2), (b)-[:TYPE2]->(a)");
-        runQuery(db, create2);
+        runQuery("CREATE (a:Node2), (b:Node2), (b)-[:TYPE2]->(a)");
+        runQuery(create2);
 
         Graph graph1 = GraphStoreCatalog
             .get("", "graph1")
