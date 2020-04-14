@@ -67,6 +67,8 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
     }
 
     public static RelationshipProjections fromString(@Nullable String typeString) {
+        validateIdentifierName(typeString);
+
         if (StringUtils.isEmpty(typeString)) {
             create(emptyMap());
         }
@@ -96,20 +98,8 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         Map<RelationshipType, RelationshipProjection> filters = new LinkedHashMap<>();
 
         for (Object item : items) {
-            if (item instanceof String) {
-                if (item.equals(ALL_RELATIONSHIPS.name())) {
-                    throw new IllegalArgumentException(String.format(
-                        Locale.US,
-                        "%s is a reserved relationship type and my not be used",
-                        ALL_RELATIONSHIPS.name()
-                    ));
-                }
-
-                RelationshipProjections relationshipProjections = fromString((String) item);
-                filters.putAll(relationshipProjections.projections());
-            } else {
-                throw new IllegalArgumentException("`relationshipProjection` list items must be of type `String`.");
-            }
+            RelationshipProjections relationshipProjections = fromObject(item);
+            filters.putAll(relationshipProjections.projections());
         }
 
         return create(filters);
@@ -202,5 +192,15 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             value.put(identifier.name, projection.toObject());
         });
         return value;
+    }
+
+    private static void validateIdentifierName(String identifier) {
+        if (identifier.equals(ALL_RELATIONSHIPS.name())) {
+            throw new IllegalArgumentException(String.format(
+                Locale.US,
+                "%s is a reserved node label and my not be used",
+                ALL_RELATIONSHIPS.name()
+            ));
+        }
     }
 }

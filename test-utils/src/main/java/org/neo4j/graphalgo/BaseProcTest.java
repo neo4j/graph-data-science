@@ -79,7 +79,7 @@ public class BaseProcTest extends BaseTest {
             baseMap.put(NODE_PROJECTION_KEY, ALL_NODES.name);
         }
         if (!baseMap.containsKey(RELATIONSHIP_PROJECTION_KEY) && !baseMap.containsKey(RELATIONSHIP_QUERY_KEY)) {
-            baseMap.put(RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name);
+            baseMap.put(RELATIONSHIP_PROJECTION_KEY, "*");
         }
         return baseMap;
     }

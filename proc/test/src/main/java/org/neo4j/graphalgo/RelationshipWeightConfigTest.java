@@ -284,7 +284,7 @@ public interface RelationshipWeightConfigTest<CONFIG extends RelationshipWeightC
             NODE_PROJECTION_KEY, NodeProjections.builder()
                 .putProjection(NodeLabel.of(labelString), NodeProjection.of(labelString, PropertyMappings.of()))
                 .build(),
-            RELATIONSHIP_PROJECTION_KEY, ALL_RELATIONSHIPS.name,
+            RELATIONSHIP_PROJECTION_KEY, "*",
             "relationshipProperties", "weight1"
         ));
         CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);

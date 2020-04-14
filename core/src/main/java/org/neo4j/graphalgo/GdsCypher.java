@@ -102,7 +102,7 @@ public abstract class GdsCypher {
         default QueryBuilder loadEverything(Orientation orientation) {
             return this
                 .withNodeLabel("*", NodeProjection.all())
-                .withRelationshipType(ALL_RELATIONSHIPS.name, RelationshipProjection.all().withOrientation(orientation));
+                .withRelationshipType(ALL_RELATIONSHIPS.name(), RelationshipProjection.all().withOrientation(orientation));
         }
 
         default ImplicitCreationBuildStage withAnyLabel() {
@@ -127,7 +127,7 @@ public abstract class GdsCypher {
         ImplicitCreationBuildStage withNodeLabels(Map<String, NodeProjection> nodeProjections);
 
         default ImplicitCreationBuildStage withAnyRelationshipType() {
-            return withRelationshipType("*", RelationshipProjection.all());
+            return withRelationshipType(ALL_RELATIONSHIPS.name(), RelationshipProjection.all());
         }
 
         default ImplicitCreationBuildStage withRelationshipType(String type) {
