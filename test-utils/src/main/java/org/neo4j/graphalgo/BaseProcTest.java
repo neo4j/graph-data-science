@@ -25,18 +25,14 @@ import org.junit.jupiter.api.AfterAll;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
-import org.neo4j.test.extension.ImpermanentDbmsExtension;
-import org.neo4j.test.extension.Inject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,17 +66,13 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
 
-@ImpermanentDbmsExtension(configurationCallback = "configuration")
-public class BaseProcTest {
+public class BaseProcTest extends BaseTest {
 
-    @Inject
-    protected GraphDatabaseAPI db;
-
+    @Override
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        builder
-            .addExtension(new ConcurrencyControllerExtension())
-            .setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"));
+        super.configuration(builder);
+        builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"));
     }
 
     @AfterAll

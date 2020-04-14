@@ -31,11 +31,7 @@ import org.neo4j.test.extension.Inject;
 
 import java.util.function.Consumer;
 
-@ImpermanentDbmsExtension
-public class AlgoTestBase {
-
-    @Inject
-    public GraphDatabaseAPI db;
+public abstract class AlgoTestBase extends BaseTest {
 
     public ProgressLogger progressLogger;
 
