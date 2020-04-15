@@ -52,24 +52,22 @@ final class LouvainProc {
 
         Optional<NodeProperties> seed = Optional.ofNullable(louvain.config().seedProperty()).map(graph::nodeProperties);
 
-        PropertyTranslator<Louvain> translator;
         if (!includeIntermediateCommunities) {
             if (isIncremental && Objects.equals(config.seedProperty(), resultProperty)) {
-                translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
+                return new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
             } else if (consecutiveIds) {
-                translator = new PropertyTranslator.ConsecutivePropertyTranslator<>(
+                return new PropertyTranslator.ConsecutivePropertyTranslator<>(
                     louvain,
                     LouvainWriteProc.CommunityTranslator.INSTANCE,
                     graph.nodeCount(),
                     computationResult.tracker()
                 );
             } else {
-                translator = LouvainWriteProc.CommunityTranslator.INSTANCE;
+                return LouvainWriteProc.CommunityTranslator.INSTANCE;
             }
         } else {
-            translator = LouvainWriteProc.CommunitiesTranslator.INSTANCE;
+            return LouvainWriteProc.CommunitiesTranslator.INSTANCE;
         }
-        return translator;
     }
 
     static <PROC_RESULT, CONFIG extends LouvainBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
-import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -162,14 +161,14 @@ public interface PropertyTranslator<T> {
         }
     }
 
-     class ConsecutivePropertyTranslator<D, T extends OfLong<D>> implements PropertyTranslator.OfLong<D> {
+     class ConsecutivePropertyTranslator<DATA, TRANSLATOR extends OfLong<DATA>> implements PropertyTranslator.OfLong<DATA> {
 
         // Magic number to estimate the number of communities that need to be mapped into consecutive space
         private static final long MAPPING_SIZE_QUOTIENT = 10L;
 
         private final HugeLongArray communities;
 
-        public ConsecutivePropertyTranslator(D data, T innerTranslator, long nodeCount, AllocationTracker tracker) {
+        public ConsecutivePropertyTranslator(DATA data, TRANSLATOR innerTranslator, long nodeCount, AllocationTracker tracker) {
 
             var nextConsecutiveId = -1L;
 
@@ -192,7 +191,7 @@ public interface PropertyTranslator<T> {
         }
 
         @Override
-        public long toLong(D data, long nodeId) {
+        public long toLong(DATA data, long nodeId) {
             return communities.get(nodeId);
         }
     }

@@ -48,13 +48,11 @@ final class LabelPropagationProc {
             .labels()
             .get(nodeId);
 
-        var seedingTranslator = new PropertyTranslator.OfLongIfChanged<LabelPropagation>(
-            computationResult.graph().nodeProperties(config.seedProperty()),
-            (data, nodeId) -> data.labels().get(nodeId)
-        );
-
         if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            return seedingTranslator;
+            return new PropertyTranslator.OfLongIfChanged<>(
+                computationResult.graph().nodeProperties(config.seedProperty()),
+                (data, nodeId) -> data.labels().get(nodeId)
+            );
         } else if (config.consecutiveIds() && !isIncremental) {
             return new PropertyTranslator.ConsecutivePropertyTranslator<>(
                 computationResult.result(),
