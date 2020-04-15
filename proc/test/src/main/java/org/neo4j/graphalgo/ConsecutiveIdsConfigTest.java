@@ -22,13 +22,16 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
+import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
@@ -60,6 +63,29 @@ public interface ConsecutiveIdsConfigTest<ALGORITHM extends Algorithm<ALGORITHM,
 
             for (long i = 0; i < consecutiveIds.size(); i++) {
                 assertTrue(consecutiveIds.contains(i));
+            }
+        });
+    }
+
+    @Test
+    default void shouldFailWhenRunWithConsecutiveIdsAndSeeding() {
+        var graphName = "loadedGraph";
+        var createGraphQuery = GdsCypher.call().loadEverything().graphCreate(graphName).yields();
+        runQuery(graphDb(), createGraphQuery);
+
+        CypherMapWrapper consecutiveIdsConfig = createMinimalConfig(CypherMapWrapper
+            .empty()
+            .withBoolean("consecutiveIds", true))
+            .withEntry("seedProperty", "prop");
+
+        applyOnProcedure((proc) -> {
+            var config = proc.newConfig(Optional.of(graphName), createMinimalConfig(CypherMapWrapper.empty()));
+            if (config instanceof SeedConfig) {
+                var ex = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> proc.newConfig(Optional.of(graphName), consecutiveIdsConfig)
+                );
+                assertTrue(ex.getMessage().contains("Seeding and the `consecutiveIds` option cannot be used at the same time"));
             }
         });
     }
