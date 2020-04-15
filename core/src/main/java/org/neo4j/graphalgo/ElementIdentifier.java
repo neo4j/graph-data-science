@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
