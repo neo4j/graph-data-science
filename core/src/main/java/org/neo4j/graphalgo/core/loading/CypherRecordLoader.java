@@ -106,7 +106,7 @@ abstract class CypherRecordLoader<R> {
     }
 
     Result runLoadingQuery(Transaction tx) {
-        Result result = runQueryWithoutClosingTheResult(api, tx, loadQuery, setup.parameters());
+        Result result = runQueryWithoutClosingTheResult(tx, loadQuery, setup.parameters());
         validateMandatoryColumns(Lists.newArrayList(result.columns().iterator()));
         return result;
     }

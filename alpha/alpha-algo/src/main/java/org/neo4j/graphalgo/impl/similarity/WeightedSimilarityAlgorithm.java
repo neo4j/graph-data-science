@@ -61,7 +61,7 @@ public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityA
         int repeatCutoff = config.sparseVectorRepeatCutoff();
 
         return applyInTransaction(api, tx -> {
-            Result result = runQueryWithoutClosingTheResult(api, tx, query, params);
+            Result result = runQueryWithoutClosingTheResult(tx, query, params);
             Map<Long, LongDoubleMap> map = new HashMap<>();
             LongSet ids = new LongHashSet();
             result.accept(resultRow -> {

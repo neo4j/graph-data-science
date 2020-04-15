@@ -58,8 +58,6 @@ import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllNodes;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllRelationships;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_RELATIONSHIP_TYPE_IDENTIFIERS;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
@@ -710,12 +708,12 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 
         long[] expectedCounts = new long[4];
         runInTransaction(db, tx -> {
-            expectedCounts[0] = getAllNodes(db, tx).stream().count();
-            expectedCounts[1] = getAllRelationships(db, tx).stream().count();
+            expectedCounts[0] = tx.getAllNodes().stream().count();
+            expectedCounts[1] = tx.getAllRelationships().stream().count();
             // The graphs share the node mapping, so we expect the node count for a subgraph
             // to be equal to the node Count for the entire Neo4j graph
-            expectedCounts[2] = getAllNodes(db, tx).stream().count();
-            expectedCounts[3] = getAllRelationships(db, tx)
+            expectedCounts[2] = tx.getAllNodes().stream().count();
+            expectedCounts[3] = tx.getAllRelationships()
                 .stream()
                 .filter(r -> r.isType(org.neo4j.graphdb.RelationshipType.withName("REL1")))
                 .count();

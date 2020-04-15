@@ -29,7 +29,6 @@ import java.util.HashSet;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.expectNodeById;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class TriangleProcTest extends BaseProcTest {
@@ -44,7 +43,7 @@ class TriangleProcTest extends BaseProcTest {
 
         runInTransaction(db, tx -> {
             for (int i = 0; i < 9; i++) {
-                final String name = (String) expectNodeById(db, tx, i).getProperty("name");
+                final String name = (String) tx.getNodeById(i).getProperty("name");
                 idToName[i] = name;
             }
         });

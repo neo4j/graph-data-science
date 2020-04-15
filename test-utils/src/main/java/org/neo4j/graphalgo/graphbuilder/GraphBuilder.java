@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Transactions;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -111,7 +110,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
      * @return the created node
      */
     public Node createNode() {
-        Node node = GraphDatabaseApiProxy.createNode(api, tx);
+        Node node = tx.createNode();
         if (null != label) {
             node.addLabel(label);
         }

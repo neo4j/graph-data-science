@@ -135,7 +135,7 @@ public class BaseProcTest extends BaseTest {
     protected void assertResult(String scoreProperty, Map<Long, Double> expected) {
         runInTransaction(db, tx -> {
             for (Map.Entry<Long, Double> entry : expected.entrySet()) {
-                double score = ((Number) GraphDatabaseApiProxy.getNodeById(db, tx, entry.getKey())
+                double score = ((Number) GraphDatabaseApiProxy.getNodeById(tx, entry.getKey())
                     .getProperty(scoreProperty))
                     .doubleValue();
                 assertEquals(

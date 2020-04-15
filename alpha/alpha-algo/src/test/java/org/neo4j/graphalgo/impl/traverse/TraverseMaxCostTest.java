@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.expectNodeById;
 
 /**
  * Graph:
@@ -113,7 +112,7 @@ class TraverseMaxCostTest extends AlgoTestBase {
         List<String> resultNodeNames = applyInTransaction(db, tx -> {
             List<String> names = Arrays
                 .stream(nodes)
-                .mapToObj(nodeId -> expectNodeById(db, tx, nodeId))
+                .mapToObj(nodeId -> tx.getNodeById(nodeId))
                 .map(node -> node.getProperty("name"))
                 .map(Objects::toString)
                 .collect(Collectors.toList());
@@ -138,7 +137,7 @@ class TraverseMaxCostTest extends AlgoTestBase {
         List<String> resultNodeNames = applyInTransaction(db, tx -> {
             List<String> names = Arrays
                 .stream(nodes)
-                .mapToObj(nodeId -> expectNodeById(db, tx, nodeId))
+                .mapToObj(nodeId -> tx.getNodeById(nodeId))
                 .map(node -> node.getProperty("name"))
                 .map(Objects::toString)
                 .collect(Collectors.toList());
@@ -150,7 +149,7 @@ class TraverseMaxCostTest extends AlgoTestBase {
     }
 
     private String name(long nodeId) {
-        return applyInTransaction(db, tx -> expectNodeById(db, tx, nodeId).getProperty("name").toString());
+        return applyInTransaction(db, tx -> tx.getNodeById(nodeId).getProperty("name").toString());
     }
 
     private long id(String name) {

@@ -37,7 +37,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllNodes;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 /**
@@ -195,7 +194,7 @@ public final class CypherExporter {
 
         @Override
         public void forEachNode(GraphDatabaseService graph, Consumer<Node> action) {
-            runInTransaction(graph, tx -> getAllNodes(graph, tx).forEach(action));
+            runInTransaction(graph, tx -> tx.getAllNodes().forEach(action));
         }
 
         @Override

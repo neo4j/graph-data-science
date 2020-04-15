@@ -39,7 +39,6 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class ArticleRankTest extends AlgoTestBase {
@@ -106,16 +105,16 @@ final class ArticleRankTest extends AlgoTestBase {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
-            expected.put(findNode(db, tx, label, "name", "a").getId(), 0.2071625);
-            expected.put(findNode(db, tx, label, "name", "b").getId(), 0.4706795);
-            expected.put(findNode(db, tx, label, "name", "c").getId(), 0.3605195);
-            expected.put(findNode(db, tx, label, "name", "d").getId(), 0.195118);
-            expected.put(findNode(db, tx, label, "name", "e").getId(), 0.2071625);
-            expected.put(findNode(db, tx, label, "name", "f").getId(), 0.195118);
-            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "a").getId(), 0.2071625);
+            expected.put(tx.findNode(label, "name", "b").getId(), 0.4706795);
+            expected.put(tx.findNode(label, "name", "c").getId(), 0.3605195);
+            expected.put(tx.findNode(label, "name", "d").getId(), 0.195118);
+            expected.put(tx.findNode(label, "name", "e").getId(), 0.2071625);
+            expected.put(tx.findNode(label, "name", "f").getId(), 0.195118);
+            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
         });
 
         final Graph graph;

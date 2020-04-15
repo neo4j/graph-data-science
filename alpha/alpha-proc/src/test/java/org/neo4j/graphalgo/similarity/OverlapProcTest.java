@@ -123,19 +123,23 @@ class OverlapProcTest extends BaseProcTest {
 
         int count = applyInTransaction(db, tx -> {
             try (
-                Result result1 = runQueryWithoutClosingTheResult(db, tx,
+                Result result1 = runQueryWithoutClosingTheResult(
+                    tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 1, "topK", 0))
                 );
-                Result result2 = runQueryWithoutClosingTheResult(db, tx,
+                Result result2 = runQueryWithoutClosingTheResult(
+                    tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 2, "topK", 0))
                 );
-                Result result4 = runQueryWithoutClosingTheResult(db, tx,
+                Result result4 = runQueryWithoutClosingTheResult(
+                    tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 4, "topK", 0))
                 );
-                Result result8 = runQueryWithoutClosingTheResult(db, tx,
+                Result result8 = runQueryWithoutClosingTheResult(
+                    tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 8, "topK", 0))
                 )
@@ -163,19 +167,23 @@ class OverlapProcTest extends BaseProcTest {
 
         runInTransaction(db, tx -> {
             try (
-                Result result1 = runQueryWithoutClosingTheResult(db, tx,
+                Result result1 = runQueryWithoutClosingTheResult(
+                    tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 1))
                 );
-                Result result2 = runQueryWithoutClosingTheResult(db, tx,
+                Result result2 = runQueryWithoutClosingTheResult(
+                    tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 2))
                 );
-                Result result4 = runQueryWithoutClosingTheResult(db, tx,
+                Result result4 = runQueryWithoutClosingTheResult(
+                    tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 4))
                 );
-                Result result8 = runQueryWithoutClosingTheResult(db, tx,
+                Result result8 = runQueryWithoutClosingTheResult(
+                    tx,
                     STATEMENT_STREAM,
                     map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 8))
                 )

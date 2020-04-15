@@ -35,7 +35,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 /**
  * A->B; A->C; B->C;
@@ -161,6 +160,6 @@ class DegreesTest extends AlgoTestBase {
     }
 
     private long nodeId(String name) {
-        return applyInTransaction(db, tx -> findNode(db, tx, Label.label("Node"), "name", name).getId());
+        return applyInTransaction(db, tx -> tx.findNode(Label.label("Node"), "name", name).getId());
     }
 }

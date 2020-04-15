@@ -57,7 +57,7 @@ public class ListProc {
     @Procedure("gds.list")
     @Description(DESCRIPTION)
     public Stream<ListResult> list(@Name(value = "name", defaultValue = "") String name) {
-        return runQueryWithoutClosingTheResult(db, transaction, QUERY, singletonMap("name", name))
+        return runQueryWithoutClosingTheResult(transaction, QUERY, singletonMap("name", name))
             .stream()
             .map(ListResult::new);
     }

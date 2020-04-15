@@ -35,7 +35,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
@@ -78,7 +77,7 @@ final class HugeGraphWeightTest extends BaseTest {
 
         runInTransaction(db, tx -> {
             for (int i = 0; i < nodes; i++) {
-                nodeIds[i] = createNode(db, tx).getId();
+                nodeIds[i] = tx.createNode().getId();
             }
             int pageSize = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF);
             for (int i = 0; i < nodes; i += pageSize) {
@@ -92,8 +91,8 @@ final class HugeGraphWeightTest extends BaseTest {
                         }
                         long targetId = nodeIds[i + targetIndex];
                         int propertyValue = ((int) sourceId << 16) | (int) targetId & 0xFFFF;
-                        Relationship relationship = getNodeById(db, tx, sourceId)
-                            .createRelationshipTo(getNodeById(db, tx, targetId), TYPE);
+                        Relationship relationship = getNodeById(tx, sourceId)
+                            .createRelationshipTo(getNodeById(tx, targetId), TYPE);
                         relationship.setProperty("weight", propertyValue);
                     }
                 }

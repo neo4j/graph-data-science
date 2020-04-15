@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -41,8 +40,6 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.expectNodeById;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class IncrementalWccTest extends AlgoTestBase {
@@ -60,21 +57,20 @@ class IncrementalWccTest extends AlgoTestBase {
     void setupGraphDb() {
         runInTransaction(db, tx -> {
             for (int i = 0; i < COMMUNITY_COUNT; i = i + 2) {
-                long community1 = createLineGraph(db, tx);
-                long community2 = createLineGraph(db, tx);
-                createConnection(db, tx, community1, community2);
+                long community1 = createLineGraph(tx);
+                long community2 = createLineGraph(tx);
+                createConnection(tx, community1, community2);
             }
         });
     }
 
     private static void createConnection(
-        GraphDatabaseService db,
         Transaction tx,
         long sourceId,
         long targetId
     ) {
-        final Node source = expectNodeById(db, tx, sourceId);
-        final Node target = expectNodeById(db, tx, targetId);
+        final Node source = tx.getNodeById(sourceId);
+        final Node target = tx.getNodeById(targetId);
 
         source.createRelationshipTo(target, RELATIONSHIP_TYPE);
     }
@@ -141,16 +137,15 @@ class IncrementalWccTest extends AlgoTestBase {
     /**
      * Creates a line graph of the given length (i.e. numer of relationships).
      *
-     * @param db database
      * @return the last node id inserted into the graph
      */
-    private long createLineGraph(GraphDatabaseService db, Transaction tx) {
-        Node temp = createNode(db, tx);
+    private long createLineGraph(Transaction tx) {
+        Node temp = tx.createNode();
         long communityId = temp.getId() / COMMUNITY_SIZE;
 
         for (int i = 1; i < COMMUNITY_SIZE; i++) {
             temp.setProperty(SEED_PROPERTY, communityId);
-            Node target = createNode(db, tx);
+            Node target = tx.createNode();
             temp.createRelationshipTo(target, RELATIONSHIP_TYPE);
             temp = target;
         }

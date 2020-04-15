@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 
@@ -147,13 +146,13 @@ class PrimTest extends AlgoTestBase {
             .graph(NativeFactory.class);
 
         runInTransaction(db, tx -> {
-            a = Math.toIntExact(graph.toMappedNodeId(findNode(db, tx, label, "name", "a").getId()));
-            b = Math.toIntExact(graph.toMappedNodeId(findNode(db, tx, label, "name", "b").getId()));
-            c = Math.toIntExact(graph.toMappedNodeId(findNode(db, tx, label, "name", "c").getId()));
-            d = Math.toIntExact(graph.toMappedNodeId(findNode(db, tx, label, "name", "d").getId()));
-            e = Math.toIntExact(graph.toMappedNodeId(findNode(db, tx, label, "name", "e").getId()));
-            y = Math.toIntExact(graph.toMappedNodeId(findNode(db, tx, label, "name", "y").getId()));
-            z = Math.toIntExact(graph.toMappedNodeId(findNode(db, tx, label, "name", "z").getId()));
+            a = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "a").getId()));
+            b = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "b").getId()));
+            c = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "c").getId()));
+            d = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "d").getId()));
+            e = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "e").getId()));
+            y = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "y").getId()));
+            z = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "z").getId()));
         });
     }
 

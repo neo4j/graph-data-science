@@ -38,7 +38,6 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class WeightedPageRankTest extends AlgoTestBase {
@@ -124,16 +123,16 @@ final class WeightedPageRankTest extends AlgoTestBase {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
-            expected.put(findNode(db, tx, label, "name", "a").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "b").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "c").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "d").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "e").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "f").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "a").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "b").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "c").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "d").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "e").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "f").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
         });
 
         final Graph graph;
@@ -179,16 +178,16 @@ final class WeightedPageRankTest extends AlgoTestBase {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
-            expected.put(findNode(db, tx, label, "name", "a").getId(), 0.243007);
-            expected.put(findNode(db, tx, label, "name", "b").getId(), 1.9183995);
-            expected.put(findNode(db, tx, label, "name", "c").getId(), 1.7806315);
-            expected.put(findNode(db, tx, label, "name", "d").getId(), 0.21885);
-            expected.put(findNode(db, tx, label, "name", "e").getId(), 0.243007);
-            expected.put(findNode(db, tx, label, "name", "f").getId(), 0.21885);
-            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "a").getId(), 0.243007);
+            expected.put(tx.findNode(label, "name", "b").getId(), 1.9183995);
+            expected.put(tx.findNode(label, "name", "c").getId(), 1.7806315);
+            expected.put(tx.findNode(label, "name", "d").getId(), 0.21885);
+            expected.put(tx.findNode(label, "name", "e").getId(), 0.243007);
+            expected.put(tx.findNode(label, "name", "f").getId(), 0.21885);
+            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
         });
 
         final Graph graph;
@@ -234,16 +233,16 @@ final class WeightedPageRankTest extends AlgoTestBase {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
-            expected.put(findNode(db, tx, label, "name", "a").getId(), 0.243007);
-            expected.put(findNode(db, tx, label, "name", "b").getId(), 1.9183995);
-            expected.put(findNode(db, tx, label, "name", "c").getId(), 1.7806315);
-            expected.put(findNode(db, tx, label, "name", "d").getId(), 0.21885);
-            expected.put(findNode(db, tx, label, "name", "e").getId(), 0.243007);
-            expected.put(findNode(db, tx, label, "name", "f").getId(), 0.21885);
-            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "a").getId(), 0.243007);
+            expected.put(tx.findNode(label, "name", "b").getId(), 1.9183995);
+            expected.put(tx.findNode(label, "name", "c").getId(), 1.7806315);
+            expected.put(tx.findNode(label, "name", "d").getId(), 0.21885);
+            expected.put(tx.findNode(label, "name", "e").getId(), 0.243007);
+            expected.put(tx.findNode(label, "name", "f").getId(), 0.21885);
+            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
         });
 
         final Graph graph;
@@ -289,16 +288,16 @@ final class WeightedPageRankTest extends AlgoTestBase {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
-            expected.put(findNode(db, tx, label, "name", "a").getId(), 0.1900095);
-            expected.put(findNode(db, tx, label, "name", "b").getId(), 2.2152279);
-            expected.put(findNode(db, tx, label, "name", "c").getId(), 2.0325884);
-            expected.put(findNode(db, tx, label, "name", "d").getId(), 0.1569275);
-            expected.put(findNode(db, tx, label, "name", "e").getId(), 0.1633280);
-            expected.put(findNode(db, tx, label, "name", "f").getId(), 0.1569275);
-            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "a").getId(), 0.1900095);
+            expected.put(tx.findNode(label, "name", "b").getId(), 2.2152279);
+            expected.put(tx.findNode(label, "name", "c").getId(), 2.0325884);
+            expected.put(tx.findNode(label, "name", "d").getId(), 0.1569275);
+            expected.put(tx.findNode(label, "name", "e").getId(), 0.1633280);
+            expected.put(tx.findNode(label, "name", "f").getId(), 0.1569275);
+            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
         });
 
         final Graph graph;
@@ -344,16 +343,16 @@ final class WeightedPageRankTest extends AlgoTestBase {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
-            expected.put(findNode(db, tx, label, "name", "a").getId(), 0.1900095);
-            expected.put(findNode(db, tx, label, "name", "b").getId(), 2.2152279);
-            expected.put(findNode(db, tx, label, "name", "c").getId(), 2.0325884);
-            expected.put(findNode(db, tx, label, "name", "d").getId(), 0.1569275);
-            expected.put(findNode(db, tx, label, "name", "e").getId(), 0.1633280);
-            expected.put(findNode(db, tx, label, "name", "f").getId(), 0.1569275);
-            expected.put(findNode(db, tx, label, "name", "g").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "h").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "i").getId(), 0.15);
-            expected.put(findNode(db, tx, label, "name", "j").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "a").getId(), 0.1900095);
+            expected.put(tx.findNode(label, "name", "b").getId(), 2.2152279);
+            expected.put(tx.findNode(label, "name", "c").getId(), 2.0325884);
+            expected.put(tx.findNode(label, "name", "d").getId(), 0.1569275);
+            expected.put(tx.findNode(label, "name", "e").getId(), 0.1633280);
+            expected.put(tx.findNode(label, "name", "f").getId(), 0.1569275);
+            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
         });
 
         final Graph graph;

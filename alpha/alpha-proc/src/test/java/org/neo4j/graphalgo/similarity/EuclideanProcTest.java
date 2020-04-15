@@ -147,10 +147,10 @@ class EuclideanProcTest extends BaseProcTest {
 
         int count = applyInTransaction(db, tx -> {
             try(
-                Result result1 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0));
-                Result result2 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0));
-                Result result4 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0));
-                Result result8 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 8, "topK", 0), "missingValue", 0))
+                Result result1 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0));
+                Result result2 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0));
+                Result result4 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0));
+                Result result8 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "concurrency", 8, "topK", 0), "missingValue", 0))
             ) {
                 int cnt = 0;
                 while (result1.hasNext()) {
@@ -175,10 +175,10 @@ class EuclideanProcTest extends BaseProcTest {
 
         int count = applyInTransaction(db, tx -> {
             try(
-                Result result1 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0));
-                Result result2 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0));
-                Result result4 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0));
-                Result result8 = runQueryWithoutClosingTheResult(db, tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0))
+                Result result1 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0));
+                Result result2 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0));
+                Result result4 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0));
+                Result result8 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", anonymousGraphConfig("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0))
             ) {
                 int cnt = 0;
                 while (result1.hasNext()) {

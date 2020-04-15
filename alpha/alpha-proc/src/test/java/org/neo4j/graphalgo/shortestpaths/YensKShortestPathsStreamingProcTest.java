@@ -38,7 +38,6 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 /**
  * Graph:
@@ -191,12 +190,12 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
 
     private List<Long> getNodeIds(String... nodes) {
         return applyInTransaction(db, tx -> Arrays.stream(nodes)
-                .map(name -> findNode(db, tx, Label.label("Node"), "name", name).getId())
+                .map(name -> tx.findNode(Label.label("Node"), "name", name).getId())
                 .collect(toList()));
     }
     private List<Node> getNodes(String... nodes) {
         return applyInTransaction(db, tx -> Arrays.stream(nodes)
-                .map(name -> findNode(db, tx, Label.label("Node"), "name", name))
+                .map(name -> tx.findNode(Label.label("Node"), "name", name))
                 .collect(toList()));
     }
 }

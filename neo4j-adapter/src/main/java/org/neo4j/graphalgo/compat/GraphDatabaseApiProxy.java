@@ -22,17 +22,12 @@ package org.neo4j.graphalgo.compat;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.ResourceIterable;
-import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.internal.recordstorage.RecordStorageEngine;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -77,7 +72,7 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
-    public static Node getNodeById(GraphDatabaseService db, Transaction tx, long id) {
+    public static Node getNodeById(Transaction tx, long id) {
         try {
             return tx.getNodeById(id);
         } catch (NotFoundException e) {
@@ -85,71 +80,19 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
-    public static Node getNodeById(GraphDatabaseService db, KernelTransaction tx, long id) {
-        try {
-            return tx.internalTransaction().getNodeById(id);
-        } catch (NotFoundException e) {
-            return null;
-        }
-    }
-
-    public static Node expectNodeById(GraphDatabaseService db, Transaction tx, long id) {
-        return tx.getNodeById(id);
-    }
-
-    public static Node findNode(
-        GraphDatabaseService db,
-        Transaction tx,
-        Label label,
-        String propertyKey,
-        Object propertyValue
-    ) {
-        return tx.findNode(label, propertyKey, propertyValue);
-    }
-
-    public static ResourceIterator<Node> findNodes(GraphDatabaseService db, Transaction tx, Label label) {
-        return tx.findNodes(label);
-    }
-
-    public static ResourceIterable<Node> getAllNodes(GraphDatabaseService db, Transaction tx) {
-        return tx.getAllNodes();
-    }
-
-    public static Node createNode(GraphDatabaseService db, Transaction tx) {
-        return tx.createNode();
-    }
-
-    public static Node createNode(GraphDatabaseService db, Transaction tx, Label... labels) {
-        return tx.createNode(labels);
-    }
-
-    public static ResourceIterable<Relationship> getAllRelationships(GraphDatabaseService db, Transaction tx) {
-        return tx.getAllRelationships();
+    public static Node getNodeById(KernelTransaction tx, long id) {
+        return getNodeById(tx.internalTransaction(), id);
     }
 
     public static NeoStores neoStores(GraphDatabaseService db) {
         return resolveDependency(db, RecordStorageEngine.class).testAccessNeoStores();
     }
 
-    public static ProcedureCallContext procedureCallContext(String... outputFieldNames) {
-        return new ProcedureCallContext(outputFieldNames, false, "", false);
-    }
-
-    public static Result runQueryWithoutClosingTheResult(
-        GraphDatabaseService db,
-        Transaction tx,
-        String query,
-        Map<String, Object> params
-    ) {
+    public static Result runQueryWithoutClosingTheResult(Transaction tx, String query, Map<String, Object> params) {
         return tx.execute(query, params);
     }
 
-    public static Result runQueryWithoutClosingTheResult(
-        GraphDatabaseService db,
-        KernelTransaction tx,
-        String query,
-        Map<String, Object> params
-    ) {
+    public static Result runQueryWithoutClosingTheResult(KernelTransaction tx, String query, Map<String, Object> params) {
         return tx.internalTransaction().execute(query, params);
     }
 

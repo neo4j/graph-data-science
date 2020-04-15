@@ -37,7 +37,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class HugeGraphLoadingTest extends BaseTest {
@@ -67,7 +66,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         Label label = Label.label("Foo");
         runInTransaction(db, tx -> {
             for (int j = 0; j < nodeCount; j++) {
-                Node node = createNode(db, tx, label);
+                Node node = tx.createNode(label);
                 node.setProperty("bar", node.getId());
             }
         });
@@ -107,7 +106,7 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         runInTransaction(db, tx -> {
             for (int i = 0; i < nodeCount; i++) {
-                createNode(db, tx);
+                tx.createNode();
             }
         });
 
@@ -128,12 +127,12 @@ final class HugeGraphLoadingTest extends BaseTest {
         int parallelEdgeCount = 10;
 
         runInTransaction(db, tx -> {
-            Node n0 = createNode(db, tx);
-            Node n1 = createNode(db, tx);
+            Node n0 = tx.createNode();
+            Node n1 = tx.createNode();
             Node last = null;
 
             for (int i = 0; i < nodeCount; i++) {
-                last = createNode(db, tx);
+                last = tx.createNode();
             }
 
             n0.createRelationshipTo(n1, fooRelType).setProperty("weight", 1.0);

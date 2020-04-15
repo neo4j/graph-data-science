@@ -45,14 +45,14 @@ public class GetNodeFunc {
     @UserFunction("gds.util.asNode")
     @Description("CALL gds.util.asNode(nodeId) - Return the node objects for the given node id or null if none exists.")
     public Node asNode(@Name(value = "nodeId") Number nodeId) {
-        return getNodeById(api, tx, nodeId.longValue());
+        return getNodeById(tx, nodeId.longValue());
     }
 
     @UserFunction("gds.util.asNodes")
     @Description("CALL gds.util.asNodes(nodeIds) - Return the node objects for the given node ids or an empty list if none exists.")
     public List<Node> asNodes(@Name(value = "nodeIds") List<Number> nodeIds) {
         return nodeIds.stream()
-            .map(nodeId -> getNodeById(api, tx, nodeId.longValue()))
+            .map(nodeId -> getNodeById(tx, nodeId.longValue()))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }

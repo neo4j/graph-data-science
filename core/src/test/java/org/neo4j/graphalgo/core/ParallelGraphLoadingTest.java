@@ -56,8 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNodes;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getAllNodes;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.core.utils.RawValues.combineIntInt;
@@ -78,7 +76,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
         buildGraph(PageUtil.pageSizeFor(Long.BYTES) << 1);
         Graph sparseGraph = load(db, l -> l.addNodeLabel("Label2"));
         runInTransaction(db, tx -> {
-            findNodes(db, tx, Label.label("Label2"))
+            tx.findNodes(Label.label("Label2"))
                 .stream().forEach(n -> {
                 long graphId = sparseGraph.toMappedNodeId(n.getId());
                 assertNotEquals(-1, graphId, n + " not mapped");
@@ -93,10 +91,9 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     void shouldLoadNodesInOrder() {
         Graph graph = loadEverything();
         final Set<Long> nodeIds;
-        nodeIds = applyInTransaction(db, tx ->
-            getAllNodes(db, tx).stream()
-                .map(Node::getId)
-                .collect(Collectors.toSet())
+        nodeIds = applyInTransaction(db, tx -> tx.getAllNodes().stream()
+            .map(Node::getId)
+            .collect(Collectors.toSet())
         );
 
         graph.forEachNode(nodeId -> {
@@ -142,7 +139,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     }
 
     private boolean testRelationships(Transaction tx, Graph graph, long nodeId) {
-        final Node node = getNodeById(db, tx, graph.toOriginalNodeId(nodeId));
+        final Node node = getNodeById(tx, graph.toOriginalNodeId(nodeId));
         assertNotNull(node);
         final Map<Long, Relationship> relationships = StreamSupport
                 .stream(node.getRelationships(Direction.OUTGOING).spliterator(), false)

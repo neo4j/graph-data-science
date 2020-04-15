@@ -163,7 +163,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
 
     private double getNodeCoordinate(int nodeId, String coordinateType) {
         long neo4jId = graph.toOriginalNodeId(nodeId);
-        Node node = getNodeById(db, tx, neo4jId);
+        Node node = getNodeById(tx, neo4jId);
         return (double) node.getProperty(coordinateType);
     }
 

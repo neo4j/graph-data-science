@@ -149,7 +149,7 @@ abstract class DocTestBase extends BaseProcTest {
     private QueryExampleConsumer defaultQueryExampleConsumer() {
         return (query, expectedColumns, expectedRows) -> {
             runInTransaction(db, tx -> {
-                try (Result result = runQueryWithoutClosingTheResult(db, tx, query, Collections.emptyMap())) {
+                try (Result result = runQueryWithoutClosingTheResult(tx, query, Collections.emptyMap())) {
                     assertEquals(expectedColumns, result.columns());
                     AtomicInteger index = new AtomicInteger(0);
                     result.accept(actualRow -> {

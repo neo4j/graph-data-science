@@ -54,7 +54,7 @@ public final class QueryRunner {
     ) {
         runInTransaction(db, tx -> {
             try (KernelTransaction.Revertable ignored = withUsername(tx, username);
-                 Result result = runQueryWithoutClosingTheResult(db, tx, query, params)) {
+                 Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(row -> {
                     rowConsumer.accept(tx, row);
                     return true;
@@ -70,7 +70,7 @@ public final class QueryRunner {
         BiConsumer<Transaction, Result.ResultRow> rowConsumer
     ) {
         runInTransaction(db, tx -> {
-            try (Result result = runQueryWithoutClosingTheResult(db, tx, query, params)) {
+            try (Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(row -> {
                     rowConsumer.accept(tx, row);
                     return true;
@@ -85,7 +85,7 @@ public final class QueryRunner {
         Consumer<Result.ResultRow> rowConsumer
     ) {
         runInTransaction(db, tx -> {
-            try (Result result = runQueryWithoutClosingTheResult(db, tx, query, emptyMap())) {
+            try (Result result = runQueryWithoutClosingTheResult(tx, query, emptyMap())) {
                 result.accept(row -> {
                     rowConsumer.accept(row);
                     return true;
@@ -100,7 +100,7 @@ public final class QueryRunner {
 
     public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
         runInTransaction(db, tx -> {
-            try (Result result = runQueryWithoutClosingTheResult(db, tx, query, params)) {
+            try (Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(CONSUME_ROWS);
             }
         });
@@ -109,7 +109,7 @@ public final class QueryRunner {
     public static void runQuery(GraphDatabaseService db, String username, String query, Map<String, Object> params) {
         runInTransaction(db, tx -> {
             try (KernelTransaction.Revertable ignored = withUsername(tx, username);
-                 Result result = runQueryWithoutClosingTheResult(db, tx, query, params)) {
+                 Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(CONSUME_ROWS);
             }
         });
@@ -125,7 +125,7 @@ public final class QueryRunner {
         Map<String, Object> params,
         Function<Result, T> resultFunction
     ) {
-        return applyInTransaction(db, tx -> resultFunction.apply(runQueryWithoutClosingTheResult(db, tx, query, params)));
+        return applyInTransaction(db, tx -> resultFunction.apply(runQueryWithoutClosingTheResult(tx, query, params)));
     }
 
     public static void runQueryWithResultConsumer(
@@ -134,7 +134,7 @@ public final class QueryRunner {
         Map<String, Object> params,
         Consumer<Result> resultConsumer
     ) {
-        runInTransaction(db, tx -> resultConsumer.accept(runQueryWithoutClosingTheResult(db, tx, query, params)));
+        runInTransaction(db, tx -> resultConsumer.accept(runQueryWithoutClosingTheResult(tx, query, params)));
     }
 
     private static KernelTransaction.Revertable withUsername(Transaction tx, String username) {

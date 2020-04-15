@@ -24,8 +24,6 @@ import org.HdrHistogram.Histogram;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
-import org.neo4j.graphalgo.wcc.ImmutableWccWriteConfig;
-import org.neo4j.graphalgo.wcc.WccWriteConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Optional;
@@ -35,13 +33,8 @@ import java.util.function.BiConsumer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.procedureCallContext;
 
 final class AbstractCommunityResultBuilderTest {
-
-    private static final WccWriteConfig DEFAULT_CONFIG = ImmutableWccWriteConfig.builder()
-        .writeProperty("communities")
-        .build();
 
     @Test
     void countCommunitySizesOverHugeCommunities() {
@@ -177,6 +170,9 @@ final class AbstractCommunityResultBuilderTest {
         assertEquals(4.0, histogram.getValueAtPercentile(100D), 0.01);
     }
 
+    static ProcedureCallContext procedureCallContext(String... outputFieldNames) {
+        return new ProcedureCallContext(outputFieldNames, false, "", false);
+    }
 
     private AbstractCommunityResultBuilder<Void> builder(
         ProcedureCallContext context,

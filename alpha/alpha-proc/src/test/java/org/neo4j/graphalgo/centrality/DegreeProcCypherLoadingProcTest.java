@@ -30,7 +30,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class DegreeProcCypherLoadingProcTest extends BaseProcTest {
@@ -64,29 +63,29 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
 
         runInTransaction(db, tx -> {
             Label label = Label.label("Label1");
-            incomingExpected.put(findNode(db, tx, label, "name", "a").getId(), 0.0);
-            incomingExpected.put(findNode(db, tx, label, "name", "b").getId(), 1.0);
-            incomingExpected.put(findNode(db, tx, label, "name", "c").getId(), 2.0);
+            incomingExpected.put(tx.findNode(label, "name", "a").getId(), 0.0);
+            incomingExpected.put(tx.findNode(label, "name", "b").getId(), 1.0);
+            incomingExpected.put(tx.findNode(label, "name", "c").getId(), 2.0);
 
-            incomingWeightedExpected.put(findNode(db, tx, label, "name", "a").getId(), 0.0);
-            incomingWeightedExpected.put(findNode(db, tx, label, "name", "b").getId(), 3.0);
-            incomingWeightedExpected.put(findNode(db, tx, label, "name", "c").getId(), 14.2);
+            incomingWeightedExpected.put(tx.findNode(label, "name", "a").getId(), 0.0);
+            incomingWeightedExpected.put(tx.findNode(label, "name", "b").getId(), 3.0);
+            incomingWeightedExpected.put(tx.findNode(label, "name", "c").getId(), 14.2);
 
-            bothExpected.put(findNode(db, tx, label, "name", "a").getId(), 2.0);
-            bothExpected.put(findNode(db, tx, label, "name", "b").getId(), 2.0);
-            bothExpected.put(findNode(db, tx, label, "name", "c").getId(), 2.0);
+            bothExpected.put(tx.findNode(label, "name", "a").getId(), 2.0);
+            bothExpected.put(tx.findNode(label, "name", "b").getId(), 2.0);
+            bothExpected.put(tx.findNode(label, "name", "c").getId(), 2.0);
 
-            bothWeightedExpected.put(findNode(db, tx, label, "name", "a").getId(), 12.2);
-            bothWeightedExpected.put(findNode(db, tx, label, "name", "b").getId(), 8.0);
-            bothWeightedExpected.put(findNode(db, tx, label, "name", "c").getId(), 14.2);
+            bothWeightedExpected.put(tx.findNode(label, "name", "a").getId(), 12.2);
+            bothWeightedExpected.put(tx.findNode(label, "name", "b").getId(), 8.0);
+            bothWeightedExpected.put(tx.findNode(label, "name", "c").getId(), 14.2);
 
-            outgoingExpected.put(findNode(db, tx, label, "name", "a").getId(), 2.0);
-            outgoingExpected.put(findNode(db, tx, label, "name", "b").getId(), 1.0);
-            outgoingExpected.put(findNode(db, tx, label, "name", "c").getId(), 0.0);
+            outgoingExpected.put(tx.findNode(label, "name", "a").getId(), 2.0);
+            outgoingExpected.put(tx.findNode(label, "name", "b").getId(), 1.0);
+            outgoingExpected.put(tx.findNode(label, "name", "c").getId(), 0.0);
 
-            outgoingWeightedExpected.put(findNode(db, tx, label, "name", "a").getId(), 12.2);
-            outgoingWeightedExpected.put(findNode(db, tx, label, "name", "b").getId(), 5.0);
-            outgoingWeightedExpected.put(findNode(db, tx, label, "name", "c").getId(), 0.0);
+            outgoingWeightedExpected.put(tx.findNode(label, "name", "a").getId(), 12.2);
+            outgoingWeightedExpected.put(tx.findNode(label, "name", "b").getId(), 5.0);
+            outgoingWeightedExpected.put(tx.findNode(label, "name", "c").getId(), 0.0);
         });
     }
 

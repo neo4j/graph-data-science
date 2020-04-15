@@ -37,7 +37,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class DijkstraProcTest_152 extends BaseProcTest {
@@ -69,8 +68,8 @@ class DijkstraProcTest_152 extends BaseProcTest {
         registerProcedures(DijkstraProc.class);
         runQuery(cypher);
         runInTransaction(db, tx -> {
-            startNodeId = findNode(db, tx, Label.label("Loc"), "name", "A").getId();
-            endNodeId = findNode(db, tx, Label.label("Loc"), "name", "F").getId();
+            startNodeId = tx.findNode(Label.label("Loc"), "name", "A").getId();
+            endNodeId = tx.findNode(Label.label("Loc"), "name", "F").getId();
         });
     }
 

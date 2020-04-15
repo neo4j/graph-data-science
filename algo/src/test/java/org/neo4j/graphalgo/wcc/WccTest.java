@@ -48,7 +48,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class WccTest extends AlgoTestBase {
@@ -242,9 +241,9 @@ class WccTest extends AlgoTestBase {
     }
 
     private static void createLine(GraphDatabaseService db, Transaction tx, int setSize) {
-        Node temp = createNode(db, tx);
+        Node temp = tx.createNode();
         for (int i = 1; i < setSize; i++) {
-            Node t = createNode(db, tx);
+            Node t = tx.createNode();
             temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
             temp = t;
         }

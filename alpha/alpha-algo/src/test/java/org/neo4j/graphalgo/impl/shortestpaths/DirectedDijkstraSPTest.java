@@ -38,7 +38,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.findNode;
 
 /**
  * expected path OUTGOING:  abcf
@@ -88,7 +87,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     }
 
     private long id(String name) {
-        return applyInTransaction(db, tx -> findNode(db, tx, Label.label("Node"), "name", name).getId());
+        return applyInTransaction(db, tx -> tx.findNode(Label.label("Node"), "name", name).getId());
     }
 
     private String name(long id) {
