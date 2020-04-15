@@ -60,6 +60,7 @@ public class NodePropertyFunc {
 
         return graphStore
             .nodeProperty(propertyKey)
+            .values()
             .nodeProperty(internalId);
     }
 }

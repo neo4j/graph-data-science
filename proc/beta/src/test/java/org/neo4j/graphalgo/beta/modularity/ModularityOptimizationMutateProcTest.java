@@ -106,8 +106,8 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         runQuery(query);
 
         GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, TEST_GRAPH_NAME).graphStore();
-        NodeProperties communities = mutatedGraph.nodeProperty(mutateProperty());
-        NodeProperties seeds = mutatedGraph.nodeProperty("seed1");
+        NodeProperties communities = mutatedGraph.nodeProperty(mutateProperty()).values();
+        NodeProperties seeds = mutatedGraph.nodeProperty("seed1").values();
         for (int i = 0; i < mutatedGraph.nodeCount(); i++) {
             assertEquals(communities.nodeProperty(i), seeds.nodeProperty(i));
         }
