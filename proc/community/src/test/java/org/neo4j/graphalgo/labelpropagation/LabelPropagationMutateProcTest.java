@@ -23,11 +23,16 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.functions.NodePropertyFunc;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -36,6 +41,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements GraphMutationTest<LabelPropagationMutateConfig, LabelPropagation> {
 
@@ -71,6 +78,48 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     @Override
     public LabelPropagationMutateConfig createConfig(CypherMapWrapper mapWrapper) {
         return LabelPropagationMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+    }
+
+    @Test
+    void testMutateAndWriteWithSeeding() {
+        String testGraphName = "lpaGraph";
+        GraphStore initialGraphStore = new StoreLoaderBuilder().api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .build()
+            .graphStore(NativeFactory.class);
+
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName(getUsername(), testGraphName), initialGraphStore);
+
+        String mutateQuery = GdsCypher
+            .call()
+            .explicitCreation(testGraphName)
+            .algo("labelPropagation")
+            .mutateMode()
+            .addParameter("mutateProperty", mutateProperty())
+            .yields();
+
+        runQuery(mutateQuery);
+
+        String writeQuery = GdsCypher
+            .call()
+            .explicitCreation(testGraphName)
+            .algo("labelPropagation")
+            .writeMode()
+            .addParameter("seedProperty", mutateProperty())
+            .addParameter("writeProperty", mutateProperty())
+            .yields();
+
+        runQuery(writeQuery);
+
+        Graph updatedGraph = new StoreLoaderBuilder().api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
+            .build()
+            .graph(NativeFactory.class);
+
+        assertGraphEquals(fromGdl(expectedMutatedGraph()), updatedGraph);
     }
 
     @Test
