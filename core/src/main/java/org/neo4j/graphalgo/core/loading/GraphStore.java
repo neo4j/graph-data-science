@@ -94,7 +94,7 @@ public final class GraphStore {
             RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
             propertyMap.forEach((propertyKey, propertyValues) -> builder.putRelationshipProperty(
                 propertyKey,
-                ImmutableRelationshipProperty.of(propertyKey, NumberType.FLOATING_POINT, propertyValues)
+                RelationshipProperty.of(propertyKey, NumberType.FLOATING_POINT, PropertyState.PERSISTENT, propertyValues)
             ));
             relationshipPropertyStores.put(relationshipType, builder.build());
         });
@@ -348,7 +348,7 @@ public final class GraphStore {
             }
             return builder.putIfAbsent(
                 propertyKey,
-                ImmutableRelationshipProperty.of(propertyKey, propertyType, propertyCSR)
+                ImmutableRelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyCSR)
             ).build();
         });
     }
@@ -684,10 +684,12 @@ public final class GraphStore {
 
         NumberType type();
 
+        PropertyState state();
+
         HugeGraph.PropertyCSR values();
 
-        static RelationshipProperty of(String key, NumberType type, HugeGraph.PropertyCSR values) {
-            return ImmutableRelationshipProperty.of(key, type, values);
+        static RelationshipProperty of(String key, NumberType type, PropertyState state, HugeGraph.PropertyCSR values) {
+            return ImmutableRelationshipProperty.of(key, type, state, values);
         }
     }
 }
