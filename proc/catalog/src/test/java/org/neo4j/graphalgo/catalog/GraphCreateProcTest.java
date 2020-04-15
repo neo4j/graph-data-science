@@ -47,9 +47,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -82,7 +80,6 @@ import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -747,7 +744,7 @@ class GraphCreateProcTest extends BaseProcTest {
                         NODE_PROJECTION_KEY, "*",
                         RELATIONSHIP_PROJECTION_KEY, "*"))
                 );
-                proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c, NativeFactory.class), () -> 42);
+                proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c), () -> 42);
             });
         });
 
@@ -767,7 +764,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     SUDO_KEY, true
                 ))
             );
-            proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c, NativeFactory.class), () -> 42);
+            proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c), () -> 42);
         });
     }
 
@@ -781,7 +778,7 @@ class GraphCreateProcTest extends BaseProcTest {
                         NODE_QUERY_KEY, "MATCH (n) RETURN n",
                         RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r"))
                 );
-                proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c, CypherFactory.class), () -> 42);
+                proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c), () -> 42);
             });
         });
 
@@ -801,7 +798,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     SUDO_KEY, true
                 ))
             );
-            proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c, CypherFactory.class), () -> 42);
+            proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c), () -> 42);
         });
     }
 

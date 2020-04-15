@@ -80,7 +80,7 @@ public class GraphCreateProc extends CatalogProc {
         // computation
         GraphCreateNativeResult result = runWithExceptionLogging(
             "Graph creation failed",
-            () -> (GraphCreateNativeResult) createGraph(config, NativeFactory.class)
+            () -> (GraphCreateNativeResult) createGraph(config)
         );
         // result
         return Stream.of(result);
@@ -102,7 +102,7 @@ public class GraphCreateProc extends CatalogProc {
             cypherConfig
         );
         validateConfig(cypherConfig, config);
-        return estimateGraph(config, NativeFactory.class);
+        return estimateGraph(config);
     }
 
     @Procedure(name = "gds.graph.create.cypher", mode = READ)
@@ -129,7 +129,7 @@ public class GraphCreateProc extends CatalogProc {
         // computation
         GraphCreateCypherResult result = runWithExceptionLogging(
             "Graph creation failed",
-            () -> (GraphCreateCypherResult) createGraph(config, CypherFactory.class)
+            () -> (GraphCreateCypherResult) createGraph(config)
         );
         // result
         return Stream.of(result);
@@ -152,25 +152,28 @@ public class GraphCreateProc extends CatalogProc {
         );
         validateConfig(cypherConfig, config);
 
-        return estimateGraph(config, CypherFactory.class);
+        return estimateGraph(config);
     }
 
-    private GraphCreateResult createGraph(GraphCreateConfig config, Class<? extends GraphStoreFactory> factoryClazz) {
-        tryValidateMemoryUsage(config, c -> memoryTreeWithDimensions(c, factoryClazz));
-        boolean isCypherConfig = config instanceof GraphCreateFromCypherConfig;
+    private Class<? extends GraphStoreFactory> getFactoryClazz(GraphCreateConfig config) {
+        return config.isCypher() ? CypherFactory.class : NativeFactory.class;
+    }
 
-        GraphCreateResult.Builder builder = isCypherConfig
+    private GraphCreateResult createGraph(GraphCreateConfig config) {
+        tryValidateMemoryUsage(config, c -> memoryTreeWithDimensions(c));
+
+        GraphCreateResult.Builder builder = config.isCypher()
             ? new GraphCreateCypherResult.Builder((GraphCreateFromCypherConfig) config)
-            : new GraphCreateNativeResult.Builder(config) ;
+            : new GraphCreateNativeResult.Builder(config);
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-            GraphStoreFactory graphStoreFactory = loader.build(factoryClazz);
+            GraphStoreFactory graphStoreFactory = loader.build(getFactoryClazz(config));
             GraphStoreFactory.ImportResult importResult = graphStoreFactory.build();
 
             GraphStore graphStore =  importResult.graphStore();
             GraphDimensions dimensions = importResult.dimensions();
-            GraphCreateConfig catalogConfig = isCypherConfig
+            GraphCreateConfig catalogConfig = config.isCypher()
                 ? ((GraphCreateFromCypherConfig) config).inferProjections(dimensions)
                 : config;
 
@@ -184,13 +187,13 @@ public class GraphCreateProc extends CatalogProc {
         return builder.build();
     }
 
-    private Stream<MemoryEstimateResult> estimateGraph(GraphCreateConfig config, Class<? extends GraphStoreFactory> factoryClazz) {
-        return Stream.of(new MemoryEstimateResult(memoryTreeWithDimensions(config, factoryClazz)));
+    private Stream<MemoryEstimateResult> estimateGraph(GraphCreateConfig config) {
+        return Stream.of(new MemoryEstimateResult(memoryTreeWithDimensions(config)));
     }
 
-    public MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config, Class<? extends GraphStoreFactory> factoryClazz) {
+    public MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-        GraphStoreFactory graphStoreFactory = loader.build(factoryClazz);
+        GraphStoreFactory graphStoreFactory = loader.build(getFactoryClazz(config));
         GraphDimensions dimensions = updateDimensions(config, graphStoreFactory, graphStoreFactory.dimensions());
 
         MemoryTree memoryTree = estimate(graphStoreFactory, dimensions, config);

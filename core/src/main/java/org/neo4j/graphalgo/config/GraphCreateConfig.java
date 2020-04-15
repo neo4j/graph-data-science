@@ -93,6 +93,12 @@ public interface GraphCreateConfig extends BaseConfig {
         return false;
     }
 
+    @Value.Default
+    @Value.Parameter(false)
+    default boolean isCypher() {
+        return false;
+    }
+
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
         CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(
             NODE_PROJECTION_KEY,

@@ -105,6 +105,13 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     @Value.Default
     default PropertyMappings nodeProperties() { return PropertyMappings.of(); }
 
+    @Override
+    @Value.Default
+    @Value.Parameter(false)
+    default boolean isCypher() {
+        return true;
+    }
+
     @Configuration.Ignore
     default GraphCreateFromCypherConfig inferProjections(GraphDimensions dimensions) {
         List<PropertyMapping> nodeProperties = dimensions
