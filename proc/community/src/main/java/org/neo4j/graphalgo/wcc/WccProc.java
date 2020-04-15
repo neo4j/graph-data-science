@@ -22,19 +22,18 @@ package org.neo4j.graphalgo.wcc;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.logging.Log;
+
+import static org.neo4j.graphalgo.core.loading.GraphStore.PropertyOrigin.CREATE;
+import static org.neo4j.graphalgo.core.loading.GraphStore.PropertyOrigin.MUTATE;
 
 final class WccProc {
 
@@ -82,18 +81,27 @@ final class WccProc {
         String resultProperty
     ) {
         var config = computationResult.config();
+        var graphStore = computationResult.graphStore();
 
         var consecutiveIds = config.consecutiveIds();
         var isIncremental = config.isIncremental();
-        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
+        var seedProperty = config.seedProperty();
+        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(seedProperty);
 
         PropertyTranslator.OfLong<DisjointSetStruct> nonSeedingTranslator = DisjointSetStruct::setIdOf;
 
         if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            return new PropertyTranslator.OfLongIfChanged<>(
-                computationResult.graph().nodeProperties(config.seedProperty()),
-                DisjointSetStruct::setIdOf
-            );
+            var propertyOrigin = graphStore.nodeProperty(seedProperty).origin();
+            if (propertyOrigin == CREATE) {
+                return new PropertyTranslator.OfLongIfChanged<>(
+                    computationResult.graph().nodeProperties(seedProperty),
+                    DisjointSetStruct::setIdOf
+                );
+            } else if (propertyOrigin == MUTATE) {
+                return nonSeedingTranslator;
+            } else {
+                throw new UnsupportedOperationException(String.format("Invalid property origin: %s", propertyOrigin));
+            }
         } else if (consecutiveIds && !isIncremental) {
             return new PropertyTranslator.ConsecutivePropertyTranslator<>(
                 computationResult.result(),
