@@ -32,9 +32,6 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.logging.Log;
 
-import static org.neo4j.graphalgo.core.loading.GraphStore.PropertyState.PERSISTENT;
-import static org.neo4j.graphalgo.core.loading.GraphStore.PropertyState.TRANSIENT;
-
 final class WccProc {
 
     static final String WCC_DESCRIPTION =
