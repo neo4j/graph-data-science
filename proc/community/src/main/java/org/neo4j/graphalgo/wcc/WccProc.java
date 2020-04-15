@@ -91,17 +91,7 @@ final class WccProc {
         PropertyTranslator.OfLong<DisjointSetStruct> nonSeedingTranslator = DisjointSetStruct::setIdOf;
 
         if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            var propertyState = graphStore.nodeProperty(seedProperty).state();
-            if (propertyState == PERSISTENT) {
-                return new PropertyTranslator.OfLongIfChanged<>(
-                    computationResult.graph().nodeProperties(seedProperty),
-                    DisjointSetStruct::setIdOf
-                );
-            } else if (propertyState == TRANSIENT) {
-                return nonSeedingTranslator;
-            } else {
-                throw new UnsupportedOperationException(String.format("Invalid property origin: %s", propertyState));
-            }
+            return PropertyTranslator.OfLongIfChanged.of(graphStore, seedProperty, DisjointSetStruct::setIdOf);
         } else if (consecutiveIds && !isIncremental) {
             return new PropertyTranslator.ConsecutivePropertyTranslator<>(
                 computationResult.result(),

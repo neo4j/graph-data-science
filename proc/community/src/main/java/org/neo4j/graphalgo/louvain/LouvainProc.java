@@ -20,16 +20,11 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-
-import java.util.Objects;
-import java.util.Optional;
 
 final class LouvainProc {
 
@@ -42,19 +37,23 @@ final class LouvainProc {
         AlgoBaseProc.ComputationResult<Louvain, Louvain, CONFIG> computationResult,
         String resultProperty
     ) {
-        Graph graph = computationResult.graph();
-        Louvain louvain = computationResult.result();
-        CONFIG config = computationResult.config();
+        var graph = computationResult.graph();
+        var louvain = computationResult.result();
+        var config = computationResult.config();
+        var graphStore = computationResult.graphStore();
 
-        boolean isIncremental = config.isIncremental();
-        boolean consecutiveIds = config.consecutiveIds();
-        boolean includeIntermediateCommunities = config.includeIntermediateCommunities();
-
-        Optional<NodeProperties> seed = Optional.ofNullable(louvain.config().seedProperty()).map(graph::nodeProperties);
+        var isIncremental = config.isIncremental();
+        var consecutiveIds = config.consecutiveIds();
+        var seedProperty = config.seedProperty();
+        var includeIntermediateCommunities = config.includeIntermediateCommunities();
 
         if (!includeIntermediateCommunities) {
-            if (isIncremental && Objects.equals(config.seedProperty(), resultProperty)) {
-                return new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
+            if (isIncremental && resultProperty.equals(seedProperty)) {
+                return PropertyTranslator.OfLongIfChanged.of(
+                    graphStore,
+                    seedProperty,
+                    Louvain::getCommunity
+                );
             } else if (consecutiveIds) {
                 return new PropertyTranslator.ConsecutivePropertyTranslator<>(
                     louvain,

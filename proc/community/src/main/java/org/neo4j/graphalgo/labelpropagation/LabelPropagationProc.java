@@ -39,18 +39,21 @@ final class LabelPropagationProc {
         String resultProperty
     ) {
         var config = computationResult.config();
+        var graphStore = computationResult.graphStore();
 
         var consecutiveIds = config.consecutiveIds();
         var isIncremental = config.isIncremental();
-        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
+        var seedProperty = config.seedProperty();
+        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(seedProperty);
 
         PropertyTranslator.OfLong<LabelPropagation> nonSeedingTranslator = (data, nodeId) -> data
             .labels()
             .get(nodeId);
 
         if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            return new PropertyTranslator.OfLongIfChanged<>(
-                computationResult.graph().nodeProperties(config.seedProperty()),
+            return PropertyTranslator.OfLongIfChanged.of(
+                graphStore,
+                seedProperty,
                 (data, nodeId) -> data.labels().get(nodeId)
             );
         } else if (config.consecutiveIds() && !isIncremental) {
