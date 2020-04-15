@@ -20,8 +20,7 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
@@ -29,7 +28,6 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Objects;
-import java.util.Optional;
 
 final class LouvainProc {
 
@@ -42,14 +40,19 @@ final class LouvainProc {
         AlgoBaseProc.ComputationResult<Louvain, Louvain, CONFIG> computationResult,
         String resultProperty
     ) {
-        Graph graph = computationResult.graph();
-        Louvain louvain = computationResult.result();
         CONFIG config = computationResult.config();
-        Optional<NodeProperties> seed = Optional.ofNullable(louvain.config().seedProperty()).map(graph::nodeProperties);
+        GraphStore graphStore = computationResult.graphStore();
+        Louvain louvain = computationResult.result();
+        String seedProperty = config.seedProperty();
+
         PropertyTranslator<Louvain> translator;
         if (!louvain.config().includeIntermediateCommunities()) {
-            if (seed.isPresent() && Objects.equals(config.seedProperty(), resultProperty)) {
-                translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
+            if (Objects.equals(seedProperty, resultProperty)) {
+                translator = PropertyTranslator.OfLongIfChanged.of(
+                    graphStore,
+                    seedProperty,
+                    Louvain::getCommunity
+                );
             } else {
                 translator = LouvainWriteProc.CommunityTranslator.INSTANCE;
             }

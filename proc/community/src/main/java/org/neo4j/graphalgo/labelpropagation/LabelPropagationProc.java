@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
@@ -39,13 +39,15 @@ final class LabelPropagationProc {
         String resultProperty
     ) {
         CONFIG config = computationResult.config();
+        GraphStore graphStore = computationResult.graphStore();
+        String seedProperty = config.seedProperty();
 
-        boolean resultPropertyEqualsSeedProperty = config.seedProperty() != null && resultProperty.equals(config.seedProperty());
+        boolean resultPropertyEqualsSeedProperty = seedProperty != null && resultProperty.equals(seedProperty);
 
         if (resultPropertyEqualsSeedProperty) {
-            NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
-            return new PropertyTranslator.OfLongIfChanged<>(
-                seedProperties,
+            return PropertyTranslator.OfLongIfChanged.of(
+                graphStore,
+                seedProperty,
                 (data, nodeId) -> data.labels().get(nodeId)
             );
         }

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -123,7 +124,7 @@ public interface PropertyTranslator<T> {
     }
 
     @FunctionalInterface
-    interface SeededDataAccessFunction<T> {
+    interface DataAccessFunction<T> {
 
         long getValue(T data, long nodeId);
 
@@ -132,9 +133,18 @@ public interface PropertyTranslator<T> {
     final class OfLongIfChanged<T> implements PropertyTranslator<T> {
 
         private final NodeProperties currentProperties;
-        private final SeededDataAccessFunction<T> newPropertiesFn;
+        private final DataAccessFunction<T> newPropertiesFn;
 
-        public OfLongIfChanged(NodeProperties currentProperties, SeededDataAccessFunction<T> newPropertiesFn) {
+        public static <T> PropertyTranslator<T> of(GraphStore graphStore, String seedProperty, DataAccessFunction<T> accessFunction) {
+            GraphStore.PropertyState propertyState = graphStore.nodeProperty(seedProperty).state();
+            if (propertyState == GraphStore.PropertyState.PERSISTENT) {
+                return new OfLongIfChanged<T>(graphStore.nodeProperty(seedProperty).values(), accessFunction);
+            } else {
+                return (OfLong<T>) accessFunction::getValue;
+            }
+        }
+
+        private OfLongIfChanged(NodeProperties currentProperties, DataAccessFunction<T> newPropertiesFn) {
             this.currentProperties = currentProperties;
             this.newPropertiesFn = newPropertiesFn;
         }
