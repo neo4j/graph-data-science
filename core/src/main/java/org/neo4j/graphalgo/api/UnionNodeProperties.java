@@ -50,6 +50,9 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public long size() {
-        return labelToNodePropertiesMap.values().stream().map(NodeProperties::size).reduce(Long::sum).orElse(0L);
+        return labelToNodePropertiesMap.values().stream()
+            .map(NodeProperties::size)
+            .reduce(Long::sum)
+            .orElse(0L);
     }
 }
