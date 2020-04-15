@@ -60,9 +60,9 @@ import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<CONFIG, NodeSimilarityResult>,
-    MemoryEstimateTest<CONFIG, NodeSimilarityResult>,
-    HeapControlTest<CONFIG, NodeSimilarityResult> {
+    AlgoBaseProcTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
+    MemoryEstimateTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
+    HeapControlTest<NodeSimilarity, CONFIG, NodeSimilarityResult> {
 
     static final String DB_CYPHER =
         "CREATE" +

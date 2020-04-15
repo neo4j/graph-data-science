@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.beta.modularity;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
@@ -32,6 +33,7 @@ public interface ModularityOptimizationConfig extends
     AlgoBaseConfig,
     IterationsConfig,
     SeedConfig,
+    ConsecutiveIdsConfig,
     ToleranceConfig,
     RelationshipWeightConfig {
 
@@ -52,5 +54,12 @@ public interface ModularityOptimizationConfig extends
     @Value.Default
     default int batchSize() {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
+    }
+
+    @Value.Check
+    default void validate() {
+        if (isIncremental() && consecutiveIds()) {
+            throw new IllegalArgumentException("Seeding and the `consecutiveIds` option cannot be used at the same time.");
+        }
     }
 }

@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NodeSimilarityMutateProcTest
     extends NodeSimilarityProcTest<NodeSimilarityMutateConfig>
-    implements GraphMutationTest<NodeSimilarityMutateConfig, NodeSimilarityResult> {
+    implements GraphMutationTest<NodeSimilarity, NodeSimilarityMutateConfig, NodeSimilarityResult> {
 
     private static final String MUTATE_RELATIONSHIP_TYPE = "SIMILAR_TO";
 
@@ -46,7 +46,7 @@ class NodeSimilarityMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<?, NodeSimilarityResult, NodeSimilarityMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig>> getProcedureClazz() {
         return NodeSimilarityMutateProc.class;
     }
 

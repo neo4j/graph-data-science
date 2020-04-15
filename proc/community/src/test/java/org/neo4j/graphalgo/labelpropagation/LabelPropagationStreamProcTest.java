@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropagationStreamConfig> {
     @Override
-    public Class<? extends AlgoBaseProc<?, LabelPropagation, LabelPropagationStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig>> getProcedureClazz() {
         return LabelPropagationStreamProc.class;
     }
 

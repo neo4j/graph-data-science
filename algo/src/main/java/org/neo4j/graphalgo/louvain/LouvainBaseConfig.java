@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.louvain;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
@@ -29,6 +30,7 @@ import org.neo4j.graphalgo.config.ToleranceConfig;
 public interface LouvainBaseConfig extends
     AlgoBaseConfig,
     SeedConfig,
+    ConsecutiveIdsConfig,
     RelationshipWeightConfig,
     ToleranceConfig,
     IterationsConfig {
@@ -53,5 +55,16 @@ public interface LouvainBaseConfig extends
     @Value.Default
     default boolean includeIntermediateCommunities() {
         return false;
+    }
+
+    @Value.Check
+    default void validate() {
+        if (isIncremental() && consecutiveIds()) {
+            throw new IllegalArgumentException("Seeding and the `consecutiveIds` option cannot be used at the same time.");
+        }
+
+        if (includeIntermediateCommunities() && consecutiveIds()) {
+            throw new IllegalArgumentException("`includeIntermediateResults` and the `consecutiveIds` option cannot be used at the same time.");
+        }
     }
 }

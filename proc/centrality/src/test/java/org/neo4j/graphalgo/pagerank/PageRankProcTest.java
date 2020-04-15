@@ -53,12 +53,12 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<CONFIG, PageRank>,
-    IterationsConfigTest<CONFIG, PageRank>,
-    RelationshipWeightConfigTest<CONFIG, PageRank>,
-    ToleranceConfigTest<CONFIG, PageRank>,
-    MemoryEstimateTest<CONFIG, PageRank>,
-    HeapControlTest<CONFIG, PageRank> {
+    AlgoBaseProcTest<PageRank, CONFIG, PageRank>,
+    IterationsConfigTest<PageRank, CONFIG, PageRank>,
+    RelationshipWeightConfigTest<PageRank, CONFIG, PageRank>,
+    ToleranceConfigTest<PageRank, CONFIG, PageRank>,
+    MemoryEstimateTest<PageRank, CONFIG, PageRank>,
+    HeapControlTest<PageRank, CONFIG, PageRank> {
 
     static Map<Long, Double> expected = new HashMap<>();
     static Map<Long, Double> weightedExpected = new HashMap<>();

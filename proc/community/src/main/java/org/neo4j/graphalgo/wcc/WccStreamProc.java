@@ -85,30 +85,19 @@ public class WccStreamProc extends StreamProc<
     }
 
     @Override
-    protected WccStreamProc.StreamResult streamResult(long nodeId, long originalNodeId, DisjointSetStruct computationResult) {
-        throw new UnsupportedOperationException("gds.wcc.stream overrides StreamProc#stream");
+    protected StreamResult streamResult(long originalNodeId, double value) {
+        return new WccStreamProc.StreamResult(originalNodeId, (long) value);
     }
 
     @Override
-    protected Stream<WccStreamProc.StreamResult> stream(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
-        if (computationResult.isGraphEmpty()) {
-            return Stream.empty();
-        }
-
+    protected PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
         DisjointSetStruct dss = computationResult.result();
 
-        PropertyTranslator.OfLong<DisjointSetStruct> propertyTranslator = computationResult.config().consecutiveIds()
-            ? new WccProc.ConsecutivePropertyTranslator(dss, computationResult.tracker())
-            : (data, nodeId) -> dss.setIdOf(nodeId);
+        PropertyTranslator.OfLong<DisjointSetStruct> simpleTranslator = (data, nodeId) -> dss.setIdOf(nodeId);
 
-        Graph graph = computationResult.graph();
-        return LongStream
-            .range(IdMapping.START_NODE_ID, graph.nodeCount())
-            .mapToObj(nodeId -> new WccStreamProc.StreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    propertyTranslator.toLong(dss, nodeId)
-                )
-            );
+        return computationResult.config().consecutiveIds()
+            ? new PropertyTranslator.ConsecutivePropertyTranslator<>(dss, simpleTranslator, computationResult.graph().nodeCount(), computationResult.tracker())
+            : simpleTranslator;
     }
 
     public static class StreamResult {

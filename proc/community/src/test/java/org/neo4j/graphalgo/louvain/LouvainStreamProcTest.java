@@ -42,7 +42,7 @@ import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
 class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
     @Override
-    public Class<? extends AlgoBaseProc<?, Louvain, LouvainStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainStreamConfig>> getProcedureClazz() {
         return LouvainStreamProc.class;
     }
 

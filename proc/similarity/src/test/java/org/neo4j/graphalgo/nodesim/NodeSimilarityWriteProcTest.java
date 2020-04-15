@@ -46,7 +46,7 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimilarityWriteConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<?, NodeSimilarityResult, NodeSimilarityWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig>> getProcedureClazz() {
         return NodeSimilarityWriteProc.class;
     }
 

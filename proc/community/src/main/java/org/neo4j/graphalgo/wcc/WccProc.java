@@ -81,61 +81,28 @@ final class WccProc {
         AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
         String resultProperty
     ) {
-        CONFIG config = computationResult.config();
+        var config = computationResult.config();
 
-        boolean consecutiveIds = config.consecutiveIds();
-        boolean isIncremental = config.isIncremental();
+        var consecutiveIds = config.consecutiveIds();
+        var isIncremental = config.isIncremental();
+        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
 
-        boolean resultPropertyEqualsSeedProperty = config.seedProperty() != null && resultProperty.equals(config.seedProperty());
+        PropertyTranslator.OfLong<DisjointSetStruct> nonSeedingTranslator = DisjointSetStruct::setIdOf;
 
-        PropertyTranslator<DisjointSetStruct> propertyTranslator;
         if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            NodeProperties seedProperties = computationResult.graph().nodeProperties(config.seedProperty());
-            propertyTranslator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, DisjointSetStruct::setIdOf);
+            return new PropertyTranslator.OfLongIfChanged<>(
+                computationResult.graph().nodeProperties(config.seedProperty()),
+                DisjointSetStruct::setIdOf
+            );
         } else if (consecutiveIds && !isIncremental) {
-            propertyTranslator = new ConsecutivePropertyTranslator(
+            return new PropertyTranslator.ConsecutivePropertyTranslator<>(
                 computationResult.result(),
+                nonSeedingTranslator,
+                computationResult.graph().nodeCount(),
                 computationResult.tracker()
             );
         } else {
-            propertyTranslator = (PropertyTranslator.OfLong<DisjointSetStruct>) DisjointSetStruct::setIdOf;
-        }
-
-        return propertyTranslator;
-    }
-
-    static class ConsecutivePropertyTranslator implements PropertyTranslator.OfLong<DisjointSetStruct> {
-
-        // Magic number to estimate the number of communities that need to be mapped into consecutive space
-        private static final long MAPPING_SIZE_QUOTIENT = 10L;
-
-        private final HugeLongArray communities;
-
-        ConsecutivePropertyTranslator(DisjointSetStruct dss, AllocationTracker tracker) {
-
-            long nextConsecutiveId = -1L;
-
-            // TODO is there a better way to set the initial size, e.g. dss.setCount
-            HugeLongLongMap setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
-                dss.size(),
-                MAPPING_SIZE_QUOTIENT
-            ), tracker);
-            this.communities = HugeLongArray.newArray(dss.size(), tracker);
-
-            for (int nodeId = 0; nodeId < dss.size(); nodeId++) {
-                long setId = dss.setIdOf(nodeId);
-                long communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
-                if (communityId == -1) {
-                    setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
-                    communityId = nextConsecutiveId;
-                }
-                communities.set(nodeId, communityId);
-            }
-        }
-
-        @Override
-        public long toLong(DisjointSetStruct data, long nodeId) {
-            return communities.get(nodeId);
+            return nonSeedingTranslator;
         }
     }
 }

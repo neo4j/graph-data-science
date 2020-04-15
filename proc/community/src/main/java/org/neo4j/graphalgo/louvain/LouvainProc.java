@@ -45,18 +45,29 @@ final class LouvainProc {
         Graph graph = computationResult.graph();
         Louvain louvain = computationResult.result();
         CONFIG config = computationResult.config();
+
+        boolean isIncremental = config.isIncremental();
+        boolean consecutiveIds = config.consecutiveIds();
+        boolean includeIntermediateCommunities = config.includeIntermediateCommunities();
+
         Optional<NodeProperties> seed = Optional.ofNullable(louvain.config().seedProperty()).map(graph::nodeProperties);
-        PropertyTranslator<Louvain> translator;
-        if (!louvain.config().includeIntermediateCommunities()) {
-            if (seed.isPresent() && Objects.equals(config.seedProperty(), resultProperty)) {
-                translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
+
+        if (!includeIntermediateCommunities) {
+            if (isIncremental && Objects.equals(config.seedProperty(), resultProperty)) {
+                return new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
+            } else if (consecutiveIds) {
+                return new PropertyTranslator.ConsecutivePropertyTranslator<>(
+                    louvain,
+                    LouvainWriteProc.CommunityTranslator.INSTANCE,
+                    graph.nodeCount(),
+                    computationResult.tracker()
+                );
             } else {
-                translator = LouvainWriteProc.CommunityTranslator.INSTANCE;
+                return LouvainWriteProc.CommunityTranslator.INSTANCE;
             }
         } else {
-            translator = LouvainWriteProc.CommunitiesTranslator.INSTANCE;
+            return LouvainWriteProc.CommunitiesTranslator.INSTANCE;
         }
-        return translator;
     }
 
     static <PROC_RESULT, CONFIG extends LouvainBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

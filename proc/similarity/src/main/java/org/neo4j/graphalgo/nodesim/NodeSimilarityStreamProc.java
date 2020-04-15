@@ -88,7 +88,7 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
     }
 
     @Override
-    protected SimilarityResult streamResult(long nodeId, long originalNodeId, NodeSimilarityResult computationResult) {
+    protected SimilarityResult streamResult(long originalNodeId, double value) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 }

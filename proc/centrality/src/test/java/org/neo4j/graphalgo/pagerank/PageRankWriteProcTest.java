@@ -35,10 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implements
-    WritePropertyConfigTest<PageRankWriteConfig, PageRank> {
+    WritePropertyConfigTest<PageRank, PageRankWriteConfig, PageRank> {
 
     @Override
-    public Class<? extends AlgoBaseProc<?, PageRank, PageRankWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRank, PageRank, PageRankWriteConfig>> getProcedureClazz() {
         return PageRankWriteProc.class;
     }
 

@@ -20,6 +20,10 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -154,6 +158,41 @@ public interface PropertyTranslator<T> {
             double seedValue = currentProperties.nodeProperty(nodeId, Double.NaN);
             long computedValue = newPropertiesFn.getValue(data, nodeId);
             return Double.isNaN(seedValue) || ((long) seedValue != computedValue) ? Values.longValue(computedValue) : null;
+        }
+    }
+
+     class ConsecutivePropertyTranslator<DATA, TRANSLATOR extends OfLong<DATA>> implements PropertyTranslator.OfLong<DATA> {
+
+        // Magic number to estimate the number of communities that need to be mapped into consecutive space
+        private static final long MAPPING_SIZE_QUOTIENT = 10L;
+
+        private final HugeLongArray communities;
+
+        public ConsecutivePropertyTranslator(DATA data, TRANSLATOR innerTranslator, long nodeCount, AllocationTracker tracker) {
+
+            var nextConsecutiveId = -1L;
+
+            var setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
+                nodeCount,
+                MAPPING_SIZE_QUOTIENT
+            ), tracker);
+
+            this.communities = HugeLongArray.newArray(nodeCount, tracker);
+
+            for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
+                var setId = innerTranslator.toLong(data, nodeId);
+                var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
+                if (communityId == -1) {
+                    setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
+                    communityId = nextConsecutiveId;
+                }
+                communities.set(nodeId, communityId);
+            }
+        }
+
+        @Override
+        public long toLong(DATA data, long nodeId) {
+            return communities.get(nodeId);
         }
     }
 }

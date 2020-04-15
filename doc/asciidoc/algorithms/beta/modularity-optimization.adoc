@@ -60,6 +60,7 @@ include::../common-configuration.adoc[]
 | writeProperty                  | String  | n/a         | yes      | The property name written back the ID of the partition particular node belongs to.
 | maxIterations                  | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
 | tolerance                      | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| consecutiveIds                 | Boolean | false       | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
@@ -121,6 +122,7 @@ include::../common-configuration.adoc[]
 | tolerance                  | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
 | seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
+| consecutiveIds             | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results

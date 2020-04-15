@@ -80,7 +80,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
 
     @Override
     protected PropertyTranslator<ModularityOptimization> nodePropertyTranslator(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult) {
-        return ModularityOptimizationProc.ModularityOptimizationTranslator.INSTANCE;
+        return ModularityOptimizationProc.nodePropertyTranslator(computationResult);
     }
 
     @Override

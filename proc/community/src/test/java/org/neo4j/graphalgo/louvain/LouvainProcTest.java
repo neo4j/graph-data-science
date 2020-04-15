@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.IterationsConfigTest;
@@ -39,6 +40,7 @@ import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -55,13 +57,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<CONFIG, Louvain>,
-    SeedConfigTest<CONFIG, Louvain>,
-    IterationsConfigTest<CONFIG, Louvain>,
-    RelationshipWeightConfigTest<CONFIG, Louvain>,
-    ToleranceConfigTest<CONFIG, Louvain>,
-    MemoryEstimateTest<CONFIG, Louvain>,
-    HeapControlTest<CONFIG, Louvain> {
+    AlgoBaseProcTest<Louvain, CONFIG, Louvain>,
+    SeedConfigTest<Louvain, CONFIG, Louvain>,
+    ConsecutiveIdsConfigTest<Louvain, CONFIG, Louvain>,
+    IterationsConfigTest<Louvain, CONFIG, Louvain>,
+    RelationshipWeightConfigTest<Louvain, CONFIG, Louvain>,
+    ToleranceConfigTest<Louvain, CONFIG, Louvain>,
+    MemoryEstimateTest<Louvain, CONFIG, Louvain>,
+    HeapControlTest<Louvain, CONFIG, Louvain> {
 
     static final List<List<Long>> RESULT = Arrays.asList(
         Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 14L),

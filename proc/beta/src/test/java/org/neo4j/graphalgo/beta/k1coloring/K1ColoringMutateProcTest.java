@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements GraphMutationTest<K1ColoringMutateConfig, HugeLongArray> {
+public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements GraphMutationTest<K1Coloring, K1ColoringMutateConfig, HugeLongArray> {
 
     @Override
     public String mutateProperty() {
@@ -63,7 +63,7 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements 
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<?, HugeLongArray, K1ColoringMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringMutateConfig>> getProcedureClazz() {
         return K1ColoringMutateProc.class;
     }
 

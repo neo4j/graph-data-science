@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GdsCypher.ExecutionModes.MUTATE;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
-class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements GraphMutationTest<ModularityOptimizationMutateConfig, ModularityOptimization> {
+class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements GraphMutationTest<ModularityOptimization, ModularityOptimizationMutateConfig, ModularityOptimization> {
 
     private static final String TEST_GRAPH_NAME = "myGraph";
 
@@ -172,7 +172,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<?, ModularityOptimization, ModularityOptimizationMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig>> getProcedureClazz() {
         return ModularityOptimizationMutateProc.class;
     }
 
