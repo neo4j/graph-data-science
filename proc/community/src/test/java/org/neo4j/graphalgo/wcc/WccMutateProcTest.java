@@ -23,8 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Optional;
@@ -32,6 +38,8 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMutationTest<WccMutateConfig, DisjointSetStruct> {
 
@@ -73,6 +81,48 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
             ", (f)-[{w: 1.0d}]->(g)" +
             // {H, I}
             ", (h)-[{w: 1.0d}]->(i)";
+    }
+
+    @Test
+    void testMutateAndWriteWithSeeding() {
+        String testGraphName = "wccGraph";
+        GraphStore initialGraphStore = new StoreLoaderBuilder().api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .build()
+            .graphStore(NativeFactory.class);
+
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName(getUsername(), testGraphName), initialGraphStore);
+
+        String mutateQuery = GdsCypher
+            .call()
+            .explicitCreation(testGraphName)
+            .algo("wcc")
+            .mutateMode()
+            .addParameter("mutateProperty", mutateProperty())
+            .yields();
+
+        runQuery(mutateQuery);
+
+        String writeQuery = GdsCypher
+            .call()
+            .explicitCreation(testGraphName)
+            .algo("wcc")
+            .writeMode()
+            .addParameter("seedProperty", mutateProperty())
+            .addParameter("writeProperty", mutateProperty())
+            .yields();
+
+        runQuery(writeQuery);
+
+        String updatedGraph = new StoreLoaderBuilder().api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
+            .build()
+            .graph(NativeFactory.class);
+
+        assertGraphEquals(fromGdl(expectedMutatedGraph()), updatedGraph);
     }
 
     @Test
