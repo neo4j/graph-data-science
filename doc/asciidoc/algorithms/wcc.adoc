@@ -425,6 +425,7 @@ Otherwise, a new unique component ID is assigned to the node.
 
 Once every node belongs to a component, the algorithm merges components of connected nodes.
 When components are merged, the resulting component is always the one with the lower component ID.
+Note that the `consecutiveIds` configuration option cannot be used in combination with seeding in order to retain the seeding values.
 
 [NOTE]
 ====

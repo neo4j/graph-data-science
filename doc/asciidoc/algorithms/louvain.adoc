@@ -91,6 +91,7 @@ include::common-configuration-anonymous-graph.adoc[]
 | maxIterations                  | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
 | tolerance                      | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | includeIntermediateCommunities | Boolean | false       | no       | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
+| consecutiveIds                 | Boolean | false       | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
@@ -182,6 +183,7 @@ include::common-configuration-anonymous-graph.adoc[]
 | maxIterations                  | Integer  | 10      | yes      | The maximum number of iterations that the modularity optimization will run for each level.
 | tolerance                      | Float    | 0.0001  | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | includeIntermediateCommunities | Boolean  | false   | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
+| consecutiveIds                 | Boolean  | false   | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory). Cannot be used in combination with the `includeIntermediateCommunities` flag.
 |===
 
 .Results
@@ -458,6 +460,7 @@ ORDER BY name ASC
 
 Using the seeded graph, we see that the community around `Alice` keeps its initial community ID of `42`.
 The other community is assigned a new community ID, which is guaranteed to be larger than the largest seeded community ID.
+Note that the `consecutiveIds` configuration option cannot be used in combination with seeding in order to retain the seeding values.
 
 
 [[algorithms-louvain-examples-stream-intermediate]]

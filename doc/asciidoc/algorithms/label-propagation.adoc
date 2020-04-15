@@ -102,6 +102,7 @@ include::common-configuration-named-graph.adoc[]
 | nodeWeightProperty         | String  | null    | yes      | The name of the node property that represents weight.
 | relationshipWeightProperty | String  | null    | yes      | The name of the relationship property that represents weight.
 | seedProperty               | String  | n/a     | yes      | Used to define initial set of labels (must be a number).
+| consecutiveIds             | Boolean | false   | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
@@ -191,6 +192,7 @@ include::common-configuration-anonymous-graph.adoc[]
 | nodeWeightProperty         | String  | null                   | yes      | The property name of node that contain weight. Must be numeric.
 | relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
 | seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
+| consecutiveIds             | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
 |===
 
 .Results
@@ -450,6 +452,7 @@ We can use this node property as `seedProperty`.
 The algorithm first checks if there is a seed label assigned to the node.
 If no seed label is present, a new unique label is assigned to the node.
 Using this preliminary set of labels, it then sequentially updates each node's label to a new one, which is the most frequent label among its neighbors at every iteration of label propagation.
+Note that the `consecutiveIds` configuration option cannot be used in combination with seeding in order to retain the seeding values.
 
 [role=query-example]
 --
