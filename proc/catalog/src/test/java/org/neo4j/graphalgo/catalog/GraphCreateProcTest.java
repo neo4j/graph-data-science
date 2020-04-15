@@ -74,6 +74,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
@@ -161,20 +162,8 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", graphName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             singletonList(map(
                 "graphName", graphName,
-                NODE_PROJECTION_KEY, map(
-                    ALL_NODES.name, map(
-                        LABEL_KEY, "*",
-                        PROPERTIES_KEY, emptyMap()
-                    )
-                ),
-                RELATIONSHIP_PROJECTION_KEY, map(
-                    ALL_RELATIONSHIPS.name, map(
-                        TYPE_KEY, "*",
-                        ORIENTATION_KEY, Orientation.NATURAL.name(),
-                        AGGREGATION_KEY, Aggregation.DEFAULT.name(),
-                        PROPERTIES_KEY, emptyMap()
-                    )
-                ),
+                NODE_QUERY_KEY, ALL_NODES_QUERY,
+                RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
@@ -195,20 +184,8 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, map(
-                    ALL_NODES.name, map(
-                        LABEL_KEY, "*",
-                        PROPERTIES_KEY, emptyMap()
-                    )
-                ),
-                RELATIONSHIP_PROJECTION_KEY, map(
-                    "REL", map(
-                        TYPE_KEY, "REL",
-                        ORIENTATION_KEY, Orientation.NATURAL.name(),
-                        AGGREGATION_KEY, Aggregation.DEFAULT.name(),
-                        PROPERTIES_KEY, emptyMap()
-                    )
-                ),
+                NODE_QUERY_KEY, ALL_NODES_QUERY,
+                RELATIONSHIP_QUERY_KEY, relationshipQuery,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
@@ -229,20 +206,8 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", graphName, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY, "validateRelationships", false),
             singletonList(map(
                 "graphName", graphName,
-                NODE_PROJECTION_KEY, map(
-                    ALL_NODES.name, map(
-                        LABEL_KEY, "*",
-                        PROPERTIES_KEY, emptyMap()
-                    )
-                ),
-                RELATIONSHIP_PROJECTION_KEY, map(
-                    ALL_RELATIONSHIPS.name, map(
-                        TYPE_KEY, "*",
-                        ORIENTATION_KEY, Orientation.NATURAL.name(),
-                        AGGREGATION_KEY, Aggregation.DEFAULT.name(),
-                        PROPERTIES_KEY, emptyMap()
-                    )
-                ),
+                NODE_QUERY_KEY, nodeQuery,
+                RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodeCount", 1L,
                 "relationshipCount", 0L,
                 "createMillis", instanceOf(Long.class)
@@ -326,17 +291,19 @@ class GraphCreateProcTest extends BaseProcTest {
         String name = "g";
 
         Map<String, Object> expectedProperties = map("age", map("property", "age", "defaultValue", Double.NaN));
-        Map<String, Object> expectedNodeProjection = map(ALL_NODES.name, map(LABEL_KEY, "*", PROPERTIES_KEY, expectedProperties));
+        String nodeQuery = "RETURN 0 AS id, 1 AS age";
+        String relationshipQuery = "RETURN 0 AS source, 0 AS target";
 
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", name,
-                "nodeQuery", "RETURN 0 AS id, 1 AS age",
-                "relationshipQuery", "RETURN 0 AS source, 0 AS target"),
+                "nodeQuery", nodeQuery,
+                "relationshipQuery", relationshipQuery
+            ),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, expectedNodeProjection,
-                RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
+                NODE_QUERY_KEY, nodeQuery,
+                RELATIONSHIP_QUERY_KEY, relationshipQuery,
                 "nodeCount", 1L,
                 "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
@@ -359,15 +326,8 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeQuery", nodeQuery, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, map(ALL_NODES.name, map(
-                    LABEL_KEY, "*",
-                    PROPERTIES_KEY, map("age", map(
-                        "property", "age",
-                        "defaultValue", Double.NaN
-                        )
-                    ))
-                ),
-                RELATIONSHIP_PROJECTION_KEY, isA(Map.class),
+                NODE_QUERY_KEY, nodeQuery,
+                RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
@@ -487,14 +447,8 @@ class GraphCreateProcTest extends BaseProcTest {
                 "relationshipProperties", relationshipProperties),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, isA(Map.class),
-                RELATIONSHIP_PROJECTION_KEY, map(
-                    ALL_RELATIONSHIPS.name, map("type", "*",
-                        ORIENTATION_KEY, "NATURAL",
-                        AGGREGATION_KEY, "DEFAULT",
-                        PROPERTIES_KEY, expectedProperties
-                    )
-                ),
+                NODE_QUERY_KEY, ALL_NODES_QUERY,
+                RELATIONSHIP_QUERY_KEY, relationshipQuery,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
@@ -516,21 +470,8 @@ class GraphCreateProcTest extends BaseProcTest {
             map("name", name, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", relationshipQuery),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, isA(Map.class),
-                RELATIONSHIP_PROJECTION_KEY, map(
-                    ALL_RELATIONSHIPS.name, map(
-                        "type", "*",
-                        ORIENTATION_KEY, "NATURAL",
-                        AGGREGATION_KEY, "DEFAULT",
-                        PROPERTIES_KEY, map(
-                            "weight", map(
-                                "property", "weight",
-                                "defaultValue", Double.NaN,
-                                AGGREGATION_KEY, "NONE"
-                            )
-                        )
-                    )
-                ),
+                NODE_QUERY_KEY, ALL_NODES_QUERY,
+                RELATIONSHIP_QUERY_KEY, relationshipQuery,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
@@ -645,30 +586,19 @@ class GraphCreateProcTest extends BaseProcTest {
     void relationshipQueryPropertyAggregations(Aggregation aggregationParam) {
         String aggregation = aggregationParam.toString();
         String name = "g";
+        String relationshipQuery = "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target, r.weight AS weight";
 
         assertCypherResult(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
             map("name", name,
                 "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target, r.weight AS weight",
+                "relationshipQuery", relationshipQuery,
                 "relationshipProperties", map("weight", map("aggregation", aggregation))
             ),
             singletonList(map(
                 "graphName", name,
-                NODE_PROJECTION_KEY, isA(Map.class),
-                RELATIONSHIP_PROJECTION_KEY, map(
-                    ALL_RELATIONSHIPS.name,
-                    map("type", "*",
-                        ORIENTATION_KEY, "NATURAL",
-                        AGGREGATION_KEY, "DEFAULT",
-                        PROPERTIES_KEY, map("weight", map(
-                                "property", "weight",
-                                AGGREGATION_KEY, aggregation,
-                                "defaultValue", Double.NaN
-                            )
-                        )
-                    )
-                ),
+                NODE_QUERY_KEY, ALL_NODES_QUERY,
+                RELATIONSHIP_QUERY_KEY, relationshipQuery,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "createMillis", instanceOf(Long.class)
@@ -1556,6 +1486,14 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphDoesNotExist(name);
+    }
+
+    @Test
+    void cypherCreationShouldNotReturnProjections() {
+        runQueryWithResultConsumer("CALL gds.graph.create.cypher('test', '*', '*')", result -> {
+            assertFalse(result.columns().contains(NODE_PROJECTION_KEY));
+            assertFalse(result.columns().contains(RELATIONSHIP_PROJECTION_KEY));
+        });
     }
 
     private Graph relPropertyGraph(String graphName, RelationshipType relationshipType, String property) {

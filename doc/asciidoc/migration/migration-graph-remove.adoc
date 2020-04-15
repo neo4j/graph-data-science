@@ -12,8 +12,8 @@
 | `removed`           | -
 | `type`              | -
 | `direction`         | -
-| -                   | `nodeProjection`
-| -                   | `relationshipProjection`
+| -                   | `nodeProjection` footnote:remove-native[Field will be `null` if a Cypher projection was used]
+| -                   | `relationshipProjection` footnote:remove-native[]
 | -                   | `nodeQuery` footnote:remove-cypher[Field will be `null` unless a Cypher projection was used]
 | -                   | `relationshipQuery` footnote:remove-cypher[]
 | -                   | `degreeDistribution`

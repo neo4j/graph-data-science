@@ -51,16 +51,22 @@ public class GraphInfo {
 
     GraphInfo(GraphCreateConfig config, GraphStore graphStore, boolean computeHistogram) {
         this.graphName = config.graphName();
-        this.nodeProjection = config.nodeProjections().toObject();
-        this.relationshipProjection = config.relationshipProjections().toObject();
         this.creationTime = config.creationTime();
+
+        if (config instanceof GraphCreateFromCypherConfig) {
+            GraphCreateFromCypherConfig cypherConfig = (GraphCreateFromCypherConfig) config;
+            this.nodeQuery = cypherConfig.nodeQuery();
+            this.relationshipQuery = cypherConfig.relationshipQuery();
+            this.nodeProjection = null;
+            this.relationshipProjection = null;
+        } else {
+            this.nodeProjection = config.nodeProjections().toObject();
+            this.relationshipProjection = config.relationshipProjections().toObject();
+            this.nodeQuery = null;
+            this.relationshipQuery = null;
+        }
+
         this.modificationTime = graphStore.modificationTime();
-        this.nodeQuery = config instanceof GraphCreateFromCypherConfig
-            ? ((GraphCreateFromCypherConfig) config).nodeQuery()
-            : null;
-        this.relationshipQuery = config instanceof GraphCreateFromCypherConfig
-            ? ((GraphCreateFromCypherConfig) config).relationshipQuery()
-            : null;
         this.nodeCount = graphStore.nodeCount();
         this.relationshipCount = graphStore.relationshipCount();
         this.degreeDistribution = computeHistogram ? computeHistogram(graphStore.getUnion()) : emptyMap();
