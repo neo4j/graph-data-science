@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.compat.InternalReadOps;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
@@ -50,8 +51,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.PROJECT_ANY_LABEL;
-import static org.neo4j.token.api.TokenConstants.ANY_LABEL;
+import static org.neo4j.internal.kernel.api.TokenRead.*;
 import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
@@ -80,7 +80,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             setup.nodeProjections()
                 .projections()
                 .forEach((key, value) -> {
-                    long labelId = value.projectAll() ? PROJECT_ANY_LABEL : (long) tokenRead.nodeLabel(value.label());
+                    long labelId = value.projectAll() ? NodesBatchBuffer.ANY_LABEL : (long) tokenRead.nodeLabel(value.label());
                     labelTokenNodeLabelMappings.put(labelId, key);
                 });
         }
@@ -112,7 +112,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             .mapToLong(dataRead::countsForNode)
             .sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
-        long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(PROJECT_ANY_LABEL)
+        long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(NodesBatchBuffer.ANY_LABEL)
             ? allNodesCount
             : Math.min(nodeCount, allNodesCount);
 
@@ -171,7 +171,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             .flatMap(nodeProjections -> nodeProjections.getValue().properties().stream())
             .collect(Collectors.toMap(
                 PropertyMapping::neoPropertyKey,
-                propertyMapping -> propertyMapping.neoPropertyKey() != null ? tokenRead.propertyKey(propertyMapping.neoPropertyKey()) : TokenRead.NO_TOKEN,
+                propertyMapping -> propertyMapping.neoPropertyKey() != null ? tokenRead.propertyKey(propertyMapping.neoPropertyKey()) : NO_TOKEN,
                 (sameKey1, sameKey2) -> sameKey1
             ));
     }
@@ -181,7 +181,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         ResolvedPropertyMappings.Builder builder = ResolvedPropertyMappings.builder();
         for (PropertyMapping mapping : propertyMappings) {
             String propertyName = mapping.neoPropertyKey();
-            int key = propertyName != null ? tokenRead.propertyKey(propertyName) : TokenRead.NO_TOKEN;
+            int key = propertyName != null ? tokenRead.propertyKey(propertyName) : NO_TOKEN;
             builder.addMapping(mapping.resolveWith(key));
         }
         return builder.build();
@@ -204,7 +204,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         LongSet keys() {
             LongSet keySet = new LongHashSet(mappings.keys().size());
             boolean allNodes = StreamSupport.stream(mappings.keys().spliterator(), false)
-                .allMatch(cursor -> cursor.value == PROJECT_ANY_LABEL);
+                .allMatch(cursor -> cursor.value == NodesBatchBuffer.ANY_LABEL);
             if (!allNodes) {
                 StreamSupport.stream(mappings.keys().spliterator(), false)
                     .forEach(cursor -> keySet.add(cursor.value));

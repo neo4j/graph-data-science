@@ -31,7 +31,7 @@ import java.util.Optional;
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
     public static final int IGNORE_LABEL = -1;
-    public static final int PROJECT_ANY_LABEL = -2;
+    public static final int ANY_LABEL = -2;
 
     private final LongSet nodeLabelIds;
     private final NodeStore nodeStore;
@@ -60,13 +60,13 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     @Override
     public void offer(final NodeRecord record) {
         if (nodeLabelIds.isEmpty()) {
-            add(record.getId(), record.getNextProp(), new long[]{PROJECT_ANY_LABEL});
+            add(record.getId(), record.getNextProp(), new long[]{ANY_LABEL});
         } else {
             boolean atLeastOneLabelFound = false;
             final long[] labels = NodeLabelsField.get(record, nodeStore);
             for (int i = 0; i < labels.length; i++) {
                 long l = labels[i];
-                if (!nodeLabelIds.contains(l) && !nodeLabelIds.contains(PROJECT_ANY_LABEL)) {
+                if (!nodeLabelIds.contains(l) && !nodeLabelIds.contains(ANY_LABEL)) {
                     labels[i] = IGNORE_LABEL;
                 } else {
                     atLeastOneLabelFound = true;

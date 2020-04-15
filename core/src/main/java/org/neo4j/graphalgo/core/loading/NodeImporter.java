@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.LongObjectMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.PROJECT_ANY_LABEL;
+import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
 
 public class NodeImporter {
 
@@ -41,7 +41,7 @@ public class NodeImporter {
     }
 
     final Map<NodeLabel, BitSet> nodeLabelBitSetMapping;
-    final LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
+    final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final HugeLongArrayBuilder idMapBuilder;
 
@@ -52,7 +52,7 @@ public class NodeImporter {
     public NodeImporter(
         HugeLongArrayBuilder idMapBuilder,
         Map<NodeLabel, BitSet> nodeLabelBitSetMapping,
-        LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
     ) {
         this.idMapBuilder = idMapBuilder;
         this.nodeLabelBitSetMapping = nodeLabelBitSetMapping;
@@ -127,7 +127,7 @@ public class NodeImporter {
         for (int i = 0; i < cappedBatchLength; i++) {
             long[] labelIdsForNode = labelIds[i];
             for (long labelId : labelIdsForNode) {
-                List<NodeLabel> elementIdentifiers = labelTokenNodeLabelMapping.getOrDefault(labelId, Collections.emptyList());
+                List<NodeLabel> elementIdentifiers = labelTokenNodeLabelMapping.getOrDefault((int) labelId, Collections.emptyList());
                 for (NodeLabel elementIdentifier : elementIdentifiers) {
                     nodeLabelBitSetMapping
                         .computeIfAbsent(elementIdentifier, (ignore) -> new BitSet(batchLength))
@@ -137,7 +137,7 @@ public class NodeImporter {
         }
 
         // set the whole range for '*' projections
-        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(PROJECT_ANY_LABEL, Collections.emptyList())) {
+        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
             nodeLabelBitSetMapping.get(starLabel).set(startIndex, startIndex + batchLength);
         }
     }
