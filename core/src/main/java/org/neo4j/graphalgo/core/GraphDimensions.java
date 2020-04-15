@@ -19,14 +19,12 @@
  */
 package org.neo4j.graphalgo.core;
 
-import com.carrotsearch.hppc.LongObjectMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Collections;
@@ -59,7 +57,13 @@ public interface GraphDimensions {
     LongSet nodeLabelIds();
 
     @Nullable
-    LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping();
+    LongSet relationshipTypeIds();
+
+    @Nullable
+    IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping();
+
+    @Nullable
+    IntObjectMap<List<RelationshipType>> typeTokenRelationshipTypeMapping();
 
     @Value.Default
     default Map<String, Integer> nodePropertyTokens() {
@@ -67,13 +71,8 @@ public interface GraphDimensions {
     }
 
     @Value.Default
-    default ResolvedPropertyMappings relationshipProperties() {
-        return ResolvedPropertyMappings.empty();
-    }
-
-    @Value.Default
-    default RelationshipProjectionMappings relationshipProjectionMappings() {
-        return RelationshipProjectionMappings.all();
+    default Map<String, Integer> relationshipPropertyTokens() {
+        return Collections.emptyMap();
     }
 
     default Set<NodeLabel> nodeLabels() {
@@ -86,20 +85,20 @@ public interface GraphDimensions {
         return nodeLabels;
     }
 
-    default Aggregation[] aggregations(Aggregation defaultAggregation) {
-        Aggregation[] aggregations = relationshipProperties().stream()
-            .map(property -> property.aggregation() == Aggregation.DEFAULT
-                ? Aggregation.NONE
-                : property.aggregation()
-            )
-            .toArray(Aggregation[]::new);
-        // TODO: backwards compat code
-        if (aggregations.length == 0) {
-            Aggregation aggregation = defaultAggregation == Aggregation.DEFAULT
-                ? Aggregation.NONE
-                : defaultAggregation;
-            aggregations = new Aggregation[]{aggregation};
-        }
-        return aggregations;
-    }
+//    default Aggregation[] aggregations(Aggregation defaultAggregation) {
+//        Aggregation[] aggregations = relationshipProperties().stream()
+//            .map(property -> property.aggregation() == Aggregation.DEFAULT
+//                ? Aggregation.NONE
+//                : property.aggregation()
+//            )
+//            .toArray(Aggregation[]::new);
+//        // TODO: backwards compat code
+//        if (aggregations.length == 0) {
+//            Aggregation aggregation = defaultAggregation == Aggregation.DEFAULT
+//                ? Aggregation.NONE
+//                : defaultAggregation;
+//            aggregations = new Aggregation[]{aggregation};
+//        }
+//        return aggregations;
+//    }
 }
