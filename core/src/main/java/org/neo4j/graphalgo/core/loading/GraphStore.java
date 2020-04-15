@@ -86,7 +86,7 @@ public final class GraphStore {
             NodePropertyStore.Builder builder = NodePropertyStore.builder();
             propertyMap.forEach((propertyKey, propertyValues) -> builder.putNodeProperty(
                 propertyKey,
-                ImmutableNodeProperty.of(propertyKey, NumberType.FLOATING_POINT, propertyValues)
+                NodeProperty.of(propertyKey, NumberType.FLOATING_POINT, PropertyOrigin.CREATE, propertyValues)
             ));
             nodePropertyStores.put(nodeLabel, builder.build());
         });
@@ -200,7 +200,7 @@ public final class GraphStore {
                 storeBuilder.from(nodePropertyStore);
             }
             return storeBuilder
-                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, propertyType, propertyValues))
+                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, propertyType, PropertyOrigin.MUTATE, propertyValues))
                 .build();
         }));
     }
@@ -222,29 +222,43 @@ public final class GraphStore {
         });
     }
 
-    public NodeProperties nodeProperty(String propertyKey) {
+    public NodeProperty nodeProperty(String propertyKey) {
         if (nodes.maybeLabelInformation.isPresent()) {
-            Map<NodeLabel, NodeProperties> properties = new HashMap<>();
-            this.nodeProperties.forEach((labelIdentifier, nodePropertyStore) -> {
+            var unionValues = new HashMap<NodeLabel, NodeProperties>();
+            var unionType = NumberType.NO_NUMBER;
+            var unionOrigin = PropertyOrigin.CREATE;
+
+            for (var labelAndPropertyStore : nodeProperties.entrySet()) {
+                var nodeLabel = labelAndPropertyStore.getKey();
+                var nodePropertyStore = labelAndPropertyStore.getValue();
                 if (nodePropertyStore.containsKey(propertyKey)) {
-                    properties.put(labelIdentifier, nodePropertyStore.get(propertyKey).propertyValues());
+                    var nodeProperty = nodePropertyStore.get(propertyKey);
+                    unionValues.put(nodeLabel, nodeProperty.values());
+                    unionType = nodeProperty.type();
+                    unionOrigin = nodeProperty.origin();
                 }
-            });
-            return new UnionNodeProperties(properties, nodes.maybeLabelInformation.get());
+            }
+
+            return NodeProperty.of(
+                propertyKey,
+                unionType,
+                unionOrigin,
+                new UnionNodeProperties(unionValues, nodes.maybeLabelInformation.get())
+            );
         }
-        return nodeProperties.get(ALL_NODES).get(propertyKey).propertyValues();
+        return nodeProperties.get(ALL_NODES).get(propertyKey);
     }
 
     public NumberType nodePropertyType(String propertyKey) {
         return nodeProperties.values().stream()
             .filter(propertyStore -> propertyStore.containsKey(propertyKey))
-            .map(propertyStore -> propertyStore.get(propertyKey).propertyType())
+            .map(propertyStore -> propertyStore.get(propertyKey).type())
             .findFirst()
             .orElse(NumberType.NO_NUMBER);
     }
 
-    public NodeProperties nodeProperty(NodeLabel label, String propertyKey) {
-        return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey).propertyValues();
+    public NodeProperty nodeProperty(NodeLabel label, String propertyKey) {
+        return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey);
     }
 
     public Set<RelationshipType> relationshipTypes() {
@@ -268,7 +282,7 @@ public final class GraphStore {
     public NumberType relationshipPropertyType(String propertyKey) {
         return relationshipProperties.values().stream()
             .filter(propertyStore -> propertyStore.containsKey(propertyKey))
-            .map(propertyStore -> propertyStore.get(propertyKey).propertyType())
+            .map(propertyStore -> propertyStore.get(propertyKey).type())
             .findFirst()
             .orElse(NumberType.NO_NUMBER);
     }
@@ -280,7 +294,7 @@ public final class GraphStore {
             .flatMapToLong(relationshipPropertyStore -> relationshipPropertyStore
                 .values()
                 .stream()
-                .map(RelationshipProperty::propertyValues)
+                .map(RelationshipProperty::values)
                 .mapToLong(HugeGraph.PropertyCSR::elementCount))
             .sum();
     }
@@ -348,7 +362,7 @@ public final class GraphStore {
                 graphStore.relationshipProperties
                     .getOrDefault(relationshipType, RelationshipPropertyStore.empty())
                     .relationshipProperties().values().forEach(property -> {
-                    builder.putDeletedProperty(property.propertyKey(), property.propertyValues().elementCount());
+                    builder.putDeletedProperty(property.key(), property.values().elementCount());
                 });
                 graphStore.relationships.remove(relationshipType);
                 graphStore.relationshipProperties.remove(relationshipType);
@@ -453,7 +467,7 @@ public final class GraphStore {
                     relTypeAndCSR.getValue(),
                     maybeRelationshipProperty.map(propertyKey -> relationshipProperties
                         .get(relTypeAndCSR.getKey())
-                        .get(propertyKey).propertyValues()),
+                        .get(propertyKey).values()),
                     tracker
                 );
 
@@ -492,7 +506,7 @@ public final class GraphStore {
                         propertyKey,
                         ignored -> new HashMap<>()
                     )
-                    .put(entry.getKey(), nodeProperty.propertyValues())
+                    .put(entry.getKey(), nodeProperty.values())
                 ));
 
         return invertedNodeProperties
@@ -553,6 +567,10 @@ public final class GraphStore {
         this.modificationTime = LocalDateTime.now();
     }
 
+    public enum PropertyOrigin {
+        CREATE, MUTATE
+    }
+
     @ValueClass
     public interface NodePropertyStore {
 
@@ -562,7 +580,7 @@ public final class GraphStore {
             return nodeProperties()
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().propertyValues()));
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().values()));
         }
 
         default NodeProperty get(String propertyKey) {
@@ -608,14 +626,16 @@ public final class GraphStore {
     @ValueClass
     public interface NodeProperty {
 
-        String propertyKey();
+        String key();
 
-        NumberType propertyType();
+        NumberType type();
 
-        NodeProperties propertyValues();
+        PropertyOrigin origin();
 
-        static NodeProperty of(String propertyKey, NumberType propertyType, NodeProperties propertyValues) {
-            return ImmutableNodeProperty.of(propertyKey, propertyType, propertyValues);
+        NodeProperties values();
+
+        static NodeProperty of(String key, NumberType type, PropertyOrigin origin, NodeProperties values) {
+            return ImmutableNodeProperty.of(key, type, origin, values);
         }
     }
 
@@ -667,14 +687,14 @@ public final class GraphStore {
     @ValueClass
     public interface RelationshipProperty {
 
-        String propertyKey();
+        String key();
 
-        NumberType propertyType();
+        NumberType type();
 
-        HugeGraph.PropertyCSR propertyValues();
+        HugeGraph.PropertyCSR values();
 
-        static RelationshipProperty of(String propertyKey, NumberType propertyType, HugeGraph.PropertyCSR propertyValues) {
-            return ImmutableRelationshipProperty.of(propertyKey, propertyType, propertyValues);
+        static RelationshipProperty of(String key, NumberType type, HugeGraph.PropertyCSR values) {
+            return ImmutableRelationshipProperty.of(key, type, values);
         }
     }
 }

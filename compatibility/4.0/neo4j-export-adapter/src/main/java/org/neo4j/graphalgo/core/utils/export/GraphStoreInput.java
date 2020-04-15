@@ -192,7 +192,7 @@ public final class GraphStoreInput implements Input {
                 graphStore.nodes().labels(id).forEach(label -> {
                     graphStore
                         .nodePropertyKeys(label).forEach(property -> {
-                        NodeProperties nodeProperties = graphStore.nodeProperty(label, property);
+                        NodeProperties nodeProperties = graphStore.nodeProperty(label, property).values();
                         visitor.property(property, nodeProperties.nodeProperty(id));
                     });
                 });

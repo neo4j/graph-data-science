@@ -87,7 +87,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         Collection<NodePropertyExporter.NodeProperty<?>> nodeProperties = nodePropertyKeys.stream()
             .map(nodePropertyKey -> ImmutableNodeProperty.of(
                 nodePropertyKey,
-                graphStore.nodeProperty(nodePropertyKey),
+                graphStore.nodeProperty(nodePropertyKey).values(),
                 NodeProperties.translatorFor(graphStore.nodePropertyType(nodePropertyKey))
             )).collect(Collectors.toList());
 

@@ -65,6 +65,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
                 long sum = config.nodeProperties()
                     .stream()
                     .map(graphStore::nodeProperty)
+                    .map(GraphStore.NodeProperty::values)
                     .mapToLong(NodeProperties::size)
                     .sum();
 
