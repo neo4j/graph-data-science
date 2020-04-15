@@ -47,4 +47,9 @@ public class UnionNodeProperties implements NodeProperties {
 
         return Double.NaN;
     }
+
+    @Override
+    public long size() {
+        return labelToNodePropertiesMap.values().stream().map(NodeProperties::size).reduce(Long::sum).orElse(0L);
+    }
 }
