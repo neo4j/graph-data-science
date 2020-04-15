@@ -185,7 +185,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
     @Test
     void computeMemoryEstimationForVirtualGraphWithProperties() throws Exception {
-        String query = "CALL gds.graph.create.estimate('*', {`*`: {type: '', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
+        String query = "CALL gds.graph.create.estimate('*', {`FOO`: {type: '*', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
         runQueryWithRowConsumer(query,
             row -> {
                 assertEquals(574224, row.getNumber("bytesMin").longValue());
