@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.logging.Log;
 
-import static org.neo4j.graphalgo.core.loading.GraphStore.PropertyOrigin.CREATE;
-import static org.neo4j.graphalgo.core.loading.GraphStore.PropertyOrigin.MUTATE;
+import static org.neo4j.graphalgo.core.loading.GraphStore.PropertyState.PERSISTENT;
+import static org.neo4j.graphalgo.core.loading.GraphStore.PropertyState.TRANSIENT;
 
 final class WccProc {
 
@@ -91,16 +91,16 @@ final class WccProc {
         PropertyTranslator.OfLong<DisjointSetStruct> nonSeedingTranslator = DisjointSetStruct::setIdOf;
 
         if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            var propertyOrigin = graphStore.nodeProperty(seedProperty).origin();
-            if (propertyOrigin == CREATE) {
+            var propertyState = graphStore.nodeProperty(seedProperty).state();
+            if (propertyState == PERSISTENT) {
                 return new PropertyTranslator.OfLongIfChanged<>(
                     computationResult.graph().nodeProperties(seedProperty),
                     DisjointSetStruct::setIdOf
                 );
-            } else if (propertyOrigin == MUTATE) {
+            } else if (propertyState == TRANSIENT) {
                 return nonSeedingTranslator;
             } else {
-                throw new UnsupportedOperationException(String.format("Invalid property origin: %s", propertyOrigin));
+                throw new UnsupportedOperationException(String.format("Invalid property origin: %s", propertyState));
             }
         } else if (consecutiveIds && !isIncremental) {
             return new PropertyTranslator.ConsecutivePropertyTranslator<>(

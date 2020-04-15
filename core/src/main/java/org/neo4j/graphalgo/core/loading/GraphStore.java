@@ -84,7 +84,7 @@ public final class GraphStore {
             NodePropertyStore.Builder builder = NodePropertyStore.builder();
             propertyMap.forEach((propertyKey, propertyValues) -> builder.putNodeProperty(
                 propertyKey,
-                NodeProperty.of(propertyKey, NumberType.FLOATING_POINT, PropertyOrigin.CREATE, propertyValues)
+                NodeProperty.of(propertyKey, NumberType.FLOATING_POINT, PropertyState.PERSISTENT, propertyValues)
             ));
             nodePropertyStores.put(nodeLabel, builder.build());
         });
@@ -198,7 +198,7 @@ public final class GraphStore {
                 storeBuilder.from(nodePropertyStore);
             }
             return storeBuilder
-                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, propertyType, PropertyOrigin.MUTATE, propertyValues))
+                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyValues))
                 .build();
         }));
     }
@@ -224,7 +224,7 @@ public final class GraphStore {
         if (nodes.maybeLabelInformation.isPresent()) {
             var unionValues = new HashMap<NodeLabel, NodeProperties>();
             var unionType = NumberType.NO_NUMBER;
-            var unionOrigin = PropertyOrigin.CREATE;
+            var unionOrigin = PropertyState.PERSISTENT;
 
             for (var labelAndPropertyStore : nodeProperties.entrySet()) {
                 var nodeLabel = labelAndPropertyStore.getKey();
@@ -233,7 +233,7 @@ public final class GraphStore {
                     var nodeProperty = nodePropertyStore.get(propertyKey);
                     unionValues.put(nodeLabel, nodeProperty.values());
                     unionType = nodeProperty.type();
-                    unionOrigin = nodeProperty.origin();
+                    unionOrigin = nodeProperty.state();
                 }
             }
 
@@ -560,8 +560,8 @@ public final class GraphStore {
         this.modificationTime = LocalDateTime.now();
     }
 
-    public enum PropertyOrigin {
-        CREATE, MUTATE
+    public enum PropertyState {
+        PERSISTENT, TRANSIENT
     }
 
     @ValueClass
@@ -623,11 +623,11 @@ public final class GraphStore {
 
         NumberType type();
 
-        PropertyOrigin origin();
+        PropertyState state();
 
         NodeProperties values();
 
-        static NodeProperty of(String key, NumberType type, PropertyOrigin origin, NodeProperties values) {
+        static NodeProperty of(String key, NumberType type, PropertyState origin, NodeProperties values) {
             return ImmutableNodeProperty.of(key, type, origin, values);
         }
     }
