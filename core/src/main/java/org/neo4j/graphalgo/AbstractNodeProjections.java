@@ -158,7 +158,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
         if (identifier.equals(ALL_NODES.name())) {
             throw new IllegalArgumentException(String.format(
                 Locale.US,
-                "%s is a reserved node label and my not be used",
+                "%s is a reserved node label and may not be used",
                 ALL_NODES.name()
             ));
         }
