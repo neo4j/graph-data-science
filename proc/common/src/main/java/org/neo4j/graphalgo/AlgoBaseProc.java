@@ -36,12 +36,10 @@ import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
@@ -52,9 +50,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
 import java.util.Collection;
@@ -409,40 +405,6 @@ public abstract class AlgoBaseProc<
     ) {
         throw new UnsupportedOperationException(
             "Procedure needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
-    }
-
-    protected void writeNodeProperties(
-        AbstractResultBuilder<?> writeBuilder,
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
-    ) {
-        PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
-
-        CONFIG config = computationResult.config();
-        if (!(config instanceof WritePropertyConfig)) {
-            throw new IllegalArgumentException(String.format(
-                "Can only write results if the config implements %s.",
-                WritePropertyConfig.class
-            ));
-        }
-
-        WritePropertyConfig writePropertyConfig = (WritePropertyConfig) config;
-        try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
-            log.debug("Writing results");
-
-            Graph graph = computationResult.graph();
-            TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
-            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
-                .withLog(log)
-                .parallel(Pools.DEFAULT, writePropertyConfig.writeConcurrency())
-                .build();
-
-            exporter.write(
-                writePropertyConfig.writeProperty(),
-                computationResult.result(),
-                resultPropertyTranslator
-            );
-            writeBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
-        }
     }
 
     private void validateMemoryUsageIfImplemented(CONFIG config) {

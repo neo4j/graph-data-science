@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -88,7 +89,8 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
             NodeSimilarityStreamProc.class,
             NodeSimilarityStatsProc.class,
             NodeSimilarityMutateProc.class,
-            GraphCreateProc.class
+            GraphCreateProc.class,
+            GraphWriteNodePropertiesProc.class
         );
         runQuery(DB_CYPHER);
 

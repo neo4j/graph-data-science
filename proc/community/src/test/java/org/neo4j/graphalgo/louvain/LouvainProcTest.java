@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -86,7 +87,8 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
             LouvainWriteProc.class,
             LouvainStatsProc.class,
             LouvainMutateProc.class,
-            GraphCreateProc.class
+            GraphCreateProc.class,
+            GraphWriteNodePropertiesProc.class
         );
         registerFunctions(GetNodeFunc.class);
 

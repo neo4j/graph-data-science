@@ -40,18 +40,18 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
-public final class NodePropertyExporter extends StatementApi {
+public class NodePropertyExporter extends StatementApi {
 
     static final long MIN_BATCH_SIZE = 10_000L;
     static final long MAX_BATCH_SIZE = 100_000L;
 
-    private final TerminationFlag terminationFlag;
-    private final ExecutorService executorService;
-    private final ProgressLogger progressLogger;
-    private final int concurrency;
-    private final long nodeCount;
-    private final LongUnaryOperator toOriginalId;
-    private final LongAdder propertiesWritten;
+    protected final TerminationFlag terminationFlag;
+    protected final ExecutorService executorService;
+    protected final ProgressLogger progressLogger;
+    protected final int concurrency;
+    protected final long nodeCount;
+    protected final LongUnaryOperator toOriginalId;
+    protected final LongAdder propertiesWritten;
 
     public static Builder of(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
         return new Builder(db, idMapping, terminationFlag);
@@ -75,7 +75,7 @@ public final class NodePropertyExporter extends StatementApi {
 
     @SuppressWarnings("immutables:subtype")
     @ValueClass
-    interface ResolvedNodeProperty extends NodeProperty<Object> {
+    public interface ResolvedNodeProperty extends NodeProperty<Object> {
         int propertyToken();
 
         static ResolvedNodeProperty of(NodeProperty<Object> nodeProperty, int propertyToken) {
@@ -115,7 +115,7 @@ public final class NodePropertyExporter extends StatementApi {
         void accept(Write ops, long value) throws Exception;
     }
 
-    private NodePropertyExporter(
+    protected NodePropertyExporter(
         GraphDatabaseAPI db,
         long nodeCount,
         LongUnaryOperator toOriginalId,
@@ -160,15 +160,15 @@ public final class NodePropertyExporter extends StatementApi {
         return propertiesWritten.longValue();
     }
 
-    private void writeSequential(List<ResolvedNodeProperty> nodeProperties) {
+    protected void writeSequential(List<ResolvedNodeProperty> nodeProperties) {
         writeSequential((ops, nodeId) -> doWrite(nodeProperties, ops, nodeId));
     }
 
-    private void writeParallel(Iterable<ResolvedNodeProperty> nodeProperties) {
+    protected void writeParallel(List<ResolvedNodeProperty> nodeProperties) {
         writeParallel((ops, offset) -> doWrite(nodeProperties, ops, offset));
     }
 
-    private void writeSequential(WriteConsumer writer) {
+    protected void writeSequential(WriteConsumer writer) {
         acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
             long progress = 0L;
@@ -188,7 +188,7 @@ public final class NodePropertyExporter extends StatementApi {
         });
     }
 
-    private void writeParallel(WriteConsumer writer) {
+    protected void writeParallel(WriteConsumer writer) {
         final long batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
             concurrency,
@@ -237,7 +237,7 @@ public final class NodePropertyExporter extends StatementApi {
         );
     }
 
-    private void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
+    protected void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
         for (ResolvedNodeProperty nodeProperty : nodeProperties) {
             int propertyId = nodeProperty.propertyToken();
             final Value prop = nodeProperty.translator().toProperty(propertyId, nodeProperty.data(), nodeId);

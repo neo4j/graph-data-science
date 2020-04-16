@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
@@ -104,7 +105,8 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
             LabelPropagationWriteProc.class,
             LabelPropagationStatsProc.class,
             LabelPropagationMutateProc.class,
-            GraphCreateProc.class
+            GraphCreateProc.class,
+            GraphWriteNodePropertiesProc.class
         );
         setupGraph(DB_CYPHER);
     }

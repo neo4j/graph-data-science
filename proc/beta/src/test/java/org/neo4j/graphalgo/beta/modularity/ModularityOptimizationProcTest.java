@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 abstract class ModularityOptimizationProcTest extends BaseProcTest {
@@ -55,7 +56,9 @@ abstract class ModularityOptimizationProcTest extends BaseProcTest {
             ModularityOptimizationStreamProc.class,
             ModularityOptimizationWriteProc.class,
             ModularityOptimizationMutateProc.class,
-            GraphCreateProc.class);
+            GraphCreateProc.class,
+            GraphWriteNodePropertiesProc.class
+        );
         runQuery(DB_CYPHER);
     }
 
