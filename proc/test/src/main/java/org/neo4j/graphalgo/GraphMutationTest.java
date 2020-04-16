@@ -37,14 +37,21 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<CONFIG, RESULT> {
 
     default Optional<String> mutateGraphName() {
         return Optional.empty();
+    }
+
+    default boolean mutatesNodes() {
+        return true;
     }
 
     String mutateProperty();
@@ -132,6 +139,60 @@ public interface GraphMutationTest<CONFIG extends MutateConfig & AlgoBaseConfig,
             Collections.emptySet(),
             mutatedGraph.nodePropertyKeys(NodeLabel.of("B"))
         );
+    }
+
+    @Test
+    default void testWriteBackGraphMutationOnFilteredGraph() {
+        if (!mutatesNodes()) {
+            return;
+        }
+
+        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
+        GraphStoreCatalog.removeAllLoadedGraphs();
+
+        runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
+        GraphStore graphStore = TestGraphLoader
+            .from(graphDb())
+            .withLabels("A", "B")
+            .withRelationshipTypes("REL")
+            .graphStore(NativeFactory.class);
+
+        String graphName = "myGraph";
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("", graphName), graphStore);
+
+        applyOnProcedure(procedure ->
+            getProcedureMethods(procedure)
+                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+                .forEach(mutateMethod -> {
+                    CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
+                        "nodeLabels",
+                        Collections.singletonList("A")
+                    );
+
+                    Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
+                    try {
+                        mutateMethod.invoke(procedure, graphName, config);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                })
+        );
+
+        String graphWriteQuery =
+            "CALL gds.graph.writeNodeProperties(" +
+            "   $graph, " +
+            "   [$property]" +
+            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";
+
+        runQuery(graphDb(), graphWriteQuery, map("graph", graphName, "property", mutateProperty()));
+
+        String checkNeo4jGraphQuery = String.format("MATCH (n:B) RETURN n.%s AS property", mutateProperty());
+
+        runQueryWithRowConsumer(
+            graphDb(),
+            checkNeo4jGraphQuery,
+            map(),
+            ((transaction, resultRow) -> assertNull(resultRow.get("property"))));
     }
 
     @Test

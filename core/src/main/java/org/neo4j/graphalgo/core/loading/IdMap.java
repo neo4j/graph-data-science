@@ -153,6 +153,10 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
             .orElseGet(() -> Stream.of(NodeLabel.ALL_NODES));
     }
 
+    public Optional<Map<NodeLabel, BitSet>> maybeLabelInformation() {
+        return maybeLabelInformation;
+    }
+
     public static final class IdIterable implements PrimitiveLongIterable {
         private final long start;
         private final long length;

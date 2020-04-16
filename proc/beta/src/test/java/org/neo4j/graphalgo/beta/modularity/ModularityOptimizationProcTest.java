@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
@@ -66,7 +67,9 @@ abstract class ModularityOptimizationProcTest extends BaseProcTest {
             ModularityOptimizationStreamProc.class,
             ModularityOptimizationWriteProc.class,
             ModularityOptimizationMutateProc.class,
-            GraphCreateProc.class);
+            GraphCreateProc.class,
+            GraphWriteNodePropertiesProc.class
+        );
         runQuery(DB_CYPHER);
     }
 

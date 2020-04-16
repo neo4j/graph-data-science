@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -85,7 +86,14 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
         db = TestDatabaseCreator.createTestDatabase();
 
-        registerProcedures(WccStreamProc.class, WccWriteProc.class, WccStatsProc.class, WccMutateProc.class, GraphCreateProc.class);
+        registerProcedures(
+            WccStreamProc.class,
+            WccWriteProc.class,
+            WccStatsProc.class,
+            WccMutateProc.class,
+            GraphCreateProc.class,
+            GraphWriteNodePropertiesProc.class
+        );
         runQuery(DB_CYPHER);
     }
 

@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -126,7 +127,8 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
             PageRankWriteProc.class,
             PageRankMutateProc.class,
             PageRankStatsProc.class,
-            GraphCreateProc.class
+            GraphCreateProc.class,
+            GraphWriteNodePropertiesProc.class
         );
         runQuery(cypher);
 

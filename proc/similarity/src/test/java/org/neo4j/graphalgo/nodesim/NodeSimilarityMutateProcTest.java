@@ -41,6 +41,11 @@ class NodeSimilarityMutateProcTest
     private static final String MUTATE_RELATIONSHIP_TYPE = "SIMILAR_TO";
 
     @Override
+    public boolean mutatesNodes() {
+        return false;
+    }
+
+    @Override
     public String mutateProperty() {
         return "similarity";
     }
