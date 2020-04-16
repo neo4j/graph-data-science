@@ -93,10 +93,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
 
         exporter.write(nodeProperties);
 
-        return nodePropertyKeys
-            .stream()
-            .mapToLong(nodePropertyKey -> graphStore.nodeProperty(nodePropertyKey).size())
-            .sum();
+        return exporter.propertiesWritten();
     }
 
     public static class Result {

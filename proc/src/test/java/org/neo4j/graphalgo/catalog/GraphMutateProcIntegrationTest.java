@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class GraphMutateProcIntegrationTest extends BaseProcTest {
@@ -178,7 +179,9 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             ")",
             TEST_GRAPH
         );
-        runQuery(writeNodePropertiesQuery);
+        runQueryWithRowConsumer(writeNodePropertiesQuery, row -> {
+            assertEquals(row.getNumber("propertiesWritten").longValue(), 48L);
+        });
 
         String writeRelationshipTypeQuery = String.format(
             "CALL gds.graph.writeRelationship(" +
