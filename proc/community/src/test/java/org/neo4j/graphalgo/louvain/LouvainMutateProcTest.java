@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -109,9 +110,9 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
 
     @Test
     void testMutateAndWriteWithSeeding() {
-        var testGraphName = mutateGraphName().get();
+        String testGraphName = mutateGraphName().get();
 
-        var mutateQuery = GdsCypher
+        String mutateQuery = GdsCypher
             .call()
             .explicitCreation(testGraphName)
             .algo("louvain")
@@ -121,7 +122,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
 
         runQuery(mutateQuery);
 
-        var writeQuery = GdsCypher
+        String writeQuery = GdsCypher
             .call()
             .explicitCreation(testGraphName)
             .algo("louvain")
@@ -132,7 +133,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
 
         runQuery(writeQuery);
 
-        var updatedGraph = new StoreLoaderBuilder().api(db)
+        Graph updatedGraph = new StoreLoaderBuilder().api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)

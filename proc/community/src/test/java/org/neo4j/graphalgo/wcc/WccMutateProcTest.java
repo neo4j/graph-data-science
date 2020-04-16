@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -115,7 +116,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
 
         runQuery(writeQuery);
 
-        String updatedGraph = new StoreLoaderBuilder().api(db)
+        Graph updatedGraph = new StoreLoaderBuilder().api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
