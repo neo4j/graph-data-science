@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
@@ -29,7 +30,6 @@ import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.EmptyLogFilesInitializer;
 import org.neo4j.internal.batchimport.ImportLogic;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
@@ -107,7 +107,7 @@ public class GraphStoreExport {
                 ImportLogic.NO_MONITOR,
                 jobScheduler,
                 Collector.EMPTY,
-                EmptyLogFilesInitializer.INSTANCE
+                TransactionLogsInitializer.INSTANCE
             );
             importer.doImport(input);
         } catch (IOException e) {
