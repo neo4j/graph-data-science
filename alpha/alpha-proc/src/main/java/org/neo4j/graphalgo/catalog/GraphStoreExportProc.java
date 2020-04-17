@@ -28,7 +28,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -46,13 +45,12 @@ public class GraphStoreExportProc extends BaseProc {
         var exportConfig = GraphStoreExportConfig.of(getUsername(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
 
-        var databasesDirectory = api.databaseLayout().getNeo4jLayout().databasesDirectory();
-        var exportDbPath = Paths.get(databasesDirectory.getAbsolutePath(), exportConfig.dbName());
+        var neo4jHome = api.databaseLayout().getNeo4jLayout().homeDirectory();
 
         var result = runWithExceptionLogging(
             "Graph creation failed", () -> {
                 var graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
-                var graphStoreExport = new GraphStoreExport(graphStore, exportDbPath, exportConfig);
+                var graphStoreExport = new GraphStoreExport(graphStore, neo4jHome, exportConfig);
 
                 var start = System.nanoTime();
                 graphStoreExport.run();

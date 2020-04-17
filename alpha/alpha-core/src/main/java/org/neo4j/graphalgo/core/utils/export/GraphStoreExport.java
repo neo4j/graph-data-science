@@ -36,7 +36,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitors;
 import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.io.fs.FileSystemAbstraction;
-import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.internal.NullLogService;
@@ -44,7 +44,6 @@ import org.neo4j.logging.internal.StoreLogService;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
@@ -53,13 +52,13 @@ public class GraphStoreExport {
 
     private final GraphStore graph;
 
-    private final Path dbPath;
+    private final File neo4jHome;
 
     private final GraphStoreExportConfig config;
 
-    public GraphStoreExport(GraphStore graphStore, Path dbPath, GraphStoreExportConfig config) {
+    public GraphStoreExport(GraphStore graphStore, File neo4jHome, GraphStoreExportConfig config) {
         this.graph = graphStore;
-        this.dbPath = dbPath;
+        this.neo4jHome = neo4jHome;
         this.config = config;
     }
 
@@ -78,9 +77,9 @@ public class GraphStoreExport {
     }
 
     private void run(boolean defaultSettingsSuitableForTests) {
-        DIRECTORY_IS_WRITABLE.validate(dbPath.toFile());
-        var databaseConfig = Config.defaults(GraphDatabaseSettings.neo4j_home, dbPath);
-        var databaseLayout = DatabaseLayout.of(databaseConfig);
+        DIRECTORY_IS_WRITABLE.validate(neo4jHome);
+        var databaseConfig = Config.defaults(GraphDatabaseSettings.neo4j_home, neo4jHome.toPath());
+        var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
         var importConfig = getImportConfig(defaultSettingsSuitableForTests);
 
         var life = new LifeSupport();
