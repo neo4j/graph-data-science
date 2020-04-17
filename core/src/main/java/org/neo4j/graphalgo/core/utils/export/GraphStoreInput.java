@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.internal.batchimport.InputIterable;
@@ -45,6 +45,8 @@ import java.util.Set;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 public final class GraphStoreInput implements Input {
 
@@ -180,8 +182,13 @@ public final class GraphStoreInput implements Input {
 
         private final GraphStore graphStore;
 
+        private final boolean hasLabels;
+        private final boolean hasProperties;
+
         NodeChunk(GraphStore graphStore) {
             this.graphStore = graphStore;
+            this.hasLabels = graphStore.nodes().hasLabelInformation();
+            this.hasProperties = !graphStore.nodePropertyKeys().isEmpty();
         }
 
         @Override
@@ -189,13 +196,24 @@ public final class GraphStoreInput implements Input {
             if (id < endId) {
                 visitor.id(id);
 
-                graphStore.nodes().labels(id).forEach(label -> {
-                    graphStore
-                        .nodePropertyKeys(label).forEach(property -> {
-                        NodeProperties nodeProperties = graphStore.nodeProperty(label, property).values();
+                if (hasLabels) {
+                    visitor.labels(graphStore.nodes().labels(id)
+                        .filter(label -> label != ALL_NODES)
+                        .map(NodeLabel::name).toArray(String[]::new));
+                    if (hasProperties) {
+                        graphStore.nodes().labels(id).forEach(label -> {
+                            graphStore.nodePropertyKeys(label).forEach(property -> {
+                                var nodeProperties = graphStore.nodeProperty(label, property).values();
+                                visitor.property(property, nodeProperties.nodeProperty(id));
+                            });
+                        });
+                    }
+                } else if (hasProperties) { // no label information, but node properties
+                    graphStore.nodePropertyKeys(ALL_NODES).forEach(property -> {
+                        var nodeProperties = graphStore.nodeProperty(ALL_NODES, property).values();
                         visitor.property(property, nodeProperties.nodeProperty(id));
                     });
-                });
+                }
 
                 visitor.endOfEntity();
                 id++;

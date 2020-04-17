@@ -152,6 +152,10 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
         return new IdMap(newGraphIds, newNodeToGraphIds, newNodeCount);
     }
 
+    public boolean hasLabelInformation() {
+        return maybeLabelInformation.isPresent();
+    }
+
     public Stream<NodeLabel> labels(long nodeId) {
         return maybeLabelInformation
             .map(elementIdentifierBitSetMap ->
