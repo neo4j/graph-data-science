@@ -14,6 +14,7 @@ ext {
             'javapoet':                     '1.11.1',
             'jctools-core':                 '2.1.1',
             'jetbrains-annotations':        '18.0.0',
+            'jol':                          '0.10',
             'jqwik':                        '1.2.0',
             'junit5':                       '5.6.2',
             'junit-quickcheck-core':        '0.8.1',

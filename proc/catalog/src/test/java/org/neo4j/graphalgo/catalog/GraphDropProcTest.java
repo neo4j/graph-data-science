@@ -105,7 +105,9 @@ class GraphDropProcTest extends BaseProcTest {
                         "p999", 1L
                     ),
                     "creationTime", isA(LocalDateTime.class),
-                    "modificationTime", isA(LocalDateTime.class)
+                    "modificationTime", isA(LocalDateTime.class),
+                    "memoryUsage", isA(String.class),
+                    "sizeInBytes", isA(Long.class)
                 )
             )
         );

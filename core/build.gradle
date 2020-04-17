@@ -17,7 +17,8 @@ dependencies {
     api(
         project(":annotations"),
         project(':neo4j-adapter'),
-        [group: 'com.carrotsearch',           name: 'hppc',               version: ver.'hppc']
+        [ group: 'com.carrotsearch',   name: 'hppc',      version: ver.'hppc' ],
+        [ group: 'org.openjdk.jol',    name: 'jol-core',  version: ver.'jol'  ],
     )
 
     testImplementation project(':test-utils')
