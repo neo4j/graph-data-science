@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 public final class NodePropertyStoreExporter extends NodePropertyExporter {
 
     private final Optional<Map<NodeLabel, BitSet>> maybeLabelInformation;
-    private final Map<NodeLabel, GraphStore.NodePropertyStore> nodeProperties;
+    private final Map<NodeLabel, GraphStore.NodePropertyStore> graphStoreNodeProperties;
 
     public static Builder of(GraphDatabaseAPI db, GraphStore graphStore, TerminationFlag terminationFlag) {
         return new Builder(db, graphStore, terminationFlag);
@@ -87,14 +87,14 @@ public final class NodePropertyStoreExporter extends NodePropertyExporter {
         long nodeCount,
         LongUnaryOperator toOriginalId,
         TerminationFlag terminationFlag,
-        Map<NodeLabel, GraphStore.NodePropertyStore> nodeProperties,
+        Map<NodeLabel, GraphStore.NodePropertyStore> graphStoreNodeProperties,
         Optional<Map<NodeLabel, BitSet>> maybeLabelInformation,
         ProgressLogger log,
         int concurrency,
         ExecutorService executorService
     ) {
         super(db, nodeCount, toOriginalId, terminationFlag, log, concurrency, executorService);
-        this.nodeProperties = nodeProperties;
+        this.graphStoreNodeProperties = graphStoreNodeProperties;
         this.maybeLabelInformation = maybeLabelInformation;
     }
 
@@ -195,8 +195,8 @@ public final class NodePropertyStoreExporter extends NodePropertyExporter {
     private List<ResolvedNodeProperty> filterNodePropertiesForLabel(List<ResolvedNodeProperty> nodeProperties, NodeLabel nodeLabel) {
         return nodeProperties
             .stream()
-            .filter(prop -> this.nodeProperties
-                .getOrDefault(nodeLabel, GraphStore.NodePropertyStore.empty())
+            .filter(prop -> graphStoreNodeProperties.containsKey(nodeLabel) && graphStoreNodeProperties
+                .get(nodeLabel)
                 .containsKey(prop.propertyKey()))
             .collect(Collectors.toList());
     }
