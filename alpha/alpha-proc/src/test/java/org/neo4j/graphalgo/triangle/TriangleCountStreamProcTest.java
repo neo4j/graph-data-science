@@ -24,7 +24,6 @@ import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountStreamConfig;
 
 import java.util.Optional;
 

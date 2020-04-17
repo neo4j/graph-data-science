@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.triangle;
+package org.neo4j.graphalgo.triangle;
 
+import org.hamcrest.core.IsIterableContaining;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
@@ -67,8 +68,8 @@ class IntersectingTriangleCountTest {
 
         List<IntersectingTriangleCount.Result> results = triangleCount.computeStream().collect(Collectors.toList());
         assertEquals(2, results.size());
-        assertThat(results, hasItem(new IntersectingTriangleCount.Result(1L, 0L, 0.0)));
-        assertThat(results, hasItem(new IntersectingTriangleCount.Result(2L, 0L, 0.0)));
+        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(1L, 0L, 0.0)));
+        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(2L, 0L, 0.0)));
     }
 
     @Test
@@ -93,8 +94,8 @@ class IntersectingTriangleCountTest {
 
         List<IntersectingTriangleCount.Result> results = triangleCount.computeStream().collect(Collectors.toList());
         assertEquals(2, results.size());
-        assertThat(results, hasItem(new IntersectingTriangleCount.Result(1L, 0L, 0.0)));
-        assertThat(results, hasItem(new IntersectingTriangleCount.Result(2L, 0L, 0.0)));
+        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(1L, 0L, 0.0)));
+        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(2L, 0L, 0.0)));
     }
 
     @Test
@@ -126,9 +127,9 @@ class IntersectingTriangleCountTest {
 
         List<IntersectingTriangleCount.Result> results = triangleCount.computeStream().collect(Collectors.toList());
         assertEquals(3, results.size());
-        assertThat(results, hasItem(new IntersectingTriangleCount.Result(1L, 1L, 1.0)));
-        assertThat(results, hasItem(new IntersectingTriangleCount.Result(2L, 1L, 1.0)));
-        assertThat(results, hasItem(new IntersectingTriangleCount.Result(3L, 1L, 1.0)));
+        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(1L, 1L, 1.0)));
+        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(2L, 1L, 1.0)));
+        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(3L, 1L, 1.0)));
     }
 
     private IdMap createIdMap(long[] inputs) {

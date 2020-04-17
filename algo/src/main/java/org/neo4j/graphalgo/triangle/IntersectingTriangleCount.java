@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.triangle;
+package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
@@ -124,7 +124,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
 
     public Stream<Result> computeStream() {
         return IntStream.range(0, Math.toIntExact(graph.nodeCount()))
-            .mapToObj(i -> new IntersectingTriangleCount.Result(
+            .mapToObj(i -> new Result(
                 graph.toOriginalNodeId(i),
                 triangles.get(i),
                 calculateCoefficient(triangles.get(i), graph.degree(i))));
