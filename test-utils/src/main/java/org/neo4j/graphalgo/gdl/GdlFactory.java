@@ -57,7 +57,6 @@ import java.util.stream.Collectors;
 
 public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig> {
 
-    private static final int NO_SUCH_PROPERTY = -2;
     private final GDLHandler gdlHandler;
 
     public static GdlFactory of(String gdlGraph) {
@@ -169,10 +168,7 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
                     NodePropertiesBuilder.of(
                         dimensions.nodeCount(),
                         loadingContext.tracker(),
-                        PropertyMapping.DEFAULT_FALLBACK_VALUE,
-                        NO_SUCH_PROPERTY,
-                        key.propertyKey(),
-                        1
+                        PropertyMapping.DEFAULT_FALLBACK_VALUE
                     )).set(idMap.toMappedNodeId(vertex.getId()), gdsValue(vertex, propertyKey, propertyValue));
             }));
 

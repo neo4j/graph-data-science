@@ -164,7 +164,6 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             return NativeNodePropertyImporter
                 .builder()
                 .nodeCount(nodeCount)
-                .concurrency(concurrency)
                 .dimensions(dimensions)
                 .propertyMappings(propertyMappingsByNodeLabel)
                 .tracker(tracker)

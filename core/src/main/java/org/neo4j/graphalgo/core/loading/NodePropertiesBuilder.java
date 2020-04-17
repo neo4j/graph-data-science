@@ -19,60 +19,107 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
+import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.util.OptionalLong;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Consumer;
 
 public final class NodePropertiesBuilder {
 
     private final double defaultValue;
-    private final int propertyId;
-    private final PagedLongDoubleMap properties;
-    private final String propertyKey;
+    private final HugeSparseLongArray.Builder valuesBuilder;
+    private final LongAdder size;
 
-    public static NodePropertiesBuilder of(
-        long numberOfNodes,
-        AllocationTracker tracker,
-        double defaultValue,
-        int propertyId,
-        String propertyKey,
-        int concurrency
-    ) {
-        assert propertyId != NO_SUCH_PROPERTY_KEY;
-        PagedLongDoubleMap properties = PagedLongDoubleMap.of(numberOfNodes, tracker, concurrency);
-        return new NodePropertiesBuilder(defaultValue, propertyId, properties, propertyKey);
+    private static final VarHandle MAX_VALUE;
+
+    static {
+        VarHandle maxValueHandle;
+        try {
+            maxValueHandle = MethodHandles
+                .lookup()
+                .findVarHandle(NodePropertiesBuilder.class, "maxValue", long.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        MAX_VALUE = maxValueHandle;
     }
 
-    private NodePropertiesBuilder(
-            final double defaultValue,
-            final int propertyId,
-            final PagedLongDoubleMap properties,
-            final String propertyKey) {
+    // Value is changed with a VarHandle and needs to be non final for that
+    // even though our favourite IDE/OS doesn't pick that up
+    @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
+    private volatile long maxValue;
+
+    public static NodePropertiesBuilder of(long nodeSize, AllocationTracker tracker, double defaultValue) {
+        return new NodePropertiesBuilder(defaultValue, nodeSize, tracker);
+    }
+
+    @TestOnly
+    static NodePropertyArray of(long size, double defaultValue, Consumer<NodePropertiesBuilder> buildBlock) {
+        var builder = of(size, AllocationTracker.EMPTY, defaultValue);
+        buildBlock.accept(builder);
+        return builder.build();
+    }
+
+    private NodePropertiesBuilder(double defaultValue, long nodeSize, AllocationTracker tracker) {
         this.defaultValue = defaultValue;
-        this.propertyId = propertyId;
-        this.properties = properties;
-        this.propertyKey = propertyKey;
+        this.valuesBuilder = HugeSparseLongArray.Builder.create(nodeSize, tracker);
+        this.size = new LongAdder();
+        this.maxValue = Long.MIN_VALUE;
     }
 
-    double defaultValue() {
-        return defaultValue;
+    public void set(long nodeId, double value) {
+        valuesBuilder.set(nodeId, Double.doubleToRawLongBits(value));
+        size.increment();
+        updateMaxValue((long) value);
     }
 
-    int propertyId() {
-        return propertyId;
+    public NodePropertyArray build() {
+        var size = this.size.sum();
+        var maxValue = size == 0 ? OptionalLong.empty() : OptionalLong.of((long) MAX_VALUE.getVolatile(this));
+        return new NodePropertyArray(
+            defaultValue,
+            maxValue,
+            size,
+            valuesBuilder.build()
+        );
     }
 
-    String propertyKey() {
-        return propertyKey;
-    }
+    private void updateMaxValue(long value) {
+        // We are basically doing the equivalent of
+        //    this.maxValue = Math.max(value, this.maxValue);
+        // but we need to deal with ordering and atomicity issues when this
+        // is called concurrently.
 
-    public void set(long index, double value) {
-        properties.put(index, value);
-    }
+        // First try to read without ordering guarantees
+        // this value could be an outdated one, but any other value
+        // would be strictly greater that this one, so if our `value`
+        // is already smaller, we don't need to write to the maxValue field.
+        // Think of this as the initial read in a double-checked locking read.
+        // Also, we can't use getPlain here, since that one has no atomicity
+        // guarantees for doubles, so we need to read at least with opaque semantics
+        // to make sure, that we don't read doubles that are currently being updated
+        // where some bits are from the old value and others from the new value.
+        long currentMax = (long) MAX_VALUE.getOpaque(this);
+        if (currentMax >= value) {
+            return;
+        }
 
-    public NodeProperties build() {
-        return new NodePropertyMap(properties, defaultValue);
+        // start a CAS loop;
+        // if the currentMax was outdated, we will get the new value after the first failed CAS
+        // otherwise we might already be done
+        while (currentMax < value) {
+            long newMax = (long) MAX_VALUE.compareAndExchange(this, currentMax, value);
+            if (newMax == currentMax) {
+                // CAS success, we are now the maxValue
+                return;
+            }
+            // update local copy and try again
+            currentMax = newMax;
+        }
     }
 }

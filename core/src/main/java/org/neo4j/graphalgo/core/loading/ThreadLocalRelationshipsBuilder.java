@@ -146,6 +146,7 @@ class ThreadLocalRelationshipsBuilder {
     }
 
     private long copyProperties(long[] properties, int degree, AdjacencyListBuilder.Allocator propertiesAllocator) {
+        // TODO: TODO
         int requiredBytes = degree * Long.BYTES;
         long address = propertiesAllocator.allocate(Integer.BYTES /* degree */ + requiredBytes);
         int offset = propertiesAllocator.offset;

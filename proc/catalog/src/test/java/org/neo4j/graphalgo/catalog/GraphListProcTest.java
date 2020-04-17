@@ -259,7 +259,51 @@ class GraphListProcTest extends BaseProcTest {
     @Test
     void calculateDegreeDistributionForUndirectedNodesWhenAskedTo() {
         String name = "name";
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", name));
+        runQuery("CALL gds.graph.create($name, 'A', {REL: {orientation: 'undirected'}})", map("name", name));
+
+        assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
+            map(
+                "degreeDistribution", map(
+                    "min", 1L,
+                    "mean", 1.0,
+                    "max", 1L,
+                    "p50", 1L,
+                    "p75", 1L,
+                    "p90", 1L,
+                    "p95", 1L,
+                    "p99", 1L,
+                    "p999", 1L
+                )
+            )
+        ));
+    }
+
+    @Test
+    void calculateDegreeDistributionForOutgoingRelationshipsWhenAskedTo() {
+        String name = "name";
+        runQuery("CALL gds.graph.create($name, 'A', {REL: {orientation: 'natural'}})", map("name", name));
+
+        assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
+            map(
+                "degreeDistribution", map(
+                    "min", 0L,
+                    "mean", 0.5D,
+                    "max", 1L,
+                    "p50", 0L,
+                    "p75", 1L,
+                    "p90", 1L,
+                    "p95", 1L,
+                    "p99", 1L,
+                    "p999", 1L
+                )
+            )
+        ));
+    }
+
+    @Test
+    void calculateDegreeDistributionForIncomingRelationshipsWhenAskedTo() {
+        String name = "name";
+        runQuery("CALL gds.graph.create($name, 'A', {REL: {orientation: 'reverse'}})", map("name", name));
 
         assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
             map(

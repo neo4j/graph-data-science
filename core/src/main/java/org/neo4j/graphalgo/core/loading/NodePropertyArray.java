@@ -22,56 +22,70 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
+import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
 import java.util.OptionalLong;
 
-public final class NodePropertyMap implements NodeProperties {
+public final class NodePropertyArray implements NodeProperties {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
-            .builder(NodePropertyMap.class)
-            .add("properties", PagedLongDoubleMap.memoryEstimation())
-            .build();
-
-    private PagedLongDoubleMap properties;
-    private final double defaultValue;
+        .builder(NodePropertyArray.class)
+        .rangePerGraphDimension(
+            "property values",
+            (dimensions, concurrency) -> HugeSparseLongArray.memoryEstimation(
+                dimensions.nodeCount(),
+                dimensions.nodeCount()
+            )
+        )
+        .build();
 
     static MemoryEstimation memoryEstimation() {
         return MEMORY_ESTIMATION;
     }
 
-    public NodePropertyMap(PagedLongDoubleMap properties, double defaultValue) {
-        this.properties = properties;
+    private final double defaultValue;
+    private final OptionalLong maxValue;
+    private final long size;
+    private final HugeSparseLongArray properties;
+
+    NodePropertyArray(
+        double defaultValue,
+        OptionalLong maxValue,
+        long size,
+        HugeSparseLongArray properties
+    ) {
         this.defaultValue = defaultValue;
+        this.maxValue = maxValue;
+        this.size = size;
+        this.properties = properties;
     }
 
     @Override
     public double nodeProperty(long nodeId) {
-        return properties.getOrDefault(nodeId, defaultValue);
+        return nodeProperty(nodeId, defaultValue);
     }
 
     @Override
     public double nodeProperty(long nodeId, double defaultValue) {
-        return properties.getOrDefault(nodeId, defaultValue);
+        var bits = properties.get(nodeId);
+        // -1 is represented as NaN, but it's a different NaN than NaN,
+        // so we can differentiate between explicit NaN and a missing value
+        return bits == -1 ? defaultValue : Double.longBitsToDouble(bits);
     }
 
     @Override
     public OptionalLong getMaxPropertyValue() {
-        return properties.getMaxValue();
-    }
-
-    @Override
-    public long release() {
-        if (properties != null) {
-            long freed = properties.release();
-            properties = null;
-            return freed;
-        }
-        return 0L;
+        return maxValue;
     }
 
     @Override
     public long size() {
-        return properties.size();
+        return size;
+    }
+
+    @Override
+    public long release() {
+        // NOTE: HugeSparseLongArray doesn't release, maybe we should add this in the future
+        return 0;
     }
 }

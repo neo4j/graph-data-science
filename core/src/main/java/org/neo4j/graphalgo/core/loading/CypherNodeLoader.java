@@ -48,8 +48,6 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 @Value.Enclosing
 class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
-    static final int CYPHER_RESULT_PROPERTY_KEY = -2;
-
     private final long nodeCount;
     private final GraphDimensions outerDimensions;
     private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
@@ -85,8 +83,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         nodePropertyImporter = new CypherNodePropertyImporter(
             propertyColumns,
             labelTokenNodeLabelMapping,
-            nodeCount,
-            cypherConfig.readConcurrency()
+            nodeCount
         );
 
         boolean hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);

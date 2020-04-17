@@ -71,7 +71,7 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
 
         // nodeProperties
         nodeProjections.allProperties()
-            .forEach(property -> builder.add(property, NodePropertyMap.memoryEstimation()));
+            .forEach(property -> builder.add(property, NodePropertyArray.memoryEstimation()));
 
         // relationships
         relationshipProjections.projections().forEach((relationshipType, relationshipProjection) -> {
@@ -134,7 +134,7 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
 
         int concurrency = graphCreateConfig.readConcurrency();
         AllocationTracker tracker = loadingContext.tracker();
-        IdsAndProperties nodes = loadNodes(tracker, concurrency);
+        IdsAndProperties nodes = loadNodes(concurrency);
         RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency);
         GraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
         progressLogger.logMessage(tracker);
@@ -142,7 +142,7 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
         return ImportResult.of(dimensions, graphStore);
     }
 
-    private IdsAndProperties loadNodes(AllocationTracker tracker, int concurrency) {
+    private IdsAndProperties loadNodes(int concurrency) {
         Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel = graphCreateConfig
             .nodeProjections()
             .projections()

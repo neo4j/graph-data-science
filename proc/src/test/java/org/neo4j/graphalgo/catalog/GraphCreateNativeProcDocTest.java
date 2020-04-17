@@ -93,13 +93,12 @@ class GraphCreateNativeProcDocTest extends BaseProcTest {
     void estimateFictive() {
         String estimateQuery = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 100, relationshipCount: 1000, nodeProperties: 'foo', relationshipProperties: 'bar'})\n" +
                                "YIELD requiredMemory, bytesMin, bytesMax, nodeCount, relationshipCount";
-        String expected = "+-------------------------------------------------------------------------------+\n" +
-                           "| requiredMemory          | bytesMin | bytesMax | nodeCount | relationshipCount |\n" +
-                           "+-------------------------------------------------------------------------------+\n" +
-                           "| \"[561 KiB ... 564 KiB]\" | 574768   | 577952   | 100       | 1000              |\n" +
-                           "+-------------------------------------------------------------------------------+\n" +
+        String expected = "+----------------------------------------------------------------------+\n" +
+                           "| requiredMemory | bytesMin | bytesMax | nodeCount | relationshipCount |\n" +
+                           "+----------------------------------------------------------------------+\n" +
+                           "| \"593 KiB\"      | 607568   | 607568   | 100       | 1000              |\n" +
+                           "+----------------------------------------------------------------------+\n" +
                            "1 row\n";
-
 
         assertEquals(expected, runQuery(estimateQuery, Result::resultAsString));
     }

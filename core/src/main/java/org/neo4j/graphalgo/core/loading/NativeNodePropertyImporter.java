@@ -160,7 +160,6 @@ public final class NativeNodePropertyImporter {
         private long nodeCount;
         private Map<NodeLabel, PropertyMappings> propertyMappingsByLabel;
         private GraphDimensions dimensions;
-        private int concurrency;
         private AllocationTracker tracker = AllocationTracker.EMPTY;
 
 
@@ -179,11 +178,6 @@ public final class NativeNodePropertyImporter {
 
         public Builder dimensions(GraphDimensions dimensions) {
             this.dimensions = dimensions;
-            return this;
-        }
-
-        public Builder concurrency(int concurrency) {
-            this.concurrency = concurrency;
             return this;
         }
 
@@ -210,12 +204,7 @@ public final class NativeNodePropertyImporter {
                     builders.putIfAbsent(nodeLabel, new HashMap<>());
                     for (PropertyMapping propertyMapping : propertyMappings) {
                         NodePropertiesBuilder builder = NodePropertiesBuilder.of(
-                            nodeCount,
-                            tracker,
-                            propertyMapping.defaultValue(),
-                            dimensions.nodePropertyTokens().get(propertyMapping.neoPropertyKey()),
-                            propertyMapping.propertyKey(),
-                            concurrency
+                            nodeCount, tracker, propertyMapping.defaultValue()
                         );
                         builders.get(nodeLabel).put(propertyMapping, builder);
                     }

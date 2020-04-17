@@ -36,7 +36,13 @@ class AdjacencyCompressionTest {
 
     @ParameterizedTest(name = "{4}")
     @MethodSource("aggregationsWithResults")
-    void shouldCountRelationships(long[] targetNodeIds, long[][] weights, Aggregation[] aggregations, double[][] expected, String aggregationType) {
+    void shouldCountRelationships(
+        long[] targetNodeIds,
+        long[][] weights,
+        Aggregation[] aggregations,
+        double[][] expected,
+        String aggregationType
+    ) {
         LongsRef data = new LongsRef(targetNodeIds, 0, targetNodeIds.length);
 
         // Calculate this before applying the delta because the target node ids array is updated in place
