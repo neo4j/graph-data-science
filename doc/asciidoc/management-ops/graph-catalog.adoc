@@ -234,7 +234,8 @@ CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO', 'similarityScore')
 We can create new Neo4j databases from named in-memory graphs stored in the graph catalog.
 All nodes, relationships and properties present in an in-memory graph are written to a new Neo4j database.
 This includes data that has been projected in `gds.graph.create` and data that has been added by running algorithms in `mutate` mode.
-After exporting the graph, the new database can be be used in a Neo4j installation by setting link:https://neo4j.com/docs/operations-manual/3.5/reference/configuration-settings/#config_dbms.active_database[`dbms.active_database`].
+The newly created database will be stored in the Neo4j `databases` directory using a given database name.
+The new database can be created and started using link:https://neo4j.com/docs/cypher-manual/current/administration/databases/#administration-databases-start-database[`databases management commands`].
 
 The feature is useful in the following, exemplary scenarios:
 
@@ -243,15 +244,13 @@ The feature is useful in the following, exemplary scenarios:
 * Produce snapshots of analytical results and persistent them for archiving and inspection.
 * Share analytical results within the organization.
 
-.Export a named graph to a specific store directory:
+.Export a named graph to a new databases in the Neo4j databases direct:
 [source,cypher]
 ----
 CALL gds.alpha.graph.export('my-graph', {
-   storeDir: '/path/to/database',
    dbName: 'my-graph-db'
 })
 ----
 
-Note that `storeDir` must exist in the local file system.
 The procedure yields information about the number of nodes, relationships and properties written.
 Optional parameters are `writeConcurrency`, `enableDebugLog` and `batchSize`.
