@@ -72,7 +72,7 @@ abstract class TriangleBaseProcTest<CONFIG extends TriangleConfig> extends BaseP
     void setup() throws Exception {
         registerProcedures(
             TriangleProc.class,
-            TriangleCountStreamProc.class,
+            AlphaTriangleCountStreamProc.class,
             TriangleCountWriteProc.class,
             TriangleCountStatsProc.class
         );

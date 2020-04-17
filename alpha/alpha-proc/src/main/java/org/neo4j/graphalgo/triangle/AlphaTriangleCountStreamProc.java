@@ -34,7 +34,8 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleCountStreamProc extends TriangleBaseProc<TriangleCountStreamConfig> {
+@Deprecated
+public class AlphaTriangleCountStreamProc extends TriangleBaseProc<TriangleCountStreamConfig> {
 
     @Procedure(name = "gds.alpha.triangleCount.stream", mode = READ)
     @Description(DESCRIPTION)

@@ -54,7 +54,7 @@ public class TriangleDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class);
+        registerProcedures(TriangleProc.class, AlphaTriangleCountStreamProc.class, TriangleCountWriteProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);
     }

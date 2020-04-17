@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
@@ -57,20 +58,24 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     private final AllocationTracker tracker;
     private final LongAdder triangleCount;
     private final AtomicLong queue;
-    private final AtomicLong visitedNodes;
+    // in the end this will have `n` integers where the indexes are node IDs values are number of triangles for the node at the index
     private PagedAtomicIntegerArray triangles;
     private double averageClusteringCoefficient;
 
-    public IntersectingTriangleCount(Graph graph, ExecutorService executorService, int concurrency, AllocationTracker tracker) {
+    public IntersectingTriangleCount(Graph graph, ExecutorService executorService, int concurrency, AllocationTracker tracker, ProgressLogger progressLogger) {
         this.graph = graph;
         this.tracker = tracker;
         this.executorService = executorService;
         this.concurrency = concurrency;
         nodeCount = graph.nodeCount();
-        visitedNodes = new AtomicLong();
         triangles = PagedAtomicIntegerArray.newArray(nodeCount, tracker);
         triangleCount = new LongAdder();
         queue = new AtomicLong();
+        this.progressLogger = progressLogger;
+    }
+
+    public IntersectingTriangleCount(Graph graph, ExecutorService executorService, int concurrency, AllocationTracker tracker) {
+        this(graph, executorService, concurrency, tracker, ProgressLogger.NULL_LOGGER);
     }
 
     public long getTriangleCount() {
@@ -111,7 +116,6 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
 
     @Override
     public PagedAtomicIntegerArray compute() {
-        visitedNodes.set(0);
         queue.set(0);
         triangleCount.reset();
         averageClusteringCoefficient = 0.0;
@@ -143,7 +147,9 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
             long node;
             while ((node = queue.getAndIncrement()) < nodeCount && running()) {
                 intersect.intersectAll(node, this);
-                getProgressLogger().logProgress(visitedNodes.incrementAndGet(), nodeCount);
+                // FIXME: This needs to be fixed when all the Triangle Count `alpha` procs are removed
+                // NB: Logging without parameters is fine!
+                // getProgressLogger().logProgress();
             }
         }
 

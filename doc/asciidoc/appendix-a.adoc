@@ -92,6 +92,8 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.wcc.stream.estimate`
 | `gds.wcc.stats`
 | `gds.wcc.stats.estimate`
+| Triangle Count
+| `gds.triangleCount.stream`
 |===
 
 [[beta-tier]]
