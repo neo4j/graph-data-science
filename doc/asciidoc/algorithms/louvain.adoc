@@ -135,7 +135,7 @@ Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 .The following will run the algorithm and store the results in `myGraph`:
 [source, cypher]
 ----
-CALL gds.lovain.mutate('myGraph', { mutateProperty: 'communityId' })
+CALL gds.louvain.mutate('myGraph', { mutateProperty: 'communityId' })
 ----
 
 
