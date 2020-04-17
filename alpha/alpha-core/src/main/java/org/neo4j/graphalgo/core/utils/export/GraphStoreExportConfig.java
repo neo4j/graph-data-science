@@ -32,8 +32,6 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 @SuppressWarnings("immutables:subtype")
 public interface GraphStoreExportConfig extends BaseConfig {
 
-    String storeDir();
-
     String dbName();
 
     @Value.Default

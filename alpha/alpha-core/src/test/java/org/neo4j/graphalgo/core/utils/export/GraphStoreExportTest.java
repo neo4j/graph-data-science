@@ -19,22 +19,23 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 
+import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class GraphStoreExportTest extends AlgoTestBase {
@@ -55,34 +56,51 @@ class GraphStoreExportTest extends AlgoTestBase {
     @TempDir
     File tempDir;
 
-    @BeforeEach
-    void setup() {
-        runQuery(db, DB_CYPHER);
-    }
-
     @Test
-    void exportTopology() {
-        StoreLoaderBuilder loaderBuilder = new StoreLoaderBuilder()
-            .loadAnyLabel()
-            .loadAnyRelationshipType();
-
-        GraphStore inputGraphStore = loaderBuilder.api(db).build().graphStore(NativeFactory.class);
-
-        GraphStoreExportConfig config = GraphStoreExportConfig.of(
-            "test-user",
-            CypherMapWrapper.empty()
-                .withString("storeDir", tempDir.getAbsolutePath())
-                .withString("dbName", "test-db")
-        );
-
-        GraphStoreExport graphStoreExport = new GraphStoreExport(inputGraphStore, config);
-        graphStoreExport.runFromTests();
-
-        DatabaseManagementService testDbms = new TestDatabaseManagementServiceBuilder(tempDir)
+    void exportTopology() throws IOException {
+        // create input db
+        var testDbms = new TestDatabaseManagementServiceBuilder(tempDir)
             .setConfig(GraphDatabaseSettings.fail_on_missing_files, false)
             .build();
-        GraphStore outputGraphStore = loaderBuilder
-            .api((GraphDatabaseAPI) testDbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
+        var inputDb = (GraphDatabaseAPI) testDbms.database(DEFAULT_DATABASE_NAME);
+        try (var tx = inputDb.beginTx()) {
+            tx.execute(DB_CYPHER);
+        }
+        var inputGraphStore = new StoreLoaderBuilder()
+            .api((GraphDatabaseAPI) testDbms.database(DEFAULT_DATABASE_NAME))
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .build()
+            .graphStore(NativeFactory.class);
+
+        var exportDbName = "test-db";
+        var config = GraphStoreExportConfig.of(
+            "test-user",
+            CypherMapWrapper.empty().withString("dbName", exportDbName)
+        );
+
+        // export db
+        var databasesDirectory = inputDb.databaseLayout().getNeo4jLayout().databasesDirectory();
+        var storeDir = Paths.get(databasesDirectory.getAbsolutePath(), exportDbName);
+        var graphStoreExport = new GraphStoreExport(inputGraphStore, storeDir, config);
+        graphStoreExport.runFromTests();
+
+        testDbms.shutdown();
+
+        testDbms = new TestDatabaseManagementServiceBuilder(tempDir)
+            .setConfig(GraphDatabaseSettings.fail_on_missing_files, false)
+            .build();
+
+        // TODO: CE-Hack .. replace neo4j default database with newly created database
+        var neo4jDb = Paths.get(databasesDirectory.getAbsolutePath(), "neo4j").toFile();
+        FileUtils.deleteDirectory(neo4jDb);
+        storeDir.toFile().renameTo(neo4jDb);
+
+        var exportDB = (GraphDatabaseAPI) testDbms.database(DEFAULT_DATABASE_NAME);
+        var outputGraphStore = new StoreLoaderBuilder()
+            .api(exportDB)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
             .build()
             .graphStore(NativeFactory.class);
 
@@ -92,30 +110,52 @@ class GraphStoreExportTest extends AlgoTestBase {
     }
 
     @Test
-    void exportTopologyAndNodeProperties() {
-        StoreLoaderBuilder loaderBuilder = new StoreLoaderBuilder()
+    void exportTopologyAndNodeProperties() throws IOException {
+        var testDbms = new TestDatabaseManagementServiceBuilder(tempDir)
+            .setConfig(GraphDatabaseSettings.fail_on_missing_files, false)
+            .build();
+        var inputDb = (GraphDatabaseAPI) testDbms.database(DEFAULT_DATABASE_NAME);
+        try (var tx = inputDb.beginTx()) {
+            tx.execute(DB_CYPHER);
+        }
+
+        var inputGraphStore = new StoreLoaderBuilder()
+            .api(inputDb)
             .loadAnyLabel()
             .addNodeProperty(PropertyMapping.of("prop1", 0))
             .addNodeProperty(PropertyMapping.of("prop2", 42))
-            .loadAnyRelationshipType();
+            .loadAnyRelationshipType()
+            .build()
+            .graphStore(NativeFactory.class);
 
-        GraphStore inputGraphStore = loaderBuilder.api(db).build().graphStore(NativeFactory.class);
-
-        GraphStoreExportConfig config = GraphStoreExportConfig.of(
+        var exportDbName = "test-db";
+        var config = GraphStoreExportConfig.of(
             "test-user",
-            CypherMapWrapper.empty()
-                .withString("storeDir", tempDir.getAbsolutePath())
-                .withString("dbName", "test-db")
+            CypherMapWrapper.empty().withString("dbName", "test-db")
         );
 
-        GraphStoreExport graphStoreExport = new GraphStoreExport(inputGraphStore, config);
+        // export db
+        var databasesDirectory = inputDb.databaseLayout().getNeo4jLayout().databasesDirectory();
+        var storeDir = Paths.get(databasesDirectory.getAbsolutePath(), exportDbName);
+        var graphStoreExport = new GraphStoreExport(inputGraphStore, storeDir, config);
         graphStoreExport.runFromTests();
 
-        DatabaseManagementService testDbms = new TestDatabaseManagementServiceBuilder(tempDir)
+        testDbms.shutdown();
+
+        testDbms = new TestDatabaseManagementServiceBuilder(tempDir)
             .setConfig(GraphDatabaseSettings.fail_on_missing_files, false)
             .build();
-        GraphStore outputGraphStore = loaderBuilder
-            .api((GraphDatabaseAPI) testDbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
+
+        // TODO: CE-Hack .. replace neo4j default database with newly created database
+        var neo4jDb = Paths.get(databasesDirectory.getAbsolutePath(), "neo4j").toFile();
+        FileUtils.deleteDirectory(neo4jDb);
+        storeDir.toFile().renameTo(neo4jDb);
+
+        var exportDB = (GraphDatabaseAPI) testDbms.database(DEFAULT_DATABASE_NAME);
+        var outputGraphStore = new StoreLoaderBuilder()
+            .api(exportDB)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
             .build()
             .graphStore(NativeFactory.class);
 

@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.catalog;
 
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExport;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExportConfig;
@@ -29,6 +28,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -42,23 +42,25 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphStoreExportConfig config = GraphStoreExportConfig.of(getUsername(), cypherConfig);
-        validateConfig(cypherConfig, config);
+        var cypherConfig = CypherMapWrapper.create(configuration);
+        var exportConfig = GraphStoreExportConfig.of(getUsername(), cypherConfig);
+        validateConfig(cypherConfig, exportConfig);
 
-        GraphStoreExportResult result = runWithExceptionLogging(
+        var databasesDirectory = api.databaseLayout().getNeo4jLayout().databasesDirectory();
+        var exportDbPath = Paths.get(databasesDirectory.getAbsolutePath(), exportConfig.dbName());
+
+        var result = runWithExceptionLogging(
             "Graph creation failed", () -> {
-                GraphStore graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
-                GraphStoreExport graphStoreExport = new GraphStoreExport(graphStore, config);
+                var graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
+                var graphStoreExport = new GraphStoreExport(graphStore, exportDbPath, exportConfig);
 
-                long start = System.nanoTime();
+                var start = System.nanoTime();
                 graphStoreExport.run();
-                long end = System.nanoTime();
+                var end = System.nanoTime();
 
                 return new GraphStoreExportResult(
                     graphName,
-                    config.storeDir(),
-                    config.dbName(),
+                    exportConfig.dbName(),
                     graphStore.nodeCount(),
                     graphStore.relationshipCount(),
                     graphStore.relationshipTypes().size(),
@@ -74,7 +76,6 @@ public class GraphStoreExportProc extends BaseProc {
 
     public static class GraphStoreExportResult {
         public final String graphName;
-        public final String storeDir;
         public final String dbName;
         public final long nodeCount;
         public final long relationshipCount;
@@ -85,7 +86,6 @@ public class GraphStoreExportProc extends BaseProc {
 
         public GraphStoreExportResult(
             String graphName,
-            String storeDir,
             String dbName,
             long nodeCount,
             long relationshipCount,
@@ -95,7 +95,6 @@ public class GraphStoreExportProc extends BaseProc {
             long writeMillis
         ) {
             this.graphName = graphName;
-            this.storeDir = storeDir;
             this.dbName = dbName;
             this.nodeCount = nodeCount;
             this.relationshipCount = relationshipCount;

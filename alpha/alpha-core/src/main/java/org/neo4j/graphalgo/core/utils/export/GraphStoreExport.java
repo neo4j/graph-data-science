@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
@@ -26,7 +27,6 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.EmptyLogFilesInitializer;
@@ -39,13 +39,12 @@ import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.lifecycle.LifeSupport;
-import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.logging.internal.StoreLogService;
-import org.neo4j.scheduler.JobScheduler;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
@@ -54,10 +53,13 @@ public class GraphStoreExport {
 
     private final GraphStore graph;
 
+    private final Path dbPath;
+
     private final GraphStoreExportConfig config;
 
-    public GraphStoreExport(GraphStore graphStore, GraphStoreExportConfig config) {
+    public GraphStoreExport(GraphStore graphStore, Path dbPath, GraphStoreExportConfig config) {
         this.graph = graphStore;
+        this.dbPath = dbPath;
         this.config = config;
     }
 
@@ -76,13 +78,49 @@ public class GraphStoreExport {
     }
 
     private void run(boolean defaultSettingsSuitableForTests) {
-        File storeDir = new File(config.storeDir());
-        DIRECTORY_IS_WRITABLE.validate(storeDir);
+        DIRECTORY_IS_WRITABLE.validate(dbPath.toFile());
+        var databaseConfig = Config.defaults(GraphDatabaseSettings.neo4j_home, dbPath);
+        var databaseLayout = DatabaseLayout.of(databaseConfig);
+        var importConfig = getImportConfig(defaultSettingsSuitableForTests);
 
-        Config dbConfig = Config.defaults(GraphDatabaseSettings.neo4j_home, storeDir.toPath());
-        DatabaseLayout databaseLayout = DatabaseLayout.of(dbConfig);
-        // TODO: @s1ck ?????
-        Configuration importConfig = new Configuration() {
+        var life = new LifeSupport();
+
+        try (FileSystemAbstraction fs = new DefaultFileSystemAbstraction()) {
+            var logService = config.enableDebugLog()
+                ? life.add(StoreLogService.withInternalLog(databaseConfig.get(SettingsProxy.storeInternalLogPath()).toFile()).build(fs))
+                : NullLogService.getInstance();
+            var jobScheduler = life.add(createScheduler());
+
+            life.start();
+
+            Input input = new GraphStoreInput(graph, config.batchSize());
+
+            var importer = BatchImporterFactory.withHighestPriority().instantiate(
+                databaseLayout,
+                fs,
+                null, // no external page cache
+                importConfig,
+                logService,
+                ExecutionMonitors.invisible(),
+                AdditionalInitialIds.EMPTY,
+                databaseConfig,
+                RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider()),
+                ImportLogic.NO_MONITOR,
+                jobScheduler,
+                Collector.EMPTY,
+                EmptyLogFilesInitializer.INSTANCE
+            );
+            importer.doImport(input);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            life.shutdown();
+        }
+    }
+
+    @NotNull
+    private Configuration getImportConfig(boolean defaultSettingsSuitableForTests) {
+        return new Configuration() {
             @Override
             public int maxNumberOfProcessors() {
                 return config.writeConcurrency();
@@ -98,40 +136,6 @@ public class GraphStoreExport {
                 return false;
             }
         };
-
-        LifeSupport life = new LifeSupport();
-
-        try (FileSystemAbstraction fs = new DefaultFileSystemAbstraction()) {
-            LogService logService = config.enableDebugLog()
-                ? life.add(StoreLogService.withInternalLog(dbConfig.get(SettingsProxy.storeInternalLogPath()).toFile()).build(fs))
-                : NullLogService.getInstance();
-            JobScheduler jobScheduler = life.add(createScheduler());
-
-            life.start();
-
-            Input input = new GraphStoreInput(graph, config.batchSize());
-
-            BatchImporter importer = BatchImporterFactory.withHighestPriority().instantiate(
-                databaseLayout,
-                fs,
-                null, // no external page cache
-                importConfig,
-                logService,
-                ExecutionMonitors.invisible(),
-                AdditionalInitialIds.EMPTY,
-                dbConfig,
-                RecordFormatSelector.selectForConfig(dbConfig, logService.getInternalLogProvider()),
-                ImportLogic.NO_MONITOR,
-                jobScheduler,
-                Collector.EMPTY,
-                EmptyLogFilesInitializer.INSTANCE
-            );
-            importer.doImport(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            life.shutdown();
-        }
     }
 
     private static final Validator<File> DIRECTORY_IS_WRITABLE = value -> {
@@ -139,7 +143,7 @@ public class GraphStoreExport {
             return;
         }
 
-        File test = new File(value, "_______test___");
+        var test = new File(value, "_______test___");
         try {
             test.createNewFile();
         } catch (IOException e) {

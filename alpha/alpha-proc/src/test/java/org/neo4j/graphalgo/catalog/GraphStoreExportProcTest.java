@@ -21,11 +21,8 @@ package org.neo4j.graphalgo.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-
-import java.io.File;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -45,9 +42,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
         ", (b)-[:REL2 { weight2: 42}]->(c)" +
         ", (c)-[:REL3 { weight3: 42}]->(d)" +
         ", (d)-[:REL3 { weight3: 42}]->(a)";
-
-    @TempDir
-    File tempDir;
 
     @BeforeEach
     void setup() throws Exception {
@@ -70,16 +64,13 @@ class GraphStoreExportProcTest extends BaseProcTest {
             .graphCreate("test-graph")
             .yields());
 
-        String exportQuery = String.format(
+        var exportQuery = String.format(
             "CALL gds.alpha.graph.export('test-graph', {" +
-            "  storeDir: '%s'," +
             "  dbName: 'test-db'" +
-            "})",
-            tempDir.getAbsolutePath()
+            "})"
         );
 
         runQueryWithRowConsumer(exportQuery, row -> {
-            assertEquals(tempDir.getAbsolutePath(), row.getString("storeDir"));
             assertEquals("test-db", row.getString("dbName"));
             assertEquals(4, row.getNumber("nodeCount").longValue());
             assertEquals(6, row.getNumber("relationshipCount").longValue());
