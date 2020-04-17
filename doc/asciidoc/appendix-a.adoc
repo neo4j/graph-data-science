@@ -138,7 +138,7 @@ The following table lists all beta graph operations in the GDS library:
 [opts=header,cols="1, 1"]
 |===
 |Operation | Procedure
-|<<catalog-graph-export, Graph Export>> | `gds.alpha.graph.export`
+|<<catalog-graph-export, Graph Export>> | `gds.beta.graph.export`
 |===
 
 The following table lists all alpha procedures in the GDS library:

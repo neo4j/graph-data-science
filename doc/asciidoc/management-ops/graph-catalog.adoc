@@ -34,7 +34,7 @@ This chapter explains the available graph catalog operations.
 | <<catalog-graph-drop, gds.graph.drop>>                                   | Drops a named graph from the catalog.
 | <<catalog-graph-write-node-properties, gds.graph.writeNodeProperties>>   | Writes node properties stored in a named graph to Neo4j.
 | <<catalog-graph-write-relationship, gds.graph.writeRelationship>>        | Writes relationships stored in a named graph to Neo4j.
-| <<catalog-graph-export, gds.alpha.graph.export>>                         | Exports a named graph into a new offline Neo4j database.
+| <<catalog-graph-export, gds.beta.graph.export>>                         | Exports a named graph into a new offline Neo4j database.
 |===
 
 [NOTE]
@@ -229,7 +229,7 @@ CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO', 'similarityScore')
 == Create Neo4j databases from named graphs
 
 [.tier-note]
-*This procedure is in the alpha tier and could be changed or removed in a future release.*
+*This procedure is in the beta tier. For more information on this tier of algorithm, see <<algorithms, here>>.
 
 We can create new Neo4j databases from named in-memory graphs stored in the graph catalog.
 All nodes, relationships and properties present in an in-memory graph are written to a new Neo4j database.
@@ -247,7 +247,7 @@ The feature is useful in the following, exemplary scenarios:
 .Export a named graph to a new databases in the Neo4j databases direct:
 [source,cypher]
 ----
-CALL gds.alpha.graph.export('my-graph', {
+CALL gds.beta.graph.export('my-graph', {
    dbName: 'my-graph-db'
 })
 ----

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.catalog;
+package org.neo4j.graphalgo.beta.catalog;
 
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStoreExportProc extends BaseProc {
 
-    @Procedure(name = "gds.alpha.graph.export", mode = READ)
+    @Procedure(name = "gds.beta.graph.export", mode = READ)
     @Description("Exports a named graph into a new offline Neo4j database.")
     public Stream<GraphStoreExportResult> create(
         @Name(value = "graphName") String graphName,
