@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.core.utils.export;
 
 import org.immutables.value.Value;
+import org.neo4j.cli.Converters;
+import org.neo4j.configuration.helpers.DatabaseNameValidator;
+import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -32,6 +35,9 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 @SuppressWarnings("immutables:subtype")
 public interface GraphStoreExportConfig extends BaseConfig {
 
+    String DB_NAME_KEY = "dbName";
+
+    @Configuration.Key(DB_NAME_KEY)
     String dbName();
 
     @Value.Default
@@ -49,7 +55,16 @@ public interface GraphStoreExportConfig extends BaseConfig {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
 
+    @Value.Check
+    default void validate() {
+        DatabaseNameValidator.validateExternalDatabaseName(new NormalizedDatabaseName(dbName()));
+    }
+
     static GraphStoreExportConfig of(String username, CypherMapWrapper config) {
+        if (config.containsKey(DB_NAME_KEY)) {
+            var dbName = new Converters.DatabaseNameConverter().convert(config.getString(DB_NAME_KEY).get()).name();
+            config = config.withString(DB_NAME_KEY, dbName);
+        }
         return new GraphStoreExportConfigImpl(username, config);
     }
 }
