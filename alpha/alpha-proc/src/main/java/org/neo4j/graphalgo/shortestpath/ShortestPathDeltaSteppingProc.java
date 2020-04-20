@@ -105,7 +105,7 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
 
         try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             NodePropertyExporter
-                .of(api, graph, algorithm.getTerminationFlag())
+                .builder(api, graph, algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build()

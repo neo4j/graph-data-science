@@ -29,16 +29,13 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.core.write.NodePropertyStoreExporter;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -81,8 +78,8 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
     }
 
     private long writeNodeProperties(GraphStore graphStore, List<String> nodePropertyKeys, int writeConcurrency) {
-        NodePropertyStoreExporter exporter = NodePropertyStoreExporter
-            .of(api, graphStore, TerminationFlag.wrap(transaction))
+        NodePropertyExporter exporter = NodePropertyExporter
+            .builder(api, graphStore, TerminationFlag.wrap(transaction))
             .parallel(Pools.DEFAULT, writeConcurrency)
             .withLog(log)
             .build();

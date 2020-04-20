@@ -45,44 +45,11 @@ public final class NodePropertyStoreExporter extends NodePropertyExporter {
     private final Optional<Map<NodeLabel, BitSet>> maybeLabelInformation;
     private final Map<NodeLabel, GraphStore.NodePropertyStore> graphStoreNodeProperties;
 
-    public static Builder of(GraphDatabaseAPI db, GraphStore graphStore, TerminationFlag terminationFlag) {
-        return new Builder(db, graphStore, terminationFlag);
-    }
-
-    public static class Builder extends ExporterBuilder<NodePropertyStoreExporter> {
-        private Map<NodeLabel, GraphStore.NodePropertyStore> nodeProperties;
-        private Optional<Map<NodeLabel, BitSet>> maybeLabelInformation;
-
-        Builder(GraphDatabaseAPI db, GraphStore graphStore, TerminationFlag terminationFlag) {
-            super(db, graphStore.nodes(), terminationFlag);
-            this.maybeLabelInformation = graphStore.nodes().maybeLabelInformation();
-            this.nodeProperties = graphStore.nodeProperties();
-        }
-
-        @Override
-        public NodePropertyStoreExporter build() {
-            ProgressLogger progressLogger = loggerAdapter == null
-                ? ProgressLogger.NULL_LOGGER
-                : loggerAdapter;
-            return new NodePropertyStoreExporter(
-                db,
-                nodeCount,
-                toOriginalId,
-                terminationFlag,
-                nodeProperties,
-                maybeLabelInformation,
-                progressLogger,
-                writeConcurrency,
-                executorService
-            );
-        }
-    }
-
     public interface WriteConsumer {
         void accept(Write ops, long value) throws Exception;
     }
 
-    private NodePropertyStoreExporter(
+    NodePropertyStoreExporter(
         GraphDatabaseAPI db,
         long nodeCount,
         LongUnaryOperator toOriginalId,

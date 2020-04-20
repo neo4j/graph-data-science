@@ -81,7 +81,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         //  the Page Rank class and therefore to all product Page Rank procs as well.
         try(ProgressTimer ignore = ProgressTimer.start(statsBuilder::withWriteMillis)) {
             NodePropertyExporter exporter = NodePropertyExporter
-                .of(api, computationResult.graph(), algorithm.getTerminationFlag())
+                .builder(api, computationResult.graph(), algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build();

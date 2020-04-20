@@ -90,7 +90,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         log.info("Scc: overall memory usage: %s", tracker.getUsageString());
 
         try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
-            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, algorithm.getTerminationFlag())
+            NodePropertyExporter exporter = NodePropertyExporter.builder(api, graph, algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build();

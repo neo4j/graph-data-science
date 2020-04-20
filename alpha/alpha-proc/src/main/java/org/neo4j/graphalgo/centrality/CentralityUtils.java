@@ -52,7 +52,7 @@ public final class CentralityUtils {
         String propertyName = configuration.writeProperty();
         try(ProgressTimer ignore = ProgressTimer.start(statsBuilder::withWriteMillis)) {
             NodePropertyExporter exporter = NodePropertyExporter
-                .of(api, graph, terminationFlag)
+                .builder(api, graph, terminationFlag)
                 .withLog(log)
                 .parallel(Pools.DEFAULT, configuration.writeConcurrency())
                 .build();
