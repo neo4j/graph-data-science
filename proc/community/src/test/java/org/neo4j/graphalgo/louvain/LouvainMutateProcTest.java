@@ -54,21 +54,21 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     @Override
     public String expectedMutatedGraph() {
         return
-            "  (a { communityId: 14, seed: 1 })" +
-            ", (b { communityId: 14, seed: 1 })" +
-            ", (c { communityId: 14, seed: 1 })" +
-            ", (d { communityId: 14, seed: 1 })" +
-            ", (e { communityId: 14, seed: 1 })" +
-            ", (f { communityId: 14, seed: 1 })" +
-            ", (g { communityId: 7, seed: 2 })" +
-            ", (h { communityId: 7, seed: 2 })" +
-            ", (i { communityId: 7, seed: 2 })" +
-            ", (j { communityId: 12, seed: 42 })" +
-            ", (k { communityId: 12, seed: 42 })" +
-            ", (l { communityId: 12, seed: 42 })" +
-            ", (m { communityId: 12, seed: 42 })" +
-            ", (n { communityId: 12, seed: 42 })" +
-            ", (x { communityId: 14, seed: 1 })" +
+            "  (a:Node { communityId: 14, seed: 1 })" +
+            ", (b:Node { communityId: 14, seed: 1 })" +
+            ", (c:Node { communityId: 14, seed: 1 })" +
+            ", (d:Node { communityId: 14, seed: 1 })" +
+            ", (e:Node { communityId: 14, seed: 1 })" +
+            ", (f:Node { communityId: 14, seed: 1 })" +
+            ", (g:Node { communityId: 7, seed: 2 })" +
+            ", (h:Node { communityId: 7, seed: 2 })" +
+            ", (i:Node { communityId: 7, seed: 2 })" +
+            ", (j:Node { communityId: 12, seed: 42 })" +
+            ", (k:Node { communityId: 12, seed: 42 })" +
+            ", (l:Node { communityId: 12, seed: 42 })" +
+            ", (m:Node { communityId: 12, seed: 42 })" +
+            ", (n:Node { communityId: 12, seed: 42 })" +
+            ", (x:Node { communityId: 14, seed: 1 })" +
             // 'LOUVAIN_GRAPH' is UNDIRECTED, e.g. each rel twice
             ", (a)-->(b)-->(a)" +
             ", (a)-->(d)-->(a)" +
@@ -133,7 +133,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
         runQuery(writeQuery);
 
         var updatedGraph = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
+            .addNodeLabel("Node")
             .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)

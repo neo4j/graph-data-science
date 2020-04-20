@@ -124,10 +124,10 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
             orientation == REVERSE
                 ? fromGdl(
                 String.format(
-                    "  (i1 {id: 10})" +
-                    ", (i2 {id: 11})" +
-                    ", (i3 {id: 12})" +
-                    ", (i4 {id: 13})" +
+                    "  (i1:Item {id: 10})" +
+                    ", (i2:Item {id: 11})" +
+                    ", (i3:Item {id: 12})" +
+                    ", (i4:Item {id: 13})" +
                     ", (i1)-[{w: %f}]->(i2)" +
                     ", (i1)-[{w: %f}]->(i3)" +
                     ", (i2)-[{w: %f}]->(i1)" +
@@ -144,10 +144,10 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
             )
                 : fromGdl(
                     String.format(
-                        "  (a {id: 0})" +
-                        ", (b {id: 1})" +
-                        ", (c {id: 2})" +
-                        ", (d {id: 3})" +
+                        "  (a:Person {id: 0})" +
+                        ", (b:Person {id: 1})" +
+                        ", (c:Person {id: 2})" +
+                        ", (d:Person {id: 3})" +
                         ", (a)-[{w: %f}]->(b)" +
                         ", (a)-[{w: %f}]->(c)" +
                         ", (b)-[{w: %f}]->(c)" +

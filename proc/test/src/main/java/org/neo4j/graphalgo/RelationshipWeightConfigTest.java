@@ -229,8 +229,8 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
     @CsvSource(
         delimiter = ';',
         value = {
-            "TYPE1; ()-[]->(), ()",
-            "TYPE; (c)<--(a)-->(b)-->(c)",
+            "TYPE1; (:Label)-[]->(:Label), (:Label)",
+            "TYPE; (c:Label)<--(a:Label)-->(b:Label)-->(c)",
             "*; (a)-->(b)-->(c)-->(a)-->(c)"
         })
     default void testRunUnweightedOnWeightedMultiRelTypeGraph(String relType, String expectedGraph) {
@@ -269,7 +269,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
             Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.of(noRelGraph));
 
             Graph graph = proc.createGraph(configAndName);
-            assertGraphEquals(fromGdl("(a)-->(b)-->(c)-->(a)-->(c)"), graph);
+            assertGraphEquals(fromGdl("(a:Label)-->(b:Label)-->(c:Label)-->(a)-->(c)"), graph);
         });
     }
 
@@ -293,7 +293,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
             CONFIG config = proc.newConfig(Optional.empty(), algoConfig);
             Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.empty());
             Graph graph = proc.createGraph(configAndName);
-            assertGraphEquals(fromGdl("(a)-->(b)-->(c)-->(a)-->(c)"), graph);
+            assertGraphEquals(fromGdl("(a:Label)-->(b:Label)-->(c:Label)-->(a)-->(c)"), graph);
         });
     }
 
@@ -313,7 +313,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
             Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.of(graphName));
 
             Graph graph = proc.createGraph(configAndName);
-            assertGraphEquals(fromGdl("()-[{w1: 0.0}]->(), ()"), graph);
+            assertGraphEquals(fromGdl("(:Label)-[{w1: 0.0}]->(:Label), (:Label)"), graph);
         });
     }
 
