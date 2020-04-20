@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 
 class TestGraphTest {
 
@@ -58,7 +60,7 @@ class TestGraphTest {
 
     @Test
     void testInvariants() {
-        Graph graph = TestGraph.Builder.fromGdl("(a { foo: 42, bar: NaN }), (b { foo: 23, bar: 42.0d }), (a)-[{ weight: 42 }]->(b)");
+        Graph graph = fromGdl("(a { foo: 42, bar: NaN }), (b { foo: 23, bar: 42.0d }), (a)-[{ weight: 42 }]->(b)");
         assertEquals(2, graph.nodeCount());
         assertEquals(1, graph.relationshipCount());
         assertEquals(Sets.newHashSet("foo", "bar"), graph.availableNodeProperties());
@@ -68,8 +70,19 @@ class TestGraphTest {
     }
 
     @Test
+    void testNodeLabels() {
+        Graph graph = fromGdl("(a:A),(b:B1:B2),(c)");
+        assertEquals(3, graph.nodeCount());
+        assertEquals(0, graph.relationshipCount());
+        Set<NodeLabel> expectedLabels = Sets.newHashSet("A", "B1", "B2").stream()
+            .map(NodeLabel::new)
+            .collect(Collectors.toSet());
+        assertEquals(expectedLabels, graph.availableNodeLabels());
+    }
+
+    @Test
     void testForAllNodes() {
-        Graph graph = TestGraph.Builder.fromGdl("({w:1}),({w:2}),({w:3})");
+        Graph graph = fromGdl("({w:1}),({w:2}),({w:3})");
         List<Double> nodeProps = Lists.newArrayList();
         graph.forEachNode(nodeId -> nodeProps.add(graph.nodeProperties("w").nodeProperty(nodeId)));
         assertEquals(3, nodeProps.size());
@@ -78,7 +91,7 @@ class TestGraphTest {
 
     @Test
     void testForAllRelationships() {
-        Graph graph = TestGraph.Builder.fromGdl("(a),(b),(c),(a)-[{w:1}]->(b),(a)-[{w:2}]->(c),(b)-[{w:3}]->(c)");
+        Graph graph = fromGdl("(a),(b),(c),(a)-[{w:1}]->(b),(a)-[{w:2}]->(c),(b)-[{w:3}]->(c)");
         Set<Double> relProps = Sets.newHashSet();
         graph.forEachNode(nodeId -> {
             graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
@@ -95,7 +108,7 @@ class TestGraphTest {
     void invalidNodeProperties() {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () -> TestGraph.Builder.fromGdl("(a { foo: 42 }), (b { bar: 23 })"));
+                () -> fromGdl("(a { foo: 42 }), (b { bar: 23 })"));
         assertThat(ex.getMessage(), containsString("Vertices must have the same set of property keys."));
     }
 
@@ -103,7 +116,7 @@ class TestGraphTest {
     void invalidRelationshipProperties() {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () -> TestGraph.Builder.fromGdl("(a { foo: 42 }), (b { foo: 23 }), (a)-[{w:1}]->(b), (a)-[{q:1}]->(b)"));
+                () -> fromGdl("(a { foo: 42 }), (b { foo: 23 }), (a)-[{w:1}]->(b), (a)-[{q:1}]->(b)"));
         assertThat(ex.getMessage(), containsString("Relationships must have the same set of property keys."));
     }
 

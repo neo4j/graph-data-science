@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -31,6 +28,9 @@ import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Edge;
@@ -38,6 +38,7 @@ import org.s1ck.gdl.model.Element;
 import org.s1ck.gdl.model.Vertex;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -56,16 +58,20 @@ public final class TestGraph implements Graph {
     private static final int STREAM_CONCURRENCY = 4;
 
     private final Map<Long, Adjacency> adjacencyList;
+    private final Map<Long, Set<NodeLabel>> nodeLabels;
     private final Map<String, NodeProperties> nodeProperties;
     private final NodeProperties relationshipProperty;
     private final boolean hasRelationshipProperty;
 
     private TestGraph(
-            Map<Long, Adjacency> adjacencyList,
-            Map<String, NodeProperties> nodeProperties,
-            NodeProperties relationshipProperty,
-            boolean hasRelationshipProperty) {
+        Map<Long, Adjacency> adjacencyList,
+        Map<Long, Set<NodeLabel>> nodeLabels,
+        Map<String, NodeProperties> nodeProperties,
+        NodeProperties relationshipProperty,
+        boolean hasRelationshipProperty
+    ) {
         this.adjacencyList = adjacencyList;
+        this.nodeLabels = nodeLabels;
         this.nodeProperties = nodeProperties;
         this.relationshipProperty = relationshipProperty;
         this.hasRelationshipProperty = hasRelationshipProperty;
@@ -142,17 +148,17 @@ public final class TestGraph implements Graph {
 
     @Override
     public Set<NodeLabel> nodeLabels(long nodeId) {
-        return null;
+        return nodeLabels.getOrDefault(nodeId, Collections.emptySet());
     }
 
     @Override
     public Stream<NodeLabel> nodeLabelStream(long nodeId) {
-        return null;
+        return nodeLabels(nodeId).stream();
     }
 
     @Override
     public Set<NodeLabel> availableNodeLabels() {
-        return null;
+        return nodeLabels.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
     @Override
@@ -268,6 +274,8 @@ public final class TestGraph implements Graph {
 
     public static final class Builder {
 
+        private static final String DEFAULT_NODE_LABEL = "__DEFAULT_NODE_LABEL";
+
         private Builder() {}
 
         public static Graph fromGdl(String gdl) {
@@ -277,12 +285,15 @@ public final class TestGraph implements Graph {
         public static Graph fromGdl(String gdl, Orientation orientation) {
             Objects.requireNonNull(gdl);
 
-            GDLHandler gdlHandler = new GDLHandler.Builder().buildFromString(gdl);
+            GDLHandler gdlHandler = new GDLHandler.Builder()
+                .setDefaultVertexLabel(DEFAULT_NODE_LABEL)
+                .buildFromString(gdl);
             Collection<Vertex> vertices = gdlHandler.getVertices();
             Collection<Edge> edges = gdlHandler.getEdges();
 
             validateInput(vertices, edges);
 
+            Map<Long, Set<NodeLabel>> nodeLabels = buildNodeLabels(vertices);
             Map<Long, Adjacency> adjacencyList = buildAdjacencyList(vertices, edges, orientation);
             Map<String, NodeProperties> nodeProperties = buildWeightMappings(vertices);
             Map<String, NodeProperties> relationshipProperties = buildWeightMappings(edges);
@@ -298,7 +309,13 @@ public final class TestGraph implements Graph {
                     .findFirst()
                     .orElseGet(() -> new NullPropertyMap(1.0));
 
-            return new TestGraph(adjacencyList, nodeProperties, relationshipProperty, hasRelationshipProperty);
+            return new TestGraph(
+                adjacencyList,
+                nodeLabels,
+                nodeProperties,
+                relationshipProperty,
+                hasRelationshipProperty
+            );
         }
 
         private static void validateInput(Collection<Vertex> vertices, Collection<Edge> edges) {
@@ -320,6 +337,16 @@ public final class TestGraph implements Graph {
                     .map(Element::getProperties)
                     .map(Map::keySet)
                     .allMatch(keys -> keys.equals(head));
+        }
+
+        private static Map<Long, Set<NodeLabel>> buildNodeLabels(Collection<Vertex> vertices) {
+            return vertices.stream().collect(Collectors.toMap(
+                Element::getId,
+                vertex -> vertex.getLabels().stream()
+                    .filter(label -> !label.equals(DEFAULT_NODE_LABEL))
+                    .map(NodeLabel::new)
+                    .collect(Collectors.toSet())
+            ));
         }
 
         private static Map<Long, Adjacency> buildAdjacencyList(
