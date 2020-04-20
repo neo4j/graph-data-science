@@ -172,6 +172,88 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         assertEquals(2, groupedCcs.get(1.0 / 3));
     }
 
+    @Test
+    void selfLoop() {
+        runQuery("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)");
+
+        TriangleCountResult result = projectAndCompute();
+
+        assertEquals(0, result.globalTriangles());
+        assertEquals(0, result.averageClusteringCoefficient());
+        assertEquals(1, result.localTriangles().size());
+        assertEquals(1, result.localClusteringCoefficients().size());
+        assertEquals(0, result.localTriangles().get(0));
+        assertEquals(0.0, result.localClusteringCoefficients().get(0));
+    }
+
+    @Test
+    void selfLoop2() {
+        // a self loop adds two to the degree
+        runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)");
+
+        TriangleCountResult result = projectAndCompute();
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(13.0 / 18, result.averageClusteringCoefficient(), 1e-10);
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(3, result.localClusteringCoefficients().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(1, result.localTriangles().get(2));
+        assertEquals(1.0 / 6, result.localClusteringCoefficients().get(0));
+        assertEquals(1.0, result.localClusteringCoefficients().get(1));
+        assertEquals(1.0, result.localClusteringCoefficients().get(2));
+    }
+
+    @Test
+    void manyTrianglesAndOtherThings() {
+        runQuery("CREATE" +
+                 " (a)-[:T]->(b)-[:T]->(b)-[:T]->(c)-[:T]->(a), " +
+                 " (c)-[:T]->(d)-[:T]->(e)-[:T]->(f)-[:T]->(d), " +
+                 " (f)-[:T]->(g)-[:T]->(h)-[:T]->(f), " +
+                 " (h)-[:T]->(i)-[:T]->(j)-[:T]->(k)-[:T]->(e), " +
+                 " (k)-[:T]->(l), " +
+                 " (k)-[:T]->(m)-[:T]->(n)-[:T]->(j), " +
+                 " (o)");
+
+        TriangleCountResult result = projectAndCompute();
+
+        assertEquals(3, result.globalTriangles());
+        assertEquals(23.0 / 90, result.averageClusteringCoefficient(), 1e-10);
+        assertEquals(15, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0)); // a
+        assertEquals(1, result.localTriangles().get(1)); // b
+        assertEquals(1, result.localTriangles().get(2)); // c
+        assertEquals(1, result.localTriangles().get(3)); // d
+        assertEquals(1, result.localTriangles().get(4)); // e
+        assertEquals(2, result.localTriangles().get(5)); // f
+        assertEquals(1, result.localTriangles().get(6)); // g
+        assertEquals(1, result.localTriangles().get(7)); // h
+        assertEquals(0, result.localTriangles().get(8)); // i
+        assertEquals(0, result.localTriangles().get(9)); // j
+        assertEquals(0, result.localTriangles().get(10)); // k
+        assertEquals(0, result.localTriangles().get(11)); // l
+        assertEquals(0, result.localTriangles().get(12)); // m
+        assertEquals(0, result.localTriangles().get(13)); // n
+        assertEquals(0, result.localTriangles().get(14)); // o
+        assertEquals(15, result.localClusteringCoefficients().size());
+        assertEquals(1, result.localClusteringCoefficients().get(0)); // a
+        assertEquals(1.0 / 6, result.localClusteringCoefficients().get(1)); // b
+        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(2)); // c
+        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(3)); // d
+        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(4)); // e
+        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(5)); // f
+        assertEquals(1, result.localClusteringCoefficients().get(6)); // g
+        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(7)); // h
+        assertEquals(0, result.localClusteringCoefficients().get(8)); // i
+        assertEquals(0, result.localClusteringCoefficients().get(9)); // j
+        assertEquals(0, result.localClusteringCoefficients().get(10)); // k
+        assertEquals(0, result.localClusteringCoefficients().get(11)); // l
+        assertEquals(0, result.localClusteringCoefficients().get(12)); // m
+        assertEquals(0, result.localClusteringCoefficients().get(13)); // n
+        assertEquals(0, result.localClusteringCoefficients().get(14)); // o
+    }
+
     private TriangleCountResult projectAndCompute() {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
