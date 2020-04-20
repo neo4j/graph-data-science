@@ -42,7 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
@@ -184,14 +183,14 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             "   [$property]" +
             ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";
 
-        runQuery(graphDb(), graphWriteQuery, map("graph", graphName, "property", mutateProperty()));
+        runQuery(graphDb(), graphWriteQuery, Map.of("graph", graphName, "property", mutateProperty()));
 
         String checkNeo4jGraphQuery = String.format("MATCH (n:B) RETURN n.%s AS property", mutateProperty());
 
         runQueryWithRowConsumer(
             graphDb(),
             checkNeo4jGraphQuery,
-            map(),
+            Map.of(),
             ((transaction, resultRow) -> assertNull(resultRow.get("property"))));
     }
 
