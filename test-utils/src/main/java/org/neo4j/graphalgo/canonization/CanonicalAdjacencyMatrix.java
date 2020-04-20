@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.canonization;
 
 import org.apache.commons.compress.utils.Lists;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.HashMap;
@@ -36,16 +37,29 @@ public final class CanonicalAdjacencyMatrix {
 
     public static String canonicalize(Graph g) {
         // canonical nodes
-        Map<Long, String> canonicalNodeLabels = new HashMap<>();
+        Map<Long, String> canonicalLabels = new HashMap<>();
         g.forEachNode(nodeId -> {
-            String canonicalNodeLabel = g.availableNodeProperties().stream()
+            String sortedLabels = g
+                .nodeLabelStream(nodeId)
+                .filter(label -> label != NodeLabel.ALL_NODES)
+                .map(NodeLabel::name)
+                .sorted()
+                .collect(Collectors.joining(":"));
+
+            String sortedProperties = g.availableNodeProperties().stream()
                     .map(propertyKey -> String.format(
                             "%s: %f",
                             propertyKey,
                             g.nodeProperties(propertyKey).nodeProperty(nodeId)))
                     .sorted()
-                    .collect(Collectors.joining(", ", "({", "})"));
-            canonicalNodeLabels.put(nodeId, canonicalNodeLabel);
+                    .collect(Collectors.joining(", "));
+
+            String canonicalNode = String.format("(%s%s)",
+                sortedLabels.isEmpty() ? "" : String.format(":%s ", sortedLabels),
+                sortedProperties.isEmpty() ? "" : String.format("{ %s }", sortedProperties)
+            );
+
+            canonicalLabels.put(nodeId, canonicalNode);
             return true;
         });
 
@@ -55,10 +69,10 @@ public final class CanonicalAdjacencyMatrix {
             g.forEachRelationship(nodeId, 1.0, (sourceId, targetId, propertyValue) -> {
                 outAdjacencies.compute(
                         sourceId,
-                        canonicalRelationship(canonicalNodeLabels.get(targetId), propertyValue, "()-[w: %f]->%s"));
+                        canonicalRelationship(canonicalLabels.get(targetId), propertyValue, "()-[w: %f]->%s"));
                 inAdjacencies.compute(
                         targetId,
-                        canonicalRelationship(canonicalNodeLabels.get(sourceId), propertyValue, "()<-[w: %f]-%s"));
+                        canonicalRelationship(canonicalLabels.get(sourceId), propertyValue, "()<-[w: %f]-%s"));
                 return true;
             });
             return true;
@@ -67,7 +81,7 @@ public final class CanonicalAdjacencyMatrix {
         Map<Long, String> canonicalInAdjacencies = canonicalAdjacencies(inAdjacencies);
 
         // canonical matrix
-        return canonicalNodeLabels.entrySet().stream()
+        return canonicalLabels.entrySet().stream()
                 .map(entry -> String.format(
                         "%s => out: %s in: %s",
                         entry.getValue(),

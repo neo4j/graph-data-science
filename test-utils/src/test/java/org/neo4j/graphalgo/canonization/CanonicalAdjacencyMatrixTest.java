@@ -44,6 +44,20 @@ class CanonicalAdjacencyMatrixTest {
     }
 
     @Test
+    void testTopologyAndNodeLabelsEquals() {
+        Graph g1 = TestGraph.Builder.fromGdl("(a:A:B), (b:B), (a)-->(b)");
+        Graph g2 = TestGraph.Builder.fromGdl("(a:A:B), (b:B), (a)-->(b)");
+        assertEquals(canonicalize(g1), canonicalize(g2));
+    }
+
+    @Test
+    void testTopologyAndNodeLabelsNotEquals() {
+        Graph g1 = TestGraph.Builder.fromGdl("(a:A:B), (b:B), (a)-->(b)");
+        Graph g2 = TestGraph.Builder.fromGdl("(a:A:B), (b:C), (a)-->(b)");
+        assertNotEquals(canonicalize(g1), canonicalize(g2));
+    }
+
+    @Test
     void testTopologyAndDataEquals() {
         Graph g1 = TestGraph.Builder.fromGdl("(a {a:2, w:1, q:NaN}), (b {w:2, a:3, q:42.0d}), (a)-->(b)");
         Graph g2 = TestGraph.Builder.fromGdl("(a {a:2, w:1, q:NaN}), (b {w:2, a:3, q:42.0d}), (a)-->(b)");
