@@ -62,7 +62,7 @@ final class FilteredNodePropertyExporter extends NodePropertyExporter {
 
     @Override
     void writeSequential(List<NodePropertyExporter.ResolvedNodeProperty> nodeProperties) {
-        if (graphStore.nodes().maybeLabelInformation().isEmpty()) {
+        if (!graphStore.nodes().maybeLabelInformation().isPresent()) {
             super.writeSequential(nodeProperties);
         } else {
             graphStore.nodes().maybeLabelInformation().get().forEach((nodeLabel, bitSet) -> {
@@ -74,7 +74,7 @@ final class FilteredNodePropertyExporter extends NodePropertyExporter {
 
     @Override
     void writeParallel(List<NodePropertyExporter.ResolvedNodeProperty> nodeProperties) {
-        if (graphStore.nodes().maybeLabelInformation().isEmpty()) {
+        if (!graphStore.nodes().maybeLabelInformation().isPresent()) {
             super.writeParallel(nodeProperties);
         } else {
             graphStore.nodes().maybeLabelInformation().get().forEach(((nodeLabel, bitSet) -> {
