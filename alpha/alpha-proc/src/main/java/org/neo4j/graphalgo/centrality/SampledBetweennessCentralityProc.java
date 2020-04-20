@@ -106,7 +106,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
 
         try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             AtomicDoubleArray centrality = algo.getCentrality();
-            NodePropertyExporter.of(api, graph, algo.getTerminationFlag())
+            NodePropertyExporter.builder(api, graph, algo.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build()

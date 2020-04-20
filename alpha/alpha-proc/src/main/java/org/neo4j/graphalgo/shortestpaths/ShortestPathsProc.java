@@ -86,7 +86,7 @@ public class ShortestPathsProc extends AlgoBaseProc<ShortestPaths, ShortestPaths
             algorithm.release();
 
             ShortestPathsConfig config = computationResult.config();
-            NodePropertyExporter.of(api, computationResult.graph(), algorithm.getTerminationFlag())
+            NodePropertyExporter.builder(api, computationResult.graph(), algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build()

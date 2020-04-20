@@ -68,7 +68,7 @@ public abstract class WriteProc<
 
             Graph graph = computationResult.graph();
             TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
-            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
+            NodePropertyExporter exporter = NodePropertyExporter.builder(api, graph, terminationFlag)
                 .withLog(log)
                 .parallel(Pools.DEFAULT, writePropertyConfig.writeConcurrency())
                 .build();

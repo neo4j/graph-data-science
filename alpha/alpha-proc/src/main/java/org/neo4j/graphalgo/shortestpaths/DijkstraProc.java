@@ -103,7 +103,7 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
             dijkstra.release();
 
             DequeMapping mapping = new DequeMapping(graph, finalPath);
-            NodePropertyExporter.of(api, mapping, dijkstra.getTerminationFlag())
+            NodePropertyExporter.builder(api, mapping, dijkstra.getTerminationFlag())
                 .withLog(log)
                 .build()
                 .write(

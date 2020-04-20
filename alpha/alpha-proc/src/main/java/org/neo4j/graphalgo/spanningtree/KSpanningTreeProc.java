@@ -95,7 +95,7 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
 
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            final NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, TerminationFlag.wrap(transaction))
+            final NodePropertyExporter exporter = NodePropertyExporter.builder(api, graph, TerminationFlag.wrap(transaction))
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build();

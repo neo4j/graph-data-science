@@ -105,7 +105,7 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
         }
 
         try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, algorithm.getTerminationFlag())
+            NodePropertyExporter exporter = NodePropertyExporter.builder(api, graph, algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, computationResult.config().writeConcurrency())
                 .build();

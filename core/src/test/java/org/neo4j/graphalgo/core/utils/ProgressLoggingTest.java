@@ -106,7 +106,7 @@ class ProgressLoggingTest {
         final int[] ints = new int[(int) graph.nodeCount()];
         Arrays.fill(ints, -1);
 
-        NodePropertyExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE)
+        NodePropertyExporter.builder(DB, graph, TerminationFlag.RUNNING_TRUE)
                 .withLog(testLogger(buffer))
                 .build()
                 .write(

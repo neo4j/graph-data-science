@@ -101,7 +101,7 @@ public class TriangleCountProc extends TriangleBaseProc<IntersectingTriangleCoun
             graph.release();
             return Stream.of(builder.buildResult());
         }
-        NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, algorithm.getTerminationFlag())
+        NodePropertyExporter exporter = NodePropertyExporter.builder(api, graph, algorithm.getTerminationFlag())
             .withLog(log)
             .parallel(Pools.DEFAULT, config.writeConcurrency())
             .build();

@@ -78,7 +78,7 @@ class NodePropertyExporterTest {
             .build()
             .graph(NativeFactory.class);
 
-        NodePropertyExporter exporter = NodePropertyExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE).build();
+        NodePropertyExporter exporter = NodePropertyExporter.builder(DB, graph, TerminationFlag.RUNNING_TRUE).build();
 
         exporter.write("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR);
 
@@ -113,7 +113,7 @@ class NodePropertyExporterTest {
             .build()
             .graph(NativeFactory.class);
 
-        NodePropertyExporter exporter = NodePropertyExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE).build();
+        NodePropertyExporter exporter = NodePropertyExporter.builder(DB, graph, TerminationFlag.RUNNING_TRUE).build();
 
         List<NodePropertyExporter.NodeProperty<?>> nodeProperties = Arrays.asList(
             ImmutableNodeProperty.of("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR),
@@ -156,7 +156,7 @@ class NodePropertyExporterTest {
 
     private void transactionTerminationTest(ExecutorService executorService) {
         TerminationFlag terminationFlag = () -> false;
-        NodePropertyExporter exporter = NodePropertyExporter.of(DB, new DirectIdMapping(3), terminationFlag)
+        NodePropertyExporter exporter = NodePropertyExporter.builder(DB, new DirectIdMapping(3), terminationFlag)
             .parallel(executorService, 4)
             .build();
 
