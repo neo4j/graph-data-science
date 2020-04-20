@@ -115,7 +115,7 @@ public class NodePropertyExporter extends StatementApi {
                 : loggerAdapter;
 
             if (maybeGraphStore.isPresent()) {
-                return new NodePropertyStoreExporter(
+                return new FilteredNodePropertyExporter(
                     db,
                     nodeCount,
                     toOriginalId,

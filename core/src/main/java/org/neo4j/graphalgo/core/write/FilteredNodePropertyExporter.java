@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
-final class NodePropertyStoreExporter extends NodePropertyExporter {
+final class FilteredNodePropertyExporter extends NodePropertyExporter {
 
     private final GraphStore graphStore;
 
@@ -46,7 +46,7 @@ final class NodePropertyStoreExporter extends NodePropertyExporter {
         void accept(Write ops, long value) throws Exception;
     }
 
-    NodePropertyStoreExporter(
+    FilteredNodePropertyExporter(
         GraphDatabaseAPI db,
         long nodeCount,
         LongUnaryOperator toOriginalId,
@@ -67,7 +67,7 @@ final class NodePropertyStoreExporter extends NodePropertyExporter {
         } else {
             graphStore.nodes().maybeLabelInformation().get().forEach((nodeLabel, bitSet) -> {
                 List<ResolvedNodeProperty> filteredProperties = filterNodePropertiesForLabel(nodeProperties, nodeLabel);
-                writeFilteredSequential(bitSet, (ops, nodeId) -> doWrite(filteredProperties, ops, nodeId));
+                writeSequentialFiltered(bitSet, (ops, nodeId) -> doWrite(filteredProperties, ops, nodeId));
             });
         }
     }
@@ -79,12 +79,12 @@ final class NodePropertyStoreExporter extends NodePropertyExporter {
         } else {
             graphStore.nodes().maybeLabelInformation().get().forEach(((nodeLabel, bitSet) -> {
                 List<ResolvedNodeProperty> filteredProperties = filterNodePropertiesForLabel(nodeProperties, nodeLabel);
-                writeFilteredParallel(bitSet, (ops, nodeId) -> doWrite(filteredProperties, ops, nodeId));
+                writeParallelFiltered(bitSet, (ops, nodeId) -> doWrite(filteredProperties, ops, nodeId));
             }));
         }
     }
 
-    private void writeFilteredSequential(BitSet nodeLabelBits, WriteConsumer writer) {
+    private void writeSequentialFiltered(BitSet nodeLabelBits, WriteConsumer writer) {
         acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
             long progress = 0L;
@@ -105,7 +105,7 @@ final class NodePropertyStoreExporter extends NodePropertyExporter {
         });
     }
 
-    private void writeFilteredParallel(BitSet nodeLabelBits, WriteConsumer writer) {
+    private void writeParallelFiltered(BitSet nodeLabelBits, WriteConsumer writer) {
         final long batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
             concurrency,
