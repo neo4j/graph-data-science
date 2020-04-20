@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.core.write;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.BitSetIterator;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
-public final class NodePropertyStoreExporter extends NodePropertyExporter {
+final class NodePropertyStoreExporter extends NodePropertyExporter {
 
     private final Optional<Map<NodeLabel, BitSet>> maybeLabelInformation;
     private final Map<NodeLabel, GraphStore.NodePropertyStore> graphStoreNodeProperties;
@@ -65,35 +65,37 @@ public final class NodePropertyStoreExporter extends NodePropertyExporter {
         this.maybeLabelInformation = maybeLabelInformation;
     }
 
-    protected void writeSequential(List<NodePropertyExporter.ResolvedNodeProperty> nodeProperties) {
+    @Override
+    void writeSequential(List<NodePropertyExporter.ResolvedNodeProperty> nodeProperties) {
         if (maybeLabelInformation.isEmpty()) {
-            super.writeSequential((ops, nodeId) -> doWrite(nodeProperties, ops, nodeId));
+            super.writeSequential(nodeProperties);
         } else {
             maybeLabelInformation.get().forEach((nodeLabel, bitSet) -> {
                 List<ResolvedNodeProperty> filteredProperties = filterNodePropertiesForLabel(nodeProperties, nodeLabel);
-                writeSequential(bitSet, (ops, nodeId) -> doWrite(filteredProperties, ops, nodeId));
+                writeFilteredSequential(bitSet, (ops, nodeId) -> doWrite(filteredProperties, ops, nodeId));
             });
         }
     }
 
-    protected void writeParallel(List<NodePropertyExporter.ResolvedNodeProperty> nodeProperties) {
+    @Override
+    void writeParallel(List<NodePropertyExporter.ResolvedNodeProperty> nodeProperties) {
         if (maybeLabelInformation.isEmpty()) {
-            super.writeParallel((ops, offset) -> doWrite(nodeProperties, ops, offset));
+            super.writeParallel(nodeProperties);
         } else {
             maybeLabelInformation.get().forEach(((nodeLabel, bitSet) -> {
                 List<ResolvedNodeProperty> filteredProperties = filterNodePropertiesForLabel(nodeProperties, nodeLabel);
-                writeParallel(bitSet, (ops, nodeId) -> doWrite(filteredProperties, ops, nodeId));
+                writeFilteredParallel(bitSet, (ops, nodeId) -> doWrite(filteredProperties, ops, nodeId));
             }));
         }
     }
 
-    protected void writeSequential(BitSet bitset, WriteConsumer writer) {
+    private void writeFilteredSequential(BitSet nodeLabelBits, WriteConsumer writer) {
         acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
             long progress = 0L;
             Write ops = stmt.dataWrite();
-            long nodeId = BitSetIterator.NO_MORE;
-            while((nodeId = bitset.nextSetBit(nodeId+1)) != -1) {
+
+            for (long nodeId : new SetBitsIterable(nodeLabelBits)) {
                 writer.accept(ops, nodeId);
                 ++progress;
                 if (progress % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
@@ -108,7 +110,7 @@ public final class NodePropertyStoreExporter extends NodePropertyExporter {
         });
     }
 
-    protected void writeParallel(BitSet bitSet, WriteConsumer writer) {
+    private void writeFilteredParallel(BitSet nodeLabelBits, WriteConsumer writer) {
         final long batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
             concurrency,
@@ -124,19 +126,19 @@ public final class NodePropertyStoreExporter extends NodePropertyExporter {
                     terminationFlag.assertRunning();
                     long end = start + len;
                     Write ops = stmt.dataWrite();
-                    for (long currentNode = start; currentNode < end; currentNode++) {
-                        if (bitSet.get(currentNode)) {
-                            writer.accept(ops, currentNode);
+                    for (long currentNode = start;
+                         currentNode < end && nodeLabelBits.get(currentNode);
+                         currentNode++) {
+                        writer.accept(ops, currentNode);
 
-                            // Only log every 10_000 written nodes
-                            if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
-                                long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
-                                progressLogger.logProgress(
-                                    currentProgress,
-                                    nodeCount
-                                );
-                                terminationFlag.assertRunning();
-                            }
+                        // Only log every 10_000 written nodes
+                        if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
+                            long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
+                            progressLogger.logProgress(
+                                currentProgress,
+                                nodeCount
+                            );
+                            terminationFlag.assertRunning();
                         }
                     }
 
