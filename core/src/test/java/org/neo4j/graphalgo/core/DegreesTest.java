@@ -68,6 +68,16 @@ class DegreesTest extends AlgoTestBase {
         ", (b)-[:TYPE]->(c)" +
         ", (c)-[:TYPE]->(b)";
 
+    private static final String WITH_SELF_LOOPS =
+        "CREATE " +
+        "  (a:Node {name:'a'})" +
+        ", (b:Node {name:'b'})" +
+        ", (c:Node {name:'c'})" +
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(a)" +
+        ", (a)-[:TYPE]->(a)";
+
     private Graph graph;
 
     @Test
@@ -124,6 +134,33 @@ class DegreesTest extends AlgoTestBase {
         assertEquals(4, graph.degree(nodeId("a")));
         assertEquals(4, graph.degree(nodeId("b")));
         assertEquals(4, graph.degree(nodeId("c")));
+    }
+
+    @Test
+    void testWithSelfLoopsNatural() {
+        setup(WITH_SELF_LOOPS, Orientation.NATURAL);
+
+        assertEquals(2, graph.degree(nodeId("a")));
+        assertEquals(1, graph.degree(nodeId("b")));
+        assertEquals(1, graph.degree(nodeId("c")));
+    }
+
+    @Test
+    void testWithSelfLoopsReverse() {
+        setup(WITH_SELF_LOOPS, Orientation.REVERSE);
+
+        assertEquals(2, graph.degree(nodeId("a")));
+        assertEquals(1, graph.degree(nodeId("b")));
+        assertEquals(1, graph.degree(nodeId("c")));
+    }
+
+    @Test
+    void testWithSelfLoopsUndirected() {
+        setup(WITH_SELF_LOOPS, Orientation.UNDIRECTED);
+
+        assertEquals(4, graph.degree(nodeId("a")));
+        assertEquals(2, graph.degree(nodeId("b")));
+        assertEquals(2, graph.degree(nodeId("c")));
     }
 
     private void setup(String cypher, Orientation orientation) {
