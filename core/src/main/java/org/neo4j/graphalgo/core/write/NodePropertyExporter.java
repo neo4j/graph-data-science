@@ -172,16 +172,14 @@ public class NodePropertyExporter extends StatementApi {
     }
 
     public void write(Collection<NodeProperty<?>> nodeProperties) {
-        writeInternal(nodeProperties.stream()
+        List<ResolvedNodeProperty> resolvedNodeProperties = nodeProperties.stream()
             .map(desc -> desc.resolveWith(getOrCreatePropertyToken(desc.propertyKey())))
-            .collect(Collectors.toList()));
-    }
+            .collect(Collectors.toList());
 
-    private void writeInternal(List<ResolvedNodeProperty> nodeProperties) {
         if (ParallelUtil.canRunInParallel(executorService)) {
-            writeParallel(nodeProperties);
+            writeParallel(resolvedNodeProperties);
         } else {
-            writeSequential(nodeProperties);
+            writeSequential(resolvedNodeProperties);
         }
     }
 
@@ -189,15 +187,30 @@ public class NodePropertyExporter extends StatementApi {
         return propertiesWritten.longValue();
     }
 
-    protected void writeSequential(List<ResolvedNodeProperty> nodeProperties) {
+    void writeSequential(List<ResolvedNodeProperty> nodeProperties) {
         writeSequential((ops, nodeId) -> doWrite(nodeProperties, ops, nodeId));
     }
 
-    protected void writeParallel(List<ResolvedNodeProperty> nodeProperties) {
+    void writeParallel(List<ResolvedNodeProperty> nodeProperties) {
         writeParallel((ops, offset) -> doWrite(nodeProperties, ops, offset));
     }
 
-    protected void writeSequential(WriteConsumer writer) {
+    void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
+        for (ResolvedNodeProperty nodeProperty : nodeProperties) {
+            int propertyId = nodeProperty.propertyToken();
+            final Value prop = nodeProperty.translator().toProperty(propertyId, nodeProperty.data(), nodeId);
+            if (prop != null) {
+                ops.nodeSetProperty(
+                    toOriginalId.applyAsLong(nodeId),
+                    propertyId,
+                    prop
+                );
+                propertiesWritten.increment();
+            }
+        }
+    }
+
+    private void writeSequential(WriteConsumer writer) {
         acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
             long progress = 0L;
@@ -217,7 +230,7 @@ public class NodePropertyExporter extends StatementApi {
         });
     }
 
-    protected void writeParallel(WriteConsumer writer) {
+    private void writeParallel(WriteConsumer writer) {
         final long batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
             concurrency,
@@ -264,20 +277,5 @@ public class NodePropertyExporter extends StatementApi {
             terminationFlag,
             executorService
         );
-    }
-
-    protected void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
-        for (ResolvedNodeProperty nodeProperty : nodeProperties) {
-            int propertyId = nodeProperty.propertyToken();
-            final Value prop = nodeProperty.translator().toProperty(propertyId, nodeProperty.data(), nodeId);
-            if (prop != null) {
-                ops.nodeSetProperty(
-                    toOriginalId.applyAsLong(nodeId),
-                    propertyId,
-                    prop
-                );
-                propertiesWritten.increment();
-            }
-        }
     }
 }
