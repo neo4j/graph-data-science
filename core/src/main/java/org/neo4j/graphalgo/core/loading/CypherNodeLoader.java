@@ -130,6 +130,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             .values()
             .stream()
             .flatMap(properties -> properties.keySet().stream())
+            .distinct()
             .collect(Collectors.toMap(PropertyMapping::propertyKey, (ignore) -> NO_SUCH_PROPERTY_KEY));
 
         GraphDimensions resultDimensions = ImmutableGraphDimensions.builder()

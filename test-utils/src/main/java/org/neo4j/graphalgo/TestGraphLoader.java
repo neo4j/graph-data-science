@@ -118,7 +118,7 @@ public final class TestGraphLoader {
     private GraphLoader cypherLoader() {
         CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder().api(db);
 
-        String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s";
+        String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s%s";
 
         String labelString = nodeLabels.isEmpty()
             ? ""
@@ -129,7 +129,10 @@ public final class TestGraphLoader {
 
         String nodePropertiesString = getNodePropertiesString(nodeProperties, "n");
 
-        cypherLoaderBuilder.nodeQuery(String.format(nodeQueryTemplate, labelString, nodePropertiesString));
+        cypherLoaderBuilder.nodeQuery(String.format(nodeQueryTemplate,
+            labelString,
+            nodeLabels.isEmpty() ? "" : ", labels(n) AS labels",
+            nodePropertiesString));
 
         String relationshipQueryTemplate = relTypes.isEmpty()
             ? "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s"
