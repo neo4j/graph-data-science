@@ -235,7 +235,6 @@ We can create new Neo4j databases from named in-memory graphs stored in the grap
 All nodes, relationships and properties present in an in-memory graph are written to a new Neo4j database.
 This includes data that has been projected in `gds.graph.create` and data that has been added by running algorithms in `mutate` mode.
 The newly created database will be stored in the Neo4j `databases` directory using a given database name.
-The new database can be created and started using link:https://neo4j.com/docs/cypher-manual/current/administration/databases/#administration-databases-start-database[`databases management commands`].
 
 The feature is useful in the following, exemplary scenarios:
 
@@ -244,13 +243,22 @@ The feature is useful in the following, exemplary scenarios:
 * Produce snapshots of analytical results and persistent them for archiving and inspection.
 * Share analytical results within the organization.
 
-.Export a named graph to a new databases in the Neo4j databases direct:
+.Export a named graph to a new database in the Neo4j databases directory:
 [source,cypher]
 ----
-CALL gds.beta.graph.export('my-graph', {
-   dbName: 'my-graph-db'
-})
+CALL gds.beta.graph.export('my-graph', { dbName: 'mydatabase' })
 ----
 
 The procedure yields information about the number of nodes, relationships and properties written.
 Optional parameters are `writeConcurrency`, `enableDebugLog` and `batchSize`.
+
+The new database can be started using link:https://neo4j.com/docs/cypher-manual/current/administration/databases/#administration-databases-start-database[`databases management commands`].
+
+.After running the procedure, we can start a new database and query the exported graph:
+[source,cypher]
+----
+:use system
+CREATE DATABASE mydatabase;
+:use mydatabase
+MATCH (n) RETURN n;
+----
