@@ -80,8 +80,8 @@ public final class UnionGraph implements IdMapGraph {
     }
 
     @Override
-    public NodeProperties nodeProperties(final String type) {
-        return first.nodeProperties(type);
+    public NodeProperties nodeProperties(final String propertyKey) {
+        return first.nodeProperties(propertyKey);
     }
 
     @Override

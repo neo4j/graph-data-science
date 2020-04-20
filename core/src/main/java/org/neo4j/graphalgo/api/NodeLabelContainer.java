@@ -19,21 +19,19 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.NodeLabel;
+
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-/**
- * Getter interface for node properties for huge graphs.
- */
-public interface NodePropertyContainer {
+public interface NodeLabelContainer {
 
-    /**
-     * Return the property mapping for a property key
-     *
-     * @param propertyKey       the node property key
-     * @return the mapping associated with that key
-     */
-    NodeProperties nodeProperties(String propertyKey);
+    Stream<NodeLabel> nodeLabelStream(long nodeId);
 
-    Set<String> availableNodeProperties();
+    default Set<NodeLabel> nodeLabels(long nodeId) {
+        return nodeLabelStream(nodeId).collect(Collectors.toSet());
+    }
 
+    Set<NodeLabel> availableNodeLabels();
 }

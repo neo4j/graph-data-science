@@ -220,8 +220,8 @@ public class HugeGraph implements IdMapGraph {
     }
 
     @Override
-    public NodeProperties nodeProperties(String type) {
-        return nodeProperties.get(type);
+    public NodeProperties nodeProperties(String propertyKey) {
+        return nodeProperties.get(propertyKey);
     }
 
     @Override

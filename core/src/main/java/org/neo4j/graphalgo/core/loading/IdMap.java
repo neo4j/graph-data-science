@@ -35,10 +35,14 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
@@ -154,6 +158,10 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
 
     public boolean hasLabelInformation() {
         return maybeLabelInformation.isPresent();
+    }
+
+    public Set<NodeLabel> availableNodeLabels() {
+        return maybeLabelInformation.map(Map::keySet).orElseGet(() -> Collections.singleton(ALL_NODES));
     }
 
     public Stream<NodeLabel> labels(long nodeId) {

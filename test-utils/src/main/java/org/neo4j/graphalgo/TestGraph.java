@@ -141,8 +141,23 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public NodeProperties nodeProperties(String type) {
-        return nodeProperties.get(type);
+    public Set<NodeLabel> nodeLabels(long nodeId) {
+        return null;
+    }
+
+    @Override
+    public Stream<NodeLabel> nodeLabelStream(long nodeId) {
+        return null;
+    }
+
+    @Override
+    public Set<NodeLabel> availableNodeLabels() {
+        return null;
+    }
+
+    @Override
+    public NodeProperties nodeProperties(String propertyKey) {
+        return nodeProperties.get(propertyKey);
     }
 
     @Override

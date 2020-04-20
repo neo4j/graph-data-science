@@ -135,8 +135,8 @@ public class NodeFilteredGraph extends FilterGraph implements IdMapGraph {
     }
 
     @Override
-    public NodeProperties nodeProperties(String type) {
-        NodeProperties properties = graph.nodeProperties(type);
+    public NodeProperties nodeProperties(String propertyKey) {
+        NodeProperties properties = graph.nodeProperties(propertyKey);
         if (properties == null) {
             return null;
         }

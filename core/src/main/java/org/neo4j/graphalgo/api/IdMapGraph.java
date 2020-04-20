@@ -19,7 +19,11 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.loading.IdMap;
+
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * A graph implementation where the nodes are backed by an {@link IdMap}.
@@ -30,5 +34,15 @@ public interface IdMapGraph extends Graph {
 
     @Override
     IdMapGraph concurrentCopy();
+
+    @Override
+    default Stream<NodeLabel> nodeLabelStream(long nodeId) {
+        return idMap().labels(nodeId);
+    }
+
+    @Override
+    default Set<NodeLabel> availableNodeLabels() {
+        return idMap().availableNodeLabels();
+    }
 
 }

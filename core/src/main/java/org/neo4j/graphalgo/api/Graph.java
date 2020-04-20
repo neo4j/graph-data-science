@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.api;
 /**
  * Composition of often used source interfaces
  */
-public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipProperties, RelationshipAccess, NodePropertyContainer {
+public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipProperties, RelationshipAccess, NodeLabelContainer, NodePropertyContainer {
 
     default boolean isEmpty() {
         return nodeCount() == 0;

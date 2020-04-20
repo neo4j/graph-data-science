@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
@@ -30,6 +31,7 @@ import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
+import java.util.stream.Stream;
 
 public class NullGraph implements Graph {
 
@@ -120,7 +122,19 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public NodeProperties nodeProperties(String type) {
+    public Stream<NodeLabel> nodeLabelStream(long nodeId) {
+        throw new UnsupportedOperationException(
+            "org.neo4j.graphalgo.similarity.NullGraph.nodeLabelStream is not implemented.");
+    }
+
+    @Override
+    public Set<NodeLabel> availableNodeLabels() {
+        throw new UnsupportedOperationException(
+            "org.neo4j.graphalgo.similarity.NullGraph.availableNodeLabels is not implemented.");
+    }
+
+    @Override
+    public NodeProperties nodeProperties(String propertyKey) {
         throw new UnsupportedOperationException(
             "org.neo4j.graphalgo.similarity.NullGraph.nodeProperties is not implemented.");
     }

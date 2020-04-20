@@ -19,12 +19,14 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
+import java.util.stream.Stream;
 
 public abstract class FilterGraph implements Graph {
 
@@ -100,8 +102,18 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public NodeProperties nodeProperties(String type) {
-        return graph.nodeProperties(type);
+    public Stream<NodeLabel> nodeLabelStream(long nodeId) {
+        return graph.nodeLabelStream(nodeId);
+    }
+
+    @Override
+    public Set<NodeLabel> availableNodeLabels() {
+        return graph.availableNodeLabels();
+    }
+
+    @Override
+    public NodeProperties nodeProperties(String propertyKey) {
+        return graph.nodeProperties(propertyKey);
     }
 
     @Override

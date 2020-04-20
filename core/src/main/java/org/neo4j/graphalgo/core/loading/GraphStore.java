@@ -163,11 +163,7 @@ public final class GraphStore {
     }
 
     public Set<NodeLabel> nodeLabels() {
-        return new HashSet<>(this
-            .nodes
-            .maybeLabelInformation
-            .map(Map::keySet)
-            .orElseGet(() -> Collections.singleton(ALL_NODES)));
+        return nodes.availableNodeLabels();
     }
 
     public Set<String> nodePropertyKeys(NodeLabel label) {
