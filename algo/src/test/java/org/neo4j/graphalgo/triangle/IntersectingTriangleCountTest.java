@@ -19,141 +19,173 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.hamcrest.core.IsIterableContaining;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
-import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.IdMapBuilder;
-import org.neo4j.graphalgo.core.loading.NodeImporter;
-import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
-import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
+import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsIterableContaining.hasItem;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class IntersectingTriangleCountTest {
+class IntersectingTriangleCountTest extends AlgoTestBase {
 
-    @Test
-    void noTriangles() {
-        long[] inputs = new long[]{1, 2};
-        IdMap idMap = createIdMap(inputs);
-
-        HugeGraphUtil.RelationshipsBuilder importer = new HugeGraphUtil.RelationshipsBuilder(
-            idMap,
-            Orientation.NATURAL,
-            false,
-            Aggregation.NONE,
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY
+    private static Stream<Arguments> noTriangleQueries() {
+        return Stream.of(
+            Arguments.of("CREATE ()-[:T]->()-[:T]->()", "line"),
+            Arguments.of("CREATE (), (), ()", "no rels"),
+            Arguments.of("CREATE ()-[:T]->(), ()", "one rel"),
+            Arguments.of("CREATE (a1)-[:T]->()-[:T]->(a1), ()", "back and forth")
         );
+    }
 
-        importer.add(1, 2);
-        importer.add(2, 1);
+    @MethodSource("noTriangleQueries")
+    @ParameterizedTest(name = "{1}")
+    void noTriangles(String query, String ignoredName) {
+        runQuery(query);
 
-        Graph graph = HugeGraphUtil.create(idMap, importer.build(), AllocationTracker.EMPTY);
-        IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
-        triangleCount.compute();
+        TriangleCountResult result =  projectAndCompute();
 
-        assertEquals(0, triangleCount.getTriangleCount());
+        assertEquals(0L, result.globalTriangles());
+        assertEquals(0, result.averageClusteringCoefficient());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(0, result.localTriangles().get(0));
+        assertEquals(0, result.localTriangles().get(1));
+        assertEquals(0, result.localTriangles().get(2));
+        assertEquals(3, result.localClusteringCoefficients().size());
+        assertEquals(0.0, result.localClusteringCoefficients().get(0));
+        assertEquals(0.0, result.localClusteringCoefficients().get(1));
+        assertEquals(0.0, result.localClusteringCoefficients().get(2));
+    }
 
-        List<IntersectingTriangleCount.Result> results = triangleCount.computeStream().collect(Collectors.toList());
-        assertEquals(2, results.size());
-        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(1L, 0L, 0.0)));
-        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(2L, 0L, 0.0)));
+    @ValueSource(ints = {1, 2, 4, 8, 100})
+    @ParameterizedTest
+    void independentTriangles(int nbrOfTriangles) {
+        for (int i = 0; i < nbrOfTriangles; ++i) {
+            runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)");
+        }
+
+        TriangleCountResult result =  projectAndCompute();
+
+        assertEquals(nbrOfTriangles, result.globalTriangles());
+        assertEquals(1, result.averageClusteringCoefficient());
+        assertEquals(3 * nbrOfTriangles, result.localTriangles().size());
+        assertEquals(3 * nbrOfTriangles, result.localClusteringCoefficients().size());
+        for (int i = 0; i < result.localTriangles().size(); ++i) {
+            assertEquals(1, result.localTriangles().get(i));
+            assertEquals(1.0, result.localClusteringCoefficients().get(i));
+        }
     }
 
     @Test
-    void noRelationships() {
-        long[] inputs = new long[]{1, 2};
-        IdMap idMap = createIdMap(inputs);
+    void clique5() {
+        runQuery("CREATE (a1), (a2), (a3), (a4), (a5) " +
+                 "CREATE " +
+                 " (a1)-[:T]->(a2), " +
+                 " (a1)-[:T]->(a3), " +
+                 " (a1)-[:T]->(a4), " +
+                 " (a1)-[:T]->(a5), " +
+                 " (a2)-[:T]->(a3), " +
+                 " (a2)-[:T]->(a4), " +
+                 " (a2)-[:T]->(a5), " +
+                 " (a3)-[:T]->(a4), " +
+                 " (a3)-[:T]->(a5), " +
+                 " (a4)-[:T]->(a5)");
 
-        HugeGraphUtil.RelationshipsBuilder builder = new HugeGraphUtil.RelationshipsBuilder(
-            idMap,
-            Orientation.NATURAL,
-            false,
-            Aggregation.NONE,
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY
-        );
-        Graph graph = HugeGraphUtil.create(idMap, builder.build(), AllocationTracker.EMPTY);
+        TriangleCountResult result =  projectAndCompute();
 
-        IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
-        triangleCount.compute();
-
-        assertEquals(0, triangleCount.getTriangleCount());
-
-        List<IntersectingTriangleCount.Result> results = triangleCount.computeStream().collect(Collectors.toList());
-        assertEquals(2, results.size());
-        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(1L, 0L, 0.0)));
-        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(2L, 0L, 0.0)));
+        assertEquals(10, result.globalTriangles());
+        assertEquals(1, result.averageClusteringCoefficient());
+        assertEquals(5, result.localTriangles().size());
+        assertEquals(5, result.localClusteringCoefficients().size());
+        for (int i = 0; i < result.localTriangles().size(); ++i) {
+            assertEquals(6, result.localTriangles().get(i));
+            assertEquals(1.0, result.localClusteringCoefficients().get(i));
+        }
     }
 
     @Test
-    void oneTriangle() {
-        long[] inputs = new long[]{1, 2, 3};
-        IdMap idMap = createIdMap(inputs);
+    void twoAdjacentTriangles() {
+        runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
+                 "CREATE (a)-[:T]->(r)-[:T]->(t)-[:T]->(a)");
 
-        HugeGraphUtil.RelationshipsBuilder builder = new HugeGraphUtil.RelationshipsBuilder(
-            idMap,
-            Orientation.NATURAL,
-            false,
-            Aggregation.NONE,
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY
-        );
+        TriangleCountResult result =  projectAndCompute();
 
-        builder.add(1, 2);
-        builder.add(2, 1);
-        builder.add(2, 3);
-        builder.add(3, 2);
-        builder.add(3, 1);
-        builder.add(1, 3);
+        assertEquals(2, result.globalTriangles());
+        assertEquals(13.0 / 15.0, result.averageClusteringCoefficient(), 1e-10);
+        assertEquals(5, result.localTriangles().size());
+        assertEquals(5, result.localClusteringCoefficients().size());
 
-        Graph graph = HugeGraphUtil.create(idMap, builder.build(), AllocationTracker.EMPTY);
-        IntersectingTriangleCount triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
-        triangleCount.compute();
-
-        assertEquals(1, triangleCount.getTriangleCount());
-
-        List<IntersectingTriangleCount.Result> results = triangleCount.computeStream().collect(Collectors.toList());
-        assertEquals(3, results.size());
-        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(1L, 1L, 1.0)));
-        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(2L, 1L, 1.0)));
-        assertThat(results, IsIterableContaining.hasItem(new IntersectingTriangleCount.Result(3L, 1L, 1.0)));
-    }
-
-    private IdMap createIdMap(long[] inputs) {
-        HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(inputs.length, AllocationTracker.EMPTY);
-        NodeImporter nodeImporter = new NodeImporter(idMapBuilder, null, null);
-
-        NodesBatchBuffer buffer = new NodesBatchBufferBuilder()
-            .capacity(inputs.length)
-            .build();
-
-        long maxNodeId = 0L;
-        for (long input : inputs) {
-            if (input > maxNodeId) {
-                maxNodeId = input;
-            }
-            buffer.add(input, -1, null);
-            if (buffer.isFull()) {
-                nodeImporter.importNodes(buffer, null);
-                buffer.reset();
+        for (int i = 0; i < result.localTriangles().size(); ++i) {
+            int localTriangleCount = result.localTriangles().get(i);
+            switch (localTriangleCount) {
+                case 1:
+                    assertEquals(1.0, result.localClusteringCoefficients().get(i));
+                    break;
+                case 2:
+                    assertEquals(1.0 / 3, result.localClusteringCoefficients().get(i));
+                    break;
+                default:
+                    fail(String.format("Unexpected local triangle count of %d for node %d", localTriangleCount, i));
             }
         }
-        nodeImporter.importNodes(buffer, null);
-
-        return IdMapBuilder.build(idMapBuilder, null, maxNodeId, 1, AllocationTracker.EMPTY);
     }
 
+    @Test
+    void twoTrianglesWithLine() {
+        runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
+                 "CREATE (q)-[:T]->(r)-[:T]->(t)-[:T]->(q) " +
+                 "CREATE (a)-[:T]->(q)");
+
+        TriangleCountResult result =  projectAndCompute();
+
+        assertEquals(2, result.globalTriangles());
+        assertEquals(7.0 / 9.0, result.averageClusteringCoefficient(), 1e-10);
+        assertEquals(6, result.localTriangles().size());
+        assertEquals(6, result.localClusteringCoefficients().size());
+
+        List<Double> localCCs = new ArrayList<>();
+        for (int i = 0; i < result.localTriangles().size(); ++i) {
+            assertEquals(1, result.localTriangles().get(i));
+            localCCs.add(result.localClusteringCoefficients().get(i));
+        }
+
+        Map<Double, Long> groupedCcs = localCCs
+            .stream()
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        assertEquals(4, groupedCcs.get(1.0));
+        assertEquals(2, groupedCcs.get(1.0 / 3));
+    }
+
+    private TriangleCountResult projectAndCompute() {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .loadAnyLabel()
+            .loadAnyRelationshipType()
+            .globalOrientation(Orientation.UNDIRECTED)
+            .build()
+            .graph(NativeFactory.class);
+
+        return new IntersectingTriangleCount(
+            graph,
+            Pools.DEFAULT,
+            1,
+            AllocationTracker.EMPTY
+        ).compute();
+    }
 }

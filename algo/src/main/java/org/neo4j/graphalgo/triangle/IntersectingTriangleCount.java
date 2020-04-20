@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -44,61 +45,74 @@ import java.util.stream.Stream;
  * This impl uses another approach where all the triangles can be calculated
  * using set intersection methods of the graph itself.
  *
- *  https://epubs.siam.org/doi/pdf/10.1137/1.9781611973198.1
- *  http://www.cse.cuhk.edu.hk/~jcheng/papers/triangle_kdd11.pdf
- *  https://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf
- *  http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
+ * https://epubs.siam.org/doi/pdf/10.1137/1.9781611973198.1
+ * http://www.cse.cuhk.edu.hk/~jcheng/papers/triangle_kdd11.pdf
+ * https://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf
+ * http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
  */
-public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount, PagedAtomicIntegerArray> {
+public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult> {
 
     private Graph graph;
     private ExecutorService executorService;
     private final int concurrency;
-    private final long nodeCount;
     private final AllocationTracker tracker;
     private final LongAdder triangleCount;
     private final AtomicLong queue;
-    // in the end this will have `n` integers where the indexes are node IDs values are number of triangles for the node at the index
     private PagedAtomicIntegerArray triangles;
+    @Deprecated
     private double averageClusteringCoefficient;
 
-    public IntersectingTriangleCount(Graph graph, ExecutorService executorService, int concurrency, AllocationTracker tracker, ProgressLogger progressLogger) {
+    public IntersectingTriangleCount(
+        Graph graph,
+        ExecutorService executorService,
+        int concurrency,
+        AllocationTracker tracker,
+        ProgressLogger progressLogger
+    ) {
         this.graph = graph;
         this.tracker = tracker;
         this.executorService = executorService;
         this.concurrency = concurrency;
-        nodeCount = graph.nodeCount();
-        triangles = PagedAtomicIntegerArray.newArray(nodeCount, tracker);
+        triangles = PagedAtomicIntegerArray.newArray(graph.nodeCount(), tracker);
         triangleCount = new LongAdder();
         queue = new AtomicLong();
         this.progressLogger = progressLogger;
     }
 
-    public IntersectingTriangleCount(Graph graph, ExecutorService executorService, int concurrency, AllocationTracker tracker) {
+    public IntersectingTriangleCount(
+        Graph graph,
+        ExecutorService executorService,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
         this(graph, executorService, concurrency, tracker, ProgressLogger.NULL_LOGGER);
     }
 
+    @Deprecated
     public long getTriangleCount() {
         return triangleCount.longValue();
     }
 
+    @Deprecated
     public double getAverageCoefficient() {
         return averageClusteringCoefficient;
     }
 
+    @Deprecated
     public PagedAtomicIntegerArray getTriangles() {
         return triangles;
     }
 
+    @Deprecated
     public HugeDoubleArray getCoefficients() {
-        final HugeDoubleArray array = HugeDoubleArray.newArray(nodeCount, tracker);
+        final HugeDoubleArray array = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         final double[] adder = new double[]{0.0};
-        for (int i = 0; i < nodeCount; i++) {
+        for (int i = 0; i < graph.nodeCount(); i++) {
             final double c = calculateCoefficient(triangles.get(i), graph.degree(i));
             array.set(i, c);
             adder[0] += (c);
         }
-        averageClusteringCoefficient = adder[0] / nodeCount;
+        averageClusteringCoefficient = adder[0] / graph.nodeCount();
         return array;
     }
 
@@ -115,7 +129,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     }
 
     @Override
-    public PagedAtomicIntegerArray compute() {
+    public TriangleCountResult compute() {
         queue.set(0);
         triangleCount.reset();
         averageClusteringCoefficient = 0.0;
@@ -123,15 +137,63 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(graph));
         // run
         ParallelUtil.run(tasks, executorService);
-        return triangles;
+
+        // collect local clustering coefficients
+        HugeDoubleArray localCCs = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
+        double localCCSum = 0.0;
+        for (long i = 0; i < graph.nodeCount(); ++i) {
+            double localCC = calculateCoefficient(triangles.get(i), graph.degree(i));
+            localCCs.set(i, localCC);
+            localCCSum += localCC;
+        }
+        // compute average clustering coefficient
+        double averageClusteringCoefficient = localCCSum / graph.nodeCount();
+        long globalTriangles = triangleCount.longValue();
+
+        return TriangleCountResult.of(
+            triangles,
+            localCCs,
+            globalTriangles,
+            averageClusteringCoefficient
+        );
     }
 
+    @Deprecated
     public Stream<Result> computeStream() {
         return IntStream.range(0, Math.toIntExact(graph.nodeCount()))
             .mapToObj(i -> new Result(
                 graph.toOriginalNodeId(i),
                 triangles.get(i),
-                calculateCoefficient(triangles.get(i), graph.degree(i))));
+                calculateCoefficient(triangles.get(i), graph.degree(i))
+            ));
+    }
+
+    @ValueClass
+    interface TriangleCountResult {
+        // value at index `i` is number of triangles for node with id `i`
+        PagedAtomicIntegerArray localTriangles();
+
+        // value at index `i` is local clustering coefficient for node with id `i`
+        HugeDoubleArray localClusteringCoefficients();
+
+        long globalTriangles();
+
+        double averageClusteringCoefficient();
+
+        static TriangleCountResult of(
+            PagedAtomicIntegerArray triangles,
+            HugeDoubleArray localClusteringCoefficients,
+            long globalTriangles,
+            double averageClusteringCoefficient
+        ) {
+            return ImmutableTriangleCountResult
+                .builder()
+                .localTriangles(triangles)
+                .localClusteringCoefficients(localClusteringCoefficients)
+                .globalTriangles(globalTriangles)
+                .averageClusteringCoefficient(averageClusteringCoefficient)
+                .build();
+        }
     }
 
     private class IntersectTask implements Runnable, IntersectionConsumer {
@@ -145,7 +207,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         @Override
         public void run() {
             long node;
-            while ((node = queue.getAndIncrement()) < nodeCount && running()) {
+            while ((node = queue.getAndIncrement()) < graph.nodeCount() && running()) {
                 intersect.intersectAll(node, this);
                 // FIXME: This needs to be fixed when all the Triangle Count `alpha` procs are removed
                 // NB: Logging without parameters is fine!
@@ -156,7 +218,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         @Override
         public void accept(final long nodeA, final long nodeB, final long nodeC) {
             // only use this triangle where the id's are in order, not the other 5
-            if  (nodeA < nodeB) { //  && nodeB < nodeC
+            if (nodeA < nodeB) { //  && nodeB < nodeC
                 triangles.add((int) nodeA, 1);
                 triangles.add((int) nodeB, 1);
                 triangles.add((int) nodeC, 1);
@@ -169,6 +231,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         if (triangles == 0) {
             return 0.0;
         }
+        // local clustering coefficient C(v) = 2 * triangles(v) / (degree(v) * (degree(v) - 1))
         return ((double) (triangles << 1)) / (degree * (degree - 1));
     }
 
