@@ -106,6 +106,6 @@ class SimilarityGraphBuilderTest extends AlgoTestBase {
         assertEquals(graph.nodeCount(), simGraph.nodeCount());
         assertEquals(1, simGraph.relationshipCount());
 
-        assertGraphEquals(fromGdl("(a)-[{w: 0.42000D}]->(b), (i1), (i2)"), simGraph);
+        assertGraphEquals(fromGdl("(a:Person)-[{w: 0.42000D}]->(b:Person), (i1:Item), (i2:Item)"), simGraph);
     }
 }

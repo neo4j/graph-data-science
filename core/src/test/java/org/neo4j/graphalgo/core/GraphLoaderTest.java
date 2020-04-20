@@ -56,19 +56,19 @@ class GraphLoaderTest extends BaseTest {
     @AllGraphTypesTest
     void testAnyLabel(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).graph(graphStoreFactory);
-        assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
+        assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
     }
 
     @AllGraphTypesTest
     void testWithLabel(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db).withLabels("Node1").graph(graphStoreFactory);
-        assertGraphEquals(graph, fromGdl("()"));
+        assertGraphEquals(fromGdl("(:Node1)"), graph);
     }
 
     @AllGraphTypesTest
     void testWithMultipleLabels(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db).withLabels("Node1", "Node2").graph(graphStoreFactory);
-        assertGraphEquals(graph, fromGdl("(a)-->(b)"));
+        assertGraphEquals(fromGdl("(a:Node1)-->(b:Node2)"), graph);
     }
 
     @AllGraphTypesTest
@@ -83,19 +83,19 @@ class GraphLoaderTest extends BaseTest {
             .withLabels("Node1", "Node2")
             .withNodeProperties(properties)
             .graph(graphStoreFactory);
-        assertGraphEquals(fromGdl("(a {prop1: 1.0})-->(b {prop1: 42.0})"), graph);
+        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0})-->(b:Node2 {prop1: 42.0})"), graph);
 
         graph = TestGraphLoader.from(db)
             .withLabels("Node1", "Node2")
             .withNodeProperties(multipleProperties)
             .graph(graphStoreFactory);
-        assertGraphEquals(fromGdl("(a {prop1: 1.0, prop2: 42.0})-->(b {prop1: 42.0, prop2: 2.0})"), graph);
+        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0, prop2: 42.0})-->(b:Node2 {prop1: 42.0, prop2: 2.0})"), graph);
     }
 
     @AllGraphTypesTest
     void testAnyRelation(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).graph(graphStoreFactory);
-        assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
+        assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
     }
 
     @AllGraphTypesTest
@@ -105,7 +105,7 @@ class GraphLoaderTest extends BaseTest {
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .graph(graphStoreFactory);
 
-        assertGraphEquals(graph, fromGdl("(), ()-[{w:1337}]->()"));
+        assertGraphEquals(fromGdl("(), ()-[{w:1337}]->()"), graph);
     }
 
     @AllGraphTypesTest
@@ -113,7 +113,7 @@ class GraphLoaderTest extends BaseTest {
         Graph graph = TestGraphLoader.from(db)
             .withRelationshipTypes("REL3")
             .graph(graphStoreFactory);
-        assertGraphEquals(graph, fromGdl("(), ()-->()"));
+        assertGraphEquals(fromGdl("(), ()-->()"), graph);
     }
 
     @AllGraphTypesTest
@@ -130,10 +130,11 @@ class GraphLoaderTest extends BaseTest {
             .withDefaultAggregation(Aggregation.SINGLE)
             .graph(graphStoreFactory);
 
-        assertGraphEquals(graph, fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
-                                         "(b {prop1: 0, prop2: 2, prop3: 0})" +
-                                         "(c {prop1: 0, prop2: 0, prop3: 3})" +
-                                         "(a)-->(b), (a)-->(c), (b)-->(c)"));
+        Graph expected = fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
+                               "(b {prop1: 0, prop2: 2, prop3: 0})" +
+                               "(c {prop1: 0, prop2: 0, prop3: 3})" +
+                               "(a)-->(b), (a)-->(c), (b)-->(c)");
+        assertGraphEquals(expected, graph);
     }
 
     @AllGraphTypesTest
@@ -142,7 +143,7 @@ class GraphLoaderTest extends BaseTest {
             .withRelationshipProperties(PropertyMapping.of("weight","prop1", 1337.42))
             .withDefaultAggregation(Aggregation.SINGLE)
             .graph(graphStoreFactory);
-        assertGraphEquals(graph, fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42D}]->(c), (b)-[{w: 1337.42D}]->(c)"));
+        assertGraphEquals(fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42D}]->(c), (b)-[{w: 1337.42D}]->(c)"), graph);
     }
 
     @Test

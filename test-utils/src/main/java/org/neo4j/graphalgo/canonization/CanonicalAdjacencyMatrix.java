@@ -55,8 +55,8 @@ public final class CanonicalAdjacencyMatrix {
                     .collect(Collectors.joining(", "));
 
             String canonicalNode = String.format("(%s%s)",
-                sortedLabels.isEmpty() ? "" : String.format(":%s ", sortedLabels),
-                sortedProperties.isEmpty() ? "" : String.format("{ %s }", sortedProperties)
+                sortedLabels.isEmpty() ? "" : String.format(":%s", sortedLabels),
+                sortedProperties.isEmpty() ? "" : String.format(" { %s }", sortedProperties)
             );
 
             canonicalLabels.put(nodeId, canonicalNode);

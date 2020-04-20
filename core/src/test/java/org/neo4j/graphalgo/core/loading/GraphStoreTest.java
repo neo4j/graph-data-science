@@ -139,7 +139,7 @@ class GraphStoreTest extends BaseTest {
             1
         );
 
-        assertGraphEquals(fromGdl("(a)"), filteredAGraph);
+        assertGraphEquals(fromGdl("(a:A:All)"), filteredAGraph);
 
         Graph filteredAllGraph = graphStore.getGraph(
             Collections.singletonList(NodeLabel.of("All")),
@@ -245,12 +245,6 @@ class GraphStoreTest extends BaseTest {
 
     @NotNull
     private static List<NodeProjection> nodeProjections() {
-
-        List<PropertyMapping> bNodePropertyList = Arrays.asList(
-            PropertyMapping.of("nodeProperty", -1D),
-            PropertyMapping.of("b", -1D)
-        );
-
         NodeProjection aMapping = NodeProjection.builder()
             .label("A")
             .properties(PropertyMappings.of(Arrays.asList(
@@ -261,7 +255,10 @@ class GraphStoreTest extends BaseTest {
 
         NodeProjection bMapping = NodeProjection.builder()
             .label("B")
-            .properties(PropertyMappings.of(bNodePropertyList))
+            .properties(PropertyMappings.of(Arrays.asList(
+                PropertyMapping.of("nodeProperty", -1D),
+                PropertyMapping.of("b", -1D)
+            )))
             .build();
 
         return Arrays.asList(aMapping, bMapping);
@@ -309,31 +306,31 @@ class GraphStoreTest extends BaseTest {
                 "filterByRelationshipType",
                 singletonList(RelationshipType.of("T1")),
                 Optional.empty(),
-                "(a), (b), (a)-[T1]->(b)"
+                "(a:A), (b:B), (a)-[T1]->(b)"
             ),
             Arguments.of(
                 "filterByMultipleRelationshipTypes",
                 Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2")),
                 Optional.empty(),
-                "(a), (b), (a)-[T1]->(b), (a)-[T2]->(b)"
+                "(a:A), (b:B), (a)-[T1]->(b), (a)-[T2]->(b)"
             ),
             Arguments.of(
                 "filterByAnyRelationshipType",
                 Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2"), RelationshipType.of("T3")),
                 Optional.empty(),
-                "(a), (b), (a)-[T1]->(b), (a)-[T2]->(b), (a)-[T3]->(b)"
+                "(a:A), (b:B), (a)-[T1]->(b), (a)-[T2]->(b), (a)-[T3]->(b)"
             ),
             Arguments.of(
                 "filterByRelationshipProperty",
                 Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2")),
                 Optional.of("property1"),
-                "(a), (b), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b)"
+                "(a:A), (b:B), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b)"
             ),
             Arguments.of(
                 "filterByRelationshipTypeAndProperty",
                 singletonList(RelationshipType.of("T1")),
                 Optional.of("property1"),
-                "(a), (b), (a)-[T1 {property1: 42}]->(b)"
+                "(a:A), (b:B), (a)-[T1 {property1: 42}]->(b)"
             ),
             /*
               As our graph loader is not capable of loading different relationship properties for different types
@@ -345,7 +342,7 @@ class GraphStoreTest extends BaseTest {
                 "includeRelationshipTypesThatDoNotHaveTheProperty",
                 Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2"), RelationshipType.of("T3")),
                 Optional.of("property1"),
-                "(a), (b), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b), (a)-[T3 {property1: 42.0}]->(b)"
+                "(a:A), (b:B), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b), (a)-[T3 {property1: 42.0}]->(b)"
             )
         );
     }
@@ -355,22 +352,22 @@ class GraphStoreTest extends BaseTest {
             Arguments.of(
                 "filterAllLabels",
                 Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("Ignore")),
-                "(a {nodeProperty: 33, a: 33, b: 'NaN'}), (b {nodeProperty: 42, a: 'NaN', b: 42}), (a)-[T1]->(b)"
+                "(a:A {nodeProperty: 33, a: 33, b: 'NaN'}), (b:B {nodeProperty: 42, a: 'NaN', b: 42}), (a)-[T1]->(b)"
             ),
             Arguments.of(
                 "filterAllTypesExplicit",
                 Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B")),
-                "(a {nodeProperty: 33, a: 33, b: 'NaN'}), (b {nodeProperty: 42, a: 'NaN', b: 42}), (a)-[T1]->(b)"
+                "(a:A {nodeProperty: 33, a: 33, b: 'NaN'}), (b:B {nodeProperty: 42, a: 'NaN', b: 42}), (a)-[T1]->(b)"
             ),
             Arguments.of(
                 "FilterA",
                 singletonList(NodeLabel.of("A")),
-                "(a {nodeProperty: 33, a: 33})"
+                "(a:A {nodeProperty: 33, a: 33})"
             ),
             Arguments.of(
                 "FilterB",
                 singletonList(NodeLabel.of("B")),
-                "(b {nodeProperty: 42, b: 42})"
+                "(b:B {nodeProperty: 42, b: 42})"
             )
         );
     }
