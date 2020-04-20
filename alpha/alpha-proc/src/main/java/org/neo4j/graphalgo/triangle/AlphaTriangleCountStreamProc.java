@@ -23,13 +23,15 @@ package org.neo4j.graphalgo.triangle;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
+import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -39,11 +41,11 @@ public class AlphaTriangleCountStreamProc extends TriangleBaseProc<TriangleCount
 
     @Procedure(name = "gds.alpha.triangleCount.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<IntersectingTriangleCount.Result> stream(
+    public Stream<Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountStreamConfig> computationResult =
+        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult =
             compute(graphNameOrConfig, configuration, false, false);
 
         Graph graph = computationResult.graph();
@@ -53,7 +55,12 @@ public class AlphaTriangleCountStreamProc extends TriangleBaseProc<TriangleCount
             return Stream.empty();
         }
 
-        return computationResult.algorithm().computeStream();
+        return IntStream.range(0, Math.toIntExact(graph.nodeCount()))
+            .mapToObj(i -> new Result(
+                graph.toOriginalNodeId(i),
+                computationResult.result().localTriangles().get(i),
+                computationResult.result().localClusteringCoefficients().get(i)
+            ));
     }
 
     @Override
@@ -64,5 +71,45 @@ public class AlphaTriangleCountStreamProc extends TriangleBaseProc<TriangleCount
         CypherMapWrapper config
     ) {
         return TriangleCountStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+
+    /**
+     * result type
+     */
+    public static class Result {
+
+        public final long nodeId;
+        public final long triangles;
+        public final double coefficient;
+
+        public Result(long nodeId, long triangles, double coefficient) {
+            this.nodeId = nodeId;
+            this.triangles = triangles;
+            this.coefficient = coefficient;
+        }
+        @Override
+        public String toString() {
+            return "Result{" +
+                   "nodeId=" + nodeId +
+                   ", triangles=" + triangles +
+                   ", coefficient=" + coefficient +
+                   '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Result result = (Result) o;
+            return nodeId == result.nodeId &&
+                   triangles == result.triangles &&
+                   Double.compare(result.coefficient, coefficient) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(nodeId, triangles, coefficient);
+        }
     }
 }

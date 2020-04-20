@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,12 +45,16 @@ public class TriangleCountStatsProc extends TriangleBaseProc<TriangleCountStream
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountStreamConfig> computationResult =
-            compute(graphNameOrConfig, configuration, false, false);
+        var computationResult = compute(
+            graphNameOrConfig,
+            configuration,
+            false,
+            false
+        );
 
         TriangleCountStreamConfig config = computationResult.config();
         Graph graph = computationResult.graph();
-        IntersectingTriangleCount algorithm = computationResult.algorithm();
+        TriangleCountResult result = computationResult.result();
 
         TriangleCountResultBuilder builder = new TriangleCountResultBuilder(callContext, computationResult.tracker())
             .buildCommunityCount(true)
@@ -63,11 +68,11 @@ public class TriangleCountStatsProc extends TriangleBaseProc<TriangleCountStream
             return Stream.of(builder.buildResult());
         }
 
-        PagedAtomicIntegerArray triangles = algorithm.getTriangles();
+        PagedAtomicIntegerArray triangles = result.localTriangles();
 
         return Stream.of(builder
-            .withAverageClusteringCoefficient(algorithm.getAverageCoefficient())
-            .withTriangleCount(algorithm.getTriangleCount())
+            .withAverageClusteringCoefficient(result.averageClusteringCoefficient())
+            .withTriangleCount(result.globalTriangles())
             .withCommunityFunction(triangles::get)
             .withConfig(config)
             .withCreateMillis(computationResult.createMillis())

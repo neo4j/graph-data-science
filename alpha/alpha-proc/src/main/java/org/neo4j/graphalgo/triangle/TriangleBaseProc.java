@@ -29,11 +29,11 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
+import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.logging.Log;
 
 public abstract class TriangleBaseProc<CONFIG extends TriangleConfig>
-    extends AlgoBaseProc<IntersectingTriangleCount, PagedAtomicIntegerArray, CONFIG> {
+    extends AlgoBaseProc<IntersectingTriangleCount, TriangleCountResult, CONFIG> {
 
     static final String DESCRIPTION =
         "Triangle counting is a community detection graph algorithm that is used to " +

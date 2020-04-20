@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -51,12 +52,13 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountWriteConfig> computationResult =
+        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig> computationResult =
             compute(graphNameOrConfig, configuration, false, false);
 
         TriangleCountWriteConfig config = computationResult.config();
         Graph graph = computationResult.graph();
         IntersectingTriangleCount algorithm = computationResult.algorithm();
+        TriangleCountResult result = computationResult.result();
 
         TriangleCountResultBuilder builder = new TriangleCountResultBuilder(
             callContext,
@@ -77,7 +79,7 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
             .parallel(Pools.DEFAULT, config.writeConcurrency())
             .build();
 
-        PagedAtomicIntegerArray triangles = algorithm.getTriangles();
+        PagedAtomicIntegerArray triangles = result.localTriangles();
         String clusteringCoefficientProperty = config.clusteringCoefficientProperty();
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
@@ -92,7 +94,7 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
                         ),
                         ImmutableNodeProperty.of(
                             clusteringCoefficientProperty,
-                            algorithm.getCoefficients(),
+                            result.localClusteringCoefficients(),
                             HugeDoubleArray.Translator.INSTANCE
                         )
                     )
@@ -108,8 +110,8 @@ public class TriangleCountWriteProc extends TriangleBaseProc<TriangleCountWriteC
         }
 
         return Stream.of(builder
-            .withAverageClusteringCoefficient(algorithm.getAverageCoefficient())
-            .withTriangleCount(algorithm.getTriangleCount())
+            .withAverageClusteringCoefficient(result.averageClusteringCoefficient())
+            .withTriangleCount(result.globalTriangles())
             .withClusteringCoefficientProperty(clusteringCoefficientProperty)
             .withCommunityFunction(triangles::get)
             .withConfig(config)

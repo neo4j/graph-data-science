@@ -23,8 +23,8 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -37,7 +37,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class TriangleCountStreamProc
-    extends StreamProc<IntersectingTriangleCount, PagedAtomicIntegerArray,
+    extends StreamProc<IntersectingTriangleCount, TriangleCountResult,
     TriangleCountStreamProc.Result, TriangleCountStreamConfig> {
 
     @Description(TriangleCountCompanion.DESCRIPTION)
@@ -50,14 +50,14 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected Stream<Result> stream(ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountStreamConfig> computationResult) {
+    protected Stream<Result> stream(ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult) {
         var graph = computationResult.graph();
         var result = computationResult.result();
 
         return LongStream.range(0, graph.nodeCount())
             .mapToObj(i -> new Result(
                 graph.toOriginalNodeId(i),
-                Objects.requireNonNull(result).get(i)
+                Objects.requireNonNull(result).localTriangles().get(i)
             ));
     }
 
@@ -89,8 +89,8 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected PropertyTranslator<PagedAtomicIntegerArray> nodePropertyTranslator(
-        ComputationResult<IntersectingTriangleCount, PagedAtomicIntegerArray, TriangleCountStreamConfig> computationResult
+    protected PropertyTranslator<TriangleCountResult> nodePropertyTranslator(
+        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult
     ) {
         return TriangleCountCompanion.nodePropertyTranslator();
     }

@@ -59,8 +59,6 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     private final LongAdder triangleCount;
     private final AtomicLong queue;
     private PagedAtomicIntegerArray triangles;
-    @Deprecated
-    private double averageClusteringCoefficient;
 
     public IntersectingTriangleCount(
         Graph graph,
@@ -88,34 +86,6 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         this(graph, executorService, concurrency, tracker, ProgressLogger.NULL_LOGGER);
     }
 
-    @Deprecated
-    public long getTriangleCount() {
-        return triangleCount.longValue();
-    }
-
-    @Deprecated
-    public double getAverageCoefficient() {
-        return averageClusteringCoefficient;
-    }
-
-    @Deprecated
-    public PagedAtomicIntegerArray getTriangles() {
-        return triangles;
-    }
-
-    @Deprecated
-    public HugeDoubleArray getCoefficients() {
-        final HugeDoubleArray array = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
-        final double[] adder = new double[]{0.0};
-        for (int i = 0; i < graph.nodeCount(); i++) {
-            final double c = calculateCoefficient(triangles.get(i), graph.degree(i));
-            array.set(i, c);
-            adder[0] += (c);
-        }
-        averageClusteringCoefficient = adder[0] / graph.nodeCount();
-        return array;
-    }
-
     @Override
     public final IntersectingTriangleCount me() {
         return this;
@@ -132,7 +102,6 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     public TriangleCountResult compute() {
         queue.set(0);
         triangleCount.reset();
-        averageClusteringCoefficient = 0.0;
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(graph));
         // run
@@ -156,44 +125,6 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
             globalTriangles,
             averageClusteringCoefficient
         );
-    }
-
-    @Deprecated
-    public Stream<Result> computeStream() {
-        return IntStream.range(0, Math.toIntExact(graph.nodeCount()))
-            .mapToObj(i -> new Result(
-                graph.toOriginalNodeId(i),
-                triangles.get(i),
-                calculateCoefficient(triangles.get(i), graph.degree(i))
-            ));
-    }
-
-    @ValueClass
-    interface TriangleCountResult {
-        // value at index `i` is number of triangles for node with id `i`
-        PagedAtomicIntegerArray localTriangles();
-
-        // value at index `i` is local clustering coefficient for node with id `i`
-        HugeDoubleArray localClusteringCoefficients();
-
-        long globalTriangles();
-
-        double averageClusteringCoefficient();
-
-        static TriangleCountResult of(
-            PagedAtomicIntegerArray triangles,
-            HugeDoubleArray localClusteringCoefficients,
-            long globalTriangles,
-            double averageClusteringCoefficient
-        ) {
-            return ImmutableTriangleCountResult
-                .builder()
-                .localTriangles(triangles)
-                .localClusteringCoefficients(localClusteringCoefficients)
-                .globalTriangles(globalTriangles)
-                .averageClusteringCoefficient(averageClusteringCoefficient)
-                .build();
-        }
     }
 
     private class IntersectTask implements Runnable, IntersectionConsumer {
@@ -235,42 +166,31 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         return ((double) (triangles << 1)) / (degree * (degree - 1));
     }
 
-    /**
-     * result type
-     */
-    public static class Result {
+    @ValueClass
+    interface TriangleCountResult {
+        // value at index `i` is number of triangles for node with id `i`
+        PagedAtomicIntegerArray localTriangles();
 
-        public final long nodeId;
-        public final long triangles;
-        public final double coefficient;
+        // value at index `i` is local clustering coefficient for node with id `i`
+        HugeDoubleArray localClusteringCoefficients();
 
-        public Result(long nodeId, long triangles, double coefficient) {
-            this.nodeId = nodeId;
-            this.triangles = triangles;
-            this.coefficient = coefficient;
-        }
-        @Override
-        public String toString() {
-            return "Result{" +
-                    "nodeId=" + nodeId +
-                    ", triangles=" + triangles +
-                    ", coefficient=" + coefficient +
-                    '}';
-        }
+        long globalTriangles();
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Result result = (Result) o;
-            return nodeId == result.nodeId &&
-                    triangles == result.triangles &&
-                    Double.compare(result.coefficient, coefficient) == 0;
-        }
+        double averageClusteringCoefficient();
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(nodeId, triangles, coefficient);
+        static TriangleCountResult of(
+            PagedAtomicIntegerArray triangles,
+            HugeDoubleArray localClusteringCoefficients,
+            long globalTriangles,
+            double averageClusteringCoefficient
+        ) {
+            return ImmutableTriangleCountResult
+                .builder()
+                .localTriangles(triangles)
+                .localClusteringCoefficients(localClusteringCoefficients)
+                .globalTriangles(globalTriangles)
+                .averageClusteringCoefficient(averageClusteringCoefficient)
+                .build();
         }
     }
 }

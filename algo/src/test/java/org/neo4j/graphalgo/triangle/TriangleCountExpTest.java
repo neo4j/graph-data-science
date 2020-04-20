@@ -69,31 +69,31 @@ class TriangleCountExpTest extends AlgoTestBase {
     @Test
     void testQueue() {
         loadGraph();
-        final IntersectingTriangleCount algo = new IntersectingTriangleCount(
-                graph,
-                Pools.DEFAULT,
-                1,
-                AllocationTracker.EMPTY);
-        algo.compute();
-        assertEquals(TRIANGLE_COUNT, algo.getTriangleCount());
-        assertTriangles(algo.getTriangles());
-        assertCoefficients(algo.getCoefficients());
-        assertEquals(EXPECTED_COEFFICIENT, algo.getAverageCoefficient(), 0.001);
+        IntersectingTriangleCount.TriangleCountResult result = new IntersectingTriangleCount(
+            graph,
+            Pools.DEFAULT,
+            1,
+            AllocationTracker.EMPTY
+        ).compute();
+        assertEquals(TRIANGLE_COUNT, result.globalTriangles());
+        assertTriangles(result.globalTriangles());
+        assertCoefficients(result.localClusteringCoefficients());
+        assertEquals(EXPECTED_COEFFICIENT, result.averageClusteringCoefficient(), 0.001);
     }
 
     @Test
     void testQueueParallel() {
         loadGraph();
-        final IntersectingTriangleCount algo = new IntersectingTriangleCount(
-                graph,
-                Pools.DEFAULT,
-                4,
-                AllocationTracker.EMPTY);
-        algo.compute();
-        assertEquals(TRIANGLE_COUNT, algo.getTriangleCount());
-        assertTriangles(algo.getTriangles());
-        assertCoefficients(algo.getCoefficients());
-        assertEquals(EXPECTED_COEFFICIENT, algo.getAverageCoefficient(), 0.001);
+        IntersectingTriangleCount.TriangleCountResult result = new IntersectingTriangleCount(
+            graph,
+            Pools.DEFAULT,
+            4,
+            AllocationTracker.EMPTY
+        ).compute();
+        assertEquals(TRIANGLE_COUNT, result.globalTriangles());
+        assertTriangles(result.globalTriangles());
+        assertCoefficients(result.localClusteringCoefficients());
+        assertEquals(EXPECTED_COEFFICIENT, result.averageClusteringCoefficient(), 0.001);
     }
 
     private void assertTriangles(Object triangles) {

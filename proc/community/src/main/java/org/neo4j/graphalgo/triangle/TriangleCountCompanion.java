@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 
 final class TriangleCountCompanion {
 
@@ -29,8 +29,8 @@ final class TriangleCountCompanion {
         "determine the number of triangles passing through each node in the graph.";
 
 
-    static PropertyTranslator<PagedAtomicIntegerArray> nodePropertyTranslator() {
-        return (PropertyTranslator.OfLong<PagedAtomicIntegerArray>) PagedAtomicIntegerArray::get;
+    static PropertyTranslator<TriangleCountResult> nodePropertyTranslator() {
+        return (PropertyTranslator.OfLong<TriangleCountResult>) (data, nodeId) -> data.localTriangles().get(nodeId);
     }
 
     private TriangleCountCompanion() {}
