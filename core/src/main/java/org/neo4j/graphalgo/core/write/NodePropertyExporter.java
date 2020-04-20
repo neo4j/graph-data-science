@@ -120,8 +120,7 @@ public class NodePropertyExporter extends StatementApi {
                     nodeCount,
                     toOriginalId,
                     terminationFlag,
-                    maybeGraphStore.get().nodeProperties(),
-                    maybeGraphStore.get().nodes().maybeLabelInformation(),
+                    maybeGraphStore.get(),
                     progressLogger,
                     writeConcurrency,
                     executorService
