@@ -197,16 +197,28 @@ public final class GraphStoreInput implements Input {
                 visitor.id(id);
 
                 if (hasLabels) {
-                    visitor.labels(graphStore.nodes().labels(id)
-                        .filter(label -> label != ALL_NODES)
-                        .map(NodeLabel::name).toArray(String[]::new));
                     if (hasProperties) {
-                        graphStore.nodes().labels(id).forEach(label -> {
+                        var nodeLabels = graphStore.nodes()
+                            .labels(id)
+                            .filter(label -> label != ALL_NODES)
+                            .collect(Collectors.toSet());
+
+                        var nodeLabelArray = new String[nodeLabels.size()];
+                        var i = 0;
+                        for (var label : nodeLabels) {
+                            nodeLabelArray[i++] = label.name;
                             graphStore.nodePropertyKeys(label).forEach(property -> {
                                 var nodeProperties = graphStore.nodeProperty(label, property).values();
                                 visitor.property(property, nodeProperties.nodeProperty(id));
                             });
-                        });
+                        }
+                        visitor.labels(nodeLabelArray);
+                    } else {
+                        visitor.labels(graphStore.nodes().labels(id)
+                            .filter(label -> label != ALL_NODES)
+                            .map(NodeLabel::name)
+                            .toArray(String[]::new)
+                        );
                     }
                 } else if (hasProperties) { // no label information, but node properties
                     graphStore.nodePropertyKeys(ALL_NODES).forEach(property -> {

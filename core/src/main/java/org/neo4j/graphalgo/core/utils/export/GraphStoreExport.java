@@ -82,15 +82,15 @@ public class GraphStoreExport {
         var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
         var importConfig = getImportConfig(defaultSettingsSuitableForTests);
 
-        var life = new LifeSupport();
+        var lifeSupport = new LifeSupport();
 
         try (FileSystemAbstraction fs = new DefaultFileSystemAbstraction()) {
             var logService = config.enableDebugLog()
-                ? life.add(StoreLogService.withInternalLog(databaseConfig.get(SettingsProxy.storeInternalLogPath()).toFile()).build(fs))
+                ? lifeSupport.add(StoreLogService.withInternalLog(databaseConfig.get(SettingsProxy.storeInternalLogPath()).toFile()).build(fs))
                 : NullLogService.getInstance();
-            var jobScheduler = life.add(createScheduler());
+            var jobScheduler = lifeSupport.add(createScheduler());
 
-            life.start();
+            lifeSupport.start();
 
             Input input = new GraphStoreInput(graph, config.batchSize());
 
@@ -113,7 +113,7 @@ public class GraphStoreExport {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            life.shutdown();
+            lifeSupport.shutdown();
         }
     }
 
