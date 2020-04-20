@@ -32,8 +32,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -42,8 +40,7 @@ import java.util.stream.Collectors;
 
 final class NodePropertyStoreExporter extends NodePropertyExporter {
 
-    private final Optional<Map<NodeLabel, BitSet>> maybeLabelInformation;
-    private final Map<NodeLabel, GraphStore.NodePropertyStore> graphStoreNodeProperties;
+    private final GraphStore graphStore;
 
     public interface WriteConsumer {
         void accept(Write ops, long value) throws Exception;
@@ -54,23 +51,21 @@ final class NodePropertyStoreExporter extends NodePropertyExporter {
         long nodeCount,
         LongUnaryOperator toOriginalId,
         TerminationFlag terminationFlag,
-        Map<NodeLabel, GraphStore.NodePropertyStore> graphStoreNodeProperties,
-        Optional<Map<NodeLabel, BitSet>> maybeLabelInformation,
+        GraphStore graphStore,
         ProgressLogger log,
         int concurrency,
         ExecutorService executorService
     ) {
         super(db, nodeCount, toOriginalId, terminationFlag, log, concurrency, executorService);
-        this.graphStoreNodeProperties = graphStoreNodeProperties;
-        this.maybeLabelInformation = maybeLabelInformation;
+        this.graphStore = graphStore;
     }
 
     @Override
     void writeSequential(List<NodePropertyExporter.ResolvedNodeProperty> nodeProperties) {
-        if (maybeLabelInformation.isEmpty()) {
+        if (graphStore.nodes().maybeLabelInformation().isEmpty()) {
             super.writeSequential(nodeProperties);
         } else {
-            maybeLabelInformation.get().forEach((nodeLabel, bitSet) -> {
+            graphStore.nodes().maybeLabelInformation().get().forEach((nodeLabel, bitSet) -> {
                 List<ResolvedNodeProperty> filteredProperties = filterNodePropertiesForLabel(nodeProperties, nodeLabel);
                 writeFilteredSequential(bitSet, (ops, nodeId) -> doWrite(filteredProperties, ops, nodeId));
             });
@@ -79,10 +74,10 @@ final class NodePropertyStoreExporter extends NodePropertyExporter {
 
     @Override
     void writeParallel(List<NodePropertyExporter.ResolvedNodeProperty> nodeProperties) {
-        if (maybeLabelInformation.isEmpty()) {
+        if (graphStore.nodes().maybeLabelInformation().isEmpty()) {
             super.writeParallel(nodeProperties);
         } else {
-            maybeLabelInformation.get().forEach(((nodeLabel, bitSet) -> {
+            graphStore.nodes().maybeLabelInformation().get().forEach(((nodeLabel, bitSet) -> {
                 List<ResolvedNodeProperty> filteredProperties = filterNodePropertiesForLabel(nodeProperties, nodeLabel);
                 writeFilteredParallel(bitSet, (ops, nodeId) -> doWrite(filteredProperties, ops, nodeId));
             }));
@@ -162,11 +157,9 @@ final class NodePropertyStoreExporter extends NodePropertyExporter {
     }
 
     private List<ResolvedNodeProperty> filterNodePropertiesForLabel(List<ResolvedNodeProperty> nodeProperties, NodeLabel nodeLabel) {
-        return nodeProperties
-            .stream()
-            .filter(prop -> graphStoreNodeProperties.containsKey(nodeLabel) && graphStoreNodeProperties
-                .get(nodeLabel)
-                .containsKey(prop.propertyKey()))
+        return nodeProperties.stream()
+            .filter(property -> graphStore.nodeLabels().contains(nodeLabel))
+            .filter(property -> graphStore.nodePropertyKeys(nodeLabel).contains(property.propertyKey()))
             .collect(Collectors.toList());
     }
 

@@ -164,10 +164,6 @@ public final class GraphStore {
         return this.nodes;
     }
 
-    public Map<NodeLabel, NodePropertyStore> nodeProperties() {
-        return nodeProperties;
-    }
-
     public Set<NodeLabel> nodeLabels() {
         return new HashSet<>(this
             .nodes
