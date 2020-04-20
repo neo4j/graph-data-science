@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
@@ -64,21 +65,10 @@ public abstract class MutateProc<
     ) {
         PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
-        ALGO_RESULT result = computationResult.result();
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             log.debug("Updating in-memory graph store");
             GraphStore graphStore = computationResult.graphStore();
             Graph graph = computationResult.graph();
-            NodeProperties nodeProperties;
-            if (graph instanceof NodeFilteredGraph) {
-                NodeFilteredGraph filteredGraph = (NodeFilteredGraph) graph;
-                nodeProperties = nodeId -> !graph.contains(nodeId) ?
-                    PropertyMapping.DEFAULT_FALLBACK_VALUE :
-                    resultPropertyTranslator.toDouble(result, filteredGraph.getMappedNodeId(nodeId));
-
-            } else {
-                nodeProperties = nodeId -> resultPropertyTranslator.toDouble(result, nodeId);
-            }
 
             Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
 
@@ -87,11 +77,45 @@ public abstract class MutateProc<
                     label,
                     mutatePropertyConfig.mutateProperty(),
                     resultPropertyTranslator.numberType(),
-                    nodeProperties
+                    nodeProperties(resultPropertyTranslator, computationResult.result(), graph)
                 );
             }
 
             resultBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
+        }
+    }
+
+    private NodeProperties nodeProperties(
+        PropertyTranslator<ALGO_RESULT> resultPropertyTranslator,
+        ALGO_RESULT result,
+        Graph graph
+    ) {
+        if (graph instanceof NodeFilteredGraph) {
+            return new NodeProperties() {
+                @Override
+                public double nodeProperty(long nodeId) {
+                    return !graph.contains(nodeId) ?
+                        PropertyMapping.DEFAULT_FALLBACK_VALUE :
+                        resultPropertyTranslator.toDouble(result, ((NodeFilteredGraph) graph).getMappedNodeId(nodeId));
+                }
+
+                @Override
+                public long size() {
+                    return graph.nodeCount();
+                }
+            };
+        } else {
+            return new NodeProperties() {
+                @Override
+                public double nodeProperty(long nodeId) {
+                    return resultPropertyTranslator.toDouble(result, nodeId);
+                }
+
+                @Override
+                public long size() {
+                    return graph.nodeCount();
+                }
+            };
         }
     }
 }
