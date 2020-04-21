@@ -35,10 +35,35 @@ class TriangleProcTest extends BaseProcTest {
 
     private static String[] idToName;
 
+    private static String dbCypher() {
+        return
+            "CREATE " +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (g:Node {name: 'g'})" +
+            ", (h:Node {name: 'h'})" +
+            ", (i:Node {name: 'i'})" +
+            ", (a)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(a)" +
+            ", (c)-[:TYPE]->(h)" +
+            ", (d)-[:TYPE]->(e)" +
+            ", (e)-[:TYPE]->(f)" +
+            ", (f)-[:TYPE]->(d)" +
+            ", (b)-[:TYPE]->(d)" +
+            ", (g)-[:TYPE]->(h)" +
+            ", (h)-[:TYPE]->(i)" +
+            ", (i)-[:TYPE]->(g)";
+    }
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(TriangleProc.class, AlphaTriangleCountStreamProc.class, AlphaTriangleCountWriteProc.class);
-        runQuery(TriangleBaseProcTest.dbCypher());
+        runQuery(dbCypher());
         idToName = new String[9];
 
         runInTransaction(db, tx -> {
