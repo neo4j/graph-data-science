@@ -48,7 +48,8 @@ final class TriangleCountCompanion {
         return procResultBuilder
             .withAverageClusteringCoefficient(result.averageClusteringCoefficient())
             .withTriangleCount(result.globalTriangles())
-            .buildCommunityCount();
+            .buildCommunityCount()
+            .buildHistogram();
     }
 
     abstract static class TriangleCountResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
@@ -72,6 +73,11 @@ final class TriangleCountCompanion {
 
         TriangleCountResultBuilder<PROC_RESULT> buildCommunityCount() {
             this.buildCommunityCount = true;
+            return this;
+        }
+
+        TriangleCountResultBuilder<PROC_RESULT> buildHistogram() {
+            this.buildHistogram = true;
             return this;
         }
 
