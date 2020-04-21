@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -39,6 +40,8 @@ public class GraphInfo {
     private static final int PRECISION = 5;
 
     public final String graphName;
+    public final String memoryUsage;
+    public final long sizeInBytes;
     public final Map<String, Object> nodeProjection;
     public final Map<String, Object> relationshipProjection;
     public final String nodeQuery;
@@ -70,6 +73,8 @@ public class GraphInfo {
         this.nodeCount = graphStore.nodeCount();
         this.relationshipCount = graphStore.relationshipCount();
         this.degreeDistribution = computeHistogram ? computeHistogram(graphStore.getUnion()) : emptyMap();
+        this.sizeInBytes = MemoryUsage.sizeOf(graphStore);
+        this.memoryUsage = MemoryUsage.humanReadable(this.sizeInBytes);
     }
 
     private Map<String, Object> computeHistogram(Graph graph) {

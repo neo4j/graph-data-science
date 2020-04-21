@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -44,6 +45,7 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -108,7 +110,9 @@ class GraphListProcTest extends BaseProcTest {
                     "p999", 1L
                 ),
                 "creationTime", isA(LocalDateTime.class),
-                "modificationTime", isA(LocalDateTime.class)
+                "modificationTime", isA(LocalDateTime.class),
+                "memoryUsage", instanceOf(String.class),
+                "sizeInBytes", instanceOf(Long.class)
             )
         ));
     }
@@ -141,7 +145,9 @@ class GraphListProcTest extends BaseProcTest {
                     "p999", 1L
                 ),
                 "creationTime", isA(LocalDateTime.class),
-                "modificationTime", isA(LocalDateTime.class)
+                "modificationTime", isA(LocalDateTime.class),
+                "memoryUsage", instanceOf(String.class),
+                "sizeInBytes", instanceOf(Long.class)
             )
         ));
     }
@@ -239,6 +245,18 @@ class GraphListProcTest extends BaseProcTest {
                 )
             )
         ));
+    }
+
+    @Test
+    void calculateActualMemoryUsage() {
+        runQuery("CALL gds.graph.create('name', 'A', 'REL')");
+        assertCypherResult(
+            "CALL gds.graph.list() YIELD memoryUsage, sizeInBytes",
+            List.of(Map.of(
+                "memoryUsage", instanceOf(String.class),
+                "sizeInBytes", instanceOf(Long.class)
+            ))
+        );
     }
 
     @ParameterizedTest(name = "name argument: {0}")

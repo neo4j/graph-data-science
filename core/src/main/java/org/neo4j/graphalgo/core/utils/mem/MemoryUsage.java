@@ -23,8 +23,13 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.io.NullOutputStream;
+import org.openjdk.jol.info.GraphWalker;
+import org.openjdk.jol.vm.VM;
 
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -162,6 +167,29 @@ public final class MemoryUsage {
         }
     }
 
+    private static final boolean VM_INFO_AVAILABLE;
+
+    /*
+     * Try to initialize JOL without having it print warnings or throw errors because
+     * we run on an unsupported VM
+     */
+    static {
+        boolean available;
+        var sysOut = System.out;
+        try {
+            var swallowSysOut = new PrintStream(NullOutputStream.NULL_OUTPUT_STREAM);
+            System.setOut(swallowSysOut);
+            VM.current();
+            swallowSysOut.flush();
+            available = true;
+        } catch (Exception unavailable) {
+            available = false;
+        } finally {
+            System.setOut(sysOut);
+        }
+        VM_INFO_AVAILABLE = available;
+    }
+
     public static long sizeOfByteArray(final long length) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + (length << SHIFT_BYTE));
     }
@@ -262,6 +290,17 @@ public final class MemoryUsage {
             }
         }
         return alignObjectSize(size);
+    }
+
+    public static long sizeOf(Object thing) {
+        if (!VM_INFO_AVAILABLE) {
+            return -1L;
+        }
+        var totalSize = new MutableLong();
+        var graphWalker = new GraphWalker(thing);
+        graphWalker.addVisitor(gpr -> totalSize.add(gpr.size()));
+        graphWalker.walk();
+        return totalSize.longValue();
     }
 
     /**
