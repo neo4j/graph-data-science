@@ -19,39 +19,16 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TriangleCountStreamProcTest extends BaseProcTest {
-
-    @BeforeEach
-    void setup() throws Exception {
-        registerProcedures(
-            GraphCreateProc.class,
-            TriangleCountStreamProc.class
-        );
-
-        var DB_CYPHER = "CREATE " +
-                           "(a1:A)-[:T]->(a2:A), " +
-                           "(a2)-[:T]->(a3:A), " +
-                           "(a3)-[:T]->(a1)";
-
-        runQuery(DB_CYPHER);
-        runQuery("CALL gds.graph.create('g', 'A', {T: {orientation: 'UNDIRECTED'}})");
-    }
-
-    @AfterEach
-    void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-    }
+class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCountStreamConfig> {
 
     @Test
     void testStreaming() {
@@ -68,6 +45,21 @@ class TriangleCountStreamProcTest extends BaseProcTest {
         });
 
         assertEquals(3, rowCount.get());
+    }
+
+    @Override
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStreamConfig>> getProcedureClazz() {
+        return TriangleCountStreamProc.class;
+    }
+
+    @Override
+    public TriangleCountStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return TriangleCountStreamConfig.of(
+            getUsername(),
+            Optional.empty(),
+            Optional.empty(),
+            mapWrapper
+        );
     }
 
 }

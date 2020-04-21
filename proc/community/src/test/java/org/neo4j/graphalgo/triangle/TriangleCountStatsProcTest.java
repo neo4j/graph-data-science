@@ -19,40 +19,18 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class TriangleCountStatsProcTest extends BaseProcTest {
-
-    @BeforeEach
-    void setup() throws Exception {
-        registerProcedures(
-            GraphCreateProc.class,
-            TriangleCountStatsProc.class
-        );
-
-        var DB_CYPHER = "CREATE " +
-                        "(a:A)-[:T]->(b:A), " +
-                        "(b)-[:T]->(c:A), " +
-                        "(c)-[:T]->(a)";
-
-        runQuery(DB_CYPHER);
-        runQuery("CALL gds.graph.create('g', 'A', {T: {orientation: 'UNDIRECTED'}})");
-    }
-
-    @AfterEach
-    void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-    }
+class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCountStreamConfig> {
 
     @Test
     void testStats() {
@@ -73,6 +51,22 @@ class TriangleCountStatsProcTest extends BaseProcTest {
             assertEquals(1, triangleCount);
             assertEquals(3, nodeCount);
         });
+    }
+
+
+    @Override
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStreamConfig>> getProcedureClazz() {
+        return TriangleCountStatsProc.class;
+    }
+
+    @Override
+    public TriangleCountStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return TriangleCountStreamConfig.of(
+            getUsername(),
+            Optional.empty(),
+            Optional.empty(),
+            mapWrapper
+        );
     }
 
 }

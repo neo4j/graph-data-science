@@ -19,48 +19,34 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-class TriangleCountMutateProcTest extends BaseProcTest {
+class TriangleCountMutateProcTest
+    extends TriangleCountBaseProcTest<TriangleCountMutateConfig>
+    implements GraphMutationTest<IntersectingTriangleCount, TriangleCountMutateConfig, IntersectingTriangleCount.TriangleCountResult> {
 
-    @BeforeEach
-    void setup() throws Exception {
-        registerProcedures(
-            GraphCreateProc.class,
-            TriangleCountMutateProc.class,
-            TriangleCountWriteProc.class
-        );
-
-        var DB_CYPHER = "CREATE " +
-                        "(a:A)-[:T]->(b:A), " +
-                        "(b)-[:T]->(c:A), " +
-                        "(c)-[:T]->(a)";
-
-        runQuery(DB_CYPHER);
-        runQuery("CALL gds.graph.create('g', 'A', {T: {orientation: 'UNDIRECTED'}})");
+    @Override
+    public String mutateProperty() {
+        return "mutatedTriangleCount";
     }
 
-    @AfterEach
-    void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-    }
-
-    String expectedMutatedGraph() {
+    @Override
+    public String expectedMutatedGraph() {
         return
             "  (a { mutatedTriangleCount: 1 })" +
             ", (b { mutatedTriangleCount: 1 })" +
@@ -82,7 +68,7 @@ class TriangleCountMutateProcTest extends BaseProcTest {
             .withAnyRelationshipType()
             .algo("triangleCount")
             .mutateMode()
-            .addParameter("mutateProperty", "mutatedTriangleCount")
+            .addParameter("mutateProperty", mutateProperty())
             .addParameter("sudo", true)
             .yields(
                 "createMillis",
@@ -107,7 +93,7 @@ class TriangleCountMutateProcTest extends BaseProcTest {
             .explicitCreation("g")
             .algo("triangleCount")
             .writeMode()
-            .addParameter("writeProperty", "mutatedTriangleCount")
+            .addParameter("writeProperty", mutateProperty())
             .addParameter("sudo", true)
             .yields();
 
@@ -117,12 +103,28 @@ class TriangleCountMutateProcTest extends BaseProcTest {
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
-            .addNodeProperty("mutatedTriangleCount", "mutatedTriangleCount", 42.0, Aggregation.NONE)
+            .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
             .build()
             .graph(NativeFactory.class);
 
         assertGraphEquals(fromGdl(expectedMutatedGraph()), updatedGraph);
 
     }
+
+    @Override
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateConfig>> getProcedureClazz() {
+        return TriangleCountMutateProc.class;
+    }
+
+    @Override
+    public TriangleCountMutateConfig createConfig(CypherMapWrapper mapWrapper) {
+        return TriangleCountMutateConfig.of(
+            getUsername(),
+            Optional.empty(),
+            Optional.empty(),
+            mapWrapper
+        );
+    }
+
 
 }

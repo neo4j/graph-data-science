@@ -19,40 +19,21 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.WritePropertyConfigTest;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class TriangleCountWriteProcTest extends BaseProcTest {
-
-    @BeforeEach
-    void setup() throws Exception {
-        registerProcedures(
-            GraphCreateProc.class,
-            TriangleCountWriteProc.class
-        );
-
-        var DB_CYPHER = "CREATE " +
-                        "(a:A)-[:T]->(b:A), " +
-                        "(b)-[:T]->(c:A), " +
-                        "(c)-[:T]->(a)";
-
-        runQuery(DB_CYPHER);
-        runQuery("CALL gds.graph.create('g', 'A', {T: {orientation: 'UNDIRECTED'}})");
-    }
-
-    @AfterEach
-    void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-    }
+class TriangleCountWriteProcTest
+    extends TriangleCountBaseProcTest<TriangleCountWriteConfig>
+    implements WritePropertyConfigTest<IntersectingTriangleCount, TriangleCountWriteConfig, IntersectingTriangleCount.TriangleCountResult> {
 
     @Test
     void testWrite() {
@@ -78,5 +59,28 @@ class TriangleCountWriteProcTest extends BaseProcTest {
             assertEquals(3, nodeCount);
             assertEquals(3, nodePropertiesWritten);
         });
+    }
+
+    @Override
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig>> getProcedureClazz() {
+        return TriangleCountWriteProc.class;
+    }
+
+    @Override
+    public TriangleCountWriteConfig createConfig(CypherMapWrapper mapWrapper) {
+        return TriangleCountWriteConfig.of(
+            getUsername(),
+            Optional.empty(),
+            Optional.empty(),
+            createMinimalConfig(mapWrapper)
+        );
+    }
+
+    @Override
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        if (!mapWrapper.containsKey("writeProperty")) {
+            return mapWrapper.withString("writeProperty", "writeProperty");
+        }
+        return mapWrapper;
     }
 }
