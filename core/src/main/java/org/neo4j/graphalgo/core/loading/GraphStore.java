@@ -33,10 +33,11 @@ import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.graphalgo.core.utils.TimeUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.values.storable.NumberType;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,7 +71,7 @@ public final class GraphStore {
 
     private final AllocationTracker tracker;
 
-    private LocalDateTime modificationTime;
+    private ZonedDateTime modificationTime;
 
     public static GraphStore of(
         IdMap nodes,
@@ -150,11 +151,11 @@ public final class GraphStore {
         this.relationships = relationships;
         this.relationshipProperties = relationshipProperties;
         this.createdGraphs = new HashSet<>();
-        this.modificationTime = LocalDateTime.now();
+        this.modificationTime = TimeUtil.now();
         this.tracker = tracker;
     }
 
-    public LocalDateTime modificationTime() {
+    public ZonedDateTime modificationTime() {
         return modificationTime;
     }
 
@@ -553,7 +554,7 @@ public final class GraphStore {
 
     private synchronized void updateGraphStore(Consumer<GraphStore> updateFunction) {
         updateFunction.accept(this);
-        this.modificationTime = LocalDateTime.now();
+        this.modificationTime = TimeUtil.now();
     }
 
     public enum PropertyState {

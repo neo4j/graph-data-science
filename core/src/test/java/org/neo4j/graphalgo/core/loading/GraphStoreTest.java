@@ -41,7 +41,7 @@ import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -163,10 +163,10 @@ class GraphStoreTest extends BaseTest {
             .graphStore(NativeFactory.class);
 
         // add node properties
-        LocalDateTime initialTime = graphStore.modificationTime();
+        ZonedDateTime initialTime = graphStore.modificationTime();
         Thread.sleep(42);
         graphStore.addNodeProperty(ALL_NODES, "foo", FLOATING_POINT, new NullPropertyMap(42.0));
-        LocalDateTime nodePropertyTime = graphStore.modificationTime();
+        ZonedDateTime nodePropertyTime = graphStore.modificationTime();
 
         // add relationships
         HugeGraph.Relationships relationships = HugeGraph.Relationships.of(
@@ -180,7 +180,7 @@ class GraphStoreTest extends BaseTest {
         );
         Thread.sleep(42);
         graphStore.addRelationshipType(RelationshipType.of("BAR"), Optional.empty(), Optional.empty(), relationships);
-        LocalDateTime relationshipTime = graphStore.modificationTime();
+        ZonedDateTime relationshipTime = graphStore.modificationTime();
 
         assertTrue(initialTime.isBefore(nodePropertyTime), "Node property update did not change modificationTime");
         assertTrue(nodePropertyTime.isBefore(relationshipTime), "Relationship update did not change modificationTime");
