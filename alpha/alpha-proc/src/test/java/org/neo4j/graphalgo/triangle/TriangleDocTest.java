@@ -54,7 +54,7 @@ public class TriangleDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(TriangleProc.class, AlphaTriangleCountStreamProc.class, AlphaTriangleCountWriteProc.class);
+        registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);
     }
@@ -96,7 +96,7 @@ public class TriangleDocTest extends BaseProcTest {
     @Test
     void shouldWriteTriangleCount() {
         @Language("Cypher")
-        String query = " CALL gds.alpha.triangleCount.write({" +
+        String query = " CALL gds.triangleCount.write({" +
                        "   nodeProjection: 'Person'," +
                        "   relationshipProjection: {" +
                        "     KNOWS: {" +
@@ -104,6 +104,7 @@ public class TriangleDocTest extends BaseProcTest {
                        "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
+                       "   sudo: true," +
                        "   writeProperty: 'triangles'" +
                        " })" +
                        " YIELD nodeCount, triangleCount, averageClusteringCoefficient";
@@ -111,7 +112,7 @@ public class TriangleDocTest extends BaseProcTest {
         String expected = "+----------------------------------------------------------+" + NL +
                           "| nodeCount | triangleCount | averageClusteringCoefficient |" + NL +
                           "+----------------------------------------------------------+" + NL +
-                          "| 6         | 3             | 0.0                          |" + NL +
+                          "| 6         | 3             | 0.6055555555555555           |" + NL +
                           "+----------------------------------------------------------+" + NL +
                           "1 row" + NL;
 
@@ -123,7 +124,7 @@ public class TriangleDocTest extends BaseProcTest {
     @Test
     void shouldStreamTriangleCount() {
         @Language("Cypher")
-        String query = " CALL gds.alpha.triangleCount.stream({" +
+        String query = " CALL gds.triangleCount.stream({" +
                        "   nodeProjection: 'Person'," +
                        "   relationshipProjection: {" +
                        "     KNOWS: {" +
@@ -131,10 +132,11 @@ public class TriangleDocTest extends BaseProcTest {
                        "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
+                       "   sudo: true," +
                        "   concurrency: 4" +
                        " })" +
-                       " YIELD nodeId, triangles, coefficient" +
-                       " RETURN gds.util.asNode(nodeId).name AS name, triangles, coefficient" +
+                       " YIELD nodeId, triangles, localClusteringCoefficient" +
+                       " RETURN gds.util.asNode(nodeId).name AS name, triangles, localClusteringCoefficient AS coefficient" +
                        " ORDER BY coefficient DESC";
 
         String expected = "+--------------------------------------------+" + NL +
@@ -158,7 +160,7 @@ public class TriangleDocTest extends BaseProcTest {
     @Disabled("Requires the Yelp dataset, which we don't load for tests.")
     void shouldWriteTriangleCountForYelpDataset() {
         @Language("Cypher")
-        String query = " CALL gds.alpha.triangleCount.write({" +
+        String query = " CALL gds.triangleCount.write({" +
                        "   nodeProjection: 'Person'," +
                        "   relationshipProjection: {" +
                        "     FRIEND: {" +
@@ -166,6 +168,7 @@ public class TriangleDocTest extends BaseProcTest {
                        "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
+                       "   sudo: true," +
                        "   concurrency: 4," +
                        "   writeProperty: 'triangles'," +
                        "   clusteringCoefficientProperty: 'coefficient'" +
@@ -186,10 +189,11 @@ public class TriangleDocTest extends BaseProcTest {
 
     @Test
     void shouldWriteWithCypherProjection() {
-        String query = " CALL gds.alpha.triangleCount.write({" +
+        String query = " CALL gds.triangleCount.write({" +
                        "   nodeQuery: 'MATCH (p:Person) RETURN id(p) AS id'," +
                        "   relationshipQuery: 'MATCH (p1:Person)-[:KNOWS]-(p2:Person) RETURN id(p1) AS source, id(p2) AS target'," +
                        "   writeProperty: 'triangle'," +
+                       "   sudo: true," +
                        "   clusteringCoefficientProperty: 'coefficient'" +
                        " }) YIELD nodeCount, triangleCount, averageClusteringCoefficient";
 
