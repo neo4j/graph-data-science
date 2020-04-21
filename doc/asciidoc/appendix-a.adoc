@@ -92,13 +92,15 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.wcc.stream.estimate`
 | `gds.wcc.stats`
 | `gds.wcc.stats.estimate`
-.6+<.^| Triangle Count
+.8+<.^| Triangle Count
 | `gds.triangleCount.stream`
 | `gds.triangleCount.stream.estimate`
 | `gds.triangleCount.stats`
 | `gds.triangleCount.stats.estimate`
 | `gds.triangleCount.write`
 | `gds.triangleCount.write.estimate`
+| `gds.triangleCount.mutate`
+| `gds.triangleCount.mutate.estimate`
 |===
 
 [[beta-tier]]
@@ -213,9 +215,8 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<alpha-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbours>>
 | `gds.alpha.ml.ann.stream`
 | `gds.alpha.ml.ann.write`
-.4+<.^|<<algorithms-triangle-count-clustering-coefficient, Triangle Count>>
+.3+<.^|<<algorithms-triangle-count-clustering-coefficient, Triangle Count>>
 | `gds.alpha.triangle.stream`
-| `gds.alpha.triangleCount.stats`
 | `gds.alpha.triangleCount.stream`
 | `gds.alpha.triangleCount.write`
 |===
