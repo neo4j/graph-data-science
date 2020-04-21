@@ -19,8 +19,13 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class TriangleCountCompanion {
 
@@ -31,6 +36,45 @@ final class TriangleCountCompanion {
 
     static PropertyTranslator<TriangleCountResult> nodePropertyTranslator() {
         return (PropertyTranslator.OfLong<TriangleCountResult>) (data, nodeId) -> data.localTriangles().get(nodeId);
+    }
+
+
+    static <PROC_RESULT, CONFIG extends TriangleConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
+        TriangleCountResultBuilder<PROC_RESULT> procResultBuilder,
+        AlgoBaseProc.ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult
+    ) {
+        var result = computeResult.result();
+
+        return procResultBuilder
+            .withAverageClusteringCoefficient(result.averageClusteringCoefficient())
+            .withTriangleCount(result.globalTriangles())
+            .buildCommunityCount();
+    }
+
+    abstract static class TriangleCountResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
+
+        double averageClusteringCoefficient = .0;
+        long triangleCount = 0;
+
+        TriangleCountResultBuilder(ProcedureCallContext callContext, AllocationTracker tracker) {
+            super(callContext, tracker);
+        }
+
+        TriangleCountResultBuilder<PROC_RESULT> withAverageClusteringCoefficient(double averageClusteringCoefficient) {
+            this.averageClusteringCoefficient = averageClusteringCoefficient;
+            return this;
+        }
+
+        TriangleCountResultBuilder<PROC_RESULT> withTriangleCount(long triangleCount) {
+            this.triangleCount = triangleCount;
+            return this;
+        }
+
+        TriangleCountResultBuilder<PROC_RESULT> buildCommunityCount() {
+            this.buildCommunityCount = true;
+            return this;
+        }
+
     }
 
     private TriangleCountCompanion() {}

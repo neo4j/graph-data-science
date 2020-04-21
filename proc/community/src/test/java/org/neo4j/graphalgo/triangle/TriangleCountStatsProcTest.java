@@ -19,50 +19,59 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-
-import java.util.Optional;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class TriangleCountStatsProcTest extends TriangleBaseProcTest<TriangleCountStreamConfig> {
+class TriangleCountStatsProcTest extends BaseProcTest {
 
-    @Override
-    TriangleBaseProc<TriangleCountStreamConfig> newInstance() {
-        return new TriangleCountStatsProc();
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            GraphCreateProc.class,
+            TriangleCountStatsProc.class
+        );
+
+        var DB_CYPHER = "CREATE " +
+                        "(a:A)-[:T]->(b:A), " +
+                        "(b)-[:T]->(c:A), " +
+                        "(c)-[:T]->(a)";
+
+        runQuery(DB_CYPHER);
+        runQuery("CALL gds.graph.create('g', 'A', {T: {orientation: 'UNDIRECTED'}})");
     }
 
-    @Override
-    TriangleCountStreamConfig newConfig() {
-        return TriangleCountStreamConfig.of(
-            getUsername(),
-            Optional.empty(),
-            Optional.empty(),
-            CypherMapWrapper.empty()
-        );
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
     void testStats() {
-        String query = GdsCypher.call()
+        var query = GdsCypher.call()
             .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds", "alpha", "triangleCount")
+            .algo("triangleCount")
             .statsMode()
+            .addParameter("sudo", true)
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            long createMillis = row.getNumber("createMillis").longValue();
-            long computeMillis = row.getNumber("computeMillis").longValue();
-            long nodeCount = row.getNumber("nodeCount").longValue();
-            long triangleCount = row.getNumber("triangleCount").longValue();
+            var createMillis = row.getNumber("createMillis").longValue();
+            var computeMillis = row.getNumber("computeMillis").longValue();
+            var nodeCount = row.getNumber("nodeCount").longValue();
+            var triangleCount = row.getNumber("triangleCount").longValue();
             assertNotEquals(-1, createMillis);
             assertNotEquals(-1, computeMillis);
-            assertEquals(3, triangleCount);
-            assertEquals(9, nodeCount);
+            assertEquals(1, triangleCount);
+            assertEquals(3, nodeCount);
         });
     }
 }

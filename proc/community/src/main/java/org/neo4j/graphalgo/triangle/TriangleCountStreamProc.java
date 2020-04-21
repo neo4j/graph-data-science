@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -36,6 +37,8 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class TriangleCountStreamProc
     extends StreamProc<IntersectingTriangleCount, TriangleCountResult,
     TriangleCountStreamProc.Result, TriangleCountStreamConfig> {
@@ -47,6 +50,15 @@ public class TriangleCountStreamProc
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return stream(compute(graphNameOrConfig, configuration));
+    }
+
+    @Procedure(value = "gds.triangleCount.stream.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateStats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -62,7 +74,7 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected TriangleCountStreamProc.Result streamResult(long originalNodeId, double value) {
+    protected Result streamResult(long originalNodeId, double value) {
         throw new UnsupportedOperationException("TriangleCount handles result building individually.");
     }
 
