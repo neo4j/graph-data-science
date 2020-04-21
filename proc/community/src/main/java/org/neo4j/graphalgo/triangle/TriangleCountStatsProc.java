@@ -60,6 +60,13 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     @Override
+    protected void validateConfigs(
+        GraphCreateConfig graphCreateConfig, TriangleCountStreamConfig config
+    ) {
+        TriangleCountCompanion.validateConfigs(graphCreateConfig, config);
+    }
+
+    @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStreamConfig> computeResult) {
         return TriangleCountCompanion.resultBuilder(
             new TriangleCountStatsBuilder(callContext, computeResult.tracker()),

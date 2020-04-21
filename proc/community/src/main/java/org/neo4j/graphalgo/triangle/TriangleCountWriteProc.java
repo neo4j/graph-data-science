@@ -61,6 +61,13 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     }
 
     @Override
+    protected void validateConfigs(
+        GraphCreateConfig graphCreateConfig, TriangleCountWriteConfig config
+    ) {
+        TriangleCountCompanion.validateConfigs(graphCreateConfig, config);
+    }
+
+    @Override
     protected TriangleCountWriteConfig newConfig(
         String username,
         Optional<String> graphName,

@@ -62,6 +62,13 @@ public class TriangleCountStreamProc
     }
 
     @Override
+    protected void validateConfigs(
+        GraphCreateConfig graphCreateConfig, TriangleCountStreamConfig config
+    ) {
+        TriangleCountCompanion.validateConfigs(graphCreateConfig, config);
+    }
+
+    @Override
     protected Stream<Result> stream(ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult) {
         var graph = computationResult.graph();
         var result = computationResult.result();
