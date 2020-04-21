@@ -61,6 +61,13 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
     }
 
     @Override
+    protected void validateConfigs(
+        GraphCreateConfig graphCreateConfig, TriangleCountMutateConfig config
+    ) {
+        TriangleCountCompanion.validateConfigs(graphCreateConfig, config);
+    }
+
+    @Override
     protected TriangleCountMutateConfig newConfig(
         String username,
         Optional<String> graphName,

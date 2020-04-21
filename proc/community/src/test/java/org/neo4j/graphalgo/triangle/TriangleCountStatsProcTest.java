@@ -24,24 +24,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
-import java.util.Optional;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TriangleCountStatsProcTest extends BaseProcTest {
 
@@ -85,48 +73,6 @@ class TriangleCountStatsProcTest extends BaseProcTest {
             assertEquals(1, triangleCount);
             assertEquals(3, nodeCount);
         });
-    }
-
-    @Test
-    void testValidateUndirectedProjection() {
-        RelationshipProjections invalidRelationshipProjections = RelationshipProjections.builder()
-            .putProjection(
-                RelationshipType.of("TYPE"),
-                RelationshipProjection.of("TYPE", Orientation.NATURAL, Aggregation.DEFAULT)
-            )
-            .build();
-
-        GraphCreateFromStoreConfig graphCreateFromStoreConfig = GraphCreateFromStoreConfig.of(
-            getUsername(),
-            "",
-            NodeProjections.empty(),
-            invalidRelationshipProjections,
-            CypherMapWrapper.empty()
-        );
-
-        var proc = newInstance();
-
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> proc.validateConfigs(graphCreateFromStoreConfig, newConfig())
-        );
-
-        assertThat(ex.getMessage(), containsString("Projection for `TYPE` uses orientation `NATURAL`"));
-    }
-
-
-
-    TriangleCountStatsProc newInstance() {
-        return new TriangleCountStatsProc();
-    }
-
-    TriangleCountStreamConfig newConfig() {
-        return TriangleCountStreamConfig.of(
-            getUsername(),
-            Optional.empty(),
-            Optional.empty(),
-            CypherMapWrapper.empty()
-        );
     }
 
 }
