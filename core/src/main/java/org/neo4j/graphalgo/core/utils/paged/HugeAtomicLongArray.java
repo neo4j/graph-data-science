@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.internal.unsafe.UnsafeUtil;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.function.IntToLongFunction;
 import java.util.function.LongUnaryOperator;
@@ -62,6 +62,9 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  * // value = 37L
  * {@code}
  * </pre>
+ *
+ * Implementation is similar to the AtomicLongArray, based on sun.misc.Unsafe
+ * https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/src/java.base/share/classes/java/util/concurrent/atomic/AtomicLongArray.java
  */
 public abstract class HugeAtomicLongArray {
 
@@ -186,31 +189,9 @@ public abstract class HugeAtomicLongArray {
         }
     }
 
-    // implementation is similar to the AtomicLongArray, based on sun.misc.Unsafe
-    // https://hg.openjdk.java.net/jdk/jdk/file/a1ee9743f4ee/jdk/src/share/classes/java/util/concurrent/atomic/AtomicLongArray.java
-    // TODO: Replace usage of Unsafe with VarHandles once we can move to jdk9+
-    // https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/src/java.base/share/classes/java/util/concurrent/atomic/AtomicLongArray.java
-
-    // array-internal values to access the raw memory locations of certain elements
-    // see #memoryOffset
-    private static final int base;
-    private static final int shift;
-
-    static {
-        UnsafeUtil.assertHasUnsafe();
-        base = UnsafeUtil.arrayBaseOffset(long[].class);
-        int scale = UnsafeUtil.arrayIndexScale(long[].class);
-        if (!BitUtil.isPowerOfTwo(scale)) {
-            throw new Error("data type scale not a power of two");
-        }
-        shift = 31 - Integer.numberOfLeadingZeros(scale);
-    }
-
-    private static long memoryOffset(int i) {
-        return ((long) i << shift) + base;
-    }
-
     private static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {
+
+        private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
 
         private static HugeAtomicLongArray of(long size, PageFiller pageFiller, AllocationTracker tracker) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
@@ -231,31 +212,26 @@ public abstract class HugeAtomicLongArray {
 
         @Override
         public long get(long index) {
-            assert index < size;
-            return getRaw(memoryOffset((int) index));
+            return (long) ARRAY_HANDLE.getVolatile(page, (int) index);
         }
 
         @Override
         public void set(long index, long value) {
-            assert index < size;
-            UnsafeUtil.putLongVolatile(page, memoryOffset((int) index), value);
+            ARRAY_HANDLE.setVolatile(page, (int) index, value);
         }
 
         @Override
         public boolean compareAndSet(long index, long expect, long update) {
-            assert index < size;
-            return compareAndSetRaw(memoryOffset((int) index), expect, update);
+            return ARRAY_HANDLE.compareAndSet(page, (int) index, expect, update);
         }
 
         @Override
         public void update(long index, LongUnaryOperator updateFunction) {
-            assert index < size;
-            long offset = memoryOffset((int) index);
             long prev, next;
             do {
-                prev = getRaw(offset);
+                prev = (long) ARRAY_HANDLE.getVolatile(page, (int) index);
                 next = updateFunction.applyAsLong(prev);
-            } while (!compareAndSetRaw(offset, prev, next));
+            } while (!ARRAY_HANDLE.weakCompareAndSet(page, (int) index, prev, next));
         }
 
         @Override
@@ -276,18 +252,11 @@ public abstract class HugeAtomicLongArray {
             }
             return 0L;
         }
-
-        private long getRaw(long offset) {
-            return UnsafeUtil.getLongVolatile(page, offset);
-        }
-
-        private boolean compareAndSetRaw(long offset, long expect, long update) {
-            return UnsafeUtil.compareAndSwapLong(page, offset, expect, update);
-        }
     }
 
-    private static final class PagedHugeAtomicLongArray extends HugeAtomicLongArray {
+    static final class PagedHugeAtomicLongArray extends HugeAtomicLongArray {
 
+        private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
 
         private static HugeAtomicLongArray of(long size, PageFiller pageFiller, AllocationTracker tracker) {
             int numPages = numberOfPages(size);
@@ -333,40 +302,35 @@ public abstract class HugeAtomicLongArray {
 
         @Override
         public long get(long index) {
-            assert index < size && index >= 0;
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
-            return getRaw(pages[pageIndex], memoryOffset(indexInPage));
+            return (long) ARRAY_HANDLE.getVolatile(pages[pageIndex], indexInPage);
         }
 
         @Override
         public void set(long index, long value) {
-            assert index < size && index >= 0;
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
-            UnsafeUtil.putLongVolatile(pages[pageIndex], memoryOffset(indexInPage), value);
+            ARRAY_HANDLE.setVolatile(pages[pageIndex], indexInPage, value);
         }
 
         @Override
         public boolean compareAndSet(long index, long expect, long update) {
-            assert index < size && index >= 0;
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
-            return compareAndSetRaw(pages[pageIndex], memoryOffset(indexInPage), expect, update);
+            return ARRAY_HANDLE.compareAndSet(pages[pageIndex], indexInPage, expect, update);
         }
 
         @Override
         public void update(long index, LongUnaryOperator updateFunction) {
-            assert index < size && index >= 0;
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             long[] page = pages[pageIndex];
-            long offset = memoryOffset(indexInPage);
             long prev, next;
             do {
-                prev = getRaw(page, offset);
+                prev = (long) ARRAY_HANDLE.getVolatile(page, indexInPage);
                 next = updateFunction.applyAsLong(prev);
-            } while (!compareAndSetRaw(page, offset, prev, next));
+            } while (!ARRAY_HANDLE.compareAndSet(page, indexInPage, prev, next));
         }
 
         @Override
@@ -387,13 +351,6 @@ public abstract class HugeAtomicLongArray {
             }
             return 0L;
         }
-
-        private long getRaw(long[] page, long offset) {
-            return UnsafeUtil.getLongVolatile(page, offset);
-        }
-
-        private boolean compareAndSetRaw(long[] page, long offset, long expect, long update) {
-            return UnsafeUtil.compareAndSwapLong(page, offset, expect, update);
-        }
     }
+
 }

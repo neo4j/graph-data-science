@@ -84,28 +84,13 @@ final class HugeAtomicLongArrayTest {
         });
     }
 
-    /**
-     * get and set for out of bound indices throw IndexOutOfBoundsException
-     */
     @Test
     void testIndexing() {
         testArray(SIZE, aa -> {
             for (int index : new int[]{-1, SIZE}) {
-                try {
-                    aa.get(index);
-                    shouldThrow();
-                } catch (AssertionError ignored) {
-                }
-                try {
-                    aa.set(index, 1);
-                    shouldThrow();
-                } catch (AssertionError ignored) {
-                }
-                try {
-                    aa.compareAndSet(index, 1, 2);
-                    shouldThrow();
-                } catch (AssertionError ignored) {
-                }
+                assertThrows(ArrayIndexOutOfBoundsException.class, () -> aa.get(index));
+                assertThrows(ArrayIndexOutOfBoundsException.class, () -> aa.set(index, 1));
+                assertThrows(ArrayIndexOutOfBoundsException.class, () -> aa.compareAndSet(index, 1, 2));
             }
         });
     }
@@ -321,6 +306,7 @@ final class HugeAtomicLongArrayTest {
         public void run() {
             phaser.arriveAndAwaitAdvance();
             HugeAtomicLongArray a = adder;
+            System.out.println("adder.getClass() = " + adder.getClass());
             for (int i = 0; i < incs; ++i) {
                 a.update(0, x -> x + 1);
             }
