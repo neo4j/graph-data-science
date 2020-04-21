@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,6 +51,11 @@ class TriangleCountProcTest extends BaseProcTest {
 
         runQuery("CREATE (a:A)-[:T]->(b:A)");
         runQuery("CALL gds.graph.create('directed', 'A', 'T')");
+        runQuery("CALL gds.graph.create('directedMultiRels', 'A', {" +
+                 "  R: { type: 'T', orientation: 'REVERSE' }, " +
+                 "  U: { type: 'T', orientation: 'UNDIRECTED' }, " +
+                 "  N: { type: 'T', orientation: 'NATURAL' } " +
+                 "})");
     }
 
     @AfterEach
@@ -57,7 +63,7 @@ class TriangleCountProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @MethodSource("runnables")
+    @MethodSource("unfiltered")
     @ParameterizedTest(name = "Mode: {1}")
     void validateUndirected(String query, String ignoredModeName) {
 
@@ -66,10 +72,58 @@ class TriangleCountProcTest extends BaseProcTest {
             () -> runQuery(query)
         );
 
-        assertThat(ex.getMessage(), containsString("Projection for `T` uses orientation `NATURAL`"));
+        assertThat(ex.getMessage(), containsString("Procedure requires relationship projections to be UNDIRECTED."));
     }
 
-    static Stream<Arguments> runnables() {
+    @MethodSource("filtered")
+    @ParameterizedTest(name = "Orientation(s): {1}")
+    void validateUndirectedFiltering(List<String> filter, String ignoredModeName) {
+
+        var query = GdsCypher.call().explicitCreation("directedMultiRels")
+            .algo("triangleCount")
+            .streamMode()
+            .addParameter("relationshipTypes", filter)
+            .addParameter("sudo", true)
+            .yields();
+
+        QueryExecutionException ex = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(query)
+        );
+
+        assertThat(ex.getMessage(), containsString("Procedure requires relationship projections to be UNDIRECTED."));
+    }
+
+    static Stream<Arguments> filtered() {
+        return Stream.of(
+            Arguments.of(
+                List.of("N"),
+                "Natural"
+            ),
+            Arguments.of(
+                List.of("R"),
+                "Reverse"
+            ),
+            Arguments.of(
+                List.of("U", "R"),
+                "Undirected and Reverse"
+            ),
+            Arguments.of(
+                List.of("U", "N"),
+                "Undirected and Natural"
+            ),
+            Arguments.of(
+                List.of("R", "N"),
+                "Reverse and Natural"
+            ),
+            Arguments.of(
+                List.of("*"),
+                "All"
+            )
+        );
+    }
+
+    static Stream<Arguments> unfiltered() {
         return Stream.of(
             Arguments.of(
                 GdsCypher.call().explicitCreation("directed")

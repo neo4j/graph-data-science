@@ -29,6 +29,10 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.util.Collections;
+
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+
 final class TriangleCountCompanion {
 
     static final String DESCRIPTION =
@@ -42,6 +46,8 @@ final class TriangleCountCompanion {
 
     static <CONFIG extends TriangleConfig> void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) {
         graphCreateConfig.relationshipProjections().projections().entrySet().stream()
+            .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
+                             config.relationshipTypes().contains(entry.getKey().name()))
             .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
             .forEach(entry -> {
                 throw new IllegalArgumentException(String.format(
