@@ -52,6 +52,10 @@ import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
+import org.neo4j.graphalgo.triangle.TriangleCountMutateProc;
+import org.neo4j.graphalgo.triangle.TriangleCountStatsProc;
+import org.neo4j.graphalgo.triangle.TriangleCountStreamProc;
+import org.neo4j.graphalgo.triangle.TriangleCountWriteProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 import org.neo4j.graphalgo.wcc.WccStatsProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
@@ -136,7 +140,16 @@ class ListProcTest extends BaseProcTest {
         "gds.wcc.stream",
         "gds.wcc.stream.estimate",
         "gds.wcc.write",
-        "gds.wcc.write.estimate"
+        "gds.wcc.write.estimate",
+
+        "gds.triangleCount.mutate",
+        "gds.triangleCount.mutate.estimate",
+        "gds.triangleCount.stats",
+        "gds.triangleCount.stats.estimate",
+        "gds.triangleCount.stream",
+        "gds.triangleCount.stream.estimate",
+        "gds.triangleCount.write",
+        "gds.triangleCount.write.estimate"
     );
 
     private static final List<String> FUNCTIONS = asList(
@@ -156,7 +169,10 @@ class ListProcTest extends BaseProcTest {
         "gds.pageRank.write.estimate"
     );
 
-    private static final List<String> ALL = Stream.concat(PROCEDURES.stream(), FUNCTIONS.stream()).collect(Collectors.toList());
+    private static final List<String> ALL = Stream
+        .concat(PROCEDURES.stream(), FUNCTIONS.stream())
+        .sorted()
+        .collect(Collectors.toList());
 
     @BeforeEach
     void setUp() throws Exception {
@@ -190,6 +206,10 @@ class ListProcTest extends BaseProcTest {
             PageRankStreamProc.class,
             PageRankMutateProc.class,
             PageRankStatsProc.class,
+            TriangleCountStatsProc.class,
+            TriangleCountWriteProc.class,
+            TriangleCountStreamProc.class,
+            TriangleCountMutateProc.class,
             WccWriteProc.class,
             WccStreamProc.class,
             WccMutateProc.class,
@@ -229,6 +249,7 @@ class ListProcTest extends BaseProcTest {
             runQuery(query, result -> result
                 .<String>columnAs("name")
                 .stream()
+                .sorted()
                 .collect(Collectors.toList())));
     }
 
@@ -239,6 +260,7 @@ class ListProcTest extends BaseProcTest {
             MapUtil.map("name", name),
             result -> result.<String>columnAs("name")
                 .stream()
+                .sorted()
                 .collect(Collectors.toList())
         );
     }

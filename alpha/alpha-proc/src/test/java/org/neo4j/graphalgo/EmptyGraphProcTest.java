@@ -31,8 +31,6 @@ import org.neo4j.graphalgo.shortestpaths.ShortestPathAStarProc;
 import org.neo4j.graphalgo.shortestpaths.ShortestPathsProc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
-import org.neo4j.graphalgo.triangle.AlphaTriangleCountStreamProc;
-import org.neo4j.graphalgo.triangle.AlphaTriangleCountWriteProc;
 import org.neo4j.graphalgo.triangle.TriangleProc;
 import org.neo4j.graphdb.Result;
 
@@ -54,8 +52,6 @@ class EmptyGraphProcTest extends BaseProcTest {
             ShortestPathAStarProc.class,
             ShortestPathsProc.class,
             SccProc.class,
-            AlphaTriangleCountStreamProc.class,
-            AlphaTriangleCountWriteProc.class,
             TriangleProc.class
         );
     }
@@ -159,26 +155,6 @@ class EmptyGraphProcTest extends BaseProcTest {
             .writeMode()
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
-    }
-
-    @Test
-    void testTriangleCountStream() {
-        String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds.alpha.triangleCount")
-            .streamMode()
-            .yields();
-        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
-    }
-
-    @Test
-    void testTriangleCountWrite() {
-        String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds.alpha.triangleCount")
-            .writeMode()
-            .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodeCount")));
     }
 
     @Test

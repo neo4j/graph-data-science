@@ -62,7 +62,7 @@ class TriangleProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(TriangleProc.class, AlphaTriangleCountStreamProc.class, AlphaTriangleCountWriteProc.class);
+        registerProcedures(TriangleProc.class);
         runQuery(dbCypher());
         idToName = new String[9];
 
