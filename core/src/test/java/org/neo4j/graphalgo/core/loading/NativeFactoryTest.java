@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipProjectionMapping;
-import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -40,7 +38,6 @@ class NativeFactoryTest {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
             .maxRelCount(500_000_000L)
-//            .relationshipProjectionMappings(RelationshipProjectionMappings.all())
             .build();
 
         MemoryEstimation memoryEstimation = NativeFactory.getMemoryEstimation(dimensions, RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL));

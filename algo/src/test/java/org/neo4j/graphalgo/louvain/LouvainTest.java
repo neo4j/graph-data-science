@@ -322,7 +322,7 @@ class LouvainTest extends AlgoTestBase {
         MemoryTree memoryTreeOneProperty = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithOneProperty, 1);
         MemoryTree memoryTreeTwoProperties = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithTwoProperties, 1);
 
-        assertTrue(memoryTree.memoryUsage().max == memoryTreeOneProperty.memoryUsage().max);
+        assertEquals(memoryTree.memoryUsage(), memoryTreeOneProperty.memoryUsage());
         assertEquals(memoryTreeOneProperty.memoryUsage(), memoryTreeTwoProperties.memoryUsage());
     }
 

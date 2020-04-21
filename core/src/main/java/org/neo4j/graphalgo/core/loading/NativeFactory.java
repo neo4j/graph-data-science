@@ -25,15 +25,12 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipProjectionMapping;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -49,11 +46,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 

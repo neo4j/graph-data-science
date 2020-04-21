@@ -215,11 +215,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             counter.sum()
         ));
 
-//        resultDimensions = ImmutableGraphDimensions.builder().from(resultDimensions)
-//            .relationshipProjectionMappings(RelationshipProjectionMappings.of(relationshipCounters.keys().toArray(
-//                RelationshipProjectionMapping.class)))
-//            .build();
-
         return ImmutableCypherRelationshipLoader.LoadResult.builder()
             .dimensions(resultDimensions)
             .relationshipCounts(relationshipCounters)
