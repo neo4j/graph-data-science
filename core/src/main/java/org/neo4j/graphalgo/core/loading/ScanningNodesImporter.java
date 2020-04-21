@@ -42,7 +42,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, IdsAndProperties> {
@@ -84,8 +84,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.labelTokenNodeLabelMapping();
 
-        nodeLabelBitSetMapping = labelTokenNodeLabelMapping.size() == 1 && labelTokenNodeLabelMapping.containsKey(
-            ANY_LABEL)
+        nodeLabelBitSetMapping = labelTokenNodeLabelMapping.size() == 1 && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
             ? null
             : initializeLabelBitSets(nodeCount, labelTokenNodeLabelMapping);
 

@@ -20,15 +20,21 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
+import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjectionMapping;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
@@ -40,10 +46,14 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 
@@ -60,17 +70,24 @@ public final class NativeFactory extends GraphStoreFactory {
 
     @Override
     public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
-        return getMemoryEstimation(dimensions);
+        return getMemoryEstimation(dimensions, graphCreateConfig);
     }
 
-    public static MemoryEstimation getMemoryEstimation(GraphDimensions dimensions) {
+    public static MemoryEstimation getMemoryEstimation(GraphDimensions dimensions, RelationshipProjections relationshipProjections) {
+        GraphCreateFromStoreConfig config = GraphCreateFromStoreConfig.of(
+            "",
+            "",
+            NodeProjections.of(),
+            relationshipProjections,
+            CypherMapWrapper.empty()
+        );
+        return getMemoryEstimation(dimensions, config);
+    }
+
+    public static MemoryEstimation getMemoryEstimation(GraphDimensions dimensions, GraphCreateConfig config) {
         MemoryEstimations.Builder builder = MemoryEstimations
             .builder(HugeGraph.class)
             .add("nodeIdMap", IdMap.memoryEstimation());
-
-        if (Objects.isNull(dimensions.relationshipProjectionMappings())) {
-            throw new IllegalArgumentException("No relationship projection was specified.");
-        }
 
         // nodes
         dimensions
@@ -79,10 +96,9 @@ public final class NativeFactory extends GraphStoreFactory {
             .forEach(property -> builder.add(property, NodePropertyMap.memoryEstimation()));
 
         // relationships
-        dimensions.relationshipProjectionMappings().stream().forEach(relationshipProjectionMapping -> {
-            RelationshipType relationshipType = relationshipProjectionMapping.relationshipType();
+        config.relationshipProjections().projections().forEach((relationshipType, relationshipProjection) -> {
 
-            boolean undirected = relationshipProjectionMapping.orientation() == Orientation.UNDIRECTED;
+            boolean undirected = relationshipProjection.orientation() == Orientation.UNDIRECTED;
 
             // adjacency list
             builder.add(
@@ -94,7 +110,7 @@ public final class NativeFactory extends GraphStoreFactory {
                 AdjacencyOffsets.memoryEstimation()
             );
             // all properties per projection
-            dimensions.relationshipProperties().mappings().forEach(resolvedPropertyMapping -> {
+            relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
                 builder.add(
                     String.format("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
                     AdjacencyList.uncompressedMemoryEstimation(relationshipType, undirected)
@@ -131,7 +147,7 @@ public final class NativeFactory extends GraphStoreFactory {
 
     @Override
     public ImportResult build() {
-        validate(dimensions, setup);
+        validate(dimensions, graphCreateConfig);
 
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker();
@@ -171,17 +187,24 @@ public final class NativeFactory extends GraphStoreFactory {
         IdsAndProperties idsAndProperties,
         int concurrency
     ) {
-        Aggregation[] aggregations = dimensions.aggregations(setup.aggregation());
-        int propertyCount = setup.relationshipPropertyMappings().numberOfMappings();
-        Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders = dimensions
-            .relationshipProjectionMappings()
+        Map<RelationshipType, RelationshipsBuilder> allBuilders = graphCreateConfig
+            .relationshipProjections()
+            .projections()
+            .entrySet()
             .stream()
             .collect(Collectors.toMap(
-                Function.identity(),
-                mapping -> new RelationshipsBuilder(aggregations, tracker, propertyCount)
+                Map.Entry::getKey,
+                projectionEntry -> new RelationshipsBuilder(projectionEntry.getValue(), tracker)
             ));
 
-        ObjectLongMap<RelationshipProjectionMapping> relationshipCounts = new ScanningRelationshipsImporter(
+        Map<RelationshipType, Integer> relationshipTypeNeoTypeIdMapping = new HashMap<>(dimensions.typeTokenRelationshipTypeMapping().size());
+        dimensions.typeTokenRelationshipTypeMapping().forEach((Consumer<? super IntObjectCursor<List<RelationshipType>>>) cursor -> {
+            int typeId = cursor.key;
+            List<RelationshipType> relationshipTypes = cursor.value;
+            relationshipTypes.forEach(relationshipType -> relationshipTypeNeoTypeIdMapping.put(relationshipType, typeId));
+        });
+
+        ObjectLongMap<RelationshipType> relationshipCounts = new ScanningRelationshipsImporter(
             setup,
             api,
             dimensions,
@@ -189,6 +212,7 @@ public final class NativeFactory extends GraphStoreFactory {
             tracker,
             idsAndProperties.idMap,
             allBuilders,
+            relationshipTypeNeoTypeIdMapping,
             threadPool,
             concurrency
         ).call(setup.log());

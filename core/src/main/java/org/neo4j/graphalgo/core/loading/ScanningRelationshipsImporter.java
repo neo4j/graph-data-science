@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.neo4j.graphalgo.RelationshipProjectionMapping;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -39,14 +41,15 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 
-final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, ObjectLongMap<RelationshipProjectionMapping>> {
+final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, ObjectLongMap<RelationshipType>> {
 
     private final GraphSetup setup;
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
     private final IdMapping idMap;
-    private final Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders;
-    private final Map<RelationshipProjectionMapping, LongAdder> allRelationshipCounters;
+    private final Map<RelationshipType, RelationshipsBuilder> allBuilders;
+    private final Map<RelationshipType, Integer> relationshipTypeNeoTypeIdMapping;
+    private final Map<RelationshipType, LongAdder> allRelationshipCounters;
 
     ScanningRelationshipsImporter(
         GraphSetup setup,
@@ -55,7 +58,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         ProgressLogger progressLogger,
         AllocationTracker tracker,
         IdMapping idMap,
-        Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders,
+        Map<RelationshipType, RelationshipsBuilder> allBuilders,
+        Map<RelationshipType, Integer> relationshipTypeNeoTypeIdMapping,
         ExecutorService threadPool,
         int concurrency
     ) {
@@ -71,6 +75,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         this.tracker = tracker;
         this.idMap = idMap;
         this.allBuilders = allBuilders;
+        this.relationshipTypeNeoTypeIdMapping = relationshipTypeNeoTypeIdMapping;
         this.allRelationshipCounters = new HashMap<>();
     }
 
@@ -83,16 +88,15 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
 
-        boolean importWeights = dimensions.relationshipProperties().hasMappings();
 
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
                 .entrySet()
                 .stream()
-                .map(entry -> createImporterBuilder(pageSize, numberOfPages, entry.getKey(), entry.getValue()))
+                .map(entry -> createImporterBuilder(pageSize, numberOfPages, entry.getKey(), entry.getValue().projection(), entry.getValue()))
                 .collect(Collectors.toList());
 
         for (SingleTypeRelationshipImporter.Builder importerBuilder : importerBuilders) {
-            allRelationshipCounters.put(importerBuilder.mapping(), importerBuilder.relationshipCounter());
+            allRelationshipCounters.put(importerBuilder.relationshipType(), importerBuilder.relationshipCounter());
         }
 
         return RelationshipsScanner.of(
@@ -101,7 +105,6 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 progressLogger,
                 idMap,
                 scanner,
-                importWeights,
                 importerBuilders
         );
     }
@@ -109,12 +112,24 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private SingleTypeRelationshipImporter.Builder createImporterBuilder(
             int pageSize,
             int numberOfPages,
-            RelationshipProjectionMapping mapping,
+            RelationshipType relationshipType,
+            RelationshipProjection projection,
             RelationshipsBuilder relationshipsBuilder
     ) {
-        int[] propertyKeyIds = dimensions.relationshipProperties().allPropertyKeyIds();
-        double[] defaultValues = dimensions.relationshipProperties().allDefaultValues();
-        Aggregation[] aggregations = dimensions.relationshipProperties().allAggregations();
+        List<PropertyMapping> propertyMappings = projection.properties().mappings();
+        int[] propertyKeyIds = propertyMappings
+            .stream()
+            .mapToInt(mapping -> dimensions.relationshipPropertyTokens().get(mapping.neoPropertyKey())).toArray();
+
+        double[] defaultValues = propertyMappings.stream().mapToDouble(PropertyMapping::defaultValue).toArray();
+        Aggregation[] aggregations = propertyMappings.stream()
+            .map(PropertyMapping::aggregation)
+            .map(Aggregation::resolve)
+            .toArray(Aggregation[]::new);
+
+        if (propertyMappings.isEmpty()) {
+            aggregations = new Aggregation[]{ Aggregation.resolve(projection.aggregation()) };
+        }
 
         LongAdder relationshipCounter = new LongAdder();
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
@@ -129,13 +144,14 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         );
 
         RelationshipImporter importer = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
-        return new SingleTypeRelationshipImporter.Builder(mapping, importer, relationshipCounter, setup.validateRelationships());
+        int typeId = relationshipTypeNeoTypeIdMapping.get(relationshipType);
+        return new SingleTypeRelationshipImporter.Builder(relationshipType, projection, typeId, importer, relationshipCounter, setup.validateRelationships());
     }
 
     @Override
-    ObjectLongMap<RelationshipProjectionMapping> build() {
-        ObjectLongMap<RelationshipProjectionMapping> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
-        allRelationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
+    ObjectLongMap<RelationshipType> build() {
+        ObjectLongMap<RelationshipType> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
+        allRelationshipCounters.forEach((relationshipType, counter) -> relationshipCounters.put(relationshipType, counter.sum()));
         return relationshipCounters;
     }
 }

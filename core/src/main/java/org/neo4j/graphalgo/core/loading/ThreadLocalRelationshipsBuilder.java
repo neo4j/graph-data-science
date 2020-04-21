@@ -24,32 +24,33 @@ import org.neo4j.graphalgo.core.Aggregation;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.loading.AdjacencyCompression.writeDegree;
 
 class ThreadLocalRelationshipsBuilder {
 
     private final ReentrantLock lock;
-    private final Aggregation[] aggregations;
     private final AdjacencyListBuilder.Allocator adjacencyAllocator;
     private final AdjacencyListBuilder.Allocator[] propertiesAllocators;
     private final long[] adjacencyOffsets;
     private final long[][] weightOffsets;
     private final boolean noAggregation;
+    private final Aggregation[] aggregations;
 
     ThreadLocalRelationshipsBuilder(
-            Aggregation[] aggregations,
-            AdjacencyListBuilder.Allocator adjacencyAllocator,
-            final AdjacencyListBuilder.Allocator[] propertiesAllocators,
-            long[] adjacencyOffsets,
-            final long[][] weightOffsets) {
-        if (aggregations.length == 0) {
-            throw new IllegalArgumentException("Needs at least one aggregation");
-        }
+        AdjacencyListBuilder.Allocator adjacencyAllocator,
+        AdjacencyListBuilder.Allocator[] propertiesAllocators,
+        long[] adjacencyOffsets,
+        long[][] weightOffsets,
+        Aggregation[] aggregations
+    ) {
+
         this.aggregations = aggregations;
-        this.noAggregation = Arrays.stream(aggregations).allMatch(d -> d == Aggregation.NONE);
+
+        this.noAggregation = Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE);
+
         this.adjacencyAllocator = adjacencyAllocator;
         this.propertiesAllocators = propertiesAllocators;
         this.adjacencyOffsets = adjacencyOffsets;
@@ -76,9 +77,10 @@ class ThreadLocalRelationshipsBuilder {
     }
 
     int applyVariableDeltaEncoding(
-            CompressedLongArray array,
-            LongsRef buffer,
-            int localId) {
+        CompressedLongArray array,
+        LongsRef buffer,
+        int localId
+    ) {
 
         if (array.hasWeights()) {
             return applyVariableDeltaEncodingWithWeights(array, buffer, localId);
@@ -88,9 +90,10 @@ class ThreadLocalRelationshipsBuilder {
     }
 
     private int applyVariableDeltaEncodingWithoutWeights(
-            CompressedLongArray array,
-            LongsRef buffer,
-            int localId) {
+        CompressedLongArray array,
+        LongsRef buffer,
+        int localId
+    ) {
         byte[] storage = array.storage();
         AdjacencyCompression.copyFrom(buffer, array);
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer, aggregations[0]);
@@ -102,9 +105,10 @@ class ThreadLocalRelationshipsBuilder {
     }
 
     private int applyVariableDeltaEncodingWithWeights(
-            CompressedLongArray array,
-            LongsRef buffer,
-            int localId) {
+        CompressedLongArray array,
+        LongsRef buffer,
+        int localId
+    ) {
         byte[] storage = array.storage();
         long[][] weights = array.weights();
         AdjacencyCompression.copyFrom(buffer, array);
@@ -143,10 +147,10 @@ class ThreadLocalRelationshipsBuilder {
         int offset = propertiesAllocator.offset;
         offset = writeDegree(propertiesAllocator.page, offset, degree);
         ByteBuffer
-                .wrap(propertiesAllocator.page, offset, requiredBytes)
-                .order(ByteOrder.LITTLE_ENDIAN)
-                .asLongBuffer()
-                .put(properties, 0, degree);
+            .wrap(propertiesAllocator.page, offset, requiredBytes)
+            .order(ByteOrder.LITTLE_ENDIAN)
+            .asLongBuffer()
+            .put(properties, 0, degree);
         propertiesAllocator.offset = (offset + requiredBytes);
         return address;
     }

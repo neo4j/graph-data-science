@@ -27,18 +27,21 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.ElementProjection;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.compat.InternalReadOps;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,23 +50,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
-import static org.neo4j.internal.kernel.api.TokenRead.ANY_RELATIONSHIP_TYPE;
-import static org.neo4j.internal.kernel.api.TokenRead.NO_TOKEN;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
+import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
+import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
-    private final GraphSetup setup;
     private final GraphCreateConfig graphCreateConfig;
     private final boolean readTokens;
 
     public GraphDimensionsReader(
-            GraphDatabaseAPI api,
-            GraphSetup setup,
-            GraphCreateConfig graphCreateConfig,
-            boolean readTokens) {
+        GraphDatabaseAPI api,
+        GraphCreateConfig graphCreateConfig,
+        boolean readTokens) {
         super(api);
-        this.setup = setup;
         this.graphCreateConfig = graphCreateConfig;
         this.readTokens = readTokens;
     }
@@ -73,27 +73,25 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
 
-        final TokenElementIdentifierMappings<NodeLabel> labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<>();
+        final TokenElementIdentifierMappings<NodeLabel> labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<>(ANY_LABEL);
         if (readTokens) {
-            setup.nodeProjections()
+            graphCreateConfig.nodeProjections()
                 .projections()
                 .forEach((key, value) -> {
-                    int labelId = value.projectAll() ? ANY_LABEL : tokenRead.nodeLabel(value.label());
+                    int labelId = value.projectAll() ? ANY_LABEL : getNodeLabel(tokenRead, value);
                     labelTokenNodeLabelMappings.put(labelId, key);
                 });
         }
 
-        final TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings = new TokenElementIdentifierMappings<>();
+        final TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings = new TokenElementIdentifierMappings<>(ANY_RELATIONSHIP_TYPE);
         if (readTokens) {
-            setup.relationshipProjections()
+            graphCreateConfig.relationshipProjections()
                 .projections()
                 .forEach((key, value) -> {
-                    int typeId = value.projectAll() ? ANY_RELATIONSHIP_TYPE : tokenRead.relationshipType(value.type());
+                    int typeId = value.projectAll() ? ANY_RELATIONSHIP_TYPE : getRelationshipType(tokenRead, value);
                     typeTokenRelTypeMappings.put(typeId, key);
                 });
         }
-
-
 
         Map<String, Integer> nodePropertyTokens = loadPropertyTokens(graphCreateConfig.nodeProjections().projections(), tokenRead);
         Map<String, Integer> relationshipPropertyTokens = loadPropertyTokens(graphCreateConfig.relationshipProjections().projections(), tokenRead);
@@ -115,17 +113,31 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         long maxRelCount = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
 
         return ImmutableGraphDimensions.builder()
-                .nodeCount(finalNodeCount)
-                .highestNeoId(allNodesCount)
-                .maxRelCount(maxRelCount)
-                .relationshipCounts(relationshipCounts)
-                .nodeLabelIds(labelTokenNodeLabelMappings.keys())
-                .relationshipTypeIds(typeTokenRelTypeMappings.keys())
-                .labelTokenNodeLabelMapping(labelTokenNodeLabelMappings.mappings())
-                .typeTokenRelationshipTypeMapping(typeTokenRelTypeMappings.mappings())
-                .nodePropertyTokens(nodePropertyTokens)
-                .relationshipPropertyTokens(relationshipPropertyTokens)
-                .build();
+            .nodeCount(finalNodeCount)
+            .highestNeoId(allNodesCount)
+            .maxRelCount(maxRelCount)
+            .relationshipCounts(relationshipCounts)
+            .nodeLabelIds(labelTokenNodeLabelMappings.keys())
+            .relationshipTypeIds(typeTokenRelTypeMappings.keys())
+            .labelTokenNodeLabelMapping(labelTokenNodeLabelMappings.mappings())
+            .typeTokenRelationshipTypeMapping(typeTokenRelTypeMappings.mappings())
+            .nodePropertyTokens(nodePropertyTokens)
+            .relationshipPropertyTokens(relationshipPropertyTokens)
+            .build();
+    }
+
+    private int getNodeLabel(TokenRead tokenRead, NodeProjection value) {
+        int labelToken = tokenRead.nodeLabel(value.label());
+        return labelToken == StatementConstants.NO_SUCH_LABEL
+            ? NO_SUCH_LABEL
+            : labelToken;
+    }
+
+    private int getRelationshipType(TokenRead tokenRead, RelationshipProjection value) {
+        int relationshipToken = tokenRead.relationshipType(value.type());
+        return relationshipToken == StatementConstants.NO_SUCH_RELATIONSHIP_TYPE
+            ? NO_SUCH_RELATIONSHIP_TYPE
+            : relationshipToken;
     }
 
     private Map<String, Integer> loadPropertyTokens(Map<? extends ElementIdentifier, ? extends ElementProjection> projections, TokenRead tokenRead) {
@@ -135,7 +147,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             .flatMap(nodeProjections -> nodeProjections.getValue().properties().stream())
             .collect(Collectors.toMap(
                 PropertyMapping::neoPropertyKey,
-                propertyMapping -> propertyMapping.neoPropertyKey() != null ? tokenRead.propertyKey(propertyMapping.neoPropertyKey()) : NO_TOKEN,
+                propertyMapping -> propertyMapping.neoPropertyKey() != null ? tokenRead.propertyKey(propertyMapping.neoPropertyKey()) : StatementConstants.NO_SUCH_PROPERTY_KEY,
                 (sameKey1, sameKey2) -> sameKey1
             ));
     }
@@ -148,7 +160,10 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     ) {
         Map<RelationshipType, Long> relationshipCountsByType = new HashMap<>();
         typeTokenRelTypeMappings
-            .forEach((typeToken, relationshipTypes) ->
+            .forEach((typeToken, relationshipTypes) -> {
+                if (typeToken == ANY_RELATIONSHIP_TYPE && relationshipTypes == null) {
+                  relationshipTypes = Collections.singletonList(RelationshipType.ALL_RELATIONSHIPS);
+                }
                 relationshipTypes.forEach(relationshipType -> {
                     if (typeToken != NO_SUCH_RELATIONSHIP_TYPE) {
                         long numberOfRelationships = labelTokenNodeLabelMappings
@@ -157,30 +172,32 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
                         relationshipCountsByType.put(relationshipType, numberOfRelationships);
                     }
-                })
-            );
+                });
+            });
 
         return relationshipCountsByType;
     }
 
     private static long maxRelCountForLabelAndType(Read dataRead, int labelId, int id) {
         return Math.max(
-            dataRead.countsForRelationshipWithoutTxState(labelId, id, TokenRead.ANY_LABEL),
-            dataRead.countsForRelationshipWithoutTxState(TokenRead.ANY_LABEL, id, labelId)
+            dataRead.countsForRelationshipWithoutTxState(labelId, id, ANY_LABEL),
+            dataRead.countsForRelationshipWithoutTxState(ANY_LABEL, id, labelId)
         );
     }
 
     static class TokenElementIdentifierMappings<T extends ElementIdentifier> {
         private final IntObjectMap<List<T>> mappings;
+        private final int allToken;
 
-        TokenElementIdentifierMappings() {
+        TokenElementIdentifierMappings(int allToken) {
+            this.allToken = allToken;
             this.mappings = new IntObjectHashMap<>();
         }
 
         LongSet keys() {
             LongSet keySet = new LongHashSet(mappings.keys().size());
             boolean allNodes = StreamSupport.stream(mappings.keys().spliterator(), false)
-                .allMatch(cursor -> cursor.value == ANY_LABEL);
+                .allMatch(cursor -> cursor.value == allToken);
             if (!allNodes) {
                 StreamSupport.stream(mappings.keys().spliterator(), false)
                     .forEach(cursor -> keySet.add(cursor.value));
@@ -190,7 +207,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         Stream<Integer> keyStream() {
             return keys().isEmpty()
-                ? Stream.of(TokenRead.ANY_LABEL)
+                ? Stream.of(allToken)
                 : StreamSupport.stream(keys().spliterator(), false).map(cursor -> (int) cursor.value);
         }
 

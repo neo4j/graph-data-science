@@ -134,4 +134,9 @@ public enum Aggregation {
         }
         return null;
     }
+
+    public static Aggregation resolve(Aggregation aggregation) {
+        return aggregation == Aggregation.DEFAULT ? Aggregation.NONE : aggregation;
+
+    }
 }

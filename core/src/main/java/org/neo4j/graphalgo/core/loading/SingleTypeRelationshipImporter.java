@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.RelationshipProjectionMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
 
@@ -52,33 +54,45 @@ final class SingleTypeRelationshipImporter {
 
     static class Builder {
 
-        private final RelationshipProjectionMapping mapping;
+        private final RelationshipType relationshipType;
+        private final RelationshipProjection projection;
         private final RelationshipImporter importer;
         private final LongAdder relationshipCounter;
+        private final int typeId;
         private boolean validateRelationships;
+        private boolean loadProperties;
 
         Builder(
-            RelationshipProjectionMapping mapping,
+            RelationshipType relationshipType,
+            RelationshipProjection projection,
+            int typeId,
             RelationshipImporter importer,
             LongAdder relationshipCounter,
             boolean validateRelationships
         ) {
-            this.mapping = mapping;
+            this.relationshipType = relationshipType;
+            this.projection = projection;
+            this.typeId = typeId;
             this.importer = importer;
             this.relationshipCounter = relationshipCounter;
+            this.loadProperties = projection.properties().hasMappings();
             this.validateRelationships = validateRelationships;
         }
 
-        RelationshipProjectionMapping mapping() {
-            return mapping;
+        RelationshipType relationshipType() {
+            return relationshipType;
         }
 
         LongAdder relationshipCounter() {
             return relationshipCounter;
         }
 
+        boolean loadProperties() {
+            return this.loadProperties;
+        }
+
         WithImporter loadImporter(boolean loadProperties) {
-            RelationshipImporter.Imports imports = importer.imports(mapping.orientation(), loadProperties);
+            RelationshipImporter.Imports imports = importer.imports(projection.orientation(), loadProperties);
             return new WithImporter(imports);
         }
 
@@ -94,12 +108,12 @@ final class SingleTypeRelationshipImporter {
             }
 
             SingleTypeRelationshipImporter withBuffer(IdMapping idMap, int bulkSize, RelationshipImporter.PropertyReader propertyReader) {
-                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, mapping.typeId(), bulkSize, validateRelationships);
+                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, typeId, bulkSize, validateRelationships);
                 return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
             }
 
             SingleTypeRelationshipImporter withBuffer(IdMapping idMap, int bulkSize, Read read, CursorFactory cursors) {
-                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, mapping.typeId(), bulkSize, validateRelationships);
+                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, typeId, bulkSize, validateRelationships);
                 RelationshipImporter.PropertyReader propertyReader = importer.storeBackedPropertiesReader(cursors, read);
                 return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
             }

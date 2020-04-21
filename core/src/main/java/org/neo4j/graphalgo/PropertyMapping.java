@@ -29,7 +29,8 @@ import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
+
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 
 @ValueClass
 public abstract class PropertyMapping {
@@ -60,6 +61,13 @@ public abstract class PropertyMapping {
     @Value.Default
     public Aggregation aggregation() {
         return Aggregation.DEFAULT;
+    }
+
+    @Value.Check
+    public void validateProperties() {
+        if (neoPropertyKey().equals(PROJECT_ALL) && aggregation() != Aggregation.COUNT) {
+            throw new IllegalArgumentException("A '*' property key can only be used in combination with count aggregation.");
+        }
     }
 
     public static PropertyMapping fromObject(String propertyKey, Object stringOrMap) {
@@ -147,19 +155,6 @@ public abstract class PropertyMapping {
             return this;
         }
         return ((ImmutablePropertyMapping) this).withAggregation(aggregation);
-    }
-
-    public final ResolvedPropertyMapping resolveWith(int propertyKeyId) {
-        String propertyKey = Objects.requireNonNull(propertyKey(), "propertyKey must not be null");
-        String neoPropertyKey = Objects.requireNonNull(neoPropertyKey(), "neoPropertyKey must not be null");
-        return ImmutableResolvedPropertyMapping
-            .builder()
-            .propertyKey(propertyKey)
-            .neoPropertyKey(neoPropertyKey)
-            .propertyKeyId(propertyKeyId)
-            .defaultValue(defaultValue())
-            .aggregation(aggregation())
-            .build();
     }
 
     /**

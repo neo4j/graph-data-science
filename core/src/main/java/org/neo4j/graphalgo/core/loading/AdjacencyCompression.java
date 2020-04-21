@@ -21,10 +21,12 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodeVLongs;
 

@@ -36,6 +36,12 @@ import java.util.Set;
 @ValueClass
 public interface GraphDimensions {
 
+    int ANY_LABEL = -1;
+    int ANY_RELATIONSHIP_TYPE = -1;
+    int NO_SUCH_LABEL = -2;
+    int NO_SUCH_RELATIONSHIP_TYPE = -2;
+    int IGNORE = -4;
+
     long nodeCount();
 
     @Value.Default
@@ -84,21 +90,4 @@ public interface GraphDimensions {
         }
         return nodeLabels;
     }
-
-//    default Aggregation[] aggregations(Aggregation defaultAggregation) {
-//        Aggregation[] aggregations = relationshipProperties().stream()
-//            .map(property -> property.aggregation() == Aggregation.DEFAULT
-//                ? Aggregation.NONE
-//                : property.aggregation()
-//            )
-//            .toArray(Aggregation[]::new);
-//        // TODO: backwards compat code
-//        if (aggregations.length == 0) {
-//            Aggregation aggregation = defaultAggregation == Aggregation.DEFAULT
-//                ? Aggregation.NONE
-//                : defaultAggregation;
-//            aggregations = new Aggregation[]{aggregation};
-//        }
-//        return aggregations;
-//    }
 }

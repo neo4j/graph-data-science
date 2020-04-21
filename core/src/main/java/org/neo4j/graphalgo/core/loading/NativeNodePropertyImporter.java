@@ -41,8 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.IGNORE_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 
 public final class NativeNodePropertyImporter {
 
@@ -100,7 +100,7 @@ public final class NativeNodePropertyImporter {
         int propertyKey = propertyCursor.propertyKey();
 
         for (long label : labels) {
-            if (label == IGNORE_LABEL || label == ANY_LABEL) {
+            if (label == IGNORE || label == ANY_LABEL) {
                 continue;
             }
 

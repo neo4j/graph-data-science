@@ -109,11 +109,13 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     }
 
     static GraphCreateFromStoreConfig emptyWithName(String userName, String graphName) {
+        NodeProjections nodeProjections = NodeProjections.all();
+        RelationshipProjections relationshipProjections = RelationshipProjections.all();
         return ImmutableGraphCreateFromStoreConfig.of(
             userName,
             graphName,
-            NodeProjections.empty(),
-            RelationshipProjections.empty()
+            nodeProjections,
+            relationshipProjections
         );
     }
 

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.apache.commons.compress.utils.Sets;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
-import org.neo4j.graphalgo.RelationshipProjectionMapping;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.validateSourceNodeIsLoaded;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.validateTargetNodeIsLoaded;
 
@@ -53,9 +54,9 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final boolean multipleProperties;
     private final String singlePropertyKey;
 
-    private final Map<String, SingleTypeRelationshipImporter> localImporters;
-    private final Map<String, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
-    private final ObjectIntHashMap<String> localRelationshipIds;
+    private final Map<RelationshipType, SingleTypeRelationshipImporter> localImporters;
+    private final Map<RelationshipType, RelationshipPropertiesBatchBuffer> localPropertiesBuffers;
+    private final ObjectIntHashMap<RelationshipType> localRelationshipIds;
     private final boolean isAnyRelTypeQuery;
 
     private long lastNeoSourceId = -1, lastNeoTargetId = -1;
@@ -102,16 +103,16 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     public boolean visit(Result.ResultRow row) throws RuntimeException {
         rows++;
 
-        RelationshipProjectionMapping relationshipType = isAnyRelTypeQuery
-            ? RelationshipProjectionMapping.all()
-            : RelationshipProjectionMapping.of(row.getString(TYPE_COLUMN), -1);
+        String relationshipTypeName = isAnyRelTypeQuery
+            ? ALL_RELATIONSHIPS.name
+            : row.getString(TYPE_COLUMN);
 
-        String relationshipTypeName = relationshipType.typeName();
+        RelationshipType relationshipType = RelationshipType.of(relationshipTypeName);
 
-        if (!localImporters.containsKey(relationshipTypeName)) {
+        if (!localImporters.containsKey(relationshipType)) {
             // Lazily init relationship importer builder
-            SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder = loaderContext
-                .getOrCreateImporterBuilder(relationshipType);
+            SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder =
+                loaderContext.getOrCreateImporterBuilder(relationshipType);
 
             RelationshipImporter.PropertyReader propertyReader;
 
@@ -122,7 +123,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
                     propertyCount
                 );
                 propertyReader = propertiesBuffer;
-                localPropertiesBuffers.put(relationshipTypeName, propertiesBuffer);
+                localPropertiesBuffers.put(relationshipType, propertiesBuffer);
             } else {
                 // Single properties can be in-lined in the relationship batch
                 propertyReader = RelationshipImporter.preLoadedPropertyReader();
@@ -130,14 +131,14 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             // Create thread-local relationship importer
             SingleTypeRelationshipImporter importer = importerBuilder.withBuffer(idMap, bufferSize, propertyReader);
 
-            localImporters.put(relationshipTypeName, importer);
-            localRelationshipIds.put(relationshipTypeName, 0);
+            localImporters.put(relationshipType, importer);
+            localRelationshipIds.put(relationshipType, 0);
         }
 
-        return visit(row, relationshipTypeName);
+        return visit(row, relationshipType);
     }
 
-    private boolean visit(Result.ResultRow row, String relationshipType) {
+    private boolean visit(Result.ResultRow row, RelationshipType relationshipType) {
 
         readSourceId(row);
         readTargetId(row);
@@ -207,9 +208,9 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     }
 
     private void readPropertyValues(Result.ResultRow row, int relationshipId, RelationshipPropertiesBatchBuffer propertiesBuffer) {
-        propertyKeyIdsByName.forEachKeyValue((propertyKey, propertyKeyId) -> {
-            propertiesBuffer.add(relationshipId, propertyKeyId, readPropertyValue(row, propertyKey));
-        });
+        propertyKeyIdsByName.forEachKeyValue((propertyKey, propertyKeyId) ->
+            propertiesBuffer.add(relationshipId, propertyKeyId, readPropertyValue(row, propertyKey))
+        );
     }
 
     private double readPropertyValue(Result.ResultRow row, String propertyKey) {
@@ -224,7 +225,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         relationshipCount += RawValues.getHead(imported);
     }
 
-    private void reset(String relationshipType, SingleTypeRelationshipImporter importer) {
+    private void reset(RelationshipType relationshipType, SingleTypeRelationshipImporter importer) {
         importer.buffer().reset();
         localRelationshipIds.put(relationshipType, 0);
     }

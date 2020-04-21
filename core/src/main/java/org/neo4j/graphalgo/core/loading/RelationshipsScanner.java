@@ -44,11 +44,10 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             ProgressLogger progressLogger,
             IdMapping idMap,
             AbstractStorePageCacheScanner<RelationshipRecord> scanner,
-            boolean loadProperties,
             Collection<SingleTypeRelationshipImporter.Builder> importerBuilders) {
         List<SingleTypeRelationshipImporter.Builder.WithImporter> builders = importerBuilders
                 .stream()
-                .map(relImporter -> relImporter.loadImporter(loadProperties))
+                .map(relImporter -> relImporter.loadImporter(relImporter.loadProperties()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         if (builders.isEmpty()) {
