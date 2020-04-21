@@ -31,12 +31,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * TriangleCount counts the number of triangles in the Graph as well
@@ -167,7 +164,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     }
 
     @ValueClass
-    interface TriangleCountResult {
+    public interface TriangleCountResult {
         // value at index `i` is number of triangles for node with id `i`
         PagedAtomicIntegerArray localTriangles();
 
