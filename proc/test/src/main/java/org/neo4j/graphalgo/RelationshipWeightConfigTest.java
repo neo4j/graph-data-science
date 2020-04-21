@@ -201,7 +201,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
             loadExplicitGraphWithRelationshipWeights(graphName, MULTI_NODES_PROJECTION, MULTI_RELATIONSHIPS_PROJECTION);
 
             CypherMapWrapper weightConfig = CypherMapWrapper.create(map(
-                "relationshipTypes", singletonList("*"),
+                "relationshipTypes", singletonList("TYPE"),
                 "relationshipWeightProperty", propertyName
                 )
             );
@@ -302,7 +302,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
             loadExplicitGraphWithRelationshipWeights(graphName, MULTI_NODES_PROJECTION, MULTI_RELATIONSHIPS_PROJECTION);
 
             CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map(
-                "relationshipTypes", singletonList("TYPE1"),
+                "relationshipTypes", singletonList("TYPE"),
                 "relationshipWeightProperty", "weight1"
             ));
             CypherMapWrapper algoConfig = createMinimalConfigWithFilteredNodes(weightConfig);
@@ -311,7 +311,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
             Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.of(graphName));
 
             Graph graph = proc.createGraph(configAndName);
-            assertGraphEquals(fromGdl("(:Label)-[{w1: 0.0}]->(:Label), (:Label)"), graph);
+            assertGraphEquals(fromGdl("(a:Label)-[{w1: 0.0}]->(b:Label), (a:Label)-[{w1: 0.0}]->(c:Label), (b:Label)-[{w1: 0.0}]->(c:Label)"), graph);
         });
     }
 

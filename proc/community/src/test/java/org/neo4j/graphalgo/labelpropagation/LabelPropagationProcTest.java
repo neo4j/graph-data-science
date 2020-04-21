@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
@@ -121,7 +122,8 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     void setupGraph(String cypher) {
         runQuery(cypher);
         // Create explicit graphs with both projection variants
-        runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
+        String query = graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME);
+        runQuery(query);
         runQuery(String.format(
             "CALL gds.graph.create.cypher('%s', '%s', '%s', {})",
             TEST_CYPHER_GRAPH_NAME,

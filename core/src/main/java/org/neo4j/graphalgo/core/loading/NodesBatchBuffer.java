@@ -25,10 +25,10 @@ import org.immutables.builder.Builder;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
+import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
 
-import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
@@ -60,13 +60,13 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     @Override
     public void offer(final NodeRecord record) {
         if (nodeLabelIds.isEmpty()) {
-            add(record.getId(), record.getNextProp(), new long[]{ANY_LABEL});
+            add(record.getId(), record.getNextProp(), new long[]{TokenConstants.ANY_LABEL});
         } else {
             boolean atLeastOneLabelFound = false;
             final long[] labels = NodeLabelsField.get(record, nodeStore);
             for (int i = 0; i < labels.length; i++) {
                 long l = labels[i];
-                if (!nodeLabelIds.contains(l) && !nodeLabelIds.contains(ANY_LABEL)) {
+                if (!nodeLabelIds.contains(l) && !nodeLabelIds.contains(TokenConstants.ANY_LABEL)) {
                     labels[i] = IGNORE;
                 } else {
                     atLeastOneLabelFound = true;

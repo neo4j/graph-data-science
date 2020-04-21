@@ -274,6 +274,12 @@ public final class GraphStore {
         return relationships.get(relationshipType).elementCount();
     }
 
+    public boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey) {
+        return relTypes
+            .stream()
+            .allMatch(relType -> relationshipProperties.containsKey(relType) && relationshipProperties.get(relType).containsKey(propertyKey));
+    }
+
     public NumberType relationshipPropertyType(String propertyKey) {
         return relationshipProperties.values().stream()
             .filter(propertyStore -> propertyStore.containsKey(propertyKey))
@@ -541,11 +547,11 @@ public final class GraphStore {
             }
 
             maybeRelationshipProperty.ifPresent(relationshipProperty -> {
-                if (!relationshipProperties.get(relationshipType).containsKey(relationshipProperty)) {
+                if (!hasRelationshipProperty(singletonList(relationshipType), relationshipProperty)) {
                     throw new IllegalArgumentException(String.format(
-                        "No relationships have been loaded for relationship type '%s' and relationship property '%s'.",
-                        relationshipType,
-                        maybeRelationshipProperty.get()
+                        "Property '%s' does not exist for relationships with type '%s'.",
+                        maybeRelationshipProperty.get(),
+                        relationshipType
                     ));
                 }
             });

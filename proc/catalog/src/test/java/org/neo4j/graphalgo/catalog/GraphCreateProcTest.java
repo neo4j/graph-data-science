@@ -432,6 +432,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "relationshipProperties")
+    @Disabled("Disable until we decide to bring back propper ")
     void relationshipQueryAndProperties(Object relationshipProperties, Map<String, Object> expectedProperties) {
         String name = "g";
 
@@ -1297,7 +1298,7 @@ class GraphCreateProcTest extends BaseProcTest {
             "    } " +
             "})";
 
-        assertError(query, "Relationship properties not found: 'foo'.");
+        assertError(query, "Relationship properties not found: 'foo' (if you meant to count parallel relationships, use `property:'*'`).");
 
         assertGraphDoesNotExist("g");
     }

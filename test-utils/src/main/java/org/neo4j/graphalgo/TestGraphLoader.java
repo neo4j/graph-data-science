@@ -32,6 +32,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -146,6 +147,7 @@ public final class TestGraphLoader {
         String relPropertiesString = getRelationshipPropertiesString(relProperties, "r");
 
         cypherLoaderBuilder.relationshipQuery(String.format(
+            Locale.US,
             relationshipQueryTemplate,
             relTypeString,
             relPropertiesString
@@ -204,6 +206,7 @@ public final class TestGraphLoader {
             ? propertyMappings
                 .stream()
                 .map(mapping -> String.format(
+                    Locale.US,
                     "COALESCE(%s.%s, %f) AS %s",
                     entityVar,
                     mapping.neoPropertyKey(),
@@ -219,6 +222,7 @@ public final class TestGraphLoader {
             ? propertyMappings
             .stream()
             .map(mapping -> String.format(
+                Locale.US,
                 "COALESCE(%s.%s, %f) AS %s",
                 entityVar,
                 removeSuffix(mapping.neoPropertyKey()),
