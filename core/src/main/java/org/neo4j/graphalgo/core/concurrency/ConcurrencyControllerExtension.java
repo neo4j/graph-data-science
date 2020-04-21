@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.concurrency;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.graphalgo.compat.SettingsProxy;
+import org.neo4j.graphalgo.compat.Settings;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
@@ -44,7 +44,7 @@ public final class ConcurrencyControllerExtension extends ExtensionFactory<Concu
             public void init() {
                 boolean unlimitedCores = dependencies
                     .config()
-                    .get(SettingsProxy.unlimitedCores());
+                    .get(Settings.unlimitedCores());
                 ConcurrencyMonitor concurrencyMonitor = ConcurrencyMonitor.instance();
                 if (unlimitedCores) {
                     concurrencyMonitor.setUnlimited();

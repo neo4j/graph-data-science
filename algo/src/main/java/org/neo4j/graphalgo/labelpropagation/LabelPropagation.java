@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -28,6 +26,8 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
-import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_LABEL;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 
 public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagation> {
 

@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
+import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.PROJECT_ANY_LABEL;
 
 public class NodeImporter {
 
@@ -137,7 +137,7 @@ public class NodeImporter {
         }
 
         // set the whole range for '*' projections
-        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
+        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(PROJECT_ANY_LABEL, Collections.emptyList())) {
             nodeLabelBitSetMapping.get(starLabel).set(startIndex, startIndex + batchLength);
         }
     }

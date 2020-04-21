@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
-import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_RELATIONSHIP_TYPE;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.validateSourceNodeIsLoaded;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.validateTargetNodeIsLoaded;
+import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 
 public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRecord> {

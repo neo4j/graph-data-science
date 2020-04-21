@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.StatementConstantsProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.values.storable.NumberValue;
@@ -27,6 +26,8 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.Arrays;
+
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class ReadHelper {
 
@@ -44,7 +45,7 @@ public final class ReadHelper {
         Arrays.setAll(properties, indexOfPropertyId -> {
             double defaultValue = defaultValues[indexOfPropertyId];
             Aggregation aggregation = aggregations[indexOfPropertyId];
-            if (propertyIds[indexOfPropertyId] == StatementConstantsProxy.NO_SUCH_PROPERTY_KEY) {
+            if (propertyIds[indexOfPropertyId] == NO_SUCH_PROPERTY_KEY) {
                 // we are in `count(*)` mode, so we don't expect any loads on the property
                 // and need to return a valid count value, since we are just counting rows
                 return aggregation.normalizePropertyValue(defaultValue);

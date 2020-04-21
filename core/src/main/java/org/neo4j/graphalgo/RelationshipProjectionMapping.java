@@ -20,10 +20,11 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.kernel.api.StatementConstants;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_RELATIONSHIP_TYPE;
-import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_RELATIONSHIP_TYPE;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
+import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 @ValueClass
 public interface RelationshipProjectionMapping {

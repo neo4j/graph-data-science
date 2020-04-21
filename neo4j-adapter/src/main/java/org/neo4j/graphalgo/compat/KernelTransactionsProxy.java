@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.compat;
 
 import org.neo4j.kernel.api.KernelTransactionHandle;
+import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 
 public final class KernelTransactionsProxy {
@@ -29,10 +30,10 @@ public final class KernelTransactionsProxy {
     }
 
     public static void markForTermination(KernelTransactionHandle ktx) {
-        ktx.markForTermination(Transactions.markedAsFailed());
+        ktx.markForTermination(Status.Transaction.TransactionMarkedAsFailed);
     }
 
-    public static String executingQueryTexts(KernelTransactionHandle ktx, String delimiter) {
+    public static String executingQueryTexts(KernelTransactionHandle ktx) {
         return ktx.executingQuery()
             .map(ExecutingQuery::queryText)
             .orElse("");

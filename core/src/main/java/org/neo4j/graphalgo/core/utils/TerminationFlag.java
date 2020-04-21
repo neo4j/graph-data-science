@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
-
-import static org.neo4j.graphalgo.compat.Transactions.transactionTerminated;
+import org.neo4j.kernel.api.exceptions.Status;
 
 public interface TerminationFlag {
 
@@ -44,7 +44,7 @@ public interface TerminationFlag {
      */
     default void assertRunning() {
         if (!running()) {
-            throw transactionTerminated();
+            throw new TransactionTerminatedException(Status.Transaction.Terminated);
         }
     }
 }

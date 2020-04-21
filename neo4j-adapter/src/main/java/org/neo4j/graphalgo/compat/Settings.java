@@ -30,7 +30,7 @@ import java.nio.file.Path;
 
 import static org.neo4j.configuration.SettingImpl.newBuilder;
 
-public final class SettingsProxy {
+public final class Settings {
 
     public static Setting<Boolean> unlimitedCores() {
         return ConcurrencyControllerSettings.unlimitedCores;
@@ -64,7 +64,7 @@ public final class SettingsProxy {
         return GraphDatabaseSettings.store_internal_log_path;
     }
 
-    private SettingsProxy() {
+    private Settings() {
         throw new UnsupportedOperationException();
     }
 }

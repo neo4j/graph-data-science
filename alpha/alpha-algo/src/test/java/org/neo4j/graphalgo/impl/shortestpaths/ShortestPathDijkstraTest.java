@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.NodeProxy;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -251,7 +250,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 long id = current.getId();
                 nodeIds[i] = id;
                 if (prev != null) {
-                    for (Relationship rel : NodeProxy.getRelationships(prev, type, Direction.OUTGOING)) {
+                    for (Relationship rel : prev.getRelationships(Direction.OUTGOING, type)) {
                         if (rel.getEndNodeId() == id) {
                             double cost = ((Number) rel.getProperty("cost")).doubleValue();
                             weight += cost;

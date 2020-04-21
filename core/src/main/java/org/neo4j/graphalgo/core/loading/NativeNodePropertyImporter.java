@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
+import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.PROJECT_ANY_LABEL;
 import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.IGNORE_LABEL;
 
 public final class NativeNodePropertyImporter {
@@ -102,7 +102,7 @@ public final class NativeNodePropertyImporter {
         int propertyKey = propertyCursor.propertyKey();
 
         for (long label : labels) {
-            if (label == IGNORE_LABEL || label == ANY_LABEL) {
+            if (label == IGNORE_LABEL || label == PROJECT_ANY_LABEL) {
                 continue;
             }
 
@@ -118,7 +118,7 @@ public final class NativeNodePropertyImporter {
         }
 
         if (containsAnyLabelProjection) {
-            propertiesImported += setPropertyValue(nodeId, propertyCursor, propertyKey, buildersByLabelIdAndPropertyToken.get((long) ANY_LABEL));
+            propertiesImported += setPropertyValue(nodeId, propertyCursor, propertyKey, buildersByLabelIdAndPropertyToken.get((long) PROJECT_ANY_LABEL));
         }
 
         return propertiesImported;
@@ -196,7 +196,7 @@ public final class NativeNodePropertyImporter {
             return new NativeNodePropertyImporter(
                 nodePropertyBuilders,
                 buildersByLabelIdAndPropertyId,
-                buildersByLabelIdAndPropertyId.containsKey((long) ANY_LABEL)
+                buildersByLabelIdAndPropertyId.containsKey((long) PROJECT_ANY_LABEL)
             );
         }
 

@@ -19,8 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.walking;
 
-import org.neo4j.graphalgo.compat.PathProxy;
-import org.neo4j.graphalgo.compat.VirtualRelationship;
+import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -29,11 +28,12 @@ import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
-public class WalkPath extends PathProxy {
+public class WalkPath implements Path {
     public static final Path EMPTY = new WalkPath(0);
     private static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
@@ -135,8 +135,8 @@ public class WalkPath extends PathProxy {
     }
 
     @Override
-    public PropertyIterator toIterator() {
-        return new PropertyIterator() {
+    public final Iterator<Entity> iterator() {
+        return new Iterator<>() {
             int i = 0;
 
             @Override
@@ -145,12 +145,12 @@ public class WalkPath extends PathProxy {
             }
 
             @Override
-            public PropertyResult next(PropertyConsumer consumer) {
-                int i = this.i++;
+            public Entity next() {
+                var i = this.i++;
                 if (i % 2 == 0) {
-                    return consumer.returnNode(nodes.get(i / 2));
+                    return nodes.get(i / 2);
                 } else {
-                    return consumer.returnRelationship(relationships.get(i / 2));
+                    return relationships.get(i / 2);
                 }
             }
         };

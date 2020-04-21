@@ -25,7 +25,7 @@ import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.graphalgo.compat.SettingsProxy;
+import org.neo4j.graphalgo.compat.Settings;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
@@ -86,7 +86,7 @@ public class GraphStoreExport {
 
         try (FileSystemAbstraction fs = new DefaultFileSystemAbstraction()) {
             var logService = config.enableDebugLog()
-                ? lifeSupport.add(StoreLogService.withInternalLog(databaseConfig.get(SettingsProxy.storeInternalLogPath()).toFile()).build(fs))
+                ? lifeSupport.add(StoreLogService.withInternalLog(databaseConfig.get(Settings.storeInternalLogPath()).toFile()).build(fs))
                 : NullLogService.getInstance();
             var jobScheduler = lifeSupport.add(createScheduler());
 

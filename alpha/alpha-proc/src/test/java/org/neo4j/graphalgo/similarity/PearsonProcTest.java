@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.similarity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.compat.SettingsProxy;
+import org.neo4j.graphalgo.compat.Settings;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -101,7 +101,7 @@ class PearsonProcTest extends BaseProcTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(SettingsProxy.unlimitedCores(), true);
+        builder.setConfig(Settings.unlimitedCores(), true);
     }
 
     private void buildRandomDB(int size) {

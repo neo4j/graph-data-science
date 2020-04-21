@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.compat.InternalReadOps;
-import org.neo4j.graphalgo.compat.StatementConstantsProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
@@ -51,8 +50,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_RELATIONSHIP_TYPE;
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
+import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.PROJECT_ANY_LABEL;
+import static org.neo4j.token.api.TokenConstants.ANY_LABEL;
+import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
     private final GraphSetup setup;
@@ -80,7 +80,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             setup.nodeProjections()
                 .projections()
                 .forEach((key, value) -> {
-                    long labelId = value.projectAll() ? ANY_LABEL : (long) tokenRead.nodeLabel(value.label());
+                    long labelId = value.projectAll() ? PROJECT_ANY_LABEL : (long) tokenRead.nodeLabel(value.label());
                     labelTokenNodeLabelMappings.put(labelId, key);
                 });
         }
@@ -112,7 +112,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             .mapToLong(dataRead::countsForNode)
             .sum();
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
-        long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(ANY_LABEL)
+        long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(PROJECT_ANY_LABEL)
             ? allNodesCount
             : Math.min(nodeCount, allNodesCount);
 
@@ -189,8 +189,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
     private static long maxRelCountForLabelAndType(Read dataRead, int labelId, int id) {
         return Math.max(
-                dataRead.countsForRelationshipWithoutTxState(labelId, id, StatementConstantsProxy.ANY_LABEL),
-                dataRead.countsForRelationshipWithoutTxState(StatementConstantsProxy.ANY_LABEL, id, labelId)
+                dataRead.countsForRelationshipWithoutTxState(labelId, id, ANY_LABEL),
+                dataRead.countsForRelationshipWithoutTxState(ANY_LABEL, id, labelId)
         );
     }
 
@@ -204,7 +204,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         LongSet keys() {
             LongSet keySet = new LongHashSet(mappings.keys().size());
             boolean allNodes = StreamSupport.stream(mappings.keys().spliterator(), false)
-                .allMatch(cursor -> cursor.value == ANY_LABEL);
+                .allMatch(cursor -> cursor.value == PROJECT_ANY_LABEL);
             if (!allNodes) {
                 StreamSupport.stream(mappings.keys().spliterator(), false)
                     .forEach(cursor -> keySet.add(cursor.value));
@@ -214,7 +214,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         Stream<Integer> keyStream() {
             return keys().isEmpty()
-                ? Stream.of(StatementConstantsProxy.ANY_LABEL)
+                ? Stream.of(ANY_LABEL)
                 : StreamSupport.stream(keys().spliterator(), false).map(cursor -> (int) cursor.value);
         }
 

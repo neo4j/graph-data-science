@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.compat;
 
 import org.neo4j.exceptions.UnsatisfiedDependencyException;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;

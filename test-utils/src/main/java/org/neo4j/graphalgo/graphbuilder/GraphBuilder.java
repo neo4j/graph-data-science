@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
-import org.neo4j.graphalgo.compat.Transactions;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -208,8 +207,8 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
 
     @Override
     public void close() {
-        Transactions.commit(tx);
-        Transactions.close(tx);
+        tx.commit();
+        tx.close();
     }
 
     private static final class RNGHolder {

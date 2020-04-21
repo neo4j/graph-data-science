@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.concurrency;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.graphalgo.compat.SettingsProxy;
+import org.neo4j.graphalgo.compat.Settings;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -45,7 +45,7 @@ class ConcurrencyControllerExtensionTest {
     void shouldSetMonitorTrue() {
         new TestDatabaseManagementServiceBuilder()
             .addExtension(new ConcurrencyControllerExtension())
-            .setConfig(SettingsProxy.unlimitedCores(), true)
+            .setConfig(Settings.unlimitedCores(), true)
             .impermanent()
             .build()
             .database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);

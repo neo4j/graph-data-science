@@ -25,7 +25,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.compat.MapConverter;
+import org.neo4j.cypher.internal.evaluator.EvaluationException;
+import org.neo4j.cypher.internal.evaluator.Evaluator;
+import org.neo4j.cypher.internal.evaluator.ExpressionEvaluator;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
@@ -48,6 +50,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 
 class GdsCypherTest {
+
+    private static final ExpressionEvaluator EVALUATOR = Evaluator.expressionEvaluator();
 
     private static final GraphCreateConfig GRAPH_CREATE_PROJECT_STAR =
         ImmutableGraphCreateFromStoreConfig.of(
@@ -127,7 +131,7 @@ class GdsCypherTest {
             "  }" +
             "}";
 
-        Map<String, Object> map = MapConverter.convert(configString);
+        Map<String, Object> map = convert(configString);
         GraphCreateConfig parsedConfig = ImmutableGraphCreateFromStoreConfig
             .builder()
             .username("")
@@ -767,6 +771,14 @@ class GdsCypherTest {
                 return "mutate";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
+        }
+    }
+
+    private static Map<String, Object> convert(String value) {
+        try {
+            return EVALUATOR.evaluate(value, Map.class);
+        } catch (EvaluationException e) {
+            throw new IllegalArgumentException(String.format("%s is not a valid map expression", value), e);
         }
     }
 }

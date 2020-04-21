@@ -41,7 +41,7 @@ import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.compat.SettingsProxy;
+import org.neo4j.graphalgo.compat.Settings;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -115,7 +115,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(SettingsProxy.unlimitedCores(), true);
+        builder.setConfig(Settings.unlimitedCores(), true);
     }
 
     void setupGraph(String cypher) {
