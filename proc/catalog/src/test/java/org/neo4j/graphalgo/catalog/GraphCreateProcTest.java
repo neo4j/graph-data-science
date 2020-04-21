@@ -57,6 +57,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
@@ -433,7 +434,6 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "properties = {0}")
     @MethodSource(value = "relationshipProperties")
-    @Disabled("Disable until we decide to bring back propper ")
     void relationshipQueryAndProperties(Object relationshipProperties, Map<String, Object> expectedProperties) {
         String name = "g";
 
@@ -973,7 +973,7 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query);
 
         Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
-        Graph expected = fromGdl(String.format("(a:Node)-[{w:%g}]->(b:Node)", expectedWeight));
+        Graph expected = fromGdl(String.format(Locale.US, "(a:Node)-[{w:%g}]->(b:Node)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
 
