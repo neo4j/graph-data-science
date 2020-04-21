@@ -50,7 +50,7 @@ import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.traverse.TraverseProc;
 import org.neo4j.graphalgo.triangle.AlphaTriangleCountStatsProc;
 import org.neo4j.graphalgo.triangle.AlphaTriangleCountStreamProc;
-import org.neo4j.graphalgo.triangle.TriangleCountWriteProc;
+import org.neo4j.graphalgo.triangle.AlphaTriangleCountWriteProc;
 import org.neo4j.graphalgo.triangle.TriangleProc;
 import org.neo4j.graphalgo.walking.RandomWalkProc;
 
@@ -173,7 +173,7 @@ class AlphaListProcTest extends BaseProcTest {
             TraverseProc.class,
             AlphaTriangleCountStatsProc.class,
             AlphaTriangleCountStreamProc.class,
-            TriangleCountWriteProc.class,
+            AlphaTriangleCountWriteProc.class,
             TriangleProc.class
         );
         registerFunctions(

@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.shortestpaths.ShortestPathsProc;
 import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphalgo.triangle.AlphaTriangleCountStreamProc;
-import org.neo4j.graphalgo.triangle.TriangleCountWriteProc;
+import org.neo4j.graphalgo.triangle.AlphaTriangleCountWriteProc;
 import org.neo4j.graphalgo.triangle.TriangleProc;
 import org.neo4j.graphdb.Result;
 
@@ -55,7 +55,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             ShortestPathsProc.class,
             SccProc.class,
             AlphaTriangleCountStreamProc.class,
-            TriangleCountWriteProc.class,
+            AlphaTriangleCountWriteProc.class,
             TriangleProc.class
         );
     }
