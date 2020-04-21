@@ -25,13 +25,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
-import org.neo4j.graphalgo.ImmutableResolvedPropertyMapping;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipProjectionMappings;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
-import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -39,8 +35,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -50,6 +44,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.internal.helpers.collection.MapUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -285,7 +280,6 @@ class LouvainTest extends AlgoTestBase {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000L)
             .maxRelCount(500_000L)
-            .relationshipProjectionMappings(RelationshipProjectionMappings.all())
             .build();
 
         LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
@@ -305,21 +299,15 @@ class LouvainTest extends AlgoTestBase {
     void testMemoryEstimationUsesOnlyOnePropertyForEachEntity() {
         ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions.builder()
             .nodeCount(100_000L)
-            .maxRelCount(500_000L)
-            .relationshipProjectionMappings(RelationshipProjectionMappings.all());
-
-
-        ResolvedPropertyMapping propertyMapping = ImmutableResolvedPropertyMapping.of("foo", "bar", 1.0, Aggregation.NONE, 1);
-        ResolvedPropertyMapping otherPropertyMapping = ImmutableResolvedPropertyMapping.of("bar", "foo", 2.0, Aggregation.NONE, 1);
-        ResolvedPropertyMappings oneProperty = ResolvedPropertyMappings.of(Arrays.asList(propertyMapping));
-        ResolvedPropertyMappings twoProperties = ResolvedPropertyMappings.of(Arrays.asList(propertyMapping, otherPropertyMapping));
+            .maxRelCount(500_000L);
 
         GraphDimensions dimensionsWithoutProperties = dimensionsBuilder.build();
         GraphDimensions dimensionsWithOneProperty = dimensionsBuilder
-            .relationshipProperties(oneProperty)
+            .putRelationshipPropertyToken("foo", 1)
             .build();
         GraphDimensions dimensionsWithTwoProperties = dimensionsBuilder
-            .relationshipProperties(twoProperties)
+            .putRelationshipPropertyToken("foo", 1)
+            .putRelationshipPropertyToken("bar", 1)
             .build();
 
         LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
@@ -334,7 +322,7 @@ class LouvainTest extends AlgoTestBase {
         MemoryTree memoryTreeOneProperty = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithOneProperty, 1);
         MemoryTree memoryTreeTwoProperties = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithTwoProperties, 1);
 
-        assertTrue(memoryTree.memoryUsage().max < memoryTreeOneProperty.memoryUsage().max);
+        assertTrue(memoryTree.memoryUsage().max == memoryTreeOneProperty.memoryUsage().max);
         assertEquals(memoryTreeOneProperty.memoryUsage(), memoryTreeTwoProperties.memoryUsage());
     }
 
@@ -384,12 +372,12 @@ class LouvainTest extends AlgoTestBase {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6414177, 13585984),
-            arguments(1, 10, 6414177, 20786344),
-            arguments(4, 1, 6417465, 19488304),
-            arguments(4, 10, 6417465, 26688664),
-            arguments(42, 1, 6459113, 95476720),
-            arguments(42, 10, 6459113, 102677080)
+            arguments(1, 1, 6414177, 23941624),
+            arguments(1, 10, 6414177, 31141984),
+            arguments(4, 1, 6417465, 29746000),
+            arguments(4, 10, 6417465, 36946360),
+            arguments(42, 1, 6459113, 105719488),
+            arguments(42, 10, 6459113, 112919848)
         );
     }
 

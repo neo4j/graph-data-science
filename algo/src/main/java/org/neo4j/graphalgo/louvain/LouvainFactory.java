@@ -20,9 +20,13 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.ResolvedPropertyMappings;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationFactory;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -34,8 +38,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
-
-import java.util.Collections;
 
 public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmFactory<Louvain, CONFIG> {
 
@@ -64,21 +66,27 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
             .rangePerGraphDimension("subGraph", (graphDimensions, concurrency) -> {
                 ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions.builder().from(graphDimensions);
 
-                graphDimensions
-                    .relationshipProperties()
-                    .stream()
-                    .findFirst()
-                    .map(prop -> dimensionsBuilder.relationshipProperties(ResolvedPropertyMappings.of(Collections.singletonList(prop))));
-
-                dimensionsBuilder.nodePropertyTokens(graphDimensions.nodePropertyTokens());
-
                 GraphDimensions sparseDimensions = dimensionsBuilder.build();
 
+                // Label Propagation creates a new graph every iteration, this graph has one relationship property
+                RelationshipProjections relationshipProjections = RelationshipProjections.builder()
+                    .putProjection(
+                        RelationshipType.of("AGGREGATE"),
+                        RelationshipProjection.builder()
+                            .type("AGGREGATE")
+                            .orientation(Orientation.UNDIRECTED)
+                            .aggregation(Aggregation.SUM)
+                            .addProperty("prop", "prop", 0.0)
+                            .build()
+                    )
+                    .build();
+
                 long maxGraphSize = NativeFactory
-                    .getMemoryEstimation(sparseDimensions)
+                    .getMemoryEstimation(sparseDimensions, relationshipProjections)
                     .estimate(sparseDimensions, concurrency)
                     .memoryUsage()
                     .max;
+
                 return MemoryRange.of(1L, maxGraphSize); // rough estimate of graph size
             })
             .rangePerNode("dendrograms", (nodeCount) -> MemoryRange.of(

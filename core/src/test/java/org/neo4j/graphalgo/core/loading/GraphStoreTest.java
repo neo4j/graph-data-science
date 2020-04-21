@@ -227,17 +227,14 @@ class GraphStoreTest extends BaseTest {
             .graphStore(NativeFactory.class);
 
         assertThat(graphStore.relationshipCount(), equalTo(4L));
-        // should be 7, change this when we have fixed the issue with
-        // relationshipTypes containing properties from other relationshipTypes
-        assertThat(graphStore.relationshipPropertyCount(), equalTo(8L));
+        assertThat(graphStore.relationshipPropertyCount(), equalTo(7L));
 
         DeletionResult deletionResult = graphStore.deleteRelationships(RelationshipType.of("LER"));
 
         assertEquals(new HashSet<>(singletonList(RelationshipType.of("REL"))), graphStore.relationshipTypes());
         assertFalse(graphStore.hasRelationshipType(RelationshipType.of("LER")));
         assertEquals(1, graphStore.relationshipCount());
-        // should expect 1 instead of two, but currently properties are global across relationship types
-        assertEquals(2, graphStore.relationshipPropertyCount());
+        assertEquals(1, graphStore.relationshipPropertyCount());
 
         assertEquals(3, deletionResult.deletedRelationships());
         assertThat(deletionResult.deletedProperties(), mapEquals(map("p", 3L, "q", 3L)));
@@ -331,18 +328,6 @@ class GraphStoreTest extends BaseTest {
                 singletonList(RelationshipType.of("T1")),
                 Optional.of("property1"),
                 "(a:A), (b:B), (a)-[T1 {property1: 42}]->(b)"
-            ),
-            /*
-              As our graph loader is not capable of loading different relationship properties for different types
-              it will still load property1 for T3.
-              It seems that the default values it uses is taken from one of the other property mappings
-              This test should be adapted once the loader is capable of loading the correct projections.
-             */
-            Arguments.of(
-                "includeRelationshipTypesThatDoNotHaveTheProperty",
-                Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2"), RelationshipType.of("T3")),
-                Optional.of("property1"),
-                "(a:A), (b:B), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b), (a)-[T3 {property1: 42.0}]->(b)"
             )
         );
     }

@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongObjectHashMap;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
@@ -58,7 +60,7 @@ class IdMapTest {
         assertEquals(MemoryRange.of(32L + 800_000_040L + 898_077_656L, 32L + 800_000_040L + 800_488_297_688L), memRec.memoryUsage());
 
 
-        LongObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMappings = new LongObjectHashMap<List<NodeLabel>>();
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMappings = new IntObjectHashMap<List<NodeLabel>>();
         labelTokenNodeLabelMappings.put(1, singletonList(NodeLabel.of("A")));
 
         dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestNeoId(100L)

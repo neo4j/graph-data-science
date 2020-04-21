@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Timeout;
 import org.neo4j.graphalgo.PrivateLookup;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Direction;
@@ -74,13 +75,13 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     void shouldLoadSparseNodes() {
         clearDb();
         buildGraph(PageUtil.pageSizeFor(Long.BYTES) << 1);
-        Graph sparseGraph = load(db, l -> l.addNodeLabel("Label2"));
+        GraphStore sparseGraph = load(db, l -> l.addNodeLabel("Label2"));
         runInTransaction(db, tx -> {
             tx.findNodes(Label.label("Label2"))
                 .stream().forEach(n -> {
-                long graphId = sparseGraph.toMappedNodeId(n.getId());
+                long graphId = sparseGraph.nodes().toMappedNodeId(n.getId());
                 assertNotEquals(-1, graphId, n + " not mapped");
-                long neoId = sparseGraph.toOriginalNodeId(graphId);
+                long neoId = sparseGraph.nodes().toOriginalNodeId(graphId);
                 assertEquals(n.getId(), neoId, n + " mapped wrongly");
             });
         });
@@ -178,17 +179,17 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     }
 
     private Graph loadEverything() {
-        return load(db, l -> l.loadAnyLabel().loadAnyRelationshipType());
+        return load(db, l -> l.loadAnyLabel().loadAnyRelationshipType()).getUnion();
     }
 
-    private Graph load(GraphDatabaseAPI db, Consumer<StoreLoaderBuilder> block) {
+    private GraphStore load(GraphDatabaseAPI db, Consumer<StoreLoaderBuilder> block) {
         final ExecutorService pool = Executors.newFixedThreadPool(3);
         StoreLoaderBuilder loader = new StoreLoaderBuilder()
             .api(db)
             .executorService(pool);
         block.accept(loader);
         try {
-            return loader.build().load(NativeFactory.class);
+            return loader.build().graphStore(NativeFactory.class);
         } catch (Exception e) {
             markFailure();
             throw e;
