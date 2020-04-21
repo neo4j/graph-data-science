@@ -74,7 +74,7 @@ abstract class TriangleBaseProcTest<CONFIG extends TriangleConfig> extends BaseP
             TriangleProc.class,
             AlphaTriangleCountStreamProc.class,
             TriangleCountWriteProc.class,
-            TriangleCountStatsProc.class
+            AlphaTriangleCountStatsProc.class
         );
         runQuery(dbCypher());
     }

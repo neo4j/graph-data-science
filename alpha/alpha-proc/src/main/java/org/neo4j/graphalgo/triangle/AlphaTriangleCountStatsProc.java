@@ -37,7 +37,8 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class TriangleCountStatsProc extends TriangleBaseProc<TriangleCountStreamConfig> {
+@Deprecated
+public class AlphaTriangleCountStatsProc extends TriangleBaseProc<TriangleCountStreamConfig> {
 
     @Procedure(value = "gds.alpha.triangleCount.stats", mode = WRITE)
     @Description(DESCRIPTION)
