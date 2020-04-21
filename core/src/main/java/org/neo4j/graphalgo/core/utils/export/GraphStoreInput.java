@@ -76,7 +76,6 @@ public final class GraphStoreInput implements Input {
 
     @Override
     public ReadableGroups groups() {
-        // TODO: @s1ck figure out what we need here
         return Groups.EMPTY;
     }
 
