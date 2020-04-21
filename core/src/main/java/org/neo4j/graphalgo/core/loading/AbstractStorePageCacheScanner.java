@@ -246,7 +246,8 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
     AbstractStorePageCacheScanner(
         int prefetchSize,
         GraphDatabaseService api,
-        Access<Record> access) {
+        Access<Record> access
+    ) {
 
         NeoStores neoStores = GraphDatabaseApiProxy.neoStores(api);
 
