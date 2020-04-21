@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.apache.commons.compress.utils.Lists;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
-import org.neo4j.graphalgo.ResolvedPropertyMappings;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphdb.Result;
@@ -125,12 +125,12 @@ abstract class CypherRecordLoader<R> {
 
     void validatePropertyColumns(
         Collection<String> propertyColumns,
-        ResolvedPropertyMappings resolvedPropertyMappings
+        PropertyMappings resolvedPropertyMappings
     ) {
         List<String> invalidNodeProperties = resolvedPropertyMappings
             .mappings()
             .stream()
-            .map(ResolvedPropertyMapping::neoPropertyKey)
+            .map(PropertyMapping::neoPropertyKey)
             .filter(k -> !propertyColumns.contains(k))
             .collect(Collectors.toList());
 
