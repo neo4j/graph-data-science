@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -55,7 +55,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     private final AllocationTracker tracker;
     private final LongAdder triangleCount;
     private final AtomicLong queue;
-    private PagedAtomicIntegerArray triangles;
+    private HugeAtomicLongArray triangles;
 
     public IntersectingTriangleCount(
         Graph graph,
@@ -68,7 +68,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         this.tracker = tracker;
         this.executorService = executorService;
         this.concurrency = concurrency;
-        triangles = PagedAtomicIntegerArray.newArray(graph.nodeCount(), tracker);
+        triangles = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
         triangleCount = new LongAdder();
         queue = new AtomicLong();
         this.progressLogger = progressLogger;
@@ -145,15 +145,15 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         public void accept(final long nodeA, final long nodeB, final long nodeC) {
             // only use this triangle where the id's are in order, not the other 5
             if (nodeA < nodeB) { //  && nodeB < nodeC
-                triangles.add((int) nodeA, 1);
-                triangles.add((int) nodeB, 1);
-                triangles.add((int) nodeC, 1);
+                triangles.update(nodeA, (previous) -> previous + 1);
+                triangles.update(nodeB, (previous) -> previous + 1);
+                triangles.update(nodeC, (previous) -> previous + 1);
                 triangleCount.increment();
             }
         }
     }
 
-    private double calculateCoefficient(int triangles, int degree) {
+    private double calculateCoefficient(long triangles, int degree) {
         if (triangles == 0) {
             return 0.0;
         }
@@ -164,7 +164,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     @ValueClass
     public interface TriangleCountResult {
         // value at index `i` is number of triangles for node with id `i`
-        PagedAtomicIntegerArray localTriangles();
+        HugeAtomicLongArray localTriangles();
 
         // value at index `i` is local clustering coefficient for node with id `i`
         HugeDoubleArray localClusteringCoefficients();
@@ -174,7 +174,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         double averageClusteringCoefficient();
 
         static TriangleCountResult of(
-            PagedAtomicIntegerArray triangles,
+            HugeAtomicLongArray triangles,
             HugeDoubleArray localClusteringCoefficients,
             long globalTriangles,
             double averageClusteringCoefficient

@@ -23,8 +23,8 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -115,8 +115,8 @@ final class TriangleCountCompanion {
         private EmptyResult() {}
 
         @Override
-        public PagedAtomicIntegerArray localTriangles() {
-            return PagedAtomicIntegerArray.newArray(0, AllocationTracker.EMPTY);
+        public HugeAtomicLongArray localTriangles() {
+            return HugeAtomicLongArray.newArray(0, AllocationTracker.EMPTY);
         }
 
         @Override

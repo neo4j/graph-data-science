@@ -132,8 +132,8 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         assertEquals(5, result.localClusteringCoefficients().size());
 
         for (int i = 0; i < result.localTriangles().size(); ++i) {
-            int localTriangleCount = result.localTriangles().get(i);
-            switch (localTriangleCount) {
+            long localTriangleCount = result.localTriangles().get(i);
+            switch ((int) localTriangleCount) {
                 case 1:
                     assertEquals(1.0, result.localClusteringCoefficients().get(i));
                     break;
