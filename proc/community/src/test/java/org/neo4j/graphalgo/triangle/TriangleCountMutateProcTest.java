@@ -105,6 +105,7 @@ class TriangleCountMutateProcTest
             .algo("triangleCount")
             .writeMode()
             .addParameter("writeProperty", mutateProperty())
+            .addParameter("clusteringCoefficientProperty", "clusteringCoefficient")
             .yields();
 
         runQuery(writeQuery);

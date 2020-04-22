@@ -31,7 +31,7 @@ import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TriangleDocTest extends BaseProcTest {
+class TriangleDocTest extends BaseProcTest {
 
     private static final String NL = System.lineSeparator();
     private static final String DB_CYPHER =
@@ -105,7 +105,8 @@ public class TriangleDocTest extends BaseProcTest {
                        "     }" +
                        "   }," +
                        "   sudo: true," +
-                       "   writeProperty: 'triangles'" +
+                       "   writeProperty: 'triangles'," +
+                       "   clusteringCoefficientProperty: 'clusteringCoefficient'" +
                        " })" +
                        " YIELD nodeCount, triangleCount, averageClusteringCoefficient";
 
