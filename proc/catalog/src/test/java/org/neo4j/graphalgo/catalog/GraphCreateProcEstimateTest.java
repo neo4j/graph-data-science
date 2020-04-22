@@ -143,7 +143,6 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
         );
     }
 
-    @Disabled
     @Test
     @Disabled("Disabled until we support relationshipProperties or it is removed")
     void computeMemoryEstimationForCypherProjectionWithProperties() {
