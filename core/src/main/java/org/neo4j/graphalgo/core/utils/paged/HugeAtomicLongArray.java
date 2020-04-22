@@ -282,8 +282,8 @@ public abstract class HugeAtomicLongArray {
             int numberOfPages = numberOfPages(size);
             int numberOfFullPages = numberOfPages - 1;
             long bytesPerPage = sizeOfLongArray(PAGE_SIZE);
-            int sizeOfLastPast = exclusiveIndexOfPage(size);
-            long bytesOfLastPage = sizeOfLongArray(sizeOfLastPast);
+            int sizeOfLastPage = exclusiveIndexOfPage(size);
+            long bytesOfLastPage = sizeOfLongArray(sizeOfLastPage);
             long memoryUsed = sizeOfObjectArray(numberOfPages);
             memoryUsed += (numberOfFullPages * bytesPerPage);
             memoryUsed += bytesOfLastPage;

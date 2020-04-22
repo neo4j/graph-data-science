@@ -47,6 +47,7 @@ import java.util.concurrent.atomic.LongAdder;
  * https://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf
  * http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult> {
 
     private Graph graph;
@@ -55,7 +56,12 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     private final AllocationTracker tracker;
     private final LongAdder triangleCount;
     private final AtomicLong queue;
+
+    // results
     private HugeAtomicLongArray triangles;
+    private HugeDoubleArray localCCs;
+    private long globalTriangles;
+    private double averageClusteringCoefficient;
 
     public IntersectingTriangleCount(
         Graph graph,
@@ -105,7 +111,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         ParallelUtil.run(tasks, executorService);
 
         // collect local clustering coefficients
-        HugeDoubleArray localCCs = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
+        localCCs = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         double localCCSum = 0.0;
         for (long i = 0; i < graph.nodeCount(); ++i) {
             double localCC = calculateCoefficient(triangles.get(i), graph.degree(i));
@@ -113,8 +119,8 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
             localCCSum += localCC;
         }
         // compute average clustering coefficient
-        double averageClusteringCoefficient = localCCSum / graph.nodeCount();
-        long globalTriangles = triangleCount.longValue();
+        averageClusteringCoefficient = localCCSum / graph.nodeCount();
+        globalTriangles = triangleCount.longValue();
 
         return TriangleCountResult.of(
             triangles,
