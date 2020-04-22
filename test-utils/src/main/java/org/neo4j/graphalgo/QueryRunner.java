@@ -125,7 +125,11 @@ public final class QueryRunner {
         Map<String, Object> params,
         Function<Result, T> resultFunction
     ) {
-        return applyInTransaction(db, tx -> resultFunction.apply(runQueryWithoutClosingTheResult(tx, query, params)));
+        return applyInTransaction(db, tx -> {
+            try (var result = runQueryWithoutClosingTheResult(tx, query, params)) {
+                return resultFunction.apply(result);
+            }
+        });
     }
 
     public static void runQueryWithResultConsumer(
@@ -134,7 +138,11 @@ public final class QueryRunner {
         Map<String, Object> params,
         Consumer<Result> resultConsumer
     ) {
-        runInTransaction(db, tx -> resultConsumer.accept(runQueryWithoutClosingTheResult(tx, query, params)));
+        runInTransaction(db, tx -> {
+            try (var result = runQueryWithoutClosingTheResult(tx, query, params)) {
+                resultConsumer.accept(result);
+            }
+        });
     }
 
     private static KernelTransaction.Revertable withUsername(Transaction tx, String username) {
