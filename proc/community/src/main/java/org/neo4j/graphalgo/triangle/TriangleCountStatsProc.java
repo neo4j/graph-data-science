@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsProc.StatsResult, TriangleCountStreamConfig> {
+public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsProc.StatsResult, TriangleCountStatsConfig> {
 
 
     @Procedure(value = "gds.triangleCount.stats", mode = READ)
@@ -61,13 +61,13 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
 
     @Override
     protected void validateConfigs(
-        GraphCreateConfig graphCreateConfig, TriangleCountStreamConfig config
+        GraphCreateConfig graphCreateConfig, TriangleCountStatsConfig config
     ) {
         TriangleCountCompanion.validateConfigs(graphCreateConfig, config);
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStreamConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsConfig> computeResult) {
         return TriangleCountCompanion.resultBuilder(
             new TriangleCountStatsBuilder(callContext, computeResult.tracker()),
             computeResult
@@ -75,13 +75,13 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected TriangleCountStreamConfig newConfig(
+    protected TriangleCountStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleCountStreamConfig.of(
+        return TriangleCountStatsConfig.of(
             username,
             graphName,
             maybeImplicitCreate,
@@ -90,8 +90,8 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountStreamConfig> algorithmFactory(
-        TriangleCountStreamConfig config
+    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountStatsConfig> algorithmFactory(
+        TriangleCountStatsConfig config
     ) {
         return new IntersectingTriangleCountFactory<>();
     }
@@ -103,6 +103,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
         public final long nodeCount;
         public final long triangleCount;
         public final double averageClusteringCoefficient;
+        // TODO: should we retain this?
         public final Map<String, Object> communityDistribution;
         public final Map<String, Object> configuration;
 

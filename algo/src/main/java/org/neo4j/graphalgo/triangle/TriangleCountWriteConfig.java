@@ -33,7 +33,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("TriangleCountWriteConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface TriangleCountWriteConfig extends TriangleConfig, WritePropertyConfig {
+public interface TriangleCountWriteConfig extends TriangleCountBaseConfig, WritePropertyConfig {
 
     @Value.Default
     default @Nullable String clusteringCoefficientProperty() {

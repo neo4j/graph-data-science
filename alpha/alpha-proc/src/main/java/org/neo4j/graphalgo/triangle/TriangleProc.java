@@ -41,12 +41,12 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> {
+public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig> {
 
     static final String DESCRIPTION = "Triangle Stream streams the nodeIds of each triangle in the graph.";
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleConfig config) {
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleCountBaseConfig config) {
         graphCreateConfig.relationshipProjections().projections().entrySet().stream()
             .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
             .forEach(entry -> {
@@ -64,7 +64,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<TriangleStream, Stream<TriangleStream.Result>, TriangleConfig> computationResult =
+        ComputationResult<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig> computationResult =
             compute(graphNameOrConfig, configuration, false, false);
 
         Graph graph = computationResult.graph();
@@ -78,21 +78,21 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     }
 
     @Override
-    protected TriangleConfig newConfig(
+    protected TriangleCountBaseConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TriangleConfig.of(username, graphName, maybeImplicitCreate, config);
+        return TriangleCountBaseConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<TriangleStream, TriangleConfig> algorithmFactory(TriangleConfig config) {
-       return new AlphaAlgorithmFactory<TriangleStream, TriangleConfig>() {
+    protected AlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory(TriangleCountBaseConfig config) {
+       return new AlphaAlgorithmFactory<TriangleStream, TriangleCountBaseConfig>() {
            @Override
            public TriangleStream buildAlphaAlgo(
-               Graph graph, TriangleConfig configuration, AllocationTracker tracker, Log log
+               Graph graph, TriangleCountBaseConfig configuration, AllocationTracker tracker, Log log
            ) {
                return new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
                    .withTerminationFlag(TerminationFlag.wrap(transaction));

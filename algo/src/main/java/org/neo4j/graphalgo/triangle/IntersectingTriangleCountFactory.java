@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.logging.Log;
 
-public class IntersectingTriangleCountFactory<CONFIG extends TriangleConfig> extends AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
+public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> extends AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
 
     @Override
     public IntersectingTriangleCount build(

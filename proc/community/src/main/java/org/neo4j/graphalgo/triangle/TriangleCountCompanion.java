@@ -47,7 +47,7 @@ final class TriangleCountCompanion {
         return (PropertyTranslator.OfLong<TriangleCountResult>) (data, nodeId) -> data.localTriangles().get(nodeId);
     }
 
-    static <CONFIG extends TriangleConfig> void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) {
+    static <CONFIG extends TriangleCountBaseConfig> void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) {
         graphCreateConfig.relationshipProjections().projections().entrySet().stream()
             .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
                              config.relationshipTypes().contains(entry.getKey().name()))
@@ -61,7 +61,7 @@ final class TriangleCountCompanion {
             });
     }
 
-    static <PROC_RESULT, CONFIG extends TriangleConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
+    static <PROC_RESULT, CONFIG extends TriangleCountBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         TriangleCountResultBuilder<PROC_RESULT> procResultBuilder,
         AlgoBaseProc.ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult
     ) {

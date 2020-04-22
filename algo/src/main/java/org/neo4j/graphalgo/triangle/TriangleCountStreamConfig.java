@@ -29,7 +29,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("TriangleCountStreamConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface TriangleCountStreamConfig extends TriangleConfig {
+public interface TriangleCountStreamConfig extends TriangleCountBaseConfig {
 
     static TriangleCountStreamConfig of(
         String username,

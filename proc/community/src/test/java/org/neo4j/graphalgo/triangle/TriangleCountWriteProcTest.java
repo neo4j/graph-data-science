@@ -57,7 +57,7 @@ class TriangleCountWriteProcTest
             assertNotEquals(-1, writeMillis);
             assertEquals(1, triangleCount);
             assertEquals(3, nodeCount);
-            assertEquals(3, nodePropertiesWritten);
+            assertEquals(3, nodePropertiesWritten); // TODO: also account for localClusteringCoefficients
         });
     }
 

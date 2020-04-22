@@ -30,7 +30,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCountStreamConfig> {
+class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCountStatsConfig> {
 
     @Test
     void testStats() {
@@ -54,13 +54,13 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
 
 
     @Override
-    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsConfig>> getProcedureClazz() {
         return TriangleCountStatsProc.class;
     }
 
     @Override
-    public TriangleCountStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TriangleCountStreamConfig.of(
+    public TriangleCountStatsConfig createConfig(CypherMapWrapper mapWrapper) {
+        return TriangleCountStatsConfig.of(
             getUsername(),
             Optional.empty(),
             Optional.empty(),

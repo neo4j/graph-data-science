@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.logging.Log;
 
-public abstract class TriangleBaseProc<CONFIG extends TriangleConfig>
+public abstract class TriangleBaseProc<CONFIG extends TriangleCountBaseConfig>
     extends AlgoBaseProc<IntersectingTriangleCount, TriangleCountResult, CONFIG> {
 
     static final String DESCRIPTION =

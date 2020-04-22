@@ -22,23 +22,22 @@ package org.neo4j.graphalgo.triangle;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
-@Configuration("TriangleCountMutateConfigImpl")
+@Configuration("TriangleCountStatsConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface TriangleCountMutateConfig extends TriangleCountBaseConfig, MutatePropertyConfig {
+public interface TriangleCountStatsConfig extends TriangleCountBaseConfig {
 
-    static TriangleCountMutateConfig of(
+    static TriangleCountStatsConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new TriangleCountMutateConfigImpl(
+        return new TriangleCountStatsConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
