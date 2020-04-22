@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -104,8 +104,8 @@ class GraphDropProcTest extends BaseProcTest {
                         "p99", 1L,
                         "p999", 1L
                     ),
-                    "creationTime", isA(LocalDateTime.class),
-                    "modificationTime", isA(LocalDateTime.class),
+                    "creationTime", isA(ZonedDateTime.class),
+                    "modificationTime", isA(ZonedDateTime.class),
                     "memoryUsage", isA(String.class),
                     "sizeInBytes", isA(Long.class)
                 )

@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -49,8 +49,8 @@ public class GraphInfo {
     public final long nodeCount;
     public final long relationshipCount;
     public final Map<String, Object> degreeDistribution;
-    public final LocalDateTime creationTime;
-    public final LocalDateTime modificationTime;
+    public final ZonedDateTime creationTime;
+    public final ZonedDateTime modificationTime;
 
     GraphInfo(GraphCreateConfig config, GraphStore graphStore, boolean computeHistogram) {
         this.graphName = config.graphName();

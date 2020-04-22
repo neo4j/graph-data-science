@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.Collections;
 import java.util.List;
@@ -109,8 +109,8 @@ class GraphListProcTest extends BaseProcTest {
                     "p99", 1L,
                     "p999", 1L
                 ),
-                "creationTime", isA(LocalDateTime.class),
-                "modificationTime", isA(LocalDateTime.class),
+                "creationTime", isA(ZonedDateTime.class),
+                "modificationTime", isA(ZonedDateTime.class),
                 "memoryUsage", instanceOf(String.class),
                 "sizeInBytes", instanceOf(Long.class)
             )
@@ -144,8 +144,8 @@ class GraphListProcTest extends BaseProcTest {
                     "p99", 1L,
                     "p999", 1L
                 ),
-                "creationTime", isA(LocalDateTime.class),
-                "modificationTime", isA(LocalDateTime.class),
+                "creationTime", isA(ZonedDateTime.class),
+                "modificationTime", isA(ZonedDateTime.class),
                 "memoryUsage", instanceOf(String.class),
                 "sizeInBytes", instanceOf(Long.class)
             )

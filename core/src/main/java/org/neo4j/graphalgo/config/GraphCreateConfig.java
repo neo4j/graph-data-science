@@ -26,8 +26,9 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphalgo.core.utils.TimeUtil;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
@@ -83,8 +84,8 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Value.Derived
     @Value.Auxiliary
-    default LocalDateTime creationTime() {
-        return LocalDateTime.now();
+    default ZonedDateTime creationTime() {
+        return TimeUtil.now();
     }
 
     @Value.Default
