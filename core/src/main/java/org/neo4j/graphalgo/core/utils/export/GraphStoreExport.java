@@ -25,7 +25,7 @@ import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.graphalgo.compat.Settings;
+import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;

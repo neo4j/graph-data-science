@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.compat.Settings;
+import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;

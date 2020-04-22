@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.concurrency;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.graphalgo.compat.Settings;
+import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

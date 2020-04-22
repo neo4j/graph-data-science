@@ -39,6 +39,8 @@ public final class Pools {
     public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createDefaultSingleThreadPool();
 
+    private static final String THREAD_NAME_PREFIX = "gds";
+
     private Pools() {
         throw new UnsupportedOperationException();
     }
@@ -58,7 +60,7 @@ public final class Pools {
             30L,
             TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(corePoolSize * 50),
-            NamedThreadFactory.daemon("algo"),
+            NamedThreadFactory.daemon(THREAD_NAME_PREFIX),
             new CallerBlocksPolicy()
         );
     }

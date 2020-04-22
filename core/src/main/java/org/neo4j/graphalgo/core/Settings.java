@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.core;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.SettingValueParsers;
 import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
+import org.neo4j.graphalgo.compat.ConcurrencyControllerSettings;
 import org.neo4j.graphdb.config.Setting;
 
 import java.nio.file.Path;

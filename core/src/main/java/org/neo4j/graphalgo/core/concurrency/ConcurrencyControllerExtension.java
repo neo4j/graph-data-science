@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.concurrency;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.graphalgo.compat.Settings;
+import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;

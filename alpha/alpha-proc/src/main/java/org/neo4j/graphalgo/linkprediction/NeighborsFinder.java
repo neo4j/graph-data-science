@@ -88,10 +88,9 @@ public class NeighborsFinder {
     }
 
     private Iterable<Relationship> loadRelationships(Node node, RelationshipType relationshipType, Direction direction) {
-        return relationshipType == null ? node.getRelationships(direction) : node.getRelationships(
-            direction,
-            relationshipType
-        );
+        return relationshipType == null
+            ? node.getRelationships(direction)
+            : node.getRelationships(direction, relationshipType);
     }
 
 }
