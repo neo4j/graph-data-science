@@ -39,12 +39,11 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     private static long calculateBatchSize(long taskVolume, int concurrency) {
         // target 100 logs per full run (every 1 percent)
-        long batchSize = taskVolume / 100;
+        var batchSize = taskVolume / 100;
         // split batchSize into thread-local chunks
         batchSize /= concurrency;
         // batchSize needs to be a power of two
-        long batchSize = BitUtil.nextHighestPowerOfTwo(batchSize);
-        return batchSize;
+        return BitUtil.nextHighestPowerOfTwo(batchSize);
     }
 
     public BatchingProgressLogger(Log log, long taskVolume, String task, int concurrency) {
