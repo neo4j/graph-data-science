@@ -41,7 +41,6 @@ class TriangleCountWriteProcTest
             .loadEverything(Orientation.UNDIRECTED)
             .algo("triangleCount")
             .writeMode()
-            .addParameter("sudo", true)
             .addParameter("writeProperty", "triangles")
             .yields();
 

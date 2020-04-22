@@ -83,7 +83,6 @@ class TriangleCountProcTest extends BaseProcTest {
             .algo("triangleCount")
             .streamMode()
             .addParameter("relationshipTypes", filter)
-            .addParameter("sudo", true)
             .yields();
 
         QueryExecutionException ex = assertThrows(
@@ -129,7 +128,6 @@ class TriangleCountProcTest extends BaseProcTest {
                 GdsCypher.call().explicitCreation("directed")
                     .algo("triangleCount")
                     .streamMode()
-                    .addParameter("sudo", true)
                     .yields(),
                 "Stream"
             ),
@@ -137,7 +135,6 @@ class TriangleCountProcTest extends BaseProcTest {
                 GdsCypher.call().explicitCreation("directed")
                     .algo("triangleCount")
                     .statsMode()
-                    .addParameter("sudo", true)
                     .yields(),
                 "Stats"
             ),
@@ -146,7 +143,6 @@ class TriangleCountProcTest extends BaseProcTest {
                     .algo("triangleCount")
                     .writeMode()
                     .addParameter("writeProperty", "testTriangleCount")
-                    .addParameter("sudo", true)
                     .yields(),
                 "Write"
             ),
@@ -155,7 +151,6 @@ class TriangleCountProcTest extends BaseProcTest {
                     .algo("triangleCount")
                     .mutateMode()
                     .addParameter("mutateProperty", "mutatedTriangleCount")
-                    .addParameter("sudo", true)
                     .yields(),
                 "Mutate"
             )

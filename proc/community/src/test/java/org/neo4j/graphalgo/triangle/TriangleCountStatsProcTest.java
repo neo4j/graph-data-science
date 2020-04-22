@@ -38,7 +38,6 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
             .loadEverything(Orientation.UNDIRECTED)
             .algo("triangleCount")
             .statsMode()
-            .addParameter("sudo", true)
             .yields();
 
         runQueryWithRowConsumer(query, row -> {

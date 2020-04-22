@@ -75,7 +75,6 @@ class TriangleCountMutateProcTest
             .algo("triangleCount")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
-            .addParameter("sudo", true)
             .yields(
                 "createMillis",
                 "computeMillis",
@@ -100,7 +99,6 @@ class TriangleCountMutateProcTest
             .algo("triangleCount")
             .writeMode()
             .addParameter("writeProperty", mutateProperty())
-            .addParameter("sudo", true)
             .yields();
 
         runQuery(writeQuery);

@@ -33,9 +33,7 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
     @Test
     void testStreaming() {
 
-        // TODO: Remove the sudo mode when memory estimation is implemented
-        // Do this in all places we use triangleCount procs
-        var query = "CALL gds.triangleCount.stream('g', {sudo: true})";
+        var query = "CALL gds.triangleCount.stream('g')";
 
         var rowCount = new AtomicInteger();
         runQueryWithRowConsumer(query, row -> {
