@@ -68,7 +68,7 @@ public class GraphCreateProc extends CatalogProc {
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphCreateConfig config = GraphCreateFromStoreConfig.of(
+        GraphCreateFromStoreConfig config = GraphCreateFromStoreConfig.of(
             getUsername(),
             graphName,
             nodeProjection,
@@ -176,19 +176,13 @@ public class GraphCreateProc extends CatalogProc {
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
             GraphStoreFactory graphStoreFactory = loader.build(getFactoryClazz(config));
-            GraphStoreFactory.ImportResult importResult = graphStoreFactory.build();
-
-            GraphStore graphStore =  importResult.graphStore();
-            GraphDimensions dimensions = importResult.dimensions();
-            GraphCreateConfig catalogConfig = config.isCypher()
-                ? ((GraphCreateFromCypherConfig) config).inferProjections(dimensions)
-                : config;
+            GraphStore graphStore =  graphStoreFactory.build().graphStore();
 
             builder
                 .withNodeCount(graphStore.nodeCount())
                 .withRelationshipCount(graphStore.relationshipCount());
 
-            GraphStoreCatalog.set(catalogConfig, graphStore);
+            GraphStoreCatalog.set(config, graphStore);
         }
 
         return builder.build();
