@@ -20,8 +20,6 @@
 
 package org.neo4j.graphalgo.triangle;
 
-import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -35,10 +33,8 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface TriangleCountWriteConfig extends TriangleCountBaseConfig, WritePropertyConfig {
 
-    @Value.Default
-    default @Nullable String clusteringCoefficientProperty() {
-        return null;
-    }
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    String clusteringCoefficientProperty();
 
     static TriangleCountWriteConfig of(
         String username,

@@ -24,12 +24,14 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TriangleCountWriteProcTest
     extends TriangleCountBaseProcTest<TriangleCountWriteConfig>
@@ -42,6 +44,7 @@ class TriangleCountWriteProcTest
             .algo("triangleCount")
             .writeMode()
             .addParameter("writeProperty", "triangles")
+            .addParameter("clusteringCoefficientProperty", "clusteringCoefficient")
             .yields();
 
         // TODO: Add testing for communityDistribution
@@ -57,8 +60,38 @@ class TriangleCountWriteProcTest
             assertNotEquals(-1, writeMillis);
             assertEquals(1, triangleCount);
             assertEquals(3, nodeCount);
-            assertEquals(3, nodePropertiesWritten); // TODO: also account for localClusteringCoefficients
+            assertEquals(6, nodePropertiesWritten);
         });
+
+        // TODO: validate the written properties
+    }
+
+    @Test
+    void testMissingClusteringCoefficientPropertyFails() {
+        CypherMapWrapper mapWrapper =
+            createMinimalConfig(CypherMapWrapper.empty())
+                .withoutEntry("clusteringCoefficientProperty");
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> createConfig(mapWrapper)
+        );
+        assertEquals(
+            "No value specified for the mandatory configuration parameter `clusteringCoefficientProperty`",
+            exception.getMessage()
+        );
+    }
+
+    @Test
+    void testEmptyClusteringCoefficientPropertyValues() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("clusteringCoefficientProperty", null));
+        assertThrows(IllegalArgumentException.class, () -> createConfig(mapWrapper));
+    }
+
+    @Test
+    void testTrimmedToNullClusteringCoefficientProperty() {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("clusteringCoefficientProperty", "  "));
+        assertThrows(IllegalArgumentException.class, () -> createConfig(mapWrapper));
     }
 
     @Override
@@ -78,8 +111,11 @@ class TriangleCountWriteProcTest
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        if (!mapWrapper.containsKey("clusteringCoefficientProperty")) {
+            mapWrapper = mapWrapper.withString("clusteringCoefficientProperty", "clusteringCoefficientProperty");
+        }
         if (!mapWrapper.containsKey("writeProperty")) {
-            return mapWrapper.withString("writeProperty", "writeProperty");
+            mapWrapper = mapWrapper.withString("writeProperty", "writeProperty");
         }
         return mapWrapper;
     }

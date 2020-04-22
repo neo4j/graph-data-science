@@ -25,6 +25,10 @@ import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -33,6 +37,8 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -100,6 +106,25 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
         return TriangleCountCompanion.resultBuilder(
             new TriangleCountWriteBuilder(callContext, computeResult.tracker()),
             computeResult
+        );
+    }
+
+    @Override
+    protected Collection<NodePropertyExporter.NodeProperty<?>> nodePropertiesToWrite(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig> computationResult) {
+        TriangleCountWriteConfig config = computationResult.config();
+        IntersectingTriangleCount.TriangleCountResult result = computationResult.result();
+
+        return List.of(
+            ImmutableNodeProperty.of(
+                config.writeProperty(),
+                result.localTriangles(),
+                HugeAtomicLongArray.Translator.INSTANCE
+            ),
+            ImmutableNodeProperty.of(
+                config.clusteringCoefficientProperty(),
+                result.localClusteringCoefficients(),
+                HugeDoubleArray.Translator.INSTANCE
+            )
         );
     }
 
