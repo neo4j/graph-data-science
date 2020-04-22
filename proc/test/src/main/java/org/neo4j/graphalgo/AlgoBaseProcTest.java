@@ -82,7 +82,9 @@ import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
  * the database returned by {@link AlgoBaseProcTest#graphDb} and
  * clears the data after each test.
  */
-public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> {
+public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT>
+    extends GraphCreateConfigSupport
+{
 
     String TEST_USERNAME = AuthSubject.ANONYMOUS.username();
 
@@ -211,8 +213,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     default void testRunOnLoadedGraph(Class<? extends GraphStoreFactory> graphStoreFactory) {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = (graphStoreFactory.isAssignableFrom(NativeFactory.class))
-            ? GraphCreateFromStoreConfig.withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections())
-            : GraphCreateFromCypherConfig.withNameAndRelationshipQuery("", loadedGraphName, relationshipQuery());
+            ? withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections())
+            : withNameAndRelationshipQuery("", loadedGraphName, relationshipQuery());
 
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore(graphStoreFactory);
@@ -276,8 +278,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     default void testRunMultipleTimesOnLoadedGraph(Class<? extends GraphStoreFactory> graphStoreFactory) {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = (graphStoreFactory.isAssignableFrom(NativeFactory.class))
-            ? GraphCreateFromStoreConfig.emptyWithName(TEST_USERNAME, loadedGraphName)
-            : GraphCreateFromCypherConfig.emptyWithName(TEST_USERNAME, loadedGraphName);
+            ? emptyWithNameNative(TEST_USERNAME, loadedGraphName)
+            : emptyWithNameCypher(TEST_USERNAME, loadedGraphName);
 
         applyOnProcedure((proc) -> {
             GraphStoreCatalog.set(

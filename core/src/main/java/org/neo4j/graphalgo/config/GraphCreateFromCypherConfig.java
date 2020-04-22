@@ -21,7 +21,6 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -175,28 +174,6 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
             graphName,
             userName,
             config
-        );
-    }
-
-    @TestOnly
-    static GraphCreateFromCypherConfig emptyWithName(String userName, String graphName) {
-        return GraphCreateFromCypherConfig.of(
-            userName,
-            graphName,
-            ALL_NODES_QUERY,
-            ALL_RELATIONSHIPS_QUERY,
-            CypherMapWrapper.empty()
-        );
-    }
-
-    @TestOnly
-    static GraphCreateFromCypherConfig withNameAndRelationshipQuery(String userName, String graphName, String relationshipQuery) {
-        return GraphCreateFromCypherConfig.of(
-            userName,
-            graphName,
-            ALL_NODES_QUERY,
-            relationshipQuery,
-            CypherMapWrapper.empty()
         );
     }
 

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -102,7 +101,7 @@ public interface SeedConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
     @Test
     default void shouldFailWithInvalidSeedProperty() {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
+        GraphCreateConfig graphCreateConfig = emptyWithNameNative("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore(NativeFactory.class);

@@ -137,9 +137,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
             long node;
             while ((node = queue.getAndIncrement()) < graph.nodeCount() && running()) {
                 intersect.intersectAll(node, this);
-                // FIXME: This needs to be fixed when all the Triangle Count `alpha` procs are removed
-                // NB: Logging without parameters is fine!
-                // getProgressLogger().logProgress();
+                getProgressLogger().logProgress();
             }
         }
 

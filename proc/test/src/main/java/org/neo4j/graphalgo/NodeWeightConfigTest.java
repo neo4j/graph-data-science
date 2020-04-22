@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -123,7 +122,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
     @Test
     default void shouldFailWithInvalidNodeWeightProperty() {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
+        GraphCreateConfig graphCreateConfig = emptyWithNameNative("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig)

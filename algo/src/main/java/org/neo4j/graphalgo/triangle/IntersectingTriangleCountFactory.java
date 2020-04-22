@@ -38,7 +38,7 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleConfig> ext
 
         ProgressLogger progressLogger = new BatchingProgressLogger(
             log,
-            graph.relationshipCount(),
+            graph.nodeCount(),
             getClass().getSimpleName()
         );
 

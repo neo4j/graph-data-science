@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -67,7 +66,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
     default void testGraphMutation() {
         String graphName = mutateGraphName().orElseGet(() -> {
             String loadedGraphName = "loadGraph";
-            GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.withNameAndRelationshipProjections(
+            GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
                 TEST_USERNAME,
                 loadedGraphName,
                 relationshipProjections()
@@ -109,7 +108,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             .graphStore(NativeFactory.class);
 
         String graphName = "myGraph";
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.withNameAndRelationshipProjections(
+        GraphStoreCatalog.set(withNameAndRelationshipProjections(
             "",
             graphName,
             relationshipProjections()
@@ -162,7 +161,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             .graphStore(NativeFactory.class);
 
         String graphName = "myGraph";
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("", graphName), graphStore);
+        GraphStoreCatalog.set(emptyWithNameNative("", graphName), graphStore);
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)
@@ -204,7 +203,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
     default void testMutateFailsOnExistingToken() {
         String graphName = mutateGraphName().orElseGet(() -> {
             String loadedGraphName = "loadGraph";
-            GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.withNameAndRelationshipProjections(
+            GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
                 TEST_USERNAME,
                 loadedGraphName,
                 relationshipProjections()

@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -52,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
@@ -166,7 +164,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
     @Test
     default void shouldFailWithInvalidRelationshipWeightProperty() {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName);
+        GraphCreateConfig graphCreateConfig = emptyWithNameNative("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig)

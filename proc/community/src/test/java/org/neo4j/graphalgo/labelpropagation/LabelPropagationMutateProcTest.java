@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -87,7 +86,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             .build()
             .graphStore(NativeFactory.class);
 
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName(getUsername(), testGraphName), initialGraphStore);
+        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
 
         var mutateQuery = GdsCypher
             .call()
