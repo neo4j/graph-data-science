@@ -73,13 +73,15 @@ class CypherFactoryTest extends BaseTest {
         runQuery(query);
 
         String nodes = "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0.0) AS partition , COALESCE(n.foo, 5.0) AS foo";
-        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
+        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' " +
+                      "WITH id(n) AS source, id(m) AS target, collect(r.prop) as weight " +
+                      "WITH DISTINCT source, target, head(weight) as weight " +
+                      "RETURN source, target, weight";
 
         Graph graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
                 .nodeQuery(nodes)
                 .relationshipQuery(rels)
                 .addRelationshipProperty(PropertyMapping.of("weight", 0))
-                .globalAggregation(Aggregation.SINGLE)
                 .build()
                 .load(CypherFactory.class));
 
@@ -119,18 +121,18 @@ class CypherFactoryTest extends BaseTest {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
 
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE);
+        loadAndTestGraph(nodeStatement, relStatement);
     }
 
     @Test
     void testLoadRelationshipsAccumulateWeightCypher() {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement =
-            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
-            "UNION ALL " +
-            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
+            "MATCH (n)-[r:REL]->(m)" +
+            "MATCH (n)-[r2:REL]->(m) " +
+            "RETURN id(n) AS source, id(m) AS target, sum(r.prop/2.0) + sum(r2.prop/2.0) AS weight ";
 
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SUM);
+        loadAndTestGraph(nodeStatement, relStatement);
     }
 
     @Test
@@ -138,18 +140,18 @@ class CypherFactoryTest extends BaseTest {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
 
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.NONE);
+        loadAndTestGraph(nodeStatement, relStatement);
     }
 
     @Test
     void accumulateWeightCypher() {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement =
-            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
-            "UNION ALL " +
-            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
+            "MATCH (n)-[r:REL]->(m)" +
+            "MATCH (n)-[r2:REL]->(m) " +
+            "RETURN id(n) AS source, id(m) AS target, sum(r.prop/2.0) + sum(r2.prop/2.0) AS weight ";
 
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SUM);
+        loadAndTestGraph(nodeStatement, relStatement);
     }
 
     @Test
@@ -157,10 +159,10 @@ class CypherFactoryTest extends BaseTest {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement =
             "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight " +
-            "UNION ALL " +
+            "UNION " +
             "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight ";
 
-        loadAndTestGraph(nodeStatement, relStatement, Aggregation.SINGLE);
+        loadAndTestGraph(nodeStatement, relStatement);
     }
 
     @Test
@@ -325,14 +327,12 @@ class CypherFactoryTest extends BaseTest {
 
     private void loadAndTestGraph(
         String nodeStatement,
-        String relStatement,
-        Aggregation aggregation
+        String relStatement
     ) {
         CypherLoaderBuilder builder = new CypherLoaderBuilder()
             .api(db)
             .nodeQuery(nodeStatement)
             .relationshipQuery(relStatement)
-            .globalAggregation(aggregation)
             .addRelationshipProperty(PropertyMapping.of("weight", 0D));
 
         Graph graph = applyInTransaction(db, tx -> builder.build().load(CypherFactory.class));

@@ -121,7 +121,6 @@ final class GraphLoaderBuilders {
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
-        Optional<Aggregation> globalAggregation,
         Optional<Boolean> validateRelationships,
         Optional<Map<String, Object>> parameters
     ) {
@@ -134,7 +133,6 @@ final class GraphLoaderBuilders {
             anyLabel,
             anyRelationshipType,
             concurrency,
-            globalAggregation,
             validateRelationships,
             parameters
         );

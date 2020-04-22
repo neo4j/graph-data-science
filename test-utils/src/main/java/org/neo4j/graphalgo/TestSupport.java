@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
@@ -204,5 +205,30 @@ public final class TestSupport {
         );
 
         assertEquals(Status.Transaction.Terminated, exception.status());
+    }
+
+    public static String getCypherAggregation(String aggregation, String property) {
+        String cypherAggregation;
+        switch (Aggregation.lookup(aggregation)) {
+            case SINGLE:
+                cypherAggregation = "head(collect(%s))";
+                break;
+            case SUM:
+                cypherAggregation = "sum(%s)";
+                break;
+            case MIN:
+                cypherAggregation = "min(%s)";
+                break;
+            case MAX:
+                cypherAggregation = "max(%s)";
+                break;
+            case COUNT:
+                cypherAggregation = "count(%s)";
+                break;
+            default:
+                cypherAggregation = "%s";
+                break;
+        }
+        return String.format(cypherAggregation, property);
     }
 }

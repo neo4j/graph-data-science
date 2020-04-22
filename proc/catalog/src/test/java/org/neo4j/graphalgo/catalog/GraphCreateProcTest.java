@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.catalog;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -84,6 +83,7 @@ import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.TestSupport.getCypherAggregation;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.compat.MapUtil.map;

@@ -39,7 +39,9 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.TestSupport.getCypherAggregation;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
+import static org.neo4j.graphalgo.core.Aggregation.NONE;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 public final class TestGraphLoader {
@@ -153,7 +155,6 @@ public final class TestGraphLoader {
             relPropertiesString
         ));
 
-        cypherLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));
         cypherLoaderBuilder.validateRelationships(false);
         if (addRelationshipPropertiesToLoader) cypherLoaderBuilder.relationshipProperties(relProperties);
 
@@ -195,7 +196,7 @@ public final class TestGraphLoader {
                 mapping.propertyKey(),
                 addSuffix(mapping.neoPropertyKey(), mutableInt.getAndIncrement()),
                 mapping.defaultValue(),
-                mapping.aggregation()
+                mapping.aggregation() == DEFAULT ? maybeAggregation.orElse(NONE) : mapping.aggregation()
             ))
             .toArray(PropertyMapping[]::new)
         );
@@ -223,11 +224,17 @@ public final class TestGraphLoader {
             .stream()
             .map(mapping -> String.format(
                 Locale.US,
-                "COALESCE(%s.%s, %f) AS %s",
-                entityVar,
-                removeSuffix(mapping.neoPropertyKey()),
-                mapping.defaultValue(),
-                mapping.neoPropertyKey()
+                "%s AS %s",
+                getCypherAggregation(
+                    mapping.aggregation().name(),
+                    String.format(
+                        "COALESCE(%s.%s, %f)",
+                        entityVar,
+                        removeSuffix(mapping.neoPropertyKey()),
+                        mapping.defaultValue()
+                    )
+                ),
+                mapping.propertyKey()
             ))
             .collect(Collectors.joining(", ", ", ", ""))
             : "";

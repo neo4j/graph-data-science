@@ -139,7 +139,6 @@ final class GraphCreateConfigBuilders {
         @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
-        Optional<Aggregation> globalAggregation,
         Optional<Boolean> validateRelationships,
         Optional<Map<String, Object>> parameters
     ) {
@@ -151,26 +150,8 @@ final class GraphCreateConfigBuilders {
             throw new IllegalArgumentException("Missing relationshipQuery or loadAnyRelationshipType().");
         }
 
-        // TODO: This is a temporary hack to allow setting a global aggregation for Cypher
-        //       loading in tests. Remove this as soon as projections and queries can be specified in conjunction.
-        RelationshipProjections relationshipProjections;
-        PropertyMappings relationshipPropertyMappings;
-        if (globalAggregation.isPresent()) {
-            Aggregation aggregation = globalAggregation.get();
-            relationshipProjections = RelationshipProjections.builder()
-                .putProjection(
-                    ALL_RELATIONSHIPS,
-                    RelationshipProjection.of("*", Orientation.NATURAL, aggregation)
-                )
-                .build();
-            relationshipPropertyMappings = PropertyMappings.builder()
-                .addAllMappings(relationshipProperties)
-                .withDefaultAggregation(aggregation)
-                .build();
-        } else {
-            relationshipProjections = RelationshipProjections.empty();
-            relationshipPropertyMappings = PropertyMappings.of(relationshipProperties);
-        }
+        RelationshipProjections relationshipProjections = RelationshipProjections.empty();
+        PropertyMappings relationshipPropertyMappings = PropertyMappings.of(relationshipProperties);
 
         return ImmutableGraphCreateFromCypherConfig.builder()
             .username(userName.orElse(""))

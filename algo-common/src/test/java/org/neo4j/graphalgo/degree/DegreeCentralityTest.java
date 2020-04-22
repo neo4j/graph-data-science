@@ -241,8 +241,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
-                .relationshipQuery("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                .globalAggregation(Aggregation.SINGLE)
+                .relationshipQuery("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN DISTINCT id(n) AS source, id(m) AS target")
                 .build()
                 .graph(factoryType));
         } else {

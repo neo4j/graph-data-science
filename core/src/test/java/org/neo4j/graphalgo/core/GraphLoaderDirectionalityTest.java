@@ -57,6 +57,13 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         "MATCH (n)<--(m) " +
         "RETURN id(n) AS source, id(m) AS target";
 
+    private static final String RELATIONSHIP_QUERY_UNDIRECTED_SINGLE =
+        "MATCH (n)-->(m)" +
+        "RETURN id(n) AS source, id(m) AS target " +
+        "UNION " +
+        "MATCH (n)<--(m) " +
+        "RETURN id(n) AS source, id(m) AS target";
+
     @AllGraphTypesTest
     void loadUndirected(Class<? extends GraphStoreFactory> graphImpl) {
         Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_BOTH, Orientation.UNDIRECTED);
@@ -184,7 +191,7 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         Graph graph = loadGraph(
             cypher,
             graphImpl,
-            RELATIONSHIP_QUERY_UNDIRECTED,
+            RELATIONSHIP_QUERY_UNDIRECTED_SINGLE,
             Orientation.UNDIRECTED,
             Aggregation.SINGLE
         );
@@ -198,7 +205,7 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         Graph graph = loadGraph(
             cypher,
             graphImpl,
-            RELATIONSHIP_QUERY_UNDIRECTED,
+            RELATIONSHIP_QUERY_UNDIRECTED_SINGLE,
             Orientation.UNDIRECTED,
             Aggregation.SINGLE
         );
@@ -222,8 +229,9 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         Class<? extends GraphStoreFactory> graphImpl,
         Aggregation aggregation
     ) {
+        String relQuery = aggregation.equals(Aggregation.SINGLE) ? RELATIONSHIP_QUERY_UNDIRECTED_SINGLE : RELATIONSHIP_QUERY_UNDIRECTED;
         return loadGraph(DB_CYPHER, graphImpl,
-            GraphLoaderDirectionalityTest.RELATIONSHIP_QUERY_UNDIRECTED, Orientation.UNDIRECTED, aggregation
+            relQuery, Orientation.UNDIRECTED, aggregation
         );
     }
 
@@ -239,11 +247,11 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         GraphLoader graphLoader;
 
         if (graphImpl == CypherFactory.class) {
+
             graphLoader = new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(GraphCreateFromCypherConfig.ALL_NODES_QUERY)
                 .relationshipQuery(relationshipQuery)
-                .globalAggregation(aggregation)
                 .build();
         } else {
             graphLoader = new StoreLoaderBuilder()
