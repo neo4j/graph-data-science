@@ -66,7 +66,7 @@ final class TriangleCountCompanion {
         AlgoBaseProc.ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult
     ) {
         var result = Optional.ofNullable(computeResult.result())
-            .orElse(NullResult.nullResult);
+            .orElse(EmptyResult.EMPTY_RESULT);
 
         return procResultBuilder
             .withAverageClusteringCoefficient(result.averageClusteringCoefficient())
@@ -108,11 +108,11 @@ final class TriangleCountCompanion {
 
     private TriangleCountCompanion() {}
 
-    private static final class NullResult implements IntersectingTriangleCount.TriangleCountResult {
+    private static final class EmptyResult implements IntersectingTriangleCount.TriangleCountResult {
 
-        static final NullResult nullResult = new NullResult();
+        static final EmptyResult EMPTY_RESULT = new EmptyResult();
 
-        private NullResult() {}
+        private EmptyResult() {}
 
         @Override
         public PagedAtomicIntegerArray localTriangles() {
