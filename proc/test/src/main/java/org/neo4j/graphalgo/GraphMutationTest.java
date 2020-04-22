@@ -67,9 +67,10 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
     default void testGraphMutation() {
         String graphName = mutateGraphName().orElseGet(() -> {
             String loadedGraphName = "loadGraph";
-            GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName(
+            GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.withNameAndRelationshipProjections(
                 TEST_USERNAME,
-                loadedGraphName
+                loadedGraphName,
+                relationshipProjections()
             );
             GraphStoreCatalog.set(
                 graphCreateConfig,
@@ -108,7 +109,11 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             .graphStore(NativeFactory.class);
 
         String graphName = "myGraph";
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("", graphName), graphStore);
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.withNameAndRelationshipProjections(
+            "",
+            graphName,
+            relationshipProjections()
+        ), graphStore);
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)
@@ -191,16 +196,18 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             graphDb(),
             checkNeo4jGraphQuery,
             Map.of(),
-            ((transaction, resultRow) -> assertNull(resultRow.get("property"))));
+            ((transaction, resultRow) -> assertNull(resultRow.get("property")))
+        );
     }
 
     @Test
     default void testMutateFailsOnExistingToken() {
         String graphName = mutateGraphName().orElseGet(() -> {
             String loadedGraphName = "loadGraph";
-            GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.emptyWithName(
+            GraphCreateConfig graphCreateConfig = GraphCreateFromStoreConfig.withNameAndRelationshipProjections(
                 TEST_USERNAME,
-                loadedGraphName
+                loadedGraphName,
+                relationshipProjections()
             );
             GraphStoreCatalog.set(
                 graphCreateConfig,

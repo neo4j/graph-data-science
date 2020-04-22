@@ -211,8 +211,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     default void testRunOnLoadedGraph(Class<? extends GraphStoreFactory> graphStoreFactory) {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = (graphStoreFactory.isAssignableFrom(NativeFactory.class))
-            ? GraphCreateFromStoreConfig.emptyWithName("", loadedGraphName)
-            : GraphCreateFromCypherConfig.emptyWithName("", loadedGraphName);
+            ? GraphCreateFromStoreConfig.withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections())
+            : GraphCreateFromCypherConfig.withNameAndRelationshipQuery("", loadedGraphName, relationshipQuery());
 
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore(graphStoreFactory);
@@ -240,7 +240,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     default void testRunOnImplicitlyLoadedGraph() {
         Map<String, Object> cypherConfig = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             NODE_QUERY_KEY, ALL_NODES_QUERY,
-            RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY
+            RELATIONSHIP_QUERY_KEY, relationshipQuery()
         ))).toMap();
 
         Map<String, Object> storeConfig = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
@@ -266,6 +266,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     default RelationshipProjections relationshipProjections() {
         return RelationshipProjections.fromString("*");
+    }
+
+    default String relationshipQuery() {
+        return ALL_RELATIONSHIPS_QUERY;
     }
 
     @AllGraphTypesTest

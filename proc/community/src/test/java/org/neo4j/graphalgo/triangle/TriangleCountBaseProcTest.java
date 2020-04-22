@@ -30,11 +30,13 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 abstract class TriangleCountBaseProcTest<CONFIG extends TriangleConfig> extends BaseProcTest
@@ -53,6 +55,7 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleConfig> extends 
     void setup() throws Exception {
         registerProcedures(
             GraphCreateProc.class,
+            GraphWriteNodePropertiesProc.class,
             TriangleCountStreamProc.class,
             TriangleCountStatsProc.class,
             TriangleCountWriteProc.class,
@@ -106,5 +109,10 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleConfig> extends 
     @Override
     public RelationshipProjections expectedRelationshipProjections() {
         return relationshipProjections();
+    }
+
+    @Override
+    public String relationshipQuery() {
+        return ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
     }
 }

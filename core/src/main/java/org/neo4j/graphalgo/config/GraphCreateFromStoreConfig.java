@@ -112,6 +112,15 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         return ImmutableGraphCreateFromStoreConfig.of(userName, graphName, NodeProjections.empty(), RelationshipProjections.empty());
     }
 
+    static GraphCreateFromStoreConfig withNameAndRelationshipProjections(String userName, String graphName, RelationshipProjections rels) {
+        return ImmutableGraphCreateFromStoreConfig.of(
+            userName,
+            graphName,
+            NodeProjections.empty(),
+            rels
+        );
+    }
+
     static GraphCreateFromStoreConfig of(
         String userName,
         String graphName,

@@ -61,6 +61,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     String RELATIONSHIP_QUERY_KEY = "relationshipQuery";
     String ALL_NODES_QUERY = "MATCH (n) RETURN id(n) AS id";
     String ALL_RELATIONSHIPS_QUERY = "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target";
+    String ALL_RELATIONSHIPS_UNDIRECTED_QUERY = "MATCH (a)--(b) RETURN id(a) AS source, id(b) AS target";
 
     @Override
     @Configuration.Ignore
@@ -184,6 +185,17 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
             graphName,
             ALL_NODES_QUERY,
             ALL_RELATIONSHIPS_QUERY,
+            CypherMapWrapper.empty()
+        );
+    }
+
+    @TestOnly
+    static GraphCreateFromCypherConfig withNameAndRelationshipQuery(String userName, String graphName, String relationshipQuery) {
+        return GraphCreateFromCypherConfig.of(
+            userName,
+            graphName,
+            ALL_NODES_QUERY,
+            relationshipQuery,
             CypherMapWrapper.empty()
         );
     }
