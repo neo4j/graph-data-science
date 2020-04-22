@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -30,6 +32,7 @@ import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResul
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 
@@ -62,7 +65,8 @@ final class TriangleCountCompanion {
         TriangleCountResultBuilder<PROC_RESULT> procResultBuilder,
         AlgoBaseProc.ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult
     ) {
-        var result = computeResult.result();
+        var result = Optional.ofNullable(computeResult.result())
+            .orElse(NullResult.nullResult);
 
         return procResultBuilder
             .withAverageClusteringCoefficient(result.averageClusteringCoefficient())
@@ -103,4 +107,31 @@ final class TriangleCountCompanion {
     }
 
     private TriangleCountCompanion() {}
+
+    private static final class NullResult implements IntersectingTriangleCount.TriangleCountResult {
+
+        static final NullResult nullResult = new NullResult();
+
+        private NullResult() {}
+
+        @Override
+        public PagedAtomicIntegerArray localTriangles() {
+            return PagedAtomicIntegerArray.newArray(0, AllocationTracker.EMPTY);
+        }
+
+        @Override
+        public HugeDoubleArray localClusteringCoefficients() {
+            return HugeDoubleArray.newArray(0, AllocationTracker.EMPTY);
+        }
+
+        @Override
+        public long globalTriangles() {
+            return 0;
+        }
+
+        @Override
+        public double averageClusteringCoefficient() {
+            return 0;
+        }
+    }
 }
