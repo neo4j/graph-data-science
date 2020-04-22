@@ -65,14 +65,14 @@ final class SingleTypeRelationshipImporter {
         Builder(
             RelationshipType relationshipType,
             RelationshipProjection projection,
-            int typeId,
+            int typeToken,
             RelationshipImporter importer,
             LongAdder relationshipCounter,
             boolean validateRelationships
         ) {
             this.relationshipType = relationshipType;
             this.projection = projection;
-            this.typeId = typeId;
+            this.typeId = typeToken;
             this.importer = importer;
             this.relationshipCounter = relationshipCounter;
             this.loadProperties = projection.properties().hasMappings();

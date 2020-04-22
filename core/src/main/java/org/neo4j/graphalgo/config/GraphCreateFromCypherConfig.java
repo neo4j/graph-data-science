@@ -24,7 +24,6 @@ import com.carrotsearch.hppc.procedures.ObjectProcedure;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -151,7 +150,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
         Set<RelationshipType> relationshipTypes = new HashSet<>();
         dimensions
-            .typeTokenRelationshipTypeMapping()
+            .tokenRelationshipTypeMapping()
             .values()
             .forEach((ObjectProcedure<List<RelationshipType>>) relationshipTypes::addAll);
 

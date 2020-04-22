@@ -21,6 +21,9 @@ package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongSet;
+import com.carrotsearch.hppc.ObjectIntHashMap;
+import com.carrotsearch.hppc.ObjectIntMap;
+import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
@@ -32,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 @ValueClass
 public interface GraphDimensions {
@@ -60,16 +64,33 @@ public interface GraphDimensions {
     }
 
     @Nullable
-    LongSet nodeLabelIds();
+    LongSet nodeLabelTokens();
 
     @Nullable
-    LongSet relationshipTypeIds();
+    LongSet relationshipTypeTokens();
 
     @Nullable
-    IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping();
+    IntObjectMap<List<NodeLabel>> tokenNodeLabelMapping();
 
     @Nullable
-    IntObjectMap<List<RelationshipType>> typeTokenRelationshipTypeMapping();
+    IntObjectMap<List<RelationshipType>> tokenRelationshipTypeMapping();
+
+    @Value.Derived
+    @Nullable
+    default ObjectIntMap<RelationshipType> relationshipTypeTokenMapping() {
+        if (tokenRelationshipTypeMapping() == null) {
+            return null;
+        }
+
+        ObjectIntMap<RelationshipType> relationshipTypeTypeTokenMapping = new ObjectIntHashMap<>();
+        tokenRelationshipTypeMapping().forEach((Consumer<? super IntObjectCursor<List<RelationshipType>>>) cursor -> {
+            var typeToken = cursor.key;
+            var relationshipTypes = cursor.value;
+            relationshipTypes.forEach(relationshipType -> relationshipTypeTypeTokenMapping.put(relationshipType, typeToken));
+        });
+
+        return relationshipTypeTypeTokenMapping;
+    }
 
     @Value.Default
     default Map<String, Integer> nodePropertyTokens() {
@@ -83,8 +104,8 @@ public interface GraphDimensions {
 
     default Set<NodeLabel> nodeLabels() {
         var nodeLabels = new HashSet<NodeLabel>();
-        if (labelTokenNodeLabelMapping() != null) {
-            for (var tokenToLabels : labelTokenNodeLabelMapping()) {
+        if (tokenNodeLabelMapping() != null) {
+            for (var tokenToLabels : tokenNodeLabelMapping()) {
                 nodeLabels.addAll(tokenToLabels.value);
             }
         }

@@ -68,7 +68,7 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
 
                 GraphDimensions sparseDimensions = dimensionsBuilder.build();
 
-                // Label Propagation creates a new graph every iteration, this graph has one relationship property
+                // Louvain creates a new graph every iteration, this graph has one relationship property
                 RelationshipProjections relationshipProjections = RelationshipProjections.builder()
                     .putProjection(
                         RelationshipType.of("AGGREGATE"),

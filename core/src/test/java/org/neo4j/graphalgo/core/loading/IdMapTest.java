@@ -64,13 +64,13 @@ class IdMapTest {
         labelTokenNodeLabelMappings.put(1, singletonList(NodeLabel.of("A")));
 
         dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestNeoId(100L)
-            .labelTokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
+            .tokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(32L + 840L + 32832L + 56L), memRec.memoryUsage());
 
         labelTokenNodeLabelMappings.put(2, Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B")));
         dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestNeoId(100L)
-            .labelTokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
+            .tokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
         memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(32L + 840L + 32832L + 112L), memRec.memoryUsage());
     }

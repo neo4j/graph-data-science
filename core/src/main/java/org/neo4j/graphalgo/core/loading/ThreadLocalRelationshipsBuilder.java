@@ -35,7 +35,7 @@ class ThreadLocalRelationshipsBuilder {
     private final AdjacencyListBuilder.Allocator adjacencyAllocator;
     private final AdjacencyListBuilder.Allocator[] propertiesAllocators;
     private final long[] adjacencyOffsets;
-    private final long[][] weightOffsets;
+    private final long[][] propertyOffsets;
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
 
@@ -43,7 +43,7 @@ class ThreadLocalRelationshipsBuilder {
         AdjacencyListBuilder.Allocator adjacencyAllocator,
         AdjacencyListBuilder.Allocator[] propertiesAllocators,
         long[] adjacencyOffsets,
-        long[][] weightOffsets,
+        long[][] propertyOffsets,
         Aggregation[] aggregations
     ) {
 
@@ -54,7 +54,7 @@ class ThreadLocalRelationshipsBuilder {
         this.adjacencyAllocator = adjacencyAllocator;
         this.propertiesAllocators = propertiesAllocators;
         this.adjacencyOffsets = adjacencyOffsets;
-        this.weightOffsets = weightOffsets;
+        this.propertyOffsets = propertyOffsets;
         this.lock = new ReentrantLock();
     }
 
@@ -116,7 +116,7 @@ class ThreadLocalRelationshipsBuilder {
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
 
         adjacencyOffsets[localId] = copyIds(storage, requiredBytes, degree);
-        copyProperties(weights, degree, localId, weightOffsets);
+        copyProperties(weights, degree, localId, propertyOffsets);
 
         array.release();
         return degree;

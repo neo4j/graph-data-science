@@ -122,8 +122,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     void setupGraph(String cypher) {
         runQuery(cypher);
         // Create explicit graphs with both projection variants
-        String query = graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME);
-        runQuery(query);
+        runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
         runQuery(String.format(
             "CALL gds.graph.create.cypher('%s', '%s', '%s', {})",
             TEST_CYPHER_GRAPH_NAME,

@@ -30,7 +30,7 @@ import java.util.Arrays;
 
 public class RelationshipsBuilder {
 
-    private static final AdjacencyListBuilder[] EMPTY_WEIGHTS = new AdjacencyListBuilder[0];
+    private static final AdjacencyListBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyListBuilder[0];
 
     private final RelationshipProjection projection;
     final AdjacencyListBuilder adjacencyListBuilder;
@@ -48,7 +48,7 @@ public class RelationshipsBuilder {
         adjacencyListBuilder = AdjacencyListBuilder.newBuilder(tracker);
 
         if (projection.properties().isEmpty()) {
-            propertyBuilders = EMPTY_WEIGHTS;
+            propertyBuilders = EMPTY_PROPERTY_BUILDERS;
         } else {
             propertyBuilders = new AdjacencyListBuilder[projection.properties().numberOfMappings()];
             Arrays.setAll(propertyBuilders, i -> AdjacencyListBuilder.newBuilder(tracker));
@@ -57,7 +57,7 @@ public class RelationshipsBuilder {
 
     final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder(
             long[] adjacencyOffsets,
-            long[][] weightOffsets,
+            long[][] propertyOffsets,
             Aggregation[] aggregations
     ) {
         return new ThreadLocalRelationshipsBuilder(
@@ -66,7 +66,7 @@ public class RelationshipsBuilder {
                 .map(AdjacencyListBuilder::newAllocator)
                 .toArray(AdjacencyListBuilder.Allocator[]::new),
             adjacencyOffsets,
-            weightOffsets,
+            propertyOffsets,
             aggregations
         );
     }

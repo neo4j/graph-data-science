@@ -48,7 +48,6 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final AllocationTracker tracker;
     private final IdMapping idMap;
     private final Map<RelationshipType, RelationshipsBuilder> allBuilders;
-    private final Map<RelationshipType, Integer> relationshipTypeNeoTypeIdMapping;
     private final Map<RelationshipType, LongAdder> allRelationshipCounters;
 
     ScanningRelationshipsImporter(
@@ -59,7 +58,6 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         AllocationTracker tracker,
         IdMapping idMap,
         Map<RelationshipType, RelationshipsBuilder> allBuilders,
-        Map<RelationshipType, Integer> relationshipTypeNeoTypeIdMapping,
         ExecutorService threadPool,
         int concurrency
     ) {
@@ -75,7 +73,6 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         this.tracker = tracker;
         this.idMap = idMap;
         this.allBuilders = allBuilders;
-        this.relationshipTypeNeoTypeIdMapping = relationshipTypeNeoTypeIdMapping;
         this.allRelationshipCounters = new HashMap<>();
     }
 
@@ -92,7 +89,17 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
                 .entrySet()
                 .stream()
-                .map(entry -> createImporterBuilder(pageSize, numberOfPages, entry.getKey(), entry.getValue().projection(), entry.getValue()))
+                .map(entry -> {
+                    var relationshipType = entry.getKey();
+                    var relationshipsBuilder = entry.getValue();
+                    return createImporterBuilder(
+                        pageSize,
+                        numberOfPages,
+                        relationshipType,
+                        relationshipsBuilder.projection(),
+                        relationshipsBuilder
+                    );
+                })
                 .collect(Collectors.toList());
 
         for (SingleTypeRelationshipImporter.Builder importerBuilder : importerBuilders) {
@@ -144,7 +151,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         );
 
         RelationshipImporter importer = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
-        int typeId = relationshipTypeNeoTypeIdMapping.get(relationshipType);
+        int typeId = dimensions.relationshipTypeTokenMapping().get(relationshipType);
         return new SingleTypeRelationshipImporter.Builder(relationshipType, projection, typeId, importer, relationshipCounter, setup.validateRelationships());
     }
 

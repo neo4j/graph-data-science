@@ -42,7 +42,7 @@ public final class GraphDimensionsValidation {
     }
 
     private static void checkValidNodePredicate(GraphDimensions dimensions, GraphCreateConfig config) {
-        if (!config.nodeProjections().isEmpty() && dimensions.nodeLabelIds().contains(NO_SUCH_LABEL)) {
+        if (!config.nodeProjections().isEmpty() && dimensions.nodeLabelTokens().contains(NO_SUCH_LABEL)) {
             throw new IllegalArgumentException(String.format(
                 "Invalid node projection, one or more labels not found: '%s'",
                 config.nodeProjections().labelProjection()
@@ -52,7 +52,7 @@ public final class GraphDimensionsValidation {
 
     private static void checkValidRelationshipTypePredicate(GraphDimensions dimensions, GraphCreateConfig config) {
         if (!config.relationshipProjections().isEmpty() && dimensions
-            .relationshipTypeIds()
+            .relationshipTypeTokens()
             .contains(NO_SUCH_RELATIONSHIP_TYPE)) {
             throw new IllegalArgumentException(String.format(
                 "Invalid relationship projection, one or more relationship types not found: '%s'",

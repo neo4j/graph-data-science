@@ -125,9 +125,9 @@ abstract class CypherRecordLoader<R> {
 
     void validatePropertyColumns(
         Collection<String> propertyColumns,
-        PropertyMappings resolvedPropertyMappings
+        PropertyMappings propertyMappings
     ) {
-        List<String> invalidNodeProperties = resolvedPropertyMappings
+        List<String> invalidNodeProperties = propertyMappings
             .mappings()
             .stream()
             .map(PropertyMapping::neoPropertyKey)

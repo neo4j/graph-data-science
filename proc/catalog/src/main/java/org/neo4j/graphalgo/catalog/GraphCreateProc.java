@@ -151,10 +151,12 @@ public class GraphCreateProc extends CatalogProc {
             cypherConfig
         );
 
+        // Relationships are needed for the estimation
         GraphCreateConfig config = ImmutableGraphCreateFromCypherConfig.builder()
             .from(initialConfig)
             .relationshipProjections(RelationshipProjections.all())
             .build();
+
         validateConfig(cypherConfig, config);
 
         return estimateGraph(config);

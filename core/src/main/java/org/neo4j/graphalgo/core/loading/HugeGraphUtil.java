@@ -39,6 +39,8 @@ import java.util.stream.Stream;
 
 public final class HugeGraphUtil {
 
+    public static final String DUMMY_PROPERTY = "property";
+
     private HugeGraphUtil() {}
 
     public static IdMapBuilder idMapBuilder(
@@ -172,7 +174,7 @@ public final class HugeGraphUtil {
                 .orientation(orientation);
 
             if (loadRelationshipProperty) {
-                projectionBuilder.addProperty("property", "property", Double.NaN, aggregation);
+                projectionBuilder.addProperty(DUMMY_PROPERTY, DUMMY_PROPERTY, Double.NaN, aggregation);
             }
 
             this.relationshipsBuilder = new org.neo4j.graphalgo.core.loading.RelationshipsBuilder(

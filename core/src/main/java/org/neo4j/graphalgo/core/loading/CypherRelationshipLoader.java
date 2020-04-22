@@ -69,7 +69,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     // by looking at the columns returned by the query.
     private ObjectIntHashMap<String> propertyKeyIdsByName;
     private ObjectDoubleHashMap<String> propertyDefaultValueByName;
-    private boolean importWeights;
+    private boolean importProperties;
     private PropertyMappings propertyMappings;
     private int[] propertyKeyIds;
     private double[] propertyDefaultValues;
@@ -94,12 +94,13 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
         this.hasExplicitPropertyMappings = config.relationshipProperties().hasMappings();
         if (hasExplicitPropertyMappings) {
-            this.propertyMappings = config.relationshipProperties();
-            initFromPropertyMappings();
+            initFromPropertyMappings(config.relationshipProperties());
         }
     }
 
-    private void initFromPropertyMappings() {
+    private void initFromPropertyMappings(PropertyMappings propertyMappings) {
+        this.propertyMappings = propertyMappings;
+
         MutableInt propertyKeyId = new MutableInt(0);
 
         int numberOfMappings = propertyMappings.numberOfMappings();
@@ -125,7 +126,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             ));
         GraphDimensions newDimensions = dimensionsBuilder.build();
 
-        importWeights = !propertyMappings.isEmpty();
+        importProperties = !propertyMappings.isEmpty();
         propertyKeyIds = newDimensions.relationshipPropertyTokens().values().stream().mapToInt(i -> i).toArray();
         propertyDefaultValues = propertyMappings.mappings().stream().mapToDouble(PropertyMapping::defaultValue).toArray();
         aggregations = propertyMappings.mappings().stream().map(PropertyMapping::aggregation).toArray(Aggregation[]::new);
@@ -164,9 +165,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 ))
                 .collect(Collectors.toList());
 
-            this.propertyMappings = PropertyMappings.of(propertyMappings);
-
-            initFromPropertyMappings();
+            initFromPropertyMappings(PropertyMappings.of(propertyMappings));
 
             initializedFromResult = true;
 
@@ -286,7 +285,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             relationshipCounters.put(projection, importerBuilder.relationshipCounter());
 
-            return importerBuilder.loadImporter(importWeights);
+            return importerBuilder.loadImporter(importProperties);
         }
 
         private SingleTypeRelationshipImporter.Builder createImporterBuilder(

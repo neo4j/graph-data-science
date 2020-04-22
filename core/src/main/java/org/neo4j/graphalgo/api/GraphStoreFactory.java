@@ -113,7 +113,7 @@ public abstract class GraphStoreFactory implements Assessable {
         AllocationTracker tracker,
         GraphDimensions dimensions
     ) {
-        int relTypeCount = dimensions.relationshipTypeIds().size();
+        int relTypeCount = dimensions.relationshipTypeTokens().size();
         Map<RelationshipType, HugeGraph.TopologyCSR> relationships = new HashMap<>(relTypeCount);
         Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
 

@@ -77,9 +77,9 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         if (readTokens) {
             graphCreateConfig.nodeProjections()
                 .projections()
-                .forEach((key, value) -> {
-                    int labelId = value.projectAll() ? ANY_LABEL : getNodeLabel(tokenRead, value);
-                    labelTokenNodeLabelMappings.put(labelId, key);
+                .forEach((nodeLabel, projection) -> {
+                    var labelToken = projection.projectAll() ? ANY_LABEL : getNodeLabelToken(tokenRead, projection);
+                    labelTokenNodeLabelMappings.put(labelToken, nodeLabel);
                 });
         }
 
@@ -87,9 +87,9 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         if (readTokens) {
             graphCreateConfig.relationshipProjections()
                 .projections()
-                .forEach((key, value) -> {
-                    int typeId = value.projectAll() ? ANY_RELATIONSHIP_TYPE : getRelationshipType(tokenRead, value);
-                    typeTokenRelTypeMappings.put(typeId, key);
+                .forEach((relType, projection) -> {
+                    var typeToken = projection.projectAll() ? ANY_RELATIONSHIP_TYPE : getRelationshipTypeToken(tokenRead, projection);
+                    typeTokenRelTypeMappings.put(typeToken, relType);
                 });
         }
 
@@ -117,34 +117,34 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             .highestNeoId(allNodesCount)
             .maxRelCount(maxRelCount)
             .relationshipCounts(relationshipCounts)
-            .nodeLabelIds(labelTokenNodeLabelMappings.keys())
-            .relationshipTypeIds(typeTokenRelTypeMappings.keys())
-            .labelTokenNodeLabelMapping(labelTokenNodeLabelMappings.mappings())
-            .typeTokenRelationshipTypeMapping(typeTokenRelTypeMappings.mappings())
+            .nodeLabelTokens(labelTokenNodeLabelMappings.keys())
+            .relationshipTypeTokens(typeTokenRelTypeMappings.keys())
+            .tokenNodeLabelMapping(labelTokenNodeLabelMappings.mappings())
+            .tokenRelationshipTypeMapping(typeTokenRelTypeMappings.mappings())
             .nodePropertyTokens(nodePropertyTokens)
             .relationshipPropertyTokens(relationshipPropertyTokens)
             .build();
     }
 
-    private int getNodeLabel(TokenRead tokenRead, NodeProjection value) {
+    private int getNodeLabelToken(TokenRead tokenRead, NodeProjection value) {
         int labelToken = tokenRead.nodeLabel(value.label());
         return labelToken == StatementConstants.NO_SUCH_LABEL
             ? NO_SUCH_LABEL
             : labelToken;
     }
 
-    private int getRelationshipType(TokenRead tokenRead, RelationshipProjection value) {
+    private int getRelationshipTypeToken(TokenRead tokenRead, RelationshipProjection value) {
         int relationshipToken = tokenRead.relationshipType(value.type());
         return relationshipToken == StatementConstants.NO_SUCH_RELATIONSHIP_TYPE
             ? NO_SUCH_RELATIONSHIP_TYPE
             : relationshipToken;
     }
 
-    private Map<String, Integer> loadPropertyTokens(Map<? extends ElementIdentifier, ? extends ElementProjection> projections, TokenRead tokenRead) {
-        return projections
-            .entrySet()
+    private Map<String, Integer> loadPropertyTokens(Map<? extends ElementIdentifier, ? extends ElementProjection> projectionMapping, TokenRead tokenRead) {
+        return projectionMapping
+            .values()
             .stream()
-            .flatMap(nodeProjections -> nodeProjections.getValue().properties().stream())
+            .flatMap(projections -> projections.properties().stream())
             .collect(Collectors.toMap(
                 PropertyMapping::neoPropertyKey,
                 propertyMapping -> propertyMapping.neoPropertyKey() != null ? tokenRead.propertyKey(propertyMapping.neoPropertyKey()) : StatementConstants.NO_SUCH_PROPERTY_KEY,

@@ -46,8 +46,8 @@ import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 
 public final class NativeNodePropertyImporter {
 
-    private final Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier;
-    private final IntObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken;
+    private final Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByNodeLabel;
+    private final IntObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelTokenAndPropertyToken;
     private final boolean containsAnyLabelProjection;
 
     public static Builder builder() {
@@ -55,12 +55,12 @@ public final class NativeNodePropertyImporter {
     }
 
     private NativeNodePropertyImporter(
-        Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier,
-        IntObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken,
+        Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByNodeLabel,
+        IntObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelTokenAndPropertyToken,
         boolean containsAnyLabelProjection
     ) {
-        this.buildersByIdentifier = buildersByIdentifier;
-        this.buildersByLabelIdAndPropertyToken = buildersByLabelIdAndPropertyToken;
+        this.buildersByNodeLabel = buildersByNodeLabel;
+        this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyToken;
         this.containsAnyLabelProjection = containsAnyLabelProjection;
     }
 
@@ -83,7 +83,7 @@ public final class NativeNodePropertyImporter {
     }
 
     public Map<NodeLabel, Map<PropertyMapping, NodeProperties>> result() {
-        return buildersByIdentifier
+        return buildersByNodeLabel
             .entrySet()
             .stream()
             .collect(Collectors.toMap(
@@ -104,7 +104,7 @@ public final class NativeNodePropertyImporter {
                 continue;
             }
 
-            IntObjectMap<List<NodePropertiesBuilder>> buildersByPropertyId = buildersByLabelIdAndPropertyToken.get((int) label);
+            IntObjectMap<List<NodePropertiesBuilder>> buildersByPropertyId = buildersByLabelTokenAndPropertyToken.get((int) label);
             if (buildersByPropertyId != null) {
                 propertiesImported += setPropertyValue(
                     nodeId,
@@ -116,7 +116,8 @@ public final class NativeNodePropertyImporter {
         }
 
         if (containsAnyLabelProjection) {
-            propertiesImported += setPropertyValue(nodeId, propertyCursor, propertyKey, buildersByLabelIdAndPropertyToken.get(ANY_LABEL));
+            propertiesImported += setPropertyValue(nodeId, propertyCursor, propertyKey, buildersByLabelTokenAndPropertyToken
+                .get(ANY_LABEL));
         }
 
         return propertiesImported;
@@ -259,7 +260,7 @@ public final class NativeNodePropertyImporter {
                 elementIdentifiers.forEach(identifier -> inverseLabelIdentifierMapping.put(identifier, labelId));
             };
 
-            dimensions.labelTokenNodeLabelMapping().forEach(listIntObjectProcedure);
+            dimensions.tokenNodeLabelMapping().forEach(listIntObjectProcedure);
 
             return inverseLabelIdentifierMapping;
         }

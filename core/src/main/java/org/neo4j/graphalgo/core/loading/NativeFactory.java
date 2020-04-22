@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
-import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
@@ -31,7 +30,7 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
@@ -43,10 +42,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
@@ -68,13 +64,14 @@ public final class NativeFactory extends GraphStoreFactory {
     }
 
     public static MemoryEstimation getMemoryEstimation(GraphDimensions dimensions, RelationshipProjections relationshipProjections) {
-        GraphCreateFromStoreConfig config = GraphCreateFromStoreConfig.of(
-            "",
-            "",
-            NodeProjections.of(),
-            relationshipProjections,
-            CypherMapWrapper.empty()
-        );
+        GraphCreateFromStoreConfig config = ImmutableGraphCreateFromStoreConfig
+            .builder()
+            .graphName("")
+            .username("")
+            .nodeProjections(NodeProjections.all())
+            .relationshipProjections(relationshipProjections)
+            .build();
+
         return getMemoryEstimation(dimensions, config);
     }
 
@@ -191,13 +188,6 @@ public final class NativeFactory extends GraphStoreFactory {
                 projectionEntry -> new RelationshipsBuilder(projectionEntry.getValue(), tracker)
             ));
 
-        Map<RelationshipType, Integer> relationshipTypeNeoTypeIdMapping = new HashMap<>(dimensions.typeTokenRelationshipTypeMapping().size());
-        dimensions.typeTokenRelationshipTypeMapping().forEach((Consumer<? super IntObjectCursor<List<RelationshipType>>>) cursor -> {
-            int typeId = cursor.key;
-            List<RelationshipType> relationshipTypes = cursor.value;
-            relationshipTypes.forEach(relationshipType -> relationshipTypeNeoTypeIdMapping.put(relationshipType, typeId));
-        });
-
         ObjectLongMap<RelationshipType> relationshipCounts = new ScanningRelationshipsImporter(
             setup,
             api,
@@ -206,7 +196,6 @@ public final class NativeFactory extends GraphStoreFactory {
             tracker,
             idsAndProperties.idMap,
             allBuilders,
-            relationshipTypeNeoTypeIdMapping,
             threadPool,
             concurrency
         ).call(setup.log());

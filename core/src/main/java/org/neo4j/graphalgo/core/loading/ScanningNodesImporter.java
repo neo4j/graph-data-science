@@ -82,7 +82,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     ) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
 
-        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.labelTokenNodeLabelMapping();
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
         nodeLabelBitSetMapping = labelTokenNodeLabelMapping.size() == 1 && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
             ? null
@@ -93,7 +93,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
         return NodesScanner.of(
             api,
             scanner,
-            dimensions.nodeLabelIds(),
+            dimensions.nodeLabelTokens(),
             progressLogger,
             new NodeImporter(
                 idMapBuilder,
