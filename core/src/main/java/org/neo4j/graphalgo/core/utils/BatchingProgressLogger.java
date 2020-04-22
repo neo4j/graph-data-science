@@ -30,21 +30,23 @@ public class BatchingProgressLogger implements ProgressLogger {
     public static final long MAXIMUM_LOG_INTERVAL = (long) Math.pow(2, 13);
 
     private final Log log;
+    private final int concurrency;
     private long taskVolume;
     private long batchSize;
     private final String task;
     private final LongAdder progressCounter;
     private final ThreadLocal<MutableLong> callCounter;
 
-    private static long calculateBatchSize(long taskVolume) {
-        return (BitUtil.nearbyPowerOfTwo(taskVolume) >>> 6);
+    private static long calculateBatchSize(long taskVolume, int concurrency) {
+        return (BitUtil.nearbyPowerOfTwo(taskVolume) >>> (concurrency * 6));
     }
 
-    public BatchingProgressLogger(Log log, long taskVolume, String task) {
-        this(log, taskVolume, calculateBatchSize(taskVolume), task);
+    public BatchingProgressLogger(Log log, long taskVolume, String task, int concurrency) {
+        this(log, taskVolume, calculateBatchSize(taskVolume, concurrency), task, concurrency);
+
     }
 
-    public BatchingProgressLogger(Log log, long taskVolume, long batchSize, String task) {
+    public BatchingProgressLogger(Log log, long taskVolume, long batchSize, String task, int concurrency) {
         this.log = log;
         this.taskVolume = taskVolume;
         this.batchSize = batchSize;
@@ -52,6 +54,7 @@ public class BatchingProgressLogger implements ProgressLogger {
 
         this.progressCounter = new LongAdder();
         this.callCounter = ThreadLocal.withInitial(MutableLong::new);
+        this.concurrency = concurrency;
     }
 
     @Override
@@ -92,7 +95,7 @@ public class BatchingProgressLogger implements ProgressLogger {
     @Override
     public void reset(long newTaskVolume) {
         this.taskVolume = newTaskVolume;
-        this.batchSize = calculateBatchSize(newTaskVolume);
+        this.batchSize = calculateBatchSize(newTaskVolume, concurrency);
         progressCounter.reset();
     }
 

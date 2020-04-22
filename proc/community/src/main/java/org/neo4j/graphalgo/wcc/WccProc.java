@@ -47,10 +47,11 @@ final class WccProc {
         return new AlgorithmFactory<Wcc, CONFIG>() {
             @Override
             public Wcc build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
-                BatchingProgressLogger progressLogger = new BatchingProgressLogger(
+                var progressLogger = new BatchingProgressLogger(
                     log,
                     graph.relationshipCount(),
-                    "WCC"
+                    "WCC",
+                    configuration.concurrency()
                 );
 
                 return new Wcc(

@@ -215,7 +215,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
 
     @Test
     void testLogging() {
-        Graph graph = new StoreLoaderBuilder()
+        var graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
@@ -223,12 +223,13 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .build()
             .graph(NativeFactory.class);
 
-        TestProgressLogger testLogger = new TestProgressLogger(
+        var testLogger = new TestProgressLogger(
             graph.relationshipCount(),
-            "ModularityOptimization"
+            "ModularityOptimization",
+            3
         );
 
-        ModularityOptimization modularityOptimization = new ModularityOptimization(
+        var modularityOptimization = new ModularityOptimization(
             graph,
             3,
             TOLERANCE_DEFAULT,

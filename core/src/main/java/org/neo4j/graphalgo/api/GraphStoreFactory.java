@@ -98,7 +98,8 @@ public abstract class GraphStoreFactory implements Assessable {
         return new BatchingProgressLogger(
             log,
             dimensions.nodeCount() + relationshipCount,
-            TASK_LOADING
+            TASK_LOADING,
+            graphCreateConfig.readConcurrency()
         );
     }
 

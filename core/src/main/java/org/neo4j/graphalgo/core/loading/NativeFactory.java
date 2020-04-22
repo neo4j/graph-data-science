@@ -125,7 +125,8 @@ public final class NativeFactory extends GraphStoreFactory {
         return new BatchingProgressLogger(
             log,
             dimensions.nodeCount() + relationshipCount,
-            TASK_LOADING
+            TASK_LOADING,
+            graphCreateConfig.readConcurrency()
         );
     }
 

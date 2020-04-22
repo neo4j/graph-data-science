@@ -46,7 +46,9 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
         final AllocationTracker tracker,
         final Log log
     ) {
-        BatchingProgressLogger progressLogger = new BatchingProgressLogger(log, 1, "Louvain");
+        var progressLogger = new BatchingProgressLogger(log, 1, "Louvain",
+            configuration.concurrency()
+        );
 
         return new Louvain(
             graph,

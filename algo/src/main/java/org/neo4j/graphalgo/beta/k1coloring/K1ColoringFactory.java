@@ -35,7 +35,12 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFact
 
     @Override
     public K1Coloring build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
-        ProgressLogger progressLogger = new BatchingProgressLogger(log, graph.nodeCount() * 2, "K1Coloring");
+        var progressLogger = new BatchingProgressLogger(
+            log,
+            graph.nodeCount() * 2,
+            "K1Coloring",
+            configuration.concurrency()
+        );
 
         return new K1Coloring(
             graph,

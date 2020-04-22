@@ -80,10 +80,11 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
     }
 
     public ModularityOptimization build(Graph graph, T configuration, NodeProperties seed, AllocationTracker tracker, Log log) {
-        ProgressLogger progressLogger = new BatchingProgressLogger(
+        var progressLogger = new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
-            "ModularityOptimization"
+            "ModularityOptimization",
+            configuration.concurrency()
         );
 
         return new ModularityOptimization(
