@@ -409,10 +409,6 @@ public class HugeGraph implements IdMapGraph {
         return hasRelationshipProperty;
     }
 
-    public double defaultRelationshipProperty() {
-        return defaultPropertyValue;
-    }
-
     private AdjacencyList.DecompressingCursor newAdjacencyCursor(AdjacencyList adjacency) {
         return adjacency != null ? adjacency.rawDecompressingCursor() : null;
     }
