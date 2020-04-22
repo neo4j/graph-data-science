@@ -156,7 +156,7 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     private Class<? extends GraphStoreFactory> getFactoryClazz(GraphCreateConfig config) {
-        return config.isCypher() ? CypherFactory.class : NativeFactory.class;
+        return config.isCypher() ? CypherFactory.class : config.getGraphImpl();
     }
 
     private GraphCreateResult createGraph(GraphCreateConfig config) {
