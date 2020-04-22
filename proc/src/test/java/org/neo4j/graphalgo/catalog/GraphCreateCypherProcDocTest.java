@@ -140,31 +140,18 @@ class GraphCreateCypherProcDocTest extends BaseProcTest {
 
     @Test
     void loadWithAggregation() {
-        String createQuery = "CALL gds.graph.create.cypher(\n" +
-                             "    'myCypherGraph',\n" +
-                             "    'MATCH (n:City) RETURN id(n) AS id, n.stateId AS community, n.population AS population',\n" +
-                             "    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, r.condition AS quality',\n" +
-                             "    {\n" +
-                             "        relationshipProperties: {\n" +
-                             "            minDistance: {\n" +
-                             "                property: 'distance',\n" +
-                             "                aggregation: 'MIN',\n" +
-                             "                defaultValue: 42.0\n" +
-                             "            },\n" +
-                             "            maxQuality: {\n" +
-                             "                property: 'quality',\n" +
-                             "                aggregation: 'MAX',\n" +
-                             "                defaultValue: 1.0\n" +
-                             "            }\n" +
-                             "        }\n" +
-                             "    }\n" +
-                             ") YIELD nodeCount, relationshipCount";
+        String createQuery = "MATCH (n:City)-[r:ROAD]->(m:City)\n" +
+                             "RETURN\n" +
+                             "    id(n) AS source,\n" +
+                             "    id(m) AS target,\n" +
+                             "    min(r.distance) AS minDistance,\n" +
+                             "    max(coalesce(r.condition, 1.0)) AS maxQuality";
 
-        String expected = "+-------------------------------+\n" +
-                          "| nodeCount | relationshipCount |\n" +
-                          "+-------------------------------+\n" +
-                          "| 2         | 1                 |\n" +
-                          "+-------------------------------+\n" +
+        String expected = "+--------------------------------------------+\n" +
+                          "| source | target | minDistance | maxQuality |\n" +
+                          "+--------------------------------------------+\n" +
+                          "| 0      | 1      | 23          | 1.0        |\n" +
+                          "+--------------------------------------------+\n" +
                           "1 row\n";
 
         assertEquals(expected, runQuery(createQuery, Result::resultAsString));

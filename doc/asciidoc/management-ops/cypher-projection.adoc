@@ -243,41 +243,8 @@ RETURN
     id(n) AS source,
     id(m) AS target,
     min(r.distance) AS minDistance,
-    max(coalesce(r.condition, 1.0), 1.0) AS maxQuality
+    coalesce(max(r.condition), 1.0) AS maxQuality
 ----
-
-One drawback of that approach is that we put more pressure on the Cypher execution engine and the query result consumes additional memory.
-An alternative approach is to use `relationshipProperties` as part of the optional configuration map.
-The syntax is identical to the property mappings used in the native projection.
-
-[source,cypher]
-----
-CALL gds.graph.create.cypher(
-    'my-cypher-graph',
-    'MATCH (n:City) RETURN id(n) AS id, n.stateId AS community, n.population AS population',
-    'MATCH (n:City)-[r:ROAD]->(m:City) RETURN id(n) AS source, id(m) AS target, r.distance AS distance, r.condition AS quality',
-    {
-        relationshipProperties: {
-            minDistance: {
-                property: 'distance',
-                aggregation: 'MIN',
-                defaultValue: 42.0
-            },
-            maxQuality: {
-                property: 'quality',
-                aggregation: 'MAX',
-                defaultValue: 1.0
-            }
-        }
-    }
-)
-----
-
-* The key of each mapping is the name under which the resulting property is stored in the graph.
-* The `property` entry refers to the column name in the query result.
-* The `aggregation` entry sets the aggregation function for values of parallel relationships (e.g. `MIN` or `MAX`).
-* The `defaultValue` entry is used if the cell contains `null` (instead of `Double.NAN`).
-
 
 [[cypher-projection-parameters]]
 == Using query parameters
