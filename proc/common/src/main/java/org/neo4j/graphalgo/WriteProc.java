@@ -24,10 +24,13 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 public abstract class WriteProc<
@@ -48,20 +51,17 @@ public abstract class WriteProc<
             .withNodeCount(computeResult.graph().nodeCount())
             .withConfig(config);
 
-        if (computeResult.isGraphEmpty()) {
-            return Stream.of(builder.build());
-        } else {
+        if (!computeResult.isGraphEmpty()) {
             writeToNeo(builder, computeResult);
             computeResult.graph().releaseProperties();
-            return Stream.of(builder.build());
         }
+        return Stream.of(builder.build());
     }
 
     private void writeToNeo(
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
-        PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
         WritePropertyConfig writePropertyConfig = computationResult.config();
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
             log.debug("Writing results");
@@ -73,13 +73,20 @@ public abstract class WriteProc<
                 .parallel(Pools.DEFAULT, writePropertyConfig.writeConcurrency())
                 .build();
 
-            exporter.write(
-                writePropertyConfig.writeProperty(),
-                computationResult.result(),
-                resultPropertyTranslator
-            );
+            exporter.write(nodePropertiesToWrite(computationResult));
+
             resultBuilder.withNodeCount(computationResult.graph().nodeCount());
             resultBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
         }
+    }
+
+    protected Collection<NodePropertyExporter.NodeProperty<?>> nodePropertiesToWrite(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        return List.of(
+            ImmutableNodeProperty.of(
+                computationResult.config().writeProperty(),
+                computationResult.result(),
+                nodePropertyTranslator(computationResult)
+            )
+        );
     }
 }
