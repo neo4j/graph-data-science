@@ -117,8 +117,8 @@ YIELD createMillis, computeMillis, writeMillis, nodeCount, triangleCount, averag
 | concurrency                   | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency               | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| writeProperty                 | String  | 'triangles'            | yes      | The property name the number of triangles a node is member of is written to.
-| clusteringCoefficientProperty | String  | 'coefficient'          | yes      | The property name clustering coefficient of the node is written to.
+| writeProperty                 | String  | 'triangles'            | no       | The property name the number of triangles a node is member of is written to.
+| clusteringCoefficientProperty | String  | 'coefficient'          | no       | The property name clustering coefficient of the node is written to.
 |===
 
 .Results
@@ -218,7 +218,8 @@ CALL gds.alpha.triangleCount.write({
       orientation: 'UNDIRECTED'
     }
   },
-  writeProperty: 'triangles'
+  writeProperty: 'triangles',
+  clusteringCoefficientProperty: 'clusteringCoefficient'
 })
 YIELD nodeCount, triangleCount, averageClusteringCoefficient
 ----
