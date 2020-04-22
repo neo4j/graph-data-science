@@ -121,11 +121,10 @@ final class FilteredNodePropertyExporter extends NodePropertyExporter {
                     terminationFlag.assertRunning();
                     long end = start + len;
                     Write ops = stmt.dataWrite();
-                    for (long currentNode = start;
-                         currentNode < end && nodeLabelBits.get(currentNode);
-                         currentNode++) {
-                        writer.accept(ops, currentNode);
-
+                    for (long currentNode = start; currentNode < end; currentNode++) {
+                        if (nodeLabelBits.get(currentNode)) {
+                            writer.accept(ops, currentNode);
+                        }
                         // Only log every 10_000 written nodes
                         if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
                             long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
