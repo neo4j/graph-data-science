@@ -32,9 +32,9 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
     private final BatchingProgressLogger batchingLogger;
     private final List<AtomicLong> progresses;
 
-    public TestProgressLogger(long initialTaskVolume, String task) {
+    public TestProgressLogger(long initialTaskVolume, String task, int concurrency) {
         super();
-        this.batchingLogger = new BatchingProgressLogger(this, initialTaskVolume, task);
+        this.batchingLogger = new BatchingProgressLogger(this, initialTaskVolume, task, concurrency);
         progresses = new ArrayList<>();
         progresses.add(new AtomicLong(0));
     }

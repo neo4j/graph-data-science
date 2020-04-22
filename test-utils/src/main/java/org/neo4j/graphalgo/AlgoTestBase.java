@@ -34,7 +34,7 @@ public abstract class AlgoTestBase extends BaseTest {
 
     @BeforeEach
     void resetProgressLogger() {
-        this.progressLogger = new BatchingProgressLogger(NullLog.getInstance(), 0, "Test");
+        this.progressLogger = new BatchingProgressLogger(NullLog.getInstance(), 0, "Test", 1);
     }
 
     protected void runQuery(String query) {

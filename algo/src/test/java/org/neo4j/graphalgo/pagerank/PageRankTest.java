@@ -293,18 +293,24 @@ final class PageRankTest extends AlgoTestBase {
 
     @Test
     void shouldLogProgress() {
-        Graph graph = new StoreLoaderBuilder()
+        var graph = new StoreLoaderBuilder()
             .api(db)
             .addNodeLabel(LABEL.name())
             .addRelationshipType(RELATIONSHIP_TYPE)
             .build()
             .graph(NativeFactory.class);
 
-        TestProgressLogger testLogger = new TestProgressLogger(graph.relationshipCount(), "PageRank");
+        var config = ImmutablePageRankStreamConfig.builder().build();
 
-        PageRank pageRank = PageRankAlgorithmType.NON_WEIGHTED.create(
+        var testLogger = new TestProgressLogger(
+            graph.relationshipCount(),
+            "PageRank",
+            config.concurrency()
+        );
+
+        var pageRank = PageRankAlgorithmType.NON_WEIGHTED.create(
             graph,
-            ImmutablePageRankStreamConfig.builder().build(),
+            config,
             LongStream.empty(),
             testLogger
         );

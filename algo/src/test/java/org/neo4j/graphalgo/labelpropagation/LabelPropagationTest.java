@@ -248,16 +248,16 @@ final class LabelPropagationTest extends AlgoTestBase {
 
     @Test
     void shouldLogProgress(){
-        Graph graph = new StoreLoaderBuilder()
+        var graph = new StoreLoaderBuilder()
             .api(db)
             .addNodeLabel("User")
             .addRelationshipType("FOLLOW")
             .build()
             .graph(NativeFactory.class);
 
-        TestProgressLogger testLogger = new TestProgressLogger(graph.relationshipCount(), "Louvain");
+        var testLogger = new TestProgressLogger(graph.relationshipCount(), "Louvain", defaultConfig().concurrency());
 
-        LabelPropagation lp = new LabelPropagation(
+        var lp = new LabelPropagation(
             graph,
             defaultConfig(),
             Pools.DEFAULT,
