@@ -57,7 +57,7 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

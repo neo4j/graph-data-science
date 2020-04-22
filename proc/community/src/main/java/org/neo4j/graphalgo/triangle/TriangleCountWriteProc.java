@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -53,11 +54,11 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
 
     @Procedure(value = "gds.triangleCount.write.estimate", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<WriteResult> estimate(
+    public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

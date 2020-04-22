@@ -135,7 +135,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     default void testImplicitGraphCreateFromStoreConfig() {
         CypherMapWrapper wrapper = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             NODE_PROJECTION_KEY, Collections.singletonList("*"),
-            RELATIONSHIP_PROJECTION_KEY, Collections.singletonList("*")
+            RELATIONSHIP_PROJECTION_KEY, relationshipProjections()
         )));
         applyOnProcedure(proc -> {
             CONFIG config = proc.newConfig(Optional.empty(), wrapper);
@@ -147,20 +147,28 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 actual instanceof GraphCreateFromStoreConfig,
                 String.format("GraphCreateConfig should be %s.", GraphCreateFromStoreConfig.class.getSimpleName()));
 
-            NodeProjections expectedNodeProjections = NodeProjections
-                .builder()
-                .putProjection(ALL_NODES, NodeProjection.all())
-                .build();
-            RelationshipProjections expectedRelationshipProjections = RelationshipProjections
-                .builder()
-                .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.all())
-                .build();
+            NodeProjections expectedNodeProjections = expectedNodeProjections();
+            RelationshipProjections expectedRelationshipProjections = expectedRelationshipProjections();
 
             assertEquals(expectedNodeProjections, actual.nodeProjections());
             assertEquals(expectedRelationshipProjections, actual.relationshipProjections());
             assertEquals(IMPLICIT_GRAPH_NAME, actual.graphName());
             assertEquals(TEST_USERNAME, actual.username());
         });
+    }
+
+    default NodeProjections expectedNodeProjections() {
+        return NodeProjections
+            .builder()
+            .putProjection(ALL_NODES, NodeProjection.all())
+            .build();
+    }
+
+    default RelationshipProjections expectedRelationshipProjections() {
+        return RelationshipProjections
+            .builder()
+            .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.all())
+            .build();
     }
 
     @Test
@@ -237,7 +245,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
         Map<String, Object> storeConfig = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             NODE_PROJECTION_KEY, Collections.singletonList("*"),
-            RELATIONSHIP_PROJECTION_KEY, Collections.singletonList("*")
+            RELATIONSHIP_PROJECTION_KEY, relationshipProjections()
         ))).toMap();
 
         applyOnProcedure((proc) -> {
@@ -254,6 +262,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
             assertResultEquals(resultOnImplicitGraphFromCypher.result(), resultOnImplicitGraphFromStore.result());
         });
+    }
+
+    default RelationshipProjections relationshipProjections() {
+        return RelationshipProjections.fromString("*");
     }
 
     @AllGraphTypesTest

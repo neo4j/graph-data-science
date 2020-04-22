@@ -25,11 +25,17 @@ import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 abstract class TriangleCountBaseProcTest<CONFIG extends TriangleConfig> extends BaseProcTest
     implements AlgoBaseProcTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
@@ -72,6 +78,33 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleConfig> extends 
     public void assertResultEquals(
         IntersectingTriangleCount.TriangleCountResult result1, IntersectingTriangleCount.TriangleCountResult result2
     ) {
-        assertEquals(result1, result2);
+        // TODO: add checks for the HugeArrays
+        assertEquals(result1.globalTriangles(), result2.globalTriangles());
+        assertEquals(result1.averageClusteringCoefficient(), result2.averageClusteringCoefficient());
+    }
+
+    @Override
+    public RelationshipProjections relationshipProjections() {
+        return RelationshipProjections.builder().putProjection(
+            RelationshipType.of("T"),
+            RelationshipProjection.of("*", Orientation.UNDIRECTED)
+        ).build();
+    }
+
+
+    @Override
+    public CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper mapWrapper) {
+        if (mapWrapper.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
+            return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper.toMap())));
+        }
+
+        return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper
+            .withEntry(RELATIONSHIP_PROJECTION_KEY, relationshipProjections())
+            .toMap())));
+    }
+
+    @Override
+    public RelationshipProjections expectedRelationshipProjections() {
+        return relationshipProjections();
     }
 }

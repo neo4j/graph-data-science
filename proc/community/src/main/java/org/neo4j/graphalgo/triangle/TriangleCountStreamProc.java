@@ -32,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -58,7 +57,7 @@ public class TriangleCountStreamProc
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
@@ -71,7 +70,7 @@ public class TriangleCountStreamProc
     @Override
     protected Stream<Result> stream(ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult) {
         var graph = computationResult.graph();
-        var result = Objects.requireNonNull(computationResult.result());
+        var result = computationResult.result();
 
         return LongStream.range(0, graph.nodeCount())
             .mapToObj(i -> new Result(

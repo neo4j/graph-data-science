@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.logging.Log;
 
@@ -52,6 +53,6 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleConfig> ext
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return MemoryEstimations.builder(IntersectingTriangleCount.class).build();
     }
 }
