@@ -42,9 +42,9 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
     private static final Map<Long, Double> outgoingWeightedExpected = new HashMap<>();
 
     private static final String NODES = "MATCH (n) RETURN id(n) AS id";
-    private static final String INCOMING_RELS = "MATCH (a)<-[r]-(b) RETURN id(a) AS source, id(b) AS target, r.foo AS foo";
-    private static final String BOTH_RELS = "MATCH (a)-[r]-(b) RETURN id(a) AS source, id(b) AS target, r.foo AS foo";
-    private static final String OUTGOING_RELS = "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, r.foo AS foo";
+    private static final String INCOMING_RELS = "MATCH (a)<-[r]-(b) RETURN id(a) AS source, id(b) AS target, %s AS foo";
+    private static final String BOTH_RELS = "MATCH (a)-[r]-(b) RETURN id(a) AS source, id(b) AS target, %s AS foo";
+    private static final String OUTGOING_RELS = "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, %s AS foo";
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -94,17 +94,12 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
         Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
-                       "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'single'" +
-                       "        }" +
-                       "    }" +
+                       "    relationshipQuery: $relQuery" +
                        "}) YIELD nodeId, score";
+
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(INCOMING_RELS, getCypherAggregation("single","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(incomingExpected, actual);
@@ -116,17 +111,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'sum'" +
-                       "        }" +
-                       "    }," +
                        "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD nodeId, score";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(INCOMING_RELS, getCypherAggregation("sum","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(incomingWeightedExpected, actual);
@@ -136,17 +125,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
     void testDegreeIncomingWriteBack() {
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
-                       "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'single'" +
-                       "        }" +
-                       "    }" +
+                       "    relationshipQuery: $relQuery" +
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(INCOMING_RELS, getCypherAggregation("single","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -160,17 +143,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'sum'" +
-                       "        }" +
-                       "    }," +
                        "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(INCOMING_RELS, getCypherAggregation("sum","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -184,17 +161,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
         Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
-                       "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'single'" +
-                       "        }" +
-                       "    }" +
+                       "    relationshipQuery: $relQuery" +
                        "}) YIELD nodeId, score";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(BOTH_RELS, getCypherAggregation("single","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(bothExpected, actual);
@@ -206,17 +177,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'sum'" +
-                       "        }" +
-                       "    }," +
                        "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD nodeId, score";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(BOTH_RELS, getCypherAggregation("sum","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(bothWeightedExpected, actual);
@@ -226,17 +191,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
     void testDegreeBothWriteBack() {
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
-                       "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'single'" +
-                       "        }" +
-                       "    }" +
+                       "    relationshipQuery: $relQuery" +
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(BOTH_RELS, getCypherAggregation("single","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -250,17 +209,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'sum'" +
-                       "        }" +
-                       "    }," +
                        "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(BOTH_RELS, getCypherAggregation("sum","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -274,17 +227,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
         Map<Long, Double> actual = new HashMap<>();
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
-                       "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'single'" +
-                       "        }" +
-                       "    }" +
+                       "    relationshipQuery: $relQuery" +
                        "}) YIELD nodeId, score";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(OUTGOING_RELS, getCypherAggregation("single","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(outgoingExpected, actual);
@@ -296,17 +243,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
         String query = "CALL gds.alpha.degree.stream({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'sum'" +
-                       "        }" +
-                       "    }," +
                        "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD nodeId, score";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(OUTGOING_RELS, getCypherAggregation("sum","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(outgoingWeightedExpected, actual);
@@ -316,17 +257,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
     void testDegreeOutgoingWriteBack() {
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
-                       "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'single'" +
-                       "        }" +
-                       "    }" +
+                       "    relationshipQuery: $relQuery" +
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(OUTGOING_RELS, getCypherAggregation("single","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -340,17 +275,11 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
         String query = "CALL gds.alpha.degree.write({" +
                        "    nodeQuery: $nodeQuery," +
                        "    relationshipQuery: $relQuery," +
-                       "    relationshipProperties: {" +
-                       "        foo: {" +
-                       "            property: 'foo'," +
-                       "            aggregation: 'sum'" +
-                       "        }" +
-                       "    }," +
                        "    relationshipWeightProperty: 'foo'" +
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(OUTGOING_RELS, getCypherAggregation("sum","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");

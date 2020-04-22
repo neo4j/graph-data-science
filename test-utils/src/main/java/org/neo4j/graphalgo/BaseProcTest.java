@@ -21,9 +21,11 @@ package org.neo4j.graphalgo;
 
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.ResourceIterator;
@@ -281,6 +283,32 @@ public class BaseProcTest extends BaseTest {
             .filter(e -> e.getKey().graphName().equals(graphName))
             .map(e -> e.getValue().getUnion())
             .collect(Collectors.toSet());
+    }
+
+    @NotNull
+    protected String getCypherAggregation(String aggregation, String property) {
+        String cypherAggregation;
+        switch (Aggregation.lookup(aggregation)) {
+            default:
+                cypherAggregation = "%s";
+                break;
+            case SINGLE:
+                cypherAggregation = "head(collect(%s))";
+                break;
+            case SUM:
+                cypherAggregation = "sum(%s)";
+                break;
+            case MIN:
+                cypherAggregation = "min(%s)";
+                break;
+            case MAX:
+                cypherAggregation = "max(%s)";
+                break;
+            case COUNT:
+                cypherAggregation = "count(%s)";
+                break;
+        }
+        return String.format(cypherAggregation, property);
     }
 
     private static void consume(ResourceIterator<Map<String, Object>> result) {

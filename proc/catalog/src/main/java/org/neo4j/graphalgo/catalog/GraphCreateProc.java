@@ -143,7 +143,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphCreateConfig initialConfig = GraphCreateFromCypherConfig.of(
+        GraphCreateFromCypherConfig config = GraphCreateFromCypherConfig.of(
             getUsername(),
             NO_GRAPH_NAME,
             nodeQuery,
@@ -158,6 +158,9 @@ public class GraphCreateProc extends CatalogProc {
             .build();
 
         validateConfig(cypherConfig, config);
+
+        //config.nodeQuery()
+        // TODO set properties based on queries
 
         return estimateGraph(config);
     }

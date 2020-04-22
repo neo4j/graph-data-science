@@ -596,34 +596,12 @@ class GraphCreateProcTest extends BaseProcTest {
         AtomicInteger cypherNodeCount = new AtomicInteger();
         AtomicInteger cypherRelCount = new AtomicInteger();
 
-        String cypherAggregation;
-        switch (Aggregation.lookup(aggregation)) {
-            default:
-                cypherAggregation = "%s";
-                break;
-            case SINGLE:
-                cypherAggregation = "head(collect(%s))";
-                break;
-            case SUM:
-                cypherAggregation = "sum(%s)";
-                break;
-            case MIN:
-                cypherAggregation = "min(%s)";
-                break;
-            case MAX:
-                cypherAggregation = "max(%s)";
-                break;
-            case COUNT:
-                cypherAggregation = "count(%s)";
-                break;
-        }
-
         runQueryWithRowConsumer(
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", cypher,
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", String.format("MATCH (s)-[r:KNOWS]->(t) RETURN id(s) AS source, id(t) AS target, %s AS weight",
-                    String.format(cypherAggregation, "r.weight")
+                    getCypherAggregation(aggregation, "r.weight")
                 )
             ),
             row -> {

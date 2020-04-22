@@ -143,13 +143,13 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
         );
     }
 
-
+    @Disabled
     @Test
     @Disabled("Disabled until we support relationshipProperties or it is removed")
     void computeMemoryEstimationForCypherProjectionWithProperties() {
         String nodeQuery = "MATCH (n) RETURN id(n) AS id";
         String relationshipQuery = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
-        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery, {relationshipProperties: 'weight'})";
+        String query = "CALL gds.graph.create.cypher.estimate($nodeQuery, $relationshipQuery)";
         runQueryWithRowConsumer(
             query,
             map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
