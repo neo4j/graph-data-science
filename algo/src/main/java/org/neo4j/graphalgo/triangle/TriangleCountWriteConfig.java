@@ -35,12 +35,6 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface TriangleCountWriteConfig extends TriangleConfig, WritePropertyConfig {
 
-    @Override
-    @Value.Default
-    default String writeProperty() {
-        return "triangles";
-    }
-
     @Value.Default
     default @Nullable String clusteringCoefficientProperty() {
         return null;

@@ -42,6 +42,7 @@ class TriangleCountWriteProcTest
             .algo("triangleCount")
             .writeMode()
             .addParameter("sudo", true)
+            .addParameter("writeProperty", "triangles")
             .yields();
 
         // TODO: Add testing for communityDistribution
@@ -72,7 +73,7 @@ class TriangleCountWriteProcTest
             getUsername(),
             Optional.empty(),
             Optional.empty(),
-            createMinimalConfig(mapWrapper)
+            mapWrapper
         );
     }
 
