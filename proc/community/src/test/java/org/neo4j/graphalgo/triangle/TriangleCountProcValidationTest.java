@@ -37,7 +37,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class TriangleCountProcTest extends BaseProcTest {
+class TriangleCountProcValidationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
