@@ -47,7 +47,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
 
     public static RelationshipProjections fromObject(Object object) {
         if (object == null) {
-            return empty();
+            return all();
         }
         if (object instanceof RelationshipProjections) {
             return (RelationshipProjections) object;
@@ -180,10 +180,6 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
 
     public boolean isEmpty() {
         return this == RelationshipProjections.of();
-    }
-
-    public static RelationshipProjections empty() {
-        return RelationshipProjections.of();
     }
 
     public static RelationshipProjections all() {

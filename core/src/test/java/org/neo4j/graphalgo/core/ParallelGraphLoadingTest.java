@@ -123,8 +123,6 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
             new StoreLoaderBuilder()
                 .api(db)
                 .executorService(pool)
-                .loadAnyLabel()
-                .loadAnyRelationshipType()
                 .build()
                 .graph(NativeFactory.class);
             fail("Should have thrown an Exception.");
@@ -179,7 +177,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     }
 
     private Graph loadEverything() {
-        return load(db, l -> l.loadAnyLabel().loadAnyRelationshipType()).getUnion();
+        return load(db, l -> { }).getUnion();
     }
 
     private GraphStore load(GraphDatabaseAPI db, Consumer<StoreLoaderBuilder> block) {

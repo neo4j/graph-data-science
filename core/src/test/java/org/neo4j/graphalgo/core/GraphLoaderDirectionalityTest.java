@@ -256,8 +256,6 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         } else {
             graphLoader = new StoreLoaderBuilder()
                 .api(db)
-                .loadAnyLabel()
-                .loadAnyRelationshipType()
                 .globalOrientation(orientation)
                 .globalAggregation(aggregation)
                 .build();

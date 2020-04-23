@@ -88,7 +88,6 @@ class YensTest extends AlgoTestBase {
 
         graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier(
                 "REL",
                 RelationshipProjection.of("REL", Orientation.UNDIRECTED, Aggregation.NONE)

@@ -45,14 +45,14 @@ class GraphCreateConfigBuildersTest {
             Arguments.arguments(
                 new StoreConfigBuilder().userName("foo").graphName("bar").build(),
                 ImmutableGraphCreateFromStoreConfig.builder().username("foo").graphName("bar")
-                    .nodeProjections(NodeProjections.empty())
-                    .relationshipProjections(RelationshipProjections.empty())
+                    .nodeProjections(NodeProjections.all())
+                    .relationshipProjections(RelationshipProjections.all())
                     .nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())
                     .build()
             ),
             Arguments.arguments(
-                new StoreConfigBuilder().loadAnyLabel().loadAnyRelationshipType().build(),
+                new StoreConfigBuilder().build(),
                 ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.builder()
                         .putProjection(ALL_NODES, NodeProjection.all())

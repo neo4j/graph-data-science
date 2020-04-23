@@ -71,8 +71,6 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
         } else {
             return new StoreLoaderBuilder()
                 .api(db)
-                .loadAnyLabel()
-                .loadAnyRelationshipType()
                 .build()
                 .graph(NativeFactory.class);
         }

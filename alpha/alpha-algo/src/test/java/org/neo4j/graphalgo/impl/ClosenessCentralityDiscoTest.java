@@ -69,8 +69,6 @@ class ClosenessCentralityDiscoTest extends AlgoTestBase {
     void testHuge() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
             .load(NativeFactory.class);

@@ -84,7 +84,7 @@ class GraphCreateConfigFromStoreTest {
                 .graphName("graph")
                 .relationshipProperties(propertyMappings)
                 .relationshipProjections(relProjections)
-                .nodeProjections(NodeProjections.empty())
+                .nodeProjections(NodeProjections.all())
                 .build()
         );
 
@@ -107,7 +107,7 @@ class GraphCreateConfigFromStoreTest {
 
         GraphCreateFromStoreConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName("graph")
-            .relationshipProjections(RelationshipProjections.of())
+            .relationshipProjections(RelationshipProjections.all())
             .nodeProperties(propertyMappings1)
             .nodeProjections(nodeProjections)
             .build();
@@ -139,7 +139,7 @@ class GraphCreateConfigFromStoreTest {
 
         GraphCreateFromStoreConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName("graph")
-            .nodeProjections(NodeProjections.empty())
+            .nodeProjections(NodeProjections.all())
             .relationshipProperties(propertyMappings1)
             .relationshipProjections(relProjections)
             .build();

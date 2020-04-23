@@ -73,8 +73,6 @@ final class HugeIntersectionTest extends AlgoTestBase {
 
         final Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
             .graph(NativeFactory.class);

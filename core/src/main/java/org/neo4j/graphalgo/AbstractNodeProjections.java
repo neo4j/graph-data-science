@@ -114,10 +114,6 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
         return NodeProjections.of(unmodifiableMap(projections));
     }
 
-    public static NodeProjections empty() {
-        return NodeProjections.of();
-    }
-
     public static NodeProjections all() {
         return ALL;
     }

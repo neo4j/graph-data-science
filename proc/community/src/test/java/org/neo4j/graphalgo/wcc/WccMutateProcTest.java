@@ -91,8 +91,6 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
     void testMutateAndWriteWithSeeding() {
         var testGraphName = "wccGraph";
         var initialGraphStore = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .build()
             .graphStore(NativeFactory.class);
 
@@ -120,8 +118,6 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
         runQuery(writeQuery);
 
         var updatedGraph = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
             .build()
             .graph(NativeFactory.class);

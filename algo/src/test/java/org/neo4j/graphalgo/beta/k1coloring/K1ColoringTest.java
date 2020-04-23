@@ -90,8 +90,6 @@ class K1ColoringTest extends AlgoTestBase {
         } else {
             graphLoader = new StoreLoaderBuilder()
                 .api(db)
-                .loadAnyLabel()
-                .loadAnyRelationshipType()
                 .build();
         }
 

@@ -119,8 +119,6 @@ class ClosenessCentralityTest extends AlgoTestBase {
     private void loadGraph() {
         graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .build()
             .graph(NativeFactory.class);
     }

@@ -62,8 +62,6 @@ final class GraphCreateConfigBuilders {
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relationshipProperties,
         Optional<Integer> concurrency,
-        @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
-        @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Orientation> globalProjection,
         Optional<Aggregation> globalAggregation,
         Optional<Boolean> validateRelationships
@@ -74,7 +72,7 @@ final class GraphCreateConfigBuilders {
         nodeProjections.forEach(np -> tempNP.put(np.label(), np));
         nodeProjectionsWithIdentifier.forEach(tempNP::put);
 
-        if (tempNP.isEmpty() && anyLabel == AnyLabel.LOAD) {
+        if (tempNP.isEmpty()) {
             tempNP.put(ALL_NODES.name, NodeProjection.all());
         }
 
@@ -90,7 +88,7 @@ final class GraphCreateConfigBuilders {
         relationshipProjections.forEach(rp -> tempRP.put(rp.type(), rp));
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
 
-        if (tempRP.isEmpty() && anyRelationshipType == AnyRelationshipType.LOAD) {
+        if (tempRP.isEmpty()) {
             tempRP.put(ALL_RELATIONSHIPS.name, RelationshipProjection.builder()
                 .type("*")
                 .orientation(orientation)

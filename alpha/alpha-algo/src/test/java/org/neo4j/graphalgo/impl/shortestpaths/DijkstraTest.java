@@ -78,8 +78,6 @@ class DijkstraTest extends AlgoTestBase {
 
         graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()

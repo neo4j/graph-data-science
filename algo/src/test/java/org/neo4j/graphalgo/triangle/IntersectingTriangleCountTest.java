@@ -257,8 +257,6 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
     private TriangleCountResult projectAndCompute() {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
             .graph(NativeFactory.class);

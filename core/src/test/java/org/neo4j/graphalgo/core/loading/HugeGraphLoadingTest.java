@@ -75,7 +75,6 @@ final class HugeGraphLoadingTest extends BaseTest {
             .api(db)
             .addNodeLabel(label.name())
             .addNodeProperty(PropertyMapping.of("bar", -1.0))
-            .loadAnyRelationshipType()
             .build()
             .graph(NativeFactory.class);
 
@@ -112,8 +111,6 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         final Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .build()
             .graph(NativeFactory.class);
 
@@ -143,8 +140,6 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         final Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
             .graph(NativeFactory.class);
@@ -161,7 +156,6 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_NATURAL",
                 RelationshipProjection.of("TYPE", Orientation.NATURAL)

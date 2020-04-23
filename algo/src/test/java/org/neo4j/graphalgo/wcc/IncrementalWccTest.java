@@ -79,7 +79,6 @@ class IncrementalWccTest extends AlgoTestBase {
     void shouldComputeComponentsFromSeedProperty() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .addRelationshipType(RELATIONSHIP_TYPE.name())
             .addNodeProperty(PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L))
             .build()

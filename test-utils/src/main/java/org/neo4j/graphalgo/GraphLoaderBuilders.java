@@ -71,8 +71,6 @@ final class GraphLoaderBuilders {
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relationshipProperties,
         Optional<Integer> concurrency,
-        @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
-        @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Orientation> globalOrientation,
         Optional<Aggregation> globalAggregation,
         Optional<Boolean> validateRelationships
@@ -90,8 +88,6 @@ final class GraphLoaderBuilders {
             nodeProperties,
             relationshipProperties,
             concurrency,
-            anyLabel,
-            anyRelationshipType,
             globalOrientation,
             globalAggregation,
             validateRelationships

@@ -127,7 +127,6 @@ class GraphStoreTest extends BaseTest {
             .graphName("myGraph")
             .putNodeProjectionsWithIdentifier("A", NodeProjection.of("A", PropertyMappings.of()))
             .putNodeProjectionsWithIdentifier("All", NodeProjection.all())
-            .loadAnyRelationshipType()
             .build();
 
         GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
@@ -157,8 +156,6 @@ class GraphStoreTest extends BaseTest {
     void testModificationDate() throws InterruptedException {
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .build()
             .graphStore(NativeFactory.class);
 
@@ -192,9 +189,7 @@ class GraphStoreTest extends BaseTest {
 
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .addNodeProperty(PropertyMapping.of("nodeProp", 0D))
-            .loadAnyRelationshipType()
             .build()
             .graphStore(NativeFactory.class);
 
@@ -209,7 +204,6 @@ class GraphStoreTest extends BaseTest {
 
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .addRelationshipProjection(RelationshipProjection.of("REL", Orientation.NATURAL)
                 .withProperties(
                     PropertyMappings.of(PropertyMapping.of("p", 3.14))
