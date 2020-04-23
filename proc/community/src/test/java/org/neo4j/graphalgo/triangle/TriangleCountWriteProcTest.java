@@ -27,11 +27,14 @@ import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -61,21 +64,16 @@ class TriangleCountWriteProcTest
             .addParameter("clusteringCoefficientProperty", "clusteringCoefficient")
             .yields();
 
-        // TODO: Add testing for communityDistribution
-        runQueryWithRowConsumer(query, row -> {
-            var createMillis = row.getNumber("createMillis").longValue();
-            var computeMillis = row.getNumber("computeMillis").longValue();
-            var writeMillis = row.getNumber("writeMillis").longValue();
-            var nodeCount = row.getNumber("nodeCount").longValue();
-            var nodePropertiesWritten = row.getNumber("nodePropertiesWritten").longValue();
-            var triangleCount = row.getNumber("triangleCount").longValue();
-            assertNotEquals(-1, createMillis);
-            assertNotEquals(-1, computeMillis);
-            assertNotEquals(-1, writeMillis);
-            assertEquals(5, triangleCount);
-            assertEquals(5, nodeCount);
-            assertEquals(10, nodePropertiesWritten);
-        });
+        assertCypherResult(query, List.of(Map.of(
+            "triangleCount", 5L,
+            "averageClusteringCoefficient", closeTo(13.0 / 15, 1e-10),
+            "nodeCount", 5L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "configuration", isA(Map.class),
+            "writeMillis", greaterThan(-1L),
+            "nodePropertiesWritten", 10L
+        )));
 
         Map<String, Map<Long, Double>> expectedResult = Map.of(
             "a", Map.of(4L, 2.0 / 3),
