@@ -40,7 +40,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -50,11 +49,10 @@ import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 public final class NativeFactory extends GraphStoreFactory {
 
     public NativeFactory(
-        GraphDatabaseAPI api,
         GraphCreateConfig graphCreateConfig,
         GraphLoadingContext loadingContext
     ) {
-        super(api, loadingContext, graphCreateConfig);
+        super(loadingContext, graphCreateConfig);
     }
 
     @Override
@@ -167,7 +165,7 @@ public final class NativeFactory extends GraphStoreFactory {
             ));
 
         return new ScanningNodesImporter(
-            api,
+            loadingContext.api(),
             dimensions,
             progressLogger,
             tracker,
@@ -196,7 +194,7 @@ public final class NativeFactory extends GraphStoreFactory {
         ObjectLongMap<RelationshipType> relationshipCounts = new ScanningRelationshipsImporter(
             graphCreateConfig,
             loadingContext,
-            api,
+            loadingContext.api(),
             dimensions,
             progressLogger,
             tracker,

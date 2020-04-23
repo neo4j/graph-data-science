@@ -33,7 +33,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -45,17 +44,14 @@ import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class CypherFactory extends GraphStoreFactory {
 
-    private final GraphDatabaseAPI api;
     private final GraphCreateFromCypherConfig cypherConfig;
     private final GraphLoadingContext loadingContext;
 
     public CypherFactory(
-        GraphDatabaseAPI api,
         GraphCreateConfig graphCreateConfig,
         GraphLoadingContext loadingContext
     ) {
-        super(api, loadingContext, graphCreateConfig, false);
-        this.api = api;
+        super(loadingContext, graphCreateConfig, false);
         this.cypherConfig = getCypherConfig(graphCreateConfig)
             .orElseThrow(() -> new IllegalArgumentException("Expected GraphCreateConfig to be a cypher config."));
         this.loadingContext = loadingContext;
@@ -65,11 +61,17 @@ public class CypherFactory extends GraphStoreFactory {
         BatchLoadResult nodeCount;
         BatchLoadResult relCount;
         try (Ktx ktx = setReadOnlySecurityContext()) {
-            nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, cypherConfig, loadingContext).load(ktx);
+            nodeCount = new CountingCypherRecordLoader(
+                nodeQuery(),
+                NODE,
+                loadingContext.api(),
+                cypherConfig,
+                loadingContext
+            ).load(ktx);
             relCount = new CountingCypherRecordLoader(
                 relationshipQuery(),
                 RELATIONSHIP,
-                api,
+                loadingContext.api(),
                 cypherConfig,
                 loadingContext
             ).load(ktx);
@@ -96,7 +98,7 @@ public class CypherFactory extends GraphStoreFactory {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(
                 nodeQuery(),
                 NODE,
-                api,
+                loadingContext.api(),
                 cypherConfig,
                 loadingContext
             ).load(ktx);
@@ -104,7 +106,7 @@ public class CypherFactory extends GraphStoreFactory {
             CypherNodeLoader.LoadResult nodes = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
-                api,
+                loadingContext.api(),
                 cypherConfig,
                 loadingContext,
                 dimensions
@@ -157,7 +159,7 @@ public class CypherFactory extends GraphStoreFactory {
         CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
             relationshipQuery,
             idsAndProperties.idMap(),
-            api,
+            loadingContext.api(),
             cypherConfig,
             loadingContext,
             nodeLoadDimensions
@@ -173,12 +175,12 @@ public class CypherFactory extends GraphStoreFactory {
     }
 
     private Ktx setReadOnlySecurityContext() {
-        GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(api);
+        GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(loadingContext.api());
         KernelTransaction ktx = transactions.ktx();
         try {
             AuthSubject subject = ktx.securityContext().subject();
             SecurityContext securityContext = new SecurityContext(subject, READ);
-            return new Ktx(api, transactions, securityContext);
+            return new Ktx(loadingContext.api(), transactions, securityContext);
         } catch (NotInTransactionException ex) {
             // happens only in tests
             throw new IllegalStateException("Must run in a transaction.", ex);

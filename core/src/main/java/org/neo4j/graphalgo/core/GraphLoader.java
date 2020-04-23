@@ -79,6 +79,7 @@ public interface GraphLoader {
     @Value.Lazy
     default GraphLoadingContext toGraphLoadingContext() {
         return ImmutableGraphLoadingContext.of(
+            api(),
             log(),
             tracker(),
             terminationFlag(),
@@ -95,9 +96,9 @@ public interface GraphLoader {
             GraphStoreFactory factory;
 
             if (CypherFactory.class.isAssignableFrom(factoryType)) {
-                factory = new CypherFactory(api(), createConfig(), loadingContext);
+                factory = new CypherFactory(createConfig(), loadingContext);
             } else {
-                factory = new NativeFactory(api(), createConfig(), loadingContext);
+                factory = new NativeFactory(createConfig(), loadingContext);
             }
 
             return factoryType.cast(factory);

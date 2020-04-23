@@ -22,12 +22,15 @@ package org.neo4j.graphalgo.api;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
 import java.util.concurrent.ExecutorService;
 
 @ValueClass
 public interface GraphLoadingContext {
+
+    GraphDatabaseAPI api();
 
     Log log();
 

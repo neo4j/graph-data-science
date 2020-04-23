@@ -41,7 +41,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,31 +55,27 @@ public abstract class GraphStoreFactory implements Assessable {
     public static final String TASK_LOADING = "LOADING";
 
     protected final ExecutorService threadPool;
-    protected final GraphDatabaseAPI api;
     protected final GraphLoadingContext loadingContext;
     protected final GraphDimensions dimensions;
     protected final ProgressLogger progressLogger;
     protected final GraphCreateConfig graphCreateConfig;
 
     public GraphStoreFactory(
-        GraphDatabaseAPI api,
         GraphLoadingContext loadingContext,
         GraphCreateConfig graphCreateConfig
     ) {
-        this(api, loadingContext, graphCreateConfig, true);
+        this(loadingContext, graphCreateConfig, true);
     }
 
     public GraphStoreFactory(
-        GraphDatabaseAPI api,
         GraphLoadingContext loadingContext,
         GraphCreateConfig graphCreateConfig,
         boolean readTokens
     ) {
         this.threadPool = loadingContext.executor();
-        this.api = api;
         this.loadingContext = loadingContext;
         this.graphCreateConfig = graphCreateConfig;
-        this.dimensions = new GraphDimensionsReader(api, graphCreateConfig, readTokens).call();
+        this.dimensions = new GraphDimensionsReader(loadingContext.api(), graphCreateConfig, readTokens).call();
         this.progressLogger = initProgressLogger();
     }
 
