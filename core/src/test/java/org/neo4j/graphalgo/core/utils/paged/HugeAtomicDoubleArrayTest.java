@@ -92,21 +92,9 @@ final class HugeAtomicDoubleArrayTest {
     void testIndexing() {
         testArray(SIZE, aa -> {
             for (int index : new int[]{-1, SIZE}) {
-                try {
-                    aa.get(index);
-                    shouldThrow();
-                } catch (AssertionError ignored) {
-                }
-                try {
-                    aa.set(index, 1);
-                    shouldThrow();
-                } catch (AssertionError ignored) {
-                }
-                try {
-                    aa.compareAndSet(index, 1, 2);
-                    shouldThrow();
-                } catch (AssertionError ignored) {
-                }
+                assertThrows(ArrayIndexOutOfBoundsException.class, () -> aa.get(index));
+                assertThrows(ArrayIndexOutOfBoundsException.class, () -> aa.set(index, 1));
+                assertThrows(ArrayIndexOutOfBoundsException.class, () -> aa.compareAndSet(index, 1, 2));
             }
         });
     }
