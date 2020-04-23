@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -47,6 +48,7 @@ import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, IdsAndProperties> {
 
+    private final GraphCreateConfig graphCreateConfig;
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
     private final TerminationFlag terminationFlag;
@@ -58,6 +60,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private Map<NodeLabel, BitSet> nodeLabelBitSetMapping;
 
     ScanningNodesImporter(
+        GraphCreateConfig graphCreateConfig,
         GraphDatabaseAPI api,
         GraphDimensions dimensions,
         ProgressLogger progressLogger,
@@ -68,6 +71,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
         Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
     ) {
         super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
+        this.graphCreateConfig = graphCreateConfig;
         this.progressLogger = progressLogger;
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
@@ -84,7 +88,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
-        nodeLabelBitSetMapping = labelTokenNodeLabelMapping.size() == 1 && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
+        nodeLabelBitSetMapping = graphCreateConfig.nodeProjections().allProjections().size() == 1 && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
             ? null
             : initializeLabelBitSets(nodeCount, labelTokenNodeLabelMapping);
 

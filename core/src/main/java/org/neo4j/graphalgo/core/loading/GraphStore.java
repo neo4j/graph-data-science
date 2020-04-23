@@ -33,6 +33,9 @@ import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.graphalgo.core.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.core.schema.NodeSchema;
+import org.neo4j.graphalgo.core.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.utils.StringJoining;
@@ -46,6 +49,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -519,7 +523,7 @@ public final class GraphStore {
             .entrySet()
             .stream()
             .collect(Collectors.toMap(
-                Map.Entry::getKey,
+                Entry::getKey,
                 entry -> new UnionNodeProperties(entry.getValue(), maybeElementIdentifierBitSetMap.get())
             ));
     }
@@ -569,6 +573,44 @@ public final class GraphStore {
     private synchronized void updateGraphStore(Consumer<GraphStore> updateFunction) {
         updateFunction.accept(this);
         this.modificationTime = TimeUtil.now();
+    }
+
+    public GraphStoreSchema schema() {
+        return GraphStoreSchema.of(nodeSchema(), relationshipTypeSchema());
+    }
+
+    private NodeSchema nodeSchema() {
+        NodeSchema.Builder nodePropsBuilder = NodeSchema.builder();
+
+        nodeProperties.forEach((label, propertyStore) -> {
+            propertyStore.nodeProperties().forEach((propertyName, nodeProperty) -> {
+                nodePropsBuilder.addPropertyAndTypeForLabel(label, propertyName, nodeProperty.type());
+            });
+        });
+
+        for (NodeLabel nodeLabel : nodeLabels()) {
+            nodePropsBuilder.addEmptyMapForLabelWithoutProperties(nodeLabel);
+        }
+        return nodePropsBuilder.build();
+    }
+
+    private RelationshipSchema relationshipTypeSchema() {
+        RelationshipSchema.Builder relationshipPropsBuilder = RelationshipSchema.builder();
+
+        relationshipProperties.forEach((type, propertyStore) -> {
+            propertyStore.relationshipProperties().forEach((propertyName, relationshipProperty) -> {
+                relationshipPropsBuilder.addPropertyAndTypeForRelationshipType(
+                    type,
+                    propertyName,
+                    relationshipProperty.type()
+                );
+            });
+        });
+
+        for (RelationshipType type : relationshipTypes()) {
+            relationshipPropsBuilder.addEmptyMapForRelationshipTypeWithoutProperties(type);
+        }
+        return relationshipPropsBuilder.build();
     }
 
     public enum PropertyState {

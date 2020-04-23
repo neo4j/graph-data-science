@@ -165,6 +165,7 @@ public final class NativeFactory extends GraphStoreFactory {
             ));
 
         return new ScanningNodesImporter(
+            graphCreateConfig,
             loadingContext.api(),
             dimensions,
             progressLogger,

@@ -107,23 +107,32 @@ Once we have created graphs in the catalog, we can list information about either
 [source,cypher]
 ----
 CALL gds.graph.list()
-YIELD graphName, nodeCount, relationshipCount;
+YIELD graphName, nodeProjection, relationshipProjection, nodeQuery, relationshipQuery,
+      nodeCount, relationshipCount, schema, degreeDistribution, creationTime, modificationTime;
 ----
 
 .List information about a named graph in the catalog:
 [source,cypher]
 ----
-CALL gds.graph.list('my-cypher-graph')
-YIELD graphName, nodeQuery, relationshipQuery, nodeCount, relationshipCount, creationTime, modificationTime, sizeInBytes, memoryUsage;
+CALL gds.graph.list(graphName)
+YIELD graphName, nodeProjection, relationshipProjection, nodeQuery, relationshipQuery,
+      nodeCount, relationshipCount, schema, degreeDistribution, creationTime, modificationTime, sizeInBytes, memoryUsage;
 ----
+The `nodeProjection` and `relationshipProjection` columns are primarily applicable to <<native-projection, Native projection>>.
+The `nodeQuery` and `relationshipQuery` columns are applicable only to <<cypher-projection, Cypher projection>> and are `null` for graphs created with Native projection.
 
-The information contains basic statistics about the graph, e.g., the node and relationship count.
-The result field `creationTime` indicates when the graph was created in memory.
-The result field `modificationTime` indicates when the graph was updated by an algorithm running in `mutate` mode.
-The result field `sizeInBytes` yields the number of bytes used in the Java Heap to store that graph.
-The result field `memoryUsage` is the same information in a human readable format.
-The procedure can also compute information about degree distributions, i.e., the number of relationships per node.
-To skip computing the distribution values, use the `YIELD` subclause and omit the `degreeDistribution` column.
+The `degreeDistribution` is more time-consuming to compute than the other return columns.
+It is however only computed when included in the `YIELD` subclause.
+
+The `schema` consists of information about the nodes and relationships stored in the graph.
+For each node label, the schema maps the label to its property keys and their corresponding property types.
+Similarly, the schema maps the relationship types to their property keys and property types.
+The property type is either `Integer` or `Float`.
+
+The `creationTime` indicates when the graph was created in memory.
+The `modificationTime` indicates when the graph was updated by an algorithm running in `mutate` mode.
+The `sizeInBytes` yields the number of bytes used in the Java Heap to store that graph.
+The `memoryUsage` is the same information in a human readable format.
 
 .List information about the degree distribution of a specific graph:
 [source,cypher]

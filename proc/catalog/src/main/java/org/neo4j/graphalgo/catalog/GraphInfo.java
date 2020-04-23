@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.time.ZonedDateTime;
@@ -51,6 +52,7 @@ public class GraphInfo {
     public final Map<String, Object> degreeDistribution;
     public final ZonedDateTime creationTime;
     public final ZonedDateTime modificationTime;
+    public final Map<String, Object> schema;
 
     GraphInfo(GraphCreateConfig config, GraphStore graphStore, boolean computeHistogram) {
         this.graphName = config.graphName();
@@ -73,6 +75,7 @@ public class GraphInfo {
         this.nodeCount = graphStore.nodeCount();
         this.relationshipCount = graphStore.relationshipCount();
         this.degreeDistribution = computeHistogram ? computeHistogram(graphStore.getUnion()) : emptyMap();
+        this.schema = graphStore.schema().toMap();
         this.sizeInBytes = MemoryUsage.sizeOf(graphStore);
         this.memoryUsage = MemoryUsage.humanReadable(this.sizeInBytes);
     }

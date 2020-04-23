@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -41,6 +42,11 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements 
     @Override
     public String mutateProperty() {
         return "color";
+    }
+
+    @Override
+    public NumberType mutatePropertyType() {
+        return NumberType.INTEGRAL;
     }
 
     @Override

@@ -60,6 +60,8 @@ CALL gds.graph.create(
 | validateRelationships  | Boolean               | false          | Whether to throw an error if relationships contain nodes not included in the nodeProjection.
 |===
 
+To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
+
 
 [[native-projection-syntax-node-projections]]
 == Node projections
