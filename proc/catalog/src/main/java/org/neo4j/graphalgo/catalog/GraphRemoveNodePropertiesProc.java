@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.catalog;
 
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphRemoveNodePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -42,7 +41,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
     public Stream<Result> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
-        @Name(value = "nodeLabels") List<String> nodeLabels,
+        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         validateGraphName(graphName);
@@ -64,20 +63,17 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         long propertiesRemoved = runWithExceptionLogging(
             "Node property removal failed",
             () -> {
-                long sum = config.nodeProperties()
-                    .stream()
-                    .map(graphStore::nodeProperty)
-                    .map(GraphStore.NodeProperty::values)
-                    .mapToLong(NodeProperties::size)
+                long sum = config.nodeLabelIdentifiers(graphStore).stream()
+                    .mapToLong(nodeLabel ->
+                        config.nodeProperties().stream()
+                            .mapToLong(property -> graphStore.nodeProperty(nodeLabel, property).values().size())
+                            .sum())
                     .sum();
 
-                config
-                    .nodeProperties()
-                    .forEach(property ->
-                        graphStore
-                            .nodeLabels()
-                            .forEach(label -> graphStore.removeNodeProperty(label, property))
-                    );
+                config.nodeLabelIdentifiers(graphStore).forEach(label ->
+                    config.nodeProperties().forEach(property ->
+                        graphStore.removeNodeProperty(label, property))
+                );
 
                 return sum;
             }

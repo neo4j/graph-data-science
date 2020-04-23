@@ -41,12 +41,12 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {nodeProp1: 0, nodeProp2: 42})" +
-        ", (b:Node {nodeProp1: 1, nodeProp2: 43})" +
-        ", (c:Node {nodeProp1: 2, nodeProp2: 44})" +
-        ", (d:Node {nodeProp1: 3, nodeProp2: 45})" +
-        ", (e:Node {nodeProp1: 4, nodeProp2: 46})" +
-        ", (f:Node {nodeProp1: 5, nodeProp2: 47})";
+        "  (a:A {nodeProp1: 0, nodeProp2: 42})" +
+        ", (b:A {nodeProp1: 1, nodeProp2: 43})" +
+        ", (c:A {nodeProp1: 2, nodeProp2: 44})" +
+        ", (d:B {nodeProp1: 3, nodeProp2: 45})" +
+        ", (e:B {nodeProp1: 4, nodeProp2: 46})" +
+        ", (f:B {nodeProp1: 5, nodeProp2: 47})";
 
     @BeforeEach
     void setup() throws Exception {
@@ -54,7 +54,8 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher.call()
-            .withAnyLabel()
+            .withNodeLabel("A")
+            .withNodeLabel("B")
             .withNodeProperty("nodeProp1")
             .withNodeProperty("nodeProp2")
             .withAnyRelationshipType()
@@ -86,6 +87,24 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
     }
 
     @Test
+    void removeNodePropertiesForLabel() {
+        String graphWriteQuery = String.format(
+            "CALL gds.graph.removeNodeProperties(" +
+            "   '%s', " +
+            "   ['nodeProp1', 'nodeProp2'], " +
+            "   ['A']" +
+            ") YIELD graphName, nodeProperties, propertiesRemoved",
+            TEST_GRAPH_NAME
+        );
+
+        runQueryWithRowConsumer(graphWriteQuery, row -> {
+            assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
+            assertEquals(Arrays.asList("nodeProp1", "nodeProp2"), row.get("nodeProperties"));
+            assertEquals(6L, row.getNumber("propertiesRemoved").longValue());
+        });
+    }
+
+    @Test
     void shouldFailOnNonExistingNodeProperty() {
         QueryExecutionException ex = assertThrows(
             QueryExecutionException.class,
@@ -100,8 +119,6 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
         Throwable rootCause = rootCause(ex);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("No node projection with property key `nodeProp3` found"));
-        assertThat(rootCause.getMessage(), containsString("nodeProp1"));
-        assertThat(rootCause.getMessage(), containsString("nodeProp2"));
+        assertThat(rootCause.getMessage(), containsString("No node projection with all property keys ['nodeProp1', 'nodeProp2', 'nodeProp3'] found."));
     }
 }
