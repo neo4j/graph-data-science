@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
 
 final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, ObjectLongMap<RelationshipType>> {
 
+    private final GraphCreateConfig graphCreateConfig;
     private final GraphSetup setup;
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
@@ -51,6 +53,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final Map<RelationshipType, LongAdder> allRelationshipCounters;
 
     ScanningRelationshipsImporter(
+        GraphCreateConfig graphCreateConfig,
         GraphSetup setup,
         GraphDatabaseAPI api,
         GraphDimensions dimensions,
@@ -68,6 +71,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 dimensions,
                 threadPool,
                 concurrency);
+        this.graphCreateConfig = graphCreateConfig;
         this.setup = setup;
         this.progressLogger = progressLogger;
         this.tracker = tracker;
@@ -152,7 +156,14 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
 
         RelationshipImporter importer = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
         int typeId = dimensions.relationshipTypeTokenMapping().get(relationshipType);
-        return new SingleTypeRelationshipImporter.Builder(relationshipType, projection, typeId, importer, relationshipCounter, setup.validateRelationships());
+        return new SingleTypeRelationshipImporter.Builder(
+            relationshipType,
+            projection,
+            typeId,
+            importer,
+            relationshipCounter,
+            graphCreateConfig.validateRelationships()
+        );
     }
 
     @Override

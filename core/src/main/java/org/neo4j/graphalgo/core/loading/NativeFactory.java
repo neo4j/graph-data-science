@@ -118,7 +118,7 @@ public final class NativeFactory extends GraphStoreFactory {
 
     @Override
     protected ProgressLogger initProgressLogger() {
-        long relationshipCount = setup.relationshipProjections().projections().entrySet().stream()
+        long relationshipCount = graphCreateConfig.relationshipProjections().projections().entrySet().stream()
             .map(entry -> {
                 Long relCount = entry.getKey().name.equals("*")
                      ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
@@ -141,7 +141,7 @@ public final class NativeFactory extends GraphStoreFactory {
     public ImportResult build() {
         validate(dimensions, graphCreateConfig);
 
-        int concurrency = setup.concurrency();
+        int concurrency = graphCreateConfig.readConcurrency();
         AllocationTracker tracker = setup.tracker();
         IdsAndProperties nodes = loadNodes(tracker, concurrency);
         RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency);
@@ -190,6 +190,7 @@ public final class NativeFactory extends GraphStoreFactory {
             ));
 
         ObjectLongMap<RelationshipType> relationshipCounts = new ScanningRelationshipsImporter(
+            graphCreateConfig,
             setup,
             api,
             dimensions,

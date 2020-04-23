@@ -121,7 +121,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             builder,
             importer.nodeLabelBitSetMapping,
             maxNodeId,
-            setup.concurrency(),
+            config.readConcurrency(),
             setup.tracker()
         );
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter.result();

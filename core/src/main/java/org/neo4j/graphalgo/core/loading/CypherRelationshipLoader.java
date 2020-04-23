@@ -187,7 +187,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             propertyDefaultValueByName,
             bufferSize,
             isAnyRelTypeQuery,
-            setup.validateRelationships()
+            config.validateRelationships()
         );
 
         queryResult.accept(visitor);
@@ -251,7 +251,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             this.importerBuildersByType = new HashMap<>();
             this.allBuilders = new HashMap<>();
 
-            ImportSizing importSizing = ImportSizing.of(setup.concurrency(), idMap.nodeCount());
+            ImportSizing importSizing = ImportSizing.of(config.readConcurrency(), idMap.nodeCount());
             this.pageSize = importSizing.pageSize();
             this.numberOfPages = importSizing.numberOfPages();
         }
@@ -313,7 +313,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             );
 
             RelationshipImporter relationshipImporter = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
-            return new SingleTypeRelationshipImporter.Builder(relationshipType, relationshipProjection, NO_SUCH_RELATIONSHIP_TYPE, relationshipImporter, relationshipCounter, setup.validateRelationships());
+            return new SingleTypeRelationshipImporter.Builder(relationshipType, relationshipProjection, NO_SUCH_RELATIONSHIP_TYPE, relationshipImporter, relationshipCounter, config.validateRelationships());
         }
     }
 

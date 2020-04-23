@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -34,6 +35,7 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
@@ -111,11 +113,22 @@ public class CypherFactory extends GraphStoreFactory {
     }
 
     private String nodeQuery() {
-        return setup.nodeQuery().orElseThrow(() -> new IllegalArgumentException("Missing node query"));
+        return getCypherConfig(graphCreateConfig)
+            .orElseThrow(() -> new IllegalArgumentException("Missing node query"))
+            .nodeQuery();
     }
 
     private String relationshipQuery() {
-        return setup.relationshipQuery().orElseThrow(() -> new IllegalArgumentException("Missing relationship query"));
+        return getCypherConfig(graphCreateConfig)
+            .orElseThrow(() -> new IllegalArgumentException("Missing relationship query"))
+            .relationshipQuery();
+    }
+
+    private Optional<GraphCreateFromCypherConfig> getCypherConfig(GraphCreateConfig config) {
+        if (!config.isCypher()) {
+            return Optional.empty();
+        }
+        return Optional.of((GraphCreateFromCypherConfig) config);
     }
 
     private RelationshipImportResult loadRelationships(

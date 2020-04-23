@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
@@ -54,7 +55,7 @@ abstract class CypherRecordLoader<R> {
 
     static final long NO_COUNT = -1L;
 
-    final GraphCreateConfig config;
+    final GraphCreateFromCypherConfig config;
     final GraphSetup setup;
 
     protected final GraphDatabaseAPI api;
@@ -66,7 +67,10 @@ abstract class CypherRecordLoader<R> {
         this.loadQuery = loadQuery;
         this.recordCount = recordCount;
         this.api = api;
-        this.config = config;
+        if (!config.isCypher()) {
+            throw new IllegalArgumentException("Expected `GraphCreateConfig#isCypher` to be true, but was false");
+        }
+        this.config = (GraphCreateFromCypherConfig) config;
         this.setup = setup;
     }
 
@@ -106,7 +110,7 @@ abstract class CypherRecordLoader<R> {
     }
 
     Result runLoadingQuery(Transaction tx) {
-        Result result = runQueryWithoutClosingTheResult(tx, loadQuery, setup.parameters());
+        Result result = runQueryWithoutClosingTheResult(tx, loadQuery, config.parameters());
         validateMandatoryColumns(Lists.newArrayList(result.columns().iterator()));
         return result;
     }

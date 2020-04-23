@@ -57,7 +57,6 @@ public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
             .yields());
     }
 
-
     @AfterEach
     void shutdown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
