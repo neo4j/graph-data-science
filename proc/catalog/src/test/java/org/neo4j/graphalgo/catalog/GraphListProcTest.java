@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -278,52 +277,6 @@ class GraphListProcTest extends BaseProcTest {
         ));
     }
 
-    @Disabled("Disabled until we support REL> syntax for type filter")
-    @Test
-    void calculateDegreeDistributionForOutgoingRelationshipsWhenAskedTo() {
-        String name = "name";
-        runQuery("CALL gds.graph.create($name, 'A', 'REL>')", map("name", name));
-
-        assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
-            map(
-                "degreeDistribution", map(
-                    "min", 1,
-                    "mean", 1,
-                    "max", 1,
-                    "p50", 1,
-                    "p75", 1,
-                    "p90", 1,
-                    "p95", 1,
-                    "p99", 1,
-                    "p999", 1
-                )
-            )
-        ));
-    }
-
-    @Disabled("Disabled until we support REL> syntax for type filter")
-    @Test
-    void calculateDegreeDistributionForIncomingRelationshipsWhenAskedTo() {
-        String name = "name";
-        runQuery("CALL gds.graph.create($name, 'A', '<REL')", map("name", name));
-
-        assertCypherResult("CALL gds.graph.list() YIELD degreeDistribution", singletonList(
-            map(
-                "degreeDistribution", map(
-                    "min", 1,
-                    "mean", 1,
-                    "max", 1,
-                    "p50", 1,
-                    "p75", 1,
-                    "p90", 1,
-                    "p95", 1,
-                    "p99", 1,
-                    "p999", 1
-                )
-            )
-        ));
-    }
-
     @Test
     void calculateActualMemoryUsage() {
         runQuery("CALL gds.graph.create('name', 'A', 'REL')");
@@ -444,7 +397,6 @@ class GraphListProcTest extends BaseProcTest {
         );
     }
 
-    @Disabled("Until the graph store has rel-type aware properties")
     @Test
     void shouldShowSchemaForMultipleProjectionsWithStar() {
         runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
@@ -465,7 +417,6 @@ class GraphListProcTest extends BaseProcTest {
         );
     }
 
-    @Disabled("Until the graph store has rel-type aware properties")
     @Test
     void shouldShowSchemaForMultipleProjectionsWithTwoRenamedStars() {
         runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
@@ -486,7 +437,6 @@ class GraphListProcTest extends BaseProcTest {
         );
     }
 
-    @Disabled("Until the graph store has rel-type aware properties")
     @Test
     void shouldShowSchemaForMultipleProjections() {
         runQuery("CREATE (:B {age: 12})-[:LIKES {since: 42}]->(:B {age: 66})");
