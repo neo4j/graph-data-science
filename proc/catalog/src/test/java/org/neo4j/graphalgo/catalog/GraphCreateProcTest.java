@@ -82,7 +82,6 @@ import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.ElementProjection.PROPERTIES_KEY;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
@@ -432,32 +431,6 @@ class GraphCreateProcTest extends BaseProcTest {
         assertGraphEquals(fromGdl("()-[{w:55}]->()"), graph);
     }
 
-    @ParameterizedTest(name = "properties = {0}")
-    @MethodSource(value = "relationshipProperties")
-    void relationshipQueryAndProperties(Object relationshipProperties, Map<String, Object> expectedProperties) {
-        String name = "g";
-
-        String relationshipQuery = "MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
-        assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
-            map("name", name,
-                "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", relationshipQuery,
-                "relationshipProperties", relationshipProperties),
-            singletonList(map(
-                "graphName", name,
-                NODE_QUERY_KEY, ALL_NODES_QUERY,
-                RELATIONSHIP_QUERY_KEY, relationshipQuery,
-                "nodeCount", 2L,
-                "relationshipCount", 1L,
-                "createMillis", instanceOf(Long.class)
-            ))
-        );
-
-        Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
-        assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
-    }
-
     @Test
     void relationshipQueryAndQueryProperties() {
         String name = "g";
@@ -582,35 +555,6 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "aggregation={0}")
     @EnumSource(Aggregation.class)
-    void relationshipQueryPropertyAggregations(Aggregation aggregationParam) {
-        String aggregation = aggregationParam.toString();
-        String name = "g";
-        String relationshipQuery = "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target, r.weight AS weight";
-
-        assertCypherResult(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
-            map("name", name,
-                "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", relationshipQuery,
-                "relationshipProperties", map("weight", map("aggregation", aggregation))
-            ),
-            singletonList(map(
-                "graphName", name,
-                NODE_QUERY_KEY, ALL_NODES_QUERY,
-                RELATIONSHIP_QUERY_KEY, relationshipQuery,
-                "nodeCount", 2L,
-                "relationshipCount", 1L,
-                "createMillis", instanceOf(Long.class)
-            ))
-        );
-
-        assertGraphExists(name);
-        Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
-        assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
-    }
-
-    @ParameterizedTest(name = "aggregation={0}")
-    @EnumSource(Aggregation.class)
     void relationshipProjectionPropertyAggregationsNativeVsCypher(Aggregation aggregationParam) {
         String aggregation = aggregationParam.toString();
 
@@ -651,12 +595,36 @@ class GraphCreateProcTest extends BaseProcTest {
 
         AtomicInteger cypherNodeCount = new AtomicInteger();
         AtomicInteger cypherRelCount = new AtomicInteger();
+
+        String cypherAggregation;
+        switch (Aggregation.lookup(aggregation)) {
+            default:
+                cypherAggregation = "%s";
+                break;
+            case SINGLE:
+                cypherAggregation = "head(collect(%s))";
+                break;
+            case SUM:
+                cypherAggregation = "sum(%s)";
+                break;
+            case MIN:
+                cypherAggregation = "min(%s)";
+                break;
+            case MAX:
+                cypherAggregation = "max(%s)";
+                break;
+            case COUNT:
+                cypherAggregation = "count(%s)";
+                break;
+        }
+
         runQueryWithRowConsumer(
-            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery, { relationshipProperties: $relationshipProperties })",
+            "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", cypher,
                 "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", "MATCH (s)-[r:KNOWS]->(t) RETURN id(s) AS source, id(t) AS target, r.weight AS weight",
-                "relationshipProperties", map("weight", map("aggregation", aggregation))
+                "relationshipQuery", String.format("MATCH (s)-[r:KNOWS]->(t) RETURN id(s) AS source, id(t) AS target, %s AS weight",
+                    String.format(cypherAggregation, "r.weight")
+                )
             ),
             row -> {
                 cypherNodeCount.set(row.getNumber("nodeCount").intValue());
@@ -1133,37 +1101,6 @@ class GraphCreateProcTest extends BaseProcTest {
         assertGraphEquals(fooExpected, fooActual);
     }
 
-    @Test
-    void preferRelationshipPropertiesForCypherLoading() {
-        String relationshipQuery = "MATCH (s)-[r]->(t) RETURN id(s) AS source, id(t) AS target " +
-                                   " , 23 AS foo, 42 AS bar, 1984 AS baz, r.weight AS weight";
-
-        String query = "CALL gds.graph.create.cypher(" +
-                       "    'testGraph', $nodeQuery, $relationshipQuery, {" +
-                       "        relationshipProperties: {" +
-                       "            foobar : 'foo'," +
-                       "            foobaz : 'baz'," +
-                       "            raboof : 'weight'" +
-                       "        }" +
-                       "    }" +
-                       ")";
-
-        runQuery(query, map("nodeQuery",
-            ALL_NODES_QUERY, "relationshipQuery", relationshipQuery));
-
-        Graph foobarGraph = relPropertyGraph("testGraph", ALL_RELATIONSHIPS, "foobar");
-        Graph foobazGraph = relPropertyGraph("testGraph", ALL_RELATIONSHIPS, "foobaz");
-        Graph raboofGraph = relPropertyGraph("testGraph", ALL_RELATIONSHIPS, "raboof");
-
-        Graph expectedFoobarGraph = fromGdl("()-[{w: 23.0D}]->()");
-        Graph expectedFoobazGraph = fromGdl("()-[{w: 1984.0D}]->()");
-        Graph expectedRaboofGraph = fromGdl("()-[{w: 55.0D}]->()");
-
-        assertGraphEquals(expectedFoobarGraph, foobarGraph);
-        assertGraphEquals(expectedFoobazGraph, foobazGraph);
-        assertGraphEquals(expectedRaboofGraph, raboofGraph);
-    }
-
     // Failure cases
 
     @ParameterizedTest(name = "projections: {0}")
@@ -1446,21 +1383,6 @@ class GraphCreateProcTest extends BaseProcTest {
             "Invalid relationship query, required column(s) not found: '%s'",
             String.join("', '", missingColumns.split(","))
         ));
-    }
-
-    @Test
-    void failsOnMismatchOfCypherRelationshipProperty() {
-        String query =
-            "CALL gds.graph.create.cypher(" +
-            "   'cypherGraph', " +
-            "   'RETURN 1 AS id', " +
-            "   'RETURN 0 AS source, 1 AS target, 2 AS weight, 3 AS bazz', " +
-            "   { " +
-            "       relationshipProperties: ['foo', 'bar', 'weight'] " +
-            "   }" +
-            ")";
-
-        assertError(query, "Relationship properties not found: 'foo', 'bar'. Available properties from the relationship query are: 'weight', 'bazz'");
     }
 
     @Test

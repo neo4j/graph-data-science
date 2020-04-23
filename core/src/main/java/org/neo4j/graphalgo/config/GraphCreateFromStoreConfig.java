@@ -42,6 +42,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     String NODE_PROJECTION_KEY = "nodeProjection";
     String RELATIONSHIP_PROJECTION_KEY = "relationshipProjection";
     String NODE_PROPERTIES_KEY = "nodeProperties";
+    String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 
     @Override
     @Key(NODE_PROJECTION_KEY)

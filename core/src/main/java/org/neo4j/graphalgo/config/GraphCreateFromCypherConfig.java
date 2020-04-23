@@ -22,19 +22,19 @@ package org.neo4j.graphalgo.config;
 
 import com.carrotsearch.hppc.procedures.ObjectProcedure;
 import org.immutables.value.Value;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 
 import java.util.Arrays;
@@ -42,23 +42,18 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
-import static org.neo4j.graphalgo.core.loading.CypherNodePropertyImporter.NO_PROPERTY_VALUE;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
 
 @ValueClass
 @Configuration("GraphCreateFromCypherConfigImpl")
 @SuppressWarnings("immutables:subtype")
 public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
-    List<String> FORBIDDEN_KEYS = Arrays.asList(NODE_PROJECTION_KEY, RELATIONSHIP_PROJECTION_KEY, NODE_PROPERTIES_KEY);
+    List<String> FORBIDDEN_KEYS = Arrays.asList(NODE_PROJECTION_KEY, RELATIONSHIP_PROJECTION_KEY, NODE_PROPERTIES_KEY, RELATIONSHIP_PROPERTIES_KEY);
 
     String NODE_QUERY_KEY = "nodeQuery";
     String RELATIONSHIP_QUERY_KEY = "relationshipQuery";
@@ -106,74 +101,9 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     @Override
     @Value.Default
-    default PropertyMappings nodeProperties() { return PropertyMappings.of(); }
-
-    @Override
-    @Value.Default
     @Value.Parameter(false)
     default boolean isCypher() {
         return true;
-    }
-
-    @Configuration.Ignore
-    default GraphCreateFromCypherConfig inferProjections(GraphDimensions dimensions) {
-        List<PropertyMapping> nodeProperties = dimensions
-            .nodePropertyTokens()
-            .keySet()
-            .stream()
-            .map(property -> PropertyMapping.of(property, NO_PROPERTY_VALUE))
-            .collect(Collectors.toList());
-
-        NodeProjections nodeProjections = NodeProjections.builder()
-            .putProjection(
-                ALL_NODES,
-                NodeProjection
-                    .builder()
-                    .label(PROJECT_ALL)
-                    .addPropertyMappings(PropertyMappings.of(nodeProperties))
-                    .build()
-            ).build();
-
-
-        PropertyMappings propertyMappings;
-        if (!relationshipProperties().isEmpty()) {
-            propertyMappings = relationshipProperties();
-        } else {
-            List<PropertyMapping> propertyMappingList = dimensions.relationshipPropertyTokens()
-                .keySet()
-                .stream()
-                .map(property -> PropertyMapping.of(property, Double.NaN, Aggregation.NONE))
-                .collect(Collectors.toList());
-
-            propertyMappings = PropertyMappings.of(propertyMappingList);
-        }
-
-        Set<RelationshipType> relationshipTypes = new HashSet<>();
-        dimensions
-            .tokenRelationshipTypeMapping()
-            .values()
-            .forEach((ObjectProcedure<List<RelationshipType>>) relationshipTypes::addAll);
-
-        if(relationshipTypes.isEmpty()) {
-            relationshipTypes.add(ALL_RELATIONSHIPS);
-        }
-
-        RelationshipProjections.Builder relationshipProjectionsBuilder = RelationshipProjections.builder();
-        relationshipTypes.forEach(relationshipType -> {
-            RelationshipProjection relationshipProjection = RelationshipProjection.builder()
-                .type(relationshipType == RelationshipType.ALL_RELATIONSHIPS ? PROJECT_ALL : relationshipType.name)
-                .addPropertyMappings(propertyMappings)
-                .build();
-
-            relationshipProjectionsBuilder.putProjection(relationshipType, relationshipProjection);
-        });
-
-        return ImmutableGraphCreateFromCypherConfig
-            .builder()
-            .from(this)
-            .nodeProjections(nodeProjections)
-            .relationshipProjections(relationshipProjectionsBuilder.build())
-            .build();
     }
 
     static GraphCreateFromCypherConfig of(
@@ -183,7 +113,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         String relationshipQuery,
         CypherMapWrapper config
     ) {
-        assertNoProjections(config);
+        assertNoProjectionsOrExplicitProperties(config);
 
         if (nodeQuery != null) {
             config = config.withString(NODE_QUERY_KEY, nodeQuery);
@@ -199,7 +129,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     }
 
     static GraphCreateFromCypherConfig fromProcedureConfig(String username, CypherMapWrapper config) {
-        assertNoProjections(config);
+        assertNoProjectionsOrExplicitProperties(config);
         return new GraphCreateFromCypherConfigImpl(
             IMPLICIT_GRAPH_NAME,
             username,
@@ -207,7 +137,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         );
     }
 
-    static void assertNoProjections(CypherMapWrapper config) {
+    static void assertNoProjectionsOrExplicitProperties(CypherMapWrapper config) {
         for (String forbiddenKey : FORBIDDEN_KEYS) {
             if (config.containsKey(forbiddenKey)) {
                 throw new IllegalArgumentException(String.format("Invalid key: %s", forbiddenKey));
