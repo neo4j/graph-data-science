@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.catalog;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -30,6 +29,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.values.storable.NumberType;
@@ -157,24 +157,13 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     }
 
     @Test
-    @Disabled
     void writeMutatedNodeProperties() {
         long expectedPropertyCount = 6;
 
-        GraphStoreCatalog
-            .get(getUsername(), TEST_GRAPH_NAME)
-            .graphStore()
-            .addNodeProperty(NodeLabel.ALL_NODES, "newNodeProp3", NumberType.INTEGRAL, new NodeProperties() {
-                @Override
-                public double nodeProperty(long nodeId) {
-                    return nodeId;
-                }
-
-                @Override
-                public long size() {
-                    return expectedPropertyCount;
-                }
-            });
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH_NAME).graphStore();
+        NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
+        graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
+        graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
 
         String graphWriteQuery = String.format(
             "CALL gds.graph.writeNodeProperties(" +
@@ -225,5 +214,23 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             rootCause.getMessage(),
             containsString("No node projection with all property keys ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'] found")
         );
+    }
+
+    private static class IdentityProperties implements NodeProperties {
+        private final long expectedPropertyCount;
+
+        IdentityProperties(long expectedPropertyCount) {
+            this.expectedPropertyCount = expectedPropertyCount;
+        }
+
+        @Override
+        public double nodeProperty(long nodeId) {
+            return nodeId;
+        }
+
+        @Override
+        public long size() {
+            return expectedPropertyCount;
+        }
     }
 }
