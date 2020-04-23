@@ -150,7 +150,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 String.format("GraphCreateConfig should be %s.", GraphCreateFromStoreConfig.class.getSimpleName()));
 
             NodeProjections expectedNodeProjections = expectedNodeProjections();
-            RelationshipProjections expectedRelationshipProjections = expectedRelationshipProjections();
+            RelationshipProjections expectedRelationshipProjections = relationshipProjections();
 
             assertEquals(expectedNodeProjections, actual.nodeProjections());
             assertEquals(expectedRelationshipProjections, actual.relationshipProjections());
@@ -163,13 +163,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         return NodeProjections
             .builder()
             .putProjection(ALL_NODES, NodeProjection.all())
-            .build();
-    }
-
-    default RelationshipProjections expectedRelationshipProjections() {
-        return RelationshipProjections
-            .builder()
-            .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.all())
             .build();
     }
 
@@ -267,7 +260,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     }
 
     default RelationshipProjections relationshipProjections() {
-        return RelationshipProjections.fromString("*");
+        return RelationshipProjections.ALL;
     }
 
     default String relationshipQuery() {

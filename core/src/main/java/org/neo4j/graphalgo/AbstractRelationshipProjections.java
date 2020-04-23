@@ -41,6 +41,7 @@ import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 public abstract class AbstractRelationshipProjections extends AbstractProjections<RelationshipType, RelationshipProjection> {
 
     public static final RelationshipProjections ALL = create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL));
+    public static final RelationshipProjections ALL_UNDIRECTED = create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL_UNDIRECTED));
 
     public abstract Map<RelationshipType, RelationshipProjection> projections();
 

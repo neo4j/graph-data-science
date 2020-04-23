@@ -33,6 +33,7 @@ import static java.util.Collections.emptyMap;
 public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     public static final RelationshipProjection ALL = of(PROJECT_ALL, Orientation.NATURAL);
+    public static final RelationshipProjection ALL_UNDIRECTED = of(PROJECT_ALL, Orientation.UNDIRECTED);
 
     public abstract String type();
 

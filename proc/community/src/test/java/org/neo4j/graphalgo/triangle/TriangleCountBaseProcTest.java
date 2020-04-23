@@ -21,14 +21,12 @@ package org.neo4j.graphalgo.triangle;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AbstractRelationshipProjections;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -88,10 +86,7 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
 
     @Override
     public RelationshipProjections relationshipProjections() {
-        return RelationshipProjections.builder().putProjection(
-            RelationshipType.of("T"),
-            RelationshipProjection.of("*", Orientation.UNDIRECTED)
-        ).build();
+        return AbstractRelationshipProjections.ALL_UNDIRECTED;
     }
 
 
@@ -104,11 +99,6 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
         return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper
             .withEntry(RELATIONSHIP_PROJECTION_KEY, relationshipProjections())
             .toMap())));
-    }
-
-    @Override
-    public RelationshipProjections expectedRelationshipProjections() {
-        return relationshipProjections();
     }
 
     @Override
