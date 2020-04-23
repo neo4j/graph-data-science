@@ -179,73 +179,28 @@ class GraphCreateConfigBuildersTest {
         return Stream.of(
             Arguments.arguments(
                 new CypherConfigBuilder()
-                    .loadAnyLabel()
-                    .loadAnyRelationshipType()
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("").graphName("")
                     .nodeQuery(ALL_NODES_QUERY)
                     .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
-                    .nodeProjections(NodeProjections.empty())
-                    .relationshipProjections(RelationshipProjections.empty())
-                    .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of())
                     .build()
             ),
             Arguments.arguments(
                 new CypherConfigBuilder().userName("foo").graphName("bar")
-                    .loadAnyLabel()
-                    .loadAnyRelationshipType()
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
                     .nodeQuery(ALL_NODES_QUERY)
                     .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
-                    .nodeProjections(NodeProjections.empty())
-                    .relationshipProjections(RelationshipProjections.empty())
-                    .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of())
                     .build()
             ),
             Arguments.arguments(
                 new CypherConfigBuilder().userName("foo").graphName("bar")
                     .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
                     .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
-                    .loadAnyRelationshipType()
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
                     .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
                     .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
-                    .nodeProjections(NodeProjections.empty())
-                    .relationshipProjections(RelationshipProjections.empty())
-                    .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of())
-                    .build()
-            ),
-            Arguments.arguments(
-                new CypherConfigBuilder().userName("foo").graphName("bar")
-                    .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id, COALESCE(n.nProp, 23.D) AS nProp")
-                    .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target, 42 as rProp")
-                    .loadAnyRelationshipType()
-                    .build(),
-                ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
-                    .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id, COALESCE(n.nProp, 23.D) AS nProp")
-                    .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
-                    .nodeProjections(NodeProjections.empty())
-                    .relationshipProjections(RelationshipProjections.empty())
-                    .relationshipProperties(PropertyMappings.of(PropertyMapping.of("rProp", 42.0D)))
-                    .build()
-            ),
-            Arguments.arguments(
-                new CypherConfigBuilder()
-                    .loadAnyLabel()
-                    .loadAnyRelationshipType()
-                    .build(),
-                ImmutableGraphCreateFromCypherConfig.builder().username("").graphName("")
-                    .nodeQuery(ALL_NODES_QUERY)
-                    .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
-                    .nodeProjections(NodeProjections.empty())
-                    .relationshipProjections(RelationshipProjections.empty())
-                    .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of())
                     .build()
             )
         );

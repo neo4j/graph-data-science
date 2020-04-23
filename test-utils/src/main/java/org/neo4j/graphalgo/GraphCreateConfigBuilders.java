@@ -135,28 +135,16 @@ final class GraphCreateConfigBuilders {
         Optional<String> graphName,
         Optional<String> nodeQuery,
         Optional<String> relationshipQuery,
-        @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
-        @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
         Optional<Boolean> validateRelationships,
         Optional<Map<String, Object>> parameters
     ) {
-        if (!(nodeQuery.isPresent() || anyLabel == AnyLabel.LOAD)) {
-            throw new IllegalArgumentException("Missing nodeQuery or loadAnyLabel().");
-        }
-
-        if (!(relationshipQuery.isPresent() || anyRelationshipType == AnyRelationshipType.LOAD)) {
-            throw new IllegalArgumentException("Missing relationshipQuery or loadAnyRelationshipType().");
-        }
-
-        RelationshipProjections relationshipProjections = RelationshipProjections.empty();
 
         return ImmutableGraphCreateFromCypherConfig.builder()
             .username(userName.orElse(""))
             .graphName(graphName.orElse(""))
             .nodeQuery(nodeQuery.orElse(ALL_NODES_QUERY))
             .relationshipQuery(relationshipQuery.orElse(ALL_RELATIONSHIPS_QUERY))
-            .relationshipProjections(relationshipProjections)
             .readConcurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
             .validateRelationships(validateRelationships.orElse(true))
             .parameters(parameters.orElse(Collections.emptyMap()))

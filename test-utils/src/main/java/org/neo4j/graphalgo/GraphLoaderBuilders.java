@@ -117,8 +117,6 @@ final class GraphLoaderBuilders {
         Optional<String> graphName,
         Optional<String> nodeQuery,
         Optional<String> relationshipQuery,
-        @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyLabel anyLabel,
-        @Builder.Switch(defaultName = "PROJECTION") GraphCreateConfigBuilders.AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
         Optional<Boolean> validateRelationships,
         Optional<Map<String, Object>> parameters
@@ -128,8 +126,6 @@ final class GraphLoaderBuilders {
             graphName,
             nodeQuery,
             relationshipQuery,
-            anyLabel,
-            anyRelationshipType,
             concurrency,
             validateRelationships,
             parameters
