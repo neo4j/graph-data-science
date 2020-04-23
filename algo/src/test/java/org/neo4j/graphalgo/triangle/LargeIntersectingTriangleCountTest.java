@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TriangleCountExpTest extends AlgoTestBase {
+class LargeIntersectingTriangleCountTest extends AlgoTestBase {
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
