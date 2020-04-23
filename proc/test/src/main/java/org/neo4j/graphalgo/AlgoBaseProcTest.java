@@ -147,15 +147,18 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             GraphCreateConfig actual = maybeGraphCreateConfig.get();
             assertTrue(
                 actual instanceof GraphCreateFromStoreConfig,
-                String.format("GraphCreateConfig should be %s.", GraphCreateFromStoreConfig.class.getSimpleName()));
+                String.format("GraphCreateConfig should be %s.", GraphCreateFromStoreConfig.class.getSimpleName())
+            );
+
+            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) actual;
 
             NodeProjections expectedNodeProjections = expectedNodeProjections();
             RelationshipProjections expectedRelationshipProjections = relationshipProjections();
 
-            assertEquals(expectedNodeProjections, actual.nodeProjections());
-            assertEquals(expectedRelationshipProjections, actual.relationshipProjections());
-            assertEquals(IMPLICIT_GRAPH_NAME, actual.graphName());
-            assertEquals(TEST_USERNAME, actual.username());
+            assertEquals(expectedNodeProjections, storeConfig.nodeProjections());
+            assertEquals(expectedRelationshipProjections, storeConfig.relationshipProjections());
+            assertEquals(IMPLICIT_GRAPH_NAME, storeConfig.graphName());
+            assertEquals(TEST_USERNAME, storeConfig.username());
         });
     }
 
@@ -185,8 +188,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
             GraphCreateFromCypherConfig actualConfig = (GraphCreateFromCypherConfig) maybeGraphCreateConfig.get();
 
-            assertEquals(NodeProjections.of(), actualConfig.nodeProjections());
-            assertEquals(RelationshipProjections.of(), actualConfig.relationshipProjections());
             assertEquals(ALL_NODES_QUERY, actualConfig.nodeQuery());
             assertEquals(ALL_RELATIONSHIPS_QUERY, actualConfig.relationshipQuery());
             assertEquals(IMPLICIT_GRAPH_NAME, actualConfig.graphName());

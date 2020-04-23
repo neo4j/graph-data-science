@@ -47,18 +47,18 @@ import java.util.stream.Collectors;
 /**
  * The Abstract Factory defines the construction of the graph
  */
-public abstract class GraphStoreFactory implements Assessable {
+public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implements Assessable {
 
     public static final String TASK_LOADING = "LOADING";
 
-    protected final GraphCreateConfig graphCreateConfig;
+    protected final CONFIG graphCreateConfig;
     protected final ExecutorService threadPool;
     protected final GraphLoadingContext loadingContext;
     protected final GraphDimensions dimensions;
     protected final ProgressLogger progressLogger;
 
     public GraphStoreFactory(
-        GraphCreateConfig graphCreateConfig,
+        CONFIG graphCreateConfig,
         GraphLoadingContext loadingContext,
         GraphDimensions dimensions
     ) {

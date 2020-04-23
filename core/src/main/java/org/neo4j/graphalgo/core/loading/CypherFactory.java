@@ -46,7 +46,7 @@ import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.NODE
 import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.RELATIONSHIP;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
-public class CypherFactory extends GraphStoreFactory {
+public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig> {
 
     private final GraphCreateFromCypherConfig cypherConfig;
 

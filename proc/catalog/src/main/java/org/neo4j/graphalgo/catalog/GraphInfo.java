@@ -20,16 +20,16 @@
 package org.neo4j.graphalgo.catalog;
 
 import org.HdrHistogram.AtomicHistogram;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStore;
-import org.neo4j.graphalgo.core.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.time.ZonedDateTime;
@@ -65,8 +65,9 @@ public class GraphInfo {
             this.nodeProjection = null;
             this.relationshipProjection = null;
         } else {
-            this.nodeProjection = config.nodeProjections().toObject();
-            this.relationshipProjection = config.relationshipProjections().toObject();
+            GraphCreateFromStoreConfig fromStoreConfig = (GraphCreateFromStoreConfig) config;
+            this.nodeProjection = fromStoreConfig.nodeProjections().toObject();
+            this.relationshipProjection = fromStoreConfig.relationshipProjections().toObject();
             this.nodeQuery = null;
             this.relationshipQuery = null;
         }

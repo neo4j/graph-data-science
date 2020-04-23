@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -47,15 +48,18 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
 
     @Override
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleCountBaseConfig config) {
-        graphCreateConfig.relationshipProjections().projections().entrySet().stream()
-            .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
-            .forEach(entry -> {
-                throw new IllegalArgumentException(String.format(
-                    "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
-                    entry.getKey().name,
-                    entry.getValue().orientation()
-                ));
-            });
+        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
+            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
+            storeConfig.relationshipProjections().projections().entrySet().stream()
+                .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
+                .forEach(entry -> {
+                    throw new IllegalArgumentException(String.format(
+                        "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
+                        entry.getKey().name,
+                        entry.getValue().orientation()
+                    ));
+                });
+        }
     }
 
     @Procedure(name = "gds.alpha.triangle.stream", mode = READ)
@@ -89,14 +93,14 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
 
     @Override
     protected AlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory(TriangleCountBaseConfig config) {
-       return new AlphaAlgorithmFactory<TriangleStream, TriangleCountBaseConfig>() {
-           @Override
-           public TriangleStream buildAlphaAlgo(
-               Graph graph, TriangleCountBaseConfig configuration, AllocationTracker tracker, Log log
-           ) {
-               return new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
-                   .withTerminationFlag(TerminationFlag.wrap(transaction));
-           }
-       };
+        return new AlphaAlgorithmFactory<TriangleStream, TriangleCountBaseConfig>() {
+            @Override
+            public TriangleStream buildAlphaAlgo(
+                Graph graph, TriangleCountBaseConfig configuration, AllocationTracker tracker, Log log
+            ) {
+                return new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+            }
+        };
     }
 }

@@ -45,12 +45,6 @@ public interface GraphCreateConfig extends BaseConfig {
     @Configuration.Parameter
     String graphName();
 
-    @Configuration.Key(NODE_PROJECTION_KEY)
-    NodeProjections nodeProjections();
-
-    @Configuration.Key(RELATIONSHIP_PROJECTION_KEY)
-    RelationshipProjections relationshipProjections();
-
     @Value.Default
     @Value.Parameter(false)
     default int readConcurrency() {

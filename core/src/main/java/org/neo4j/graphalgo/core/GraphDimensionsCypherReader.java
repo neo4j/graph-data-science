@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.internal.kernel.api.TokenRead;
@@ -43,5 +45,15 @@ public class GraphDimensionsCypherReader extends GraphDimensionsReader<GraphCrea
     @Override
     protected TokenElementIdentifierMappings<RelationshipType> labelTokenRelationshipTypeMappings(TokenRead tokenRead) {
         return new TokenElementIdentifierMappings<>(ANY_RELATIONSHIP_TYPE);
+    }
+
+    @Override
+    protected NodeProjections getNodeProjections() {
+        return NodeProjections.all();
+    }
+
+    @Override
+    protected RelationshipProjections getRelationshipProjections() {
+        return RelationshipProjections.all();
     }
 }

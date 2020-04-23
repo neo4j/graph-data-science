@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -48,7 +49,7 @@ import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, IdsAndProperties> {
 
-    private final GraphCreateConfig graphCreateConfig;
+    private final GraphCreateFromStoreConfig graphCreateConfig;
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
     private final TerminationFlag terminationFlag;
@@ -60,7 +61,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private Map<NodeLabel, BitSet> nodeLabelBitSetMapping;
 
     ScanningNodesImporter(
-        GraphCreateConfig graphCreateConfig,
+        GraphCreateFromStoreConfig graphCreateConfig,
         GraphDatabaseAPI api,
         GraphDimensions dimensions,
         ProgressLogger progressLogger,

@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.internal.kernel.api.TokenRead;
@@ -59,5 +61,15 @@ public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreat
                 typeTokenRelTypeMappings.put(typeToken, relType);
             });
         return typeTokenRelTypeMappings;
+    }
+
+    @Override
+    protected NodeProjections getNodeProjections() {
+        return graphCreateConfig.nodeProjections();
+    }
+
+    @Override
+    protected RelationshipProjections getRelationshipProjections() {
+        return graphCreateConfig.relationshipProjections();
     }
 }

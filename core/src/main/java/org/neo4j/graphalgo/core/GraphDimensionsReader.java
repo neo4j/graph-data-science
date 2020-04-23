@@ -28,8 +28,10 @@ import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.ElementProjection;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.compat.InternalReadOps;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -73,8 +75,8 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
 
         final TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings = labelTokenRelationshipTypeMappings(tokenRead);
 
-        Map<String, Integer> nodePropertyTokens = loadPropertyTokens(graphCreateConfig.nodeProjections().projections(), tokenRead);
-        Map<String, Integer> relationshipPropertyTokens = loadPropertyTokens(graphCreateConfig.relationshipProjections().projections(), tokenRead);
+        Map<String, Integer> nodePropertyTokens = loadPropertyTokens(getNodeProjections().projections(), tokenRead);
+        Map<String, Integer> relationshipPropertyTokens = loadPropertyTokens(getRelationshipProjections().projections(), tokenRead);
 
         long nodeCount = labelTokenNodeLabelMappings.keyStream()
             .mapToLong(dataRead::countsForNode)
@@ -109,6 +111,9 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
     protected abstract TokenElementIdentifierMappings<NodeLabel> labelTokeNodeLabelMappings(TokenRead tokenRead);
 
     protected abstract TokenElementIdentifierMappings<RelationshipType> labelTokenRelationshipTypeMappings(TokenRead tokenRead);
+
+    protected abstract NodeProjections getNodeProjections();
+    protected abstract RelationshipProjections getRelationshipProjections();
 
     protected int getNodeLabelToken(TokenRead tokenRead, NodeProjection value) {
         int labelToken = tokenRead.nodeLabel(value.label());

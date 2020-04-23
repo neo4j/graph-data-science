@@ -70,20 +70,6 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     @Override
     @Value.Default
-    @Configuration.Key(NODE_PROJECTION_KEY)
-    default NodeProjections nodeProjections() {
-        return NodeProjections.of();
-    }
-
-    @Override
-    @Value.Default
-    @Configuration.Key(RELATIONSHIP_PROJECTION_KEY)
-    default RelationshipProjections relationshipProjections() {
-        return RelationshipProjections.of();
-    }
-
-    @Override
-    @Value.Default
     @Value.Parameter(false)
     default boolean isCypher() {
         return true;

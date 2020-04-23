@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 
-public final class NativeFactory extends GraphStoreFactory {
+public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreConfig> {
 
     private final GraphCreateFromStoreConfig storeConfig;
 

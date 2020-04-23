@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 
 public interface BaseBetweennessCentralityConfig extends WritePropertyConfig {
@@ -39,22 +40,31 @@ public interface BaseBetweennessCentralityConfig extends WritePropertyConfig {
 
     @Configuration.Ignore
     default void validate(GraphCreateConfig graphCreateConfig) {
-        if (graphCreateConfig.relationshipProjections().projections().size() > 1) {
-            throw new IllegalArgumentException(
-                "Betweenness Centrality does not support multiple relationship projections.");
+        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
+            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
+            if (storeConfig.relationshipProjections().projections().size() > 1) {
+                throw new IllegalArgumentException(
+                    "Betweenness Centrality does not support multiple relationship projections.");
+            }
         }
     }
 
     @Configuration.Ignore
     default boolean undirected() {
         return implicitCreateConfig()
-            .map(config -> config
-                .relationshipProjections()
-                .projections()
-                .values()
-                .stream()
-                .anyMatch(p -> p.orientation() == Orientation.UNDIRECTED))
-            .orElse(false);
+            .map(config -> {
+                if (config instanceof GraphCreateFromStoreConfig) {
+                    GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) config;
+                    return storeConfig
+                        .relationshipProjections()
+                        .projections()
+                        .values()
+                        .stream()
+                        .anyMatch(p -> p.orientation() == Orientation.UNDIRECTED);
+                } else {
+                    return false;
+                }
+            }).orElse(false);
     }
 
 }
