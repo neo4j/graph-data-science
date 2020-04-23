@@ -27,15 +27,29 @@ import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TriangleCountWriteProcTest
     extends TriangleCountBaseProcTest<TriangleCountWriteConfig>
     implements WritePropertyConfigTest<IntersectingTriangleCount, TriangleCountWriteConfig, IntersectingTriangleCount.TriangleCountResult> {
+
+    String dbCypher() {
+        return "CREATE " +
+               "(a:A { name: 'a' })-[:T]->(b:A { name: 'b' }), " +
+               "(b)-[:T]->(c:A { name: 'c' }), " +
+               "(c)-[:T]->(a), " +
+               "(a)-[:T]->(d:A { name: 'd' }), " +
+               "(b)-[:T]->(d), " +
+               "(c)-[:T]->(d), " +
+               "(a)-[:T]->(e:A { name: 'e' }), " +
+               "(b)-[:T]->(e) ";
+    }
 
     @Test
     void testWrite() {
@@ -58,12 +72,20 @@ class TriangleCountWriteProcTest
             assertNotEquals(-1, createMillis);
             assertNotEquals(-1, computeMillis);
             assertNotEquals(-1, writeMillis);
-            assertEquals(1, triangleCount);
-            assertEquals(3, nodeCount);
-            assertEquals(6, nodePropertiesWritten);
+            assertEquals(5, triangleCount);
+            assertEquals(5, nodeCount);
+            assertEquals(10, nodePropertiesWritten);
         });
 
-        // TODO: validate the written properties
+        Map<String, Map<Long, Double>> expectedResult = Map.of(
+            "a", Map.of(4L, 2.0 / 3),
+            "b", Map.of(4L, 2.0 / 3),
+            "c", Map.of(3L, 1.0),
+            "d", Map.of(3L, 1.0),
+            "e", Map.of(1L, 1.0)
+        );
+
+        assertWriteResult(expectedResult, "triangles", "clusteringCoefficient");
     }
 
     @Test
@@ -119,4 +141,30 @@ class TriangleCountWriteProcTest
         }
         return mapWrapper;
     }
+
+    private void assertWriteResult(
+        Map<String, Map<Long, Double>> expectedResult,
+        String writeProperty,
+        String clusteringCoefficientProperty
+    ) {
+        runQueryWithRowConsumer(String.format(
+            "MATCH (n) RETURN n.name as name, n.%s as triangles, n.%s as clusteringCoefficient",
+            writeProperty,
+            clusteringCoefficientProperty
+        ), (row) -> {
+            long triangles = row.getNumber("triangles").longValue();
+            double clusteringCoefficient = row.getNumber("clusteringCoefficient").doubleValue();
+            String name = row.getString("name");
+            Map<Long, Double> trianglesAndCoefficient = expectedResult.get(name);
+            assertNotNull(
+                trianglesAndCoefficient,
+                String.format("There is no record in the expected result for node : %s", name)
+            );
+            Double coefficient = trianglesAndCoefficient.get(triangles);
+            assertEquals(coefficient, clusteringCoefficient,
+                String.format("Incorrect clustering coefficient for node %s", name)
+            );
+        });
+    }
+
 }
