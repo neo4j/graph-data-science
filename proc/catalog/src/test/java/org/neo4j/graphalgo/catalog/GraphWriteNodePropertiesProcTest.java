@@ -28,6 +28,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -47,7 +50,8 @@ import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
-    private static final String TEST_GRAPH_NAME = "testGraph";
+    private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
+    private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -69,7 +73,26 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             .withNodeProperty("newNodeProp1", "nodeProp1")
             .withNodeProperty("newNodeProp2", "nodeProp2")
             .withAnyRelationshipType()
-            .graphCreate(TEST_GRAPH_NAME)
+            .graphCreate(TEST_GRAPH_SAME_PROPERTIES)
+            .yields()
+        );
+
+        runQuery(GdsCypher.call()
+            .withNodeLabel("A", NodeProjection.of(
+                "A",
+                PropertyMappings.of().withMappings(
+                    PropertyMapping.of("newNodeProp1", "nodeProp1", 1337),
+                    PropertyMapping.of("newNodeProp2", "nodeProp2", 1337)
+                )
+            ))
+            .withNodeLabel("B", NodeProjection.of(
+                "B",
+                PropertyMappings.of().withMappings(
+                    PropertyMapping.of("newNodeProp1", "nodeProp1", 1337)
+                )
+            ))
+            .withAnyRelationshipType()
+            .graphCreate(TEST_GRAPH_DIFFERENT_PROPERTIES)
             .yields()
         );
     }
@@ -94,11 +117,11 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten"
     })
     void writeLoadedNodeProperties(String graphWriteQueryTemplate) {
-        String graphWriteQuery = String.format(graphWriteQueryTemplate, TEST_GRAPH_NAME);
+        String graphWriteQuery = String.format(graphWriteQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
             assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
-            assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
+            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
             assertEquals(Arrays.asList("newNodeProp1", "newNodeProp2"), row.get("nodeProperties"));
             assertEquals(12L, row.getNumber("propertiesWritten").longValue());
         });
@@ -121,19 +144,54 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     }
 
     @Test
-    void writeLoadedNodePropertiesForSingleLabel() {
+    void writeLoadedNodePropertiesForLabel() {
         String graphWriteQuery = String.format(
             "CALL gds.graph.writeNodeProperties(" +
             "   '%s', " +
             "   ['newNodeProp1', 'newNodeProp2'], " +
             "   ['A']" +
             ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
-            TEST_GRAPH_NAME
+            TEST_GRAPH_SAME_PROPERTIES
         );
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
             assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
-            assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
+            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
+            assertEquals(Arrays.asList("newNodeProp1", "newNodeProp2"), row.get("nodeProperties"));
+            assertEquals(6L, row.getNumber("propertiesWritten").longValue());
+        });
+
+        String validationQuery =
+            "MATCH (n) " +
+            "RETURN " +
+            "  labels(n) AS labels, " +
+            "  n.newNodeProp1 AS newProp1, " +
+            "  n.newNodeProp2 AS newProp2 " +
+            "ORDER BY newProp1 ASC, newProp2 ASC";
+
+        assertCypherResult(validationQuery, asList(
+            map("labels", singletonList("A"), "newProp1", 0D, "newProp2", 42D),
+            map("labels", singletonList("A"), "newProp1", 1D, "newProp2", 43D),
+            map("labels", singletonList("A"), "newProp1", 2D, "newProp2", 44D),
+            map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
+            map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
+            map("labels", singletonList("B"), "newProp1", null, "newProp2", null)
+        ));
+    }
+
+    @Test
+    void writeLoadedNodePropertiesForLabelSubset() {
+        String graphWriteQuery = String.format(
+            "CALL gds.graph.writeNodeProperties(" +
+            "   '%s', " +
+            "   ['newNodeProp1', 'newNodeProp2']" +
+            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
+            TEST_GRAPH_DIFFERENT_PROPERTIES
+        );
+
+        runQueryWithRowConsumer(graphWriteQuery, row -> {
+            assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
+            assertEquals(TEST_GRAPH_DIFFERENT_PROPERTIES, row.getString("graphName"));
             assertEquals(Arrays.asList("newNodeProp1", "newNodeProp2"), row.get("nodeProperties"));
             assertEquals(6L, row.getNumber("propertiesWritten").longValue());
         });
@@ -160,7 +218,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     void writeMutatedNodeProperties() {
         long expectedPropertyCount = 6;
 
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH_NAME).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
         NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
         graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
         graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
@@ -170,12 +228,12 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             "   '%s', " +
             "   ['newNodeProp3']" +
             ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
-            TEST_GRAPH_NAME
+            TEST_GRAPH_SAME_PROPERTIES
         );
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
             assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
-            assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
+            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
             assertEquals(singletonList("newNodeProp3"), row.get("nodeProperties"));
             assertEquals(expectedPropertyCount, row.getNumber("propertiesWritten").longValue());
         });
@@ -204,7 +262,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
                 "   '%s', " +
                 "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']" +
                 ")",
-                TEST_GRAPH_NAME
+                TEST_GRAPH_SAME_PROPERTIES
             ))
         );
 
@@ -226,7 +284,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
                 "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], " +
                 "   ['A'] " +
                 ")",
-                TEST_GRAPH_NAME
+                TEST_GRAPH_SAME_PROPERTIES
             ))
         );
 

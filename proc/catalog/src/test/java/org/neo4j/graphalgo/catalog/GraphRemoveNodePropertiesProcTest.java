@@ -24,6 +24,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -37,7 +40,8 @@ import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
-    private static final String TEST_GRAPH_NAME = "testGraph";
+    private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
+    private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -59,7 +63,26 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
             .withNodeProperty("nodeProp1")
             .withNodeProperty("nodeProp2")
             .withAnyRelationshipType()
-            .graphCreate(TEST_GRAPH_NAME)
+            .graphCreate(TEST_GRAPH_SAME_PROPERTIES)
+            .yields()
+        );
+
+        runQuery(GdsCypher.call()
+            .withNodeLabel("A", NodeProjection.of(
+                "A",
+                PropertyMappings.of().withMappings(
+                    PropertyMapping.of("nodeProp1", 1337),
+                    PropertyMapping.of("nodeProp2", 1337)
+                )
+            ))
+            .withNodeLabel("B", NodeProjection.of(
+                "B",
+                PropertyMappings.of().withMappings(
+                    PropertyMapping.of("nodeProp1", 1337)
+                )
+            ))
+            .withAnyRelationshipType()
+            .graphCreate(TEST_GRAPH_DIFFERENT_PROPERTIES)
             .yields()
         );
     }
@@ -76,11 +99,11 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
             "   '%s', " +
             "   ['nodeProp1', 'nodeProp2']" +
             ") YIELD graphName, nodeProperties, propertiesRemoved",
-            TEST_GRAPH_NAME
+            TEST_GRAPH_SAME_PROPERTIES
         );
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
+            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
             assertEquals(Arrays.asList("nodeProp1", "nodeProp2"), row.get("nodeProperties"));
             assertEquals(12L, row.getNumber("propertiesRemoved").longValue());
         });
@@ -94,11 +117,28 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
             "   ['nodeProp1', 'nodeProp2'], " +
             "   ['A']" +
             ") YIELD graphName, nodeProperties, propertiesRemoved",
-            TEST_GRAPH_NAME
+            TEST_GRAPH_SAME_PROPERTIES
         );
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
+            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
+            assertEquals(Arrays.asList("nodeProp1", "nodeProp2"), row.get("nodeProperties"));
+            assertEquals(6L, row.getNumber("propertiesRemoved").longValue());
+        });
+    }
+
+    @Test
+    void removeNodePropertiesForLabelSubset() {
+        String graphWriteQuery = String.format(
+            "CALL gds.graph.removeNodeProperties(" +
+            "   '%s', " +
+            "   ['nodeProp1', 'nodeProp2']" +
+            ") YIELD graphName, nodeProperties, propertiesRemoved",
+            TEST_GRAPH_DIFFERENT_PROPERTIES
+        );
+
+        runQueryWithRowConsumer(graphWriteQuery, row -> {
+            assertEquals(TEST_GRAPH_DIFFERENT_PROPERTIES, row.getString("graphName"));
             assertEquals(Arrays.asList("nodeProp1", "nodeProp2"), row.get("nodeProperties"));
             assertEquals(6L, row.getNumber("propertiesRemoved").longValue());
         });
@@ -113,12 +153,15 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
                 "   '%s', " +
                 "   ['nodeProp1', 'nodeProp2', 'nodeProp3']" +
                 ")",
-                TEST_GRAPH_NAME
+                TEST_GRAPH_SAME_PROPERTIES
             ))
         );
 
         Throwable rootCause = rootCause(ex);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("No node projection with all property keys ['nodeProp1', 'nodeProp2', 'nodeProp3'] found."));
+        assertThat(
+            rootCause.getMessage(),
+            containsString("No node projection with all property keys ['nodeProp1', 'nodeProp2', 'nodeProp3'] found.")
+        );
     }
 }
