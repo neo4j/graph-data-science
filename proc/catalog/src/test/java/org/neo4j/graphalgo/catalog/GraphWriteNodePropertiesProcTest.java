@@ -22,7 +22,10 @@ package org.neo4j.graphalgo.catalog;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;
@@ -32,9 +35,9 @@ import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,12 +51,12 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {nodeProp1: 0, nodeProp2: 42})" +
-        ", (b:Node {nodeProp1: 1, nodeProp2: 43})" +
-        ", (c:Node {nodeProp1: 2, nodeProp2: 44})" +
-        ", (d:Node {nodeProp1: 3, nodeProp2: 45})" +
-        ", (e:Node {nodeProp1: 4, nodeProp2: 46})" +
-        ", (f:Node {nodeProp1: 5, nodeProp2: 47})";
+        "  (a:A {nodeProp1: 0, nodeProp2: 42})" +
+        ", (b:A {nodeProp1: 1, nodeProp2: 43})" +
+        ", (c:A {nodeProp1: 2, nodeProp2: 44})" +
+        ", (d:B {nodeProp1: 3, nodeProp2: 45})" +
+        ", (e:B {nodeProp1: 4, nodeProp2: 46})" +
+        ", (f:B {nodeProp1: 5, nodeProp2: 47})";
 
     @BeforeEach
     void setup() throws Exception {
@@ -61,7 +64,8 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher.call()
-            .withAnyLabel()
+            .withNodeLabel("A")
+            .withNodeLabel("B")
             .withNodeProperty("newNodeProp1", "nodeProp1")
             .withNodeProperty("newNodeProp2", "nodeProp2")
             .withAnyRelationshipType()
@@ -75,15 +79,22 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void writeLoadedNodeProperties() {
-        String graphWriteQuery = String.format(
-            "CALL gds.graph.writeNodeProperties(" +
-            "   '%s', " +
-            "   ['newNodeProp1', 'newNodeProp2']" +
-            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
-            TEST_GRAPH_NAME
-        );
+    @ParameterizedTest
+    @ValueSource(strings = {
+        // no labels -> defaults to PROJECT_ALL
+        "CALL gds.graph.writeNodeProperties(" +
+        "   '%s', " +
+        "   ['newNodeProp1', 'newNodeProp2']" +
+        ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
+        // explicit PROJECT_ALL
+        "CALL gds.graph.writeNodeProperties(" +
+        "   '%s', " +
+        "   ['newNodeProp1', 'newNodeProp2'], " +
+        "   ['*']" +
+        ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten"
+    })
+    void writeLoadedNodeProperties(String graphWriteQueryTemplate) {
+        String graphWriteQuery = String.format(graphWriteQueryTemplate, TEST_GRAPH_NAME);
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
             assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
@@ -110,6 +121,43 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     }
 
     @Test
+    void writeLoadedNodePropertiesForSingleLabel() {
+        String graphWriteQuery = String.format(
+            "CALL gds.graph.writeNodeProperties(" +
+            "   '%s', " +
+            "   ['newNodeProp1', 'newNodeProp2'], " +
+            "   ['A']" +
+            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
+            TEST_GRAPH_NAME
+        );
+
+        runQueryWithRowConsumer(graphWriteQuery, row -> {
+            assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
+            assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
+            assertEquals(Arrays.asList("newNodeProp1", "newNodeProp2"), row.get("nodeProperties"));
+            assertEquals(6L, row.getNumber("propertiesWritten").longValue());
+        });
+
+        String validationQuery =
+            "MATCH (n) " +
+            "RETURN " +
+            "  labels(n) AS labels, " +
+            "  n.newNodeProp1 AS newProp1, " +
+            "  n.newNodeProp2 AS newProp2 " +
+            "ORDER BY newProp1 ASC, newProp2 ASC";
+
+        assertCypherResult(validationQuery, asList(
+            map("labels", singletonList("A"), "newProp1", 0D, "newProp2", 42D),
+            map("labels", singletonList("A"), "newProp1", 1D, "newProp2", 43D),
+            map("labels", singletonList("A"), "newProp1", 2D, "newProp2", 44D),
+            map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
+            map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
+            map("labels", singletonList("B"), "newProp1", null, "newProp2", null)
+        ));
+    }
+
+    @Test
+    @Disabled
     void writeMutatedNodeProperties() {
         long expectedPropertyCount = 6;
 
@@ -139,7 +187,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         runQueryWithRowConsumer(graphWriteQuery, row -> {
             assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
             assertEquals(TEST_GRAPH_NAME, row.getString("graphName"));
-            assertEquals(Collections.singletonList("newNodeProp3"), row.get("nodeProperties"));
+            assertEquals(singletonList("newNodeProp3"), row.get("nodeProperties"));
             assertEquals(expectedPropertyCount, row.getNumber("propertiesWritten").longValue());
         });
 
@@ -173,7 +221,9 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
         Throwable rootCause = rootCause(ex);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("No node projection with property key `newNodeProp3` found"));
-        assertThat(rootCause.getMessage(), containsString("[newNodeProp1, newNodeProp2]"));
+        assertThat(
+            rootCause.getMessage(),
+            containsString("No node projection with all property keys ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'] found")
+        );
     }
 }

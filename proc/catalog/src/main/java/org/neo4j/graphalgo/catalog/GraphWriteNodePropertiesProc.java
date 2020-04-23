@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphWriteNodePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -34,8 +37,10 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,6 +53,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
     public Stream<Result> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         validateGraphName(graphName);
@@ -58,18 +64,20 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
             getUsername(),
             graphName,
             nodeProperties,
+            nodeLabels,
             cypherConfig
         );
         // validation
         validateConfig(cypherConfig, config);
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
         config.validate(graphStore);
+
         // writing
         Result.Builder builder = new Result.Builder(graphName, nodeProperties);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             long propertiesWritten = runWithExceptionLogging(
                 "Node property writing failed",
-                () -> writeNodeProperties(graphStore, nodeProperties, config.writeConcurrency())
+                () -> writeNodeProperties(graphStore, config, nodeProperties)
             );
             builder.withPropertiesWritten(propertiesWritten);
         }
@@ -77,27 +85,58 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         return Stream.of(builder.build());
     }
 
-    private long writeNodeProperties(GraphStore graphStore, List<String> nodePropertyKeys, int writeConcurrency) {
-        NodePropertyExporter exporter = NodePropertyExporter
-            .builder(api, graphStore, TerminationFlag.wrap(transaction))
-            .parallel(Pools.DEFAULT, writeConcurrency)
-            .withLog(log)
-            .build();
+    private long writeNodeProperties(
+        GraphStore graphStore,
+        GraphWriteNodePropertiesConfig config,
+        List<String> nodePropertyKeys
+    ) {
+        Collection<NodeLabel> writeNodeLabels;
 
-        Collection<NodePropertyExporter.NodeProperty<?>> nodeProperties =
-            nodePropertyKeys.stream()
-                .map(nodePropertyKey ->
-                    ImmutableNodeProperty.of(
-                        nodePropertyKey,
-                        graphStore.nodeProperty(nodePropertyKey).values(),
-                        NodeProperties.translatorFor(graphStore.nodePropertyType(nodePropertyKey))
+        if (config.projectAll()) {
+            // Filter node labels that have all the properties.
+            // Validation guarantees that there is at least one.
+            writeNodeLabels = config.nodeLabelIdentifiers(graphStore)
+                .stream()
+                .filter(nodeLabel -> graphStore.nodePropertyKeys(nodeLabel).containsAll(nodePropertyKeys))
+                .collect(Collectors.toList());
+        } else {
+            // Write for all the labels that are specified.
+            // Validation guarantees that each label has all properties.
+            writeNodeLabels = config.nodeLabelIdentifiers(graphStore);
+        }
+
+        var propertiesWritten = 0L;
+
+        for (NodeLabel nodeLabel : writeNodeLabels) {
+            Graph subGraph = graphStore.getGraph(
+                Collections.singletonList(nodeLabel),
+                Collections.singleton(RelationshipType.ALL_RELATIONSHIPS),
+                Optional.empty(),
+                config.writeConcurrency()
+            );
+
+            NodePropertyExporter exporter = NodePropertyExporter
+                .builder(api, subGraph, TerminationFlag.wrap(transaction))
+                .parallel(Pools.DEFAULT, config.writeConcurrency())
+                .withLog(log)
+                .build();
+
+            Collection<NodePropertyExporter.NodeProperty<?>> writeNodeProperties =
+                nodePropertyKeys.stream()
+                    .map(nodePropertyKey ->
+                        ImmutableNodeProperty.of(
+                            nodePropertyKey,
+                            subGraph.nodeProperties(nodePropertyKey),
+                            NodeProperties.translatorFor(graphStore.nodePropertyType(nodePropertyKey))
+                        )
                     )
-                )
-            .collect(Collectors.toList());
+                    .collect(Collectors.toList());
 
-        exporter.write(nodeProperties);
+            exporter.write(writeNodeProperties);
+            propertiesWritten += exporter.propertiesWritten();
+        }
 
-        return exporter.propertiesWritten();
+        return propertiesWritten;
     }
 
     public static class Result {

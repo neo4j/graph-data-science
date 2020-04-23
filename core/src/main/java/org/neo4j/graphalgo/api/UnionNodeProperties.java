@@ -40,6 +40,10 @@ public class UnionNodeProperties implements NodeProperties {
             if (elementIdentifierToBitSetMap.get(label).get(nodeId)) {
                 NodeProperties nodeProperties = labelToNodePropertiesMap.get(label);
                 if (nodeProperties != null) {
+                    // This returns the property value for the first label that has the property.
+                    // If there are multiple labels with the same property key, but different values,
+                    // this might lead to issues.
+                    // TODO: find out if this is an actual problem
                     return nodeProperties.nodeProperty(nodeId);
                 }
             }

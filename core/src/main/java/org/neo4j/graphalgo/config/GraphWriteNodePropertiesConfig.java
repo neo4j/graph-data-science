@@ -19,14 +19,18 @@
  */
 package org.neo4j.graphalgo.config;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.utils.StringJoining;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.Collections.singletonList;
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 
 @ValueClass
 @Configuration("GraphWriteNodePropertiesConfigImpl")
@@ -36,14 +40,36 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
     @Configuration.Parameter
     List<String> nodeProperties();
 
+    @Configuration.Parameter
+    @Value.Default
+    @Override
+    default List<String> nodeLabels() {
+        return singletonList(PROJECT_ALL);
+    }
+
+    // This is necessary because of the initialization order in the generated constructors.
+    // If we don't set it, it uses into this.concurrency, which is not initialized yet.
+    @Value.Default
+    @Override
+    default int writeConcurrency() {
+        return DEFAULT_CONCURRENCY;
+    }
+
+    @Configuration.Ignore
+    default boolean projectAll() {
+        return nodeLabels().contains(PROJECT_ALL);
+    }
+
     static GraphWriteNodePropertiesConfig of(
         String userName,
         String graphName,
         List<String> nodeProperties,
+        List<String> nodeLabels,
         CypherMapWrapper config
     ) {
         return new GraphWriteNodePropertiesConfigImpl(
             nodeProperties,
+            nodeLabels,
             Optional.of(graphName),
             Optional.empty(),
             userName,
@@ -53,22 +79,30 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
 
     @Configuration.Ignore
     default void validate(GraphStore graphStore) {
-        nodeProperties().forEach(nodePropertyKey -> {
-            boolean propertyExists = graphStore
-                .nodeLabels()
-                .stream()
-                .anyMatch(label -> graphStore.hasNodeProperty(Collections.singleton(label), nodePropertyKey));
+        if (!nodeLabels().contains(PROJECT_ALL)) {
+            // validate that all given labels have all the properties
+            nodeLabelIdentifiers(graphStore).forEach(nodeLabel ->
+                nodeProperties().forEach(nodeProperty -> {
+                    if (!graphStore.hasNodeProperty(singletonList(nodeLabel), nodeProperty)) {
+                        throw new IllegalArgumentException(String.format(
+                            "Property key `%s` not found for node label `%s`.",
+                            nodeProperty,
+                            nodeLabel
+                        ));
+                    }
+                }));
+        } else {
+            // validate that at least one label has all the properties
+            boolean hasValidLabel = nodeLabelIdentifiers(graphStore).stream()
+                .anyMatch(nodeLabel -> nodeProperties().stream()
+                    .allMatch(nodeProperty -> graphStore.hasNodeProperty(singletonList(nodeLabel), nodeProperty)));
 
-            if (!propertyExists) {
+            if (!hasValidLabel) {
                 throw new IllegalArgumentException(String.format(
-                    "No node projection with property key `%s` found. Existing properties are: %s.",
-                    nodePropertyKey,
-                    graphStore.nodePropertyKeys().values().stream().reduce((lhs, rhs) -> {
-                        lhs.addAll(rhs);
-                        return lhs;
-                    }).orElseGet(Collections::emptySet)
+                    "No node projection with all property keys %s found.",
+                    StringJoining.join(nodeProperties())
                 ));
             }
-        });
+        }
     }
 }

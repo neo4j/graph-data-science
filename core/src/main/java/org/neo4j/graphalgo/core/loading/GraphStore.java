@@ -441,18 +441,18 @@ public final class GraphStore {
         boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
 
         boolean containsAllNodes = true;
-        BitSet combinedBitSet = BitSet.newInstance();
+        BitSet unionBitSet = BitSet.newInstance();
 
         if (this.nodes.maybeLabelInformation.isPresent() && !loadAllNodes) {
             Map<NodeLabel, BitSet> labelInformation = this.nodes.maybeLabelInformation.get();
             validateNodeLabelFilter(filteredLabels, labelInformation);
-            filteredLabels.forEach(label -> combinedBitSet.union(labelInformation.get(label)));
-            containsAllNodes = combinedBitSet.cardinality() == this.nodes.nodeCount();
+            filteredLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
+            containsAllNodes = unionBitSet.cardinality() == this.nodes.nodeCount();
         }
 
         Optional<IdMap> filteredNodes = loadAllNodes || !this.nodes.maybeLabelInformation.isPresent() || containsAllNodes
             ? Optional.empty()
-            : Optional.of(this.nodes.withFilteredLabels(combinedBitSet, concurrency));
+            : Optional.of(this.nodes.withFilteredLabels(unionBitSet, concurrency));
 
         List<IdMapGraph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> relationshipTypes.contains(relTypeAndCSR.getKey()))
@@ -489,7 +489,7 @@ public final class GraphStore {
         if (this.nodeProperties.isEmpty()) {
             return Collections.emptyMap();
         }
-        if (labels.size() == 1 || !maybeElementIdentifierBitSetMap.isPresent()) {
+        if (labels.size() == 1 || maybeElementIdentifierBitSetMap.isEmpty()) {
             return this.nodeProperties.get(labels.iterator().next()).nodePropertyValues();
         }
 

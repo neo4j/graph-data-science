@@ -68,9 +68,11 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
         .build();
 
     protected long nodeCount;
-    protected HugeLongArray graphIds;
-    protected SparseNodeMapping nodeToGraphIds;
-    protected final Optional<Map<NodeLabel, BitSet>> maybeLabelInformation;
+
+    final Optional<Map<NodeLabel, BitSet>> maybeLabelInformation;
+
+    private HugeLongArray graphIds;
+    private SparseNodeMapping nodeToGraphIds;
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
@@ -133,16 +135,16 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
                 IdIterable::new);
     }
 
-    public IdMap withFilteredLabels(BitSet unionedBitSet, int concurrency) {
-        if (!maybeLabelInformation.isPresent()) {
+    IdMap withFilteredLabels(BitSet unionBitSet, int concurrency) {
+        if (maybeLabelInformation.isEmpty()) {
             return this;
         }
 
         long nodeId = -1L;
         long cursor = 0L;
-        long newNodeCount = unionedBitSet.cardinality();
+        long newNodeCount = unionBitSet.cardinality();
         HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, AllocationTracker.EMPTY);
-        while((nodeId = unionedBitSet.nextSetBit(nodeId+1)) != -1) {
+        while((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
             newGraphIds.set(cursor, nodeId);
             cursor++;
         }

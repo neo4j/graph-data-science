@@ -35,10 +35,12 @@ public interface GraphRemoveNodePropertiesConfig extends GraphWriteNodePropertie
         String userName,
         String graphName,
         List<String> nodeProperties,
+        List<String> nodeLabels,
         CypherMapWrapper config
     ) {
         return new GraphRemoveNodePropertiesConfigImpl(
             nodeProperties,
+            nodeLabels,
             Optional.of(graphName),
             Optional.empty(),
             userName,

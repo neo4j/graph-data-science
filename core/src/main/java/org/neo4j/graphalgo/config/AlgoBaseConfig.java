@@ -32,13 +32,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 public interface AlgoBaseConfig extends BaseConfig {
 
     int DEFAULT_CONCURRENCY = 4;
     String NODE_LABELS_KEY = "nodeLabels";
-    List<NodeLabel> ALL_NODE_LABEL_IDENTIFIERS = Collections.singletonList(ALL_NODES);
 
     @Value.Default
     default int concurrency() {

@@ -42,6 +42,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
     public Stream<Result> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeLabels") List<String> nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         validateGraphName(graphName);
@@ -52,6 +53,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
             getUsername(),
             graphName,
             nodeProperties,
+            nodeLabels,
             cypherConfig
         );
         // validation
