@@ -363,13 +363,15 @@ class LouvainTest extends AlgoTestBase {
 
     @Test
     void testLogging() {
-        Graph graph = loadGraph(NativeFactory.class, DB_CYPHER);
+        var graph = loadGraph(NativeFactory.class, DB_CYPHER);
 
-        TestProgressLogger testLogger = new TestProgressLogger(0, "Louvain");
+        var config = defaultConfigBuilder().build();
 
-        Louvain louvain = new Louvain(
+        var testLogger = new TestProgressLogger(0, "Louvain", config.concurrency());
+
+        var louvain = new Louvain(
             graph,
-            defaultConfigBuilder().build(),
+            config,
             Pools.DEFAULT,
             testLogger,
             AllocationTracker.EMPTY

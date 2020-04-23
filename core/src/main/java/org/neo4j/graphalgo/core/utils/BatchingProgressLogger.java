@@ -19,44 +19,57 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.logging.Log;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
 public class BatchingProgressLogger implements ProgressLogger {
     public static final long MAXIMUM_LOG_INTERVAL = (long) Math.pow(2, 13);
 
     private final Log log;
+    private final int concurrency;
     private long taskVolume;
     private long batchSize;
     private final String task;
-    private final AtomicLong progressCounter;
+    private final LongAdder progressCounter;
+    private final ThreadLocal<MutableLong> callCounter;
 
-    private static long calculateBatchSize(long taskVolume) {
-        return (BitUtil.nearbyPowerOfTwo(taskVolume) >>> 6);
+    private static long calculateBatchSize(long taskVolume, int concurrency) {
+        // target 100 logs per full run (every 1 percent)
+        var batchSize = taskVolume / 100;
+        // split batchSize into thread-local chunks
+        batchSize /= concurrency;
+        // batchSize needs to be a power of two
+        return BitUtil.nextHighestPowerOfTwo(batchSize);
     }
 
-    public BatchingProgressLogger(Log log, long taskVolume, String task) {
-        this(log, taskVolume, calculateBatchSize(taskVolume), task);
+    public BatchingProgressLogger(Log log, long taskVolume, String task, int concurrency) {
+        this(log, taskVolume, calculateBatchSize(taskVolume, concurrency), task, concurrency);
+
     }
 
-    public BatchingProgressLogger(Log log, long taskVolume, long batchSize, String task) {
+    public BatchingProgressLogger(Log log, long taskVolume, long batchSize, String task, int concurrency) {
         this.log = log;
         this.taskVolume = taskVolume;
         this.batchSize = batchSize;
         this.task = task;
 
-        this.progressCounter = new AtomicLong(0);
+        this.progressCounter = new LongAdder();
+        this.callCounter = ThreadLocal.withInitial(MutableLong::new);
+        this.concurrency = concurrency;
     }
 
     @Override
     public void logProgress(Supplier<String> msgFactory) {
-        long progress = progressCounter.incrementAndGet();
+        progressCounter.increment();
+        long localProgress = callCounter.get().incrementAndGet();
 
-        if ((progress & (batchSize - 1)) == 0) {
+        if ((localProgress & (batchSize - 1)) == 0) {
             String message = msgFactory != ProgressLogger.NO_MESSAGE ? msgFactory.get() : null;
-            int percent = (int) ((progress / (double) taskVolume) * 100);
+            int percent = (int) ((progressCounter.sum() / (double) taskVolume) * 100);
             if (message == null || message.isEmpty()) {
                 log.info("[%s] %s %d%%", Thread.currentThread().getName(), task, percent);
             } else {
@@ -70,10 +83,11 @@ public class BatchingProgressLogger implements ProgressLogger {
         if (progress == 0) {
             return;
         }
-        long globalProgress = progressCounter.addAndGet(progress);
+        progressCounter.add(progress);
+        long localProgress = callCounter.get().incrementAndGet();
 
-        if ((globalProgress & (batchSize -1)) == 0) {
-            int percent = (int) ((globalProgress / (double) taskVolume) * 100);
+        if ((localProgress & (batchSize -1)) == 0) {
+            int percent = (int) ((progressCounter.sum() / (double) taskVolume) * 100);
             log.info("[%s] %s %d%%", Thread.currentThread().getName(), task, percent);
         }
     }
@@ -86,8 +100,8 @@ public class BatchingProgressLogger implements ProgressLogger {
     @Override
     public void reset(long newTaskVolume) {
         this.taskVolume = newTaskVolume;
-        this.batchSize = calculateBatchSize(newTaskVolume);
-        progressCounter.set(0);
+        this.batchSize = calculateBatchSize(newTaskVolume, concurrency);
+        progressCounter.reset();
     }
 
     @Override

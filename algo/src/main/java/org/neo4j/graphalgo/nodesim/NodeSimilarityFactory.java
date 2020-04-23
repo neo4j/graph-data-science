@@ -36,10 +36,11 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
 
     @Override
     public NodeSimilarity build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
-        BatchingProgressLogger progressLogger = new BatchingProgressLogger(
+        var progressLogger = new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
-            "NodeSimilarity"
+            "NodeSimilarity",
+            configuration.concurrency()
         );
 
         return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressLogger, tracker);

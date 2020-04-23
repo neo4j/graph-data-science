@@ -139,7 +139,7 @@ final class ArticleRankTest extends AlgoTestBase {
                 graph,
                 DEFAULT_CONFIG,
                 LongStream.empty(),
-                new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank")
+                new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank", DEFAULT_CONFIG.concurrency())
             ).compute()
             .result();
 
