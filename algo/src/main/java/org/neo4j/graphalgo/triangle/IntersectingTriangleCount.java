@@ -58,9 +58,9 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     private final AtomicLong queue;
 
     // results
-    private HugeAtomicLongArray triangles;
-    private HugeDoubleArray localCCs;
-    private long globalTriangles;
+    private HugeAtomicLongArray triangleCounts;
+    private HugeDoubleArray localClusteringCoefficients;
+    private long globalTriangleCount;
     private double averageClusteringCoefficient;
 
     public IntersectingTriangleCount(
@@ -74,7 +74,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         this.tracker = tracker;
         this.executorService = executorService;
         this.concurrency = concurrency;
-        triangles = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
+        triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
         triangleCount = new LongAdder();
         queue = new AtomicLong();
         this.progressLogger = progressLogger;
@@ -98,7 +98,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     public void release() {
         executorService = null;
         graph = null;
-        triangles = null;
+        triangleCounts = null;
     }
 
     @Override
@@ -111,21 +111,21 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         ParallelUtil.run(tasks, executorService);
 
         // collect local clustering coefficients
-        localCCs = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
-        double localCCSum = 0.0;
+        localClusteringCoefficients = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
+        double localClusteringCoefficientSum = 0.0;
         for (long i = 0; i < graph.nodeCount(); ++i) {
-            double localCC = calculateCoefficient(triangles.get(i), graph.degree(i));
-            localCCs.set(i, localCC);
-            localCCSum += localCC;
+            double localClusteringCoefficient = calculateCoefficient(triangleCounts.get(i), graph.degree(i));
+            localClusteringCoefficients.set(i, localClusteringCoefficient);
+            localClusteringCoefficientSum += localClusteringCoefficient;
         }
         // compute average clustering coefficient
-        averageClusteringCoefficient = localCCSum / graph.nodeCount();
-        globalTriangles = triangleCount.longValue();
+        averageClusteringCoefficient = localClusteringCoefficientSum / graph.nodeCount();
+        globalTriangleCount = triangleCount.longValue();
 
         return TriangleCountResult.of(
-            triangles,
-            localCCs,
-            globalTriangles,
+            triangleCounts,
+            localClusteringCoefficients,
+            globalTriangleCount,
             averageClusteringCoefficient
         );
     }
@@ -151,9 +151,9 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         public void accept(final long nodeA, final long nodeB, final long nodeC) {
             // only use this triangle where the id's are in order, not the other 5
             if (nodeA < nodeB) { //  && nodeB < nodeC
-                triangles.update(nodeA, (previous) -> previous + 1);
-                triangles.update(nodeB, (previous) -> previous + 1);
-                triangles.update(nodeC, (previous) -> previous + 1);
+                triangleCounts.update(nodeA, (previous) -> previous + 1);
+                triangleCounts.update(nodeB, (previous) -> previous + 1);
+                triangleCounts.update(nodeC, (previous) -> previous + 1);
                 triangleCount.increment();
             }
         }
