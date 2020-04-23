@@ -61,7 +61,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     private final IdMap idMap;
     private final Context loaderContext;
     private final GraphDimensions dimensionsAfterNodeLoading;
-    private final boolean hasExplicitPropertyMappings;
     private final Map<RelationshipProjection, LongAdder> relationshipCounters;
 
     // Property mappings are either defined upfront in
@@ -91,11 +90,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         this.dimensionsAfterNodeLoading = dimensions;
         this.loaderContext = new Context();
         this.relationshipCounters = new HashMap<>();
-
-        this.hasExplicitPropertyMappings = config.relationshipProperties().hasMappings();
-        if (hasExplicitPropertyMappings) {
-            initFromPropertyMappings(config.relationshipProperties());
-        }
     }
 
     private void initFromPropertyMappings(PropertyMappings propertyMappings) {
@@ -131,14 +125,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         propertyDefaultValues = propertyMappings.mappings().stream().mapToDouble(PropertyMapping::defaultValue).toArray();
         aggregations = propertyMappings.mappings().stream().map(PropertyMapping::aggregation).toArray(Aggregation[]::new);
         if (propertyMappings.isEmpty()) {
-            Aggregation defaultAggregation = cypherConfig
-                .relationshipProjections()
-                .allProjections()
-                .stream()
-                .map(RelationshipProjection::aggregation)
-                .findFirst()
-                .orElse(Aggregation.NONE);
-            aggregations = new Aggregation[]{ defaultAggregation };
+            aggregations = new Aggregation[]{ Aggregation.NONE };
         }
         resultDimensions = newDimensions;
     }
@@ -153,7 +140,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         // Otherwise, we create new property mappings from the result columns.
         // We do that only once, as each batch has the same columns.
         Collection<String> propertyColumns = getPropertyColumns(queryResult);
-        if (!hasExplicitPropertyMappings && !initializedFromResult) {
+        if (!initializedFromResult) {
 
             List<PropertyMapping> propertyMappings = propertyColumns
                 .stream()
@@ -167,10 +154,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             initFromPropertyMappings(PropertyMappings.of(propertyMappings));
 
-            initializedFromResult = true;
-
-        } else if (!initializedFromResult) {
-            validatePropertyColumns(propertyColumns, cypherConfig.relationshipProperties());
             initializedFromResult = true;
         }
 

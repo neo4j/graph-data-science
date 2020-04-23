@@ -20,7 +20,6 @@
 
 package org.neo4j.graphalgo.config;
 
-import com.carrotsearch.hppc.procedures.ObjectProcedure;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.NodeProjection;
@@ -33,13 +32,11 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
