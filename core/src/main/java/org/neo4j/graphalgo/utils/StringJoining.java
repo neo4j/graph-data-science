@@ -20,12 +20,18 @@
 package org.neo4j.graphalgo.utils;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
 public final class StringJoining {
 
     private StringJoining() {}
+
+    public static String join(Stream<String> alternatives) {
+        return join(alternatives.collect(Collectors.toList()));
+    }
 
     public static String join(Collection<String> alternatives) {
         return join(alternatives, "', '", "['", "']");

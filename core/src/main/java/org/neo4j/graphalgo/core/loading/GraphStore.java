@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
@@ -189,6 +190,13 @@ public final class GraphStore {
     }
 
     public void addNodeProperty(NodeLabel nodeLabel, String propertyKey, NumberType propertyType, NodeProperties propertyValues) {
+        if (!nodeLabels().contains(nodeLabel)) {
+            throw new IllegalArgumentException(String.format(
+                "Adding '%s.%s' to the graph store failed. Node label '%s' does not exist in the store. Available node labels: %s",
+                nodeLabel.name, propertyKey, nodeLabel.name,
+                StringJoining.join(nodeLabels().stream().map(NodeLabel::name))
+            ));
+        }
         updateGraphStore((graphStore) -> graphStore.nodeProperties.compute(nodeLabel, (k, nodePropertyStore) -> {
             NodePropertyStore.Builder storeBuilder = NodePropertyStore.builder();
             if (nodePropertyStore != null) {
