@@ -196,7 +196,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldFailOnNonExistingNodeProperty() {
+    void shouldFailOnNonExistingNodeProperties() {
         QueryExecutionException ex = assertThrows(
             QueryExecutionException.class,
             () -> runQuery(String.format(
@@ -214,6 +214,26 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             rootCause.getMessage(),
             containsString("No node projection with all property keys ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'] found")
         );
+    }
+
+    @Test
+    void shouldFailOnNonExistingNodePropertiesForSpecificLabel() {
+        QueryExecutionException ex = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(String.format(
+                "CALL gds.graph.writeNodeProperties(" +
+                "   '%s', " +
+                "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], " +
+                "   ['A'] " +
+                ")",
+                TEST_GRAPH_NAME
+            ))
+        );
+
+        Throwable rootCause = rootCause(ex);
+        assertEquals(IllegalArgumentException.class, rootCause.getClass());
+        assertThat(rootCause.getMessage(), containsString("Node projection 'A' does not have property key 'newNodeProp3'"));
+        assertThat(rootCause.getMessage(), containsString("Available keys: ['newNodeProp1', 'newNodeProp2']"));
     }
 
     private static class IdentityProperties implements NodeProperties {

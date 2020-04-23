@@ -24,13 +24,13 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
-import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 @ValueClass
 @Configuration("GraphWriteNodePropertiesConfigImpl")
@@ -85,9 +85,10 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
                 nodeProperties().forEach(nodeProperty -> {
                     if (!graphStore.hasNodeProperty(singletonList(nodeLabel), nodeProperty)) {
                         throw new IllegalArgumentException(String.format(
-                            "Property key `%s` not found for node label `%s`.",
+                            "Node projection '%s' does not have property key '%s'. Available keys: %s.",
+                            nodeLabel.name,
                             nodeProperty,
-                            nodeLabel
+                            join(graphStore.nodePropertyKeys(nodeLabel))
                         ));
                     }
                 }));
@@ -100,7 +101,7 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
             if (!hasValidLabel) {
                 throw new IllegalArgumentException(String.format(
                     "No node projection with all property keys %s found.",
-                    StringJoining.join(nodeProperties())
+                    join(nodeProperties())
                 ));
             }
         }
