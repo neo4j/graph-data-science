@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -54,6 +55,12 @@ public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
             .withRelationshipType("TYPE")
             .graphCreate("testGraph")
             .yields());
+    }
+
+
+    @AfterEach
+    void shutdown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
