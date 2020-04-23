@@ -58,21 +58,30 @@ public abstract class GraphStoreFactory implements Assessable {
 
     protected final ExecutorService threadPool;
     protected final GraphDatabaseAPI api;
-    protected final GraphSetup setup;
+    protected final GraphLoadingContext loadingContext;
     protected final GraphDimensions dimensions;
     protected final Log log;
     protected final ProgressLogger progressLogger;
     protected final GraphCreateConfig graphCreateConfig;
 
-    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup, GraphCreateConfig graphCreateConfig) {
-        this(api, setup, graphCreateConfig, true);
+    public GraphStoreFactory(
+        GraphDatabaseAPI api,
+        GraphLoadingContext loadingContext,
+        GraphCreateConfig graphCreateConfig
+    ) {
+        this(api, loadingContext, graphCreateConfig, true);
     }
 
-    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup, GraphCreateConfig graphCreateConfig, boolean readTokens) {
-        this.threadPool = setup.executor();
+    public GraphStoreFactory(
+        GraphDatabaseAPI api,
+        GraphLoadingContext loadingContext,
+        GraphCreateConfig graphCreateConfig,
+        boolean readTokens
+    ) {
+        this.threadPool = loadingContext.executor();
         this.api = api;
-        this.setup = setup;
-        this.log = setup.log();
+        this.loadingContext = loadingContext;
+        this.log = loadingContext.log();
         this.graphCreateConfig = graphCreateConfig;
         this.dimensions = new GraphDimensionsReader(api, graphCreateConfig, readTokens).call();
         this.progressLogger = initProgressLogger();

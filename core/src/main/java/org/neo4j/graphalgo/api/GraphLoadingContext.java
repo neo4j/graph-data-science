@@ -27,7 +27,7 @@ import org.neo4j.logging.Log;
 import java.util.concurrent.ExecutorService;
 
 @ValueClass
-public interface GraphSetup {
+public interface GraphLoadingContext {
 
     Log log();
 

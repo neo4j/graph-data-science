@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -49,8 +49,12 @@ import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 
 public final class NativeFactory extends GraphStoreFactory {
 
-    public NativeFactory(GraphDatabaseAPI api, GraphCreateConfig graphCreateConfig, GraphSetup setup) {
-        super(api, setup, graphCreateConfig);
+    public NativeFactory(
+        GraphDatabaseAPI api,
+        GraphCreateConfig graphCreateConfig,
+        GraphLoadingContext loadingContext
+    ) {
+        super(api, loadingContext, graphCreateConfig);
     }
 
     @Override
@@ -142,7 +146,7 @@ public final class NativeFactory extends GraphStoreFactory {
         validate(dimensions, graphCreateConfig);
 
         int concurrency = graphCreateConfig.readConcurrency();
-        AllocationTracker tracker = setup.tracker();
+        AllocationTracker tracker = loadingContext.tracker();
         IdsAndProperties nodes = loadNodes(tracker, concurrency);
         RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency);
         GraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
@@ -167,11 +171,11 @@ public final class NativeFactory extends GraphStoreFactory {
             dimensions,
             progressLogger,
             tracker,
-            setup.terminationFlag(),
+            loadingContext.terminationFlag(),
             threadPool,
             concurrency,
             propertyMappingsByNodeLabel
-        ).call(setup.log());
+        ).call(loadingContext.log());
     }
 
     private RelationshipImportResult loadRelationships(
@@ -191,7 +195,7 @@ public final class NativeFactory extends GraphStoreFactory {
 
         ObjectLongMap<RelationshipType> relationshipCounts = new ScanningRelationshipsImporter(
             graphCreateConfig,
-            setup,
+            loadingContext,
             api,
             dimensions,
             progressLogger,
@@ -200,7 +204,7 @@ public final class NativeFactory extends GraphStoreFactory {
             allBuilders,
             threadPool,
             concurrency
-        ).call(setup.log());
+        ).call(loadingContext.log());
 
         return RelationshipImportResult.of(allBuilders, relationshipCounts, dimensions);
     }

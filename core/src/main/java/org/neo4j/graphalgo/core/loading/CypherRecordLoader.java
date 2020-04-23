@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphdb.Result;
@@ -56,14 +56,20 @@ abstract class CypherRecordLoader<R> {
     static final long NO_COUNT = -1L;
 
     final GraphCreateFromCypherConfig config;
-    final GraphSetup setup;
+    final GraphLoadingContext loadingContext;
 
     protected final GraphDatabaseAPI api;
 
     private final long recordCount;
     private final String loadQuery;
 
-    CypherRecordLoader(String loadQuery, long recordCount, GraphDatabaseAPI api, GraphCreateConfig config, GraphSetup setup) {
+    CypherRecordLoader(
+        String loadQuery,
+        long recordCount,
+        GraphDatabaseAPI api,
+        GraphCreateConfig config,
+        GraphLoadingContext loadingContext
+    ) {
         this.loadQuery = loadQuery;
         this.recordCount = recordCount;
         this.api = api;
@@ -71,7 +77,7 @@ abstract class CypherRecordLoader<R> {
             throw new IllegalArgumentException("Expected `GraphCreateConfig#isCypher` to be true, but was false");
         }
         this.config = (GraphCreateFromCypherConfig) config;
-        this.setup = setup;
+        this.loadingContext = loadingContext;
     }
 
     final R load(CypherFactory.Ktx ktx) {

@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.core;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.api.ImmutableGraphSetup;
+import org.neo4j.graphalgo.api.ImmutableGraphLoadingContext;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
@@ -77,8 +77,8 @@ public interface GraphLoader {
     }
 
     @Value.Lazy
-    default GraphSetup toSetup() {
-        return ImmutableGraphSetup.of(
+    default GraphLoadingContext toGraphLoadingContext() {
+        return ImmutableGraphLoadingContext.of(
             log(),
             tracker(),
             terminationFlag(),
@@ -91,13 +91,13 @@ public interface GraphLoader {
      */
     default <T extends GraphStoreFactory> T build(final Class<T> factoryType) {
         try {
-            GraphSetup setup = toSetup();
+            GraphLoadingContext loadingContext = toGraphLoadingContext();
             GraphStoreFactory factory;
 
             if (CypherFactory.class.isAssignableFrom(factoryType)) {
-                factory = new CypherFactory(api(), createConfig(), setup);
+                factory = new CypherFactory(api(), createConfig(), loadingContext);
             } else {
-                factory = new NativeFactory(api(), createConfig(), setup);
+                factory = new NativeFactory(api(), createConfig(), loadingContext);
             }
 
             return factoryType.cast(factory);

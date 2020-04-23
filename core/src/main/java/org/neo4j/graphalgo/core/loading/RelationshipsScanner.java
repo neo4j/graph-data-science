@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -39,27 +39,28 @@ import java.util.stream.Collectors;
 final class RelationshipsScanner extends StatementAction implements RecordScanner {
 
     static InternalImporter.CreateScanner of(
-            GraphDatabaseAPI api,
-            GraphSetup setup,
-            ProgressLogger progressLogger,
-            IdMapping idMap,
-            AbstractStorePageCacheScanner<RelationshipRecord> scanner,
-            Collection<SingleTypeRelationshipImporter.Builder> importerBuilders) {
+        GraphDatabaseAPI api,
+        GraphLoadingContext loadingContext,
+        ProgressLogger progressLogger,
+        IdMapping idMap,
+        AbstractStorePageCacheScanner<RelationshipRecord> scanner,
+        Collection<SingleTypeRelationshipImporter.Builder> importerBuilders
+    ) {
         List<SingleTypeRelationshipImporter.Builder.WithImporter> builders = importerBuilders
-                .stream()
-                .map(relImporter -> relImporter.loadImporter(relImporter.loadProperties()))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+            .stream()
+            .map(relImporter -> relImporter.loadImporter(relImporter.loadProperties()))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
         if (builders.isEmpty()) {
             return InternalImporter.createEmptyScanner();
         }
         return new RelationshipsScanner.Creator(
-                api,
-                progressLogger,
-                idMap,
-                scanner,
-                builders,
-            setup.terminationFlag()
+            api,
+            progressLogger,
+            idMap,
+            scanner,
+            builders,
+            loadingContext.terminationFlag()
         );
     }
 

@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, ObjectLongMap<RelationshipType>> {
 
     private final GraphCreateConfig graphCreateConfig;
-    private final GraphSetup setup;
+    private final GraphLoadingContext loadingContext;
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
     private final IdMapping idMap;
@@ -54,7 +54,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
 
     ScanningRelationshipsImporter(
         GraphCreateConfig graphCreateConfig,
-        GraphSetup setup,
+        GraphLoadingContext loadingContext,
         GraphDatabaseAPI api,
         GraphDimensions dimensions,
         ProgressLogger progressLogger,
@@ -72,7 +72,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 threadPool,
                 concurrency);
         this.graphCreateConfig = graphCreateConfig;
-        this.setup = setup;
+        this.loadingContext = loadingContext;
         this.progressLogger = progressLogger;
         this.tracker = tracker;
         this.idMap = idMap;
@@ -111,12 +111,12 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         }
 
         return RelationshipsScanner.of(
-                api,
-                setup,
-                progressLogger,
-                idMap,
-                scanner,
-                importerBuilders
+            api,
+            loadingContext,
+            progressLogger,
+            idMap,
+            scanner,
+            importerBuilders
         );
     }
 
@@ -154,7 +154,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             aggregations
         );
 
-        RelationshipImporter importer = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
+        RelationshipImporter importer = new RelationshipImporter(loadingContext.tracker(), adjacencyBuilder);
         int typeId = dimensions.relationshipTypeTokenMapping().get(relationshipType);
         return new SingleTypeRelationshipImporter.Builder(
             relationshipType,
