@@ -157,9 +157,10 @@ This is useful to free up main memory or to remove accidentally created node pro
 CALL gds.graph.removeNodeProperties('my-graph', ['pageRank', 'communityId'])
 ----
 
-The above example requires all given properties to be present on at least one node projection.
-The procedure can be configured to remove just the properties for a specific node projection.
-In the following example, we ran an algorithm on a sub-graph and want to write those results to Neo4j.
+The above example requires all given properties to be present on at least one node projection, and the properties will be removed from all such projections.
+
+The procedure can be configured to remove just the properties for some specific node projections.
+In the following example, we ran an algorithm on a sub-graph and subsequently remove the newly created property.
 
 .Remove node properties of a specific node projection:
 [source,cypher]
@@ -169,8 +170,10 @@ CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId
 CALL gds.graph.removeNodeProperties('my-graph', ['componentId'], ['A'])
 ----
 
-The procedure will fail for properties that are not mapped to the given projection.
-If no label or `*` is given, all projections that have all the given properties will be considered.
+When a list of projections that are not `*` is specified, as in the example above, a different validation and execution is applied;
+It is then required that all projections have all of the given properties, and they will be removed from all of the projections.
+
+If any of the given projections is `'*'`, the procedure behaves like in the first example.
 
 
 [[catalog-graph-delete-rel-type]]
