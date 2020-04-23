@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
@@ -62,7 +62,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         String nodeQuery,
         long nodeCount,
         GraphDatabaseAPI api,
-        GraphCreateConfig config,
+        GraphCreateFromCypherConfig config,
         GraphLoadingContext loadingContext,
         GraphDimensions outerDimensions
     ) {
@@ -85,7 +85,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             propertyColumns,
             labelTokenNodeLabelMapping,
             nodeCount,
-            config.readConcurrency()
+            cypherConfig.readConcurrency()
         );
 
         boolean hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);
@@ -121,7 +121,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             builder,
             importer.nodeLabelBitSetMapping,
             maxNodeId,
-            config.readConcurrency(),
+            cypherConfig.readConcurrency(),
             loadingContext.tracker()
         );
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter.result();

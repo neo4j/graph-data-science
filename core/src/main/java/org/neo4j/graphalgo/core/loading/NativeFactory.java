@@ -134,7 +134,7 @@ public final class NativeFactory extends GraphStoreFactory {
             }).mapToLong(Long::longValue).sum();
 
         return new BatchingProgressLogger(
-            log,
+            loadingContext.log(),
             dimensions.nodeCount() + relationshipCount,
             TASK_LOADING,
             graphCreateConfig.readConcurrency()
