@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.catalog;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphWriteNodePropertiesConfig;
@@ -77,7 +76,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             long propertiesWritten = runWithExceptionLogging(
                 "Node property writing failed",
-                () -> writeNodeProperties(graphStore, config, nodeProperties)
+                () -> writeNodeProperties(graphStore, config)
             );
             builder.withPropertiesWritten(propertiesWritten);
         }
@@ -85,29 +84,12 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         return Stream.of(builder.build());
     }
 
-    private long writeNodeProperties(
-        GraphStore graphStore,
-        GraphWriteNodePropertiesConfig config,
-        List<String> nodePropertyKeys
-    ) {
-        Collection<NodeLabel> writeNodeLabels;
-
-        if (config.projectAll()) {
-            // Filter node labels that have all the properties.
-            // Validation guarantees that there is at least one.
-            writeNodeLabels = config.nodeLabelIdentifiers(graphStore)
-                .stream()
-                .filter(nodeLabel -> graphStore.nodePropertyKeys(nodeLabel).containsAll(nodePropertyKeys))
-                .collect(Collectors.toList());
-        } else {
-            // Write for all the labels that are specified.
-            // Validation guarantees that each label has all properties.
-            writeNodeLabels = config.nodeLabelIdentifiers(graphStore);
-        }
+    private long writeNodeProperties(GraphStore graphStore, GraphWriteNodePropertiesConfig config) {
+        Collection<NodeLabel> validNodeLabels = config.validNodeLabels(graphStore);
 
         var propertiesWritten = 0L;
 
-        for (NodeLabel nodeLabel : writeNodeLabels) {
+        for (NodeLabel nodeLabel : validNodeLabels) {
             Graph subGraph = graphStore.getGraph(
                 Collections.singletonList(nodeLabel),
                 graphStore.relationshipTypes(),
@@ -122,7 +104,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
                 .build();
 
             Collection<NodePropertyExporter.NodeProperty<?>> writeNodeProperties =
-                nodePropertyKeys.stream()
+                config.nodeProperties().stream()
                     .map(nodePropertyKey ->
                         ImmutableNodeProperty.of(
                             nodePropertyKey,

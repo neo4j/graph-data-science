@@ -20,13 +20,16 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
@@ -53,11 +56,6 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
     @Override
     default int writeConcurrency() {
         return DEFAULT_CONCURRENCY;
-    }
-
-    @Configuration.Ignore
-    default boolean projectAll() {
-        return nodeLabels().contains(PROJECT_ALL);
     }
 
     static GraphWriteNodePropertiesConfig of(
@@ -105,5 +103,34 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
                 ));
             }
         }
+    }
+
+    /**
+     * Returns the node labels that are to be considered for writing properties.
+     *
+     * If nodeLabels contains '*`, this returns all node labels in the graph store
+     * that have the specified nodeProperties.
+     *
+     * Otherwise, it just returns all the labels in the graph store since validation
+     * made sure that all node labels have the specified properties.
+     */
+    @Configuration.Ignore
+    default Collection<NodeLabel> validNodeLabels(GraphStore graphStore) {
+        Collection<NodeLabel> filteredNodeLabels;
+
+        if (nodeLabels().contains(PROJECT_ALL)) {
+            // Filter node labels that have all the properties.
+            // Validation guarantees that there is at least one.
+            filteredNodeLabels = nodeLabelIdentifiers(graphStore)
+                .stream()
+                .filter(nodeLabel -> graphStore.nodePropertyKeys(nodeLabel).containsAll(nodeProperties()))
+                .collect(Collectors.toList());
+        } else {
+            // Write for all the labels that are specified.
+            // Validation guarantees that each label has all properties.
+            filteredNodeLabels = nodeLabelIdentifiers(graphStore);
+        }
+
+        return filteredNodeLabels;
     }
 }

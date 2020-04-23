@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.config.GraphRemoveNodePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -27,6 +29,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,24 +65,29 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         // removing
         long propertiesRemoved = runWithExceptionLogging(
             "Node property removal failed",
-            () -> {
-                long sum = config.nodeLabelIdentifiers(graphStore).stream()
-                    .mapToLong(nodeLabel ->
-                        config.nodeProperties().stream()
-                            .mapToLong(property -> graphStore.nodeProperty(nodeLabel, property).values().size())
-                            .sum())
-                    .sum();
-
-                config.nodeLabelIdentifiers(graphStore).forEach(label ->
-                    config.nodeProperties().forEach(property ->
-                        graphStore.removeNodeProperty(label, property))
-                );
-
-                return sum;
-            }
+            () -> removeNodeProperties(graphStore, config)
         );
         // result
         return Stream.of(new Result(graphName, nodeProperties, propertiesRemoved));
+    }
+
+    @NotNull
+    private Long removeNodeProperties(GraphStore graphStore, GraphRemoveNodePropertiesConfig config) {
+        Collection<NodeLabel> validNodeLabels = config.validNodeLabels(graphStore);
+
+        long sum = validNodeLabels.stream()
+            .mapToLong(nodeLabel ->
+                config.nodeProperties().stream()
+                    .mapToLong(property -> graphStore.nodeProperty(nodeLabel, property).values().size())
+                    .sum())
+            .sum();
+
+        validNodeLabels.forEach(label ->
+            config.nodeProperties().forEach(property ->
+                graphStore.removeNodeProperty(label, property))
+        );
+
+        return sum;
     }
 
     public static class Result {
