@@ -138,8 +138,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery(
-                    "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
-                .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+                    "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(type.weight, 1) AS weight")
                 .build()
                 .graph(graphStoreFactory)
             );
@@ -224,8 +223,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                     .relationshipQuery(
-                        "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+                        "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, coalesce(type.weight, 1) AS weight")
                     .build()
                     .graph(graphStoreFactory)
             );
@@ -283,8 +281,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                     .relationshipQuery(
-                        "MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+                        "MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, coalesce(type.weight, 1) AS weight")
                     .build()
                     .graph(graphStoreFactory)
             );
@@ -341,8 +338,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                     .relationshipQuery(
-                        "MATCH (n:Label1)<-[t:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target, t.weight AS weight")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+                        "MATCH (n:Label1)<-[t:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target, coalesce(t.weight, 1) AS weight")
                     .build()
                     .graph(graphStoreFactory)
             );

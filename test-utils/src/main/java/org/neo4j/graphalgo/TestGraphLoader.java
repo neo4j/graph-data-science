@@ -161,8 +161,7 @@ public final class TestGraphLoader {
         ));
 
         cypherLoaderBuilder.validateRelationships(false);
-        if (addRelationshipPropertiesToLoader) cypherLoaderBuilder.relationshipProperties(relProperties);
-
+        
         return cypherLoaderBuilder.build();
     }
 

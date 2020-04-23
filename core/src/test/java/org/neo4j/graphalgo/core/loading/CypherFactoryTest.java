@@ -74,13 +74,12 @@ class CypherFactoryTest extends BaseTest {
         String nodes = "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0.0) AS partition , COALESCE(n.foo, 5.0) AS foo";
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' " +
                       "WITH id(n) AS source, id(m) AS target, collect(r.prop) as weight " +
-                      "WITH DISTINCT source, target, head(weight) as weight " +
+                      "WITH DISTINCT source, target, coalesce(head(weight), 0) as weight " +
                       "RETURN source, target, weight";
 
         Graph graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
                 .nodeQuery(nodes)
                 .relationshipQuery(rels)
-                .addRelationshipProperty(PropertyMapping.of("weight", 0))
                 .build()
                 .load(CypherFactory.class));
 
@@ -331,8 +330,7 @@ class CypherFactoryTest extends BaseTest {
         CypherLoaderBuilder builder = new CypherLoaderBuilder()
             .api(db)
             .nodeQuery(nodeStatement)
-            .relationshipQuery(relStatement)
-            .addRelationshipProperty(PropertyMapping.of("weight", 0D));
+            .relationshipQuery(relStatement);
 
         Graph graph = applyInTransaction(db, tx -> builder.build().load(CypherFactory.class));
 

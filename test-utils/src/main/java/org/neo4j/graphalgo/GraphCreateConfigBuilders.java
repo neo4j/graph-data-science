@@ -135,7 +135,6 @@ final class GraphCreateConfigBuilders {
         Optional<String> graphName,
         Optional<String> nodeQuery,
         Optional<String> relationshipQuery,
-        List<PropertyMapping> relationshipProperties,
         @Builder.Switch(defaultName = "PROJECTION") AnyLabel anyLabel,
         @Builder.Switch(defaultName = "PROJECTION") AnyRelationshipType anyRelationshipType,
         Optional<Integer> concurrency,
@@ -151,7 +150,6 @@ final class GraphCreateConfigBuilders {
         }
 
         RelationshipProjections relationshipProjections = RelationshipProjections.empty();
-        PropertyMappings relationshipPropertyMappings = PropertyMappings.of(relationshipProperties);
 
         return ImmutableGraphCreateFromCypherConfig.builder()
             .username(userName.orElse(""))
@@ -159,7 +157,6 @@ final class GraphCreateConfigBuilders {
             .nodeQuery(nodeQuery.orElse(ALL_NODES_QUERY))
             .relationshipQuery(relationshipQuery.orElse(ALL_RELATIONSHIPS_QUERY))
             .relationshipProjections(relationshipProjections)
-            .relationshipProperties(relationshipPropertyMappings)
             .readConcurrency(concurrency.orElse(AlgoBaseConfig.DEFAULT_CONCURRENCY))
             .validateRelationships(validateRelationships.orElse(true))
             .parameters(parameters.orElse(Collections.emptyMap()))

@@ -223,8 +223,7 @@ class GraphCreateConfigBuildersTest {
             Arguments.arguments(
                 new CypherConfigBuilder().userName("foo").graphName("bar")
                     .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id, COALESCE(n.nProp, 23.D) AS nProp")
-                    .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
-                    .addRelationshipProperty(PropertyMapping.of("rProp", 42.0D))
+                    .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target, 42 as rProp")
                     .loadAnyRelationshipType()
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("foo").graphName("bar")
@@ -239,18 +238,14 @@ class GraphCreateConfigBuildersTest {
                 new CypherConfigBuilder()
                     .loadAnyLabel()
                     .loadAnyRelationshipType()
-                    .addRelationshipProperty(PropertyMapping.of("foo", 42.0D))
-                    .globalAggregation(Aggregation.MAX)
                     .build(),
                 ImmutableGraphCreateFromCypherConfig.builder().username("").graphName("")
                     .nodeQuery(ALL_NODES_QUERY)
                     .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
                     .nodeProjections(NodeProjections.empty())
-                    .relationshipProjections(RelationshipProjections.builder()
-                        .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.of("*", Orientation.NATURAL, Aggregation.MAX))
-                        .build())
+                    .relationshipProjections(RelationshipProjections.empty())
                     .nodeProperties(PropertyMappings.of())
-                    .relationshipProperties(PropertyMappings.of(PropertyMapping.of("foo", 42.0D, Aggregation.MAX)))
+                    .relationshipProperties(PropertyMappings.of())
                     .build()
             )
         );

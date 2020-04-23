@@ -142,7 +142,6 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                     .relationshipQuery(
                         "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, 0 as weight")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
                     .build()
                     .graph(graphStoreFactory)
             );
@@ -197,7 +196,6 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                     .relationshipQuery(
                         "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, 1 as weight")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 1))
                     .build()
                     .graph(graphStoreFactory)
             );
@@ -251,8 +249,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                     .relationshipQuery(
-                        "MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                        "MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(r.weight, 0) AS weight")
                     .build()
                     .graph(graphStoreFactory)
             );
@@ -306,8 +303,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                         .api(db)
                         .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                         .relationshipQuery(
-                            "MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                        .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                            "MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(r.weight, 0) AS weight")
                         .build()
                         .graph(graphStoreFactory)
             );
@@ -361,8 +357,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                     .relationshipQuery(
-                        "MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
+                        "MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(r.weight, 0) AS weight")
                     .build()
                     .graph(graphStoreFactory)
             );
