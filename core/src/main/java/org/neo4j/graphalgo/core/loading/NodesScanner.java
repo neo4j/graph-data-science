@@ -144,7 +144,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     public void accept(KernelTransaction transaction) {
         Read read = transaction.dataRead();
         CursorFactory cursors = transaction.cursors();
-        try (AbstractStorePageCacheScanner<NodeRecord>.Cursor cursor = scanner.getCursor()) {
+        try (AbstractStorePageCacheScanner.Cursor<NodeRecord> cursor = scanner.getCursor()) {
             NodesBatchBuffer batches = new NodesBatchBufferBuilder()
                 .store(nodeStore)
                 .nodeLabelIds(labels)

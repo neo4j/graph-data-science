@@ -74,7 +74,16 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         void offer(Record record);
     }
 
-    public final class Cursor implements AutoCloseable {
+    public interface Cursor<Record extends AbstractBaseRecord> extends AutoCloseable {
+        int bulkSize();
+
+        boolean bulkNext(RecordConsumer<Record> consumer);
+
+        @Override
+        void close();
+    }
+
+    public final class StoreScanCursor implements Cursor<Record> {
 
         // last page to contain a value of interest, inclusive, but we mostly
         // treat is as exclusive since we want to special-case the last page
@@ -96,7 +105,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         // the current offset into the page
         private int offset;
 
-        Cursor(PageCursor pageCursor, Record record) {
+        StoreScanCursor(PageCursor pageCursor, Record record) {
             this.lastOffset = offsetForId(maxId, pageSize, recordSize);
             this.lastPage = calculateLastPageId(maxId, recordsPerPage, lastOffset);
             this.pageCursor = pageCursor;
@@ -105,7 +114,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             this.currentPage = -1;
         }
 
-        int bulkSize() {
+        @Override public int bulkSize() {
             return prefetchSize * recordsPerPage;
         }
 
@@ -118,7 +127,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             return lastPageId;
         }
 
-        boolean bulkNext(RecordConsumer<Record> consumer) {
+        @Override public boolean bulkNext(RecordConsumer<Record> consumer) {
             try {
                 return bulkNext0(consumer);
             } catch (IOException e) {
@@ -215,7 +224,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
                 pageCursor = null;
                 record = null;
 
-                final Cursor localCursor = cursors.get();
+                final Cursor<Record> localCursor = cursors.get();
                 // sanity check, should always be called from the same thread
                 if (localCursor == this) {
                     cursors.remove();
@@ -229,7 +238,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
     // global pointer which block of pages need to be fetched next
     private final AtomicLong nextPageId;
     // global cursor pool to return this one to
-    private final ThreadLocal<Cursor> cursors;
+    private final ThreadLocal<Cursor<Record>> cursors;
 
     // size in bytes of a single record - advance the offset by this much
     private final int recordSize;
@@ -283,8 +292,8 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         this.pagedFile = pagedFile;
     }
 
-    public final Cursor getCursor() {
-        Cursor cursor = cursors.get();
+    public final Cursor<Record> getCursor() {
+        Cursor<Record> cursor = cursors.get();
         if (cursor == null) {
             // Don't add as we want to always call next as the first cursor action,
             // which actually does the advance and returns the correct cursor.
@@ -304,7 +313,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
                 throw new UncheckedIOException(e);
             }
             Record record = store.newRecord();
-            cursor = new Cursor(pageCursor, record);
+            cursor = new StoreScanCursor(pageCursor, record);
             cursors.set(cursor);
         }
         return cursor;

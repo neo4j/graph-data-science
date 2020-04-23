@@ -146,7 +146,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     }
 
     private void scanRelationships(final Read read, final CursorFactory cursors) {
-        try (AbstractStorePageCacheScanner<RelationshipRecord>.Cursor cursor = scanner.getCursor()) {
+        try (AbstractStorePageCacheScanner.Cursor<RelationshipRecord> cursor = scanner.getCursor()) {
             List<SingleTypeRelationshipImporter> importers = this.importerBuilders.stream()
                     .map(imports -> imports.withBuffer(idMap, cursor.bulkSize(), read, cursors))
                     .collect(Collectors.toList());
