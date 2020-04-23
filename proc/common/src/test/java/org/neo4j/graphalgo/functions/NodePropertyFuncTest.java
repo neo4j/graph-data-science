@@ -27,21 +27,28 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
-import static java.util.Collections.singletonList;
+import java.util.Arrays;
+
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class NodePropertyFuncTest  extends BaseProcTest {
+
+    private static final String DB_CYPHER =
+        "CREATE " +
+        "  (:A { prop: 42.0 })" +
+        ", (:B { prop: 84.0 })";
 
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(GraphCreateProc.class);
         registerFunctions(NodePropertyFunc.class);
-        runQuery("CREATE (n { prop: 42.0 })");
+        runQuery(DB_CYPHER);
         runQuery(GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .withNodeLabel("A")
+            .withNodeLabel("B")
             .withNodeProperty("prop")
+            .withAnyRelationshipType()
             .graphCreate("testGraph")
             .yields());
     }
@@ -53,8 +60,14 @@ class NodePropertyFuncTest  extends BaseProcTest {
 
     @Test
     void shouldReturnNodeProperty() {
-        String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'prop') AS prop";
-        assertCypherResult(query, singletonList(map("prop", 42.0)));
+        String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'prop') AS prop ORDER BY prop ASC";
+        assertCypherResult(query, Arrays.asList(map("prop", 42.0), map("prop", 84.0)));
+    }
+
+    @Test
+    void shouldReturnNodePropertyForLabel() {
+        String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'prop', 'A') AS prop ORDER BY prop ASC";
+        assertCypherResult(query, Arrays.asList(map("prop", 42.0), map("prop", null)));
     }
 
     @Test
@@ -72,7 +85,13 @@ class NodePropertyFuncTest  extends BaseProcTest {
     @Test
     void failsOnNonExistingProperty() {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'noProp') AS prop";
-        assertError(query, "Node property with given name `noProp` does not exist.");
+        assertError(query, "No node projection with property 'noProp' exists.");
+    }
+
+    @Test
+    void failsOnNonExistingPropertyForLabel() {
+        String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'noProp', 'A') AS prop";
+        assertError(query, "Node projection 'A' does not have property key 'noProp'. Available keys: ['prop'].");
     }
 
 }

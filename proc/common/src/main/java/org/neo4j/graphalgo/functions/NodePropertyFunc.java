@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.functions;
 
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -29,27 +30,51 @@ import org.neo4j.procedure.UserFunction;
 
 import java.util.Objects;
 
+import static java.util.Collections.singletonList;
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.utils.StringJoining.join;
+
 public class NodePropertyFunc {
     @Context
     public KernelTransaction transaction;
 
     @UserFunction("gds.util.nodeProperty")
     @Description("Returns a node property value from a named in-memory graph.")
-    public double nodeProperty(
+    public Double nodeProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeId") Number nodeId,
-        @Name(value = "propertyKey") String propertyKey
+        @Name(value = "propertyKey") String propertyKey,
+        @Name(value = "nodeLabel", defaultValue = "*") String nodeLabel
     ) {
         Objects.requireNonNull(graphName);
         Objects.requireNonNull(nodeId);
         Objects.requireNonNull(propertyKey);
+        Objects.requireNonNull(nodeLabel);
 
         String username = transaction.subjectOrAnonymous().username();
-
         GraphStore graphStore = GraphStoreCatalog.get(username, graphName).graphStore();
+        boolean projectAll = nodeLabel.equals(PROJECT_ALL);
 
-        if (!graphStore.hasNodeProperty(graphStore.nodeLabels(), propertyKey)) {
-            throw new IllegalArgumentException(String.format("Node property with given name `%s` does not exist.", propertyKey));
+        if (projectAll) {
+            long labelsWithProperty = graphStore.nodeLabels().stream()
+                .filter(label -> graphStore.hasNodeProperty(singletonList(label), propertyKey))
+                .count();
+
+            if (labelsWithProperty == 0) {
+                throw new IllegalArgumentException(String.format(
+                    "No node projection with property '%s' exists.",
+                    propertyKey
+                ));
+            }
+        } else {
+            if (!graphStore.hasNodeProperty(singletonList(NodeLabel.of(nodeLabel)), propertyKey)) {
+                throw new IllegalArgumentException(String.format(
+                    "Node projection '%s' does not have property key '%s'. Available keys: %s.",
+                    nodeLabel,
+                    propertyKey,
+                    join(graphStore.nodePropertyKeys(NodeLabel.of(nodeLabel)))
+                ));
+            }
         }
 
         long internalId = graphStore.nodes().toMappedNodeId(nodeId.longValue());
@@ -58,9 +83,11 @@ public class NodePropertyFunc {
             throw new IllegalArgumentException(String.format("Node id %d does not exist.", nodeId.longValue()));
         }
 
-        return graphStore
-            .nodeProperty(propertyKey)
-            .values()
-            .nodeProperty(internalId);
+        GraphStore.NodeProperty propertyValues = projectAll
+            ? graphStore.nodeProperty(propertyKey) // builds UnionNodeProperties and returns the first matching property
+            : graphStore.nodeProperty(NodeLabel.of(nodeLabel), propertyKey);
+
+        double propertyValue = propertyValues.values().nodeProperty(internalId);
+        return Double.isNaN(propertyValue) ? null : propertyValue;
     }
 }
