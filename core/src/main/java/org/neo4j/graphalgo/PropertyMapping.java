@@ -222,13 +222,4 @@ public abstract class PropertyMapping {
     ) {
         return ImmutablePropertyMapping.of(propertyKey, neoPropertyKey, defaultValue, aggregation);
     }
-
-    public static PropertyMapping of(ResolvedPropertyMapping resolvedPropertyMapping) {
-        return of(
-            resolvedPropertyMapping.propertyKey(),
-            resolvedPropertyMapping.neoPropertyKey(),
-            resolvedPropertyMapping.defaultValue(),
-            resolvedPropertyMapping.aggregation()
-        );
-    }
 }
