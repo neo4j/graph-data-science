@@ -23,43 +23,35 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.io.layout.DatabaseFile;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.NodeStore;
-import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-public final class NodeStoreScanner extends AbstractStorePageCacheScanner<NodeRecord> {
+public final class NodeStoreScanner extends AbstractStorePageCacheScanner<NodeReference, NodeRecord, NodeStore> {
 
-    public static final AbstractStorePageCacheScanner.Access<NodeRecord> NODE_ACCESS = new Access<NodeRecord>() {
-        @Override
-        public RecordStore<NodeRecord> store(final NeoStores neoStores) {
-            return neoStores.getNodeStore();
-        }
+    public static final StoreScanner.Factory<NodeReference> FACTORY = NodeStoreScanner::new;
 
-        @Override
-        public RecordFormat<NodeRecord> recordFormat(final RecordFormats formats) {
-            return formats.node();
-        }
-
-        @Override
-        public String storeFileName() {
-            return DatabaseFile.NODE_STORE.getName();
-        }
-
-        @Override
-        public AbstractStorePageCacheScanner<NodeRecord> newScanner(
-                final GraphDatabaseService api,
-                final int prefetchSize) {
-            return new NodeStoreScanner(prefetchSize, api);
-        }
-    };
-
-    private NodeStoreScanner(final int prefetchSize, final GraphDatabaseService api) {
-        super(prefetchSize, api, NODE_ACCESS);
+    public NodeStoreScanner(int prefetchSize, GraphDatabaseService api) {
+        super(prefetchSize, api);
     }
 
     @Override
-    NodeStore store() {
-        return (NodeStore) super.store();
+    NodeStore store(NeoStores neoStores) {
+        return neoStores.getNodeStore();
+    }
+
+    @Override
+    RecordFormat<NodeRecord> recordFormat(RecordFormats formats) {
+        return formats.node();
+    }
+
+    @Override
+    NodeReference recordReference(NodeRecord record, NodeStore store) {
+        return new NodeRecordReference(record, store);
+    }
+
+    @Override
+    public String storeFileName() {
+        return DatabaseFile.NODE_STORE.getName();
     }
 }

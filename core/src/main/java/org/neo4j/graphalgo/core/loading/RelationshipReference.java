@@ -17,23 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.core.loading;
 
-public class RelationshipCursor {
+import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
-    /**
-     * the mapped source node id
-     */
-    public int sourceNodeId;
+public interface RelationshipReference extends RecordReference<RelationshipRecord> {
 
-    /**
-     * the mapped target node id
-     */
-    public int targetNodeId;
+    long relationshipId();
 
-    /**
-     * deprecated
-     */
-    @Deprecated
-    public long relationshipId;
+    int typeTokenId();
+
+    long sourceNodeReference();
+
+    long targetNodeReference();
+
+    long propertiesReference();
 }

@@ -19,33 +19,22 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
-
-    private final RelationshipsBatchBuffer[] buffers;
-
-    private CompositeRelationshipsBatchBuffer(RelationshipsBatchBuffer... buffers) {
-        super(0);
-        this.buffers = buffers;
-    }
-
-    static RecordsBatchBuffer<RelationshipReference> of(RelationshipsBatchBuffer... buffers) {
-        if (buffers.length == 1) {
-            return buffers[0];
-        }
-        return new CompositeRelationshipsBatchBuffer(buffers);
+public final class NodeCursorReference implements NodeReference {
+    @Override
+    public long nodeId() {
+        throw new UnsupportedOperationException(
+            "org.neo4j.graphalgo.core.loading.NodeCursorReference.nodeId is not implemented.");
     }
 
     @Override
-    public void offer(RelationshipReference record) {
-        for (RelationshipsBatchBuffer buffer : buffers) {
-            buffer.offer(record);
-        }
+    public long[] labels() {
+        throw new UnsupportedOperationException(
+            "org.neo4j.graphalgo.core.loading.NodeCursorReference.labels is not implemented.");
     }
 
     @Override
-    public void reset() {
-        for (RelationshipsBatchBuffer buffer : buffers) {
-            buffer.reset();
-        }
+    public long propertiesReference() {
+        throw new UnsupportedOperationException(
+            "org.neo4j.graphalgo.core.loading.NodeCursorReference.propertiesReference is not implemented.");
     }
 }

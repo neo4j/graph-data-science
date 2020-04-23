@@ -20,14 +20,13 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
 import static org.neo4j.graphalgo.utils.ExceptionUtil.validateSourceNodeIsLoaded;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.validateTargetNodeIsLoaded;
 import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 
-public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRecord> {
+public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
 
     public static final int RELATIONSHIP_REFERENCE_OFFSET = 2;
     public static final int PROPERTIES_REFERENCE_OFFSET = 3;
@@ -66,20 +65,21 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     }
 
     @Override
-    public void offer(final RelationshipRecord record) {
-        if ((type == ANY_RELATIONSHIP_TYPE) || (type == record.getType())) {
-            long source = idMap.toMappedNodeId(record.getFirstNode());
-            long target = idMap.toMappedNodeId(record.getSecondNode());
+    public void offer(final RelationshipReference record) {
+        // TODO
+        if ((type == ANY_RELATIONSHIP_TYPE) || (type == record.typeTokenId())) {
+            long source = idMap.toMappedNodeId(record.sourceNodeReference());
+            long target = idMap.toMappedNodeId(record.targetNodeReference());
 
             if (throwOnUnMappedNodeIds) {
-                validateSourceNodeIsLoaded(source, record.getFirstNode());
-                validateTargetNodeIsLoaded(target, record.getSecondNode());
+                validateSourceNodeIsLoaded(source, record.sourceNodeReference());
+                validateTargetNodeIsLoaded(target, record.targetNodeReference());
             }
             else if (source == -1 || target == -1) {
                 return;
             }
 
-            add(source, target, record.getId(), record.getNextProp());
+            add(source, target, record.relationshipId(), record.propertiesReference());
         }
     }
 

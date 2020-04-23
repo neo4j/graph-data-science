@@ -19,42 +19,34 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.core.loading.StoreScanner.RecordConsumer;
+import org.neo4j.graphdb.GraphDatabaseService;
 
-abstract class RecordsBatchBuffer<Reference> implements RecordConsumer<Reference> {
+public interface StoreScanner<Record> {
 
-    static final int DEFAULT_BUFFER_SIZE = 100_000;
+    int DEFAULT_PREFETCH_SIZE = 100;
 
-    final long[] buffer;
-    int length;
-
-    RecordsBatchBuffer(int capacity) {
-        this.buffer = new long[capacity];
+    interface RecordConsumer<Record> {
+        /**
+         * Imports the record at a given position and return the new position.
+         * Can also ignore the record if it is not of interest.
+         */
+        void offer(Record record);
     }
 
-    boolean scan(AbstractStorePageCacheScanner.Cursor<Reference> cursor) {
-        reset();
-        return cursor.bulkNext(this);
+    interface Factory<Record> {
+        StoreScanner<Record> newScanner(int prefetchSize, GraphDatabaseService api);
     }
 
-    int length() {
-        return length;
+    interface Cursor<Record> extends AutoCloseable {
+        int bulkSize();
+
+        boolean bulkNext(RecordConsumer<Record> consumer);
+
+        @Override
+        void close();
     }
 
-    int capacity() {
-        return buffer.length;
-    }
+    Cursor<Record> getCursor();
 
-    public boolean isFull() {
-        return length >= buffer.length;
-    }
-
-    public void reset() {
-        this.length = 0;
-    }
-
-    long[] batch() {
-        return buffer;
-    }
-
+    long storeSize();
 }

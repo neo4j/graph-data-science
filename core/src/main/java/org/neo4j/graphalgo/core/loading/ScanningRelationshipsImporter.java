@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 
-final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, ObjectLongMap<RelationshipType>> {
+final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, ObjectLongMap<RelationshipType>> {
 
     private final GraphCreateConfig graphCreateConfig;
     private final GraphLoadingContext loadingContext;
@@ -65,7 +65,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int concurrency
     ) {
         super(
-                RelationshipStoreScanner.RELATIONSHIP_ACCESS,
+                RelationshipStoreScanner.FACTORY,
                 "Relationship",
                 api,
                 dimensions,
@@ -84,7 +84,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     InternalImporter.CreateScanner creator(
             final long nodeCount,
             final ImportSizing sizing,
-            final AbstractStorePageCacheScanner<RelationshipRecord> scanner) {
+            final StoreScanner<RelationshipReference> scanner) {
 
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();

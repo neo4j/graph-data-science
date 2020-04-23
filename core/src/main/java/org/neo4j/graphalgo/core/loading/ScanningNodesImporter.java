@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
@@ -47,7 +46,7 @@ import java.util.stream.StreamSupport;
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
 
-final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, IdsAndProperties> {
+final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
 
     private final GraphCreateFromStoreConfig graphCreateConfig;
     private final ProgressLogger progressLogger;
@@ -71,7 +70,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
         int concurrency,
         Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
     ) {
-        super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
+        super(NodeStoreScanner.FACTORY, "Node", api, dimensions, threadPool, concurrency);
         this.graphCreateConfig = graphCreateConfig;
         this.progressLogger = progressLogger;
         this.tracker = tracker;
@@ -83,7 +82,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     InternalImporter.CreateScanner creator(
         long nodeCount,
         ImportSizing sizing,
-        AbstractStorePageCacheScanner<NodeRecord> scanner
+        StoreScanner<NodeReference> scanner
     ) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
 

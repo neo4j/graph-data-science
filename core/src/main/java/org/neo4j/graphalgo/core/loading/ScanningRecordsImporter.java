@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.InternalImporter.ImportResult;
-import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
@@ -33,11 +32,11 @@ import java.util.concurrent.ExecutorService;
 import static org.neo4j.graphalgo.core.loading.AbstractStorePageCacheScanner.DEFAULT_PREFETCH_SIZE;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
-abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
+abstract class ScanningRecordsImporter<Record, T> {
 
     private static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
 
-    private final AbstractStorePageCacheScanner.Access<Record> access;
+    private final StoreScanner.Factory<Record> factory;
     private final String label;
     final GraphDatabaseAPI api;
     final GraphDimensions dimensions;
@@ -45,14 +44,14 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
     final int concurrency;
 
     ScanningRecordsImporter(
-        AbstractStorePageCacheScanner.Access<Record> access,
+        StoreScanner.Factory<Record> factory,
         String label,
         GraphDatabaseAPI api,
         GraphDimensions dimensions,
         ExecutorService threadPool,
         int concurrency
     ) {
-        this.access = access;
+        this.factory = factory;
         this.label = label;
         this.api = api;
         this.dimensions = dimensions;
@@ -65,8 +64,7 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
         final ImportSizing sizing = ImportSizing.of(concurrency, nodeCount);
         int numberOfThreads = sizing.numberOfThreads();
 
-        AbstractStorePageCacheScanner<Record> scanner =
-                new AbstractStorePageCacheScanner<>(DEFAULT_PREFETCH_SIZE, api, access);
+        StoreScanner<Record> scanner = factory.newScanner(DEFAULT_PREFETCH_SIZE, api);
 
         InternalImporter.CreateScanner creator = creator(nodeCount, sizing, scanner);
         InternalImporter importer = new InternalImporter(numberOfThreads, creator);
@@ -103,7 +101,8 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
     abstract InternalImporter.CreateScanner creator(
             long nodeCount,
             ImportSizing sizing,
-            AbstractStorePageCacheScanner<Record> scanner);
+            StoreScanner<Record> scanner
+    );
 
     abstract T build();
 }

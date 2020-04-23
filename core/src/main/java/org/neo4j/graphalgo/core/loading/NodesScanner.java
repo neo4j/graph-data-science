@@ -28,8 +28,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.store.NodeStore;
-import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -39,7 +37,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
 
     static InternalImporter.CreateScanner of(
         GraphDatabaseAPI api,
-        AbstractStorePageCacheScanner<NodeRecord> scanner,
+        StoreScanner<NodeReference> scanner,
         LongSet labels,
         ProgressLogger progressLogger,
         NodeImporter importer,
@@ -57,7 +55,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
 
     static final class Creator implements InternalImporter.CreateScanner {
         private final GraphDatabaseAPI api;
-        private final AbstractStorePageCacheScanner<NodeRecord> scanner;
+        private final StoreScanner<NodeReference> scanner;
         private final LongSet labels;
         private final ProgressLogger progressLogger;
         private final NodeImporter importer;
@@ -66,7 +64,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
 
         Creator(
             GraphDatabaseAPI api,
-            AbstractStorePageCacheScanner<NodeRecord> scanner,
+            StoreScanner<NodeReference> scanner,
             LongSet labels,
             ProgressLogger progressLogger,
             NodeImporter importer,
@@ -104,8 +102,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     }
 
     private final TerminationFlag terminationFlag;
-    private final NodeStore nodeStore;
-    private final AbstractStorePageCacheScanner<NodeRecord> scanner;
+    private final StoreScanner<NodeReference> scanner;
     private final LongSet labels;
     private final int scannerIndex;
     private final ProgressLogger progressLogger;
@@ -117,7 +114,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private NodesScanner(
         GraphDatabaseAPI api,
         TerminationFlag terminationFlag,
-        AbstractStorePageCacheScanner<NodeRecord> scanner,
+        StoreScanner<NodeReference> scanner,
         LongSet labels,
         int threadIndex,
         ProgressLogger progressLogger,
@@ -126,7 +123,6 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     ) {
         super(api);
         this.terminationFlag = terminationFlag;
-        this.nodeStore = (NodeStore) scanner.store();
         this.scanner = scanner;
         this.labels = labels;
         this.scannerIndex = threadIndex;
@@ -144,9 +140,8 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     public void accept(KernelTransaction transaction) {
         Read read = transaction.dataRead();
         CursorFactory cursors = transaction.cursors();
-        try (AbstractStorePageCacheScanner.Cursor<NodeRecord> cursor = scanner.getCursor()) {
+        try (AbstractStorePageCacheScanner.Cursor<NodeReference> cursor = scanner.getCursor()) {
             NodesBatchBuffer batches = new NodesBatchBufferBuilder()
-                .store(nodeStore)
                 .nodeLabelIds(labels)
                 .capacity(cursor.bulkSize())
                 .hasLabelInformation(!labels.isEmpty())

@@ -40,50 +40,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.neo4j.kernel.impl.store.RecordPageLocationCalculator.offsetForId;
 
 
-public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
+abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractBaseRecord, Store extends RecordStore<Record>> implements StoreScanner<Reference> {
 
-    public static final int DEFAULT_PREFETCH_SIZE = 100;
-
-    public interface Access<Record extends AbstractBaseRecord> {
-        /**
-         * Return the store to use.
-         */
-        RecordStore<Record> store(NeoStores neoStores);
-
-        /**
-         * Return the record format to use.
-         */
-        RecordFormat<Record> recordFormat(RecordFormats formats);
-
-        /**
-         * Return the filename of the store file that the page cache maps
-         */
-        String storeFileName();
-
-        /**
-         * Create a new scanner for the selected access type
-         */
-        AbstractStorePageCacheScanner<Record> newScanner(GraphDatabaseService api, int prefetchSize);
-    }
-
-    public interface RecordConsumer<Record extends AbstractBaseRecord> {
-        /**
-         * Imports the record at a given position and return the new position.
-         * Can also ignore the record if it is not of interest.
-         */
-        void offer(Record record);
-    }
-
-    public interface Cursor<Record extends AbstractBaseRecord> extends AutoCloseable {
-        int bulkSize();
-
-        boolean bulkNext(RecordConsumer<Record> consumer);
-
-        @Override
-        void close();
-    }
-
-    public final class StoreScanCursor implements Cursor<Record> {
+    final class StoreScanCursor implements Cursor<Reference> {
 
         // last page to contain a value of interest, inclusive, but we mostly
         // treat is as exclusive since we want to special-case the last page
@@ -95,6 +54,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         private PageCursor pageCursor;
         // thread-local record instance
         private Record record;
+        private Reference recordReference;
 
         // the current record id -
         private long recordId;
@@ -105,16 +65,18 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         // the current offset into the page
         private int offset;
 
-        StoreScanCursor(PageCursor pageCursor, Record record) {
+        StoreScanCursor(PageCursor pageCursor, Record record, Reference reference) {
             this.lastOffset = offsetForId(maxId, pageSize, recordSize);
             this.lastPage = calculateLastPageId(maxId, recordsPerPage, lastOffset);
             this.pageCursor = pageCursor;
             this.record = record;
+            this.recordReference = reference;
             this.offset = pageSize; // trigger page load as first action
             this.currentPage = -1;
         }
 
-        @Override public int bulkSize() {
+        @Override
+        public int bulkSize() {
             return prefetchSize * recordsPerPage;
         }
 
@@ -127,7 +89,8 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             return lastPageId;
         }
 
-        @Override public boolean bulkNext(RecordConsumer<Record> consumer) {
+        @Override
+        public boolean bulkNext(RecordConsumer<Reference> consumer) {
             try {
                 return bulkNext0(consumer);
             } catch (IOException e) {
@@ -135,7 +98,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             }
         }
 
-        private boolean bulkNext0(RecordConsumer<Record> consumer) throws IOException {
+        private boolean bulkNext0(RecordConsumer<Reference> consumer) throws IOException {
             if (recordId == -1L) {
                 return false;
             }
@@ -156,7 +119,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             } else {
                 page = currentPage;
                 endPage = fetchedUntilPage;
-                endOffset = AbstractStorePageCacheScanner.this.pageSize;
+                endOffset = pageSize;
             }
 
             int offset = this.offset;
@@ -164,6 +127,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             int recordSize = AbstractStorePageCacheScanner.this.recordSize;
             PageCursor pageCursor = this.pageCursor;
             Record record = this.record;
+            Reference recordReference = this.recordReference;
 
             while (page < endPage) {
                 if (!pageCursor.next(page++)) {
@@ -176,7 +140,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
                     loadAtOffset(offset);
                     offset += recordSize;
                     if (record.inUse()) {
-                        consumer.offer(record);
+                        consumer.offer(recordReference);
                     }
                 }
             }
@@ -217,14 +181,16 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             pageCursor.checkAndClearBoundsFlag();
         }
 
+        @SuppressWarnings("ConstantConditions")
         @Override
         public void close() {
             if (pageCursor != null) {
                 pageCursor.close();
                 pageCursor = null;
                 record = null;
+                recordReference = null;
 
-                final Cursor<Record> localCursor = cursors.get();
+                final Cursor<Reference> localCursor = cursors.get();
                 // sanity check, should always be called from the same thread
                 if (localCursor == this) {
                     cursors.remove();
@@ -238,7 +204,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
     // global pointer which block of pages need to be fetched next
     private final AtomicLong nextPageId;
     // global cursor pool to return this one to
-    private final ThreadLocal<Cursor<Record>> cursors;
+    private final ThreadLocal<Cursor<Reference>> cursors;
 
     // size in bytes of a single record - advance the offset by this much
     private final int recordSize;
@@ -249,25 +215,23 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
     private final int pageSize;
     // how to read the record
     private final RecordFormat<Record> recordFormat;
-    private final RecordStore<Record> store;
+    private final Store store;
     private final PagedFile pagedFile;
 
     AbstractStorePageCacheScanner(
         int prefetchSize,
-        GraphDatabaseService api,
-        Access<Record> access
+        GraphDatabaseService api
     ) {
 
-        NeoStores neoStores = GraphDatabaseApiProxy.neoStores(api);
-
-        RecordStore<Record> store = access.store(neoStores);
+        var neoStores = GraphDatabaseApiProxy.neoStores(api);
+        var store = store(neoStores);
         int recordSize = store.getRecordSize();
         int recordsPerPage = store.getRecordsPerPage();
         int pageSize = recordsPerPage * recordSize;
 
         PagedFile pagedFile = null;
         PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(api, PageCache.class);
-        String storeFileName = access.storeFileName();
+        String storeFileName = storeFileName();
         try {
             for (PagedFile pf : pageCache.listExistingMappings()) {
                 if (pf.file().getName().equals(storeFileName)) {
@@ -287,13 +251,14 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         this.recordsPerPage = recordsPerPage;
         this.maxId = 1L + store.getHighestPossibleIdInUse();
         this.pageSize = pageSize;
-        this.recordFormat = access.recordFormat(neoStores.getRecordFormats());
+        this.recordFormat = recordFormat(neoStores.getRecordFormats());
         this.store = store;
         this.pagedFile = pagedFile;
     }
 
-    public final Cursor<Record> getCursor() {
-        Cursor<Record> cursor = cursors.get();
+    @Override
+    public final Cursor<Reference> getCursor() {
+        Cursor<Reference> cursor = cursors.get();
         if (cursor == null) {
             // Don't add as we want to always call next as the first cursor action,
             // which actually does the advance and returns the correct cursor.
@@ -313,13 +278,15 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
                 throw new UncheckedIOException(e);
             }
             Record record = store.newRecord();
-            cursor = new StoreScanCursor(pageCursor, record);
+            Reference reference = recordReference(record, store);
+            cursor = new StoreScanCursor(pageCursor, record, reference);
             cursors.set(cursor);
         }
         return cursor;
     }
 
-    final long storeSize() {
+    @Override
+    public final long storeSize() {
         if (pagedFile != null) {
             return pagedFile.file().length();
         }
@@ -328,7 +295,20 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         return idsInPages * (long) recordSize;
     }
 
-    RecordStore<Record> store() {
-        return store;
-    }
+    /**
+     * Return the store to use.
+     */
+    abstract Store store(NeoStores neoStores);
+
+    /**
+         * Return the record format to use.
+         */
+    abstract RecordFormat<Record> recordFormat(RecordFormats formats);
+
+    abstract Reference recordReference(Record record, Store store);
+
+    /**
+         * Return the filename of the store file that the page cache maps
+         */
+    abstract String storeFileName();
 }

@@ -31,10 +31,9 @@ import java.util.Optional;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 
-public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
+public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
 
     private final LongSet nodeLabelIds;
-    private final NodeStore nodeStore;
     private final boolean hasLabelInformation;
     private final long[][] labelIds;
 
@@ -44,13 +43,11 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     @Builder.Constructor
     NodesBatchBuffer(
         int capacity,
-        Optional<NodeStore> store,
         Optional<LongSet> nodeLabelIds,
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> readProperty
     ) {
         super(capacity);
-        this.nodeStore = store.orElse(null);
         this.nodeLabelIds = nodeLabelIds.orElseGet(LongHashSet::new);
         this.hasLabelInformation = hasLabelInformation.orElse(false);
         this.properties = readProperty.orElse(false) ? new long[capacity] : null;
@@ -58,12 +55,12 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     }
 
     @Override
-    public void offer(final NodeRecord record) {
+    public void offer(final NodeReference record) {
         if (nodeLabelIds.isEmpty()) {
-            add(record.getId(), record.getNextProp(), new long[]{TokenConstants.ANY_LABEL});
+            add(record.nodeId(), record.propertiesReference(), new long[]{TokenConstants.ANY_LABEL});
         } else {
             boolean atLeastOneLabelFound = false;
-            final long[] labels = NodeLabelsField.get(record, nodeStore);
+            var labels = record.labels();
             for (int i = 0; i < labels.length; i++) {
                 long l = labels[i];
                 if (!nodeLabelIds.contains(l) && !nodeLabelIds.contains(TokenConstants.ANY_LABEL)) {
@@ -73,7 +70,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
                 }
             }
             if (atLeastOneLabelFound) {
-                add(record.getId(), record.getNextProp(), labels);
+                add(record.nodeId(), record.propertiesReference(), labels);
             }
         }
     }

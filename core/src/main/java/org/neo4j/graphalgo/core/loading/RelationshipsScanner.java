@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
@@ -43,7 +42,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         GraphLoadingContext loadingContext,
         ProgressLogger progressLogger,
         IdMapping idMap,
-        AbstractStorePageCacheScanner<RelationshipRecord> scanner,
+        StoreScanner<RelationshipReference> scanner,
         Collection<SingleTypeRelationshipImporter.Builder> importerBuilders
     ) {
         List<SingleTypeRelationshipImporter.Builder.WithImporter> builders = importerBuilders
@@ -68,7 +67,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         private final GraphDatabaseAPI api;
         private final ProgressLogger progressLogger;
         private final IdMapping idMap;
-        private final AbstractStorePageCacheScanner<RelationshipRecord> scanner;
+        private final StoreScanner<RelationshipReference> scanner;
         private final List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders;
         private final TerminationFlag terminationFlag;
 
@@ -76,7 +75,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 GraphDatabaseAPI api,
                 ProgressLogger progressLogger,
                 IdMapping idMap,
-                AbstractStorePageCacheScanner<RelationshipRecord> scanner,
+                StoreScanner<RelationshipReference> scanner,
                 List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders,
                 TerminationFlag terminationFlag) {
             this.api = api;
@@ -111,7 +110,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
     private final IdMapping idMap;
-    private final AbstractStorePageCacheScanner<RelationshipRecord> scanner;
+    private final StoreScanner<RelationshipReference> scanner;
     private final int scannerIndex;
     private final List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders;
 
@@ -123,7 +122,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             TerminationFlag terminationFlag,
             ProgressLogger progressLogger,
             IdMapping idMap,
-            AbstractStorePageCacheScanner<RelationshipRecord> scanner,
+            StoreScanner<RelationshipReference> scanner,
             int threadIndex,
             List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders) {
         super(api);
@@ -146,7 +145,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     }
 
     private void scanRelationships(final Read read, final CursorFactory cursors) {
-        try (AbstractStorePageCacheScanner.Cursor<RelationshipRecord> cursor = scanner.getCursor()) {
+        try (AbstractStorePageCacheScanner.Cursor<RelationshipReference> cursor = scanner.getCursor()) {
             List<SingleTypeRelationshipImporter> importers = this.importerBuilders.stream()
                     .map(imports -> imports.withBuffer(idMap, cursor.bulkSize(), read, cursors))
                     .collect(Collectors.toList());
@@ -156,7 +155,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                     .map(SingleTypeRelationshipImporter::buffer)
                     .toArray(RelationshipsBatchBuffer[]::new);
 
-            RecordsBatchBuffer<RelationshipRecord> buffer = CompositeRelationshipsBatchBuffer.of(buffers);
+            RecordsBatchBuffer<RelationshipReference> buffer = CompositeRelationshipsBatchBuffer.of(buffers);
 
             long allImportedRels = 0L;
             long allImportedWeights = 0L;

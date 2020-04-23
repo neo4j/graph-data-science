@@ -19,42 +19,13 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.core.loading.StoreScanner.RecordConsumer;
+import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-abstract class RecordsBatchBuffer<Reference> implements RecordConsumer<Reference> {
+public interface NodeReference extends RecordReference<NodeRecord> {
 
-    static final int DEFAULT_BUFFER_SIZE = 100_000;
+    long nodeId();
 
-    final long[] buffer;
-    int length;
+    long[] labels();
 
-    RecordsBatchBuffer(int capacity) {
-        this.buffer = new long[capacity];
-    }
-
-    boolean scan(AbstractStorePageCacheScanner.Cursor<Reference> cursor) {
-        reset();
-        return cursor.bulkNext(this);
-    }
-
-    int length() {
-        return length;
-    }
-
-    int capacity() {
-        return buffer.length;
-    }
-
-    public boolean isFull() {
-        return length >= buffer.length;
-    }
-
-    public void reset() {
-        this.length = 0;
-    }
-
-    long[] batch() {
-        return buffer;
-    }
-
+    long propertiesReference();
 }

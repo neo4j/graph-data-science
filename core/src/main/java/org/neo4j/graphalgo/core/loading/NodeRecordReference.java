@@ -19,33 +19,34 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
+import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
+import org.neo4j.kernel.impl.store.NodeLabelsField;
+import org.neo4j.kernel.impl.store.NodeStore;
+import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-    private final RelationshipsBatchBuffer[] buffers;
+public final class NodeRecordReference implements NodeReference {
 
-    private CompositeRelationshipsBatchBuffer(RelationshipsBatchBuffer... buffers) {
-        super(0);
-        this.buffers = buffers;
-    }
+    private final NodeRecord record;
+    private final NodeStore nodeStore;
 
-    static RecordsBatchBuffer<RelationshipReference> of(RelationshipsBatchBuffer... buffers) {
-        if (buffers.length == 1) {
-            return buffers[0];
-        }
-        return new CompositeRelationshipsBatchBuffer(buffers);
-    }
-
-    @Override
-    public void offer(RelationshipReference record) {
-        for (RelationshipsBatchBuffer buffer : buffers) {
-            buffer.offer(record);
-        }
+    NodeRecordReference(NodeRecord record, NodeStore nodeStore) {
+        this.record = record;
+        this.nodeStore = nodeStore;
     }
 
     @Override
-    public void reset() {
-        for (RelationshipsBatchBuffer buffer : buffers) {
-            buffer.reset();
-        }
+    public long nodeId() {
+        return record.getId();
+    }
+
+    @Override
+    public long[] labels() {
+        // TODO: PageCursorTracer from tx
+        return NodeLabelsField.get(record, nodeStore, PageCursorTracer.NULL);
+    }
+
+    @Override
+    public long propertiesReference() {
+        return record.getNextProp();
     }
 }

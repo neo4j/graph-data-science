@@ -19,33 +19,38 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
+import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
-    private final RelationshipsBatchBuffer[] buffers;
+public final class RelationshipRecordReference implements RelationshipReference {
 
-    private CompositeRelationshipsBatchBuffer(RelationshipsBatchBuffer... buffers) {
-        super(0);
-        this.buffers = buffers;
-    }
+    private final RelationshipRecord record;
 
-    static RecordsBatchBuffer<RelationshipReference> of(RelationshipsBatchBuffer... buffers) {
-        if (buffers.length == 1) {
-            return buffers[0];
-        }
-        return new CompositeRelationshipsBatchBuffer(buffers);
+    public RelationshipRecordReference(RelationshipRecord record) {
+        this.record = record;
     }
 
     @Override
-    public void offer(RelationshipReference record) {
-        for (RelationshipsBatchBuffer buffer : buffers) {
-            buffer.offer(record);
-        }
+    public long relationshipId() {
+        return record.getId();
     }
 
     @Override
-    public void reset() {
-        for (RelationshipsBatchBuffer buffer : buffers) {
-            buffer.reset();
-        }
+    public int typeTokenId() {
+        return record.getType();
+    }
+
+    @Override
+    public long sourceNodeReference() {
+        return record.getFirstNode();
+    }
+
+    @Override
+    public long targetNodeReference() {
+        return record.getSecondNode();
+    }
+
+    @Override
+    public long propertiesReference() {
+        return record.getNextProp();
     }
 }
