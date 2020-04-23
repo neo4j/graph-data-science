@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.write;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -34,7 +33,6 @@ import org.neo4j.values.storable.Value;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -57,10 +55,6 @@ public class NodePropertyExporter extends StatementApi {
 
     public static Builder builder(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
         return new Builder(db, idMapping, terminationFlag);
-    }
-
-    public static Builder builder(GraphDatabaseAPI db, GraphStore graphStore, TerminationFlag terminationFlag) {
-        return new Builder(db, graphStore, terminationFlag);
     }
 
     @ValueClass
@@ -96,16 +90,8 @@ public class NodePropertyExporter extends StatementApi {
 
     public static class Builder extends ExporterBuilder<NodePropertyExporter> {
 
-        private final Optional<GraphStore> maybeGraphStore;
-
         Builder(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
             super(db, idMapping, terminationFlag);
-            this.maybeGraphStore = Optional.empty();
-        }
-
-        Builder(GraphDatabaseAPI db, GraphStore graphStore, TerminationFlag terminationFlag) {
-            super(db, graphStore.nodes(), terminationFlag);
-            this.maybeGraphStore = Optional.of(graphStore);
         }
 
         @Override
@@ -114,28 +100,15 @@ public class NodePropertyExporter extends StatementApi {
                 ? ProgressLogger.NULL_LOGGER
                 : loggerAdapter;
 
-            if (maybeGraphStore.isPresent()) {
-                return new FilteredNodePropertyExporter(
-                    db,
-                    nodeCount,
-                    toOriginalId,
-                    terminationFlag,
-                    maybeGraphStore.get(),
-                    progressLogger,
-                    writeConcurrency,
-                    executorService
-                );
-            } else {
-                return new NodePropertyExporter(
-                    db,
-                    nodeCount,
-                    toOriginalId,
-                    terminationFlag,
-                    progressLogger,
-                    writeConcurrency,
-                    executorService
-                );
-            }
+            return new NodePropertyExporter(
+                db,
+                nodeCount,
+                toOriginalId,
+                terminationFlag,
+                progressLogger,
+                writeConcurrency,
+                executorService
+            );
         }
     }
 
