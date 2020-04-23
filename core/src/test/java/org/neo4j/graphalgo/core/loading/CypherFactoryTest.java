@@ -49,7 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
-import static org.neo4j.graphalgo.TestGraphLoader.addSuffix;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
@@ -218,17 +217,17 @@ class CypherFactoryTest extends BaseTest {
 
         assertGraphEquals(
             fromGdl(String.format(Locale.US, expectedGraph, 1.0f, prop1.defaultValue(), prop1.defaultValue())),
-            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(addSuffix(prop1.propertyKey(), 0)))
+            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop1.propertyKey()))
         );
 
         assertGraphEquals(
             fromGdl(String.format(Locale.US, expectedGraph, prop2.defaultValue(), 2.0, prop2.defaultValue())),
-            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(addSuffix(prop2.propertyKey(), 1)))
+            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop2.propertyKey()))
         );
 
         assertGraphEquals(
             fromGdl(String.format(Locale.US, expectedGraph, prop3.defaultValue(), prop3.defaultValue(), 3.0)),
-            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(addSuffix(prop3.propertyKey(), 2)))
+            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop3.propertyKey()))
         );
     }
 

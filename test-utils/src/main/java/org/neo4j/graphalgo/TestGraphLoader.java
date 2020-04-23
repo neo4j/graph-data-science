@@ -137,9 +137,14 @@ public final class TestGraphLoader {
             nodeLabels.isEmpty() ? "" : ", labels(n) AS labels",
             nodePropertiesString));
 
-        String relationshipQueryTemplate = relTypes.isEmpty()
-            ? "MATCH (n)-[r%s]->(m) RETURN id(n) AS source, id(m) AS target%s"
-            : "MATCH (n)-[r%s]->(m) RETURN type(r) AS type, id(n) AS source, id(m) AS target%s";
+        String relationshipQueryTemplate = "MATCH (n)-[r%s]->(m) RETURN ";
+        if (!Arrays.asList(DEFAULT, NONE).contains(maybeAggregation.orElse(NONE))) {
+            relationshipQueryTemplate += "DISTINCT ";
+        }
+
+        relationshipQueryTemplate += relTypes.isEmpty()
+            ? " id(n) AS source, id(m) AS target%s"
+            : " type(r) AS type, id(n) AS source, id(m) AS target%s";
 
         String relTypeString = relTypes.isEmpty()
             ? ""
