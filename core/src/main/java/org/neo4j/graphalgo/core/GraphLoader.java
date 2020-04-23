@@ -100,8 +100,7 @@ public interface GraphLoader {
             if (CypherFactory.class.isAssignableFrom(factoryType)) {
                 factory = new CypherFactory((GraphCreateFromCypherConfig) createConfig(), loadingContext);
             } else {
-                GraphCreateFromStoreConfig config = (GraphCreateFromStoreConfig) createConfig();
-                factory = new NativeFactory(config, loadingContext);
+                factory = new NativeFactory((GraphCreateFromStoreConfig) createConfig(), loadingContext);
             }
 
             return factoryType.cast(factory);

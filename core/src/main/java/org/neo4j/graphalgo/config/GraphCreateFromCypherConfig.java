@@ -25,9 +25,7 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,12 +49,6 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     String ALL_NODES_QUERY = "MATCH (n) RETURN id(n) AS id";
     String ALL_RELATIONSHIPS_QUERY = "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target";
     String ALL_RELATIONSHIPS_UNDIRECTED_QUERY = "MATCH (a)--(b) RETURN id(a) AS source, id(b) AS target";
-
-    @Override
-    @Configuration.Ignore
-    default Class<? extends GraphStoreFactory> getGraphImpl() {
-        return CypherFactory.class;
-    }
 
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String nodeQuery();
