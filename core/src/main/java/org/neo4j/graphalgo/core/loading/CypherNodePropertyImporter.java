@@ -19,8 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.LongObjectMap;
-import org.neo4j.graphalgo.ElementIdentifier;
+import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -33,9 +32,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 import static org.neo4j.graphalgo.core.loading.CypherNodeLoader.CYPHER_RESULT_PROPERTY_KEY;
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.PROJECT_ANY_LABEL;
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.IGNORE_LABEL;
 
 public class CypherNodePropertyImporter {
 
@@ -44,13 +43,13 @@ public class CypherNodePropertyImporter {
     private final Collection<String> propertyColumns;
     private final long nodeCount;
     private final int concurrency;
-    private final LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
+    private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
     private final Map<NodeLabel, Map<String, NodePropertiesBuilder>> buildersByNodeLabel;
 
 
     public CypherNodePropertyImporter(
         Collection<String> propertyColumns,
-        LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         long nodeCount,
         int concurrency
     ) {
@@ -96,11 +95,11 @@ public class CypherNodePropertyImporter {
         propertiesImported += setPropertyForLabel(ALL_NODES, nodeProperties, nodeId);
 
         for (long label : labels) {
-            if (label == IGNORE_LABEL || label == PROJECT_ANY_LABEL) {
+            if (label == IGNORE || label == ANY_LABEL) {
                 continue;
             }
 
-            for (ElementIdentifier labelIdentifier : labelTokenNodeLabelMapping.get(label)) {
+            for (NodeLabel labelIdentifier : labelTokenNodeLabelMapping.get((int) label)) {
                 propertiesImported += setPropertyForLabel(labelIdentifier, nodeProperties, nodeId);
             }
         }
@@ -122,7 +121,7 @@ public class CypherNodePropertyImporter {
     }
 
     private int setPropertyForLabel(
-        ElementIdentifier labelIdentifier,
+        NodeLabel labelIdentifier,
         Map<String, Number> nodeProperties,
         long nodeId
     ) {

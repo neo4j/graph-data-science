@@ -21,7 +21,8 @@ package org.neo4j.graphalgo.api;
 
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipProjectionMapping;
+import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -73,7 +74,7 @@ public abstract class GraphStoreFactory implements Assessable {
         this.setup = setup;
         this.log = setup.log();
         this.graphCreateConfig = graphCreateConfig;
-        this.dimensions = new GraphDimensionsReader(api, setup, graphCreateConfig, readTokens).call();
+        this.dimensions = new GraphDimensionsReader(api, graphCreateConfig, readTokens).call();
         this.progressLogger = initProgressLogger();
     }
 
@@ -86,10 +87,14 @@ public abstract class GraphStoreFactory implements Assessable {
     }
 
     protected ProgressLogger initProgressLogger() {
-        long relationshipCount = dimensions.relationshipProjectionMappings().stream()
-            .mapToLong(mapping -> {
-                Long typeCount = dimensions.relationshipCounts().get(mapping.relationshipType());
-                return mapping.orientation() == Orientation.UNDIRECTED
+        long relationshipCount = graphCreateConfig
+            .relationshipProjections()
+            .projections()
+            .entrySet()
+            .stream()
+            .mapToLong(projectionEntry -> {
+                Long typeCount = dimensions.relationshipCounts().getOrDefault(projectionEntry.getKey(), 0L);
+                return projectionEntry.getValue().orientation() == Orientation.UNDIRECTED
                     ? typeCount * 2
                     : typeCount;
             })
@@ -109,40 +114,42 @@ public abstract class GraphStoreFactory implements Assessable {
         AllocationTracker tracker,
         GraphDimensions dimensions
     ) {
-        int relTypeCount = dimensions.relationshipProjectionMappings().numberOfMappings();
+        int relTypeCount = dimensions.relationshipTypeTokens().size();
         Map<RelationshipType, HugeGraph.TopologyCSR> relationships = new HashMap<>(relTypeCount);
         Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
 
-        relationshipImportResult.builders().forEach((relationshipProjectionMapping, relationshipsBuilder) -> {
+        relationshipImportResult.builders().forEach((relationshipType, relationshipsBuilder) -> {
             AdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
             AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets();
-            long relationshipCount = relationshipImportResult.counts().getOrDefault(relationshipProjectionMapping, 0L);
+            long relationshipCount = relationshipImportResult.counts().getOrDefault(relationshipType, 0L);
+
+            RelationshipProjection projection = relationshipsBuilder.projection();
 
             relationships.put(
-                relationshipProjectionMapping.relationshipType(),
+                relationshipType,
                 ImmutableTopologyCSR.of(
                     adjacencyList,
                     adjacencyOffsets,
                     relationshipCount,
-                    relationshipProjectionMapping.orientation()
+                    projection.orientation()
                 )
             );
 
-            if (dimensions.relationshipProperties().hasMappings()) {
-                Map<String, HugeGraph.PropertyCSR> propertyMap = dimensions
-                    .relationshipProperties()
+            PropertyMappings propertyMappings = projection.properties();
+            if (!propertyMappings.isEmpty()) {
+                Map<String, HugeGraph.PropertyCSR> propertyMap = propertyMappings
                     .enumerate()
                     .collect(Collectors.toMap(
-                        propertyIdAndMapping -> propertyIdAndMapping.getTwo().propertyKey(),
-                        propertyIdAndMapping -> ImmutablePropertyCSR.of(
-                            relationshipsBuilder.properties(propertyIdAndMapping.getOne()),
-                            relationshipsBuilder.globalPropertyOffsets(propertyIdAndMapping.getOne()),
+                        propertyIndexAndMapping -> propertyIndexAndMapping.getTwo().propertyKey(),
+                        propertyIndexAndMapping -> ImmutablePropertyCSR.of(
+                            relationshipsBuilder.properties(propertyIndexAndMapping.getOne()),
+                            relationshipsBuilder.globalPropertyOffsets(propertyIndexAndMapping.getOne()),
                             relationshipCount,
-                            relationshipProjectionMapping.orientation(),
-                            propertyIdAndMapping.getTwo().defaultValue()
+                            projection.orientation(),
+                            propertyIndexAndMapping.getTwo().defaultValue()
                         )
                     ));
-                relationshipProperties.put(relationshipProjectionMapping.relationshipType(), propertyMap);
+                relationshipProperties.put(relationshipType, propertyMap);
             }
         });
 
@@ -171,15 +178,15 @@ public abstract class GraphStoreFactory implements Assessable {
 
     @ValueClass
     public interface RelationshipImportResult {
-        Map<RelationshipProjectionMapping, RelationshipsBuilder> builders();
+        Map<RelationshipType, RelationshipsBuilder> builders();
 
-        ObjectLongMap<RelationshipProjectionMapping> counts();
+        ObjectLongMap<RelationshipType> counts();
 
         GraphDimensions dimensions();
 
         static RelationshipImportResult of(
-            Map<RelationshipProjectionMapping, RelationshipsBuilder> builders,
-            ObjectLongMap<RelationshipProjectionMapping> counts,
+            Map<RelationshipType, RelationshipsBuilder> builders,
+            ObjectLongMap<RelationshipType> counts,
             GraphDimensions dimensions
         ) {
             return ImmutableRelationshipImportResult.of(builders, counts, dimensions);

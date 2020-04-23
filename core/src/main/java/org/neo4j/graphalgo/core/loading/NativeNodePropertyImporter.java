@@ -21,9 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
-import com.carrotsearch.hppc.LongObjectHashMap;
-import com.carrotsearch.hppc.LongObjectMap;
-import com.carrotsearch.hppc.procedures.LongObjectProcedure;
+import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -43,13 +41,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.PROJECT_ANY_LABEL;
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.IGNORE_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 
 public final class NativeNodePropertyImporter {
 
-    private final Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier;
-    private final LongObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken;
+    private final Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByNodeLabel;
+    private final IntObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelTokenAndPropertyToken;
     private final boolean containsAnyLabelProjection;
 
     public static Builder builder() {
@@ -57,12 +55,12 @@ public final class NativeNodePropertyImporter {
     }
 
     private NativeNodePropertyImporter(
-        Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier,
-        LongObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyToken,
+        Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByNodeLabel,
+        IntObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelTokenAndPropertyToken,
         boolean containsAnyLabelProjection
     ) {
-        this.buildersByIdentifier = buildersByIdentifier;
-        this.buildersByLabelIdAndPropertyToken = buildersByLabelIdAndPropertyToken;
+        this.buildersByNodeLabel = buildersByNodeLabel;
+        this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyToken;
         this.containsAnyLabelProjection = containsAnyLabelProjection;
     }
 
@@ -85,7 +83,7 @@ public final class NativeNodePropertyImporter {
     }
 
     public Map<NodeLabel, Map<PropertyMapping, NodeProperties>> result() {
-        return buildersByIdentifier
+        return buildersByNodeLabel
             .entrySet()
             .stream()
             .collect(Collectors.toMap(
@@ -102,11 +100,11 @@ public final class NativeNodePropertyImporter {
         int propertyKey = propertyCursor.propertyKey();
 
         for (long label : labels) {
-            if (label == IGNORE_LABEL || label == PROJECT_ANY_LABEL) {
+            if (label == IGNORE || label == ANY_LABEL) {
                 continue;
             }
 
-            IntObjectMap<List<NodePropertiesBuilder>> buildersByPropertyId = buildersByLabelIdAndPropertyToken.get(label);
+            IntObjectMap<List<NodePropertiesBuilder>> buildersByPropertyId = buildersByLabelTokenAndPropertyToken.get((int) label);
             if (buildersByPropertyId != null) {
                 propertiesImported += setPropertyValue(
                     nodeId,
@@ -118,7 +116,8 @@ public final class NativeNodePropertyImporter {
         }
 
         if (containsAnyLabelProjection) {
-            propertiesImported += setPropertyValue(nodeId, propertyCursor, propertyKey, buildersByLabelIdAndPropertyToken.get((long) PROJECT_ANY_LABEL));
+            propertiesImported += setPropertyValue(nodeId, propertyCursor, propertyKey, buildersByLabelTokenAndPropertyToken
+                .get(ANY_LABEL));
         }
 
         return propertiesImported;
@@ -191,12 +190,12 @@ public final class NativeNodePropertyImporter {
 
         public NativeNodePropertyImporter build() {
             Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> nodePropertyBuilders = initializeNodePropertyBuilders();
-            LongObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId =
+            IntObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId =
                 buildersByLabelIdAndPropertyId(nodePropertyBuilders);
             return new NativeNodePropertyImporter(
                 nodePropertyBuilders,
                 buildersByLabelIdAndPropertyId,
-                buildersByLabelIdAndPropertyId.containsKey((long) PROJECT_ANY_LABEL)
+                buildersByLabelIdAndPropertyId.containsKey(ANY_LABEL)
             );
         }
 
@@ -221,12 +220,12 @@ public final class NativeNodePropertyImporter {
             return builders;
         }
 
-        private LongObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId(Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier) {
-            Map<NodeLabel, Long> inverseIdentifierIdMapping = inverseIdentifierIdMapping();
+        private IntObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId(Map<NodeLabel, Map<PropertyMapping, NodePropertiesBuilder>> buildersByIdentifier) {
+            Map<NodeLabel, Integer> inverseIdentifierIdMapping = inverseIdentifierIdMapping();
 
-            LongObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId = new LongObjectHashMap<>();
+            IntObjectMap<IntObjectMap<List<NodePropertiesBuilder>>> buildersByLabelIdAndPropertyId = new IntObjectHashMap<>();
             buildersByIdentifier.forEach((labelIdentifier, builders) -> {
-                long labelId = inverseIdentifierIdMapping.get(labelIdentifier);
+                int labelId = inverseIdentifierIdMapping.get(labelIdentifier);
 
                 IntObjectMap<List<NodePropertiesBuilder>> buildersByPropertyToken;
                 if (buildersByLabelIdAndPropertyId.containsKey(labelId)) {
@@ -254,14 +253,14 @@ public final class NativeNodePropertyImporter {
             return buildersByLabelIdAndPropertyId;
         }
 
-        private Map<NodeLabel, Long> inverseIdentifierIdMapping() {
-            HashMap<NodeLabel, Long> inverseLabelIdentifierMapping = new HashMap<>();
+        private Map<NodeLabel, Integer> inverseIdentifierIdMapping() {
+            HashMap<NodeLabel, Integer> inverseLabelIdentifierMapping = new HashMap<>();
 
-            LongObjectProcedure<List<NodeLabel>> listLongObjectProcedure = (labelId, elementIdentifiers) -> {
+            IntObjectProcedure<List<NodeLabel>> listIntObjectProcedure = (labelId, elementIdentifiers) -> {
                 elementIdentifiers.forEach(identifier -> inverseLabelIdentifierMapping.put(identifier, labelId));
             };
 
-            dimensions.labelTokenNodeLabelMapping().forEach(listLongObjectProcedure);
+            dimensions.tokenNodeLabelMapping().forEach(listIntObjectProcedure);
 
             return inverseLabelIdentifierMapping;
         }

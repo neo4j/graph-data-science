@@ -165,8 +165,9 @@ public abstract class AdjacencyBuilder {
             }
 
             localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder(
-                    localAdjacencyOffsets,
-                    localWeightOffsets
+                localAdjacencyOffsets,
+                localWeightOffsets,
+                aggregations
             );
             localBuilders[pageIndex].prepare();
         }

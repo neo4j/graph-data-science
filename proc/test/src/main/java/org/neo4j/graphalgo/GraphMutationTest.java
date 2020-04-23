@@ -23,8 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
@@ -154,14 +157,19 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
-        GraphStore graphStore = TestGraphLoader
-            .from(graphDb())
-            .withLabels("A", "B")
-            .withRelationshipTypes("REL")
-            .graphStore(NativeFactory.class);
-
         String graphName = "myGraph";
-        GraphStoreCatalog.set(emptyWithNameNative("", graphName), graphStore);
+
+        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
+            .api(graphDb())
+            .graphName(graphName)
+            .addNodeLabels("A", "B");
+
+        relationshipProjections().projections().forEach((relationshipType, projection)-> {
+            storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection);
+        });
+
+        GraphLoader loader = storeLoaderBuilder.build();
+        GraphStoreCatalog.set(loader.createConfig(), loader.graphStore(NativeFactory.class));
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)

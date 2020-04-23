@@ -278,7 +278,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     default void testRunMultipleTimesOnLoadedGraph(Class<? extends GraphStoreFactory> graphStoreFactory) {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = (graphStoreFactory.isAssignableFrom(NativeFactory.class))
-            ? emptyWithNameNative(TEST_USERNAME, loadedGraphName)
+            ? withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections())
             : emptyWithNameCypher(TEST_USERNAME, loadedGraphName);
 
         applyOnProcedure((proc) -> {

@@ -20,54 +20,44 @@
 
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.RelationshipProjectionMapping;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
-import org.neo4j.graphalgo.ResolvedPropertyMappings;
-import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class GraphDimensionsValidation {
 
     private GraphDimensionsValidation() {}
 
-    public static void validate(GraphDimensions dimensions, GraphSetup setup) {
-        checkValidNodePredicate(dimensions, setup);
-        checkValidRelationshipTypePredicate(dimensions, setup);
+    public static void validate(GraphDimensions dimensions, GraphCreateConfig config) {
+        checkValidNodePredicate(dimensions, config);
         checkValidPropertyTokens("Node", dimensions.nodePropertyTokens());
-        checkValidProperties("Relationship", dimensions.relationshipProperties());
+        checkValidRelationshipTypePredicate(dimensions, config);
+        checkValidPropertyTokens("Relationship", dimensions.relationshipPropertyTokens());
     }
 
-    private static void checkValidNodePredicate(GraphDimensions dimensions, GraphSetup setup) {
-        if (!setup.nodeProjections().isEmpty() && dimensions.nodeLabelIds().contains(NO_SUCH_LABEL)) {
+    private static void checkValidNodePredicate(GraphDimensions dimensions, GraphCreateConfig config) {
+        if (!config.nodeProjections().isEmpty() && dimensions.nodeLabelTokens().contains(NO_SUCH_LABEL)) {
             throw new IllegalArgumentException(String.format(
                 "Invalid node projection, one or more labels not found: '%s'",
-                setup.nodeProjections().labelProjection()
+                config.nodeProjections().labelProjection()
             ));
         }
     }
 
-    private static void checkValidRelationshipTypePredicate(GraphDimensions dimensions, GraphSetup setup) {
-        if (isNotEmpty(setup.relationshipType())) {
-            String missingTypes = dimensions.relationshipProjectionMappings()
-                .stream()
-                .filter(m -> !m.exists() && !m.typeName().equals(ALL_RELATIONSHIPS.name))
-                .map(RelationshipProjectionMapping::typeName)
-                .collect(joining("', '"));
-            if (!missingTypes.isEmpty()) {
-                throw new IllegalArgumentException(String.format(
-                    "Invalid relationship projection, one or more relationship types not found: '%s'",
-                    missingTypes
-                ));
-            }
+    private static void checkValidRelationshipTypePredicate(GraphDimensions dimensions, GraphCreateConfig config) {
+        if (!config.relationshipProjections().isEmpty() && dimensions
+            .relationshipTypeTokens()
+            .contains(NO_SUCH_RELATIONSHIP_TYPE)) {
+            throw new IllegalArgumentException(String.format(
+                "Invalid relationship projection, one or more relationship types not found: '%s'",
+                config.relationshipProjections().typeFilter()
+            ));
         }
     }
 
@@ -78,57 +68,20 @@ public final class GraphDimensionsValidation {
             .filter(mapping -> {
                 String propertyKey = mapping.getKey();
                 int id = mapping.getValue();
-                return isNotEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
+                return (isNotEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY) && !propertyKey.equals("*");
             })
             .map(Map.Entry::getKey)
             .collect(joining("', '"));
 
         if (!missingProperties.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
+            String errorMessage = String.format(
                 "%s properties not found: '%s'",
                 recordType,
-                missingProperties));
-        }
-    }
+                missingProperties
+            );
 
-    @Deprecated
-    private static void checkValidProperties(String recordType, ResolvedPropertyMappings mappings) {
-        List<ResolvedPropertyMapping> invalidProperties = mappings
-            .stream()
-            .filter(mapping -> {
-                int id = mapping.propertyKeyId();
-                if (id != NO_SUCH_PROPERTY_KEY) {
-                    return false;
-                }
-                String propertyKey = mapping.neoPropertyKey();
-                if (mapping.aggregation() == Aggregation.COUNT && "*".equals(propertyKey)) {
-                    return false;
-                }
-                return true;
-            })
-            .collect(Collectors.toList());
-
-        if (!invalidProperties.isEmpty()) {
-            String missingPropertiesMessage = invalidProperties
-                .stream()
-                .map(mapping -> {
-                    String propertyKey = mapping.neoPropertyKey();
-                    if (mapping.aggregation() == Aggregation.COUNT &&
-                        propertyKey.equals(mapping.propertyKey())) {
-                        return String.format(
-                            "'%s' (if you meant to count parallel relationships, use `property:'*'`)",
-                            propertyKey
-                        );
-                    }
-                    return String.format("'%s'", propertyKey);
-                })
-                .collect(joining(", "));
-
-            throw new IllegalArgumentException(String.format(
-                "%s properties not found: %s.",
-                recordType,
-                missingPropertiesMessage
-            ));
+            errorMessage += recordType.equals("Relationship") ? " (if you meant to count parallel relationships, use `property:'*'`)." : "";
+            throw new IllegalArgumentException(errorMessage);
         }
     }
 }

@@ -21,12 +21,12 @@ package org.neo4j.graphalgo.catalog;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -143,13 +143,20 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphCreateConfig config = GraphCreateFromCypherConfig.of(
+        GraphCreateConfig initialConfig = GraphCreateFromCypherConfig.of(
             getUsername(),
             NO_GRAPH_NAME,
             nodeQuery,
             relationshipQuery,
             cypherConfig
         );
+
+        // Relationships are needed for the estimation
+        GraphCreateConfig config = ImmutableGraphCreateFromCypherConfig.builder()
+            .from(initialConfig)
+            .relationshipProjections(RelationshipProjections.all())
+            .build();
+
         validateConfig(cypherConfig, config);
 
         return estimateGraph(config);
@@ -210,7 +217,6 @@ public class GraphCreateProc extends CatalogProc {
                 .from(graphStoreFactory.dimensions())
                 .nodeCount(config.nodeCount())
                 .highestNeoId(config.nodeCount())
-                .relationshipProjectionMappings(RelationshipProjectionMappings.all())
                 .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, config.relationshipCount()))
                 .maxRelCount(Math.max(config.relationshipCount(), 0))
                 .build();

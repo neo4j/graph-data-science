@@ -111,52 +111,6 @@ public class GraphSetup {
             : Optional.empty();
     }
 
-    /**
-     * @deprecated There is no global relationship property anymore
-     */
-    @Deprecated
-    public Optional<Double> relationshipDefaultPropertyValue() {
-        return createConfig.relationshipProjections().allProjections().stream().flatMap(
-            f -> f.properties().defaultWeight().map(Stream::of).orElse(Stream.empty())
-        ).findFirst();
-    }
-
-    /**
-     * @deprecated There is no global relationship property configuration anymore
-     */
-    @Deprecated
-    public PropertyMappings relationshipPropertyMappings() {
-        Map<String, List<PropertyMapping>> groupedPropertyMappings = createConfig.relationshipProjections()
-            .allProjections()
-            .stream()
-            .flatMap(e -> e.properties().stream())
-            .collect(Collectors.groupingBy(PropertyMapping::propertyKey));
-
-        PropertyMappings.Builder builder = PropertyMappings.builder();
-        groupedPropertyMappings.values().stream()
-            .map(l -> l.iterator().next())
-            .forEach(builder::addMapping);
-
-        // Necessary for Cypher projections
-        createConfig.relationshipProperties().forEach(builder::addMapping);
-
-        return builder.build();
-    }
-
-    /**
-     * @deprecated There is no global relationship aggregation strategy anymore
-     */
-    @Deprecated
-    public Aggregation aggregation() {
-        return createConfig
-            .relationshipProjections()
-            .allProjections()
-            .stream()
-            .map(RelationshipProjection::aggregation)
-            .findFirst()
-            .orElse(Aggregation.DEFAULT);
-    }
-
     public Map<String, Object> parameters() {
         if (createConfig instanceof GraphCreateFromCypherConfig) {
             GraphCreateFromCypherConfig cypherConfig = (GraphCreateFromCypherConfig) this.createConfig;
@@ -168,10 +122,6 @@ public class GraphSetup {
 
     public Log log() {
         return log;
-    }
-
-    public long logMillis() {
-        return -1;
     }
 
     public AllocationTracker tracker() {

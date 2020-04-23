@@ -25,11 +25,11 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipProjectionMapping;
-import org.neo4j.graphalgo.RelationshipProjectionMappings;
-import org.neo4j.graphalgo.ResolvedPropertyMapping;
-import org.neo4j.graphalgo.ResolvedPropertyMappings;
+import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -42,6 +42,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -50,27 +51,26 @@ import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_FALLBACK_VALUE;
-import static org.neo4j.graphalgo.core.Aggregation.NONE;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.core.loading.CypherNodePropertyImporter.NO_PROPERTY_VALUE;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 @Value.Enclosing
 class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoader.LoadResult> {
 
     private final IdMap idMap;
     private final Context loaderContext;
-    private final GraphDimensions outerDimensions;
+    private final GraphDimensions dimensionsAfterNodeLoading;
     private final boolean hasExplicitPropertyMappings;
-    private final Aggregation globalAggregation;
-    private final double globalDefaultPropertyValue;
-    private final Map<RelationshipProjectionMapping, LongAdder> relationshipCounters;
+    private final Map<RelationshipProjection, LongAdder> relationshipCounters;
 
     // Property mappings are either defined upfront in
     // the procedure configuration or during load time
     // by looking at the columns returned by the query.
     private ObjectIntHashMap<String> propertyKeyIdsByName;
     private ObjectDoubleHashMap<String> propertyDefaultValueByName;
-    private boolean importWeights;
+    private boolean importProperties;
+    private PropertyMappings propertyMappings;
     private int[] propertyKeyIds;
     private double[] propertyDefaultValues;
     private Aggregation[] aggregations;
@@ -88,56 +88,59 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     ) {
         super(relationshipQuery, idMap.nodeCount(), api, config, setup);
         this.idMap = idMap;
-        this.outerDimensions = dimensions;
+        this.dimensionsAfterNodeLoading = dimensions;
         this.loaderContext = new Context();
         this.relationshipCounters = new HashMap<>();
 
-        this.hasExplicitPropertyMappings = dimensions.relationshipProperties().hasMappings();
-
-        this.globalAggregation = setup.aggregation() == Aggregation.DEFAULT
-            ? NONE
-            : setup.aggregation();
-        this.globalDefaultPropertyValue = setup.relationshipDefaultPropertyValue().orElse(DEFAULT_FALLBACK_VALUE);
-        this.resultDimensions = initFromDimension(dimensions);
+        this.hasExplicitPropertyMappings = config.relationshipProperties().hasMappings();
+        if (hasExplicitPropertyMappings) {
+            initFromPropertyMappings(config.relationshipProperties());
+        }
     }
 
-    private GraphDimensions initFromDimension(GraphDimensions dimensions) {
+    private void initFromPropertyMappings(PropertyMappings propertyMappings) {
+        this.propertyMappings = propertyMappings;
+
         MutableInt propertyKeyId = new MutableInt(0);
 
-        int numberOfMappings = dimensions.relationshipProperties().numberOfMappings();
+        int numberOfMappings = propertyMappings.numberOfMappings();
         propertyKeyIdsByName = new ObjectIntHashMap<>(numberOfMappings);
-        dimensions
-            .relationshipProperties()
+        propertyMappings
             .stream()
             .forEach(mapping -> propertyKeyIdsByName.put(mapping.neoPropertyKey(), propertyKeyId.getAndIncrement()));
+
         propertyDefaultValueByName = new ObjectDoubleHashMap<>(numberOfMappings);
-        dimensions
-            .relationshipProperties()
+        propertyMappings
             .stream()
             .forEach(mapping -> propertyDefaultValueByName.put(mapping.neoPropertyKey(), mapping.defaultValue()));
 
         // We can not rely on what the token store gives us.
         // We need to resolve the given property mappings
         // using our newly created property key identifiers.
-        GraphDimensions newDimensions = ImmutableGraphDimensions.builder()
-            .from(dimensions)
-            .relationshipProperties(ResolvedPropertyMappings.of(dimensions.relationshipProperties().stream()
-                .map(mapping -> PropertyMapping.of(
-                    mapping.propertyKey(),
-                    mapping.neoPropertyKey(),
-                    mapping.defaultValue(),
-                    mapping.aggregation()
-                ))
-                .map(mapping -> mapping.resolveWith(propertyKeyIdsByName.get(mapping.neoPropertyKey())))
-                .collect(Collectors.toList())))
-            .build();
+        ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions.builder().from(
+            dimensionsAfterNodeLoading);
+        propertyMappings
+            .forEach(propertyMapping -> dimensionsBuilder.putRelationshipPropertyToken(
+                propertyMapping.neoPropertyKey(),
+                propertyKeyIdsByName.get(propertyMapping.neoPropertyKey())
+            ));
+        GraphDimensions newDimensions = dimensionsBuilder.build();
 
-        importWeights = newDimensions.relationshipProperties().atLeastOneExists();
-        propertyKeyIds = newDimensions.relationshipProperties().allPropertyKeyIds();
-        propertyDefaultValues = newDimensions.relationshipProperties().allDefaultValues();
-        aggregations = dimensions.aggregations(globalAggregation);
-
-        return newDimensions;
+        importProperties = !propertyMappings.isEmpty();
+        propertyKeyIds = newDimensions.relationshipPropertyTokens().values().stream().mapToInt(i -> i).toArray();
+        propertyDefaultValues = propertyMappings.mappings().stream().mapToDouble(PropertyMapping::defaultValue).toArray();
+        aggregations = propertyMappings.mappings().stream().map(PropertyMapping::aggregation).toArray(Aggregation[]::new);
+        if (propertyMappings.isEmpty()) {
+            Aggregation defaultAggregation = config
+                .relationshipProjections()
+                .allProjections()
+                .stream()
+                .map(RelationshipProjection::aggregation)
+                .findFirst()
+                .orElse(Aggregation.NONE);
+            aggregations = new Aggregation[]{ defaultAggregation };
+        }
+        resultDimensions = newDimensions;
     }
 
     @Override
@@ -151,34 +154,30 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         // We do that only once, as each batch has the same columns.
         Collection<String> propertyColumns = getPropertyColumns(queryResult);
         if (!hasExplicitPropertyMappings && !initializedFromResult) {
-            List<ResolvedPropertyMapping> propertyMappings = propertyColumns
+
+            List<PropertyMapping> propertyMappings = propertyColumns
                 .stream()
                 .map(propertyColumn -> PropertyMapping.of(
                     propertyColumn,
                     propertyColumn,
-                    globalDefaultPropertyValue,
-                    globalAggregation
+                    NO_PROPERTY_VALUE,
+                    Aggregation.NONE
                 ))
-                .map(mapping -> mapping.resolveWith(NO_SUCH_PROPERTY_KEY))
                 .collect(Collectors.toList());
 
-            GraphDimensions innerDimensions = ImmutableGraphDimensions.builder()
-                .from(outerDimensions)
-                .relationshipProperties(ResolvedPropertyMappings.of(propertyMappings))
-                .build();
-
-            resultDimensions = initFromDimension(innerDimensions);
+            initFromPropertyMappings(PropertyMappings.of(propertyMappings));
 
             initializedFromResult = true;
+
         } else if (!initializedFromResult) {
-            validatePropertyColumns(propertyColumns, outerDimensions.relationshipProperties());
+            validatePropertyColumns(propertyColumns, config.relationshipProperties());
             initializedFromResult = true;
         }
 
         boolean isAnyRelTypeQuery = !allColumns.contains(RelationshipRowVisitor.TYPE_COLUMN);
 
         if (isAnyRelTypeQuery) {
-            loaderContext.getOrCreateImporterBuilder(RelationshipProjectionMapping.all());
+            loaderContext.getOrCreateImporterBuilder(ALL_RELATIONSHIPS);
         }
 
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
@@ -209,13 +208,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
         ParallelUtil.run(flushTasks, setup.executor());
 
-        ObjectLongMap<RelationshipProjectionMapping> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
-        this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(mapping, counter.sum()));
-
-        resultDimensions = ImmutableGraphDimensions.builder().from(resultDimensions)
-            .relationshipProjectionMappings(RelationshipProjectionMappings.of(relationshipCounters.keys().toArray(
-                RelationshipProjectionMapping.class)))
-            .build();
+        ObjectLongMap<RelationshipType> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
+        this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(
+            RelationshipType.of(mapping.type()),
+            counter.sum()
+        ));
 
         return ImmutableCypherRelationshipLoader.LoadResult.builder()
             .dimensions(resultDimensions)
@@ -238,14 +235,14 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         return QueryType.RELATIONSHIP;
     }
 
-    Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders() {
+    Map<RelationshipType, RelationshipsBuilder> allBuilders() {
         return loaderContext.allBuilders;
     }
 
     class Context {
 
-        private final Map<RelationshipProjectionMapping, SingleTypeRelationshipImporter.Builder.WithImporter> importerBuildersByType;
-        private final Map<RelationshipProjectionMapping, RelationshipsBuilder> allBuilders;
+        private final Map<RelationshipType, SingleTypeRelationshipImporter.Builder.WithImporter> importerBuildersByType;
+        private final Map<RelationshipType, RelationshipsBuilder> allBuilders;
 
         private final int pageSize;
         private final int numberOfPages;
@@ -260,40 +257,49 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         }
 
         synchronized SingleTypeRelationshipImporter.Builder.WithImporter getOrCreateImporterBuilder(
-            RelationshipProjectionMapping relationshipProjectionMapping
+            RelationshipType relationshipType
         ) {
-            return importerBuildersByType.computeIfAbsent(relationshipProjectionMapping, this::createImporter);
+            return importerBuildersByType.computeIfAbsent(relationshipType, this::createImporter);
         }
 
-        private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipProjectionMapping typeMapping) {
-            RelationshipsBuilder builder = new RelationshipsBuilder(
-                aggregations,
-                setup.tracker(),
-                propertyKeyIds.length
-            );
+        private SingleTypeRelationshipImporter.Builder.WithImporter createImporter(RelationshipType relationshipType) {
+            RelationshipProjection projection = RelationshipProjection
+                .builder()
+                .type(relationshipType.name)
+                .orientation(Orientation.NATURAL)
+                .properties(propertyMappings)
+                .build();
 
-            allBuilders.put(typeMapping, builder);
+            RelationshipsBuilder builder = new RelationshipsBuilder(projection, setup.tracker());
+
+            allBuilders.put(relationshipType, builder);
 
             SingleTypeRelationshipImporter.Builder importerBuilder = createImporterBuilder(
                 pageSize,
                 numberOfPages,
-                typeMapping,
+                relationshipType,
+                projection,
                 builder,
                 setup.tracker()
             );
 
-            relationshipCounters.put(typeMapping, importerBuilder.relationshipCounter());
+            relationshipCounters.put(projection, importerBuilder.relationshipCounter());
 
-            return importerBuilder.loadImporter(importWeights);
+            return importerBuilder.loadImporter(importProperties);
         }
 
         private SingleTypeRelationshipImporter.Builder createImporterBuilder(
             int pageSize,
             int numberOfPages,
-            RelationshipProjectionMapping mapping,
+            RelationshipType relationshipType,
+            RelationshipProjection relationshipProjection,
             RelationshipsBuilder relationshipsBuilder,
             AllocationTracker tracker
         ) {
+            Aggregation[] aggregationsWithDefault = Arrays.stream(aggregations)
+                .map(Aggregation::resolve)
+                .toArray(Aggregation[]::new);
+
             LongAdder relationshipCounter = new LongAdder();
             AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
                 relationshipsBuilder,
@@ -303,11 +309,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 relationshipCounter,
                 propertyKeyIds,
                 propertyDefaultValues,
-                aggregations
+                aggregationsWithDefault
             );
 
             RelationshipImporter relationshipImporter = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
-            return new SingleTypeRelationshipImporter.Builder(mapping, relationshipImporter, relationshipCounter, setup.validateRelationships());
+            return new SingleTypeRelationshipImporter.Builder(relationshipType, relationshipProjection, NO_SUCH_RELATIONSHIP_TYPE, relationshipImporter, relationshipCounter, setup.validateRelationships());
         }
     }
 
@@ -315,6 +321,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     interface LoadResult {
         GraphDimensions dimensions();
 
-        ObjectLongMap<RelationshipProjectionMapping> relationshipCounts();
+        ObjectLongMap<RelationshipType> relationshipCounts();
     }
 }

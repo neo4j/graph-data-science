@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;

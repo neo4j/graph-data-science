@@ -19,14 +19,15 @@
  */
 package org.neo4j.graphalgo.core;
 
-import com.carrotsearch.hppc.LongObjectMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongSet;
+import com.carrotsearch.hppc.ObjectIntHashMap;
+import com.carrotsearch.hppc.ObjectIntMap;
+import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipProjectionMappings;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.ResolvedPropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Collections;
@@ -34,9 +35,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 @ValueClass
 public interface GraphDimensions {
+
+    int ANY_LABEL = -1;
+    int ANY_RELATIONSHIP_TYPE = -1;
+    int NO_SUCH_LABEL = -2;
+    int NO_SUCH_RELATIONSHIP_TYPE = -2;
+    int IGNORE = -4;
 
     long nodeCount();
 
@@ -56,10 +64,33 @@ public interface GraphDimensions {
     }
 
     @Nullable
-    LongSet nodeLabelIds();
+    LongSet nodeLabelTokens();
 
     @Nullable
-    LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping();
+    LongSet relationshipTypeTokens();
+
+    @Nullable
+    IntObjectMap<List<NodeLabel>> tokenNodeLabelMapping();
+
+    @Nullable
+    IntObjectMap<List<RelationshipType>> tokenRelationshipTypeMapping();
+
+    @Value.Derived
+    @Nullable
+    default ObjectIntMap<RelationshipType> relationshipTypeTokenMapping() {
+        if (tokenRelationshipTypeMapping() == null) {
+            return null;
+        }
+
+        ObjectIntMap<RelationshipType> relationshipTypeTypeTokenMapping = new ObjectIntHashMap<>();
+        tokenRelationshipTypeMapping().forEach((Consumer<? super IntObjectCursor<List<RelationshipType>>>) cursor -> {
+            var typeToken = cursor.key;
+            var relationshipTypes = cursor.value;
+            relationshipTypes.forEach(relationshipType -> relationshipTypeTypeTokenMapping.put(relationshipType, typeToken));
+        });
+
+        return relationshipTypeTypeTokenMapping;
+    }
 
     @Value.Default
     default Map<String, Integer> nodePropertyTokens() {
@@ -67,39 +98,17 @@ public interface GraphDimensions {
     }
 
     @Value.Default
-    default ResolvedPropertyMappings relationshipProperties() {
-        return ResolvedPropertyMappings.empty();
-    }
-
-    @Value.Default
-    default RelationshipProjectionMappings relationshipProjectionMappings() {
-        return RelationshipProjectionMappings.all();
+    default Map<String, Integer> relationshipPropertyTokens() {
+        return Collections.emptyMap();
     }
 
     default Set<NodeLabel> nodeLabels() {
         var nodeLabels = new HashSet<NodeLabel>();
-        if (labelTokenNodeLabelMapping() != null) {
-            for (var tokenToLabels : labelTokenNodeLabelMapping()) {
+        if (tokenNodeLabelMapping() != null) {
+            for (var tokenToLabels : tokenNodeLabelMapping()) {
                 nodeLabels.addAll(tokenToLabels.value);
             }
         }
         return nodeLabels;
-    }
-
-    default Aggregation[] aggregations(Aggregation defaultAggregation) {
-        Aggregation[] aggregations = relationshipProperties().stream()
-            .map(property -> property.aggregation() == Aggregation.DEFAULT
-                ? Aggregation.NONE
-                : property.aggregation()
-            )
-            .toArray(Aggregation[]::new);
-        // TODO: backwards compat code
-        if (aggregations.length == 0) {
-            Aggregation aggregation = defaultAggregation == Aggregation.DEFAULT
-                ? Aggregation.NONE
-                : defaultAggregation;
-            aggregations = new Aggregation[]{aggregation};
-        }
-        return aggregations;
     }
 }

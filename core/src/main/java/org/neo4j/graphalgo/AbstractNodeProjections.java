@@ -40,6 +40,8 @@ import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 @Value.Immutable(singleton = true)
 public abstract class AbstractNodeProjections extends AbstractProjections<NodeLabel, NodeProjection> {
 
+    public static final NodeProjections ALL = create(singletonMap(ALL_NODES, NodeProjection.all()));
+
     public abstract Map<NodeLabel, NodeProjection> projections();
 
     public static NodeProjections fromObject(Object object) {
@@ -114,6 +116,10 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
 
     public static NodeProjections empty() {
         return NodeProjections.of();
+    }
+
+    public static NodeProjections all() {
+        return ALL;
     }
 
     public NodeProjections addPropertyMappings(PropertyMappings mappings) {

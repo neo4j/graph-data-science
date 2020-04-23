@@ -242,24 +242,6 @@ class GdsCypherTest {
         );
     }
 
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("implicitBuilders")
-    void generatesGraphCreateCypherFromImplicitConfig(GdsCypher.QueryBuilder queryBuilder, String testName) {
-        String query = queryBuilder
-            .graphCreateCypher("foo42")
-            .addParameter("nodeProjection", "SOMETHING | ELSE")
-            .yields();
-
-        assertEquals(
-            String.format(
-                "CALL gds.graph.create.cypher(\"foo42\", %s, %s, {nodeProjection: \"SOMETHING | ELSE\"})",
-                expectedNodeProjection(),
-                expectedRelationshipProjection()
-            ),
-            query
-        );
-    }
-
     @Test
     void loadEverythingShortcut() {
         String query = GdsCypher

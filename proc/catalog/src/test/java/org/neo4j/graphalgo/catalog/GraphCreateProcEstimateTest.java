@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.catalog;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -142,7 +143,9 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
         );
     }
 
+
     @Test
+    @Disabled("Disabled until we support relationshipProperties or it is removed")
     void computeMemoryEstimationForCypherProjectionWithProperties() {
         String nodeQuery = "MATCH (n) RETURN id(n) AS id";
         String relationshipQuery = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";

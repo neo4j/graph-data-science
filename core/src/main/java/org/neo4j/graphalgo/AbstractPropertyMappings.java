@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.utils.CollectionUtil;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -104,6 +107,10 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         return mappings().iterator();
     }
 
+    public Stream<IntObjectPair<PropertyMapping>> enumerate() {
+        return CollectionUtil.enumerate(mappings());
+    }
+
     @Deprecated
     public Optional<Double> defaultWeight() {
         return stream().mapToDouble(PropertyMapping::defaultValue).boxed().findFirst();
@@ -115,6 +122,10 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
 
     public int numberOfMappings() {
         return mappings().size();
+    }
+
+    public boolean isEmpty() {
+        return mappings().isEmpty();
     }
 
     public Map<String, Object> toObject(boolean includeAggregation) {

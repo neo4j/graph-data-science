@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.LongObjectHashMap;
-import com.carrotsearch.hppc.LongObjectMap;
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -51,7 +51,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     private final long nodeCount;
     private final GraphDimensions outerDimensions;
-    private final LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
+    private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final HugeLongArrayBuilder builder;
     private final NodeImporter importer;
@@ -70,7 +70,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.nodeCount = nodeCount;
         this.outerDimensions = outerDimensions;
         this.maxNodeId = 0L;
-        this.labelTokenNodeLabelMapping = new LongObjectHashMap<>();
+        this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker());
         this.importer = new NodeImporter(builder, new HashMap<>(), labelTokenNodeLabelMapping);
     }

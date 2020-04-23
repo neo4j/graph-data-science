@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
@@ -29,9 +30,9 @@ import java.util.Arrays;
 
 public class RelationshipsBuilder {
 
-    private static final AdjacencyListBuilder[] EMPTY_WEIGHTS = new AdjacencyListBuilder[0];
+    private static final AdjacencyListBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyListBuilder[0];
 
-    private final Aggregation[] aggregations;
+    private final RelationshipProjection projection;
     final AdjacencyListBuilder adjacencyListBuilder;
     final AdjacencyListBuilder[] propertyBuilders;
 
@@ -39,38 +40,34 @@ public class RelationshipsBuilder {
     AdjacencyOffsets[] globalPropertyOffsets;
 
     public RelationshipsBuilder(
-        Aggregation[] aggregations,
-        AllocationTracker tracker,
-        int numberOfRelationshipProperties
+        RelationshipProjection projection,
+        AllocationTracker tracker
     ) {
-        if (Arrays.stream(aggregations).anyMatch(d -> d == Aggregation.DEFAULT)) {
-            throw new IllegalArgumentException(String.format(
-                "Needs an explicit aggregation, but got %s",
-                Arrays.toString(aggregations)
-            ));
-        }
-        this.aggregations = aggregations;
+        this.projection = projection;
+
         adjacencyListBuilder = AdjacencyListBuilder.newBuilder(tracker);
-        if (numberOfRelationshipProperties > 0) {
-            propertyBuilders = new AdjacencyListBuilder[numberOfRelationshipProperties];
-            Arrays.setAll(propertyBuilders, i -> AdjacencyListBuilder.newBuilder(tracker));
+
+        if (projection.properties().isEmpty()) {
+            propertyBuilders = EMPTY_PROPERTY_BUILDERS;
         } else {
-            propertyBuilders = EMPTY_WEIGHTS;
+            propertyBuilders = new AdjacencyListBuilder[projection.properties().numberOfMappings()];
+            Arrays.setAll(propertyBuilders, i -> AdjacencyListBuilder.newBuilder(tracker));
         }
     }
 
     final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder(
             long[] adjacencyOffsets,
-            long[][] weightOffsets
+            long[][] propertyOffsets,
+            Aggregation[] aggregations
     ) {
         return new ThreadLocalRelationshipsBuilder(
-            aggregations,
             adjacencyListBuilder.newAllocator(),
             Arrays.stream(propertyBuilders)
                 .map(AdjacencyListBuilder::newAllocator)
                 .toArray(AdjacencyListBuilder.Allocator[]::new),
             adjacencyOffsets,
-            weightOffsets
+            propertyOffsets,
+            aggregations
         );
     }
 
@@ -97,6 +94,10 @@ public class RelationshipsBuilder {
 
     public AdjacencyList properties(int propertyIndex) {
         return propertyBuilders.length > 0 ? propertyBuilders[propertyIndex].build() : null;
+    }
+
+    public RelationshipProjection projection() {
+        return this.projection;
     }
 
     // TODO: This returns only the first of possibly multiple properties

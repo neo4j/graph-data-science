@@ -49,8 +49,8 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private final boolean hasLabelInformation;
     private final CypherNodePropertyImporter propertyImporter;
 
-    private final Map<ElementIdentifier, Long> elementIdentifierLabelIdMapping;
-    private long labelIdCounter = 0;
+    private final Map<ElementIdentifier, Integer> elementIdentifierLabelTokenMapping;
+    private int labelIdCounter = 0;
 
     public NodeRowVisitor(
         NodesBatchBuffer buffer,
@@ -63,7 +63,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         this.cypherNodeProperties = new ArrayList<>(buffer.capacity());
         this.hasLabelInformation = hasLabelInformation;
         this.propertyImporter = propertyImporter;
-        this.elementIdentifierLabelIdMapping = new HashMap<>();
+        this.elementIdentifierLabelTokenMapping = new HashMap<>();
 
     }
 
@@ -129,7 +129,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
         for (int i = 0; i < labels.size(); i++) {
             NodeLabel nodeLabel = NodeLabel.of(labels.get(i));
-            long labelId = elementIdentifierLabelIdMapping.computeIfAbsent(nodeLabel, (l) -> {
+            long labelId = elementIdentifierLabelTokenMapping.computeIfAbsent(nodeLabel, (l) -> {
                 importer.labelTokenNodeLabelMapping.put(labelIdCounter, Collections.singletonList(nodeLabel));
                 return labelIdCounter++;
             });

@@ -140,10 +140,10 @@ class GraphLoaderTest extends BaseTest {
     @AllGraphTypesTest
     void testWithRelationshipProperty(Class<? extends GraphStoreFactory> graphStoreFactory) {
         Graph graph = TestGraphLoader.from(db)
-            .withRelationshipProperties(PropertyMapping.of("weight","prop1", 1337.42))
+            .withRelationshipProperties(PropertyMapping.of("weight","prop1", 3.14))
             .withDefaultAggregation(Aggregation.SINGLE)
             .graph(graphStoreFactory);
-        assertGraphEquals(fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42D}]->(c), (b)-[{w: 1337.42D}]->(c)"), graph);
+        assertGraphEquals(fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 3.14D}]->(c), (b)-[{w: 3.14D}]->(c)"), graph);
     }
 
     @Test

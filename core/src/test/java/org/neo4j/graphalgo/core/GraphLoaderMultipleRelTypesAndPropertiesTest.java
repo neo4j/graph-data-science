@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestGraphLoader;
@@ -51,6 +52,7 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
@@ -312,6 +314,43 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         assertGraphEquals(fromGdl("(a)-[]->(c), (b)"), rel2Graph);
         assertGraphEquals(fromGdl("(a)-[]->(b)-[]->(c)<-[]-(a)"), unionGraph);
     }
+
+    @Test
+    void multipleTypesWithDifferentProperties() {
+        RelationshipType rel1 = RelationshipType.of("REL1");
+        RelationshipType rel2 = RelationshipType.of("REL2");
+
+        String prop1 = "prop1";
+        String prop2 = "prop2";
+
+        var graphStore = new StoreLoaderBuilder()
+            .api(db)
+            .addRelationshipProjections(
+                RelationshipProjection
+                    .builder()
+                    .type(rel1.name)
+                    .addProperty(prop1, prop1, Double.NaN)
+                    .build(),
+                RelationshipProjection
+                    .builder()
+                    .type(rel2.name)
+                    .addProperty(prop2, prop2, Double.NaN)
+                    .build()
+            ).build().graphStore(NativeFactory.class);
+
+        assertEquals(2, graphStore.relationshipTypes().size());
+        assertEquals(graphStore.relationshipTypes(), new HashSet<>(asList(
+            rel1,
+            rel2
+        )));
+
+        assertTrue(graphStore.hasRelationshipProperty(Collections.singletonList(rel1), prop1));
+        assertFalse(graphStore.hasRelationshipProperty(Collections.singletonList(rel1), prop2));
+
+        assertTrue(graphStore.hasRelationshipProperty(Collections.singletonList(rel2), prop2));
+        assertFalse(graphStore.hasRelationshipProperty(Collections.singletonList(rel2), prop1));
+    }
+
 
     @AllGraphTypesTest
     void multipleProperties(Class<? extends GraphStoreFactory> graphStoreFactory) {

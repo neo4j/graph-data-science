@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.graphalgo.AbstractRelationshipProjection;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -36,6 +38,8 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
 public final class HugeGraphUtil {
+
+    public static final String DUMMY_PROPERTY = "property";
 
     private HugeGraphUtil() {}
 
@@ -163,12 +167,19 @@ public final class HugeGraphUtil {
 
             int[] propertyKeyIds = loadRelationshipProperty ? new int[]{DUMMY_PROPERTY_ID} : new int[0];
             double[] defaultValues = loadRelationshipProperty ? new double[]{Double.NaN} : new double[0];
-            Aggregation[] aggregations = loadRelationshipProperty ? new Aggregation[]{Aggregation.NONE} : new Aggregation[0];
+
+            AbstractRelationshipProjection.Builder projectionBuilder = RelationshipProjection
+                .builder()
+                .type("*")
+                .orientation(orientation);
+
+            if (loadRelationshipProperty) {
+                projectionBuilder.addProperty(DUMMY_PROPERTY, DUMMY_PROPERTY, Double.NaN, aggregation);
+            }
 
             this.relationshipsBuilder = new org.neo4j.graphalgo.core.loading.RelationshipsBuilder(
-                new Aggregation[]{aggregation},
-                tracker,
-                loadRelationshipProperty ? 1 : 0
+                projectionBuilder.build(),
+                tracker
             );
 
             AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
@@ -179,7 +190,7 @@ public final class HugeGraphUtil {
                 new LongAdder(),
                 propertyKeyIds,
                 defaultValues,
-                aggregations
+                new Aggregation[]{aggregation}
             );
 
             this.relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);

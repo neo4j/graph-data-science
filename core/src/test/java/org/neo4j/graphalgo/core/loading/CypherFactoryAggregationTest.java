@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -55,6 +56,8 @@ class CypherFactoryAggregationTest extends BaseTest {
     }
 
     @Test
+    @Disabled
+//    // TODO What to do with this feature?
     void testLoadCypher() {
         String nodes = "MATCH (n) RETURN id(n) AS id";
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";

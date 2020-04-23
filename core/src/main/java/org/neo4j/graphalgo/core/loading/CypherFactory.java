@@ -68,12 +68,12 @@ public class CypherFactory extends GraphStoreFactory {
             .maxRelCount(relCount.rows())
             .build();
 
-        return NativeFactory.getMemoryEstimation(estimateDimensions);
+        return NativeFactory.getMemoryEstimation(estimateDimensions, graphCreateConfig);
     }
 
     @Override
     public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
-        return NativeFactory.getMemoryEstimation(dimensions);
+        return NativeFactory.getMemoryEstimation(dimensions, graphCreateConfig);
     }
 
     @Override

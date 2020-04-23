@@ -25,13 +25,13 @@ import org.immutables.builder.Builder;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
+import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
 
-public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
+import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 
-    public static final int IGNORE_LABEL = -1;
-    public static final int PROJECT_ANY_LABEL = -2;
+public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
     private final LongSet nodeLabelIds;
     private final NodeStore nodeStore;
@@ -60,14 +60,14 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     @Override
     public void offer(final NodeRecord record) {
         if (nodeLabelIds.isEmpty()) {
-            add(record.getId(), record.getNextProp(), new long[]{PROJECT_ANY_LABEL});
+            add(record.getId(), record.getNextProp(), new long[]{TokenConstants.ANY_LABEL});
         } else {
             boolean atLeastOneLabelFound = false;
             final long[] labels = NodeLabelsField.get(record, nodeStore);
             for (int i = 0; i < labels.length; i++) {
                 long l = labels[i];
-                if (!nodeLabelIds.contains(l) && !nodeLabelIds.contains(PROJECT_ANY_LABEL)) {
-                    labels[i] = IGNORE_LABEL;
+                if (!nodeLabelIds.contains(l) && !nodeLabelIds.contains(TokenConstants.ANY_LABEL)) {
+                    labels[i] = IGNORE;
                 } else {
                     atLeastOneLabelFound = true;
                 }

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.LongObjectMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
@@ -42,7 +42,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.PROJECT_ANY_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, IdsAndProperties> {
@@ -82,10 +82,9 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     ) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
 
-        LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.labelTokenNodeLabelMapping();
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
-        nodeLabelBitSetMapping = labelTokenNodeLabelMapping.size() == 1 && labelTokenNodeLabelMapping.containsKey(
-            PROJECT_ANY_LABEL)
+        nodeLabelBitSetMapping = labelTokenNodeLabelMapping.size() == 1 && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
             ? null
             : initializeLabelBitSets(nodeCount, labelTokenNodeLabelMapping);
 
@@ -94,7 +93,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
         return NodesScanner.of(
             api,
             scanner,
-            dimensions.nodeLabelIds(),
+            dimensions.nodeLabelTokens(),
             progressLogger,
             new NodeImporter(
                 idMapBuilder,
@@ -126,7 +125,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     @NotNull
     private Map<NodeLabel, BitSet> initializeLabelBitSets(
         long nodeCount,
-        LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
     ) {
         return StreamSupport.stream(
             labelTokenNodeLabelMapping.values().spliterator(),

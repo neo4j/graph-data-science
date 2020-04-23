@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.catalog;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -56,6 +57,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
@@ -971,7 +973,7 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query);
 
         Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
-        Graph expected = fromGdl(String.format("(a:Node)-[{w:%g}]->(b:Node)", expectedWeight));
+        Graph expected = fromGdl(String.format(Locale.US, "(a:Node)-[{w:%g}]->(b:Node)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
 
@@ -1297,7 +1299,7 @@ class GraphCreateProcTest extends BaseProcTest {
             "    } " +
             "})";
 
-        assertError(query, "Relationship properties not found: 'foo'.");
+        assertError(query, "Relationship properties not found: 'foo' (if you meant to count parallel relationships, use `property:'*'`).");
 
         assertGraphDoesNotExist("g");
     }

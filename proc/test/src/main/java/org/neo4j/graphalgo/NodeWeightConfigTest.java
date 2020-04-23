@@ -188,7 +188,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
         GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName(graphName)
             .nodeProjections(nodeProjections)
-            .relationshipProjections(RelationshipProjections.empty())
+            .relationshipProjections(RelationshipProjections.all())
             .build();
 
         GraphStore graphStore = graphLoader(db, graphCreateConfig)

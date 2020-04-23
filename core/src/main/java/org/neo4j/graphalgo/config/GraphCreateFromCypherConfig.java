@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.config;
 
+import com.carrotsearch.hppc.procedures.ObjectProcedure;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
@@ -31,14 +32,17 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
@@ -67,7 +71,6 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     default Class<? extends GraphStoreFactory> getGraphImpl() {
         return CypherFactory.class;
     }
-
 
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String nodeQuery();
@@ -131,27 +134,45 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
                     .build()
             ).build();
 
-        PropertyMappings relationshipPropertyMappings = PropertyMappings.of(dimensions.relationshipProperties());
 
-        RelationshipProjections.Builder relProjectionBuilder = RelationshipProjections.builder();
-        dimensions.relationshipProjectionMappings().stream().forEach(typeMapping -> {
-            String neoType = typeMapping.typeName();
-            String relationshipType = neoType.isEmpty() || neoType.equals(PROJECT_ALL) ? ALL_RELATIONSHIPS.name : neoType;
-            relProjectionBuilder.putProjection(
-                RelationshipType.of(relationshipType),
-                RelationshipProjection
-                    .builder()
-                    .type(neoType)
-                    .addPropertyMappings(relationshipPropertyMappings)
-                    .build()
-            );
+        PropertyMappings propertyMappings;
+        if (!relationshipProperties().isEmpty()) {
+            propertyMappings = relationshipProperties();
+        } else {
+            List<PropertyMapping> propertyMappingList = dimensions.relationshipPropertyTokens()
+                .keySet()
+                .stream()
+                .map(property -> PropertyMapping.of(property, Double.NaN, Aggregation.NONE))
+                .collect(Collectors.toList());
+
+            propertyMappings = PropertyMappings.of(propertyMappingList);
+        }
+
+        Set<RelationshipType> relationshipTypes = new HashSet<>();
+        dimensions
+            .tokenRelationshipTypeMapping()
+            .values()
+            .forEach((ObjectProcedure<List<RelationshipType>>) relationshipTypes::addAll);
+
+        if(relationshipTypes.isEmpty()) {
+            relationshipTypes.add(ALL_RELATIONSHIPS);
+        }
+
+        RelationshipProjections.Builder relationshipProjectionsBuilder = RelationshipProjections.builder();
+        relationshipTypes.forEach(relationshipType -> {
+            RelationshipProjection relationshipProjection = RelationshipProjection.builder()
+                .type(relationshipType == RelationshipType.ALL_RELATIONSHIPS ? PROJECT_ALL : relationshipType.name)
+                .addPropertyMappings(propertyMappings)
+                .build();
+
+            relationshipProjectionsBuilder.putProjection(relationshipType, relationshipProjection);
         });
 
         return ImmutableGraphCreateFromCypherConfig
             .builder()
             .from(this)
             .nodeProjections(nodeProjections)
-            .relationshipProjections(relProjectionBuilder.build())
+            .relationshipProjections(relationshipProjectionsBuilder.build())
             .build();
     }
 

@@ -114,10 +114,6 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         return RelationshipProjection.builder().type(type).orientation(orientation).build();
     }
 
-    public boolean hasMappings() {
-        return properties().hasMappings();
-    }
-
     @Override
     boolean includeAggregation() {
         return true;
