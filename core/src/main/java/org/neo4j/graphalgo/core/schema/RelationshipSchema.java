@@ -60,17 +60,12 @@ public interface RelationshipSchema {
 
         public void addPropertyAndTypeForRelationshipType(RelationshipType type, String propertyName, NumberType relationshipProperty) {
             this.properties
-                .computeIfAbsent(fixRelationshipType(type), ignore -> new LinkedHashMap<>())
+                .computeIfAbsent(type, ignore -> new LinkedHashMap<>())
                 .put(propertyName, relationshipProperty);
         }
 
         public void addEmptyMapForRelationshipTypeWithoutProperties(RelationshipType type) {
-            this.properties.putIfAbsent(fixRelationshipType(type), Collections.emptyMap());
-        }
-
-        // TODO: remove if "" as a rel-type is impossible
-        private RelationshipType fixRelationshipType(RelationshipType type) {
-            return type.name.isEmpty() ? RelationshipType.ALL_RELATIONSHIPS : type;
+            this.properties.putIfAbsent(type, Collections.emptyMap());
         }
     }
 }

@@ -584,7 +584,7 @@ public final class GraphStore {
 
         nodeProperties.forEach((label, propertyStore) -> {
             propertyStore.nodeProperties().forEach((propertyName, nodeProperty) -> {
-                nodePropsBuilder.addPropertyAndTypeForLabel(label, propertyName, nodeProperty.propertyType());
+                nodePropsBuilder.addPropertyAndTypeForLabel(label, propertyName, nodeProperty.type());
             });
         });
 
@@ -602,7 +602,7 @@ public final class GraphStore {
                 relationshipPropsBuilder.addPropertyAndTypeForRelationshipType(
                     type,
                     propertyName,
-                    relationshipProperty.propertyType()
+                    relationshipProperty.type()
                 );
             });
         });

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Optional;
 
@@ -46,6 +47,11 @@ class TriangleCountMutateProcTest
     @Override
     public String mutateProperty() {
         return "mutatedTriangleCount";
+    }
+
+    @Override
+    public NumberType mutatePropertyType() {
+        return NumberType.INTEGRAL;
     }
 
     @Override

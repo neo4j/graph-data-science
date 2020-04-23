@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
@@ -37,7 +36,6 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
             GraphCreateProc.class,
             GraphListProc.class,
@@ -48,10 +46,8 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
     }
 
     @AfterEach
-    void tearDown() {
-        db.shutdown();
-        GraphStoreCatalog.removeAllLoadedGraphs();
-    }
+    void tearDown() { GraphStoreCatalog.removeAllLoadedGraphs();}
+
     @Test
     void listWithMutatedNodeProperty() {
         String name = "name";

@@ -53,7 +53,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<?, DisjointSetStruct, WccMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutateConfig>> getProcedureClazz() {
         return WccMutateProc.class;
     }
 

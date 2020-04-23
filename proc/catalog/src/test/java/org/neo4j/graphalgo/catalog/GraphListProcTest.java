@@ -50,6 +50,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -154,8 +156,8 @@ class GraphListProcTest extends BaseProcTest {
                 "nodeProjection", null,
                 "relationshipProjection", null,
                 "schema", map(
-                    "nodes", map("*", map()),
-                    "relationships", map("*", map())
+                    "nodes", map(ALL_NODES.name, map()),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map())
                 ),
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
@@ -217,8 +219,8 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
                 "schema", map(
-                    "nodes", map("*", map("foo", "Float")),
-                    "relationships", map("*", map("bar", "Float"))
+                    "nodes", map(ALL_NODES.name, map("foo", "Float")),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map("bar", "Float"))
                 )
             )
         ));
@@ -436,8 +438,8 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema",
             Collections.singletonList(map(
                 "schema", map(
-                    "nodes", map("*", map()),
-                    "relationships", map("*", map())
+                    "nodes", map(ALL_NODES.name, map()),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map())
             )))
         );
     }
