@@ -31,8 +31,8 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -82,11 +82,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         String relationshipQuery,
         IdMap idMap,
         GraphDatabaseAPI api,
-        GraphCreateConfig config,
-        GraphSetup setup,
+        GraphCreateFromCypherConfig config,
+        GraphLoadingContext loadingContext,
         GraphDimensions dimensions
     ) {
-        super(relationshipQuery, idMap.nodeCount(), api, config, setup);
+        super(relationshipQuery, idMap.nodeCount(), api, config, loadingContext);
         this.idMap = idMap;
         this.dimensionsAfterNodeLoading = dimensions;
         this.loaderContext = new Context();
@@ -131,7 +131,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         propertyDefaultValues = propertyMappings.mappings().stream().mapToDouble(PropertyMapping::defaultValue).toArray();
         aggregations = propertyMappings.mappings().stream().map(PropertyMapping::aggregation).toArray(Aggregation[]::new);
         if (propertyMappings.isEmpty()) {
-            Aggregation defaultAggregation = config
+            Aggregation defaultAggregation = cypherConfig
                 .relationshipProjections()
                 .allProjections()
                 .stream()
@@ -170,7 +170,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             initializedFromResult = true;
 
         } else if (!initializedFromResult) {
-            validatePropertyColumns(propertyColumns, config.relationshipProperties());
+            validatePropertyColumns(propertyColumns, cypherConfig.relationshipProperties());
             initializedFromResult = true;
         }
 
@@ -187,7 +187,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             propertyDefaultValueByName,
             bufferSize,
             isAnyRelTypeQuery,
-            setup.validateRelationships()
+            cypherConfig.validateRelationships()
         );
 
         queryResult.accept(visitor);
@@ -206,7 +206,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             .flatMap(SingleTypeRelationshipImporter.Builder.WithImporter::flushTasks)
             .collect(Collectors.toList());
 
-        ParallelUtil.run(flushTasks, setup.executor());
+        ParallelUtil.run(flushTasks, loadingContext.executor());
 
         ObjectLongMap<RelationshipType> relationshipCounters = new ObjectLongHashMap<>(this.relationshipCounters.size());
         this.relationshipCounters.forEach((mapping, counter) -> relationshipCounters.put(
@@ -251,7 +251,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             this.importerBuildersByType = new HashMap<>();
             this.allBuilders = new HashMap<>();
 
-            ImportSizing importSizing = ImportSizing.of(setup.concurrency(), idMap.nodeCount());
+            ImportSizing importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
             this.pageSize = importSizing.pageSize();
             this.numberOfPages = importSizing.numberOfPages();
         }
@@ -270,7 +270,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .properties(propertyMappings)
                 .build();
 
-            RelationshipsBuilder builder = new RelationshipsBuilder(projection, setup.tracker());
+            RelationshipsBuilder builder = new RelationshipsBuilder(projection, loadingContext.tracker());
 
             allBuilders.put(relationshipType, builder);
 
@@ -280,7 +280,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 relationshipType,
                 projection,
                 builder,
-                setup.tracker()
+                loadingContext.tracker()
             );
 
             relationshipCounters.put(projection, importerBuilder.relationshipCounter());
@@ -312,8 +312,15 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 aggregationsWithDefault
             );
 
-            RelationshipImporter relationshipImporter = new RelationshipImporter(setup.tracker(), adjacencyBuilder);
-            return new SingleTypeRelationshipImporter.Builder(relationshipType, relationshipProjection, NO_SUCH_RELATIONSHIP_TYPE, relationshipImporter, relationshipCounter, setup.validateRelationships());
+            RelationshipImporter relationshipImporter = new RelationshipImporter(loadingContext.tracker(), adjacencyBuilder);
+            return new SingleTypeRelationshipImporter.Builder(
+                relationshipType,
+                relationshipProjection,
+                NO_SUCH_RELATIONSHIP_TYPE,
+                relationshipImporter,
+                relationshipCounter,
+                cypherConfig.validateRelationships()
+            );
         }
     }
 

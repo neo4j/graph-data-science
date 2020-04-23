@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -40,7 +40,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,8 +48,11 @@ import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 
 public final class NativeFactory extends GraphStoreFactory {
 
-    public NativeFactory(GraphDatabaseAPI api, GraphCreateConfig graphCreateConfig, GraphSetup setup) {
-        super(api, setup, graphCreateConfig);
+    public NativeFactory(
+        GraphCreateConfig graphCreateConfig,
+        GraphLoadingContext loadingContext
+    ) {
+        super(loadingContext, graphCreateConfig);
     }
 
     @Override
@@ -118,7 +120,7 @@ public final class NativeFactory extends GraphStoreFactory {
 
     @Override
     protected ProgressLogger initProgressLogger() {
-        long relationshipCount = setup.relationshipProjections().projections().entrySet().stream()
+        long relationshipCount = graphCreateConfig.relationshipProjections().projections().entrySet().stream()
             .map(entry -> {
                 Long relCount = entry.getKey().name.equals("*")
                      ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
@@ -130,7 +132,7 @@ public final class NativeFactory extends GraphStoreFactory {
             }).mapToLong(Long::longValue).sum();
 
         return new BatchingProgressLogger(
-            log,
+            loadingContext.log(),
             dimensions.nodeCount() + relationshipCount,
             TASK_LOADING,
             graphCreateConfig.readConcurrency()
@@ -141,8 +143,8 @@ public final class NativeFactory extends GraphStoreFactory {
     public ImportResult build() {
         validate(dimensions, graphCreateConfig);
 
-        int concurrency = setup.concurrency();
-        AllocationTracker tracker = setup.tracker();
+        int concurrency = graphCreateConfig.readConcurrency();
+        AllocationTracker tracker = loadingContext.tracker();
         IdsAndProperties nodes = loadNodes(tracker, concurrency);
         RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency);
         GraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
@@ -163,15 +165,15 @@ public final class NativeFactory extends GraphStoreFactory {
             ));
 
         return new ScanningNodesImporter(
-            api,
+            loadingContext.api(),
             dimensions,
             progressLogger,
             tracker,
-            setup.terminationFlag(),
+            loadingContext.terminationFlag(),
             threadPool,
             concurrency,
             propertyMappingsByNodeLabel
-        ).call(setup.log());
+        ).call(loadingContext.log());
     }
 
     private RelationshipImportResult loadRelationships(
@@ -190,8 +192,9 @@ public final class NativeFactory extends GraphStoreFactory {
             ));
 
         ObjectLongMap<RelationshipType> relationshipCounts = new ScanningRelationshipsImporter(
-            setup,
-            api,
+            graphCreateConfig,
+            loadingContext,
+            loadingContext.api(),
             dimensions,
             progressLogger,
             tracker,
@@ -199,7 +202,7 @@ public final class NativeFactory extends GraphStoreFactory {
             allBuilders,
             threadPool,
             concurrency
-        ).call(setup.log());
+        ).call(loadingContext.log());
 
         return RelationshipImportResult.of(allBuilders, relationshipCounts, dimensions);
     }

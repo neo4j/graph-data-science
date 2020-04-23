@@ -41,8 +41,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,24 +55,27 @@ public abstract class GraphStoreFactory implements Assessable {
     public static final String TASK_LOADING = "LOADING";
 
     protected final ExecutorService threadPool;
-    protected final GraphDatabaseAPI api;
-    protected final GraphSetup setup;
+    protected final GraphLoadingContext loadingContext;
     protected final GraphDimensions dimensions;
-    protected final Log log;
     protected final ProgressLogger progressLogger;
     protected final GraphCreateConfig graphCreateConfig;
 
-    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup, GraphCreateConfig graphCreateConfig) {
-        this(api, setup, graphCreateConfig, true);
+    public GraphStoreFactory(
+        GraphLoadingContext loadingContext,
+        GraphCreateConfig graphCreateConfig
+    ) {
+        this(loadingContext, graphCreateConfig, true);
     }
 
-    public GraphStoreFactory(GraphDatabaseAPI api, GraphSetup setup, GraphCreateConfig graphCreateConfig, boolean readTokens) {
-        this.threadPool = setup.executor();
-        this.api = api;
-        this.setup = setup;
-        this.log = setup.log();
+    public GraphStoreFactory(
+        GraphLoadingContext loadingContext,
+        GraphCreateConfig graphCreateConfig,
+        boolean readTokens
+    ) {
+        this.threadPool = loadingContext.executor();
+        this.loadingContext = loadingContext;
         this.graphCreateConfig = graphCreateConfig;
-        this.dimensions = new GraphDimensionsReader(api, graphCreateConfig, readTokens).call();
+        this.dimensions = new GraphDimensionsReader(loadingContext.api(), graphCreateConfig, readTokens).call();
         this.progressLogger = initProgressLogger();
     }
 
@@ -101,7 +102,7 @@ public abstract class GraphStoreFactory implements Assessable {
             .sum();
 
         return new BatchingProgressLogger(
-            log,
+            loadingContext.log(),
             dimensions.nodeCount() + relationshipCount,
             TASK_LOADING,
             graphCreateConfig.readConcurrency()

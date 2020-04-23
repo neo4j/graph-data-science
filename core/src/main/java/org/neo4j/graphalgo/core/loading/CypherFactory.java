@@ -19,10 +19,11 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -32,8 +33,8 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
@@ -43,23 +44,37 @@ import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class CypherFactory extends GraphStoreFactory {
 
-    private final GraphDatabaseAPI api;
-    private final GraphCreateConfig graphCreateConfig;
-    private final GraphSetup setup;
+    private final GraphCreateFromCypherConfig cypherConfig;
+    private final GraphLoadingContext loadingContext;
 
-    public CypherFactory(GraphDatabaseAPI api, GraphCreateConfig graphCreateConfig, GraphSetup setup) {
-        super(api, setup, graphCreateConfig, false);
-        this.api = api;
-        this.graphCreateConfig = graphCreateConfig;
-        this.setup = setup;
+    public CypherFactory(
+        GraphCreateConfig graphCreateConfig,
+        GraphLoadingContext loadingContext
+    ) {
+        super(loadingContext, graphCreateConfig, false);
+        this.cypherConfig = getCypherConfig(graphCreateConfig)
+            .orElseThrow(() -> new IllegalArgumentException("Expected GraphCreateConfig to be a cypher config."));
+        this.loadingContext = loadingContext;
     }
 
     public final MemoryEstimation memoryEstimation() {
         BatchLoadResult nodeCount;
         BatchLoadResult relCount;
         try (Ktx ktx = setReadOnlySecurityContext()) {
-            nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, graphCreateConfig, setup).load(ktx);
-            relCount = new CountingCypherRecordLoader(relationshipQuery(), RELATIONSHIP, api, graphCreateConfig, setup).load(ktx);
+            nodeCount = new CountingCypherRecordLoader(
+                nodeQuery(),
+                NODE,
+                loadingContext.api(),
+                cypherConfig,
+                loadingContext
+            ).load(ktx);
+            relCount = new CountingCypherRecordLoader(
+                relationshipQuery(),
+                RELATIONSHIP,
+                loadingContext.api(),
+                cypherConfig,
+                loadingContext
+            ).load(ktx);
         }
 
         GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
@@ -68,26 +83,32 @@ public class CypherFactory extends GraphStoreFactory {
             .maxRelCount(relCount.rows())
             .build();
 
-        return NativeFactory.getMemoryEstimation(estimateDimensions, graphCreateConfig);
+        return NativeFactory.getMemoryEstimation(estimateDimensions, cypherConfig);
     }
 
     @Override
     public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
-        return NativeFactory.getMemoryEstimation(dimensions, graphCreateConfig);
+        return NativeFactory.getMemoryEstimation(dimensions, cypherConfig);
     }
 
     @Override
     public ImportResult build() {
         // Temporarily override the security context to enforce read-only access during load
         try (Ktx ktx = setReadOnlySecurityContext()) {
-            BatchLoadResult nodeCount = new CountingCypherRecordLoader(nodeQuery(), NODE, api, graphCreateConfig, setup).load(ktx);
+            BatchLoadResult nodeCount = new CountingCypherRecordLoader(
+                nodeQuery(),
+                NODE,
+                loadingContext.api(),
+                cypherConfig,
+                loadingContext
+            ).load(ktx);
 
             CypherNodeLoader.LoadResult nodes = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
-                api,
-                graphCreateConfig,
-                setup,
+                loadingContext.api(),
+                cypherConfig,
+                loadingContext,
                 dimensions
             ).load(ktx);
 
@@ -101,21 +122,32 @@ public class CypherFactory extends GraphStoreFactory {
             GraphStore graphStore = createGraphStore(
                 nodes.idsAndProperties(),
                 relationships,
-                setup.tracker(),
+                loadingContext.tracker(),
                 relationships.dimensions()
             );
 
-            progressLogger.logMessage(setup.tracker());
+            progressLogger.logMessage(loadingContext.tracker());
             return ImportResult.of(relationships.dimensions(), graphStore);
         }
     }
 
     private String nodeQuery() {
-        return setup.nodeQuery().orElseThrow(() -> new IllegalArgumentException("Missing node query"));
+        return getCypherConfig(cypherConfig)
+            .orElseThrow(() -> new IllegalArgumentException("Missing node query"))
+            .nodeQuery();
     }
 
     private String relationshipQuery() {
-        return setup.relationshipQuery().orElseThrow(() -> new IllegalArgumentException("Missing relationship query"));
+        return getCypherConfig(cypherConfig)
+            .orElseThrow(() -> new IllegalArgumentException("Missing relationship query"))
+            .relationshipQuery();
+    }
+
+    private Optional<GraphCreateFromCypherConfig> getCypherConfig(GraphCreateConfig config) {
+        if (!config.isCypher()) {
+            return Optional.empty();
+        }
+        return Optional.of((GraphCreateFromCypherConfig) config);
     }
 
     private RelationshipImportResult loadRelationships(
@@ -127,9 +159,9 @@ public class CypherFactory extends GraphStoreFactory {
         CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
             relationshipQuery,
             idsAndProperties.idMap(),
-            api,
-            graphCreateConfig,
-            setup,
+            loadingContext.api(),
+            cypherConfig,
+            loadingContext,
             nodeLoadDimensions
         );
 
@@ -143,12 +175,12 @@ public class CypherFactory extends GraphStoreFactory {
     }
 
     private Ktx setReadOnlySecurityContext() {
-        GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(api);
+        GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(loadingContext.api());
         KernelTransaction ktx = transactions.ktx();
         try {
             AuthSubject subject = ktx.securityContext().subject();
             SecurityContext securityContext = new SecurityContext(subject, READ);
-            return new Ktx(api, transactions, securityContext);
+            return new Ktx(loadingContext.api(), transactions, securityContext);
         } catch (NotInTransactionException ex) {
             // happens only in tests
             throw new IllegalStateException("Must run in a transaction.", ex);
