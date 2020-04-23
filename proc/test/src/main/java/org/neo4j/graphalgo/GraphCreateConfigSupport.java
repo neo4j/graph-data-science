@@ -33,7 +33,7 @@ public interface GraphCreateConfigSupport {
         return withNameAndRelationshipProjections(
             userName,
             graphName,
-            RelationshipProjections.empty()
+            RelationshipProjections.all()
         );
     }
 
@@ -45,7 +45,7 @@ public interface GraphCreateConfigSupport {
         return ImmutableGraphCreateFromStoreConfig.of(
             userName,
             graphName,
-            NodeProjections.empty(),
+            NodeProjections.all(),
             rels
         );
     }
