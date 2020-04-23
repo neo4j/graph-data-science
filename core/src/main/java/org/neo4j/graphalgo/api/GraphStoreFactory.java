@@ -20,14 +20,12 @@
 package org.neo4j.graphalgo.api;
 
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -36,7 +34,6 @@ import org.neo4j.graphalgo.core.huge.ImmutableTopologyCSR;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -54,28 +51,21 @@ public abstract class GraphStoreFactory implements Assessable {
 
     public static final String TASK_LOADING = "LOADING";
 
+    protected final GraphCreateConfig graphCreateConfig;
     protected final ExecutorService threadPool;
     protected final GraphLoadingContext loadingContext;
     protected final GraphDimensions dimensions;
     protected final ProgressLogger progressLogger;
-    protected final GraphCreateConfig graphCreateConfig;
 
     public GraphStoreFactory(
-        GraphLoadingContext loadingContext,
-        GraphCreateConfig graphCreateConfig
-    ) {
-        this(loadingContext, graphCreateConfig, true);
-    }
-
-    public GraphStoreFactory(
-        GraphLoadingContext loadingContext,
         GraphCreateConfig graphCreateConfig,
-        boolean readTokens
+        GraphLoadingContext loadingContext,
+        GraphDimensions dimensions
     ) {
+        this.graphCreateConfig = graphCreateConfig;
         this.threadPool = loadingContext.executor();
         this.loadingContext = loadingContext;
-        this.graphCreateConfig = graphCreateConfig;
-        this.dimensions = new GraphDimensionsReader(loadingContext.api(), graphCreateConfig, readTokens).call();
+        this.dimensions = dimensions;
         this.progressLogger = initProgressLogger();
     }
 
@@ -87,27 +77,7 @@ public abstract class GraphStoreFactory implements Assessable {
         return this.dimensions;
     }
 
-    protected ProgressLogger initProgressLogger() {
-        long relationshipCount = graphCreateConfig
-            .relationshipProjections()
-            .projections()
-            .entrySet()
-            .stream()
-            .mapToLong(projectionEntry -> {
-                Long typeCount = dimensions.relationshipCounts().getOrDefault(projectionEntry.getKey(), 0L);
-                return projectionEntry.getValue().orientation() == Orientation.UNDIRECTED
-                    ? typeCount * 2
-                    : typeCount;
-            })
-            .sum();
-
-        return new BatchingProgressLogger(
-            loadingContext.log(),
-            dimensions.nodeCount() + relationshipCount,
-            TASK_LOADING,
-            graphCreateConfig.readConcurrency()
-        );
-    }
+    protected abstract ProgressLogger initProgressLogger();
 
     protected GraphStore createGraphStore(
         IdsAndProperties idsAndProperties,

@@ -28,10 +28,10 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -48,11 +48,14 @@ import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 
 public final class NativeFactory extends GraphStoreFactory {
 
+    private final GraphCreateFromStoreConfig storeConfig;
+
     public NativeFactory(
-        GraphCreateConfig graphCreateConfig,
+        GraphCreateFromStoreConfig graphCreateConfig,
         GraphLoadingContext loadingContext
     ) {
-        super(loadingContext, graphCreateConfig);
+        super(graphCreateConfig, loadingContext, new GraphDimensionsStoreReader(loadingContext.api(), graphCreateConfig).call());
+        this.storeConfig = graphCreateConfig;
     }
 
     @Override
@@ -62,7 +65,7 @@ public final class NativeFactory extends GraphStoreFactory {
 
     @Override
     public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
-        return getMemoryEstimation(dimensions, graphCreateConfig);
+        return getMemoryEstimation(dimensions, storeConfig);
     }
 
     public static MemoryEstimation getMemoryEstimation(GraphDimensions dimensions, RelationshipProjections relationshipProjections) {
@@ -77,7 +80,7 @@ public final class NativeFactory extends GraphStoreFactory {
         return getMemoryEstimation(dimensions, config);
     }
 
-    public static MemoryEstimation getMemoryEstimation(GraphDimensions dimensions, GraphCreateConfig config) {
+    public static MemoryEstimation getMemoryEstimation(GraphDimensions dimensions, GraphCreateFromStoreConfig config) {
         MemoryEstimations.Builder builder = MemoryEstimations
             .builder(HugeGraph.class)
             .add("nodeIdMap", IdMap.memoryEstimation());
@@ -120,7 +123,11 @@ public final class NativeFactory extends GraphStoreFactory {
 
     @Override
     protected ProgressLogger initProgressLogger() {
-        long relationshipCount = graphCreateConfig.relationshipProjections().projections().entrySet().stream()
+        long relationshipCount = graphCreateConfig
+            .relationshipProjections()
+            .projections()
+            .entrySet()
+            .stream()
             .map(entry -> {
                 Long relCount = entry.getKey().name.equals("*")
                      ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
@@ -141,7 +148,7 @@ public final class NativeFactory extends GraphStoreFactory {
 
     @Override
     public ImportResult build() {
-        validate(dimensions, graphCreateConfig);
+        validate(dimensions, storeConfig);
 
         int concurrency = graphCreateConfig.readConcurrency();
         AllocationTracker tracker = loadingContext.tracker();

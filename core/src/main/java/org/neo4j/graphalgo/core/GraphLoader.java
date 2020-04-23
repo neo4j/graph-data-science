@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.ImmutableGraphLoadingContext;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -96,9 +98,10 @@ public interface GraphLoader {
             GraphStoreFactory factory;
 
             if (CypherFactory.class.isAssignableFrom(factoryType)) {
-                factory = new CypherFactory(createConfig(), loadingContext);
+                factory = new CypherFactory((GraphCreateFromCypherConfig) createConfig(), loadingContext);
             } else {
-                factory = new NativeFactory(createConfig(), loadingContext);
+                GraphCreateFromStoreConfig config = (GraphCreateFromStoreConfig) createConfig();
+                factory = new NativeFactory(config, loadingContext);
             }
 
             return factoryType.cast(factory);

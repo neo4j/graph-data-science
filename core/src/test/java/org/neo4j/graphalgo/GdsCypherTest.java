@@ -29,7 +29,7 @@ import org.neo4j.cypher.internal.evaluator.EvaluationException;
 import org.neo4j.cypher.internal.evaluator.Evaluator;
 import org.neo4j.cypher.internal.evaluator.ExpressionEvaluator;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphdb.Direction;
@@ -53,7 +53,7 @@ class GdsCypherTest {
 
     private static final ExpressionEvaluator EVALUATOR = Evaluator.expressionEvaluator();
 
-    private static final GraphCreateConfig GRAPH_CREATE_PROJECT_STAR =
+    private static final GraphCreateFromStoreConfig GRAPH_CREATE_PROJECT_STAR =
         ImmutableGraphCreateFromStoreConfig.of(
             "",
             "",
@@ -132,7 +132,7 @@ class GdsCypherTest {
             "}";
 
         Map<String, Object> map = convert(configString);
-        GraphCreateConfig parsedConfig = ImmutableGraphCreateFromStoreConfig
+        GraphCreateFromStoreConfig parsedConfig = ImmutableGraphCreateFromStoreConfig
             .builder()
             .username("")
             .graphName("")
@@ -154,7 +154,7 @@ class GdsCypherTest {
             .addProperty("relProp", "RelationshipPropertyName", 1337, Aggregation.MAX)
             .build();
 
-        GraphCreateConfig configFromBuilder = ImmutableGraphCreateFromStoreConfig
+        GraphCreateFromStoreConfig configFromBuilder = ImmutableGraphCreateFromStoreConfig
             .builder()
             .username("")
             .graphName("")

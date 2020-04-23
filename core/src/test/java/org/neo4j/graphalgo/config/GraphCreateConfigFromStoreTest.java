@@ -105,7 +105,7 @@ class GraphCreateConfigFromStoreTest {
             NodeLabel.of("A"), NodeProjection.of("A", propertyMappings2)
         ));
 
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
+        GraphCreateFromStoreConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName("graph")
             .relationshipProjections(RelationshipProjections.of())
             .nodeProperties(propertyMappings1)
@@ -137,7 +137,7 @@ class GraphCreateConfigFromStoreTest {
                 .build()
         );
 
-        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
+        GraphCreateFromStoreConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.builder()
             .graphName("graph")
             .nodeProjections(NodeProjections.empty())
             .relationshipProperties(propertyMappings1)

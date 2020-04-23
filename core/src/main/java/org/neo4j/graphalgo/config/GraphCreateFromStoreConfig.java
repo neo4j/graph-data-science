@@ -44,15 +44,27 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     String NODE_PROPERTIES_KEY = "nodeProperties";
     String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 
-    @Override
     @Key(NODE_PROJECTION_KEY)
     @ConvertWith("org.neo4j.graphalgo.AbstractNodeProjections#fromObject")
     NodeProjections nodeProjections();
 
-    @Override
     @Key(RELATIONSHIP_PROJECTION_KEY)
     @ConvertWith("org.neo4j.graphalgo.AbstractRelationshipProjections#fromObject")
     RelationshipProjections relationshipProjections();
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
+    default PropertyMappings nodeProperties() {
+        return PropertyMappings.of();
+    }
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
+    default PropertyMappings relationshipProperties() {
+        return PropertyMappings.of();
+    }
 
     @Value.Check
     default GraphCreateFromStoreConfig withNormalizedPropertyMappings() {

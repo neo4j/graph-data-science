@@ -19,13 +19,17 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.GraphDimensionsCypherReader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.NotInTransactionException;
@@ -45,16 +49,13 @@ import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 public class CypherFactory extends GraphStoreFactory {
 
     private final GraphCreateFromCypherConfig cypherConfig;
-    private final GraphLoadingContext loadingContext;
 
     public CypherFactory(
-        GraphCreateConfig graphCreateConfig,
+        GraphCreateFromCypherConfig graphCreateConfig,
         GraphLoadingContext loadingContext
     ) {
-        super(loadingContext, graphCreateConfig, false);
-        this.cypherConfig = getCypherConfig(graphCreateConfig)
-            .orElseThrow(() -> new IllegalArgumentException("Expected GraphCreateConfig to be a cypher config."));
-        this.loadingContext = loadingContext;
+        super(graphCreateConfig, loadingContext, new GraphDimensionsCypherReader(loadingContext.api(), graphCreateConfig).call());
+        this.cypherConfig = getCypherConfig(graphCreateConfig).orElseThrow(() -> new IllegalArgumentException("Expected GraphCreateConfig to be a cypher config."));
     }
 
     public final MemoryEstimation memoryEstimation() {
@@ -83,12 +84,12 @@ public class CypherFactory extends GraphStoreFactory {
             .maxRelCount(relCount.rows())
             .build();
 
-        return NativeFactory.getMemoryEstimation(estimateDimensions, cypherConfig);
+        return NativeFactory.getMemoryEstimation(estimateDimensions, RelationshipProjections.all());
     }
 
     @Override
     public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
-        return NativeFactory.getMemoryEstimation(dimensions, cypherConfig);
+        return NativeFactory.getMemoryEstimation(dimensions, RelationshipProjections.all());
     }
 
     @Override
@@ -131,19 +132,29 @@ public class CypherFactory extends GraphStoreFactory {
         }
     }
 
+    @Override
+    protected ProgressLogger initProgressLogger() {
+        return new BatchingProgressLogger(
+            loadingContext.log(),
+            dimensions.nodeCount() + dimensions.maxRelCount(),
+            TASK_LOADING,
+            graphCreateConfig.readConcurrency()
+        );
+    }
+
     private String nodeQuery() {
-        return getCypherConfig(cypherConfig)
+        return getCypherConfig(graphCreateConfig)
             .orElseThrow(() -> new IllegalArgumentException("Missing node query"))
             .nodeQuery();
     }
 
     private String relationshipQuery() {
-        return getCypherConfig(cypherConfig)
+        return getCypherConfig(graphCreateConfig)
             .orElseThrow(() -> new IllegalArgumentException("Missing relationship query"))
             .relationshipQuery();
     }
 
-    private Optional<GraphCreateFromCypherConfig> getCypherConfig(GraphCreateConfig config) {
+    private static Optional<GraphCreateFromCypherConfig> getCypherConfig(GraphCreateConfig config) {
         if (!config.isCypher()) {
             return Optional.empty();
         }
