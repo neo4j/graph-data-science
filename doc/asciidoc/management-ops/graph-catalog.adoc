@@ -157,6 +157,21 @@ This is useful to free up main memory or to remove accidentally created node pro
 CALL gds.graph.removeNodeProperties('my-graph', ['pageRank', 'communityId'])
 ----
 
+The above example requires all given properties to be present on at least one node projection.
+The procedure can be configured to remove just the properties for a specific node projection.
+In the following example, we ran an algorithm on a sub-graph and want to write those results to Neo4j.
+
+.Remove node properties of a specific node projection:
+[source,cypher]
+----
+CALL gds.graph.create('my-graph', ['A', 'B'], '*')
+CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
+CALL gds.graph.removeNodeProperties('my-graph', ['componentId'], ['A'])
+----
+
+The procedure will fail for properties that are not mapped to the given projection.
+If no label or `*` is given, all projections that have all the given properties will be considered.
+
 
 [[catalog-graph-delete-rel-type]]
 == Deleting relationship types from a named graph
@@ -199,6 +214,21 @@ Properties that were added to the created graph at creation time will often alre
 ----
 CALL gds.graph.writeNodeProperties('my-graph', ['componentId', 'pageRank', 'communityId'])
 ----
+
+The above example requires all given properties to be present on at least one node projection.
+The procedure can be configured to write just the properties for a specific node projection.
+In the following example, we ran an algorithm on a sub-graph and want to write those results to Neo4j.
+
+.Write node properties of a specific node projection to Neo4j:
+[source,cypher]
+----
+CALL gds.graph.create('my-graph', ['A', 'B'], '*')
+CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
+CALL gds.graph.writeNodeProperties('my-graph', ['componentId'], ['A'])
+----
+
+The procedure will fail for properties that are not mapped to the given projection.
+If no label or `*` is given, all projections that have all the given properties will be considered.
 
 
 [[catalog-graph-write-relationship]]

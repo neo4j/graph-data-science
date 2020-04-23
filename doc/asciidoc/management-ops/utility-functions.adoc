@@ -189,8 +189,8 @@ Catalog functions allow accessing in-memory graphs directly from a Cypher query.
 
 [opts=header,cols="1m,1"]
 |===
-| Name                                                                           | Description
-| gds.util.nodeProperty(graphName: STRING, nodeId: INTEGER, propertyKey: STRING) | Named graph in the catalog, Neo4j node id and node property key present in the named-graph.
+| Name                                                                                           | Description
+| gds.util.nodeProperty(graphName: STRING, nodeId: INTEGER, propertyKey: STRING, label: STRING?) | Named graph in the catalog, Neo4j node id, node property key and optional node label present in the named-graph.
 |===
 
 === Examples
