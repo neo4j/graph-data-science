@@ -25,8 +25,6 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphalgo.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
 
@@ -38,6 +36,8 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 public interface GraphCreateConfig extends BaseConfig {
 
     String IMPLICIT_GRAPH_NAME = "";
+    String NODECOUNT_KEY = "nodeCount";
+    String RELCOUNT_KEY = "relationshipCount";
 
     @Configuration.Parameter
     String graphName();
@@ -70,14 +70,14 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Value.Default
     @Value.Parameter(false)
-    @Configuration.Key(ProcedureConstants.NODECOUNT_KEY)
+    @Configuration.Key(NODECOUNT_KEY)
     default long nodeCount() {
         return -1;
     }
 
     @Value.Default
     @Value.Parameter(false)
-    @Configuration.Key(ProcedureConstants.RELCOUNT_KEY)
+    @Configuration.Key(RELCOUNT_KEY)
     default long relationshipCount() {
         return -1;
     }
