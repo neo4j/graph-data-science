@@ -110,7 +110,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         for (NodeLabel nodeLabel : writeNodeLabels) {
             Graph subGraph = graphStore.getGraph(
                 Collections.singletonList(nodeLabel),
-                Collections.singleton(RelationshipType.ALL_RELATIONSHIPS),
+                graphStore.relationshipTypes(),
                 Optional.empty(),
                 config.writeConcurrency()
             );
