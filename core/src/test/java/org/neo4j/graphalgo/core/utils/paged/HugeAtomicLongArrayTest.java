@@ -306,7 +306,6 @@ final class HugeAtomicLongArrayTest {
         public void run() {
             phaser.arriveAndAwaitAdvance();
             HugeAtomicLongArray a = adder;
-            System.out.println("adder.getClass() = " + adder.getClass());
             for (int i = 0; i < incs; ++i) {
                 a.update(0, x -> x + 1);
             }
