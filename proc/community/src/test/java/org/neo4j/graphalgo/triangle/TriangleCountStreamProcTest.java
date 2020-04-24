@@ -38,7 +38,6 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
         var rowCount = new AtomicInteger();
         runQueryWithRowConsumer(query, row -> {
             assertEquals(1L, row.getNumber("triangles"));
-            assertEquals(1.0, row.getNumber("localClusteringCoefficient"));
             rowCount.incrementAndGet();
         });
 
