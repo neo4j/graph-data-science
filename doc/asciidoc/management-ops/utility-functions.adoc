@@ -189,9 +189,14 @@ Catalog functions allow accessing in-memory graphs directly from a Cypher query.
 
 [opts=header,cols="1m,1"]
 |===
-| Name                                                                           | Description
-| gds.util.nodeProperty(graphName: STRING, nodeId: INTEGER, propertyKey: STRING) | Named graph in the catalog, Neo4j node id and node property key present in the named-graph.
+| Name                                                                                               | Description
+| gds.util.nodeProperty(graphName: STRING, nodeId: INTEGER, propertyKey: STRING, nodeLabel: STRING?) | Named graph in the catalog, Neo4j node id, node property key and optional node label present in the named-graph.
 |===
+
+If a node label is given, the property value for the corresponding projection and the given node is returned.
+If no label or `'*'` is given, the property value is retrieved and returned from an arbitrary projection that contains the given propertyKey.
+If the property value is missing for the given node, `null` is returned.
+
 
 === Examples
 
@@ -219,6 +224,28 @@ WHERE alice.name = 'Alice'
 RETURN
   alice.name AS name,
   gds.util.nodeProperty('my-graph', id(alice), 'score') AS score
+----
+
+.Results
+[opts="header",cols="2"]
+|===
+| name    | score
+| "Alice" | 0.15000000000000002
+|===
+--
+
+We can also specifically return the `score` property from the `User` projection in case other projections also have a `score` property as follows.
+
+[role=query-example]
+--
+.Access a property node property from User for Alice:
+[source, cypher]
+----
+MATCH (alice:User)
+WHERE alice.name = 'Alice'
+RETURN
+  alice.name AS name,
+  gds.util.nodeProperty('my-graph', id(alice), 'score', 'User') AS score
 ----
 
 .Results
