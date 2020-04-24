@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, LabelPropagation, LabelPropagationStatsProc.StatsResult, LabelPropagationStreamConfig> {
+public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, LabelPropagation, LabelPropagationStatsProc.StatsResult, LabelPropagationStatsConfig> {
 
     @Procedure(value = "gds.labelPropagation.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -58,7 +58,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStatsConfig> computeResult) {
         return LabelPropagationProc.resultBuilder(
             new StatsResult.Builder(callContext, computeResult.tracker()),
             computeResult
@@ -66,18 +66,18 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     }
 
     @Override
-    protected LabelPropagationStreamConfig newConfig(
+    protected LabelPropagationStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LabelPropagationStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LabelPropagationStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation, LabelPropagationStreamConfig> algorithmFactory(
-        LabelPropagationStreamConfig config
+    protected AlgorithmFactory<LabelPropagation, LabelPropagationStatsConfig> algorithmFactory(
+        LabelPropagationStatsConfig config
     ) {
         return new LabelPropagationFactory<>(config);
     }
