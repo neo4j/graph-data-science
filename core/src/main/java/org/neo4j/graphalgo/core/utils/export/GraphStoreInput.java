@@ -23,7 +23,6 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.internal.batchimport.InputIterable;
@@ -91,25 +90,26 @@ public final class GraphStoreInput implements Input {
             numberOfRelationshipProperties,
             numberOfNodeProperties * Double.BYTES,
             numberOfRelationshipProperties * Double.BYTES,
-            0
+            graphStore.nodeLabels().size()
         );
     }
 
     abstract static class GraphImporter implements InputIterator {
 
-        private final int batchSize;
         private final long nodeCount;
+        private final int batchSize;
 
         private long id;
 
         GraphImporter(long nodeCount, int batchSize) {
-            this.batchSize = batchSize;
             this.nodeCount = nodeCount;
+            this.batchSize = batchSize;
         }
 
         @Override
         public synchronized boolean next(InputChunk chunk) {
-            if (id >= nodeCount) {
+            if (id >= nodeCount)
+            {
                 return false;
             }
             long startId = id;
@@ -140,26 +140,40 @@ public final class GraphStoreInput implements Input {
     }
 
     static class RelationshipImporter extends GraphImporter {
-        private final Map<Pair<RelationshipType, Optional<String>>, Graph> relationships;
+
+        private final Map<Pair<RelationshipType, Optional<String>>, RelationshipIterator> relationships;
 
         RelationshipImporter(GraphStore graphStore, long nodeCount, int batchSize) {
             super(nodeCount, batchSize);
-            relationships = graphStore.relationshipTypes().stream().flatMap(relType -> {
-                Set<String> relProperties = graphStore.relationshipPropertyKeys(relType);
-                if (relProperties.isEmpty()) {
-                    return Stream.of(Tuples.pair(relType, Optional.<String>empty()));
-                } else {
-                    return relProperties.stream().map(propertyKey -> Tuples.pair(relType, Optional.of(propertyKey)));
-                }
-            }).collect(Collectors.toMap(
-                relTypeAndProperty -> relTypeAndProperty,
-                relTypeAndProperty -> graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
-            ));
+            this.relationships = graphStore
+                .relationshipTypes()
+                .stream()
+                .flatMap(relType -> {
+                    Set<String> relProperties = graphStore.relationshipPropertyKeys(relType);
+                    if (relProperties.isEmpty()) {
+                        return Stream.of(Tuples.pair(relType, Optional.<String>empty()));
+                    } else {
+                        return relProperties
+                            .stream()
+                            .map(propertyKey -> Tuples.pair(relType, Optional.of(propertyKey)));
+                    }
+                })
+                .collect(Collectors.toMap(
+                    relTypeAndProperty -> relTypeAndProperty,
+                    relTypeAndProperty -> graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
+                ));
         }
 
         @Override
         public InputChunk newChunk() {
-            return new RelationshipChunk(relationships);
+            var concurrentCopies = relationships
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> e.getValue().concurrentCopy()
+                ));
+            return new RelationshipChunk(concurrentCopies);
         }
     }
 
@@ -236,16 +250,16 @@ public final class GraphStoreInput implements Input {
 
     static class RelationshipChunk extends EntityChunk {
 
-        private final Map<Pair<RelationshipType, Optional<String>>, Graph> relationships;
+        private final Map<Pair<RelationshipType, Optional<String>>, RelationshipIterator> relationships;
 
-        RelationshipChunk(Map<Pair<RelationshipType, Optional<String>>, Graph> relationships) {
+        RelationshipChunk(Map<Pair<RelationshipType, Optional<String>>, RelationshipIterator> relationships) {
             this.relationships = relationships;
         }
 
         @Override
         public boolean next(InputEntityVisitor visitor) {
             if (id < endId) {
-                for (Map.Entry<Pair<RelationshipType, Optional<String>>, Graph> relationship : relationships.entrySet()) {
+                for (Map.Entry<Pair<RelationshipType, Optional<String>>, RelationshipIterator> relationship : relationships.entrySet()) {
                     RelationshipType relType = relationship.getKey().getOne();
                     Optional<String> relProperty = relationship.getKey().getTwo();
                     RelationshipIterator iterator = relationship.getValue();

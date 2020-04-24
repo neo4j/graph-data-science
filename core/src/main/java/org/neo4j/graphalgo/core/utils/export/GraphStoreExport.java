@@ -50,14 +50,14 @@ import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createSchedule
 
 public class GraphStoreExport {
 
-    private final GraphStore graph;
+    private final GraphStore graphStore;
 
     private final File neo4jHome;
 
     private final GraphStoreExportConfig config;
 
     public GraphStoreExport(GraphStore graphStore, File neo4jHome, GraphStoreExportConfig config) {
-        this.graph = graphStore;
+        this.graphStore = graphStore;
         this.neo4jHome = neo4jHome;
         this.config = config;
     }
@@ -92,7 +92,7 @@ public class GraphStoreExport {
 
             lifeSupport.start();
 
-            Input input = new GraphStoreInput(graph, config.batchSize());
+            Input input = new GraphStoreInput(graphStore, config.batchSize());
 
             var importer = BatchImporterFactory.withHighestPriority().instantiate(
                 databaseLayout,
