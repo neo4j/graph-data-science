@@ -33,9 +33,6 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface TriangleCountWriteConfig extends TriangleCountBaseConfig, WritePropertyConfig {
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
-    String clusteringCoefficientProperty();
-
     static TriangleCountWriteConfig of(
         String username,
         Optional<String> graphName,

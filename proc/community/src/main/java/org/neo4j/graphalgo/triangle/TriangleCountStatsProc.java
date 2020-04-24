@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -97,33 +96,23 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     public static class StatsResult {
+        public final long triangleCount;
+        public final long nodeCount;
         public final long createMillis;
         public final long computeMillis;
-        public final long postProcessingMillis;
-        public final long nodeCount;
-        public final long triangleCount;
-        public final double averageClusteringCoefficient;
-        // TODO: should we retain this?
-        public final Map<String, Object> communityDistribution;
         public final Map<String, Object> configuration;
 
         public StatsResult(
+            long triangleCount,
+            long nodeCount,
             long createMillis,
             long computeMillis,
-            long postProcessingMillis,
-            long nodeCount,
-            long triangleCount,
-            double averageClusteringCoefficient,
-            @Nullable Map<String, Object> communityDistribution,
             Map<String, Object> configuration
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
             this.nodeCount = nodeCount;
-            this.averageClusteringCoefficient = averageClusteringCoefficient;
             this.triangleCount = triangleCount;
-            this.communityDistribution = communityDistribution;
             this.configuration = configuration;
         }
     }
@@ -140,13 +129,10 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
         @Override
         protected StatsResult buildResult() {
             return new StatsResult(
+                triangleCount,
+                nodeCount,
                 createMillis,
                 computeMillis,
-                postProcessingDuration,
-                nodeCount,
-                triangleCount,
-                averageClusteringCoefficient,
-                communityHistogramOrNull(),
                 config.toMap()
             );
         }

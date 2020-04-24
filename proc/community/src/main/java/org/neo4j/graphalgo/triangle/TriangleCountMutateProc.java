@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -105,30 +104,27 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
     }
 
     public static class MutateResult extends TriangleCountStatsProc.StatsResult {
+
+        public long nodePropertiesWritten;
         public long mutateMillis;
 
         public MutateResult(
+            long triangleCount,
+            long nodeCount,
+            long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
-            long postProcessingMillis,
             long mutateMillis,
-            long nodeCount,
-            long triangleCount,
-            double averageClusteringCoefficient,
-            @Nullable Map<String, Object> communityDistribution,
             Map<String, Object> configuration
         ) {
             super(
+                triangleCount,
+                nodeCount,
                 createMillis,
                 computeMillis,
-                postProcessingMillis,
-                nodeCount,
-                triangleCount,
-                averageClusteringCoefficient,
-                communityDistribution,
                 configuration
             );
-
+            this.nodePropertiesWritten = nodePropertiesWritten;
             this.mutateMillis = mutateMillis;
         }
     }
@@ -145,14 +141,12 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
         @Override
         protected MutateResult buildResult() {
             return new MutateResult(
+                triangleCount,
+                nodeCount,
+                nodePropertiesWritten,
                 createMillis,
                 computeMillis,
-                postProcessingDuration,
                 mutateMillis,
-                nodeCount,
-                triangleCount,
-                averageClusteringCoefficient,
-                communityHistogramOrNull(),
                 config.toMap()
             );
         }

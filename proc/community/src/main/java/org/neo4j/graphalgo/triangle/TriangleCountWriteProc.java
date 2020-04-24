@@ -19,16 +19,11 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -37,8 +32,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -109,50 +102,25 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
         );
     }
 
-    @Override
-    protected Collection<NodePropertyExporter.NodeProperty<?>> nodePropertiesToWrite(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig> computationResult) {
-        TriangleCountWriteConfig config = computationResult.config();
-        IntersectingTriangleCount.TriangleCountResult result = computationResult.result();
-
-        return List.of(
-            ImmutableNodeProperty.of(
-                config.writeProperty(),
-                result.localTriangles(),
-                HugeAtomicLongArray.Translator.INSTANCE
-            ),
-            ImmutableNodeProperty.of(
-                config.clusteringCoefficientProperty(),
-                result.localClusteringCoefficients(),
-                HugeDoubleArray.Translator.INSTANCE
-            )
-        );
-    }
-
     public static class WriteResult extends TriangleCountStatsProc.StatsResult {
 
-        public long writeMillis;
         public long nodePropertiesWritten;
+        public long writeMillis;
 
         public WriteResult(
+            long triangleCount,
+            long nodeCount,
+            long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
             long writeMillis,
-            long postProcessingMillis,
-            long nodeCount,
-            long triangleCount,
-            double averageClusteringCoefficient,
-            long nodePropertiesWritten,
-            @Nullable Map<String, Object> communityDistribution,
             Map<String, Object> configuration
         ) {
             super(
+                triangleCount,
+                nodeCount,
                 createMillis,
                 computeMillis,
-                postProcessingMillis,
-                nodeCount,
-                triangleCount,
-                averageClusteringCoefficient,
-                communityDistribution,
                 configuration
             );
 
@@ -173,15 +141,12 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
         @Override
         protected WriteResult buildResult() {
             return new WriteResult(
+                triangleCount,
+                nodeCount,
+                nodePropertiesWritten,
                 createMillis,
                 computeMillis,
                 writeMillis,
-                postProcessingDuration,
-                nodeCount,
-                triangleCount,
-                averageClusteringCoefficient,
-                nodePropertiesWritten,
-                communityHistogramOrNull(),
                 config.toMap()
             );
         }

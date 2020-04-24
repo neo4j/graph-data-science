@@ -24,13 +24,10 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 public abstract class WriteProc<
@@ -73,20 +70,14 @@ public abstract class WriteProc<
                 .parallel(Pools.DEFAULT, writePropertyConfig.writeConcurrency())
                 .build();
 
-            exporter.write(nodePropertiesToWrite(computationResult));
+            exporter.write(
+                writePropertyConfig.writeProperty(),
+                computationResult.result(),
+                nodePropertyTranslator(computationResult)
+            );
 
             resultBuilder.withNodeCount(computationResult.graph().nodeCount());
             resultBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
         }
-    }
-
-    protected Collection<NodePropertyExporter.NodeProperty<?>> nodePropertiesToWrite(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return List.of(
-            ImmutableNodeProperty.of(
-                computationResult.config().writeProperty(),
-                computationResult.result(),
-                nodePropertyTranslator(computationResult)
-            )
-        );
     }
 }

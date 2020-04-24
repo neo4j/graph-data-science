@@ -25,20 +25,17 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.values.storable.NumberType;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class TriangleCountMutateProcTest
     extends TriangleCountBaseProcTest<TriangleCountMutateConfig>
@@ -70,7 +67,7 @@ class TriangleCountMutateProcTest
     }
 
     @Test
-    void testMutate() {
+    void testMutateYields() {
         String query = GdsCypher
             .call()
             .withAnyLabel()
@@ -81,45 +78,17 @@ class TriangleCountMutateProcTest
             .algo("triangleCount")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
-            .yields(
-                "createMillis",
-                "computeMillis",
-                "mutateMillis",
-                "postProcessingMillis",
-                "communityDistribution",
-                "configuration"
-            );
-
-        runQueryWithRowConsumer(
-            query,
-            row -> {
-                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
-            }
-        );
-
-        var writeQuery = GdsCypher
-            .call()
-            .explicitCreation("g")
-            .algo("triangleCount")
-            .writeMode()
-            .addParameter("writeProperty", mutateProperty())
-            .addParameter("clusteringCoefficientProperty", "clusteringCoefficient")
             .yields();
 
-        runQuery(writeQuery);
-
-        var updatedGraph = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
-            .globalOrientation(Orientation.UNDIRECTED)
-            .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
-            .build()
-            .graph(NativeFactory.class);
-
-        assertGraphEquals(fromGdl(expectedMutatedGraph()), updatedGraph);
-
+        assertCypherResult(query, List.of(Map.of(
+            "triangleCount", 1L,
+            "nodeCount", 3L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "configuration", isA(Map.class),
+            "mutateMillis", greaterThan(-1L),
+            "nodePropertiesWritten", 3L
+        )));
     }
 
     @Override
@@ -136,6 +105,4 @@ class TriangleCountMutateProcTest
             mapWrapper
         );
     }
-
-
 }

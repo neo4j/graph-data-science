@@ -24,19 +24,15 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TriangleCountWriteProcTest
     extends TriangleCountBaseProcTest<TriangleCountWriteConfig>
@@ -61,57 +57,27 @@ class TriangleCountWriteProcTest
             .algo("triangleCount")
             .writeMode()
             .addParameter("writeProperty", "triangles")
-            .addParameter("clusteringCoefficientProperty", "clusteringCoefficient")
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
             "triangleCount", 5L,
-            "averageClusteringCoefficient", closeTo(13.0 / 15, 1e-10),
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "configuration", isA(Map.class),
-            "writeMillis", greaterThan(-1L),
-            "nodePropertiesWritten", 10L
+            "nodePropertiesWritten", 5L,
+            "writeMillis", greaterThan(-1L)
         )));
 
-        Map<String, Map<Long, Double>> expectedResult = Map.of(
-            "a", Map.of(4L, 2.0 / 3),
-            "b", Map.of(4L, 2.0 / 3),
-            "c", Map.of(3L, 1.0),
-            "d", Map.of(3L, 1.0),
-            "e", Map.of(1L, 1.0)
+        Map<String, Long> expectedResult = Map.of(
+            "a", 4L,
+            "b", 4L,
+            "c", 3L,
+            "d", 3L,
+            "e", 1L
         );
 
-        assertWriteResult(expectedResult, "triangles", "clusteringCoefficient");
-    }
-
-    @Test
-    void testMissingClusteringCoefficientPropertyFails() {
-        CypherMapWrapper mapWrapper =
-            createMinimalConfig(CypherMapWrapper.empty())
-                .withoutEntry("clusteringCoefficientProperty");
-
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> createConfig(mapWrapper)
-        );
-        assertEquals(
-            "No value specified for the mandatory configuration parameter `clusteringCoefficientProperty`",
-            exception.getMessage()
-        );
-    }
-
-    @Test
-    void testEmptyClusteringCoefficientPropertyValues() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("clusteringCoefficientProperty", null));
-        assertThrows(IllegalArgumentException.class, () -> createConfig(mapWrapper));
-    }
-
-    @Test
-    void testTrimmedToNullClusteringCoefficientProperty() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("clusteringCoefficientProperty", "  "));
-        assertThrows(IllegalArgumentException.class, () -> createConfig(mapWrapper));
+        assertWriteResult(expectedResult, "triangles");
     }
 
     @Override
@@ -131,9 +97,6 @@ class TriangleCountWriteProcTest
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("clusteringCoefficientProperty")) {
-            mapWrapper = mapWrapper.withString("clusteringCoefficientProperty", "clusteringCoefficientProperty");
-        }
         if (!mapWrapper.containsKey("writeProperty")) {
             mapWrapper = mapWrapper.withString("writeProperty", "writeProperty");
         }
@@ -141,27 +104,17 @@ class TriangleCountWriteProcTest
     }
 
     private void assertWriteResult(
-        Map<String, Map<Long, Double>> expectedResult,
-        String writeProperty,
-        String clusteringCoefficientProperty
+        Map<String, Long> expectedResult,
+        String writeProperty
     ) {
         runQueryWithRowConsumer(String.format(
-            "MATCH (n) RETURN n.name as name, n.%s as triangles, n.%s as clusteringCoefficient",
-            writeProperty,
-            clusteringCoefficientProperty
+            "MATCH (n) RETURN n.name AS name, n.%s AS triangles",
+            writeProperty
         ), (row) -> {
             long triangles = row.getNumber("triangles").longValue();
-            double clusteringCoefficient = row.getNumber("clusteringCoefficient").doubleValue();
             String name = row.getString("name");
-            Map<Long, Double> trianglesAndCoefficient = expectedResult.get(name);
-            assertNotNull(
-                trianglesAndCoefficient,
-                String.format("There is no record in the expected result for node : %s", name)
-            );
-            Double coefficient = trianglesAndCoefficient.get(triangles);
-            assertEquals(coefficient, clusteringCoefficient,
-                String.format("Incorrect clustering coefficient for node %s", name)
-            );
+            Long expectedTriangles = expectedResult.get(name);
+            assertEquals(expectedTriangles, triangles);
         });
     }
 

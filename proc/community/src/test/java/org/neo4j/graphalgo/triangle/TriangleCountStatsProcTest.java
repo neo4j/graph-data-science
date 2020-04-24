@@ -25,10 +25,12 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
 
 class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCountStatsConfig> {
 
@@ -40,16 +42,13 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
             .statsMode()
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            var createMillis = row.getNumber("createMillis").longValue();
-            var computeMillis = row.getNumber("computeMillis").longValue();
-            var nodeCount = row.getNumber("nodeCount").longValue();
-            var triangleCount = row.getNumber("triangleCount").longValue();
-            assertNotEquals(-1, createMillis);
-            assertNotEquals(-1, computeMillis);
-            assertEquals(1, triangleCount);
-            assertEquals(3, nodeCount);
-        });
+        assertCypherResult(query, List.of(Map.of(
+            "triangleCount", 1L,
+            "nodeCount", 3L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "configuration", isA(Map.class)
+        )));
     }
 
 
