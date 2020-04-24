@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc.StatsResult, WccStreamConfig> {
+public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc.StatsResult, WccStatsConfig> {
 
     @Procedure(value = "gds.wcc.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -47,7 +47,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult = compute(
+        ComputationResult<Wcc, DisjointSetStruct, WccStatsConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -64,7 +64,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccStatsConfig> computeResult) {
         return WccProc.resultBuilder(
             new StatsResult.Builder(callContext, computeResult.tracker()),
             computeResult
@@ -72,17 +72,17 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
     }
 
     @Override
-    protected WccStreamConfig newConfig(
+    protected WccStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return WccStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return WccStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory(WccStreamConfig config) {
+    protected AlgorithmFactory<Wcc, WccStatsConfig> algorithmFactory(WccStatsConfig config) {
         return WccProc.algorithmFactory();
     }
 
