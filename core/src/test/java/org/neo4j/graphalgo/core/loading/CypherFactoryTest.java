@@ -73,9 +73,7 @@ class CypherFactoryTest extends BaseTest {
 
         String nodes = "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0.0) AS partition , COALESCE(n.foo, 5.0) AS foo";
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' " +
-                      "WITH id(n) AS source, id(m) AS target, collect(r.prop) as weight " +
-                      "WITH DISTINCT source, target, coalesce(head(weight), 0) as weight " +
-                      "RETURN source, target, weight";
+                      "RETURN id(n) AS source, id(m) AS target, coalesce(head(collect(r.prop)), 0)";
 
         Graph graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
                 .nodeQuery(nodes)
@@ -123,48 +121,7 @@ class CypherFactoryTest extends BaseTest {
     }
 
     @Test
-    void testLoadRelationshipsAccumulateWeightCypher() {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String relStatement =
-            "MATCH (n)-[r:REL]->(m)" +
-            "MATCH (n)-[r2:REL]->(m) " +
-            "RETURN id(n) AS source, id(m) AS target, sum(r.prop/2.0) + sum(r2.prop/2.0) AS weight ";
-
-        loadAndTestGraph(nodeStatement, relStatement);
-    }
-
-    @Test
-    void uniqueRelationships() {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
-
-        loadAndTestGraph(nodeStatement, relStatement);
-    }
-
-    @Test
-    void accumulateWeightCypher() {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String relStatement =
-            "MATCH (n)-[r:REL]->(m)" +
-            "MATCH (n)-[r2:REL]->(m) " +
-            "RETURN id(n) AS source, id(m) AS target, sum(r.prop/2.0) + sum(r2.prop/2.0) AS weight ";
-
-        loadAndTestGraph(nodeStatement, relStatement);
-    }
-
-    @Test
-    void countEachRelationshipOnce() {
-        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
-        String relStatement =
-            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight " +
-            "UNION " +
-            "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight ";
-
-        loadAndTestGraph(nodeStatement, relStatement);
-    }
-
-    @Test
-    void testInitNodePropertiesFromQuery() {
+    void testMultipleNodeProperties() {
         clearDb();
         runQuery(
             "CREATE" +
@@ -189,7 +146,7 @@ class CypherFactoryTest extends BaseTest {
     }
 
     @Test
-    void testInitRelationshipPropertiesFromQuery() {
+    void testMultipleRelationshipProperties() {
         clearDb();
         runQuery(
             "CREATE" +
