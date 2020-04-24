@@ -27,6 +27,10 @@ final class StepRunner implements Runnable {
         this.current = current;
     }
 
+    public boolean didConverge() {
+        return this.current.didConverge();
+    }
+
     @Override
     public void run() {
         current.run();

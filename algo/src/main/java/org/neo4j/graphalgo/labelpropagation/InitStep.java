@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 final class InitStep implements Step {
@@ -54,7 +54,7 @@ final class InitStep implements Step {
     }
 
     @Override
-    public final void run() {
+    public void run() {
         PrimitiveLongIterator iterator = nodes.iterator();
         while (iterator.hasNext()) {
             long nodeId = iterator.next();
@@ -75,6 +75,11 @@ final class InitStep implements Step {
             existingLabels.set(nodeId, existingLabel);
             progressLogger.logProgress(graph.degree(nodeId));
         }
+    }
+
+    @Override
+    public boolean didConverge() {
+        return false;
     }
 
     @Override
