@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsProc.StatsResult, LouvainStreamConfig> {
+public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsProc.StatsResult, LouvainStatsConfig> {
 
     @Procedure(value = "gds.louvain.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -61,7 +61,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainStatsConfig> computeResult) {
         return LouvainProc.resultBuilder(
             new StatsResult.Builder(callContext, computeResult.tracker()),
             computeResult
@@ -69,17 +69,17 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
     }
 
     @Override
-    protected LouvainStreamConfig newConfig(
+    protected LouvainStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LouvainStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return LouvainStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<Louvain, LouvainStreamConfig> algorithmFactory(LouvainStreamConfig config) {
+    protected AlgorithmFactory<Louvain, LouvainStatsConfig> algorithmFactory(LouvainStatsConfig config) {
         return new LouvainFactory<>();
     }
 
