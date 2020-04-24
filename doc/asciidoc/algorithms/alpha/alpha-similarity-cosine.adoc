@@ -361,7 +361,7 @@ CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
- With collect(userData) AS data
+ WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({nodeProjection: '*', relationshipProjection: '*', data: data})
  YIELD item1, item2, count1, count2, similarity
  RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
