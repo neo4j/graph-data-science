@@ -62,7 +62,6 @@ final class ComputeStep implements Step {
     @Override
     public void run() {
         if (this.didChange) {
-            iteration++;
             this.didChange = iterateAll(nodes.iterator());
             if (!this.didChange) {
                 release();
