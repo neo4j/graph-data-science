@@ -104,16 +104,15 @@ class TriangleDocTest extends BaseProcTest {
                        "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
-                       "   writeProperty: 'triangles'," +
-                       "   clusteringCoefficientProperty: 'clusteringCoefficient'" +
+                       "   writeProperty: 'triangles'" +
                        " })" +
-                       " YIELD nodeCount, triangleCount, averageClusteringCoefficient";
+                       " YIELD nodeCount, triangleCount";
 
-        String expected = "+----------------------------------------------------------+" + NL +
-                          "| nodeCount | triangleCount | averageClusteringCoefficient |" + NL +
-                          "+----------------------------------------------------------+" + NL +
-                          "| 6         | 3             | 0.6055555555555555           |" + NL +
-                          "+----------------------------------------------------------+" + NL +
+        String expected = "+---------------------------+" + NL +
+                          "| nodeCount | triangleCount |" + NL +
+                          "+---------------------------+" + NL +
+                          "| 6         | 3             |" + NL +
+                          "+---------------------------+" + NL +
                           "1 row" + NL;
 
         String actual = runQuery(query, Result::resultAsString);
@@ -168,16 +167,15 @@ class TriangleDocTest extends BaseProcTest {
                        "     }" +
                        "   }," +
                        "   concurrency: 4," +
-                       "   writeProperty: 'triangles'," +
-                       "   clusteringCoefficientProperty: 'coefficient'" +
+                       "   writeProperty: 'triangles'" +
                        " })" +
-                       " YIELD nodeCount, triangleCount, averageClusteringCoefficient";
+                       " YIELD nodeCount, triangleCount";
 
-        String expected = "+----------------------------------------------------------+" + NL +
-                          "| nodeCount | triangleCount | averageClusteringCoefficient |" + NL +
-                          "+----------------------------------------------------------+" + NL +
-                          "| ?         | ?             | 0.0523                       |" + NL +
-                          "+----------------------------------------------------------+" + NL +
+        String expected = "+---------------------------+" + NL +
+                          "| nodeCount | triangleCount |" + NL +
+                          "+---------------------------+" + NL +
+                          "| ?         | ?             |" + NL +
+                          "+---------------------------+" + NL +
                           "1 row" + NL;
 
         String actual = runQuery(query, Result::resultAsString);
@@ -190,15 +188,14 @@ class TriangleDocTest extends BaseProcTest {
         String query = " CALL gds.triangleCount.write({" +
                        "   nodeQuery: 'MATCH (p:Person) RETURN id(p) AS id'," +
                        "   relationshipQuery: 'MATCH (p1:Person)-[:KNOWS]-(p2:Person) RETURN id(p1) AS source, id(p2) AS target'," +
-                       "   writeProperty: 'triangle'," +
-                       "   clusteringCoefficientProperty: 'coefficient'" +
-                       " }) YIELD nodeCount, triangleCount, averageClusteringCoefficient";
+                       "   writeProperty: 'triangle'" +
+                       " }) YIELD nodeCount, triangleCount";
 
-        String expected = "+----------------------------------------------------------+" + NL +
-                          "| nodeCount | triangleCount | averageClusteringCoefficient |" + NL +
-                          "+----------------------------------------------------------+" + NL +
-                          "| 6         | 3             | 0.6055555555555555           |" + NL +
-                          "+----------------------------------------------------------+" + NL +
+        String expected = "+---------------------------+" + NL +
+                          "| nodeCount | triangleCount |" + NL +
+                          "+---------------------------+" + NL +
+                          "| 6         | 3             |" + NL +
+                          "+---------------------------+" + NL +
                           "1 row" + NL;
 
         String actual = runQuery(query, Result::resultAsString);

@@ -143,7 +143,6 @@ class TriangleCountProcValidationTest extends BaseProcTest {
                     .algo("triangleCount")
                     .writeMode()
                     .addParameter("writeProperty", "testTriangleCount")
-                    .addParameter("clusteringCoefficientProperty", "clusteringCoefficient")
                     .yields(),
                 "Write"
             ),
