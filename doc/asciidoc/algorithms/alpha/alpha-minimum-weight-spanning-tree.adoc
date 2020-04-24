@@ -174,11 +174,12 @@ CALL gds.alpha.spanningTree.minimum.write({
       type: 'LINK',
       properties: 'cost',
       orientation: 'UNDIRECTED'
-    },
-    startNodeId: id(n),
-    relationshipWeightProperty: 'cost',
-    writeProperty: 'MINST',
-    weightWriteProperty: 'writeCost'
+    }
+  },
+  startNodeId: id(n),
+  relationshipWeightProperty: 'cost',
+  writeProperty: 'MINST',
+  weightWriteProperty: 'writeCost'
   }
 })
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
