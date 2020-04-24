@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankStatsProc.StatsResult, PageRankStreamConfig> {
+public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankStatsProc.StatsResult, PageRankStatsConfig> {
 
     @Procedure(value = "gds.pageRank.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -43,7 +43,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult = compute(
+        ComputationResult<PageRank, PageRank, PageRankStatsConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -60,22 +60,22 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankStatsConfig> computeResult) {
         return PageRankProc.resultBuilder(new StatsResult.Builder(), computeResult);
     }
 
     @Override
-    protected PageRankStreamConfig newConfig(
+    protected PageRankStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return PageRankStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return PageRankStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<PageRank, PageRankStreamConfig> algorithmFactory(PageRankStreamConfig config) {
+    protected AlgorithmFactory<PageRank, PageRankStatsConfig> algorithmFactory(PageRankStatsConfig config) {
         return PageRankProc.algorithmFactory(config);
     }
 
