@@ -104,7 +104,6 @@ class TriangleDocTest extends BaseProcTest {
                        "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
-                       "   sudo: true," +
                        "   writeProperty: 'triangles'," +
                        "   clusteringCoefficientProperty: 'clusteringCoefficient'" +
                        " })" +
@@ -133,7 +132,6 @@ class TriangleDocTest extends BaseProcTest {
                        "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
-                       "   sudo: true," +
                        "   concurrency: 4" +
                        " })" +
                        " YIELD nodeId, triangles, localClusteringCoefficient" +
@@ -169,7 +167,6 @@ class TriangleDocTest extends BaseProcTest {
                        "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
-                       "   sudo: true," +
                        "   concurrency: 4," +
                        "   writeProperty: 'triangles'," +
                        "   clusteringCoefficientProperty: 'coefficient'" +
@@ -194,7 +191,6 @@ class TriangleDocTest extends BaseProcTest {
                        "   nodeQuery: 'MATCH (p:Person) RETURN id(p) AS id'," +
                        "   relationshipQuery: 'MATCH (p1:Person)-[:KNOWS]-(p2:Person) RETURN id(p1) AS source, id(p2) AS target'," +
                        "   writeProperty: 'triangle'," +
-                       "   sudo: true," +
                        "   clusteringCoefficientProperty: 'coefficient'" +
                        " }) YIELD nodeCount, triangleCount, averageClusteringCoefficient";
 
