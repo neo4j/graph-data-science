@@ -75,8 +75,7 @@ public class TriangleCountStreamProc
         return LongStream.range(0, graph.nodeCount())
             .mapToObj(i -> new Result(
                 graph.toOriginalNodeId(i),
-                result.localTriangles().get(i),
-                result.localClusteringCoefficients().get(i)
+                result.localTriangles().get(i)
             ));
     }
 
@@ -118,12 +117,10 @@ public class TriangleCountStreamProc
 
         public final long nodeId;
         public final long triangles;
-        public final double localClusteringCoefficient;
 
-        public Result(long nodeId, long triangles, double localClusteringCoefficient) {
+        public Result(long nodeId, long triangles) {
             this.nodeId = nodeId;
             this.triangles = triangles;
-            this.localClusteringCoefficient = localClusteringCoefficient;
         }
     }
 }

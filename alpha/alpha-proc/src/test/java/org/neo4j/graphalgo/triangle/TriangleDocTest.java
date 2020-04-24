@@ -133,20 +133,20 @@ class TriangleDocTest extends BaseProcTest {
                        "   }," +
                        "   concurrency: 4" +
                        " })" +
-                       " YIELD nodeId, triangles, localClusteringCoefficient" +
-                       " RETURN gds.util.asNode(nodeId).name AS name, triangles, localClusteringCoefficient AS coefficient" +
-                       " ORDER BY coefficient DESC";
+                       " YIELD nodeId, triangles" +
+                       " RETURN gds.util.asNode(nodeId).name AS name, triangles" +
+                       " ORDER BY triangles ASC";
 
-        String expected = "+--------------------------------------------+" + NL +
-                          "| name      | triangles | coefficient        |" + NL +
-                          "+--------------------------------------------+" + NL +
-                          "| \"Karin\"   | 1         | 1.0                |" + NL +
-                          "| \"Mark\"    | 1         | 1.0                |" + NL +
-                          "| \"Chris\"   | 2         | 0.6666666666666666 |" + NL +
-                          "| \"Will\"    | 2         | 0.6666666666666666 |" + NL +
-                          "| \"Michael\" | 3         | 0.3                |" + NL +
-                          "| \"Alice\"   | 0         | 0.0                |" + NL +
-                          "+--------------------------------------------+" + NL +
+        String expected = "+-----------------------+" + NL +
+                          "| name      | triangles |" + NL +
+                          "+-----------------------+" + NL +
+                          "| \"Alice\"   | 0         |" + NL +
+                          "| \"Karin\"   | 1         |" + NL +
+                          "| \"Mark\"    | 1         |" + NL +
+                          "| \"Chris\"   | 2         |" + NL +
+                          "| \"Will\"    | 2         |" + NL +
+                          "| \"Michael\" | 3         |" + NL +
+                          "+-----------------------+" + NL +
                           "6 rows" + NL;
 
         String actual = runQuery(query, Result::resultAsString);
