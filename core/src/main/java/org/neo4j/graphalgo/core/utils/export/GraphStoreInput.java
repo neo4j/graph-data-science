@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -51,16 +50,19 @@ public final class GraphStoreInput implements Input {
 
     private final GraphStore graphStore;
 
+    private final GraphStoreExport.NodeStore nodeStore;
+
     private final int batchSize;
 
-    GraphStoreInput(GraphStore graphStore, int batchSize) {
+    GraphStoreInput(GraphStore graphStore, GraphStoreExport.NodeStore nodeStore, int batchSize) {
         this.graphStore = graphStore;
+        this.nodeStore = nodeStore;
         this.batchSize = batchSize;
     }
 
     @Override
     public InputIterable nodes(Collector badCollector) {
-        return () -> new NodeImporter(graphStore, batchSize);
+        return () -> new NodeImporter(nodeStore, batchSize);
     }
 
     @Override
@@ -126,16 +128,16 @@ public final class GraphStoreInput implements Input {
 
     static class NodeImporter extends GraphImporter {
 
-        private final GraphStore graphStore;
+        private final GraphStoreExport.NodeStore nodeStore;
 
-        NodeImporter(GraphStore graphStore, int batchSize) {
-            super(graphStore.nodeCount(), batchSize);
-            this.graphStore = graphStore;
+        NodeImporter(GraphStoreExport.NodeStore nodeStore, int batchSize) {
+            super(nodeStore.nodeCount, batchSize);
+            this.nodeStore = nodeStore;
         }
 
         @Override
         public InputChunk newChunk() {
-            return new NodeChunk(graphStore);
+            return new NodeChunk(nodeStore);
         }
     }
 
@@ -193,15 +195,15 @@ public final class GraphStoreInput implements Input {
 
     static class NodeChunk extends EntityChunk {
 
-        private final GraphStore graphStore;
+        private final GraphStoreExport.NodeStore nodeStore;
 
         private final boolean hasLabels;
         private final boolean hasProperties;
 
-        NodeChunk(GraphStore graphStore) {
-            this.graphStore = graphStore;
-            this.hasLabels = graphStore.nodes().hasLabelInformation();
-            this.hasProperties = !graphStore.nodePropertyKeys().isEmpty();
+        NodeChunk(GraphStoreExport.NodeStore nodeStore) {
+            this.nodeStore = nodeStore;
+            this.hasLabels = nodeStore.hasLabels();
+            this.hasProperties = nodeStore.hasProperties();
         }
 
         @Override
@@ -210,34 +212,28 @@ public final class GraphStoreInput implements Input {
                 visitor.id(id);
 
                 if (hasLabels) {
-                    if (hasProperties) {
-                        var nodeLabels = graphStore.nodes()
-                            .labels(id)
-                            .filter(label -> label != ALL_NODES)
-                            .collect(Collectors.toSet());
+                    String[] labels = nodeStore.labels(id);
+                    visitor.labels(labels);
 
-                        var nodeLabelArray = new String[nodeLabels.size()];
-                        var i = 0;
-                        for (var label : nodeLabels) {
-                            nodeLabelArray[i++] = label.name;
-                            graphStore.nodePropertyKeys(label).forEach(property -> {
-                                var nodeProperties = graphStore.nodeProperty(label, property).values();
-                                visitor.property(property, nodeProperties.nodeProperty(id));
-                            });
+                    if (hasProperties) {
+                        for (var label : labels) {
+                            if (nodeStore.nodeProperties.containsKey(label)) {
+                                for (var propertyKeyAndValue : nodeStore.nodeProperties.get(label).entrySet()) {
+                                    visitor.property(
+                                        propertyKeyAndValue.getKey(),
+                                        propertyKeyAndValue.getValue().nodeProperty(id)
+                                    );
+                                }
+                            }
                         }
-                        visitor.labels(nodeLabelArray);
-                    } else {
-                        visitor.labels(graphStore.nodes().labels(id)
-                            .filter(label -> label != ALL_NODES)
-                            .map(NodeLabel::name)
-                            .toArray(String[]::new)
-                        );
                     }
                 } else if (hasProperties) { // no label information, but node properties
-                    graphStore.nodePropertyKeys(ALL_NODES).forEach(property -> {
-                        var nodeProperties = graphStore.nodeProperty(ALL_NODES, property).values();
-                        visitor.property(property, nodeProperties.nodeProperty(id));
-                    });
+                    for (var propertyKeyAndValue : nodeStore.nodeProperties.get(ALL_NODES.name).entrySet()) {
+                        visitor.property(
+                            propertyKeyAndValue.getKey(),
+                            propertyKeyAndValue.getValue().nodeProperty(id)
+                        );
+                    }
                 }
 
                 visitor.endOfEntity();

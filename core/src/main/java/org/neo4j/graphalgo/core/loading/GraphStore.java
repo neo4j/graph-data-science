@@ -176,7 +176,7 @@ public final class GraphStore {
         return new HashSet<>(nodeProperties.getOrDefault(label, NodePropertyStore.empty()).keySet());
     }
 
-    public Map<ElementIdentifier, Set<String>> nodePropertyKeys() {
+    public Map<NodeLabel, Set<String>> nodePropertyKeys() {
         return nodeLabels().stream().collect(Collectors.toMap(Function.identity(), this::nodePropertyKeys));
     }
 

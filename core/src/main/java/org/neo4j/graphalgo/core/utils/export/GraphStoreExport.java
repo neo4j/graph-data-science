@@ -19,14 +19,19 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
+import com.carrotsearch.hppc.BitSet;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
@@ -44,6 +49,8 @@ import org.neo4j.logging.internal.StoreLogService;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
@@ -92,7 +99,7 @@ public class GraphStoreExport {
 
             lifeSupport.start();
 
-            Input input = new GraphStoreInput(graphStore, config.batchSize());
+            Input input = new GraphStoreInput(graphStore, NodeStore.of(graphStore), config.batchSize());
 
             var importer = BatchImporterFactory.withHighestPriority().instantiate(
                 databaseLayout,
@@ -135,6 +142,100 @@ public class GraphStoreExport {
                 return false;
             }
         };
+    }
+
+    static class NodeStore {
+
+        static final String[] EMPTY_LABELS = new String[0];
+
+        final long nodeCount;
+
+        @Nullable
+        HugeIntArray labelCounts;
+
+        @Nullable
+        Map<String, BitSet> nodeLabels;
+
+        @Nullable
+        Map<String, Map<String, NodeProperties>> nodeProperties;
+
+        NodeStore(
+            long nodeCount,
+            @Nullable HugeIntArray labelCounts,
+            @Nullable Map<String, BitSet> nodeLabels,
+            @Nullable Map<String, Map<String, NodeProperties>> nodeProperties
+        ) {
+            this.nodeCount = nodeCount;
+            this.labelCounts = labelCounts;
+            this.nodeLabels = nodeLabels;
+            this.nodeProperties = nodeProperties;
+        }
+
+        boolean hasLabels() {
+            return nodeLabels != null;
+        }
+
+        boolean hasProperties() {
+            return nodeProperties != null;
+        }
+
+        String[] labels(long nodeId) {
+            int labelCount = labelCounts.get(nodeId);
+            if (labelCount == 0) {
+                return EMPTY_LABELS;
+            }
+            String[] labels = new String[labelCount];
+
+            int i = 0;
+            for (var nodeLabelToBitSet : nodeLabels.entrySet()) {
+                if (nodeLabelToBitSet.getValue().get(nodeId)) {
+                    labels[i++] = nodeLabelToBitSet.getKey();
+                }
+            }
+
+            return labels;
+        }
+
+        static NodeStore of(GraphStore graphStore) {
+            HugeIntArray labelCounts = null;
+            Map<String, BitSet> nodeLabels = null;
+            Map<String, Map<String, NodeProperties>> nodeProperties;
+
+            if (graphStore.nodes().hasLabelInformation()) {
+                var nodeLabelBitSetMap = graphStore.nodes().maybeLabelInformation().get();
+
+                nodeLabels = nodeLabelBitSetMap.entrySet().stream()
+                    .collect(Collectors.toMap(
+                        entry -> entry.getKey().name,
+                        Map.Entry::getValue
+                    ));
+
+                labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), AllocationTracker.EMPTY);
+                labelCounts.setAll(i -> {
+                    int labelCount = 0;
+                    for (BitSet value : nodeLabelBitSetMap.values()) {
+                        if (value.get(i)) {
+                            labelCount++;
+                        }
+                    }
+                    return labelCount;
+                });
+            }
+
+            if (graphStore.nodePropertyCount() == 0) {
+                nodeProperties = null;
+            } else {
+                nodeProperties = graphStore.nodePropertyKeys().entrySet().stream().collect(Collectors.toMap(
+                    entry -> entry.getKey().name,
+                    entry -> entry.getValue().stream().collect(Collectors.toMap(
+                        propertyKey -> propertyKey,
+                        propertyKey -> graphStore.nodeProperty(entry.getKey(), propertyKey).values()
+                    ))
+                ));
+            }
+            return new NodeStore(graphStore.nodeCount(), labelCounts, nodeLabels, nodeProperties);
+        }
+
     }
 
     private static final Validator<File> DIRECTORY_IS_WRITABLE = value -> {
