@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 
@@ -36,10 +37,8 @@ class LocalClusteringCoefficientStatsProcTest extends LocalClusteringCoefficient
     void testStats() {
         var query = "CALL gds.triangleCount.localClusteringCoefficient.stats('g')";
 
-        double sum = expectedResult.values().stream().mapToDouble(Double::doubleValue).sum();
-
         assertCypherResult(query, List.of(Map.of(
-            "averageClusteringCoefficient", sum / 5,
+            "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficient() / 5, 1e-10),
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
@@ -51,10 +50,8 @@ class LocalClusteringCoefficientStatsProcTest extends LocalClusteringCoefficient
     void testStatsSeeded() {
         var query = "CALL gds.triangleCount.localClusteringCoefficient.stats('g', { seedProperty: 'seed'})";
 
-        double sum = expectedResultWithSeeding.values().stream().mapToDouble(Double::doubleValue).sum();
-
         assertCypherResult(query, List.of(Map.of(
-            "averageClusteringCoefficient", sum / 5,
+            "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficientSeeded() / 5, 1e-10),
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.triangle;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -31,6 +32,12 @@ import java.util.Optional;
 final class LocalClusteringCoefficientCompanion {
 
     private LocalClusteringCoefficientCompanion() {}
+
+    static PropertyTranslator<LocalClusteringCoefficient.Result> nodePropertyTranslator() {
+        return (PropertyTranslator.OfDouble<LocalClusteringCoefficient.Result>) (data, nodeId) -> data
+            .localClusteringCoefficients()
+            .get(nodeId);
+    }
 
     static <PROC_RESULT, CONFIG extends LocalClusteringCoefficientBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         ResultBuilder<PROC_RESULT> procResultBuilder,

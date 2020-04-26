@@ -89,9 +89,7 @@ public class LocalClusteringCoefficientStreamProc
     protected PropertyTranslator<LocalClusteringCoefficient.Result> nodePropertyTranslator(
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig> computationResult
     ) {
-        return (PropertyTranslator.OfDouble<LocalClusteringCoefficient.Result>) (data, nodeId) -> data
-            .localClusteringCoefficients()
-            .get(nodeId);
+        return LocalClusteringCoefficientCompanion.nodePropertyTranslator();
     }
 
     public static class Result {

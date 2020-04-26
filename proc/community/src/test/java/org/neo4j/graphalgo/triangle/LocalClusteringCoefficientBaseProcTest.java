@@ -71,6 +71,13 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
         "e", 2.0
     );
 
+    double expectedAverageClusteringCoefficientSeeded() {
+        return expectedResultWithSeeding.values().stream().mapToDouble(Double::doubleValue).sum();
+    }
+
+    double expectedAverageClusteringCoefficient() {
+        return expectedResult.values().stream().mapToDouble(Double::doubleValue).sum();
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -78,7 +85,8 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class,
             LocalClusteringCoefficientStreamProc.class,
-            LocalClusteringCoefficientStatsProc.class
+            LocalClusteringCoefficientStatsProc.class,
+            LocalClusteringCoefficientWriteProc.class
         );
 
         runQuery(dbCypher());
