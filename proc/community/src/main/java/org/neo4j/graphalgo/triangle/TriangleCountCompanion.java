@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -74,7 +73,6 @@ final class TriangleCountCompanion {
             .orElse(EmptyResult.EMPTY_RESULT);
 
         return procResultBuilder
-            .withAverageClusteringCoefficient(result.averageClusteringCoefficient())
             .withTriangleCount(result.globalTriangles())
             .buildHistogram()
             .withCommunityFunction(result.localTriangles()::get);
@@ -82,16 +80,10 @@ final class TriangleCountCompanion {
 
     abstract static class TriangleCountResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
 
-        double averageClusteringCoefficient = .0;
         long triangleCount = 0;
 
         TriangleCountResultBuilder(ProcedureCallContext callContext, AllocationTracker tracker) {
             super(callContext, tracker);
-        }
-
-        TriangleCountResultBuilder<PROC_RESULT> withAverageClusteringCoefficient(double averageClusteringCoefficient) {
-            this.averageClusteringCoefficient = averageClusteringCoefficient;
-            return this;
         }
 
         TriangleCountResultBuilder<PROC_RESULT> withTriangleCount(long triangleCount) {
@@ -125,18 +117,9 @@ final class TriangleCountCompanion {
         }
 
         @Override
-        public HugeDoubleArray localClusteringCoefficients() {
-            return HugeDoubleArray.newArray(0, AllocationTracker.EMPTY);
-        }
-
-        @Override
         public long globalTriangles() {
             return 0;
         }
 
-        @Override
-        public double averageClusteringCoefficient() {
-            return 0;
-        }
     }
 }

@@ -77,8 +77,6 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
         ).compute();
         assertEquals(TRIANGLE_COUNT, result.globalTriangles());
         assertTriangles(result.globalTriangles());
-        assertCoefficients(result.localClusteringCoefficients());
-        assertEquals(EXPECTED_COEFFICIENT, result.averageClusteringCoefficient(), 0.001);
     }
 
     @Test
@@ -92,8 +90,6 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
         ).compute();
         assertEquals(TRIANGLE_COUNT, result.globalTriangles());
         assertTriangles(result.globalTriangles());
-        assertCoefficients(result.localClusteringCoefficients());
-        assertEquals(EXPECTED_COEFFICIENT, result.averageClusteringCoefficient(), 0.001);
     }
 
     private void assertTriangles(Object triangles) {

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.logging.Log;
 
 public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> extends AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
@@ -59,7 +58,6 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
         return MemoryEstimations
             .builder(IntersectingTriangleCount.class)
             .perNode("triangle-counts", HugeAtomicLongArray::memoryEstimation)
-            .perNode("local-clustering-coefficients", HugeDoubleArray::memoryEstimation)
             .build();
     }
 }

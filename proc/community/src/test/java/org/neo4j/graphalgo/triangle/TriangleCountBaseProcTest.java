@@ -81,7 +81,6 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
     ) {
         // TODO: add checks for the HugeArrays
         assertEquals(result1.globalTriangles(), result2.globalTriangles());
-        assertEquals(result1.averageClusteringCoefficient(), result2.averageClusteringCoefficient());
     }
 
     @Override

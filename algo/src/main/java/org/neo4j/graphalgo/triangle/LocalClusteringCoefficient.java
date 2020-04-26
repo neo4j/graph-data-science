@@ -26,9 +26,11 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
 public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficient, LocalClusteringCoefficient.Result> {
 
@@ -37,6 +39,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     private final AllocationTracker tracker;
     private final NodeProperties seedProperty;
 
+    private HugeAtomicLongArray triangleCounts;
     private Graph graph;
 
     // Results
@@ -64,26 +67,31 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
 
         if (null == seedProperty) {
             computeTriangleCounts();
+            calculateCoefficients(triangleCounts::get);
         } else {
-            long nodeCount = graph.nodeCount();
-            localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, tracker);
-            double localClusteringCoefficientSum = 0.0;
-            for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
-                double localClusteringCoefficient = calculateCoefficient(
-                    (long) seedProperty.nodeProperty(nodeId, -1),
-                    graph.degree(nodeId)
-                );
-                localClusteringCoefficients.set(nodeId, localClusteringCoefficient);
-                localClusteringCoefficientSum += localClusteringCoefficient;
-            }
-            // compute average clustering coefficient
-            averageClusteringCoefficient = localClusteringCoefficientSum / nodeCount;
+            calculateCoefficients((nodeId) -> (long) seedProperty.nodeProperty(nodeId, -1));
         }
 
         return Result.of(
             localClusteringCoefficients,
             averageClusteringCoefficient
         );
+    }
+
+    private void calculateCoefficients(Function<Long, Long> propertyValueSupplier) {
+        long nodeCount = graph.nodeCount();
+        localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, tracker);
+        double localClusteringCoefficientSum = 0.0;
+        for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
+            double localClusteringCoefficient = calculateCoefficient(
+                propertyValueSupplier.apply(nodeId),
+                graph.degree(nodeId)
+            );
+            localClusteringCoefficients.set(nodeId, localClusteringCoefficient);
+            localClusteringCoefficientSum += localClusteringCoefficient;
+        }
+        // compute average clustering coefficient
+        averageClusteringCoefficient = localClusteringCoefficientSum / nodeCount;
     }
 
     private double calculateCoefficient(long triangles, int degree) {
@@ -102,9 +110,8 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
             tracker,
             progressLogger
         );
-        IntersectingTriangleCount.TriangleCountResult compute = intersectingTriangleCount.compute();
-        localClusteringCoefficients = compute.localClusteringCoefficients();
-        averageClusteringCoefficient = compute.averageClusteringCoefficient();
+
+        this.triangleCounts = intersectingTriangleCount.compute().localTriangles();
     }
 
     @Override

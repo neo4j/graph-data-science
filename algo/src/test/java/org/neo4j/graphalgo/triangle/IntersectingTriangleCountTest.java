@@ -33,14 +33,8 @@ import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class IntersectingTriangleCountTest extends AlgoTestBase {
@@ -62,15 +56,10 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         TriangleCountResult result =  projectAndCompute();
 
         assertEquals(0L, result.globalTriangles());
-        assertEquals(0, result.averageClusteringCoefficient());
         assertEquals(3, result.localTriangles().size());
         assertEquals(0, result.localTriangles().get(0));
         assertEquals(0, result.localTriangles().get(1));
         assertEquals(0, result.localTriangles().get(2));
-        assertEquals(3, result.localClusteringCoefficients().size());
-        assertEquals(0.0, result.localClusteringCoefficients().get(0));
-        assertEquals(0.0, result.localClusteringCoefficients().get(1));
-        assertEquals(0.0, result.localClusteringCoefficients().get(2));
     }
 
     @ValueSource(ints = {1, 2, 4, 8, 100})
@@ -83,12 +72,9 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         TriangleCountResult result =  projectAndCompute();
 
         assertEquals(nbrOfTriangles, result.globalTriangles());
-        assertEquals(1, result.averageClusteringCoefficient());
         assertEquals(3 * nbrOfTriangles, result.localTriangles().size());
-        assertEquals(3 * nbrOfTriangles, result.localClusteringCoefficients().size());
         for (int i = 0; i < result.localTriangles().size(); ++i) {
             assertEquals(1, result.localTriangles().get(i));
-            assertEquals(1.0, result.localClusteringCoefficients().get(i));
         }
     }
 
@@ -110,12 +96,9 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         TriangleCountResult result =  projectAndCompute();
 
         assertEquals(10, result.globalTriangles());
-        assertEquals(1, result.averageClusteringCoefficient());
         assertEquals(5, result.localTriangles().size());
-        assertEquals(5, result.localClusteringCoefficients().size());
         for (int i = 0; i < result.localTriangles().size(); ++i) {
             assertEquals(6, result.localTriangles().get(i));
-            assertEquals(1.0, result.localClusteringCoefficients().get(i));
         }
     }
 
@@ -127,23 +110,7 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         TriangleCountResult result =  projectAndCompute();
 
         assertEquals(2, result.globalTriangles());
-        assertEquals(13.0 / 15.0, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(5, result.localTriangles().size());
-        assertEquals(5, result.localClusteringCoefficients().size());
-
-        for (int i = 0; i < result.localTriangles().size(); ++i) {
-            long localTriangleCount = result.localTriangles().get(i);
-            switch ((int) localTriangleCount) {
-                case 1:
-                    assertEquals(1.0, result.localClusteringCoefficients().get(i));
-                    break;
-                case 2:
-                    assertEquals(1.0 / 3, result.localClusteringCoefficients().get(i));
-                    break;
-                default:
-                    fail(String.format("Unexpected local triangle count of %d for node %d", localTriangleCount, i));
-            }
-        }
     }
 
     @Test
@@ -155,21 +122,11 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         TriangleCountResult result =  projectAndCompute();
 
         assertEquals(2, result.globalTriangles());
-        assertEquals(7.0 / 9.0, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(6, result.localTriangles().size());
-        assertEquals(6, result.localClusteringCoefficients().size());
 
-        List<Double> localCCs = new ArrayList<>();
         for (int i = 0; i < result.localTriangles().size(); ++i) {
             assertEquals(1, result.localTriangles().get(i));
-            localCCs.add(result.localClusteringCoefficients().get(i));
         }
-
-        Map<Double, Long> groupedCcs = localCCs
-            .stream()
-            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        assertEquals(4, groupedCcs.get(1.0));
-        assertEquals(2, groupedCcs.get(1.0 / 3));
     }
 
     @Test
@@ -179,11 +136,8 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         TriangleCountResult result = projectAndCompute();
 
         assertEquals(0, result.globalTriangles());
-        assertEquals(0, result.averageClusteringCoefficient());
         assertEquals(1, result.localTriangles().size());
-        assertEquals(1, result.localClusteringCoefficients().size());
         assertEquals(0, result.localTriangles().get(0));
-        assertEquals(0.0, result.localClusteringCoefficients().get(0));
     }
 
     @Test
@@ -194,15 +148,10 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         TriangleCountResult result = projectAndCompute();
 
         assertEquals(1, result.globalTriangles());
-        assertEquals(13.0 / 18, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(3, result.localTriangles().size());
-        assertEquals(3, result.localClusteringCoefficients().size());
         assertEquals(1, result.localTriangles().get(0));
         assertEquals(1, result.localTriangles().get(1));
         assertEquals(1, result.localTriangles().get(2));
-        assertEquals(1.0 / 6, result.localClusteringCoefficients().get(0));
-        assertEquals(1.0, result.localClusteringCoefficients().get(1));
-        assertEquals(1.0, result.localClusteringCoefficients().get(2));
     }
 
     @Test
@@ -219,7 +168,6 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         TriangleCountResult result = projectAndCompute();
 
         assertEquals(3, result.globalTriangles());
-        assertEquals(23.0 / 90, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(15, result.localTriangles().size());
         assertEquals(1, result.localTriangles().get(0)); // a
         assertEquals(1, result.localTriangles().get(1)); // b
@@ -236,22 +184,6 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         assertEquals(0, result.localTriangles().get(12)); // m
         assertEquals(0, result.localTriangles().get(13)); // n
         assertEquals(0, result.localTriangles().get(14)); // o
-        assertEquals(15, result.localClusteringCoefficients().size());
-        assertEquals(1, result.localClusteringCoefficients().get(0)); // a
-        assertEquals(1.0 / 6, result.localClusteringCoefficients().get(1)); // b
-        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(2)); // c
-        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(3)); // d
-        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(4)); // e
-        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(5)); // f
-        assertEquals(1, result.localClusteringCoefficients().get(6)); // g
-        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(7)); // h
-        assertEquals(0, result.localClusteringCoefficients().get(8)); // i
-        assertEquals(0, result.localClusteringCoefficients().get(9)); // j
-        assertEquals(0, result.localClusteringCoefficients().get(10)); // k
-        assertEquals(0, result.localClusteringCoefficients().get(11)); // l
-        assertEquals(0, result.localClusteringCoefficients().get(12)); // m
-        assertEquals(0, result.localClusteringCoefficients().get(13)); // n
-        assertEquals(0, result.localClusteringCoefficients().get(14)); // o
     }
 
     private TriangleCountResult projectAndCompute() {

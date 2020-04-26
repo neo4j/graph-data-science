@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -53,15 +52,12 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     private Graph graph;
     private ExecutorService executorService;
     private final int concurrency;
-    private final AllocationTracker tracker;
     private final LongAdder triangleCount;
     private final AtomicLong queue;
 
     // results
     private HugeAtomicLongArray triangleCounts;
-    private HugeDoubleArray localClusteringCoefficients;
     private long globalTriangleCount;
-    private double averageClusteringCoefficient;
 
     public IntersectingTriangleCount(
         Graph graph,
@@ -71,7 +67,6 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
-        this.tracker = tracker;
         this.executorService = executorService;
         this.concurrency = concurrency;
         triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
@@ -110,23 +105,11 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         // run
         ParallelUtil.run(tasks, executorService);
 
-        // collect local clustering coefficients
-        localClusteringCoefficients = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
-        double localClusteringCoefficientSum = 0.0;
-        for (long i = 0; i < graph.nodeCount(); ++i) {
-            double localClusteringCoefficient = calculateCoefficient(triangleCounts.get(i), graph.degree(i));
-            localClusteringCoefficients.set(i, localClusteringCoefficient);
-            localClusteringCoefficientSum += localClusteringCoefficient;
-        }
-        // compute average clustering coefficient
-        averageClusteringCoefficient = localClusteringCoefficientSum / graph.nodeCount();
         globalTriangleCount = triangleCount.longValue();
 
         return TriangleCountResult.of(
             triangleCounts,
-            localClusteringCoefficients,
-            globalTriangleCount,
-            averageClusteringCoefficient
+            globalTriangleCount
         );
     }
 
@@ -159,38 +142,21 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         }
     }
 
-    private double calculateCoefficient(long triangles, int degree) {
-        if (triangles == 0) {
-            return 0.0;
-        }
-        // local clustering coefficient C(v) = 2 * triangles(v) / (degree(v) * (degree(v) - 1))
-        return ((double) (triangles << 1)) / (degree * (degree - 1));
-    }
-
     @ValueClass
     public interface TriangleCountResult {
         // value at index `i` is number of triangles for node with id `i`
         HugeAtomicLongArray localTriangles();
 
-        // value at index `i` is local clustering coefficient for node with id `i`
-        HugeDoubleArray localClusteringCoefficients();
-
         long globalTriangles();
-
-        double averageClusteringCoefficient();
 
         static TriangleCountResult of(
             HugeAtomicLongArray triangles,
-            HugeDoubleArray localClusteringCoefficients,
-            long globalTriangles,
-            double averageClusteringCoefficient
+            long globalTriangles
         ) {
             return ImmutableTriangleCountResult
                 .builder()
                 .localTriangles(triangles)
-                .localClusteringCoefficients(localClusteringCoefficients)
                 .globalTriangles(globalTriangles)
-                .averageClusteringCoefficient(averageClusteringCoefficient)
                 .build();
         }
     }
