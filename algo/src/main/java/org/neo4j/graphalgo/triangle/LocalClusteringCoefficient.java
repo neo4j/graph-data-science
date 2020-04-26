@@ -39,8 +39,10 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     private final AllocationTracker tracker;
     private final NodeProperties seedProperty;
 
-    private HugeAtomicLongArray triangleCounts;
     private Graph graph;
+
+    // The result of computing triangles when no seed property is supplied
+    private HugeAtomicLongArray triangleCounts;
 
     // Results
     private HugeDoubleArray localClusteringCoefficients;
@@ -78,13 +80,13 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         );
     }
 
-    private void calculateCoefficients(Function<Long, Long> propertyValueSupplier) {
+    private void calculateCoefficients(Function<Long, Long> propertyValueFunction) {
         long nodeCount = graph.nodeCount();
         localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, tracker);
         double localClusteringCoefficientSum = 0.0;
         for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
             double localClusteringCoefficient = calculateCoefficient(
-                propertyValueSupplier.apply(nodeId),
+                propertyValueFunction.apply(nodeId),
                 graph.degree(nodeId)
             );
             localClusteringCoefficients.set(nodeId, localClusteringCoefficient);
