@@ -101,6 +101,9 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.triangleCount.write.estimate`
 | `gds.triangleCount.mutate`
 | `gds.triangleCount.mutate.estimate`
+.2+<.^| Local Clustering Coefficient
+| `gds.triangleCount.localClusteringCoefficient.stream`
+| `gds.triangleCount.localClusteringCoefficient.stream.estimate`
 |===
 
 [[beta-tier]]
