@@ -86,7 +86,8 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
             GraphWriteNodePropertiesProc.class,
             LocalClusteringCoefficientStreamProc.class,
             LocalClusteringCoefficientStatsProc.class,
-            LocalClusteringCoefficientWriteProc.class
+            LocalClusteringCoefficientWriteProc.class,
+            LocalClusteringCoefficientMutateProc.class
         );
 
         runQuery(dbCypher());
