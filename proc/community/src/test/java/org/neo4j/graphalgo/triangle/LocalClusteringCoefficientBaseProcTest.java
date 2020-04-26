@@ -33,6 +33,8 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Map;
+
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
@@ -43,10 +45,32 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
 
     String dbCypher() {
         return "CREATE " +
-               "(a:A)-[:T]->(b:A), " +
-               "(b)-[:T]->(c:A), " +
-               "(c)-[:T]->(a)";
+               "(a:A { name: 'a', seed: 2 })-[:T]->(b:A { name: 'b', seed: 2 }), " +
+               "(b)-[:T]->(c:A { name: 'c', seed: 1 }), " +
+               "(c)-[:T]->(a), " +
+               "(a)-[:T]->(d:A { name: 'd', seed: 2 }), " +
+               "(b)-[:T]->(d), " +
+               "(c)-[:T]->(d), " +
+               "(a)-[:T]->(e:A { name: 'e', seed: 2 }), " +
+               "(b)-[:T]->(e) ";
     }
+
+    final Map<String, Double> expectedResult = Map.of(
+        "a", 2.0 / 3,
+        "b", 2.0 / 3,
+        "c", 1.0,
+        "d", 1.0,
+        "e", 1.0
+    );
+
+    final Map<String, Double> expectedResultWithSeeding = Map.of(
+        "a", 1.0 / 3,
+        "b", 1.0 / 3,
+        "c", 1.0 / 3,
+        "d", 2.0 / 3,
+        "e", 2.0
+    );
+
 
     @BeforeEach
     void setup() throws Exception {
@@ -57,7 +81,7 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
         );
 
         runQuery(dbCypher());
-        runQuery("CALL gds.graph.create('g', 'A', {T: {orientation: 'UNDIRECTED'}})");
+        runQuery("CALL gds.graph.create('g', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})");
     }
 
     @AfterEach

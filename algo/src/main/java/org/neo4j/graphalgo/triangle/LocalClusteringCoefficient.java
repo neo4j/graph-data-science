@@ -19,9 +19,11 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -33,6 +35,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     private final ExecutorService executorService;
     private final int concurrency;
     private final AllocationTracker tracker;
+    private final NodeProperties seedProperty;
 
     private Graph graph;
 
@@ -40,14 +43,16 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     private HugeDoubleArray localClusteringCoefficients;
     private double averageClusteringCoefficient;
 
-    public LocalClusteringCoefficient(
+    LocalClusteringCoefficient(
         Graph graph,
+        @Nullable NodeProperties seedProperty,
         AllocationTracker tracker,
         ExecutorService executorService,
         int concurrency,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
+        this.seedProperty = seedProperty;
         this.tracker = tracker;
         this.progressLogger = progressLogger;
         this.executorService = executorService;
@@ -57,13 +62,36 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     @Override
     public Result compute() {
 
-        // TODO: Make this conditional on whether a `seedProperty` is specified or not
-        computeTriangleCounts();
+        if (null == seedProperty) {
+            computeTriangleCounts();
+        } else {
+            long nodeCount = graph.nodeCount();
+            localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, tracker);
+            double localClusteringCoefficientSum = 0.0;
+            for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
+                double localClusteringCoefficient = calculateCoefficient(
+                    (long) seedProperty.nodeProperty(nodeId, -1),
+                    graph.degree(nodeId)
+                );
+                localClusteringCoefficients.set(nodeId, localClusteringCoefficient);
+                localClusteringCoefficientSum += localClusteringCoefficient;
+            }
+            // compute average clustering coefficient
+            averageClusteringCoefficient = localClusteringCoefficientSum / nodeCount;
+        }
 
         return Result.of(
             localClusteringCoefficients,
             averageClusteringCoefficient
         );
+    }
+
+    private double calculateCoefficient(long triangles, int degree) {
+        if (triangles == 0) {
+            return 0.0;
+        }
+        // local clustering coefficient C(v) = 2 * triangles(v) / (degree(v) * (degree(v) - 1))
+        return ((double) (triangles << 1)) / (degree * (degree - 1));
     }
 
     private void computeTriangleCounts() {

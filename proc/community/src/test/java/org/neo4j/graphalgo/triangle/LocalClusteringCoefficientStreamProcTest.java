@@ -23,8 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,13 +35,42 @@ class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficien
     void testStreaming() {
         var query = "CALL gds.triangleCount.localClusteringCoefficient.stream('g')";
 
-        var rowCount = new AtomicInteger();
+        Map<Long, Double> actualResult = new HashMap<>();
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(1.0, row.getNumber("localClusteringCoefficient"));
-            rowCount.incrementAndGet();
+            long nodeId = row.getNumber("nodeId").longValue();
+            double localClusteringCoefficient = row.getNumber("localClusteringCoefficient").doubleValue();
+            actualResult.put(nodeId, localClusteringCoefficient);
         });
 
-        assertEquals(3, rowCount.get());
+        assertStreamResult(actualResult, expectedResult);
+    }
+
+    @Test
+    void testStreamingSeeded() {
+        var query = "CALL gds.triangleCount.localClusteringCoefficient.stream('g', { seedProperty: 'seed'})";
+
+        Map<Long, Double> actualResult = new HashMap<>();
+        runQueryWithRowConsumer(query, row -> {
+            long nodeId = row.getNumber("nodeId").longValue();
+            double localClusteringCoefficient = row.getNumber("localClusteringCoefficient").doubleValue();
+            actualResult.put(nodeId, localClusteringCoefficient);
+        });
+
+        assertStreamResult(actualResult, expectedResultWithSeeding);
+    }
+
+    private void assertStreamResult(Map<Long, Double> actualResult, Map<String, Double> expectedResult) {
+        actualResult.forEach(
+            (nodeId, coefficient) -> {
+                runQueryWithRowConsumer(String.format(
+                    "MATCH (n) WHERE id(n) = %d RETURN n.name AS name",
+                    nodeId
+                ), row -> {
+                    String name = row.getString("name");
+                    assertEquals(coefficient, expectedResult.get(name));
+                });
+            }
+        );
     }
 
     @Override

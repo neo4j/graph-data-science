@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -28,6 +29,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.logging.Log;
+
+import java.util.Optional;
 
 public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> extends AlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
 
@@ -43,8 +46,14 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
             configuration.concurrency()
         );
 
+        NodeProperties nodeProperties =
+            Optional.ofNullable(configuration.seedProperty())
+                .map(graph::nodeProperties)
+                .orElse(null);
+
         return new LocalClusteringCoefficient(
             graph,
+            nodeProperties,
             tracker,
             Pools.DEFAULT,
             configuration.concurrency(),
