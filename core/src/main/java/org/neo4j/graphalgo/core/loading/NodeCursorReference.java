@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.internal.kernel.api.NodeCursor;
-import org.neo4j.storageengine.api.LongReference;
 
 public final class NodeCursorReference implements NodeReference {
 
@@ -42,6 +41,6 @@ public final class NodeCursorReference implements NodeReference {
 
     @Override
     public long propertiesReference() {
-        return ((LongReference) nodeCursor.propertiesReference()).id;
+        return nodeCursor.propertiesReference();
     }
 }

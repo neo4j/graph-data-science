@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -128,7 +127,7 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
 
     @Override
     public final long storeSize() {
-        long recordsInUse = 1L + store.getHighestPossibleIdInUse(PageCursorTracer.NULL);
+        long recordsInUse = 1L + store.getHighestPossibleIdInUse();
         long idsInPages = ((recordsInUse + (recordsPerPage - 1L)) / recordsPerPage) * recordsPerPage;
         return idsInPages * (long) recordSize;
     }

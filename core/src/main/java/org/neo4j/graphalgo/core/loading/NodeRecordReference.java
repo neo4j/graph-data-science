@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
@@ -41,8 +40,7 @@ public final class NodeRecordReference implements NodeReference {
 
     @Override
     public long[] labels() {
-        // TODO: PageCursorTracer from tx
-        return NodeLabelsField.get(record, nodeStore, PageCursorTracer.NULL);
+        return NodeLabelsField.get(record, nodeStore);
     }
 
     @Override

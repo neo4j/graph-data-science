@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Scan;
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.NodeStore;
@@ -42,7 +41,7 @@ public class NodeCursorScanner extends AbstractCursorScanner<NodeReference, Node
 
     @Override
     NodeCursor entityCursor(KernelTransaction transaction) {
-        return transaction.cursors().allocateNodeCursor(PageCursorTracer.NULL);
+        return transaction.cursors().allocateNodeCursor();
     }
 
     @Override

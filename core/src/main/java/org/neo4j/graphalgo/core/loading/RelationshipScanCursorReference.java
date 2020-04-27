@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
-import org.neo4j.storageengine.api.LongReference;
 
 public class RelationshipScanCursorReference implements RelationshipReference {
 
@@ -52,6 +51,6 @@ public class RelationshipScanCursorReference implements RelationshipReference {
 
     @Override
     public long propertiesReference() {
-        return ((LongReference) relationshipScanCursor.propertiesReference()).id;
+        return relationshipScanCursor.propertiesReference();
     }
 }
