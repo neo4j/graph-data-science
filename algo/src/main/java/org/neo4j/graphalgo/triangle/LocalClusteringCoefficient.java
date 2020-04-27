@@ -19,30 +19,29 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 
 public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficient, LocalClusteringCoefficient.Result> {
 
-    private final ExecutorService executorService;
     private final int concurrency;
     private final AllocationTracker tracker;
     private final NodeProperties seedProperty;
+    private final LocalClusteringCoefficientBaseConfig configuration;
 
     private Graph graph;
-
-    // The result of computing triangles when no seed property is supplied
-    private HugeAtomicLongArray triangleCounts;
 
     // Results
     private HugeDoubleArray localClusteringCoefficients;
@@ -50,28 +49,31 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
 
     LocalClusteringCoefficient(
         Graph graph,
-        @Nullable NodeProperties seedProperty,
+        LocalClusteringCoefficientBaseConfig configuration,
         AllocationTracker tracker,
         ExecutorService executorService,
-        int concurrency,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
-        this.seedProperty = seedProperty;
         this.tracker = tracker;
         this.progressLogger = progressLogger;
-        this.executorService = executorService;
-        this.concurrency = concurrency;
+
+        this.configuration = configuration;
+        this.concurrency = configuration.concurrency();
+        this.seedProperty =
+            Optional.ofNullable(configuration.seedProperty())
+                .map(graph::nodeProperties)
+                .orElse(null);
     }
 
     @Override
     public Result compute() {
 
         if (null == seedProperty) {
-            computeTriangleCounts();
+            HugeAtomicLongArray triangleCounts = computeTriangleCounts();
             calculateCoefficients(triangleCounts::get);
         } else {
-            calculateCoefficients((nodeId) -> (long) seedProperty.nodeProperty(nodeId, -1));
+            calculateCoefficients((nodeId) -> (long) seedProperty.nodeProperty(nodeId, 0.0));
         }
 
         return Result.of(
@@ -83,17 +85,31 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     private void calculateCoefficients(Function<Long, Long> propertyValueFunction) {
         long nodeCount = graph.nodeCount();
         localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, tracker);
-        double localClusteringCoefficientSum = 0.0;
-        for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
+
+        DoubleAdder localClusteringCoefficientSum = new DoubleAdder();
+        ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
             double localClusteringCoefficient = calculateCoefficient(
                 propertyValueFunction.apply(nodeId),
                 graph.degree(nodeId)
             );
             localClusteringCoefficients.set(nodeId, localClusteringCoefficient);
-            localClusteringCoefficientSum += localClusteringCoefficient;
-        }
+            localClusteringCoefficientSum.add(localClusteringCoefficient);
+        });
+
         // compute average clustering coefficient
-        averageClusteringCoefficient = localClusteringCoefficientSum / nodeCount;
+        averageClusteringCoefficient = localClusteringCoefficientSum.doubleValue() / nodeCount;
+    }
+
+    private HugeAtomicLongArray computeTriangleCounts() {
+
+        IntersectingTriangleCount intersectingTriangleCount = new IntersectingTriangleCountFactory<>().build(
+            graph,
+            LocalClusteringCoefficientFactory.createTriangleCountConfig(configuration),
+            tracker,
+            progressLogger.getLog()
+        );
+
+        return intersectingTriangleCount.compute().localTriangles();
     }
 
     private double calculateCoefficient(long triangles, int degree) {
@@ -102,18 +118,6 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         }
         // local clustering coefficient C(v) = 2 * triangles(v) / (degree(v) * (degree(v) - 1))
         return ((double) (triangles << 1)) / (degree * (degree - 1));
-    }
-
-    private void computeTriangleCounts() {
-        IntersectingTriangleCount intersectingTriangleCount = new IntersectingTriangleCount(
-            graph,
-            executorService,
-            concurrency,
-            tracker,
-            progressLogger
-        );
-
-        this.triangleCounts = intersectingTriangleCount.compute().localTriangles();
     }
 
     @Override

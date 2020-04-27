@@ -222,12 +222,15 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
 
         return new LocalClusteringCoefficient(
             graph,
-            null,
+            createConfig().build(),
             AllocationTracker.EMPTY,
             Pools.DEFAULT,
-            1,
             ProgressLogger.NULL_LOGGER
         ).compute();
+    }
+
+    private ImmutableLocalClusteringCoefficientBaseConfig.Builder createConfig() {
+        return ImmutableLocalClusteringCoefficientBaseConfig.builder();
     }
 
 }

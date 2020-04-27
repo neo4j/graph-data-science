@@ -21,16 +21,14 @@ package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.logging.Log;
-
-import java.util.Optional;
 
 public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> extends AlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
 
@@ -46,25 +44,38 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
             configuration.concurrency()
         );
 
-        NodeProperties nodeProperties =
-            Optional.ofNullable(configuration.seedProperty())
-                .map(graph::nodeProperties)
-                .orElse(null);
-
         return new LocalClusteringCoefficient(
             graph,
-            nodeProperties,
+            configuration,
             tracker,
             Pools.DEFAULT,
-            configuration.concurrency(),
             progressLogger
         );
     }
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return MemoryEstimations
+        MemoryEstimations.Builder builder = MemoryEstimations
             .builder(LocalClusteringCoefficient.class)
+            .perNode("local-clustering-coefficient", HugeDoubleArray::memoryEstimation);
+
+        if(null == configuration.seedProperty()) {
+            builder.add(
+                "computed-triangle-counts",
+                new IntersectingTriangleCountFactory<>().memoryEstimation(createTriangleCountConfig(configuration))
+            );
+        }
+
+        return builder.build();
+    }
+
+    static TriangleCountStatsConfig createTriangleCountConfig(LocalClusteringCoefficientBaseConfig configuration) {
+        return ImmutableTriangleCountStatsConfig.builder()
+            .username(configuration.username())
+            .graphName(configuration.graphName())
+            .implicitCreateConfig(configuration.implicitCreateConfig())
+            .concurrency(configuration.concurrency())
             .build();
     }
+
 }

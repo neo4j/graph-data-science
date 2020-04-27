@@ -105,10 +105,10 @@ class LocalClusteringCoefficientWriteProcTest
             "MATCH (n) RETURN n.name AS name, n.%s AS localCC",
             writeProperty
         ), (row) -> {
-            double triangles = row.getNumber("localCC").doubleValue();
+            double lcc = row.getNumber("localCC").doubleValue();
             String name = row.getString("name");
-            Double expectedTriangles = expectedResult.get(name);
-            assertEquals(expectedTriangles, triangles, String.format("Node with name `%s` has wrong coefficient", name));
+            Double expectedLcc = expectedResult.get(name);
+            assertEquals(expectedLcc, lcc, String.format("Node with name `%s` has wrong coefficient", name));
         });
     }
 
