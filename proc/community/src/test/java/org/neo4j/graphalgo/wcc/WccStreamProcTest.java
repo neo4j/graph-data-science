@@ -85,7 +85,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
     @Test
     void testStreamRunsOnLoadedGraph() {
-        GraphCreateConfig createGraphConfig = ImmutableGraphCreateFromStoreConfig
+        GraphCreateConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig
             .builder()
             .graphName("testGraph")
             .nodeProjections(NodeProjections.all())
@@ -93,8 +93,8 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
             .build();
 
         GraphStoreCatalog.set(
-            createGraphConfig,
-            graphLoader(createGraphConfig).build(NativeFactory.class).build().graphStore()
+            graphCreateConfig,
+            graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
         );
 
         String query = GdsCypher.call()

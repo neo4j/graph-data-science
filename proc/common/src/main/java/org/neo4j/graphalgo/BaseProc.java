@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.api.ImmutableGraphLoadingContext;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -66,11 +67,13 @@ public abstract class BaseProc {
     protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
         return ImmutableGraphLoader
             .builder()
-            .api(api)
-            .log(log)
+            .context(ImmutableGraphLoadingContext.builder()
+                .api(api)
+                .log(log)
+                .tracker(tracker)
+                .terminationFlag(TerminationFlag.wrap(transaction))
+                .build())
             .username(getUsername())
-            .tracker(tracker)
-            .terminationFlag(TerminationFlag.wrap(transaction))
             .createConfig(createConfig)
             .build();
     }

@@ -30,14 +30,10 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.impl.store.record.RelationshipRecord;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
@@ -47,7 +43,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final GraphCreateConfig graphCreateConfig;
     private final GraphLoadingContext loadingContext;
     private final ProgressLogger progressLogger;
-    private final AllocationTracker tracker;
+
     private final IdMapping idMap;
     private final Map<RelationshipType, RelationshipsBuilder> allBuilders;
     private final Map<RelationshipType, LongAdder> allRelationshipCounters;
@@ -55,26 +51,21 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     ScanningRelationshipsImporter(
         GraphCreateConfig graphCreateConfig,
         GraphLoadingContext loadingContext,
-        GraphDatabaseAPI api,
         GraphDimensions dimensions,
         ProgressLogger progressLogger,
-        AllocationTracker tracker,
         IdMapping idMap,
         Map<RelationshipType, RelationshipsBuilder> allBuilders,
-        ExecutorService threadPool,
         int concurrency
     ) {
         super(
                 RelationshipStoreScanner.FACTORY,
                 "Relationship",
-                api,
+                loadingContext,
                 dimensions,
-                threadPool,
                 concurrency);
         this.graphCreateConfig = graphCreateConfig;
         this.loadingContext = loadingContext;
         this.progressLogger = progressLogger;
-        this.tracker = tracker;
         this.idMap = idMap;
         this.allBuilders = allBuilders;
         this.allRelationshipCounters = new HashMap<>();

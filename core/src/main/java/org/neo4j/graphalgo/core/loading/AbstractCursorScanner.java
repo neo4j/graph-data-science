@@ -87,13 +87,15 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
 
     // fetch this many pages at once
     private final int prefetchSize;
-    // global cursor pool to return this one to
-    private final ThreadLocal<GdsCursor<Reference>> cursors;
-
     // size in bytes of a single record - advance the offset by this much
     private final int recordSize;
     // how many records are there in a single page
     private final int recordsPerPage;
+
+    // global cursor pool to return this one to
+    private final ThreadLocal<GdsCursor<Reference>> cursors;
+
+    private volatile Scan<EntityCursor> entityCursorScan;
 
     private final Store store;
 
@@ -115,9 +117,15 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
         GdsCursor<Reference> gdsCursor = this.cursors.get();
 
         if (gdsCursor == null) {
+            if (entityCursorScan == null) {
+                synchronized (this) {
+                    if (entityCursorScan == null) {
+                        this.entityCursorScan = entityCursorScan(transaction);
+                    }
+                }
+            }
             EntityCursor entityCursor = entityCursor(transaction);
             Reference reference = cursorReference(entityCursor);
-            Scan<EntityCursor> entityCursorScan = entityCursorScan(transaction);
             gdsCursor = new StoreScanCursor(entityCursor, reference, entityCursorScan);
             this.cursors.set(gdsCursor);
         }

@@ -29,9 +29,9 @@ import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
 public final class RelationshipStoreScanner extends AbstractStorePageCacheScanner<RelationshipReference, RelationshipRecord, RelationshipStore> {
 
-    public static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipStoreScanner::new;
+    static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipStoreScanner::new;
 
-    public RelationshipStoreScanner(int prefetchSize, GraphDatabaseService api) {
+    private RelationshipStoreScanner(int prefetchSize, GraphDatabaseService api) {
         super(prefetchSize, api);
     }
 

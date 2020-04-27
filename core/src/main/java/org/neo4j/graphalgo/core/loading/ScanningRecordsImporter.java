@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.InternalImporter.ImportResult;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
@@ -38,24 +40,26 @@ abstract class ScanningRecordsImporter<Record, T> {
 
     private final StoreScanner.Factory<Record> factory;
     private final String label;
+    private final ExecutorService threadPool;
+
     final GraphDatabaseAPI api;
     final GraphDimensions dimensions;
-    private final ExecutorService threadPool;
+    final AllocationTracker tracker;
     final int concurrency;
 
     ScanningRecordsImporter(
         StoreScanner.Factory<Record> factory,
         String label,
-        GraphDatabaseAPI api,
+        GraphLoadingContext loadingContext,
         GraphDimensions dimensions,
-        ExecutorService threadPool,
         int concurrency
     ) {
         this.factory = factory;
         this.label = label;
-        this.api = api;
+        this.api = loadingContext.api();
         this.dimensions = dimensions;
-        this.threadPool = threadPool;
+        this.threadPool = loadingContext.executor();
+        this.tracker = loadingContext.tracker();
         this.concurrency = concurrency;
     }
 

@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -34,9 +36,18 @@ public interface GraphLoadingContext {
 
     Log log();
 
-    AllocationTracker tracker();
+    @Value.Default
+    default ExecutorService executor() {
+        return Pools.DEFAULT;
+    }
 
-    TerminationFlag terminationFlag();
+    @Value.Default
+    default AllocationTracker tracker() {
+        return AllocationTracker.EMPTY;
+    }
 
-    ExecutorService executor();
+    @Value.Default
+    default TerminationFlag terminationFlag() {
+        return TerminationFlag.RUNNING_TRUE;
+    }
 }

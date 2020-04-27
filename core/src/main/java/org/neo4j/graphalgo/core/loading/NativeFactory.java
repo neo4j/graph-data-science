@@ -174,12 +174,9 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
 
         return new ScanningNodesImporter(
             graphCreateConfig,
-            loadingContext.api(),
+            loadingContext,
             dimensions,
             progressLogger,
-            tracker,
-            loadingContext.terminationFlag(),
-            threadPool,
             concurrency,
             propertyMappingsByNodeLabel
         ).call(loadingContext.log());
@@ -203,13 +200,10 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
         ObjectLongMap<RelationshipType> relationshipCounts = new ScanningRelationshipsImporter(
             graphCreateConfig,
             loadingContext,
-            loadingContext.api(),
             dimensions,
             progressLogger,
-            tracker,
             idsAndProperties.idMap,
             allBuilders,
-            threadPool,
             concurrency
         ).call(loadingContext.log());
 

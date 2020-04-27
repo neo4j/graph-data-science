@@ -26,20 +26,17 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -50,7 +47,6 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
 
     private final GraphCreateFromStoreConfig graphCreateConfig;
     private final ProgressLogger progressLogger;
-    private final AllocationTracker tracker;
     private final TerminationFlag terminationFlag;
     private final Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel;
 
@@ -61,20 +57,16 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
 
     ScanningNodesImporter(
         GraphCreateFromStoreConfig graphCreateConfig,
-        GraphDatabaseAPI api,
+        GraphLoadingContext loadingContext,
         GraphDimensions dimensions,
         ProgressLogger progressLogger,
-        AllocationTracker tracker,
-        TerminationFlag terminationFlag,
-        ExecutorService threadPool,
         int concurrency,
         Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
     ) {
-        super(NodeStoreScanner.FACTORY, "Node", api, dimensions, threadPool, concurrency);
+        super(NodeStoreScanner.FACTORY, "Node", loadingContext, dimensions, concurrency);
         this.graphCreateConfig = graphCreateConfig;
         this.progressLogger = progressLogger;
-        this.tracker = tracker;
-        this.terminationFlag = terminationFlag;
+        this.terminationFlag = loadingContext.terminationFlag();
         this.propertyMappingsByNodeLabel = propertyMappingsByNodeLabel;
     }
 

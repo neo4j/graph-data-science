@@ -29,9 +29,9 @@ import org.neo4j.kernel.impl.store.record.NodeRecord;
 
 public final class NodeStoreScanner extends AbstractStorePageCacheScanner<NodeReference, NodeRecord, NodeStore> {
 
-    public static final StoreScanner.Factory<NodeReference> FACTORY = NodeStoreScanner::new;
+    static final StoreScanner.Factory<NodeReference> FACTORY = NodeStoreScanner::new;
 
-    public NodeStoreScanner(int prefetchSize, GraphDatabaseService api) {
+    private NodeStoreScanner(int prefetchSize, GraphDatabaseService api) {
         super(prefetchSize, api);
     }
 

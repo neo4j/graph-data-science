@@ -24,49 +24,24 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphLoadingContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.api.ImmutableGraphLoadingContext;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-
-import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
 @ValueClass
 public interface GraphLoader {
 
-    GraphDatabaseAPI api();
-
-    @Value.Default
-    default ExecutorService executorService() {
-        return Pools.DEFAULT;
-    }
-
-    @Value.Default
-    default AllocationTracker tracker() {
-        return AllocationTracker.EMPTY;
-    }
-
-    @Value.Default
-    default TerminationFlag terminationFlag() {
-        return TerminationFlag.RUNNING_TRUE;
-    }
+    GraphLoadingContext context();
 
     @Value.Default
     default String username() {
         return createConfig().username();
     }
-
-    Log log();
 
     GraphCreateConfig createConfig();
 
@@ -78,29 +53,17 @@ public interface GraphLoader {
         return build(factoryType).build().graphStore();
     }
 
-    @Value.Lazy
-    default GraphLoadingContext toGraphLoadingContext() {
-        return ImmutableGraphLoadingContext.of(
-            api(),
-            log(),
-            tracker(),
-            terminationFlag(),
-            executorService()
-        );
-    }
-
     /**
      * Returns an instance of the factory that can be used to load the graph.
      */
     default <T extends GraphStoreFactory> T build(final Class<T> factoryType) {
         try {
-            GraphLoadingContext loadingContext = toGraphLoadingContext();
             GraphStoreFactory factory;
 
             if (CypherFactory.class.isAssignableFrom(factoryType)) {
-                factory = new CypherFactory((GraphCreateFromCypherConfig) createConfig(), loadingContext);
+                factory = new CypherFactory((GraphCreateFromCypherConfig) createConfig(), context());
             } else {
-                factory = new NativeFactory((GraphCreateFromStoreConfig) createConfig(), loadingContext);
+                factory = new NativeFactory((GraphCreateFromStoreConfig) createConfig(), context());
             }
 
             return factoryType.cast(factory);

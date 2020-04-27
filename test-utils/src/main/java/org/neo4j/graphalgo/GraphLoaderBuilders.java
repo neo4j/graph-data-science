@@ -23,6 +23,7 @@ package org.neo4j.graphalgo;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.api.ImmutableGraphLoadingContext;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -140,14 +141,16 @@ final class GraphLoaderBuilders {
         Optional<String> userName,
         GraphCreateConfig graphCreateConfig
     ) {
-        return ImmutableGraphLoader.of(
-            api,
-            executorService.orElse(Pools.DEFAULT),
-            tracker.orElse(AllocationTracker.EMPTY),
-            terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
-            userName.orElse(""),
-            log.orElse(NullLog.getInstance()),
-            graphCreateConfig
-        );
+        return ImmutableGraphLoader.builder()
+            .context(ImmutableGraphLoadingContext.builder()
+                .api(api)
+                .executor(executorService.orElse(Pools.DEFAULT))
+                .tracker(tracker.orElse(AllocationTracker.EMPTY))
+                .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
+                .log(log.orElse(NullLog.getInstance()))
+                .build())
+            .username(userName.orElse(""))
+            .createConfig(graphCreateConfig)
+            .build();
     }
 }
