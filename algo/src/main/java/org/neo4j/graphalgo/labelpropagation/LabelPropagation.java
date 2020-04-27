@@ -145,6 +145,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
             getProgressLogger().reset(graph.relationshipCount());
         }
 
+        stepRunners.forEach(StepRunner::release);
         getProgressLogger().logMessage(":: Finished");
 
         return me();

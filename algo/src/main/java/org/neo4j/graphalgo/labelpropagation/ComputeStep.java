@@ -61,12 +61,7 @@ final class ComputeStep implements Step {
 
     @Override
     public void run() {
-        if (this.didChange) {
-            this.didChange = iterateAll(nodes.iterator());
-            if (!this.didChange) {
-                release();
-            }
-        }
+        this.didChange = iterateAll(nodes.iterator());
     }
 
     @Override
@@ -96,7 +91,8 @@ final class ComputeStep implements Step {
         return didChange;
     }
 
-    private void release() {
+    @Override
+    public void release() {
         consumer.release();
     }
 }

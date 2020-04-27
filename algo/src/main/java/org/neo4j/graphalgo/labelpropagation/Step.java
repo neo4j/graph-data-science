@@ -27,4 +27,5 @@ interface Step extends Runnable {
 
     Step next();
 
+    default void release() {}
 }

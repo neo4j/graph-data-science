@@ -36,4 +36,8 @@ final class StepRunner implements Runnable {
         current.run();
         current = current.next();
     }
+
+    public void release() {
+        current.release();
+    }
 }
