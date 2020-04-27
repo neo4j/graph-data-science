@@ -54,12 +54,14 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 
 public abstract class AlgoBaseProc<
@@ -310,14 +312,16 @@ public abstract class AlgoBaseProc<
 
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) { }
 
-    protected void validateIsUndirectedGraph(GraphCreateConfig graphCreateConfig) {
+    protected void validateIsUndirectedGraph(GraphCreateConfig graphCreateConfig, CONFIG config) {
         if (!graphCreateConfig.isCypher()) {
             GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
             storeConfig.relationshipProjections().projections().entrySet().stream()
+                .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
+                                 config.relationshipTypes().contains(entry.getKey().name()))
                 .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
                 .forEach(entry -> {
                     throw new IllegalArgumentException(String.format(
-                        "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses projection `%s`",
+                        "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
                         entry.getKey().name,
                         entry.getValue().orientation()
                     ));

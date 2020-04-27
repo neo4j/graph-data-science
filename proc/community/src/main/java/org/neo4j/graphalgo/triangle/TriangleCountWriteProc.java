@@ -64,7 +64,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     protected void validateConfigs(
         GraphCreateConfig graphCreateConfig, TriangleCountWriteConfig config
     ) {
-        ValidationUtil.validateConfigs(graphCreateConfig, config);
+        validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override

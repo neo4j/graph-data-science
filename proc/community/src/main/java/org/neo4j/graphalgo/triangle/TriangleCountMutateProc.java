@@ -63,7 +63,7 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
     protected void validateConfigs(
         GraphCreateConfig graphCreateConfig, TriangleCountMutateConfig config
     ) {
-        ValidationUtil.validateConfigs(graphCreateConfig, config);
+        validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override

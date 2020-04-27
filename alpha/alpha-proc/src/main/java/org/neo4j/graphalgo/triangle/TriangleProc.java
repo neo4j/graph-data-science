@@ -46,7 +46,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
 
     @Override
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleCountBaseConfig config) {
-        validateIsUndirectedGraph(graphCreateConfig);
+        validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Procedure(name = "gds.alpha.triangle.stream", mode = READ)

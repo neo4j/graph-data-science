@@ -64,7 +64,7 @@ public class TriangleCountStreamProc
     protected void validateConfigs(
         GraphCreateConfig graphCreateConfig, TriangleCountStreamConfig config
     ) {
-        ValidationUtil.validateConfigs(graphCreateConfig, config);
+        validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override

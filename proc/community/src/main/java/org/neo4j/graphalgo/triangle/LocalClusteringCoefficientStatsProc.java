@@ -63,7 +63,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     protected void validateConfigs(
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStatsConfig config
     ) {
-        ValidationUtil.validateConfigs(graphCreateConfig, config);
+        validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override

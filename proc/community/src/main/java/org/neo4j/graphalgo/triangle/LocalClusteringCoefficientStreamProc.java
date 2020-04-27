@@ -89,7 +89,7 @@ public class LocalClusteringCoefficientStreamProc
     protected void validateConfigs(
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStreamConfig config
     ) {
-        ValidationUtil.validateConfigs(graphCreateConfig, config);
+        validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override

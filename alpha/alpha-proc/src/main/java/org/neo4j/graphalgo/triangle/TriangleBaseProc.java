@@ -40,7 +40,7 @@ public abstract class TriangleBaseProc<CONFIG extends TriangleCountBaseConfig>
 
     @Override
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        validateIsUndirectedGraph(graphCreateConfig);
+        validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override

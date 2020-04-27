@@ -86,7 +86,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     protected void validateConfigs(
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientWriteConfig config
     ) {
-        ValidationUtil.validateConfigs(graphCreateConfig, config);
+        validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override
