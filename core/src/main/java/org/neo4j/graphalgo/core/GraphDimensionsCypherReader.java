@@ -32,18 +32,17 @@ import static org.neo4j.graphalgo.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
 
 public class GraphDimensionsCypherReader extends GraphDimensionsReader<GraphCreateFromCypherConfig> {
 
-
     public GraphDimensionsCypherReader(GraphDatabaseAPI api, GraphCreateFromCypherConfig config) {
         super(api, config);
     }
 
     @Override
-    protected TokenElementIdentifierMappings<NodeLabel> labelTokeNodeLabelMappings(TokenRead tokenRead) {
+    protected TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead) {
         return new TokenElementIdentifierMappings<>(ANY_LABEL);
     }
 
     @Override
-    protected TokenElementIdentifierMappings<RelationshipType> labelTokenRelationshipTypeMappings(TokenRead tokenRead) {
+    protected TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead) {
         return new TokenElementIdentifierMappings<>(ANY_RELATIONSHIP_TYPE);
     }
 
