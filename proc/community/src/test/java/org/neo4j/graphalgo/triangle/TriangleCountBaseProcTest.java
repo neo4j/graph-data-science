@@ -39,6 +39,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 
 abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig> extends BaseProcTest
     implements AlgoBaseProcTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
+    UndirectedValidationTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
     MemoryEstimateTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
     HeapControlTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult> {
 

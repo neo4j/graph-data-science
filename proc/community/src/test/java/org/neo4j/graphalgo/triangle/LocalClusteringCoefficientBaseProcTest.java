@@ -29,15 +29,18 @@ import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
 abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalClusteringCoefficientBaseConfig> extends BaseProcTest
     implements AlgoBaseProcTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
+    UndirectedValidationTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     MemoryEstimateTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     HeapControlTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result> {
 
@@ -108,6 +111,17 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
         LocalClusteringCoefficient.Result result1, LocalClusteringCoefficient.Result result2
     ) {
 
+    }
+
+    @Override
+    public CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper mapWrapper) {
+        if (mapWrapper.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
+            return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper.toMap())));
+        }
+
+        return createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(mapWrapper
+            .withEntry(RELATIONSHIP_PROJECTION_KEY, relationshipProjections())
+            .toMap())));
     }
 
     @Override

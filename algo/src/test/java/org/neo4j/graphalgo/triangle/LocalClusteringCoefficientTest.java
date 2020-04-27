@@ -214,8 +214,6 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
     private LocalClusteringCoefficient.Result projectWithoutSeedAndCompute() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
             .graph(NativeFactory.class);
