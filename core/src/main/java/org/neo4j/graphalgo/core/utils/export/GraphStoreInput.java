@@ -19,11 +19,9 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.utils.export.GraphStoreExport.NodeStore;
+import org.neo4j.graphalgo.core.utils.export.GraphStoreExport.RelationshipStore;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
@@ -37,26 +35,25 @@ import org.neo4j.values.storable.Value;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 public final class GraphStoreInput implements Input {
 
-    private final GraphStore graphStore;
+    private final NodeStore nodeStore;
 
-    private final GraphStoreExport.NodeStore nodeStore;
+    private final RelationshipStore relationshipStore;
 
     private final int batchSize;
 
-    GraphStoreInput(GraphStore graphStore, GraphStoreExport.NodeStore nodeStore, int batchSize) {
-        this.graphStore = graphStore;
+    GraphStoreInput(
+        NodeStore nodeStore,
+        RelationshipStore relationshipStore,
+        int batchSize
+    ) {
         this.nodeStore = nodeStore;
+        this.relationshipStore = relationshipStore;
         this.batchSize = batchSize;
     }
 
@@ -67,7 +64,7 @@ public final class GraphStoreInput implements Input {
 
     @Override
     public InputIterable relationships(Collector badCollector) {
-        return () -> new RelationshipImporter(graphStore, graphStore.nodeCount(), batchSize);
+        return () -> new RelationshipImporter(relationshipStore, batchSize);
     }
 
     @Override
@@ -82,17 +79,17 @@ public final class GraphStoreInput implements Input {
 
     @Override
     public Estimates calculateEstimates(ToIntFunction<Value[]> valueSizeCalculator) {
-        long numberOfNodeProperties = graphStore.nodePropertyCount();
-        long numberOfRelationshipProperties = graphStore.relationshipPropertyCount();
+        long numberOfNodeProperties = nodeStore.propertyCount();
+        long numberOfRelationshipProperties = relationshipStore.propertyCount();
 
         return Input.knownEstimates(
-            graphStore.nodeCount(),
-            graphStore.relationshipCount(),
+            nodeStore.nodeCount,
+            relationshipStore.relationshipCount,
             numberOfNodeProperties,
             numberOfRelationshipProperties,
             numberOfNodeProperties * Double.BYTES,
             numberOfRelationshipProperties * Double.BYTES,
-            graphStore.nodeLabels().size()
+            nodeStore.labelCount()
         );
     }
 
@@ -128,9 +125,9 @@ public final class GraphStoreInput implements Input {
 
     static class NodeImporter extends GraphImporter {
 
-        private final GraphStoreExport.NodeStore nodeStore;
+        private final NodeStore nodeStore;
 
-        NodeImporter(GraphStoreExport.NodeStore nodeStore, int batchSize) {
+        NodeImporter(NodeStore nodeStore, int batchSize) {
             super(nodeStore.nodeCount, batchSize);
             this.nodeStore = nodeStore;
         }
@@ -143,39 +140,16 @@ public final class GraphStoreInput implements Input {
 
     static class RelationshipImporter extends GraphImporter {
 
-        private final Map<Pair<RelationshipType, Optional<String>>, RelationshipIterator> relationships;
+        private final RelationshipStore relationshipStore;
 
-        RelationshipImporter(GraphStore graphStore, long nodeCount, int batchSize) {
-            super(nodeCount, batchSize);
-            this.relationships = graphStore
-                .relationshipTypes()
-                .stream()
-                .flatMap(relType -> {
-                    Set<String> relProperties = graphStore.relationshipPropertyKeys(relType);
-                    if (relProperties.isEmpty()) {
-                        return Stream.of(Tuples.pair(relType, Optional.<String>empty()));
-                    } else {
-                        return relProperties
-                            .stream()
-                            .map(propertyKey -> Tuples.pair(relType, Optional.of(propertyKey)));
-                    }
-                })
-                .collect(Collectors.toMap(
-                    relTypeAndProperty -> relTypeAndProperty,
-                    relTypeAndProperty -> graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
-                ));
+        RelationshipImporter(RelationshipStore relationshipStore, int batchSize) {
+            super(relationshipStore.nodeCount, batchSize);
+            this.relationshipStore = relationshipStore;
         }
 
         @Override
         public InputChunk newChunk() {
-            var concurrentCopies = relationships
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    e -> e.getValue().concurrentCopy()
-                ));
-            return new RelationshipChunk(concurrentCopies);
+            return new RelationshipChunk(relationshipStore.concurrentCopy());
         }
     }
 
@@ -195,12 +169,12 @@ public final class GraphStoreInput implements Input {
 
     static class NodeChunk extends EntityChunk {
 
-        private final GraphStoreExport.NodeStore nodeStore;
+        private final NodeStore nodeStore;
 
         private final boolean hasLabels;
         private final boolean hasProperties;
 
-        NodeChunk(GraphStoreExport.NodeStore nodeStore) {
+        NodeChunk(NodeStore nodeStore) {
             this.nodeStore = nodeStore;
             this.hasLabels = nodeStore.hasLabels();
             this.hasProperties = nodeStore.hasProperties();
@@ -246,33 +220,49 @@ public final class GraphStoreInput implements Input {
 
     static class RelationshipChunk extends EntityChunk {
 
-        private final Map<Pair<RelationshipType, Optional<String>>, RelationshipIterator> relationships;
+        private final RelationshipStore relationshipStore;
 
-        RelationshipChunk(Map<Pair<RelationshipType, Optional<String>>, RelationshipIterator> relationships) {
-            this.relationships = relationships;
+        RelationshipChunk(RelationshipStore relationshipStore) {
+            this.relationshipStore = relationshipStore;
         }
 
         @Override
         public boolean next(InputEntityVisitor visitor) {
             if (id < endId) {
-                for (Map.Entry<Pair<RelationshipType, Optional<String>>, RelationshipIterator> relationship : relationships.entrySet()) {
-                    RelationshipType relType = relationship.getKey().getOne();
-                    Optional<String> relProperty = relationship.getKey().getTwo();
-                    RelationshipIterator iterator = relationship.getValue();
+                for (int i = 0; i < relationshipStore.relTypes.length; i++) {
+                    String relType = relationshipStore.relTypes[i];
+                    String propKey = relationshipStore.propertyKeys[i];
+                    RelationshipIterator relationshipIterator = relationshipStore.relationships.get(relType);
 
-                    iterator.forEachRelationship(id, Double.NaN, (s, t, propertyValue) -> {
-                        visitor.startId(s);
-                        visitor.endId(t);
-                        visitor.type(relType.name);
-                        relProperty.ifPresent(value -> visitor.property(value, propertyValue));
-                        try {
-                            visitor.endOfEntity();
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
-                        }
-                        return true;
-                    });
+                    if (propKey != null) {
+                        relationshipIterator
+                            .forEachRelationship(id, Double.NaN, (s, t, propertyValue) -> {
+                            visitor.startId(s);
+                            visitor.endId(t);
+                            visitor.type(relType);
+                            visitor.property(propKey, propertyValue);
+                            try {
+                                visitor.endOfEntity();
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                            return true;
+                        });
+                    } else {
+                        relationshipIterator.forEachRelationship(id, (s, t) -> {
+                            visitor.startId(s);
+                            visitor.endId(t);
+                            visitor.type(relType);
+                            try {
+                                visitor.endOfEntity();
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                            return true;
+                        });
+                    }
                 }
+
                 id++;
                 return true;
             }

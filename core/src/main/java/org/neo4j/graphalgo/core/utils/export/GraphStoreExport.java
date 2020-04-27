@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core.utils.export;
 
 import com.carrotsearch.hppc.BitSet;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
@@ -27,7 +29,10 @@ import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -49,8 +54,12 @@ import org.neo4j.logging.internal.StoreLogService;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
@@ -99,7 +108,11 @@ public class GraphStoreExport {
 
             lifeSupport.start();
 
-            Input input = new GraphStoreInput(graphStore, NodeStore.of(graphStore), config.batchSize());
+            Input input = new GraphStoreInput(
+                NodeStore.of(graphStore),
+                RelationshipStore.of(graphStore),
+                config.batchSize()
+            );
 
             var importer = BatchImporterFactory.withHighestPriority().instantiate(
                 databaseLayout,
@@ -151,13 +164,13 @@ public class GraphStoreExport {
         final long nodeCount;
 
         @Nullable
-        HugeIntArray labelCounts;
+        final HugeIntArray labelCounts;
 
         @Nullable
-        Map<String, BitSet> nodeLabels;
+        final Map<String, BitSet> nodeLabels;
 
         @Nullable
-        Map<String, Map<String, NodeProperties>> nodeProperties;
+        final Map<String, Map<String, NodeProperties>> nodeProperties;
 
         NodeStore(
             long nodeCount,
@@ -177,6 +190,18 @@ public class GraphStoreExport {
 
         boolean hasProperties() {
             return nodeProperties != null;
+        }
+
+        int labelCount() {
+            return !hasLabels() ? 0 : nodeLabels.size();
+        }
+
+        int propertyCount() {
+            if (nodeProperties == null) {
+                return 0;
+            } else {
+                return nodeProperties.values().stream().mapToInt(Map::size).sum();
+            }
         }
 
         String[] labels(long nodeId) {
@@ -235,7 +260,90 @@ public class GraphStoreExport {
             }
             return new NodeStore(graphStore.nodeCount(), labelCounts, nodeLabels, nodeProperties);
         }
+    }
 
+    static class RelationshipStore {
+
+        final long nodeCount;
+        final long relationshipCount;
+
+        final Map<String, RelationshipIterator> relationships;
+
+        final Map<String, String> relationshipPropertyKeys;
+
+        final String[] relTypes;
+
+        final String[] propertyKeys;
+
+        RelationshipStore(
+            long nodeCount,
+            long relationshipCount,
+            Map<String, RelationshipIterator> relationships,
+            Map<String, String> relationshipPropertyKeys
+        ) {
+            this.nodeCount = nodeCount;
+            this.relationshipCount = relationshipCount;
+            this.relationships = relationships;
+            this.relationshipPropertyKeys = relationshipPropertyKeys;
+
+            this.relTypes = relationships.keySet().toArray(new String[0]);
+            this.propertyKeys = Arrays.stream(relTypes).map(relationshipPropertyKeys::get).toArray(String[]::new);
+        }
+
+        int propertyCount() {
+            return relationshipPropertyKeys.size();
+        }
+
+        RelationshipStore concurrentCopy() {
+            return new RelationshipStore(
+                nodeCount,
+                relationshipCount,
+                relationships.entrySet().stream().collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> entry.getValue().concurrentCopy()
+                )),
+                relationshipPropertyKeys
+            );
+        }
+
+        static RelationshipStore of(GraphStore graphStore) {
+            Map<Pair<RelationshipType, Optional<String>>, Graph> graphs = graphStore
+                .relationshipTypes()
+                .stream()
+                .flatMap(relType -> {
+                    Set<String> relProperties = graphStore.relationshipPropertyKeys(relType);
+                    if (relProperties.isEmpty()) {
+                        return Stream.of(Tuples.pair(relType, Optional.<String>empty()));
+                    } else {
+                        return relProperties
+                            .stream()
+                            .map(propertyKey -> Tuples.pair(relType, Optional.of(propertyKey)));
+                    }
+                })
+                .collect(Collectors.toMap(
+                    relTypeAndProperty -> relTypeAndProperty,
+                    relTypeAndProperty -> graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
+                ));
+
+            Map<String, RelationshipIterator> relationships = graphs.entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey().getOne().name,
+                Map.Entry::getValue
+            ));
+
+            var relationshipPropertyKeys = graphs.keySet().stream()
+                .filter(pair -> pair.getTwo().isPresent())
+                .collect(Collectors.toMap(
+                    entry -> entry.getOne().name,
+                    entry -> entry.getTwo().get()
+                ));
+
+            return new RelationshipStore(
+                graphStore.nodeCount(),
+                graphStore.relationshipCount(),
+                relationships,
+                relationshipPropertyKeys
+            );
+        }
     }
 
     private static final Validator<File> DIRECTORY_IS_WRITABLE = value -> {
