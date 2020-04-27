@@ -1,4 +1,4 @@
-org.neo4j.graphdb.GraphDatabaseService#execute(java.lang.String) @ Use test tooling to run queries.
 org.neo4j.kernel.internal.GraphDatabaseAPI#getDependencyResolver() @ Use the GraphDatabaseApiProxy from the neo4j-adapter module instead
 org.neo4j.stream.Streams @ Don't use deprecated utility code.
 org.neo4j.helpers.collection.MapUtil @ Use the GDS MapUtil instead.
+java.lang.formatWithLocale(java.lang.String, java.lang.Object...) @ Use org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale or java.lang.formatWithLocale(java.util.Locale, java.lang.String, java.lang.Object...) instead
