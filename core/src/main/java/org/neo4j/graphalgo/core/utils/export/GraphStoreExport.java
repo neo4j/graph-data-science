@@ -327,14 +327,16 @@ public class GraphStoreExport {
 
             Map<String, RelationshipIterator> relationships = graphs.entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey().getOne().name,
-                Map.Entry::getValue
+                Map.Entry::getValue,
+                (left, right) -> left
             ));
 
             var relationshipPropertyKeys = graphs.keySet().stream()
                 .filter(pair -> pair.getTwo().isPresent())
                 .collect(Collectors.toMap(
                     entry -> entry.getOne().name,
-                    entry -> entry.getTwo().get()
+                    entry -> entry.getTwo().get(),
+                    (left, right) -> left
                 ));
 
             return new RelationshipStore(
