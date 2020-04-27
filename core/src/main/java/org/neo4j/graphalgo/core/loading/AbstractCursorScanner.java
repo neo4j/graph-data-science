@@ -29,7 +29,7 @@ import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 
-abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Store extends RecordStore<AbstractBaseRecord>> implements StoreScanner<Reference> {
+abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Store extends RecordStore<? extends AbstractBaseRecord>> implements StoreScanner<Reference> {
 
     final class StoreScanCursor implements GdsCursor<Reference> {
 
@@ -117,7 +117,7 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
 
         if (gdsCursor == null) {
             EntityCursor entityCursor = entityCursor(transaction);
-            Reference reference = cursorReference(entityCursor, transaction);
+            Reference reference = cursorReference(entityCursor);
             Scan<EntityCursor> entityCursorScan = entityCursorScan(transaction);
             gdsCursor = new StoreScanCursor(entityCursor, reference, entityCursorScan);
             this.cursors.set(gdsCursor);
@@ -139,5 +139,5 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
 
     abstract Scan<EntityCursor> entityCursorScan(KernelTransaction transaction);
 
-    abstract Reference cursorReference(EntityCursor cursor, KernelTransaction transaction);
+    abstract Reference cursorReference(EntityCursor cursor);
 }
