@@ -23,6 +23,9 @@ interface Step extends Runnable {
     @Override
     void run();
 
+    boolean didConverge();
+
     Step next();
 
+    default void release() {}
 }

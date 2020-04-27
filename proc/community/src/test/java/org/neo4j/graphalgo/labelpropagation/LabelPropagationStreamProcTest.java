@@ -63,7 +63,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
             actualCommunities.add(id, community);
         });
 
-        assertEquals(actualCommunities, RESULT);
+        assertEquals(RESULT, actualCommunities);
     }
 
     @Test
@@ -100,7 +100,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
             actualCommunities.add(id - 1, community - 1 - deletedNodes);
         });
 
-        assertEquals(actualCommunities, RESULT);
+        assertEquals(RESULT, actualCommunities);
     }
 
     @Test
@@ -116,8 +116,8 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
         assertCypherResult(query, Arrays.asList(MapUtil.map(
             "nodeCount", 12L,
             "relationshipCount", 10L,
-            "bytesMin", 1688L,
-            "bytesMax", 2200L
+            "bytesMin", 1656L,
+            "bytesMax", 2168L
         )));
     }
 

@@ -19,12 +19,12 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.neo4j.graphalgo.labelpropagation.LabelPropagation.DEFAULT_WEIGHT;
@@ -37,6 +37,8 @@ final class ComputeStep implements Step {
     private final ProgressLogger progressLogger;
     private final ComputeStepConsumer consumer;
     private final Graph graph;
+
+    private boolean didChange = true;
 
     ComputeStep(
             Graph graph,
@@ -57,18 +59,14 @@ final class ComputeStep implements Step {
         return this;
     }
 
-    boolean didChange = true;
-    long iteration = 0L;
-
     @Override
     public void run() {
-        if (this.didChange) {
-            iteration++;
-            this.didChange = iterateAll(nodes.iterator());
-            if (!this.didChange) {
-                release();
-            }
-        }
+        this.didChange = iterateAll(nodes.iterator());
+    }
+
+    @Override
+    public boolean didConverge() {
+        return !this.didChange;
     }
 
     private boolean iterateAll(PrimitiveLongIterator nodeIds) {
@@ -93,7 +91,8 @@ final class ComputeStep implements Step {
         return didChange;
     }
 
-    void release() {
+    @Override
+    public void release() {
         consumer.release();
     }
 }

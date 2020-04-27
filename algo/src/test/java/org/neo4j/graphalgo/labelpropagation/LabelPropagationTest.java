@@ -255,7 +255,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             .build()
             .graph(NativeFactory.class);
 
-        var testLogger = new TestProgressLogger(graph.relationshipCount(), "Louvain", defaultConfig().concurrency());
+        var testLogger = new TestProgressLogger(graph.relationshipCount(), "LabelPropagation", defaultConfig().concurrency());
 
         var lp = new LabelPropagation(
             graph,
@@ -270,7 +270,7 @@ final class LabelPropagationTest extends AlgoTestBase {
         List<AtomicLong> progresses = testLogger.getProgresses();
 
         // Should log progress for every iteration + init step
-        assertEquals(defaultConfig().maxIterations() + 2, progresses.size());
+        assertEquals(lp.ranIterations() + 1, progresses.size());
         progresses.forEach(progress -> assertTrue(progress.get() <= graph.relationshipCount()));
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
@@ -292,15 +292,15 @@ final class LabelPropagationTest extends AlgoTestBase {
             .memoryUsage();
 
         Map<Integer, Long> minByConcurrency = genericMap(
-            1, 800488L,
-            4, 801592L,
-            42, 815576L
+            1, 800480L,
+            4, 801560L,
+            42, 815240L
         );
 
         Map<Integer, Long> maxByConcurrency = genericMap(
-            1, 4994664L,
-            4, 17578296L,
-            42, 176970968L
+            1, 4994656L,
+            4, 17578264L,
+            42, 176970632L
         );
 
         assertEquals(minByConcurrency.get(concurrency), actual.min, "min");

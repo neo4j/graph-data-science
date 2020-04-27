@@ -133,32 +133,19 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
 
         List<StepRunner> stepRunners = stepRunners();
 
-        long currentIteration = 0L;
-        while (currentIteration < config.maxIterations()) {
-            getProgressLogger().logMessage(String.format(":: Iteration %d :: Start", currentIteration + 1));
+        while (ranIterations < config.maxIterations()) {
+            getProgressLogger().logMessage(String.format(":: Iteration %d :: Start", ranIterations + 1));
             ParallelUtil.runWithConcurrency(config.concurrency(), stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
-            ++currentIteration;
-            getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", currentIteration));
+            ++ranIterations;
+            didConverge = stepRunners.stream().allMatch(StepRunner::didConverge);
+            if (didConverge) {
+                break;
+            }
+            getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", ranIterations));
             getProgressLogger().reset(graph.relationshipCount());
         }
 
-        long maxIteration = 0L;
-        boolean converged = true;
-        for (StepRunner stepRunner : stepRunners) {
-            Step current = stepRunner.current;
-            if (current instanceof ComputeStep) {
-                ComputeStep step = (ComputeStep) current;
-                if (step.iteration > maxIteration) {
-                    maxIteration = step.iteration;
-                }
-                converged = converged && !step.didChange;
-                step.release();
-            }
-        }
-
-        ranIterations = maxIteration;
-        didConverge = converged;
-
+        stepRunners.forEach(StepRunner::release);
         getProgressLogger().logMessage(":: Finished");
 
         return me();
