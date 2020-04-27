@@ -19,29 +19,39 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.internal.kernel.api.NodeCursor;
+import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.storageengine.api.LongReference;
 
-public final class NodeCursorReference implements NodeReference {
+public class RelationshipScanCursorReference implements RelationshipReference {
 
-    private final NodeCursor nodeCursor;
+    private final RelationshipScanCursor relationshipScanCursor;
 
-    NodeCursorReference(NodeCursor nodeCursor) {
-        this.nodeCursor = nodeCursor;
+    public RelationshipScanCursorReference(RelationshipScanCursor relationshipScanCursor) {
+        this.relationshipScanCursor = relationshipScanCursor;
     }
 
     @Override
-    public long nodeId() {
-        return nodeCursor.nodeReference();
+    public long relationshipId() {
+        return relationshipScanCursor.relationshipReference();
     }
 
     @Override
-    public long[] labels() {
-        return nodeCursor.labels().all();
+    public int typeTokenId() {
+        return relationshipScanCursor.type();
+    }
+
+    @Override
+    public long sourceNodeReference() {
+        return relationshipScanCursor.sourceNodeReference();
+    }
+
+    @Override
+    public long targetNodeReference() {
+        return relationshipScanCursor.targetNodeReference();
     }
 
     @Override
     public long propertiesReference() {
-        return ((LongReference) nodeCursor.propertiesReference()).id;
+        return ((LongReference) relationshipScanCursor.propertiesReference()).id;
     }
 }
