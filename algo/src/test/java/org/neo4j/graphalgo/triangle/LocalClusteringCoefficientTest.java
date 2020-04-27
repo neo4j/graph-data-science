@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -222,7 +221,6 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
             graph,
             createConfig().build(),
             AllocationTracker.EMPTY,
-            Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER
         ).compute();
     }

@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 
@@ -51,7 +50,6 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         Graph graph,
         LocalClusteringCoefficientBaseConfig configuration,
         AllocationTracker tracker,
-        ExecutorService executorService,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
@@ -71,9 +69,9 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
 
         if (null == triangleCountProperty) {
             HugeAtomicLongArray triangleCounts = computeTriangleCounts();
-            calculateCoefficients(triangleCounts::get);
+            calculateCoefficients((nodeId) -> Long.valueOf(triangleCounts.get(nodeId)).doubleValue());
         } else {
-            calculateCoefficients((nodeId) -> (long) triangleCountProperty.nodeProperty(nodeId, 0.0));
+            calculateCoefficients((nodeId) -> triangleCountProperty.nodeProperty(nodeId, Double.NaN));
         }
 
         return Result.of(
@@ -82,7 +80,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         );
     }
 
-    private void calculateCoefficients(Function<Long, Long> propertyValueFunction) {
+    private void calculateCoefficients(Function<Long, Double> propertyValueFunction) {
         long nodeCount = graph.nodeCount();
         localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, tracker);
 
@@ -112,12 +110,17 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         return intersectingTriangleCount.compute().localTriangles();
     }
 
-    private double calculateCoefficient(long triangles, int degree) {
+    private double calculateCoefficient(double triangles, int degree) {
+        if (Double.isNaN(triangles)) {
+            return Double.NaN;
+        }
+
         if (triangles == 0) {
             return 0.0;
         }
+
         // local clustering coefficient C(v) = 2 * triangles(v) / (degree(v) * (degree(v) - 1))
-        return ((double) (triangles << 1)) / (degree * (degree - 1));
+        return triangles * 2 / (degree * (degree - 1));
     }
 
     @Override
