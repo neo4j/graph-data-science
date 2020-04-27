@@ -71,6 +71,7 @@ import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class ParallelUtilTest {
 
@@ -212,7 +213,7 @@ final class ParallelUtilTest {
         int maxConcurrency = 8;
         int nodeCount = 1337;
 
-        String params = String.format(
+        String params = formatWithLocale(
                 " [bs=%d,c=%d,n=%d]",
                 minBatchSize,
                 maxConcurrency,

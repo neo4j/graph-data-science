@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class TransactionTerminationTestUtils {
 
@@ -54,7 +55,7 @@ public final class TransactionTerminationTestUtils {
         long terminatedAt = System.currentTimeMillis();
         long terminationDelay = terminatedAt - terminationTime.getValue();
 
-        assertTrue(terminationDelay <= maxDelay, String.format("Expected to terminate after at most %dms but took %dms", maxDelay, terminationDelay));
+        assertTrue(terminationDelay <= maxDelay, formatWithLocale("Expected to terminate after at most %dms but took %dms", maxDelay, terminationDelay));
     }
 
     private TransactionTerminationTestUtils() {}

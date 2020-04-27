@@ -30,6 +30,8 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 @ExtendWith(RandomGraphTestCase.TestWatcherExtension.class)
 public abstract class RandomGraphTestCase extends BaseTest {
 
@@ -78,7 +80,7 @@ public abstract class RandomGraphTestCase extends BaseTest {
     }
 
     void buildGraph(int nodeCount) {
-        String createGraph = String.format(RANDOM_GRAPH_TPL, nodeCount);
+        String createGraph = formatWithLocale(RANDOM_GRAPH_TPL, nodeCount);
         List<String> cyphers = Arrays.asList(createGraph, RANDOM_LABELS);
 
         for (String cypher : cyphers) {

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.BitUtil.previousPowerOfTwo;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ImportSizing {
 
@@ -74,7 +75,7 @@ public final class ImportSizing {
 
         if (numberOfPages > MAX_PAGE_SIZE || pageSize > MAX_PAGE_SIZE) {
             throw new IllegalArgumentException(
-                    String.format(TOO_MANY_PAGES_REQUIRED, nodeCount, numberOfPages, pageSize)
+                    formatWithLocale(TOO_MANY_PAGES_REQUIRED, nodeCount, numberOfPages, pageSize)
             );
         }
 

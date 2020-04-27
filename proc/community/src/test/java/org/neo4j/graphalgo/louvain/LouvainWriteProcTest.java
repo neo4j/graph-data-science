@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implements
     WritePropertyConfigTest<Louvain, LouvainWriteConfig, Louvain> {
@@ -108,7 +109,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
             assertUserInput(row, "includeIntermediateCommunities", true);
         });
 
-        runQueryWithRowConsumer(String.format("MATCH (n) RETURN n.%s as %s", writeProperty, writeProperty), row -> {
+        runQueryWithRowConsumer(formatWithLocale("MATCH (n) RETURN n.%s as %s", writeProperty, writeProperty), row -> {
             Object maybeList = row.get(writeProperty);
             assertTrue(maybeList instanceof long[]);
             long[] communities = (long[]) maybeList;
@@ -202,7 +203,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
 
     private void assertWriteResult(List<List<Long>> expectedCommunities, String writeProperty) {
         List<Long> actualCommunities = new ArrayList<>();
-        runQueryWithRowConsumer(String.format("MATCH (n) RETURN id(n) as id, n.%s as community", writeProperty), (row) -> {
+        runQueryWithRowConsumer(formatWithLocale("MATCH (n) RETURN id(n) as id, n.%s as community", writeProperty), (row) -> {
             long community = row.getNumber("community").longValue();
             int id = row.getNumber("id").intValue();
             actualCommunities.add(id, community);

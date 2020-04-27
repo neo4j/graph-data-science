@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 @ValueClass
@@ -82,7 +83,7 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
             nodeLabelIdentifiers(graphStore).forEach(nodeLabel ->
                 nodeProperties().forEach(nodeProperty -> {
                     if (!graphStore.hasNodeProperty(singletonList(nodeLabel), nodeProperty)) {
-                        throw new IllegalArgumentException(String.format(
+                        throw new IllegalArgumentException(formatWithLocale(
                             "Node projection '%s' does not have property key '%s'. Available keys: %s.",
                             nodeLabel.name,
                             nodeProperty,
@@ -97,7 +98,7 @@ public interface GraphWriteNodePropertiesConfig extends WriteConfig {
                     .allMatch(nodeProperty -> graphStore.hasNodeProperty(singletonList(nodeLabel), nodeProperty)));
 
             if (!hasValidLabel) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "No node projection with all property keys %s found.",
                     join(nodeProperties())
                 ));

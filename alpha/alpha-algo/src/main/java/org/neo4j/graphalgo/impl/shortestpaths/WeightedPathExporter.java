@@ -35,6 +35,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 /**
  * Specialized exporter for {@link WeightedPath}
  */
@@ -115,7 +117,7 @@ public class WeightedPathExporter extends StatementApi {
 
         Stream<Pair<WeightedPath, String>> pathsAndRelTypes = paths
             .stream()
-            .map(path -> Tuples.pair(path, String.format("%s%d", relPrefix, counter.v++)));
+            .map(path -> Tuples.pair(path, formatWithLocale("%s%d", relPrefix, counter.v++)));
 
         final List<Runnable> tasks = pathsAndRelTypes
                 .map(pair -> (Runnable) () ->  export(pair.getTwo(), propertyName, pair.getOne()))

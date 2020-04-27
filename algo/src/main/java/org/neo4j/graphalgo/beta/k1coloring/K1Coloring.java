@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * <p>
@@ -151,7 +152,7 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
         nodesToColor.set(0, nodeCount);
 
         while (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
-            getProgressLogger().logMessage(String.format(":: Iteration %d :: Start", ranIterations + 1));
+            getProgressLogger().logMessage(formatWithLocale(":: Iteration %d :: Start", ranIterations + 1));
             assertRunning();
             runColoring();
 
@@ -164,7 +165,7 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
                 getProgressLogger().reset(nodesToColor.cardinality() * 2);
             }
 
-            getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", ranIterations));
+            getProgressLogger().logMessage(formatWithLocale(":: Iteration %d :: Finished", ranIterations));
         }
 
         this.didConverge = ranIterations < maxIterations;

@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality, WeightedDegreeCentrality> {
     private final long nodeCount;
     private Graph graph;
@@ -77,7 +79,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency);
         long threadSize = ParallelUtil.threadCount(batchSize, nodeCount);
         if (threadSize > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                     "A concurrency of %d is too small to divide graph into at most Integer.MAX_VALUE tasks",
                     concurrency));
         }

@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public class PagedDataStructure<T> {
 
     final int pageSize;
@@ -59,7 +61,7 @@ public class PagedDataStructure<T> {
         pageMask = pageSize - 1;
 
         if (numPages(size) != pages.length) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                     "The capacity of [%d] would require [%d] pages, but [%d] were provided",
                     size,
                     numPages(size),

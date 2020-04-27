@@ -28,6 +28,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class CommunityHelper {
 
@@ -66,7 +67,7 @@ public final class CommunityHelper {
                 assertNotEquals(
                     actualCommunityData.get(expected),
                     actualCommunityData.get(actual),
-                    String.format(
+                    formatWithLocale(
                         "Expected node %d to be in a different community than node %d",
                         expected,
                         actual
@@ -95,7 +96,7 @@ public final class CommunityHelper {
             assertEquals(
                 expectedCommunity,
                 actualCommunity,
-                String.format(
+                formatWithLocale(
                     "Expected node %d (community %d) to have the same community as node %d (community %d)",
                     member,
                     actualCommunity,
@@ -123,7 +124,7 @@ public final class CommunityHelper {
             Long[] community = expectedCommunities.get(label);
             for (Long nodeId : community) {
                 assertEquals(label, communityData[nodeId.intValue()],
-                    String.format(
+                    formatWithLocale(
                         "Expected node %d to be in community %d, but was %d",
                         nodeId,
                         label,

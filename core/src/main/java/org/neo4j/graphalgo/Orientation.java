@@ -22,6 +22,8 @@ package org.neo4j.graphalgo;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public enum Orientation {
 
     NATURAL,
@@ -36,7 +38,7 @@ public enum Orientation {
                 .stream(Orientation.values())
                 .map(Orientation::name)
                 .collect(Collectors.joining(", "));
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Orientation `%s` is not supported. Must be one of: %s.",
                 value,
                 availableProjections));

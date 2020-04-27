@@ -34,6 +34,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class NodeSimilarityMutateProcTest
     extends NodeSimilarityProcTest<NodeSimilarityMutateConfig>
@@ -79,7 +80,7 @@ class NodeSimilarityMutateProcTest
 
     @Override
     public String expectedMutatedGraph() {
-        return String.format(
+        return formatWithLocale(
             "  (a)" +
             ", (b)" +
             ", (c)" +
@@ -109,7 +110,7 @@ class NodeSimilarityMutateProcTest
 
     @Override
     public String failOnExistingTokenMessage() {
-        return String.format(
+        return formatWithLocale(
             "Relationship type `%s` already exists in the in-memory graph.",
             MUTATE_RELATIONSHIP_TYPE
         );

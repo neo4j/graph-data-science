@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private static final String ID_COLUMN = "id";
@@ -99,8 +100,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         if (hasLabelInformation) {
             Object labelsObject = row.get(LABELS_COLUMN);
             if (!(labelsObject instanceof List)) {
-                throw new IllegalArgumentException(String.format(
-                    Locale.US,
+                throw new IllegalArgumentException(formatWithLocale(
                     "Type of column `%s` should be of type List, but was `%s`",
                     LABELS_COLUMN,
                     labelsObject
@@ -110,8 +110,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
             List<String> labels = (List<String>) labelsObject;
 
             if (labels.isEmpty()) {
-                throw new IllegalArgumentException(String.format(
-                    Locale.US,
+                throw new IllegalArgumentException(formatWithLocale(
                     "Node(%d) does not specify a label, but label column '%s' was specified.",
                     neoId,
                     LABELS_COLUMN
@@ -150,7 +149,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
             } else if (null == value) {
                 propertyValues.put(propertyKey, Double.NaN);
             } else {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Unsupported type [%s] of value %s. Please use a numeric property.",
                     Values.of(value).valueGroup(),
                     value

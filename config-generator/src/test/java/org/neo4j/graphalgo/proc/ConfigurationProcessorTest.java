@@ -36,6 +36,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.JavaFileObjects.forResource;
@@ -81,7 +82,7 @@ class ConfigurationProcessorTest {
             .processedWith(new ConfigurationProcessor())
             .compilesWithoutError()
             .and()
-            .generatesSources(loadExpectedFile(String.format("expected/%s.java", className)));
+            .generatesSources(loadExpectedFile(String.format(Locale.ENGLISH, "expected/%s.java", className)));
     }
 
     @Test
@@ -173,7 +174,7 @@ class ConfigurationProcessorTest {
     }
 
     private void runNegativeTest(String className, ErrorCheck... expectations) {
-        JavaFileObject file = forResource(String.format("negative/%s.java", className));
+        JavaFileObject file = forResource(String.format(Locale.ENGLISH,"negative/%s.java", className));
 
         CompileTester.UnsuccessfulCompilationClause clause = assertAbout(javaSource())
             .that(file)

@@ -37,6 +37,7 @@ import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityAlgorithm<ME>> extends SimilarityAlgorithm<ME, WeightedInput> {
 
@@ -76,7 +77,7 @@ public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityA
                         return agg;
                     });
                 } catch (NoSuchElementException nse) {
-                    throw new IllegalArgumentException(String.format(
+                    throw new IllegalArgumentException(formatWithLocale(
                         "Query %s does not return expected columns 'item', 'category' and 'weight'.",
                         query
                     ));

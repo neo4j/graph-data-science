@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphExistsProcTest extends BaseProcTest {
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
@@ -83,12 +84,12 @@ class GraphExistsProcTest extends BaseProcTest {
         assertError(
             "CALL gds.graph.exists($graphName)",
             map("graphName", invalidName),
-            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+            formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
         assertError(
             "RETURN gds.graph.exists($graphName)",
             map("graphName", invalidName),
-            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+            formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
     }
 

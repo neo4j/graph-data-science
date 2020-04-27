@@ -29,6 +29,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class ComputationTestUtil {
 
@@ -53,7 +54,7 @@ final class ComputationTestUtil {
             assertEquals(
                     (long) expectedValue,
                     computedValue,
-                    String.format("Node.id = %d should have value %d", idProp, expectedValue));
+                    formatWithLocale("Node.id = %d should have value %d", idProp, expectedValue));
         });
     }
 
@@ -79,7 +80,7 @@ final class ComputationTestUtil {
                     expectedValue,
                     computedValue,
                     delta,
-                    String.format("Node.id = %d should have value %f", idProp, expectedValue));
+                    formatWithLocale("Node.id = %d should have value %f", idProp, expectedValue));
         });
     }
 }

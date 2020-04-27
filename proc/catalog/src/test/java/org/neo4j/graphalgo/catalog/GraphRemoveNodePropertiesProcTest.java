@@ -37,6 +37,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
@@ -94,7 +95,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void removeNodeProperties() {
-        String graphWriteQuery = String.format(
+        String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.removeNodeProperties(" +
             "   '%s', " +
             "   ['nodeProp1', 'nodeProp2']" +
@@ -111,7 +112,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void removeNodePropertiesForLabel() {
-        String graphWriteQuery = String.format(
+        String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.removeNodeProperties(" +
             "   '%s', " +
             "   ['nodeProp1', 'nodeProp2'], " +
@@ -129,7 +130,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void removeNodePropertiesForLabelSubset() {
-        String graphWriteQuery = String.format(
+        String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.removeNodeProperties(" +
             "   '%s', " +
             "   ['nodeProp1', 'nodeProp2']" +
@@ -148,7 +149,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
     void shouldFailOnNonExistingNodeProperty() {
         QueryExecutionException ex = assertThrows(
             QueryExecutionException.class,
-            () -> runQuery(String.format(
+            () -> runQuery(formatWithLocale(
                 "CALL gds.graph.removeNodeProperties(" +
                 "   '%s', " +
                 "   ['nodeProp1', 'nodeProp2', 'nodeProp3']" +

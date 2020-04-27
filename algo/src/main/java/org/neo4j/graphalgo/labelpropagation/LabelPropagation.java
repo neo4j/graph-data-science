@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 
 public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagation> {
@@ -134,14 +135,14 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         List<StepRunner> stepRunners = stepRunners();
 
         while (ranIterations < config.maxIterations()) {
-            getProgressLogger().logMessage(String.format(":: Iteration %d :: Start", ranIterations + 1));
+            getProgressLogger().logMessage(formatWithLocale(":: Iteration %d :: Start", ranIterations + 1));
             ParallelUtil.runWithConcurrency(config.concurrency(), stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
             ++ranIterations;
             didConverge = stepRunners.stream().allMatch(StepRunner::didConverge);
             if (didConverge) {
                 break;
             }
-            getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", ranIterations));
+            getProgressLogger().logMessage(formatWithLocale(":: Iteration %d :: Finished", ranIterations));
             getProgressLogger().reset(graph.relationshipCount());
         }
 

@@ -31,6 +31,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class GraphStoreCatalog {
 
     private static final ConcurrentHashMap<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
@@ -85,7 +87,7 @@ public final class GraphStoreCatalog {
     }
 
     private static Supplier<RuntimeException> failOnNonExistentGraph(String graphName) {
-        return () -> new IllegalArgumentException(String.format(
+        return () -> new IllegalArgumentException(formatWithLocale(
             "Graph with name `%s` does not exist and can't be removed.",
             graphName
         ));
@@ -103,7 +105,7 @@ public final class GraphStoreCatalog {
             }
             GraphStoreWithConfig graphStoreWithConfig = ImmutableGraphStoreWithConfig.of(graphStore, config);
             if (graphsByName.putIfAbsent(config.graphName(), graphStoreWithConfig) != null) {
-                throw new IllegalStateException(String.format(
+                throw new IllegalStateException(formatWithLocale(
                     "Graph name %s already loaded",
                     config.graphName()
                 ));
@@ -115,7 +117,7 @@ public final class GraphStoreCatalog {
             if (graphsByName.containsKey(graphName)) {
                 return graphsByName.get(graphName);
             } else {
-                throw new NoSuchElementException(String.format("Cannot find graph with name '%s'.", graphName));
+                throw new NoSuchElementException(formatWithLocale("Cannot find graph with name '%s'.", graphName));
             }
         }
 

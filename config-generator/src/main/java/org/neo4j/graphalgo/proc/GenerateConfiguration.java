@@ -59,6 +59,7 @@ import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -483,7 +484,7 @@ final class GenerateConfiguration {
             if (validCandidates.size() > 1) {
                 for (ExecutableElement candidate : validCandidates) {
                     error(
-                        String.format("Method is ambiguous and a possible candidate for [%s]", converter),
+                        String.format(Locale.ENGLISH,"Method is ambiguous and a possible candidate for [%s]", converter),
                         candidate
                     );
                 }
@@ -517,7 +518,7 @@ final class GenerateConfiguration {
         } while (!classesToSearch.isEmpty());
 
         for (InvalidCandidate invalidCandidate : invalidCandidates) {
-            error(String.format(invalidCandidate.message(), invalidCandidate.args()), invalidCandidate.element());
+            error(String.format(Locale.ENGLISH,invalidCandidate.message(), invalidCandidate.args()), invalidCandidate.element());
         }
 
         return converterError(
@@ -703,7 +704,7 @@ final class GenerateConfiguration {
     private <T> Optional<T> converterError(Element element, String message, Object... args) {
         messager.printMessage(
             Diagnostic.Kind.ERROR,
-            String.format(message, args),
+            String.format(Locale.ENGLISH, message, args),
             element,
             getAnnotationMirror(element, ConvertWith.class).orNull()
         );

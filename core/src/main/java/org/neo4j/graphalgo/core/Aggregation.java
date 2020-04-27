@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.core;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public enum Aggregation {
     DEFAULT {
         public double merge(double runningTotal, double value) {
@@ -115,7 +117,7 @@ public enum Aggregation {
                     .stream(Aggregation.values())
                     .map(Aggregation::name)
                     .collect(Collectors.joining(", "));
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                     "Aggregation `%s` is not supported. Must be one of: %s.",
                     name,
                     availableStrategies));

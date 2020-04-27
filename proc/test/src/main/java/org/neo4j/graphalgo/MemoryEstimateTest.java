@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface MemoryEstimateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
@@ -47,7 +48,7 @@ public interface MemoryEstimateTest<ALGORITHM extends Algorithm<ALGORITHM, RESUL
                     boolean estimateProcExists = getProcedureMethods(proc)
                         .map(this::getProcedureMethodName)
                         .anyMatch(otherProcName -> otherProcName.equals(procName + ".estimate"));
-                    assertTrue(estimateProcExists, String.format("Could not find estimate method for %s", procName));
+                    assertTrue(estimateProcExists, formatWithLocale("Could not find estimate method for %s", procName));
                 });
         });
     }

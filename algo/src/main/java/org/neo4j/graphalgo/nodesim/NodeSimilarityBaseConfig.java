@@ -23,6 +23,8 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
 
     String TOP_K_KEY = "topK";
@@ -125,14 +127,14 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig {
     @Value.Check
     default void validate() {
         if (topK() != TOP_K_DEFAULT && bottomK() != BOTTOM_K_DEFAULT) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Invalid parameter combination: %s combined with %s",
                 TOP_K_KEY,
                 BOTTOM_K_KEY
             ));
         }
         if (topN() != TOP_N_DEFAULT && bottomN() != BOTTOM_N_DEFAULT) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Invalid parameter combination: %s combined with %s",
                 TOP_N_KEY,
                 BOTTOM_N_KEY

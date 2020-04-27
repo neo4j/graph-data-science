@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class RelationshipPropertiesImportTest extends BaseTest {
 
@@ -109,11 +110,11 @@ class RelationshipPropertiesImportTest extends BaseTest {
         List<Executable> assertions = new ArrayList<>();
 
         RelationshipWithPropertyConsumer consumer = (s, t, w) -> {
-            String rel = String.format("(%d %s %d)", s, arrow(orientation), t);
+            String rel = formatWithLocale("(%d %s %d)", s, arrow(orientation), t);
             if (i.get() >= limit) {
                 assertions.add(() -> assertFalse(
                     i.get() >= limit,
-                    String.format("Unexpected relationship: %s = %.1f", rel, w)
+                    formatWithLocale("Unexpected relationship: %s = %.1f", rel, w)
                 ));
                 return false;
             }
@@ -123,7 +124,7 @@ class RelationshipPropertiesImportTest extends BaseTest {
                 expectedIterator,
                 w,
                 1e-4,
-                String.format("%s (WRI): %.1f != %.1f", rel, w, expectedIterator)
+                formatWithLocale("%s (WRI): %.1f != %.1f", rel, w, expectedIterator)
             ));
             return true;
         };

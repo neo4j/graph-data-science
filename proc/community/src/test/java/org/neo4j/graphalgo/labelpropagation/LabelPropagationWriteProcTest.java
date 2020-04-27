@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropagationWriteConfig> implements
     WritePropertyConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation> {
@@ -280,7 +281,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
             }
         );
-        String check = String.format("MATCH (a {id: 0}), (b {id: 1}) " +
+        String check = formatWithLocale("MATCH (a {id: 0}), (b {id: 1}) " +
                                      "RETURN a.%1$s AS a, b.%1$s AS b", writeProperty);
         runQueryWithRowConsumer(check, row -> {
             assertEquals(2, row.getNumber("a").intValue());
@@ -319,7 +320,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
             }
         );
-        String validateQuery = String.format(
+        String validateQuery = formatWithLocale(
             "MATCH (n) RETURN n.%1$s AS community, count(*) AS communitySize",
             writeProperty
         );

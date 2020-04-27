@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.utils;
 
 import java.util.Objects;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class ExceptionUtil {
 
     /**
@@ -105,7 +107,7 @@ public final class ExceptionUtil {
     private static void validateNodeIsLoaded(long mappedId, long neoId, String side) {
         if (mappedId == -1) {
             throw new IllegalStateException(
-                String.format("Failed to load relationship with unknown %s-node id %s.", side, neoId));
+                formatWithLocale("Failed to load relationship with unknown %s-node id %s.", side, neoId));
         }
     }
 

@@ -35,6 +35,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -62,7 +63,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
             Iterable<?> list = (Iterable) object;
             return fromList(list);
         }
-        throw new IllegalArgumentException(String.format(
+        throw new IllegalArgumentException(formatWithLocale(
             "Cannot construct a node projection out of a %s",
             object.getClass().getName()
         ));
@@ -90,7 +91,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
             NodeProjection projection = NodeProjection.fromObject(spec, nodeLabel);
             // sanity
             if (projections.put(nodeLabel, projection) != null) {
-                throw new IllegalStateException(String.format("Duplicate key: %s", name));
+                throw new IllegalStateException(formatWithLocale("Duplicate key: %s", name));
             }
         });
         return create(projections);
@@ -158,8 +159,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
 
     private static void validateIdentifierName(String identifier) {
         if (identifier.equals(ALL_NODES.name())) {
-            throw new IllegalArgumentException(String.format(
-                Locale.US,
+            throw new IllegalArgumentException(formatWithLocale(
                 "%s is a reserved node label and may not be used",
                 ALL_NODES.name()
             ));

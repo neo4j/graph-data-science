@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class ElementIdentifier {
 
@@ -60,7 +61,7 @@ public abstract class ElementIdentifier {
 
     @Override
     public String toString() {
-        return String.format("%s{" +
+        return formatWithLocale("%s{" +
                "name='" + name + '\'' +
                '}', this.getClass().getSimpleName());
     }

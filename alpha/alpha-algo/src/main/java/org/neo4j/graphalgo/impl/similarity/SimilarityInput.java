@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface SimilarityInput {
     long getId();
@@ -45,7 +46,7 @@ public interface SimilarityInput {
         }
 
         if (!missingIds.isEmpty()) {
-            throw new IllegalArgumentException(String.format("Node ids %s do not exist in node ids list", missingIds));
+            throw new IllegalArgumentException(formatWithLocale("Node ids %s do not exist in node ids list", missingIds));
         }
 
         return indexes;
@@ -59,7 +60,7 @@ public interface SimilarityInput {
         try {
             return indexes(inputIds, sourceIds);
         } catch(IllegalArgumentException exception) {
-            String message = String.format("%s: %s", String.format("Missing node ids in '%s' list ", key), exception.getMessage());
+            String message = formatWithLocale("%s: %s", formatWithLocale("Missing node ids in '%s' list ", key), exception.getMessage());
             throw new RuntimeException(new IllegalArgumentException(message));
         }
     }

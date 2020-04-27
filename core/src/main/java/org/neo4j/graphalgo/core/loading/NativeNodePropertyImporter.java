@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class NativeNodePropertyImporter {
 
@@ -141,7 +142,7 @@ public final class NativeNodePropertyImporter {
                     propertiesImported++;
                 }
             } else if (!Values.NO_VALUE.equals(value)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Unsupported type [%s] of value %s. Please use a numeric property.",
                     value.valueGroup(),
                     value

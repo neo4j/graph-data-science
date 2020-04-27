@@ -52,6 +52,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class TestGraph implements Graph {
 
@@ -426,7 +427,7 @@ public final class TestGraph implements Graph {
                     builder.set(element.getId(), Double.NaN);
                     return builder;
                 } else {
-                    throw new IllegalArgumentException(String.format(
+                    throw new IllegalArgumentException(formatWithLocale(
                             "%s property '%s' of must be of type Number, but was %s for %s.",
                             element.getClass().getSimpleName(),
                             propertyKey,

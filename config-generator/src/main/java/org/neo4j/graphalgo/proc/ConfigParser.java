@@ -47,6 +47,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -185,7 +186,7 @@ final class ConfigParser {
             if (isAnnotationPresent(method, Parameter.class)) {
                 messager.printMessage(
                     Diagnostic.Kind.ERROR,
-                    String.format("The `@%s` annotation cannot be used together with the `@%s` annotation", Parameter.class.getSimpleName(), Key.class.getSimpleName()),
+                    String.format(Locale.ENGLISH,"The `@%s` annotation cannot be used together with the `@%s` annotation", Parameter.class.getSimpleName(), Key.class.getSimpleName()),
                     method
                 );
                 return Optional.empty();
@@ -296,6 +297,7 @@ final class ConfigParser {
             }
             if (collectsKeys() && (validates() || normalizes())) {
                 throw new InvalidMemberException(String.format(
+                    Locale.ENGLISH,
                     "Cannot combine @%s with @%s",
                     CollectKeys.class.getSimpleName(),
                     Value.Check.class.getSimpleName()
@@ -303,6 +305,7 @@ final class ConfigParser {
             }
             if (toMap() && (validates() || normalizes())) {
                 throw new InvalidMemberException(String.format(
+                    Locale.ENGLISH,
                     "Cannot combine @%s with @%s",
                     ToMap.class.getSimpleName(),
                     Value.Check.class.getSimpleName()

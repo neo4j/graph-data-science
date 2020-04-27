@@ -188,7 +188,7 @@ class CypherMapWrapperTest {
             () -> config.requireOnlyKeysFrom(keys)
         );
         assertEquals(
-            String.format("Unexpected configuration %s", expectedMessage),
+            String.format(Locale.ENGLISH,"Unexpected configuration %s", expectedMessage),
             error.getMessage()
         );
     }

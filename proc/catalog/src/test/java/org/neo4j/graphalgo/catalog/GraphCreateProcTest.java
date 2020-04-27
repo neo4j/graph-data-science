@@ -94,6 +94,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphCreateProcTest extends BaseProcTest {
 
@@ -510,7 +511,7 @@ class GraphCreateProcTest extends BaseProcTest {
         assertGraphExists(name);
         Graph weightGraph = relPropertyGraph(name, RelationshipType.of("B"), "weight");
         Graph fooGraph = relPropertyGraph(name, RelationshipType.of("B"), "foo");
-        assertGraphEquals(fromGdl(String.format("(a)-[{w: %d}]->()", expectedValue)), weightGraph);
+        assertGraphEquals(fromGdl(formatWithLocale("(a)-[{w: %d}]->()", expectedValue)), weightGraph);
         assertGraphEquals(fromGdl("(a)-[{w: 55}]->()"), fooGraph);
     }
 
@@ -550,7 +551,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         assertGraphExists(name);
         Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
-        assertGraphEquals(fromGdl(String.format("()-[{w: %d}]->()", expectedValue)), graph);
+        assertGraphEquals(fromGdl(formatWithLocale("()-[{w: %d}]->()", expectedValue)), graph);
     }
 
     @ParameterizedTest(name = "aggregation={0}")
@@ -600,7 +601,7 @@ class GraphCreateProcTest extends BaseProcTest {
             "CALL gds.graph.create.cypher($name, $nodeQuery, $relationshipQuery)",
             map("name", cypher,
                 "nodeQuery", ALL_NODES_QUERY,
-                "relationshipQuery", String.format("MATCH (s)-[r:KNOWS]->(t) RETURN id(s) AS source, id(t) AS target, %s AS weight",
+                "relationshipQuery", formatWithLocale("MATCH (s)-[r:KNOWS]->(t) RETURN id(s) AS source, id(t) AS target, %s AS weight",
                     getCypherAggregation(aggregation, "r.weight")
                 )
             ),
@@ -620,7 +621,7 @@ class GraphCreateProcTest extends BaseProcTest {
         assertEquals(
             relationshipsStandard,
             relationshipCountCypher,
-            String.format(
+            formatWithLocale(
                 "Expected %d relationships using `gds.graph.create` to be equal to %d relationships when using `gds.graph.create.cypher`",
                 relationshipsStandard,
                 relationshipCountCypher
@@ -891,7 +892,7 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query);
 
         Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
-        Graph expected = fromGdl(String.format("(a:Node)-[{w:%d}]->(b:Node)", expectedWeight));
+        Graph expected = fromGdl(formatWithLocale("(a:Node)-[{w:%d}]->(b:Node)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
 
@@ -919,7 +920,7 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query);
 
         Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
-        Graph expected = fromGdl(String.format(Locale.US, "(a:Node)-[{w:%g}]->(b:Node)", expectedWeight));
+        Graph expected = fromGdl(formatWithLocale("(a:Node)-[{w:%g}]->(b:Node)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
 
@@ -946,7 +947,7 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query);
 
         Graph actual = relPropertyGraph("g", RelationshipType.of("TYPE"), "agg");
-        Graph expected = fromGdl(String.format("(a:Node)-[{w:%d}]->(b:Node)", expectedWeight));
+        Graph expected = fromGdl(formatWithLocale("(a:Node)-[{w:%d}]->(b:Node)", expectedWeight));
         assertGraphEquals(expected, actual);
     }
 
@@ -1225,12 +1226,12 @@ class GraphCreateProcTest extends BaseProcTest {
         assertError(
             "CALL gds.graph.create($graphName, {}, {})",
             map("graphName", invalidName),
-            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+            formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
         assertError(
             "CALL gds.graph.create.cypher($graphName, $nodeQuery, $relationshipQuery)",
             map("graphName", invalidName, "nodeQuery", ALL_NODES_QUERY, "relationshipQuery", ALL_RELATIONSHIPS_QUERY),
-            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+            formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
 
         assertGraphDoesNotExist(invalidName);
@@ -1303,12 +1304,12 @@ class GraphCreateProcTest extends BaseProcTest {
         assertError(
             "CALL gds.graph.create($name, '*', '*')",
             map("name", name),
-            String.format("A graph with name '%s' already exists.", name));
+            formatWithLocale("A graph with name '%s' already exists.", name));
 
         assertError(
             "CALL gds.graph.create.cypher($name, '*', '*')",
             map("name", name),
-            String.format("A graph with name '%s' already exists.", name));
+            formatWithLocale("A graph with name '%s' already exists.", name));
     }
 
     @Test
@@ -1350,14 +1351,14 @@ class GraphCreateProcTest extends BaseProcTest {
             "RETURN 0 AS foo, 1 AS bar;source,target",
         })
     void failsOnMissingSourceAndTargetColumns(String returnClause, String missingColumns) {
-        String query = String.format(
+        String query = formatWithLocale(
             "CALL gds.graph.create.cypher(" +
             "   'cypherGraph', " +
             "   'RETURN 1 AS id', " +
             "   '%s'" +
             ")", returnClause);
 
-        assertError(query, String.format(
+        assertError(query, formatWithLocale(
             "Invalid relationship query, required column(s) not found: '%s'",
             String.join("', '", missingColumns.split(","))
         ));

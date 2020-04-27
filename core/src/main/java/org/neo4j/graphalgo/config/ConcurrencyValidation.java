@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.config;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public interface ConcurrencyValidation {
 
     int CONCURRENCY_LIMITATION = 4;
@@ -48,7 +50,7 @@ public interface ConcurrencyValidation {
     class Validator {
         private static void validate(int requestedConcurrency) {
             if (requestedConcurrency > CONCURRENCY_LIMITATION) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "The configured concurrency value is too high. " +
                     "The maximum allowed concurrency value is %d but %d was configured. " +
                     "Please see the documentation (System Requirements section) for an explanation of concurrency limitations for different editions of Neo4j Graph Data Science. " +

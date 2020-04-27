@@ -59,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.Orientation.REVERSE;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class TestSupport {
 
@@ -118,7 +119,7 @@ public final class TestSupport {
             .reduce(Boolean::logicalXor)
             .orElse(false);
 
-        String message = String.format(
+        String message = formatWithLocale(
             "None of the given graphs matches the actual one.%nActual:%n%s%nExpected:%n%s",
             actualCanonicalized,
             String.join("\n\n", expectedCanonicalized)
@@ -229,6 +230,6 @@ public final class TestSupport {
                 cypherAggregation = "%s";
                 break;
         }
-        return String.format(cypherAggregation, property);
+        return formatWithLocale(cypherAggregation, property);
     }
 }

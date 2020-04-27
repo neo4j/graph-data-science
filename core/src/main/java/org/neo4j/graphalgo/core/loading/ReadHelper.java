@@ -27,6 +27,7 @@ import org.neo4j.values.storable.Values;
 
 import java.util.Arrays;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class ReadHelper {
@@ -85,7 +86,7 @@ public final class ReadHelper {
 
         // TODO: We used to do be lenient and parse strings/booleans into doubles.
         //       Do we want to do so or is failing on non numeric properties ok?
-        throw new IllegalArgumentException(String.format(
+        throw new IllegalArgumentException(formatWithLocale(
             "Unsupported type [%s] of value %s. Please use a numeric property.",
             value.valueGroup(),
             value

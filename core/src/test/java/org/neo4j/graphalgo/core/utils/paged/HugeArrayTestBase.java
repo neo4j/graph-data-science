@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, Huge>> {
 
@@ -422,7 +423,7 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
                 array.copyFromArrayIntoSlice(source, 0, targetSize);
             });
             assertEquals(
-                    String.format("end expected to be in [0 : %d] but got %d", size, targetSize),
+                    formatWithLocale("end expected to be in [0 : %d] but got %d", size, targetSize),
                     assertionError.getMessage()
             );
         });

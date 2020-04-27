@@ -33,6 +33,7 @@ import java.util.Collection;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.BATCH_ENTRY_SIZE;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.PROPERTIES_REFERENCE_OFFSET;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.RELATIONSHIP_REFERENCE_OFFSET;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class RelationshipImporter {
 
@@ -62,7 +63,7 @@ class RelationshipImporter {
                 ? this::importReverseWithProperties
                 : this::importReverse;
         } else {
-            throw new IllegalArgumentException(String.format("Unexpected projection: %s", orientation));
+            throw new IllegalArgumentException(formatWithLocale("Unexpected projection: %s", orientation));
         }
     }
 

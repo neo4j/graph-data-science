@@ -32,6 +32,7 @@ import java.util.Objects;
 
 import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 public class NodePropertyFunc {
@@ -61,14 +62,14 @@ public class NodePropertyFunc {
                 .count();
 
             if (labelsWithProperty == 0) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "No node projection with property '%s' exists.",
                     propertyKey
                 ));
             }
         } else {
             if (!graphStore.hasNodeProperty(singletonList(NodeLabel.of(nodeLabel)), propertyKey)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Node projection '%s' does not have property key '%s'. Available keys: %s.",
                     nodeLabel,
                     propertyKey,
@@ -80,7 +81,7 @@ public class NodePropertyFunc {
         long internalId = graphStore.nodes().toMappedNodeId(nodeId.longValue());
 
         if (internalId == -1) {
-            throw new IllegalArgumentException(String.format("Node id %d does not exist.", nodeId.longValue()));
+            throw new IllegalArgumentException(formatWithLocale("Node id %d does not exist.", nodeId.longValue()));
         }
 
         GraphStore.NodeProperty propertyValues = projectAll

@@ -40,6 +40,7 @@ import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_NAME_KEY;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_TYPE_KEY;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public final class GraphGenerateProc extends BaseProc {
@@ -84,7 +85,7 @@ public final class GraphGenerateProc extends BaseProc {
         GraphGenerationStats stats = new GraphGenerationStats(name, averageDegree, config);
 
         if (GraphStoreCatalog.exists(getUsername(), name)) {
-            throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded.", name));
+            throw new IllegalArgumentException(formatWithLocale("A graph with name '%s' is already loaded.", name));
         }
 
         try (ProgressTimer ignored = ProgressTimer.start(time -> stats.generateMillis = time)) {

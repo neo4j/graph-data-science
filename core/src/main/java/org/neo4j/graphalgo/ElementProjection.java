@@ -30,6 +30,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.Collections.emptyMap;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class ElementProjection {
 
@@ -65,7 +66,7 @@ public abstract class ElementProjection {
     static String nonEmptyString(Map<String, Object> config, String key) {
         @Nullable Object value = config.get(key);
         if (!(value instanceof String) || ((String) value).isEmpty()) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "'%s' is not a valid value for  the key '%s'",
                 value, key
             ));

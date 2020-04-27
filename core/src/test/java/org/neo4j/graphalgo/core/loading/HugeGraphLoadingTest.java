@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class HugeGraphLoadingTest extends BaseTest {
 
@@ -80,7 +81,7 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         NodeProperties nodeProperties = graph.nodeProperties("bar");
         long propertyCountDiff = nodeCount - nodeProperties.size();
-        String errorMessage = String.format(
+        String errorMessage = formatWithLocale(
             "Expected %d properties to be imported. Actually imported %d properties (missing %d properties).",
             nodeCount, nodeProperties.size(), propertyCountDiff
         );
@@ -89,7 +90,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
             double propertyValue = nodeProperties.nodeProperty(nodeId);
             long neoId = graph.toOriginalNodeId(nodeId);
-            assertEquals(neoId, (long) propertyValue, String.format("Property for node %d (neo = %d) was overwritten.", nodeId, neoId));
+            assertEquals(neoId, (long) propertyValue, formatWithLocale("Property for node %d (neo = %d) was overwritten.", nodeId, neoId));
         }
     }
 

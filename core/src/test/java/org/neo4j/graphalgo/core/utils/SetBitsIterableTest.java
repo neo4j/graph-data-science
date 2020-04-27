@@ -30,6 +30,7 @@ import java.util.stream.LongStream;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class SetBitsIterableTest {
 
@@ -81,7 +82,7 @@ class SetBitsIterableTest {
         LongStream outerIter = new SetBitsIterable(bitSet).stream();
         List<String> actual = outerIter.boxed().flatMap(
             outerVal -> new SetBitsIterable(bitSet, outerVal + 1).stream()
-                .mapToObj(innerVal -> String.format("%d, %d", outerVal, innerVal))
+                .mapToObj(innerVal -> formatWithLocale("%d, %d", outerVal, innerVal))
         ).collect(Collectors.toList());
         assertEquals(expected, actual);
     }
@@ -121,7 +122,7 @@ class SetBitsIterableTest {
         // When parallelizing the outer stream and collecting one result per outerVal and thread
         Set<String> actual = new SetBitsIterable(bitSet).stream().parallel().boxed().flatMap(
             outerVal -> new SetBitsIterable(bitSet, outerVal + 1).stream()
-                .mapToObj(innerVal -> String.format("%d handled by %s", outerVal, Thread.currentThread().getName()))
+                .mapToObj(innerVal -> formatWithLocale("%d handled by %s", outerVal, Thread.currentThread().getName()))
         ).collect(Collectors.toSet());
 
         // There should be exactly one result per outerVal, because each inner iteration is handled by exactly one thread

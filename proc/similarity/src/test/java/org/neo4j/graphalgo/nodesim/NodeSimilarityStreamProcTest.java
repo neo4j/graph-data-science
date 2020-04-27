@@ -36,6 +36,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.graphalgo.Orientation.REVERSE;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarityStreamConfig> {
 
@@ -55,7 +56,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
     private static final Collection<String> EXPECTED_TOP_INCOMING = new HashSet<>();
 
     private static String resultString(long node1, long node2, double similarity) {
-        return String.format("%d,%d %f%n", node1, node2, similarity);
+        return formatWithLocale("%d,%d %f%n", node1, node2, similarity);
     }
 
     static {
@@ -95,7 +96,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
         int idOffset = 100;
         long deletedNodes = clearDb();
         registerProcedures(GraphDropProc.class);
-        runQuery(String.format("UNWIND range(1, %d) AS i CREATE (:IncrementIdSpace)", idOffset));
+        runQuery(formatWithLocale("UNWIND range(1, %d) AS i CREATE (:IncrementIdSpace)", idOffset));
         runQuery(DB_CYPHER);
         runQuery("CALL gds.graph.drop('myGraphNATURAL')");
         runQuery(graphCreate);

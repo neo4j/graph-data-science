@@ -59,6 +59,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECT
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class BaseProcTest extends BaseTest {
 
@@ -190,7 +191,7 @@ public class BaseProcTest extends BaseTest {
                     }
                     Object actualValue = actualRow.get(key);
                     assertThat(
-                        String.format("Different value for column '%s' of row %d", key, rowNumber),
+                        formatWithLocale("Different value for column '%s' of row %d", key, rowNumber),
                         actualValue, matcher
                     );
                 });
@@ -243,7 +244,7 @@ public class BaseProcTest extends BaseTest {
 
     protected void assertUserInput(Result.ResultRow row, String key, Object expected) {
         Map<String, Object> configMap = extractUserInput(row);
-        assertTrue(configMap.containsKey(key), String.format("Key %s is not present in config", key));
+        assertTrue(configMap.containsKey(key), formatWithLocale("Key %s is not present in config", key));
         assertEquals(expected, configMap.get(key));
     }
 
@@ -270,7 +271,7 @@ public class BaseProcTest extends BaseTest {
             .filter(e -> e.getKey().graphName().equals(graphName))
             .map(e -> e.getValue().getUnion())
             .findFirst()
-            .orElseThrow(() -> new RuntimeException(String.format("Graph %s not found.", graphName)));
+            .orElseThrow(() -> new RuntimeException(formatWithLocale("Graph %s not found.", graphName)));
     }
 
     private Set<Graph> getLoadedGraphs(String graphName) {

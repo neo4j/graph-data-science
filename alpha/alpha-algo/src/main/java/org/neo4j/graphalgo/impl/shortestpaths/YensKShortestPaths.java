@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * Yen's k-shortest-paths Algorithm.
@@ -88,7 +89,7 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShort
     @Override
     public YensKShortestPaths compute() {
         yens(k, graph.toMappedNodeId(startNode), graph.toMappedNodeId(goalNode), maxDepth);
-        getProgressLogger().logMessage(String.format("done.. found %d/%d paths", shortestPaths.size(), k));
+        getProgressLogger().logMessage(formatWithLocale("done.. found %d/%d paths", shortestPaths.size(), k));
         return this;
     }
 
@@ -113,7 +114,7 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShort
         }
         final WeightedPath shortestPath = shortestPathOpt.get();
         shortestPaths.add(shortestPath);
-        progressLogger.logMessage(String.format("found shortest path: %d nodes / %.2f weight",
+        progressLogger.logMessage(formatWithLocale("found shortest path: %d nodes / %.2f weight",
                 shortestPath.size(),
                 shortestPath.getCost()));
         // keep running until k paths have been found or no further shortest path is possible
@@ -157,7 +158,7 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShort
                         .concat(spurPathOpt.get());
                 // already found?
                 if (!candidates.contains(concatenation)) {
-                    progressLogger.logMessage(String.format("found candidate: %d nodes / %.2f weight",
+                    progressLogger.logMessage(formatWithLocale("found candidate: %d nodes / %.2f weight",
                             concatenation.size(),
                             concatenation.getCost()));
                     candidates.add(concatenation);
@@ -169,7 +170,7 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths, YensKShort
             }
             // add the best candidate (with lowest weight) to the result set.
             final WeightedPath candidate = candidates.remove();
-            progressLogger.logMessage(String.format("found path: %d nodes / %.2f weight",
+            progressLogger.logMessage(formatWithLocale("found path: %d nodes / %.2f weight",
                     candidate.size(),
                     candidate.getCost()));
             shortestPaths.add(candidate);

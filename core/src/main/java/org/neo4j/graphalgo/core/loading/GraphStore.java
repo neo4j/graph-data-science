@@ -61,6 +61,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class GraphStore {
 
@@ -195,7 +196,7 @@ public final class GraphStore {
 
     public void addNodeProperty(NodeLabel nodeLabel, String propertyKey, NumberType propertyType, NodeProperties propertyValues) {
         if (!nodeLabels().contains(nodeLabel)) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Adding '%s.%s' to the graph store failed. Node label '%s' does not exist in the store. Available node labels: %s",
                 nodeLabel.name, propertyKey, nodeLabel.name,
                 StringJoining.join(nodeLabels().stream().map(NodeLabel::name))
@@ -534,7 +535,7 @@ public final class GraphStore {
             .filter(label -> !new HashSet<>(labelInformation.keySet()).contains(label))
             .collect(Collectors.toList());
         if (!invalidLabels.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Specified labels %s do not correspond to any of the node projections %s.",
                 invalidLabels,
                 labelInformation.keySet()
@@ -544,7 +545,7 @@ public final class GraphStore {
 
     private void validateInput(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         if (relationshipTypes.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "The parameter '%s' should not be empty. Use '*' to load all relationship types.",
                 ProcedureConstants.RELATIONSHIP_TYPES
             ));
@@ -552,7 +553,7 @@ public final class GraphStore {
 
         relationshipTypes.forEach(relationshipType -> {
             if (!relationships.containsKey(relationshipType)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "No relationships have been loaded for relationship type '%s'",
                     relationshipType
                 ));
@@ -560,7 +561,7 @@ public final class GraphStore {
 
             maybeRelationshipProperty.ifPresent(relationshipProperty -> {
                 if (!hasRelationshipProperty(singletonList(relationshipType), relationshipProperty)) {
-                    throw new IllegalArgumentException(String.format(
+                    throw new IllegalArgumentException(formatWithLocale(
                         "Property '%s' does not exist for relationships with type '%s'.",
                         maybeRelationshipProperty.get(),
                         relationshipType

@@ -59,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
@@ -187,7 +188,7 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
     @ParameterizedTest(name = "parameter: {0}, value: {1}")
     @CsvSource(value = {"topN, -2", "bottomN, -2", "topK, -2", "bottomK, -2", "topK, 0", "bottomK, 0"})
     void shouldThrowForInvalidTopsAndBottoms(String parameter, long value) {
-        String message = String.format("Value for `%s` must be within", parameter);
+        String message = formatWithLocale("Value for `%s` must be within", parameter);
         CypherMapWrapper input = baseUserInput().withNumber(parameter, value);
 
         IllegalArgumentException illegalArgumentException = assertThrows(
@@ -202,7 +203,7 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
     void shouldThrowForInvalidTopAndBottomCombination(String top, String bottom) {
         CypherMapWrapper input = baseUserInput().withNumber(top, 1).withNumber(bottom, 1);
 
-        String expectedMessage = String.format("Invalid parameter combination: %s combined with %s", top, bottom);
+        String expectedMessage = formatWithLocale("Invalid parameter combination: %s combined with %s", top, bottom);
 
         IllegalArgumentException illegalArgumentException = assertThrows(
             IllegalArgumentException.class,
@@ -219,7 +220,7 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
             IllegalArgumentException.class,
             () -> config(input)
         );
-        assertThat(illegalArgumentException.getMessage(), is(String.format("Value for `degreeCutoff` must be within [1, %d].", Integer.MAX_VALUE)));
+        assertThat(illegalArgumentException.getMessage(), is(formatWithLocale("Value for `degreeCutoff` must be within [1, %d].", Integer.MAX_VALUE)));
     }
 
     @ParameterizedTest
@@ -233,7 +234,7 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
         );
         assertThat(
             illegalArgumentException.getMessage(),
-            is(String.format(Locale.ENGLISH, "Value for `similarityCutoff` must be within [%.2f, %.2f].", 0D, 1D))
+            is(formatWithLocale("Value for `similarityCutoff` must be within [%.2f, %.2f].", 0D, 1D))
         );
     }
 

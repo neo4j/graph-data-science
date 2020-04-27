@@ -38,6 +38,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * Graph:
@@ -84,7 +85,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
             .addParameter("relationshipWeightProperty", "cost")
             .yields("index", "sourceNodeId", "targetNodeId", "nodeIds", "costs");
 
-        String cypher = String.format(
+        String cypher = formatWithLocale(
             "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) %s RETURN *",
             algoCall
         );
@@ -121,7 +122,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
             .addParameter("path", true)
             .yields("index", "sourceNodeId", "targetNodeId", "nodeIds", "costs", "path");
 
-        String cypher = String.format(
+        String cypher = formatWithLocale(
             "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) %s RETURN *",
             algoCall
         );
@@ -161,7 +162,7 @@ class YensKShortestPathsStreamingProcTest extends BaseProcTest {
             .addParameter("path", true)
             .yields("index", "sourceNodeId", "targetNodeId", "nodeIds", "costs", "path");
 
-        String cypher = String.format(
+        String cypher = formatWithLocale(
             "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) %s RETURN *",
             algoCall
         );

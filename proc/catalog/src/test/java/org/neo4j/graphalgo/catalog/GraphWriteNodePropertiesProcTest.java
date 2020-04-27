@@ -47,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
@@ -117,7 +118,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten"
     })
     void writeLoadedNodeProperties(String graphWriteQueryTemplate) {
-        String graphWriteQuery = String.format(graphWriteQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
+        String graphWriteQuery = formatWithLocale(graphWriteQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
             assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
@@ -145,7 +146,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void writeLoadedNodePropertiesForLabel() {
-        String graphWriteQuery = String.format(
+        String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.writeNodeProperties(" +
             "   '%s', " +
             "   ['newNodeProp1', 'newNodeProp2'], " +
@@ -181,7 +182,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void writeLoadedNodePropertiesForLabelSubset() {
-        String graphWriteQuery = String.format(
+        String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.writeNodeProperties(" +
             "   '%s', " +
             "   ['newNodeProp1', 'newNodeProp2']" +
@@ -223,7 +224,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
         graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
 
-        String graphWriteQuery = String.format(
+        String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.writeNodeProperties(" +
             "   '%s', " +
             "   ['newNodeProp3']" +
@@ -257,7 +258,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     void shouldFailOnNonExistingNodeProperties() {
         QueryExecutionException ex = assertThrows(
             QueryExecutionException.class,
-            () -> runQuery(String.format(
+            () -> runQuery(formatWithLocale(
                 "CALL gds.graph.writeNodeProperties(" +
                 "   '%s', " +
                 "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']" +
@@ -278,7 +279,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     void shouldFailOnNonExistingNodePropertiesForSpecificLabel() {
         QueryExecutionException ex = assertThrows(
             QueryExecutionException.class,
-            () -> runQuery(String.format(
+            () -> runQuery(formatWithLocale(
                 "CALL gds.graph.writeNodeProperties(" +
                 "   '%s', " +
                 "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], " +

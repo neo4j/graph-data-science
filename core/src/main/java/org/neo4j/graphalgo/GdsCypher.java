@@ -56,6 +56,7 @@ import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_VALUE_KEY;
 import static org.neo4j.graphalgo.PropertyMapping.PROPERTY_KEY;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE, depluralize = true, deepImmutablesDetection = true)
 public abstract class GdsCypher {
@@ -384,7 +385,7 @@ public abstract class GdsCypher {
         String procedureName = procedureName(algoNamespace, algoName, executionMode, specialExecution);
         String queryArguments = queryArguments(explicitGraphName, implicitCreateConfig, executionMode, parameters);
         String yieldsFields = yieldsFields(yields);
-        return String.format("CALL %s(%s)%s", procedureName, queryArguments, yieldsFields);
+        return formatWithLocale("CALL %s(%s)%s", procedureName, queryArguments, yieldsFields);
     }
 
     private static String procedureName(

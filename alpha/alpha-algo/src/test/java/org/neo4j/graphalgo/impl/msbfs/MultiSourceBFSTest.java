@@ -51,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class MultiSourceBFSTest extends AlgoTestBase {
 
@@ -150,7 +151,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                             graph,
                             graph,
                             (i, d, s) -> {
-                                String message = String.format(
+                                String message = formatWithLocale(
                                         "The node(%d) was traversed multiple times at depth %d",
                                         i,
                                         d

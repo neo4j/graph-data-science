@@ -71,6 +71,7 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
 import static org.neo4j.graphalgo.nodesim.NodeSimilarityBaseConfig.TOP_K_DEFAULT;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class NodeSimilarityTest extends AlgoTestBase {
 
@@ -194,7 +195,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
     }
 
     private static String resultString(long node1, long node2, double similarity) {
-        return String.format("%d,%d %f%n", node1, node2, similarity);
+        return formatWithLocale("%d,%d %f%n", node1, node2, similarity);
     }
 
     private static String resultString(SimilarityResult result) {

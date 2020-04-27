@@ -54,6 +54,7 @@ import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphListProcTest extends BaseProcTest {
 
@@ -484,7 +485,7 @@ class GraphListProcTest extends BaseProcTest {
             assertError(
                 "CALL gds.graph.list($graphName)",
                 map("graphName", invalidName),
-                String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+                formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
             );
         }
     }
@@ -492,7 +493,7 @@ class GraphListProcTest extends BaseProcTest {
     @ParameterizedTest(name = "Invalid Graph Name: {0}")
     @ValueSource(strings = {"{ a: 'b' }", "[]", "1", "true", "false", "[1, 2, 3]", "1.4"})
     void failsOnInvalidGraphNameTypeDueToObjectSignature(String graphName) {
-        assertError(String.format("CALL gds.graph.list(%s)", graphName), "Type mismatch: expected String but was");
+        assertError(formatWithLocale("CALL gds.graph.list(%s)", graphName), "Type mismatch: expected String but was");
     }
 
     private String formatCreationTime(Result.ResultRow resultRow) {

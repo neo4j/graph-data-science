@@ -55,6 +55,7 @@ import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_SEED_KEY;
 import static org.neo4j.graphalgo.core.CypherMapWrapper.create;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphGenerateProcTest extends BaseProcTest {
 
@@ -168,7 +169,7 @@ class GraphGenerateProcTest extends BaseProcTest {
         errorFragments.forEach((expectedErrorFragment) -> {
             assertTrue(
                 message.contains(expectedErrorFragment),
-                String.format(
+                formatWithLocale(
                     "Expected error message to contain `%s`, but got `%s`",
                     expectedErrorFragment,
                     message

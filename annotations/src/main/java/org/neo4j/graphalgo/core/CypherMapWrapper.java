@@ -213,9 +213,9 @@ public final class CypherMapWrapper {
                     return invalid;
                 }
                 if (candidates.size() == 1) {
-                    return String.format("%s (Did you mean [%s]?)", invalid, candidates.get(0));
+                    return String.format(Locale.ENGLISH, "%s (Did you mean [%s]?)", invalid, candidates.get(0));
                 }
-                return String.format("%s (Did you mean one of [%s]?)", invalid, String.join(", ", candidates));
+                return String.format(Locale.ENGLISH, "%s (Did you mean one of [%s]?)", invalid, String.join(", ", candidates));
             })
             .collect(Collectors.toList());
 
@@ -315,6 +315,7 @@ public final class CypherMapWrapper {
             return expectedType.cast(((Number) value).doubleValue());
         } else if (!expectedType.isInstance(value)) {
             String message = String.format(
+                Locale.ENGLISH,
                 "The value of `%s` must be of type `%s` but was `%s`.",
                 key,
                 expectedType.getSimpleName(),
@@ -345,18 +346,21 @@ public final class CypherMapWrapper {
     private static String missingValueMessage(String key, List<String> suggestions) {
         if (suggestions.isEmpty()) {
             return String.format(
+                Locale.US,
                 "No value specified for the mandatory configuration parameter `%s`",
                 key
             );
         }
         if (suggestions.size() == 1) {
             return String.format(
+                Locale.ENGLISH,
                 "No value specified for the mandatory configuration parameter `%s` (a similar parameter exists: [%s])",
                 key,
                 suggestions.get(0)
             );
         }
         return String.format(
+            Locale.ENGLISH,
             "No value specified for the mandatory configuration parameter `%s` (similar parameters exist: [%s])",
             key,
             String.join(", ", suggestions)
@@ -400,7 +404,7 @@ public final class CypherMapWrapper {
         }
 
         String message = missingMutuallyExclusivePairMessage(firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo);
-        throw new IllegalArgumentException(String.format("%s %s", errorPrefix, message));
+        throw new IllegalArgumentException(String.format(Locale.ENGLISH,"%s %s", errorPrefix, message));
     }
 
     private boolean checkMutuallyExclusivePairs(
@@ -414,6 +418,7 @@ public final class CypherMapWrapper {
             boolean secondTwoExists = config.containsKey(secondPairKeyTwo);
             if (secondOneExists && secondTwoExists) {
                 throw new IllegalArgumentException(String.format(
+                    Locale.ENGLISH,
                     "Invalid keys: [%s, %s]. Those keys cannot be used together with `%s` and `%s`.",
                     secondPairKeyOne,
                     secondPairKeyTwo,
@@ -422,6 +427,7 @@ public final class CypherMapWrapper {
                 ));
             } else if (secondOneExists || secondTwoExists) {
                 throw new IllegalArgumentException(String.format(
+                    Locale.ENGLISH,
                     "Invalid key: [%s]. This key cannot be used together with `%s` and `%s`.",
                     secondOneExists ? secondPairKeyOne : secondPairKeyTwo,
                     firstPairKeyOne,
@@ -454,6 +460,7 @@ public final class CypherMapWrapper {
 
         // either pairs have the same possibility score, we don't know which one we should use
         return String.format(
+            Locale.ENGLISH,
             "Specify either `%s` and `%s` or `%s` and `%s`.",
             firstPairKeyOne,
             firstPairKeyTwo,
@@ -506,6 +513,7 @@ public final class CypherMapWrapper {
 
     private static IllegalArgumentException blankValueFor(String key, @Nullable String value) {
         return new IllegalArgumentException(String.format(
+            Locale.ENGLISH,
             "`%s` can not be null or blank, but it was `%s`",
             key,
             value
@@ -520,6 +528,7 @@ public final class CypherMapWrapper {
         boolean maxInclusive
     ) {
         return new IllegalArgumentException(String.format(
+            Locale.ENGLISH,
             "Value for `%s` must be within %s%s, %s%s.",
             key,
             minInclusive ? "[" : "(",

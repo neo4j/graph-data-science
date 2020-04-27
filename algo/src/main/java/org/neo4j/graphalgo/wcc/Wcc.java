@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 /**
  * Parallel Union-Find Algorithm based on the
  * "Wait-free Parallel Algorithms for the Union-Find Problem" paper.
@@ -88,7 +90,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
 
         long threadSize = ParallelUtil.threadCount(batchSize, nodeCount);
         if (threadSize > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Too many nodes (%d) to run union find with the given concurrency (%d) and batchSize (%d)",
                 nodeCount,
                 config.concurrency(),

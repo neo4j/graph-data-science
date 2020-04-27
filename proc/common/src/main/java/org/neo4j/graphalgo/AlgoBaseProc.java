@@ -64,6 +64,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -256,7 +257,7 @@ public abstract class AlgoBaseProc<
         if (config instanceof SeedConfig) {
             String seedProperty = ((SeedConfig) config).seedProperty();
             if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Seed property `%s` not found in graph with node properties: %s",
                     seedProperty,
                     graphStore.nodePropertyKeys().values()
@@ -278,7 +279,7 @@ public abstract class AlgoBaseProc<
         if (config instanceof NodeWeightConfig) {
             String weightProperty = ((NodeWeightConfig) config).nodeWeightProperty();
             if (weightProperty != null && !graphStore.hasNodeProperty(filterLabels, weightProperty)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Node weight property `%s` not found in graph with node properties: %s",
                     weightProperty,
                     graphStore.nodePropertyKeys().values()
@@ -290,7 +291,7 @@ public abstract class AlgoBaseProc<
 
             String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
             if (weightProperty != null && !properties.contains(weightProperty)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Relationship weight property `%s` not found in graph with relationship properties: %s",
                     weightProperty,
                     properties
@@ -303,7 +304,7 @@ public abstract class AlgoBaseProc<
             String mutateProperty = mutateConfig.mutateProperty();
 
             if (mutateProperty != null && graphStore.hasNodeProperty(filterLabels, mutateProperty)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Node property `%s` already exists in the in-memory graph.",
                     mutateProperty
                 ));
@@ -313,7 +314,7 @@ public abstract class AlgoBaseProc<
         if (config instanceof MutateRelationshipConfig) {
             String mutateRelationshipType = ((MutateRelationshipConfig) config).mutateRelationshipType();
             if (mutateRelationshipType != null && graphStore.hasRelationshipType(RelationshipType.of(mutateRelationshipType))) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Relationship type `%s` already exists in the in-memory graph.",
                     mutateRelationshipType
                 ));
