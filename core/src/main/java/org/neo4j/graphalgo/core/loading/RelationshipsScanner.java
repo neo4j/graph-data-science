@@ -25,8 +25,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -140,14 +138,10 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     }
 
     @Override
-    public void accept(final KernelTransaction transaction) {
-        scanRelationships(transaction.dataRead(), transaction.cursors());
-    }
-
-    private void scanRelationships(final Read read, final CursorFactory cursors) {
-        try (AbstractStorePageCacheScanner.Cursor<RelationshipReference> cursor = scanner.getCursor()) {
+    public void accept(KernelTransaction transaction) {
+        try (StoreScanner.GdsCursor<RelationshipReference> cursor = scanner.getCursor(transaction)) {
             List<SingleTypeRelationshipImporter> importers = this.importerBuilders.stream()
-                    .map(imports -> imports.withBuffer(idMap, cursor.bulkSize(), read, cursors))
+                    .map(imports -> imports.withBuffer(idMap, cursor.bulkSize(), transaction.dataRead(), transaction.cursors()))
                     .collect(Collectors.toList());
 
             RelationshipsBatchBuffer[] buffers = importers

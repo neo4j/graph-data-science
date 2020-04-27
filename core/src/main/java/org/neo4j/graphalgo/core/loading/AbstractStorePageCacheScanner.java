@@ -26,6 +26,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
@@ -42,7 +43,7 @@ import static org.neo4j.kernel.impl.store.RecordPageLocationCalculator.offsetFor
 
 abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractBaseRecord, Store extends RecordStore<Record>> implements StoreScanner<Reference> {
 
-    final class StoreScanCursor implements Cursor<Reference> {
+    final class StoreScanCursor implements GdsCursor<Reference> {
 
         // last page to contain a value of interest, inclusive, but we mostly
         // treat is as exclusive since we want to special-case the last page
@@ -190,7 +191,7 @@ abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractB
                 record = null;
                 recordReference = null;
 
-                final Cursor<Reference> localCursor = cursors.get();
+                final GdsCursor<Reference> localCursor = cursors.get();
                 // sanity check, should always be called from the same thread
                 if (localCursor == this) {
                     cursors.remove();
@@ -204,7 +205,7 @@ abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractB
     // global pointer which block of pages need to be fetched next
     private final AtomicLong nextPageId;
     // global cursor pool to return this one to
-    private final ThreadLocal<Cursor<Reference>> cursors;
+    private final ThreadLocal<GdsCursor<Reference>> cursors;
 
     // size in bytes of a single record - advance the offset by this much
     private final int recordSize;
@@ -257,8 +258,8 @@ abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractB
     }
 
     @Override
-    public final Cursor<Reference> getCursor() {
-        Cursor<Reference> cursor = cursors.get();
+    public final GdsCursor<Reference> getCursor(KernelTransaction transaction) {
+        GdsCursor<Reference> cursor = this.cursors.get();
         if (cursor == null) {
             // Don't add as we want to always call next as the first cursor action,
             // which actually does the advance and returns the correct cursor.
@@ -280,7 +281,7 @@ abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractB
             Record record = store.newRecord();
             Reference reference = recordReference(record, store);
             cursor = new StoreScanCursor(pageCursor, record, reference);
-            cursors.set(cursor);
+            this.cursors.set(cursor);
         }
         return cursor;
     }

@@ -32,7 +32,7 @@ abstract class RecordsBatchBuffer<Reference> implements RecordConsumer<Reference
         this.buffer = new long[capacity];
     }
 
-    boolean scan(AbstractStorePageCacheScanner.Cursor<Reference> cursor) {
+    boolean scan(StoreScanner.GdsCursor<Reference> cursor) {
         reset();
         return cursor.bulkNext(this);
     }

@@ -20,33 +20,34 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.kernel.api.KernelTransaction;
 
-public interface StoreScanner<Record> {
+public interface StoreScanner<Reference> {
 
     int DEFAULT_PREFETCH_SIZE = 100;
 
-    interface RecordConsumer<Record> {
+    interface RecordConsumer<Reference> {
         /**
          * Imports the record at a given position and return the new position.
          * Can also ignore the record if it is not of interest.
          */
-        void offer(Record record);
+        void offer(Reference reference);
     }
 
-    interface Factory<Record> {
-        StoreScanner<Record> newScanner(int prefetchSize, GraphDatabaseService api);
+    interface Factory<Reference> {
+        StoreScanner<Reference> newScanner(int prefetchSize, GraphDatabaseService api);
     }
 
-    interface Cursor<Record> extends AutoCloseable {
+    interface GdsCursor<Reference> extends AutoCloseable {
         int bulkSize();
 
-        boolean bulkNext(RecordConsumer<Record> consumer);
+        boolean bulkNext(RecordConsumer<Reference> consumer);
 
         @Override
         void close();
     }
 
-    Cursor<Record> getCursor();
+    GdsCursor<Reference> getCursor(KernelTransaction transaction);
 
     long storeSize();
 }
