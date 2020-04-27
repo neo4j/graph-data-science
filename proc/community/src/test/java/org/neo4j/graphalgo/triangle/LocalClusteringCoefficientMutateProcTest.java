@@ -113,7 +113,7 @@ class LocalClusteringCoefficientMutateProcTest
     void testMutateSeeded() {
         var query = "CALL gds.triangleCount.localClusteringCoefficient.mutate('g', {" +
                     "   mutateProperty: $mutateProperty," +
-                    "   seedProperty: 'seed'" +
+                    "   triangleCountProperty: 'seed'" +
                     "})";
 
         assertCypherResult(query, Map.of("mutateProperty", mutateProperty()), List.of(Map.of(

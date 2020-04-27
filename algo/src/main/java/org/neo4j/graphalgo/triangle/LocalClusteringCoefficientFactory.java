@@ -59,7 +59,7 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
             .builder(LocalClusteringCoefficient.class)
             .perNode("local-clustering-coefficient", HugeDoubleArray::memoryEstimation);
 
-        if(null == configuration.seedProperty()) {
+        if(null == configuration.triangleCountProperty()) {
             builder.add(
                 "computed-triangle-counts",
                 new IntersectingTriangleCountFactory<>().memoryEstimation(createTriangleCountConfig(configuration))

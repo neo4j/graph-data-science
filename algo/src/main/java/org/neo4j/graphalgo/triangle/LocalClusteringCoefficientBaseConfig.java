@@ -20,11 +20,12 @@
 
 package org.neo4j.graphalgo.triangle;
 
+import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -32,7 +33,13 @@ import java.util.Optional;
 @ValueClass
 @Configuration("LocalClusteringCoefficientBaseConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, SeedConfig {
+public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig {
+
+    @Nullable
+    @Value.Default
+    default String triangleCountProperty() {
+        return null;
+    }
 
     static LocalClusteringCoefficientBaseConfig of(
         String username,

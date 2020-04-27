@@ -48,7 +48,7 @@ class LocalClusteringCoefficientStatsProcTest extends LocalClusteringCoefficient
 
     @Test
     void testStatsSeeded() {
-        var query = "CALL gds.triangleCount.localClusteringCoefficient.stats('g', { seedProperty: 'seed'})";
+        var query = "CALL gds.triangleCount.localClusteringCoefficient.stats('g', { triangleCountProperty: 'seed'})";
 
         assertCypherResult(query, List.of(Map.of(
             "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficientSeeded() / 5, 1e-10),

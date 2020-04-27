@@ -38,7 +38,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
 
     private final int concurrency;
     private final AllocationTracker tracker;
-    private final NodeProperties seedProperty;
+    private final NodeProperties triangleCountProperty;
     private final LocalClusteringCoefficientBaseConfig configuration;
 
     private Graph graph;
@@ -60,8 +60,8 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
 
         this.configuration = configuration;
         this.concurrency = configuration.concurrency();
-        this.seedProperty =
-            Optional.ofNullable(configuration.seedProperty())
+        this.triangleCountProperty =
+            Optional.ofNullable(configuration.triangleCountProperty())
                 .map(graph::nodeProperties)
                 .orElse(null);
     }
@@ -69,11 +69,11 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     @Override
     public Result compute() {
 
-        if (null == seedProperty) {
+        if (null == triangleCountProperty) {
             HugeAtomicLongArray triangleCounts = computeTriangleCounts();
             calculateCoefficients(triangleCounts::get);
         } else {
-            calculateCoefficients((nodeId) -> (long) seedProperty.nodeProperty(nodeId, 0.0));
+            calculateCoefficients((nodeId) -> (long) triangleCountProperty.nodeProperty(nodeId, 0.0));
         }
 
         return Result.of(
