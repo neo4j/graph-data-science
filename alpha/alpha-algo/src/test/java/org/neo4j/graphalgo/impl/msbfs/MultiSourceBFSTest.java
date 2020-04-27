@@ -294,8 +294,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         runQuery(cypher);
         block.accept(new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .build()
             .graph(NativeFactory.class));
     }
@@ -310,8 +308,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         graphBuilder.close();
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .build()
             .graph(NativeFactory.class);
         block.accept(graph);

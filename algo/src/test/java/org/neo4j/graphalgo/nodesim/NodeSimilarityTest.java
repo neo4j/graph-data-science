@@ -231,8 +231,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldComputeForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .graph(NativeFactory.class);
@@ -259,8 +257,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldComputeTopNForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .graph(NativeFactory.class);
@@ -287,8 +283,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldComputeNegativeTopNForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .graph(NativeFactory.class);
@@ -318,8 +312,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldComputeTopKForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .graph(NativeFactory.class);
@@ -346,8 +338,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldComputeNegativeTopKForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .graph(NativeFactory.class);
@@ -381,8 +371,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldComputeWithSimilarityCutoffForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .graph(NativeFactory.class);
@@ -412,8 +400,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldComputeWithDegreeCutoffForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .graph(NativeFactory.class);
@@ -443,8 +429,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldComputeForUndirectedGraphs(int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(UNDIRECTED)
             .build()
             .graph(NativeFactory.class);
@@ -466,8 +450,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldComputeSimilarityGraphInAllSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .graph(NativeFactory.class);
@@ -525,8 +507,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .graph(NativeFactory.class);
@@ -580,8 +560,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .graph(NativeFactory.class);
@@ -622,8 +600,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .globalAggregation(Aggregation.NONE)
             .build()
@@ -652,8 +628,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldThrowForDirectionBoth(int concurrency) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(UNDIRECTED)
             .build()
             .graph(NativeFactory.class);
@@ -799,8 +773,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldLogMessages(int topK, int concurrency) {
         var graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .build()
             .graph(NativeFactory.class);
 
@@ -839,8 +811,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
     void shouldLogProgress(int concurrency) {
         var graph =  new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(NATURAL)
             .build()
             .graph(NativeFactory.class);

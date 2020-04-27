@@ -55,14 +55,11 @@ import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 
 public abstract class AlgoBaseProc<
@@ -127,7 +124,7 @@ public abstract class AlgoBaseProc<
         if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
-            GraphStoreFactory graphStoreFactory = loader.build(config.getGraphImpl());
+            GraphStoreFactory graphStoreFactory = loader.build(createConfig.getGraphImpl());
             estimateDimensions = graphStoreFactory.dimensions();
 
             if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {
@@ -143,7 +140,9 @@ public abstract class AlgoBaseProc<
         } else {
             String graphName = config.graphName().orElseThrow(IllegalStateException::new);
 
-            GraphCreateConfig graphCreateConfig = GraphStoreCatalog.get(getUsername(), graphName).config();
+            GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(getUsername(), graphName);
+            GraphCreateConfig graphCreateConfig = graphStoreWithConfig.config();
+            GraphStore graphStore = graphStoreWithConfig.graphStore();
 
             // TODO get the dimensions from the graph itself.
             if (graphCreateConfig instanceof RandomGraphGeneratorConfig) {
@@ -152,11 +151,19 @@ public abstract class AlgoBaseProc<
                     .maxRelCount(((RandomGraphGeneratorConfig) graphCreateConfig).averageDegree() * graphCreateConfig.nodeCount())
                     .build();
             } else {
-                GraphCreateConfig filteredConfig = filterGraphCreateConfig(config, graphCreateConfig);
+                Graph filteredGraph = graphStore.getGraph(
+                    config.nodeLabelIdentifiers(graphStore),
+                    config.relationshipTypeIdentifiers(graphStore),
+                    Optional.empty(),
+                    config.concurrency()
+                );
+                long relCount = filteredGraph.relationshipCount();
 
-                GraphLoader loader = newLoader(filteredConfig, AllocationTracker.EMPTY);
-                GraphStoreFactory graphStoreFactory = loader.build(config.getGraphImpl());
-                estimateDimensions = graphStoreFactory.dimensions();
+                estimateDimensions = ImmutableGraphDimensions.builder()
+                    .nodeCount(filteredGraph.nodeCount())
+                    .relationshipCounts(Map.of(RelationshipType.ALL_RELATIONSHIPS, relCount))
+                    .maxRelCount(relCount)
+                    .build();
             }
         }
 
@@ -164,30 +171,6 @@ public abstract class AlgoBaseProc<
 
         MemoryTree memoryTree = estimationBuilder.build().estimate(estimateDimensions, config.concurrency());
         return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);
-    }
-
-    private GraphCreateConfig filterGraphCreateConfig(CONFIG config, GraphCreateConfig graphCreateConfig) {
-        NodeProjections nodeProjections = graphCreateConfig.nodeProjections();
-        if (config.nodeLabels().contains(PROJECT_ALL)) {
-            return graphCreateConfig;
-        } else {
-            List<NodeLabel> nodeLabels = config.nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
-            NodeProjections.Builder builder = NodeProjections.builder();
-            nodeProjections
-                .projections()
-                .entrySet()
-                .stream()
-                .filter(projection -> nodeLabels.contains(projection.getKey()))
-                .forEach(entry -> builder.putProjection(entry.getKey(), entry.getValue()));
-            NodeProjections filteredNodeProjections = builder.build();
-            return GraphCreateFromStoreConfig.of(
-                config.username(),
-                config.graphName().get(),
-                filteredNodeProjections,
-                graphCreateConfig.relationshipProjections(),
-                CypherMapWrapper.create(config.toMap())
-            );
-        }
     }
 
     protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
@@ -231,9 +214,7 @@ public abstract class AlgoBaseProc<
             : Optional.empty();
 
         Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
-        Collection<RelationshipType> relationshipTypes = config.relationshipTypes().contains(PROJECT_ALL)
-            ? graphStore.relationshipTypes()
-            : config.relationshipTypeIdentifiers();
+        Collection<RelationshipType> relationshipTypes = config.relationshipTypeIdentifiers(graphStore);
 
         return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty, config.concurrency());
     }
@@ -328,6 +309,21 @@ public abstract class AlgoBaseProc<
     }
 
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) { }
+
+    protected void validateIsUndirectedGraph(GraphCreateConfig graphCreateConfig) {
+        if (!graphCreateConfig.isCypher()) {
+            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
+            storeConfig.relationshipProjections().projections().entrySet().stream()
+                .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
+                .forEach(entry -> {
+                    throw new IllegalArgumentException(String.format(
+                        "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses projection `%s`",
+                        entry.getKey().name,
+                        entry.getValue().orientation()
+                    ));
+                });
+        }
+    }
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,

@@ -81,8 +81,6 @@ class TraverseMaxCostTest extends AlgoTestBase {
 
         graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addRelationshipProperty(PropertyMapping.of("distance", Double.MAX_VALUE))
             .build()
             .load(NativeFactory.class);

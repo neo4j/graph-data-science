@@ -103,7 +103,6 @@ class DijkstraProcTest_152 extends BaseProcTest {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .addNodeLabel("Loc")
-            .loadAnyRelationshipType()
             .globalAggregation(Aggregation.NONE)
             .addRelationshipProperty(PropertyMapping.of("d", 0))
             .build()

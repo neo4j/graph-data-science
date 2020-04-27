@@ -91,8 +91,6 @@ final class CypherExporterTest extends BaseTest {
     private String dumpGraph() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addNodeProperty(PropertyMapping.of("property", 42))
             .addRelationshipProperty(PropertyMapping.of("property", 42))
             .build()

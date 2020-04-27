@@ -24,7 +24,7 @@ import org.immutables.value.Value;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.utils.cypher.CypherPrinter;
@@ -263,7 +263,7 @@ public abstract class GdsCypher {
     }
 
     public interface CreationBuildStage extends ImplicitCreationInlineBuilder {
-        QueryBuilder implicitCreation(GraphCreateConfig config);
+        QueryBuilder implicitCreation(GraphCreateFromStoreConfig config);
 
         QueryBuilder explicitCreation(String graphName);
     }
@@ -377,7 +377,7 @@ public abstract class GdsCypher {
         ExecutionMode executionMode,
         @Builder.Switch(defaultName = "NORMAL") SpecialExecution specialExecution,
         Optional<String> explicitGraphName,
-        Optional<GraphCreateConfig> implicitCreateConfig,
+        Optional<GraphCreateFromStoreConfig> implicitCreateConfig,
         Map<String, Object> parameters,
         List<String> yields
     ) {
@@ -412,7 +412,7 @@ public abstract class GdsCypher {
 
     private static String queryArguments(
         Optional<String> explicitGraphName,
-        Optional<GraphCreateConfig> implicitCreateConfig,
+        Optional<GraphCreateFromStoreConfig> implicitCreateConfig,
         ExecutionMode executionMode,
         Map<String, Object> parameters
     ) {
@@ -420,7 +420,7 @@ public abstract class GdsCypher {
         explicitGraphName.ifPresent(name -> queryArguments.add(PRINTER.toCypherString(name)));
 
         if (implicitCreateConfig.isPresent()) {
-            GraphCreateConfig config = implicitCreateConfig.get();
+            GraphCreateFromStoreConfig config = implicitCreateConfig.get();
             Map<String, Object> newParameters = new LinkedHashMap<>(
                 parameters.size() + ADDITIONAL_PARAMETERS_FOR_IMPLICIT_GRAPH_CREATION
             );
@@ -480,7 +480,7 @@ public abstract class GdsCypher {
         }
 
         @Override
-        public StagedBuilder implicitCreation(GraphCreateConfig config) {
+        public StagedBuilder implicitCreation(GraphCreateFromStoreConfig config) {
             graphCreateBuilder()
                 .graphName("")
                 .nodeProjections(config.nodeProjections().projections())
@@ -613,7 +613,7 @@ public abstract class GdsCypher {
         @Language("Cypher")
         private String build() {
             if (graphCreateBuilder != null) {
-                GraphCreateConfig config = graphCreateBuilder.build();
+                GraphCreateFromStoreConfig config = graphCreateBuilder.build();
                 if (config.graphName().isEmpty()) {
                     builder.explicitGraphName(Optional.empty());
                 } else {
@@ -634,7 +634,7 @@ public abstract class GdsCypher {
 
 
     @Builder.Factory
-    static GraphCreateConfig inlineGraphCreateConfig(
+    static GraphCreateFromStoreConfig inlineGraphCreateConfig(
         Optional<String> graphName,
         Map<NodeLabel, NodeProjection> nodeProjections,
         Map<RelationshipType, RelationshipProjection> relProjections,

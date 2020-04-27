@@ -59,8 +59,6 @@ class NodePropertyExporterTest extends BaseTest {
     @Test
     void exportSingleNodeProperty() {
         Graph graph = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addNodeProperty("newProp1", "prop1", 42.0, Aggregation.NONE)
             .build()
             .graph(NativeFactory.class);
@@ -70,8 +68,6 @@ class NodePropertyExporterTest extends BaseTest {
         exporter.write("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR);
 
         Graph updatedGraph = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addNodeProperty("prop1", "prop1", 42.0, Aggregation.NONE)
             .addNodeProperty("newProp1", "newProp1", 42.0, Aggregation.NONE)
             .build()
@@ -93,8 +89,6 @@ class NodePropertyExporterTest extends BaseTest {
     @Test
     void exportMultipleNodeProperties() {
         Graph graph = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addNodeProperty("newProp1", "prop1", 42.0, Aggregation.NONE)
             .addNodeProperty("newProp2", "prop2", 42.0, Aggregation.NONE)
             .build()
@@ -110,8 +104,6 @@ class NodePropertyExporterTest extends BaseTest {
         exporter.write(nodeProperties);
 
         Graph updatedGraph = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addNodeProperty("prop1", "prop1", 42.0, Aggregation.NONE)
             .addNodeProperty("newProp1", "newProp1", 42.0, Aggregation.NONE)
             .addNodeProperty("newProp2", "newProp2", 42.0, Aggregation.NONE)

@@ -140,7 +140,6 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
 
         var updatedGraph = new StoreLoaderBuilder().api(db)
             .addNodeLabel("Node")
-            .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
             .addNodeProperty("seed", "seed", 42.0, Aggregation.NONE)

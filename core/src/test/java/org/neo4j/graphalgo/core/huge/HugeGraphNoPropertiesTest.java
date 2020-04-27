@@ -87,8 +87,6 @@ final class HugeGraphNoPropertiesTest extends BaseTest {
     private Graph loadGraph(final GraphDatabaseAPI db, Orientation orientation) {
         return new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(orientation)
             .build()
             .load(NativeFactory.class);

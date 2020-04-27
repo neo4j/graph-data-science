@@ -85,7 +85,6 @@ class WccTest extends AlgoTestBase {
     void shouldComputeComponents(Orientation orientation) {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .addRelationshipType(RELATIONSHIP_TYPE.name())
             .globalOrientation(orientation)
             .build()
@@ -125,7 +124,6 @@ class WccTest extends AlgoTestBase {
     void shouldLogProgress() {
         var graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .addRelationshipType(RELATIONSHIP_TYPE.name())
             .globalOrientation(Orientation.NATURAL)
             .build()

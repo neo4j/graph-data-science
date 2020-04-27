@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.triangle;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -47,15 +46,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
 
     @Override
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleCountBaseConfig config) {
-        graphCreateConfig.relationshipProjections().projections().entrySet().stream()
-            .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
-            .forEach(entry -> {
-                throw new IllegalArgumentException(String.format(
-                    "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
-                    entry.getKey().name,
-                    entry.getValue().orientation()
-                ));
-            });
+        validateIsUndirectedGraph(graphCreateConfig);
     }
 
     @Procedure(name = "gds.alpha.triangle.stream", mode = READ)
@@ -89,14 +80,14 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
 
     @Override
     protected AlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory(TriangleCountBaseConfig config) {
-       return new AlphaAlgorithmFactory<TriangleStream, TriangleCountBaseConfig>() {
-           @Override
-           public TriangleStream buildAlphaAlgo(
-               Graph graph, TriangleCountBaseConfig configuration, AllocationTracker tracker, Log log
-           ) {
-               return new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
-                   .withTerminationFlag(TerminationFlag.wrap(transaction));
-           }
-       };
+        return new AlphaAlgorithmFactory<TriangleStream, TriangleCountBaseConfig>() {
+            @Override
+            public TriangleStream buildAlphaAlgo(
+                Graph graph, TriangleCountBaseConfig configuration, AllocationTracker tracker, Log log
+            ) {
+                return new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+            }
+        };
     }
 }

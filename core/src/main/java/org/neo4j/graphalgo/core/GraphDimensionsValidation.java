@@ -20,7 +20,7 @@
 
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 
 import java.util.Map;
 
@@ -34,14 +34,14 @@ public final class GraphDimensionsValidation {
 
     private GraphDimensionsValidation() {}
 
-    public static void validate(GraphDimensions dimensions, GraphCreateConfig config) {
+    public static void validate(GraphDimensions dimensions, GraphCreateFromStoreConfig config) {
         checkValidNodePredicate(dimensions, config);
         checkValidPropertyTokens("Node", dimensions.nodePropertyTokens());
         checkValidRelationshipTypePredicate(dimensions, config);
         checkValidPropertyTokens("Relationship", dimensions.relationshipPropertyTokens());
     }
 
-    private static void checkValidNodePredicate(GraphDimensions dimensions, GraphCreateConfig config) {
+    private static void checkValidNodePredicate(GraphDimensions dimensions, GraphCreateFromStoreConfig config) {
         if (!config.nodeProjections().isEmpty() && dimensions.nodeLabelTokens().contains(NO_SUCH_LABEL)) {
             throw new IllegalArgumentException(String.format(
                 "Invalid node projection, one or more labels not found: '%s'",
@@ -50,7 +50,7 @@ public final class GraphDimensionsValidation {
         }
     }
 
-    private static void checkValidRelationshipTypePredicate(GraphDimensions dimensions, GraphCreateConfig config) {
+    private static void checkValidRelationshipTypePredicate(GraphDimensions dimensions, GraphCreateFromStoreConfig config) {
         if (!config.relationshipProjections().isEmpty() && dimensions
             .relationshipTypeTokens()
             .contains(NO_SUCH_RELATIONSHIP_TYPE)) {

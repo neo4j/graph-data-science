@@ -69,10 +69,8 @@ class RelationshipPredicateTest extends BaseTest {
     void testOutgoing() {
         final Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
-                .build()
-                .graph(NativeFactory.class);
+            .build()
+            .graph(NativeFactory.class);
 
         // A -> B
         assertTrue(graph.exists(
@@ -206,9 +204,6 @@ class RelationshipPredicateTest extends BaseTest {
     }
 
     private StoreLoaderBuilder loader() {
-        return new StoreLoaderBuilder()
-                .api(db)
-                .loadAnyLabel()
-                .loadAnyRelationshipType();
+        return new StoreLoaderBuilder().api(db);
     }
 }

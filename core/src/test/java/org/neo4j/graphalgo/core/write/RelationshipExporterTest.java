@@ -82,7 +82,6 @@ class RelationshipExporterTest extends BaseTest {
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
 
         GraphStore graphStore = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier(
                 "NEW_REL",
                 RelationshipProjection.of("BARFOO", Orientation.NATURAL)
@@ -148,7 +147,6 @@ class RelationshipExporterTest extends BaseTest {
 
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .addRelationshipType("BARFOO");
         if (includeProperties) {
             storeLoaderBuilder.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_MISSING));
@@ -194,7 +192,6 @@ class RelationshipExporterTest extends BaseTest {
     private Graph loadWrittenGraph(boolean loadRelProperty) {
         StoreLoaderBuilder loader = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .addRelationshipType("FOOBAR");
         if (loadRelProperty) {
             loader.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN));

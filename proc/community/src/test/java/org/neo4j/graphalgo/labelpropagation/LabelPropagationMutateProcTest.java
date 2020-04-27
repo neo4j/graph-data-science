@@ -88,8 +88,6 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     void testMutateAndWriteWithSeeding() {
         var testGraphName = "lpaGraph";
         var initialGraphStore = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .build()
             .graphStore(NativeFactory.class);
 
@@ -117,8 +115,6 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         runQuery(writeQuery);
 
         var updatedGraph = new StoreLoaderBuilder().api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
             .build()
             .graph(NativeFactory.class);

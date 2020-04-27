@@ -167,11 +167,8 @@ public final class TestGraphLoader {
 
     private GraphLoader storeLoader() {
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().api(db);
-        if (nodeLabels.isEmpty()) {
-            storeLoaderBuilder.loadAnyLabel();
-        } else {
-            nodeLabels.forEach(storeLoaderBuilder::addNodeLabel);
-        }
+
+        nodeLabels.forEach(storeLoaderBuilder::addNodeLabel);
 
         if (relTypes.isEmpty()) {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(

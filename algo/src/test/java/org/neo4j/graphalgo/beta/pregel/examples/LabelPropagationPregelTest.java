@@ -71,8 +71,6 @@ class LabelPropagationPregelTest extends AlgoTestBase {
         runQuery(TEST_GRAPH);
         graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .globalAggregation(Aggregation.NONE)
             .build()

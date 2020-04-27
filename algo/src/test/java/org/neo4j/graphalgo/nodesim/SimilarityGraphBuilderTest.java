@@ -59,8 +59,6 @@ class SimilarityGraphBuilderTest extends AlgoTestBase {
     void testConstructionFromHugeGraph() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(Orientation.NATURAL)
             .build()
             .graph(NativeFactory.class);

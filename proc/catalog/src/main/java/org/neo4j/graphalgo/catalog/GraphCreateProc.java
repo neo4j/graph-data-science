@@ -143,7 +143,7 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphCreateFromCypherConfig initialConfig = GraphCreateFromCypherConfig.of(
+        GraphCreateFromCypherConfig config = GraphCreateFromCypherConfig.of(
             getUsername(),
             NO_GRAPH_NAME,
             nodeQuery,
@@ -151,14 +151,7 @@ public class GraphCreateProc extends CatalogProc {
             cypherConfig
         );
 
-        // Relationships are needed for the estimation
-        GraphCreateConfig config = ImmutableGraphCreateFromCypherConfig.builder()
-            .from(initialConfig)
-            .relationshipProjections(RelationshipProjections.all())
-            .build();
-
         validateConfig(cypherConfig, config);
-
         return estimateGraph(config);
     }
 
@@ -171,7 +164,7 @@ public class GraphCreateProc extends CatalogProc {
 
         GraphCreateResult.Builder builder = config.isCypher()
             ? new GraphCreateCypherResult.Builder((GraphCreateFromCypherConfig) config)
-            : new GraphCreateNativeResult.Builder(config);
+            : new GraphCreateNativeResult.Builder((GraphCreateFromStoreConfig) config);
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
@@ -291,7 +284,7 @@ public class GraphCreateProc extends CatalogProc {
             private NodeProjections nodeProjections;
             private RelationshipProjections relationshipProjections;
 
-            Builder(GraphCreateConfig config) {
+            Builder(GraphCreateFromStoreConfig config) {
                 super(config);
                 this.nodeProjections = config.nodeProjections();
                 this.relationshipProjections = config.relationshipProjections();

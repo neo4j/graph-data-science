@@ -44,15 +44,42 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     String NODE_PROPERTIES_KEY = "nodeProperties";
     String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 
-    @Override
     @Key(NODE_PROJECTION_KEY)
     @ConvertWith("org.neo4j.graphalgo.AbstractNodeProjections#fromObject")
     NodeProjections nodeProjections();
 
-    @Override
     @Key(RELATIONSHIP_PROJECTION_KEY)
     @ConvertWith("org.neo4j.graphalgo.AbstractRelationshipProjections#fromObject")
     RelationshipProjections relationshipProjections();
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
+    default PropertyMappings nodeProperties() {
+        return PropertyMappings.of();
+    }
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
+    default PropertyMappings relationshipProperties() {
+        return PropertyMappings.of();
+    }
+
+    @Value.Check
+    default void validateProjectionsAreNotEmpty() {
+        if (nodeProjections().isEmpty()) {
+            throw new IllegalArgumentException(
+                "The parameter 'nodeProjections' should not be empty. Use '*' to load all nodes."
+            );
+        }
+
+        if (relationshipProjections().isEmpty()) {
+            throw new IllegalArgumentException(
+                "The parameter 'relationshipProjections' should not be empty. Use '*' to load all Relationships."
+            );
+        }
+    }
 
     @Value.Check
     default GraphCreateFromStoreConfig withNormalizedPropertyMappings() {
@@ -145,17 +172,17 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         return ImmutableGraphCreateFromStoreConfig.builder()
             .username(userName)
             .graphName(graphName)
-            .nodeProjections(NodeProjections.empty())
-            .relationshipProjections(RelationshipProjections.empty())
+            .nodeProjections(NodeProjections.all())
+            .relationshipProjections(RelationshipProjections.all())
             .build();
     }
 
     static GraphCreateFromStoreConfig fromProcedureConfig(String username, CypherMapWrapper config) {
         if (!config.containsKey(NODE_PROJECTION_KEY)) {
-            config = config.withEntry(NODE_PROJECTION_KEY, NodeProjections.empty());
+            config = config.withEntry(NODE_PROJECTION_KEY, NodeProjections.all());
         }
         if (!config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
-            config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.empty());
+            config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.all());
         }
 
         return GraphCreateFromStoreConfigImpl.of(

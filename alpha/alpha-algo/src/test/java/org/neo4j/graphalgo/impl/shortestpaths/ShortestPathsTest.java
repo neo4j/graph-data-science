@@ -96,8 +96,6 @@ final class ShortestPathsTest extends AlgoTestBase {
 
         graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
             .graph(NativeFactory.class);

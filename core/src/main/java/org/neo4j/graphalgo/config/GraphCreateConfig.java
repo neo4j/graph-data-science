@@ -21,10 +21,12 @@ package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
@@ -42,26 +44,6 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Configuration.Parameter
     String graphName();
-
-    @Configuration.Key(NODE_PROJECTION_KEY)
-    NodeProjections nodeProjections();
-
-    @Configuration.Key(RELATIONSHIP_PROJECTION_KEY)
-    RelationshipProjections relationshipProjections();
-
-    @Value.Default
-    @Value.Parameter(false)
-    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
-    default PropertyMappings nodeProperties() {
-        return PropertyMappings.of();
-    }
-
-    @Value.Default
-    @Value.Parameter(false)
-    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
-    default PropertyMappings relationshipProperties() {
-        return PropertyMappings.of();
-    }
 
     @Value.Default
     @Value.Parameter(false)
@@ -100,6 +82,13 @@ public interface GraphCreateConfig extends BaseConfig {
     default boolean isCypher() {
         return false;
     }
+
+    @Configuration.Ignore
+    default Class<? extends GraphStoreFactory> getGraphImpl() {
+        return isCypher()
+            ? CypherFactory.class
+            : NativeFactory.class;
+    };
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
         CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(

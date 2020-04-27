@@ -27,9 +27,9 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.ElementProjection;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.compat.InternalReadOps;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -52,20 +52,15 @@ import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
-import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
 
-public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
-    private final GraphCreateConfig graphCreateConfig;
-    private final boolean readTokens;
+public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends StatementFunction<GraphDimensions> {
 
-    public GraphDimensionsReader(
-        GraphDatabaseAPI api,
-        GraphCreateConfig graphCreateConfig,
-        boolean readTokens) {
+    protected T graphCreateConfig;
+
+    public GraphDimensionsReader(GraphDatabaseAPI api, T graphCreateConfig) {
         super(api);
         this.graphCreateConfig = graphCreateConfig;
-        this.readTokens = readTokens;
     }
 
     @Override
@@ -73,28 +68,12 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
 
-        final TokenElementIdentifierMappings<NodeLabel> labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<>(ANY_LABEL);
-        if (readTokens) {
-            graphCreateConfig.nodeProjections()
-                .projections()
-                .forEach((nodeLabel, projection) -> {
-                    var labelToken = projection.projectAll() ? ANY_LABEL : getNodeLabelToken(tokenRead, projection);
-                    labelTokenNodeLabelMappings.put(labelToken, nodeLabel);
-                });
-        }
+        final TokenElementIdentifierMappings<NodeLabel> labelTokenNodeLabelMappings = getNodeLabelTokens(tokenRead);
 
-        final TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings = new TokenElementIdentifierMappings<>(ANY_RELATIONSHIP_TYPE);
-        if (readTokens) {
-            graphCreateConfig.relationshipProjections()
-                .projections()
-                .forEach((relType, projection) -> {
-                    var typeToken = projection.projectAll() ? ANY_RELATIONSHIP_TYPE : getRelationshipTypeToken(tokenRead, projection);
-                    typeTokenRelTypeMappings.put(typeToken, relType);
-                });
-        }
+        final TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings = getRelationshipTypeTokens(tokenRead);
 
-        Map<String, Integer> nodePropertyTokens = loadPropertyTokens(graphCreateConfig.nodeProjections().projections(), tokenRead);
-        Map<String, Integer> relationshipPropertyTokens = loadPropertyTokens(graphCreateConfig.relationshipProjections().projections(), tokenRead);
+        Map<String, Integer> nodePropertyTokens = loadPropertyTokens(getNodeProjections().projections(), tokenRead);
+        Map<String, Integer> relationshipPropertyTokens = loadPropertyTokens(getRelationshipProjections().projections(), tokenRead);
 
         long nodeCount = labelTokenNodeLabelMappings.keyStream()
             .mapToLong(dataRead::countsForNode)
@@ -126,21 +105,15 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             .build();
     }
 
-    private int getNodeLabelToken(TokenRead tokenRead, NodeProjection value) {
-        int labelToken = tokenRead.nodeLabel(value.label());
-        return labelToken == StatementConstants.NO_SUCH_LABEL
-            ? NO_SUCH_LABEL
-            : labelToken;
-    }
+    protected abstract TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead);
 
-    private int getRelationshipTypeToken(TokenRead tokenRead, RelationshipProjection value) {
-        int relationshipToken = tokenRead.relationshipType(value.type());
-        return relationshipToken == StatementConstants.NO_SUCH_RELATIONSHIP_TYPE
-            ? NO_SUCH_RELATIONSHIP_TYPE
-            : relationshipToken;
-    }
+    protected abstract TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead);
 
-    private Map<String, Integer> loadPropertyTokens(Map<? extends ElementIdentifier, ? extends ElementProjection> projectionMapping, TokenRead tokenRead) {
+    protected abstract NodeProjections getNodeProjections();
+
+    protected abstract RelationshipProjections getRelationshipProjections();
+
+    protected Map<String, Integer> loadPropertyTokens(Map<? extends ElementIdentifier, ? extends ElementProjection> projectionMapping, TokenRead tokenRead) {
         return projectionMapping
             .values()
             .stream()
@@ -153,7 +126,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     }
 
     @NotNull
-    private Map<RelationshipType, Long> getRelationshipCountsByType(
+    protected Map<RelationshipType, Long> getRelationshipCountsByType(
         Read dataRead,
         TokenElementIdentifierMappings<NodeLabel> labelTokenNodeLabelMappings,
         TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings

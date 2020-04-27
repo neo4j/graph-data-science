@@ -72,8 +72,6 @@ class SingleSourceShortestPathPregelTest extends AlgoTestBase {
         runQuery(TEST_GRAPH);
         graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .build()
             .load(NativeFactory.class);
     }

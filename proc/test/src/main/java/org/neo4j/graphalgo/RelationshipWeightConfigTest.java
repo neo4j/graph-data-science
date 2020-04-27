@@ -256,7 +256,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
 
         applyOnProcedure((proc) -> {
             RelationshipProjections relationshipProjections = RelationshipProjections
-                .empty()
+                .all()
                 .addPropertyMappings(PropertyMappings.of(PropertyMapping.of("weight1", 1.0)));
 
             loadExplicitGraphWithRelationshipWeights(noRelGraph, MULTI_NODES_PROJECTION, relationshipProjections);

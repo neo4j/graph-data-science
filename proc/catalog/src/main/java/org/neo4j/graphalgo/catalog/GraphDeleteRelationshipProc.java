@@ -19,11 +19,8 @@
  */
 package org.neo4j.graphalgo.catalog;
 
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.DeleteRelationshipsConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
@@ -32,8 +29,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -60,37 +55,8 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
         return Stream.of(new Result(
             graphName,
             relationshipType,
-            filterDeletionResult(deletionResult, relationshipType, graphStoreWithConfig.config())
+            deletionResult
         ));
-    }
-
-    @Deprecated
-    private DeletionResult filterDeletionResult(
-        DeletionResult deletionResult,
-        String relationshipType,
-        GraphCreateConfig config
-    ) {
-        // We have to post-filter to hide the fact that we delete properties for other relationship projections
-        RelationshipType relType = RelationshipType.of(relationshipType);
-        Map<RelationshipType, RelationshipProjection> projectedRels = config
-            .relationshipProjections()
-            .projections();
-        // we only have to post-filter when an originally projected rel-type is being removed
-        if (projectedRels.containsKey(relType)) {
-            Set<String> declaredProperties = projectedRels
-                .get(relType).properties().mappings()
-                .stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet());
-
-            return DeletionResult.of(builder -> {
-                builder.deletedRelationships(deletionResult.deletedRelationships());
-                deletionResult.deletedProperties()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> declaredProperties.contains(entry.getKey()))
-                    .forEach(builder::putDeletedProperty);
-            });
-        }
-        return deletionResult;
     }
 
     public static class Result {

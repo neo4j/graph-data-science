@@ -97,8 +97,6 @@ class KSpanningTreeTest extends AlgoTestBase {
     private void loadGraph() {
         graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .globalOrientation(Orientation.UNDIRECTED)
             .addRelationshipProperty(PropertyMapping.of("w", 1.0))
             .build()

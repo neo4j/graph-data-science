@@ -78,7 +78,6 @@ class ModularityOptimizationTest extends AlgoTestBase {
     void testUnweighted() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .build()
@@ -107,7 +106,6 @@ class ModularityOptimizationTest extends AlgoTestBase {
     void testWeighted() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
@@ -137,7 +135,6 @@ class ModularityOptimizationTest extends AlgoTestBase {
     void testSeedingWithBiggerSeedValues() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .addNodeProperty(PropertyMapping.of("seed2", -1))
@@ -169,7 +166,6 @@ class ModularityOptimizationTest extends AlgoTestBase {
     void testSeeding() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .addNodeProperty(PropertyMapping.of("seed1", -1))
@@ -209,7 +205,6 @@ class ModularityOptimizationTest extends AlgoTestBase {
     void testLogging() {
         var graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .build()
@@ -247,7 +242,6 @@ class ModularityOptimizationTest extends AlgoTestBase {
     void requireAtLeastOneIteration() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .build()

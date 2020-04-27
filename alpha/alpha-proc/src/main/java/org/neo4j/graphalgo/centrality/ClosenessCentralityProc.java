@@ -125,8 +125,9 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
     ) {
         maybeImplicitCreate = maybeImplicitCreate.map(graphCreateConfig -> {
             if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
+                GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
                 RelationshipProjections.Builder builder = RelationshipProjections.builder();
-                graphCreateConfig.relationshipProjections().projections().forEach(
+                storeConfig.relationshipProjections().projections().forEach(
                     (id, projection) ->
                         builder.putProjection(id, projection.withOrientation(Orientation.UNDIRECTED))
                 );

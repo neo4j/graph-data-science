@@ -103,8 +103,6 @@ final class HugeGraphWeightTest extends BaseTest {
     private Graph loadGraph(final GraphDatabaseAPI db) {
         return new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
             .addRelationshipProperty(PropertyMapping.of("weight", 0))
             .build()
             .load(NativeFactory.class);

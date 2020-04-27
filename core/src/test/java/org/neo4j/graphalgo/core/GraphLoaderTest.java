@@ -152,8 +152,6 @@ class GraphLoaderTest extends BaseTest {
         assertTransactionTermination(
             () -> new StoreLoaderBuilder()
                 .api(db)
-                .loadAnyLabel()
-                .loadAnyRelationshipType()
                 .terminationFlag(terminationFlag)
                 .build()
                 .load(NativeFactory.class)
