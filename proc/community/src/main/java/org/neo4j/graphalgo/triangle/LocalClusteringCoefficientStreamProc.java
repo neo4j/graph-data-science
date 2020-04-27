@@ -86,6 +86,13 @@ public class LocalClusteringCoefficientStreamProc
     }
 
     @Override
+    protected void validateConfigs(
+        GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStreamConfig config
+    ) {
+        ValidationUtil.validateConfigs(graphCreateConfig, config);
+    }
+
+    @Override
     protected PropertyTranslator<LocalClusteringCoefficient.Result> nodePropertyTranslator(
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig> computationResult
     ) {

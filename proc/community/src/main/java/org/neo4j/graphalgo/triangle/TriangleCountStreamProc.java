@@ -64,7 +64,7 @@ public class TriangleCountStreamProc
     protected void validateConfigs(
         GraphCreateConfig graphCreateConfig, TriangleCountStreamConfig config
     ) {
-        TriangleCountCompanion.validateConfigs(graphCreateConfig, config);
+        ValidationUtil.validateConfigs(graphCreateConfig, config);
     }
 
     @Override

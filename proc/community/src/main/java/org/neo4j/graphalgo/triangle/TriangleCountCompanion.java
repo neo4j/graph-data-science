@@ -20,9 +20,6 @@
 package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
@@ -31,10 +28,7 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
-import java.util.Collections;
 import java.util.Optional;
-
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 
 final class TriangleCountCompanion {
 
@@ -45,24 +39,6 @@ final class TriangleCountCompanion {
 
     static PropertyTranslator<TriangleCountResult> nodePropertyTranslator() {
         return (PropertyTranslator.OfLong<TriangleCountResult>) (data, nodeId) -> data.localTriangles().get(nodeId);
-    }
-
-    static <CONFIG extends TriangleCountBaseConfig> void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        if (!graphCreateConfig.isCypher()) {
-            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
-            storeConfig.relationshipProjections().projections().entrySet().stream()
-                .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
-                                 config.relationshipTypes().contains(entry.getKey().name()))
-                .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
-                .forEach(entry -> {
-                    throw new IllegalArgumentException(String.format(
-                        "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
-                        entry.getKey().name,
-                        entry.getValue().orientation()
-                    ));
-                });
-        }
-
     }
 
     static <PROC_RESULT, CONFIG extends TriangleCountBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

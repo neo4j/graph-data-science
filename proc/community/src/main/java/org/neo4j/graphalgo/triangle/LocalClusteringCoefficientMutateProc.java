@@ -82,6 +82,13 @@ public class LocalClusteringCoefficientMutateProc extends MutateProc<LocalCluste
     }
 
     @Override
+    protected void validateConfigs(
+        GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientMutateConfig config
+    ) {
+        ValidationUtil.validateConfigs(graphCreateConfig, config);
+    }
+
+    @Override
     protected PropertyTranslator<LocalClusteringCoefficient.Result> nodePropertyTranslator(
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig> computationResult
     ) {

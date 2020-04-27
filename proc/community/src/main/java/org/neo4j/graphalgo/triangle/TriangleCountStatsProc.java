@@ -62,7 +62,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     protected void validateConfigs(
         GraphCreateConfig graphCreateConfig, TriangleCountStatsConfig config
     ) {
-        TriangleCountCompanion.validateConfigs(graphCreateConfig, config);
+        ValidationUtil.validateConfigs(graphCreateConfig, config);
     }
 
     @Override

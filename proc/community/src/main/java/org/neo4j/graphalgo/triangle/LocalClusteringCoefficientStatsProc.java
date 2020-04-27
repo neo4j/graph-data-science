@@ -60,6 +60,13 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     }
 
     @Override
+    protected void validateConfigs(
+        GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStatsConfig config
+    ) {
+        ValidationUtil.validateConfigs(graphCreateConfig, config);
+    }
+
+    @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig> computeResult) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
             new LocalClusteringCoefficientStatsBuilder(callContext, computeResult.tracker()),

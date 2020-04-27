@@ -83,6 +83,13 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     }
 
     @Override
+    protected void validateConfigs(
+        GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientWriteConfig config
+    ) {
+        ValidationUtil.validateConfigs(graphCreateConfig, config);
+    }
+
+    @Override
     protected PropertyTranslator<LocalClusteringCoefficient.Result> nodePropertyTranslator(
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig> computationResult
     ) {
