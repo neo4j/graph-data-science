@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
@@ -308,6 +309,21 @@ public abstract class AlgoBaseProc<
     }
 
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) { }
+
+    protected void validateIsUndirectedGraph(GraphCreateConfig graphCreateConfig) {
+        if (!graphCreateConfig.isCypher()) {
+            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
+            storeConfig.relationshipProjections().projections().entrySet().stream()
+                .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
+                .forEach(entry -> {
+                    throw new IllegalArgumentException(String.format(
+                        "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses projection `%s`",
+                        entry.getKey().name,
+                        entry.getValue().orientation()
+                    ));
+                });
+        }
+    }
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,

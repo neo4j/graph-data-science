@@ -40,7 +40,7 @@ public interface BaseBetweennessCentralityConfig extends WritePropertyConfig {
 
     @Configuration.Ignore
     default void validate(GraphCreateConfig graphCreateConfig) {
-        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
+        if (!graphCreateConfig.isCypher()) {
             GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
             if (storeConfig.relationshipProjections().projections().size() > 1) {
                 throw new IllegalArgumentException(
@@ -53,9 +53,8 @@ public interface BaseBetweennessCentralityConfig extends WritePropertyConfig {
     default boolean undirected() {
         return implicitCreateConfig()
             .map(config -> {
-                if (config instanceof GraphCreateFromStoreConfig) {
-                    GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) config;
-                    return storeConfig
+                if (!config.isCypher()) {
+                    return ((GraphCreateFromStoreConfig) config)
                         .relationshipProjections()
                         .projections()
                         .values()
