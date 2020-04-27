@@ -25,12 +25,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.core.loading.DoubleCompressor.CompressionInfo;
+import org.neo4j.util.FeatureToggles;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
+import java.util.Random;
+import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
 import static java.util.function.Predicate.not;
@@ -39,6 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class DoubleCompressorTestBase {
+
+    private static final boolean DEBUG_PRINT = FeatureToggles.flag(DoubleCompressorTestBase.class, "debugPrint", false);
+    private static final int NUMBER_OF_DOUBLES_TO_TEST = 100_000;
 
     private DoubleCompressor compressor;
 
@@ -92,47 +97,30 @@ public abstract class DoubleCompressorTestBase {
 
     @Test
     void testDoubleCompressionForConsecutiveIdValues() {
-        var data = LongStream.range(0, 10_000_000).mapToDouble(v -> (double) v).toArray();
+        var data = LongStream.range(0, NUMBER_OF_DOUBLES_TO_TEST).mapToDouble(v -> (double) v).toArray();
         testDoubleCompression(data, false);
     }
 
-//    @Test
-    void measureDoubleCompressionForConsecutiveIdValues() {
-        var length = 33_554_432;
-        var data = LongStream.range(0, length).mapToDouble(v -> (double) v).toArray();
-        var compressed = new byte[Long.BYTES * length];
-
-        var warmupIterations = 5;
-        for (var i = 0; i < warmupIterations; i++) {
-            compressor.compressDoubles(data, length, compressed);
+    @Test
+    void testDoubleCompressionForRandomValues() {
+        var seed = new Random().nextLong();
+        var random = new Random(seed);
+        // Note, this whole spiel of generating doubles could be as simple as
+        //     var data = random.doubles(NUMBER_OF_DOUBLES_TO_TEST, 0.0, 0x1p53).toArray();
+        // But that produces 98% worst-case input cases
+        var maxSignificantWidth = compressor.supportedSignificandWith();
+        var data = DoubleStream.generate(() -> {
+            var significantWidth = random.nextInt(maxSignificantWidth);
+            var significant = Long.reverse(random.nextLong() & ((1L << significantWidth) - 1));
+            var exponent = random.nextInt(2047);
+            return Double.longBitsToDouble(((long) exponent) << 52 | significant);
+        }).limit(NUMBER_OF_DOUBLES_TO_TEST).toArray();
+        try {
+            testDoubleCompression(data, false);
+        } catch (AssertionError e) {
+            System.err.println("Seed for random values: " + seed);
+            throw e;
         }
-
-        var measurementIterations = 20;
-        var startCompress = System.nanoTime();
-        for (var i = 0; i < measurementIterations; i++) {
-            compressor.compressDoubles(data, length, compressed);
-        }
-        var stopCompress = System.nanoTime();
-
-        var compressTime = (stopCompress - startCompress) / measurementIterations;
-        var compressSpeed = 256 / (compressTime / 1_000_000_000.0);
-        System.out.println("[compress] time (ms) = " + TimeUnit.NANOSECONDS.toMillis(compressTime));
-        System.out.println("[compress] speed (MiB/s) = " + compressSpeed);
-
-        for (var i = 0; i < warmupIterations; i++) {
-            compressor.decompressDoubles(compressed, length);
-        }
-
-        var startDecompress = System.nanoTime();
-        for (var i = 0; i < measurementIterations; i++) {
-            compressor.decompressDoubles(compressed, length);
-        }
-        var stopDecompress = System.nanoTime();
-
-        var decompressTime = (stopDecompress - startDecompress) / measurementIterations;
-        var decompressSpeed = 256 / (decompressTime / 1_000_000_000.0);
-        System.out.println("[decompress] time (ms) = " + TimeUnit.NANOSECONDS.toMillis(decompressTime));
-        System.out.println("[decompress] speed (MiB/s) = " + decompressSpeed);
     }
 
     static double[] testDoubles() {
@@ -196,7 +184,7 @@ public abstract class DoubleCompressorTestBase {
         // given input from original
 
         // when compressing
-        var compressed = new byte[Long.BYTES * original.length];
+        var compressed = new byte[10 * original.length];
         var outLength = compressor.compressDoubles(original, original.length, compressed);
         compressed = Arrays.copyOf(compressed, outLength);
 
@@ -228,58 +216,86 @@ public abstract class DoubleCompressorTestBase {
         var compressionInfos = new ArrayList<CompressionInfo>(original.length);
         var sizeDistribution = new int[10];
         var typeDistribution = new int[9];
+        var sizePerType = new int[9][10];
         var pos = 0;
         for (double input : original) {
             var info = compressor.describeCompressedValue(compressed, pos, input);
             compressionInfos.add(info);
-            sizeDistribution[info.compressedSize()]++;
-            typeDistribution[info.compressedType()]++;
-            pos += info.compressedType();
+            var size = info.compressedSize();
+            var type = info.compressedType();
+            sizeDistribution[size]++;
+            typeDistribution[type]++;
+            sizePerType[type][size]++;
+            pos += size;
         }
 
-        if (detailPrint) {
-            System.out.printf("original = %s%n", Arrays.toString(original));
-            System.out.printf("decompressed = %s%n", Arrays.toString(decompressed));
-            System.out.printf("compressed [%d] = %s%n", compressedSize, Arrays.toString(compressed));
-            System.out.printf("uncompressed [%d] = %s%n", uncompressedSize, Arrays.toString(uncompressed));
-            System.out.printf("space savings %.2f%%%n", 100 * savings);
-            System.out.printf("bytes per value %.4f%n", bytesPerValue);
-        } else {
-            System.out.printf(
-                "uncompressed size = [%d] | compressed size = [%d] | space savings %.2f%% | bytes per value = %.4f%n",
-                uncompressedSize,
-                compressedSize,
-                100 * savings,
-                bytesPerValue
-            );
-        }
+        if (DEBUG_PRINT) {
+            if (detailPrint) {
+                System.out.printf("original = %s%n", Arrays.toString(original));
+                System.out.printf("decompressed = %s%n", Arrays.toString(decompressed));
+                System.out.printf("compressed [%d] = %s%n", compressedSize, Arrays.toString(compressed));
+                System.out.printf("uncompressed [%d] = %s%n", uncompressedSize, Arrays.toString(uncompressed));
+                System.out.printf("space savings %.2f%%%n", 100 * savings);
+                System.out.printf("bytes per value %.4f%n", bytesPerValue);
+            } else {
+                System.out.printf(
+                    "uncompressed size = [%d] | compressed size = [%d] | space savings %.2f%% | bytes per value = %.4f%n",
+                    uncompressedSize,
+                    compressedSize,
+                    100 * savings,
+                    bytesPerValue
+                );
+            }
 
-        System.out.println("   Compression size  |  Number of Values  |  Percentile  |  Total Percentile");
-        var cumulativeSizes = 0;
-        for (var compressionSize = 0; compressionSize < sizeDistribution.length; compressionSize++) {
-            var numberOfValuesAtCompression = sizeDistribution[compressionSize];
-            cumulativeSizes += numberOfValuesAtCompression;
-            System.out.printf(
-                "  %17s  |  %16s  |  %9.2f%%  |  %15.2f%%%n",
-                compressionSize,
-                numberOfValuesAtCompression,
-                100 * (double) numberOfValuesAtCompression / original.length,
-                100 * (double) cumulativeSizes / original.length
-            );
-        }
+            System.out.println("   Compression size  |  Number of Values  |  Percentile  |  Total Percentile");
+            var cumulativeSizes = 0;
+            for (var compressionSize = 0; compressionSize < sizeDistribution.length; compressionSize++) {
+                var numberOfValuesAtCompression = sizeDistribution[compressionSize];
+                cumulativeSizes += numberOfValuesAtCompression;
+                System.out.printf(
+                    "  %17s  |  %16s  |  %9.2f%%  |  %15.2f%%%n",
+                    compressionSize,
+                    numberOfValuesAtCompression,
+                    100 * (double) numberOfValuesAtCompression / original.length,
+                    100 * (double) cumulativeSizes / original.length
+                );
+            }
 
-        System.out.println("   Compression type  |  Number of Values  |  Percentile  |  Total Percentile");
-        var cumulativeTypes = 0;
-        for (var compressionType = 0; compressionType < typeDistribution.length; compressionType++) {
-            var numberOfValuesWithCompressionType = typeDistribution[compressionType];
-            cumulativeTypes += numberOfValuesWithCompressionType;
-            System.out.printf(
-                "  %17s  |  %16s  |  %9.2f%%  |  %15.2f%%%n",
-                compressor.describeCompression(compressionType),
-                numberOfValuesWithCompressionType,
-                100 * (double) numberOfValuesWithCompressionType / original.length,
-                100 * (double) cumulativeTypes / original.length
-            );
+            System.out.println();
+            System.out.println();
+            System.out.println(
+                "   Compression type  |  Compression size  |  Number of Values  |  Percentile  |  Total Percentile");
+            var cumulativeTypes = 0;
+            for (var compressionType = 0; compressionType < typeDistribution.length; compressionType++) {
+                var numberOfValuesWithCompressionType = typeDistribution[compressionType];
+                cumulativeTypes += numberOfValuesWithCompressionType;
+                if (numberOfValuesWithCompressionType > 0) {
+                    System.out.printf(
+                        "  %17s  |  %16s  |  %16s  |  %9.2f%%  |  %15.2f%%%n",
+                        compressor.describeCompression(compressionType),
+                        "",
+                        numberOfValuesWithCompressionType,
+                        100 * (double) numberOfValuesWithCompressionType / original.length,
+                        100 * (double) cumulativeTypes / original.length
+                    );
+                    var sizes = sizePerType[compressionType];
+                    var allSizes = 0;
+                    for (var compressionSize = 0; compressionSize < sizes.length; compressionSize++) {
+                        var numberOfValuesAtCompression = sizes[compressionSize];
+                        allSizes += numberOfValuesAtCompression;
+                        if (numberOfValuesAtCompression > 0) {
+                            System.out.printf(
+                                "  %17s  |  %16s  |  %16s  |  %7.2f%% ¦  |  %13.2f%% ¦%n",
+                                "",
+                                compressionSize,
+                                numberOfValuesAtCompression,
+                                100 * (double) numberOfValuesAtCompression / numberOfValuesWithCompressionType,
+                                100 * (double) allSizes / numberOfValuesWithCompressionType
+                            );
+                        }
+                    }
+                }
+            }
         }
 
         // then all values are identical
