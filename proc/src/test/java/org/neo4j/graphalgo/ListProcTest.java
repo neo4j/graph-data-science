@@ -52,6 +52,10 @@ import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
+import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientMutateProc;
+import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientStatsProc;
+import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientStreamProc;
+import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientWriteProc;
 import org.neo4j.graphalgo.triangle.TriangleCountMutateProc;
 import org.neo4j.graphalgo.triangle.TriangleCountStatsProc;
 import org.neo4j.graphalgo.triangle.TriangleCountStreamProc;
@@ -149,7 +153,16 @@ class ListProcTest extends BaseProcTest {
         "gds.triangleCount.stream",
         "gds.triangleCount.stream.estimate",
         "gds.triangleCount.write",
-        "gds.triangleCount.write.estimate"
+        "gds.triangleCount.write.estimate",
+
+        "gds.triangleCount.localClusteringCoefficient.mutate",
+        "gds.triangleCount.localClusteringCoefficient.mutate.estimate",
+        "gds.triangleCount.localClusteringCoefficient.stats",
+        "gds.triangleCount.localClusteringCoefficient.stats.estimate",
+        "gds.triangleCount.localClusteringCoefficient.stream",
+        "gds.triangleCount.localClusteringCoefficient.stream.estimate",
+        "gds.triangleCount.localClusteringCoefficient.write",
+        "gds.triangleCount.localClusteringCoefficient.write.estimate"
     );
 
     private static final List<String> FUNCTIONS = asList(
@@ -213,7 +226,11 @@ class ListProcTest extends BaseProcTest {
             WccWriteProc.class,
             WccStreamProc.class,
             WccMutateProc.class,
-            WccStatsProc.class
+            WccStatsProc.class,
+            LocalClusteringCoefficientStreamProc.class,
+            LocalClusteringCoefficientStatsProc.class,
+            LocalClusteringCoefficientWriteProc.class,
+            LocalClusteringCoefficientMutateProc.class
         );
         registerFunctions(
             GetNodeFunc.class,
