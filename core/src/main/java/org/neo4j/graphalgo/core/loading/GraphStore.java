@@ -408,7 +408,7 @@ public final class GraphStore {
         return createGraph(nodeLabels, relationshipTypes, maybeRelationshipProperty, concurrency);
     }
 
-    public IdMapGraph getUnion() {
+    public Graph getUnion() {
         return UnionGraph.of(relationships
             .keySet()
             .stream()

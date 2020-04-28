@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.api.IdMapGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 
@@ -92,17 +92,17 @@ public class DeleteRelationshipsIntegrationTest extends BaseProcTest {
 
     @Test
     void shouldBeAbleToMutateAndDelete() {
-        IdMapGraph graphBefore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH2).graphStore().getUnion();
+        Graph graphBefore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH2).graphStore().getUnion();
 
         runQuery("CALL gds.nodeSimilarity.mutate('testGraph2', {mutateRelationshipType: 'SIM', mutateProperty: 'foo'})");
-        IdMapGraph graphAfterMutate = GraphStoreCatalog.get(getUsername(), TEST_GRAPH2).graphStore().getUnion();
+        Graph graphAfterMutate = GraphStoreCatalog.get(getUsername(), TEST_GRAPH2).graphStore().getUnion();
         assertNotEquals(graphBefore.relationshipCount(), graphAfterMutate.relationshipCount());
 
         assertCypherResult(
             "CALL gds.graph.deleteRelationships('testGraph2', 'SIM') YIELD deletedProperties",
             singletonList(map("deletedProperties", map("foo", 2L)))
         );
-        IdMapGraph graphAfterDelete = GraphStoreCatalog.get(getUsername(), TEST_GRAPH2).graphStore().getUnion();
+        Graph graphAfterDelete = GraphStoreCatalog.get(getUsername(), TEST_GRAPH2).graphStore().getUnion();
         TestSupport.assertGraphEquals(graphBefore, graphAfterDelete);
     }
 
