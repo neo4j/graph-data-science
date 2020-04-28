@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class HugeLongLongDoubleMapTest {
 
@@ -253,7 +254,7 @@ final class HugeLongLongDoubleMapTest {
 
         @Override
         public String toString() {
-            return String.format("(%d,%d)", k1, k2);
+            return formatWithLocale("(%d,%d)", k1, k2);
         }
 
         @Override

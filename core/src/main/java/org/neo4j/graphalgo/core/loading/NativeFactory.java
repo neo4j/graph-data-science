@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreConfig> {
 
@@ -98,21 +99,21 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
 
             // adjacency list
             builder.add(
-                String.format("adjacency list for '%s'", relationshipType),
+                formatWithLocale("adjacency list for '%s'", relationshipType),
                 AdjacencyList.compressedMemoryEstimation(relationshipType, undirected)
             );
             builder.add(
-                String.format("adjacency offsets for '%s'", relationshipType),
+                formatWithLocale("adjacency offsets for '%s'", relationshipType),
                 AdjacencyOffsets.memoryEstimation()
             );
             // all properties per projection
             relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
                 builder.add(
-                    String.format("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
+                    formatWithLocale("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
                     AdjacencyList.uncompressedMemoryEstimation(relationshipType, undirected)
                 );
                 builder.add(
-                    String.format("property offset '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
+                    formatWithLocale("property offset '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
                     AdjacencyOffsets.memoryEstimation()
                 );
             });

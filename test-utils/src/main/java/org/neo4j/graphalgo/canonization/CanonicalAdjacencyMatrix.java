@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 public final class CanonicalAdjacencyMatrix {
@@ -47,16 +48,16 @@ public final class CanonicalAdjacencyMatrix {
                 .collect(Collectors.joining(":"));
 
             String sortedProperties = g.availableNodeProperties().stream()
-                    .map(propertyKey -> String.format(
+                    .map(propertyKey -> formatWithLocale(
                             "%s: %f",
                             propertyKey,
                             g.nodeProperties(propertyKey).nodeProperty(nodeId)))
                     .sorted()
                     .collect(Collectors.joining(", "));
 
-            String canonicalNode = String.format("(%s%s)",
-                sortedLabels.isEmpty() ? "" : String.format(":%s", sortedLabels),
-                sortedProperties.isEmpty() ? "" : String.format(" { %s }", sortedProperties)
+            String canonicalNode = formatWithLocale("(%s%s)",
+                sortedLabels.isEmpty() ? "" : formatWithLocale(":%s", sortedLabels),
+                sortedProperties.isEmpty() ? "" : formatWithLocale(" { %s }", sortedProperties)
             );
 
             canonicalLabels.put(nodeId, canonicalNode);
@@ -82,7 +83,7 @@ public final class CanonicalAdjacencyMatrix {
 
         // canonical matrix
         return canonicalLabels.entrySet().stream()
-                .map(entry -> String.format(
+                .map(entry -> formatWithLocale(
                         "%s => out: %s in: %s",
                         entry.getValue(),
                         canonicalOutAdjacencies.getOrDefault(entry.getKey(), ""),
@@ -109,7 +110,7 @@ public final class CanonicalAdjacencyMatrix {
             if (list == null) {
                 list = Lists.newArrayList();
             }
-            list.add(String.format(pattern, relationshipProperty, canonicalNodeLabel));
+            list.add(formatWithLocale(pattern, relationshipProperty, canonicalNodeLabel));
             return list;
         };
     }

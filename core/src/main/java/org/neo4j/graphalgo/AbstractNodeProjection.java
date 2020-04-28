@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.annotation.DataClass;
 
 import java.util.Map;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 @DataClass
 public abstract class AbstractNodeProjection extends ElementProjection {
 
@@ -61,7 +63,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
             @SuppressWarnings("unchecked") Map<String, Object> map = (Map) object;
             return fromMap(map, nodeLabel);
         }
-        throw new IllegalArgumentException(String.format(
+        throw new IllegalArgumentException(formatWithLocale(
             "Cannot construct a node filter out of a %s",
             object.getClass().getName()
         ));

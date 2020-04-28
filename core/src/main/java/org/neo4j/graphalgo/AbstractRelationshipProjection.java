@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @DataClass
 public abstract class AbstractRelationshipProjection extends ElementProjection {
@@ -105,7 +106,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
             @SuppressWarnings("unchecked") Map<String, Object> map = (Map) object;
             return fromMap(map, relationshipType);
         }
-        throw new IllegalArgumentException(String.format(
+        throw new IllegalArgumentException(formatWithLocale(
             "Cannot construct a relationship filter out of a %s",
             object.getClass().getName()
         ));

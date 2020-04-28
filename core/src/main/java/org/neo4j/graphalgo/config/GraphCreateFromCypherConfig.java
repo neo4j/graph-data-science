@@ -36,6 +36,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECT
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration("GraphCreateFromCypherConfigImpl")
@@ -109,7 +110,7 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     static void assertNoProjectionsOrExplicitProperties(CypherMapWrapper config) {
         for (String forbiddenKey : FORBIDDEN_KEYS) {
             if (config.containsKey(forbiddenKey)) {
-                throw new IllegalArgumentException(String.format("Invalid key: %s", forbiddenKey));
+                throw new IllegalArgumentException(formatWithLocale("Invalid key: %s", forbiddenKey));
             }
         }
     }

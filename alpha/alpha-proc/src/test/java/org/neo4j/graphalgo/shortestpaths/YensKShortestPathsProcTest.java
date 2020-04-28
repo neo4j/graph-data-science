@@ -30,6 +30,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * Graph:
@@ -82,7 +83,7 @@ class YensKShortestPathsProcTest extends BaseProcTest {
             .addParameter("relationshipWeightProperty", "cost")
             .yields("resultCount");
 
-        String cypher = String.format("MATCH (a:Node{name:'a'}), (f:Node{name:'f'}) %s RETURN resultCount", algoCall);
+        String cypher = formatWithLocale("MATCH (a:Node{name:'a'}), (f:Node{name:'f'}) %s RETURN resultCount", algoCall);
 
         // 9 possible paths without loop
         runQueryWithRowConsumer(cypher, row -> assertEquals(9, row.getNumber("resultCount").intValue()));
@@ -110,7 +111,7 @@ class YensKShortestPathsProcTest extends BaseProcTest {
             "UNWIND relationships(p) AS pair " +
             "return sum(pair.weight) AS distance";
         for (String relationshipType : combinations.keySet()) {
-            String shortestPathsQuery = String.format(
+            String shortestPathsQuery = formatWithLocale(
                 shortestPathQueryTemplate,
                 relationshipType
             );

@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -59,6 +58,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECT
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class BaseProcTest extends BaseTest {
 
@@ -169,7 +169,7 @@ public class BaseProcTest extends BaseTest {
                     return true;
                 });
             });
-            String reason = format(
+            String reason = formatWithLocale(
                 "Different amount of rows returned for actual result (%d) than expected (%d)",
                 actual.size(),
                 expected.size()
@@ -190,7 +190,7 @@ public class BaseProcTest extends BaseTest {
                     }
                     Object actualValue = actualRow.get(key);
                     assertThat(
-                        String.format("Different value for column '%s' of row %d", key, rowNumber),
+                        formatWithLocale("Different value for column '%s' of row %d", key, rowNumber),
                         actualValue, matcher
                     );
                 });
@@ -235,7 +235,7 @@ public class BaseProcTest extends BaseTest {
     ) {
         try {
             runQueryWithResultConsumer(query, queryParameters, BaseProcTest::consume);
-            fail(format("Expected an exception to be thrown by query:\n%s", query));
+            fail(formatWithLocale("Expected an exception to be thrown by query:\n%s", query));
         } catch (Throwable e) {
             assertThat(e, matcher);
         }
@@ -243,7 +243,7 @@ public class BaseProcTest extends BaseTest {
 
     protected void assertUserInput(Result.ResultRow row, String key, Object expected) {
         Map<String, Object> configMap = extractUserInput(row);
-        assertTrue(configMap.containsKey(key), String.format("Key %s is not present in config", key));
+        assertTrue(configMap.containsKey(key), formatWithLocale("Key %s is not present in config", key));
         assertEquals(expected, configMap.get(key));
     }
 
@@ -270,7 +270,7 @@ public class BaseProcTest extends BaseTest {
             .filter(e -> e.getKey().graphName().equals(graphName))
             .map(e -> e.getValue().getUnion())
             .findFirst()
-            .orElseThrow(() -> new RuntimeException(String.format("Graph %s not found.", graphName)));
+            .orElseThrow(() -> new RuntimeException(formatWithLocale("Graph %s not found.", graphName)));
     }
 
     private Set<Graph> getLoadedGraphs(String graphName) {

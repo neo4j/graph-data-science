@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.Orientation.REVERSE;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimilarityWriteConfig> {
 
@@ -123,7 +124,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
         assertGraphEquals(
             orientation == REVERSE
                 ? fromGdl(
-                String.format(
+                formatWithLocale(
                     "  (i1:Item {id: 10})" +
                     ", (i2:Item {id: 11})" +
                     ", (i3:Item {id: 12})" +
@@ -143,7 +144,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
                 )
             )
                 : fromGdl(
-                    String.format(
+                    formatWithLocale(
                         "  (a:Person {id: 0})" +
                         ", (b:Person {id: 1})" +
                         ", (c:Person {id: 2})" +
@@ -178,7 +179,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
         );
         assertThat(
             illegalArgumentException.getMessage(),
-            startsWith(String.format("No value specified for the mandatory configuration parameter `%s`", parameter))
+            startsWith(formatWithLocale("No value specified for the mandatory configuration parameter `%s`", parameter))
         );
     }
 

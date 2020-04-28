@@ -28,9 +28,11 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public abstract class PropertyMapping {
@@ -84,7 +86,7 @@ public abstract class PropertyMapping {
             Map<String, Object> relPropertyMap = (Map) stringOrMap;
             Object propertyNameValue = relPropertyMap.getOrDefault(PROPERTY_KEY, propertyKey);
             if (!(propertyNameValue instanceof String)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Expected the value of '%s' to be of type String, but was '%s'.",
                     PROPERTY_KEY, propertyNameValue.getClass().getSimpleName()
                 ));
@@ -96,9 +98,9 @@ public abstract class PropertyMapping {
             if (aggregationValue == null) {
                 aggregation = Aggregation.DEFAULT;
             } else if (aggregationValue instanceof String) {
-                aggregation = Aggregation.lookup(((String) aggregationValue).toUpperCase());
+                aggregation = Aggregation.lookup(((String) aggregationValue).toUpperCase(Locale.ENGLISH));
             } else {
-                throw new IllegalStateException(String.format(
+                throw new IllegalStateException(formatWithLocale(
                     "Expected the value of '%s' to be of type String, but was '%s'",
                     RelationshipProjection.AGGREGATION_KEY, aggregationValue.getClass().getSimpleName()
                 ));
@@ -111,7 +113,7 @@ public abstract class PropertyMapping {
             } else if (defaultPropertyValue instanceof Number) {
                 defaultProperty = ((Number) defaultPropertyValue).doubleValue();
             } else {
-                throw new IllegalStateException(String.format(
+                throw new IllegalStateException(formatWithLocale(
                     "Expected the value of '%s' to be of type double, but was '%s'",
                     DEFAULT_VALUE_KEY, defaultPropertyValue.getClass().getSimpleName()
                 ));
@@ -124,7 +126,7 @@ public abstract class PropertyMapping {
                 aggregation
             );
         } else {
-            throw new IllegalStateException(String.format(
+            throw new IllegalStateException(formatWithLocale(
                 "Expected stringOrMap to be of type String or Map, but got %s",
                 stringOrMap.getClass().getSimpleName()
             ));

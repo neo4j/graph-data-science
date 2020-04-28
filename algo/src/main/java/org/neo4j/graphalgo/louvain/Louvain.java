@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class Louvain extends Algorithm<Louvain, Louvain> {
 
@@ -80,7 +81,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         long oldNodeCount = rootGraph.nodeCount();
         for (ranLevels = 0; ranLevels < config.maxLevels(); ranLevels++) {
-            getProgressLogger().logMessage(String.format("Level %d :: Start", ranLevels + 1));
+            getProgressLogger().logMessage(formatWithLocale("Level %d :: Start", ranLevels + 1));
 
             assertRunning();
 
@@ -97,7 +98,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
             nextSeedingValues = new OriginalIdNodeProperties(workingGraph);
 
-            getProgressLogger().logMessage(String.format("Level %d :: Finished", ranLevels + 1));
+            getProgressLogger().logMessage(formatWithLocale("Level %d :: Finished", ranLevels + 1));
 
 
             if (workingGraph.nodeCount() == oldNodeCount

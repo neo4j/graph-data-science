@@ -56,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class LabelPropagationTest extends AlgoTestBase {
 
@@ -275,8 +276,8 @@ final class LabelPropagationTest extends AlgoTestBase {
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
         LongStream.range(1, lp.ranIterations() + 1).forEach(iteration -> {
-            assertTrue(testLogger.containsMessage(TestLog.INFO, String.format("Iteration %d :: Start", iteration)));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, String.format("Iteration %d :: Start", iteration)));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d :: Start", iteration)));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d :: Start", iteration)));
         });
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
     }

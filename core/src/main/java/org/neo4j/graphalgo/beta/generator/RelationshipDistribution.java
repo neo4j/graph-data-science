@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.generator;
 
+import java.util.Locale;
 import java.util.Random;
 import java.util.function.LongUnaryOperator;
 
@@ -67,7 +68,7 @@ public enum RelationshipDistribution {
             return null;
         }
         if (object instanceof String) {
-            return RelationshipDistribution.valueOf(((String) object).toUpperCase());
+            return RelationshipDistribution.valueOf(((String) object).toUpperCase(Locale.ENGLISH));
         }
         if (object instanceof RelationshipDistribution) {
             return (RelationshipDistribution) object;

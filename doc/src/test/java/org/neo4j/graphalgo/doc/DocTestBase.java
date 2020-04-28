@@ -53,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class DocTestBase extends BaseProcTest {
 
@@ -132,7 +133,7 @@ abstract class DocTestBase extends BaseProcTest {
                     }
                     Object actualValue = actualRow.get(key);
                     assertThat(
-                        String.format("Different value for column '%s' of row %d", key, rowNumber),
+                        formatWithLocale("Different value for column '%s' of row %d", key, rowNumber),
                         actualValue, matcher
                     );
                 });

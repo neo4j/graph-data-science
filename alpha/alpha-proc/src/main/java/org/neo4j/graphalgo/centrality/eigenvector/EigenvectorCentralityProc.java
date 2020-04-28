@@ -39,6 +39,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -124,7 +125,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
     }
 
     private NormalizationFunction normalization(String normalization) {
-        return NormalizationFunction.valueOf(normalization.toUpperCase());
+        return NormalizationFunction.valueOf(normalization.toUpperCase(Locale.ENGLISH));
     }
 
 }

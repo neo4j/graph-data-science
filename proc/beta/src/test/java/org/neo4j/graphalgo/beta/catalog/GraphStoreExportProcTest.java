@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphStoreExportProcTest extends BaseProcTest {
 
@@ -65,7 +66,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
             .graphCreate("test-graph")
             .yields());
 
-        var exportQuery = String.format(
+        var exportQuery = formatWithLocale(
             "CALL gds.beta.graph.export('test-graph', {" +
             "  dbName: 'test-db'" +
             "})"

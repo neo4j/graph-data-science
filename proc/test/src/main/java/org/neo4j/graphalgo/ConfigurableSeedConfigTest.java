@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends ConfigurableSeedConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
@@ -112,7 +113,7 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<ALGORITH
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = String.format(
+            String error = formatWithLocale(
                 "`%s`: `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found",
                 seedPropertyKeyOverride()
             );

@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResul
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class IntersectingTriangleCountTest extends AlgoTestBase {
 

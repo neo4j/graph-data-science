@@ -51,6 +51,7 @@ import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class CypherFactoryTest extends BaseTest {
 
@@ -172,17 +173,17 @@ class CypherFactoryTest extends BaseTest {
             ", (a)-[{w: %f}]->(b)";
 
         assertGraphEquals(
-            fromGdl(String.format(Locale.US, expectedGraph, 1.0f, prop1.defaultValue(), prop1.defaultValue())),
+            fromGdl(formatWithLocale(expectedGraph, 1.0f, prop1.defaultValue(), prop1.defaultValue())),
             graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop1.propertyKey()))
         );
 
         assertGraphEquals(
-            fromGdl(String.format(Locale.US, expectedGraph, prop2.defaultValue(), 2.0, prop2.defaultValue())),
+            fromGdl(formatWithLocale(expectedGraph, prop2.defaultValue(), 2.0, prop2.defaultValue())),
             graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop2.propertyKey()))
         );
 
         assertGraphEquals(
-            fromGdl(String.format(Locale.US, expectedGraph, prop3.defaultValue(), prop3.defaultValue(), 3.0)),
+            fromGdl(formatWithLocale(expectedGraph, prop3.defaultValue(), prop3.defaultValue(), 3.0)),
             graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop3.propertyKey()))
         );
     }

@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 @ValueClass
@@ -62,7 +63,7 @@ public interface GraphWriteRelationshipConfig extends WriteConfig {
     @Configuration.Ignore
     default void validate(GraphStore graphStore) {
         if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType()))) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Relationship type `%s` not found. Available types: %s",
                 relationshipType(),
                 join(graphStore.relationshipTypes().stream().map(RelationshipType::name).collect(Collectors.toSet()))
@@ -72,7 +73,7 @@ public interface GraphWriteRelationshipConfig extends WriteConfig {
             Set<String> availableProperties = graphStore.relationshipPropertyKeys(RelationshipType.of(relationshipType()));
             String relProperty = relationshipProperty().get();
             if (!availableProperties.contains(relProperty)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Relationship property `%s` not found for relationship type '%s'. Available properties: %s",
                     relProperty,
                     relationshipType(),

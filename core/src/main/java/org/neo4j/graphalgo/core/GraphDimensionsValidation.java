@@ -28,6 +28,7 @@ import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class GraphDimensionsValidation {
@@ -43,7 +44,7 @@ public final class GraphDimensionsValidation {
 
     private static void checkValidNodePredicate(GraphDimensions dimensions, GraphCreateFromStoreConfig config) {
         if (!config.nodeProjections().isEmpty() && dimensions.nodeLabelTokens().contains(NO_SUCH_LABEL)) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Invalid node projection, one or more labels not found: '%s'",
                 config.nodeProjections().labelProjection()
             ));
@@ -54,7 +55,7 @@ public final class GraphDimensionsValidation {
         if (!config.relationshipProjections().isEmpty() && dimensions
             .relationshipTypeTokens()
             .contains(NO_SUCH_RELATIONSHIP_TYPE)) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Invalid relationship projection, one or more relationship types not found: '%s'",
                 config.relationshipProjections().typeFilter()
             ));
@@ -74,7 +75,7 @@ public final class GraphDimensionsValidation {
             .collect(joining("', '"));
 
         if (!missingProperties.isEmpty()) {
-            String errorMessage = String.format(
+            String errorMessage = formatWithLocale(
                 "%s properties not found: '%s'",
                 recordType,
                 missingProperties

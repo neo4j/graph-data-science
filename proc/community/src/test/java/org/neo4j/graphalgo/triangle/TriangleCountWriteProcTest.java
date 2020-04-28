@@ -33,6 +33,7 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class TriangleCountWriteProcTest
     extends TriangleCountBaseProcTest<TriangleCountWriteConfig>
@@ -107,7 +108,7 @@ class TriangleCountWriteProcTest
         Map<String, Long> expectedResult,
         String writeProperty
     ) {
-        runQueryWithRowConsumer(String.format(
+        runQueryWithRowConsumer(formatWithLocale(
             "MATCH (n) RETURN n.name AS name, n.%s AS triangles",
             writeProperty
         ), (row) -> {

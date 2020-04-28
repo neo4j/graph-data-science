@@ -37,6 +37,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.core.Is.isA;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphDropProcTest extends BaseProcTest {
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
@@ -231,7 +232,7 @@ class GraphDropProcTest extends BaseProcTest {
         assertError(
             "CALL gds.graph.drop($graphName)",
             map("graphName", GRAPH_NAME),
-            String.format("Graph with name `%s` does not exist and can't be removed.", GRAPH_NAME)
+            formatWithLocale("Graph with name `%s` does not exist and can't be removed.", GRAPH_NAME)
         );
 
         assertCypherResult(
@@ -249,7 +250,7 @@ class GraphDropProcTest extends BaseProcTest {
         assertError(
             "CALL gds.graph.drop($graphName)",
             map("graphName", invalidName),
-            String.format("`graphName` can not be null or blank, but it was `%s`", invalidName)
+            formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
     }
 

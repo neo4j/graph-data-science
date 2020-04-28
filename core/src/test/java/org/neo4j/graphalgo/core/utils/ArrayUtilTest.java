@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ArrayUtilTest {
 
@@ -45,8 +46,8 @@ class ArrayUtilTest {
     void testBinarySearch(int size) {
         int[] testData = setup(size);
         for (int i = 0; i < testData.length; i++) {
-            assertTrue(ArrayUtil.binarySearch(testData, testData.length, (i + 1) * 2), String.format("False negative at %d value %d%n", i, testData[i]));
-            assertFalse(ArrayUtil.binarySearch(testData, testData.length, (i * 2) + 1), String.format("False positive at %d value %d%n", i, testData[i]));
+            assertTrue(ArrayUtil.binarySearch(testData, testData.length, (i + 1) * 2), formatWithLocale("False negative at %d value %d%n", i, testData[i]));
+            assertFalse(ArrayUtil.binarySearch(testData, testData.length, (i * 2) + 1), formatWithLocale("False positive at %d value %d%n", i, testData[i]));
         }
     }
 
@@ -55,8 +56,8 @@ class ArrayUtilTest {
     void testLinearSearch(int size) {
         int[] testData = setup(size);
         for (int i = 0; i < testData.length; i++) {
-            assertTrue(ArrayUtil.linearSearch(testData, testData.length, (i + 1) * 2), String.format("False negative at %d value %d%n", i, testData[i]));
-            assertFalse(ArrayUtil.linearSearch(testData, testData.length, (i * 2) + 1), String.format("False positive at %d value %d%n", i, testData[i]));
+            assertTrue(ArrayUtil.linearSearch(testData, testData.length, (i + 1) * 2), formatWithLocale("False negative at %d value %d%n", i, testData[i]));
+            assertFalse(ArrayUtil.linearSearch(testData, testData.length, (i * 2) + 1), formatWithLocale("False positive at %d value %d%n", i, testData[i]));
         }
     }
 }

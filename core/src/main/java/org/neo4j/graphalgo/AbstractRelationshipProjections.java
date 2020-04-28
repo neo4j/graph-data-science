@@ -35,6 +35,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -63,7 +64,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             Iterable<?> list = (Iterable) object;
             return fromList(list);
         }
-        throw new IllegalArgumentException(String.format(
+        throw new IllegalArgumentException(formatWithLocale(
             "Cannot construct a relationship projection out of a %s",
             object.getClass().getName()
         ));
@@ -91,7 +92,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             RelationshipProjection filter = RelationshipProjection.fromObject(spec, relationshipType);
             // sanity
             if (projections.put(relationshipType, filter) != null) {
-                throw new IllegalStateException(String.format("Duplicate key: %s", name));
+                throw new IllegalStateException(formatWithLocale("Duplicate key: %s", name));
             }
         });
         return create(projections);
@@ -196,8 +197,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
 
     private static void validateIdentifierName(String identifier) {
         if (identifier.equals(ALL_RELATIONSHIPS.name())) {
-            throw new IllegalArgumentException(String.format(
-                Locale.US,
+            throw new IllegalArgumentException(formatWithLocale(
                 "%s is a reserved node label and may not be used",
                 ALL_RELATIONSHIPS.name()
             ));

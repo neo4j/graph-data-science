@@ -42,6 +42,7 @@ import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestSupport.getCypherAggregation;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
 import static org.neo4j.graphalgo.core.Aggregation.NONE;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 public final class TestGraphLoader {
@@ -132,7 +133,7 @@ public final class TestGraphLoader {
 
         String nodePropertiesString = getNodePropertiesString(nodeProperties, "n");
 
-        cypherLoaderBuilder.nodeQuery(String.format(nodeQueryTemplate,
+        cypherLoaderBuilder.nodeQuery(formatWithLocale(nodeQueryTemplate,
             labelString,
             nodeLabels.isEmpty() ? "" : ", labels(n) AS labels",
             nodePropertiesString));
@@ -153,8 +154,7 @@ public final class TestGraphLoader {
         relProperties = getUniquePropertyMappings(relProperties);
         String relPropertiesString = getRelationshipPropertiesString(relProperties, "r");
 
-        cypherLoaderBuilder.relationshipQuery(String.format(
-            Locale.US,
+        cypherLoaderBuilder.relationshipQuery(formatWithLocale(
             relationshipQueryTemplate,
             relTypeString,
             relPropertiesString
@@ -207,8 +207,7 @@ public final class TestGraphLoader {
         return propertyMappings.hasMappings()
             ? propertyMappings
                 .stream()
-                .map(mapping -> String.format(
-                    Locale.US,
+                .map(mapping -> formatWithLocale(
                     "COALESCE(%s.%s, %f) AS %s",
                     entityVar,
                     mapping.neoPropertyKey(),
@@ -223,12 +222,11 @@ public final class TestGraphLoader {
         return propertyMappings.hasMappings()
             ? propertyMappings
             .stream()
-            .map(mapping -> String.format(
-                Locale.US,
+            .map(mapping -> formatWithLocale(
                 "%s AS %s",
                 getCypherAggregation(
                     mapping.aggregation().name(),
-                    String.format(
+                    formatWithLocale(
                         "COALESCE(%s.%s, %f)",
                         entityVar,
                         removeSuffix(mapping.neoPropertyKey()),
@@ -244,7 +242,7 @@ public final class TestGraphLoader {
     private static final String SUFFIX = "___";
 
     public static String addSuffix(String propertyKey, int id) {
-        return String.format("%s%s%d", propertyKey, SUFFIX, id);
+        return formatWithLocale("%s%s%d", propertyKey, SUFFIX, id);
     }
 
     private String removeSuffix(String propertyKey) {

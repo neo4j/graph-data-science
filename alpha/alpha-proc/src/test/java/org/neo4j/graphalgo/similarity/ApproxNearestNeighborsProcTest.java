@@ -32,6 +32,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ApproxNearestNeighborsProcTest extends BaseProcTest {
 
@@ -119,7 +120,7 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
                 expectedScore = expectedScores.get(Tuples.pair(to, from));
             }
             if (expectedScore == null) {
-                fail(String.format("Unexpected result pair: from = %s to = %s", from, to));
+                fail(formatWithLocale("Unexpected result pair: from = %s to = %s", from, to));
             } else {
                 assertEquals(expectedScore, row.getNumber("similarity").doubleValue());
             }
@@ -175,7 +176,7 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
                 expectedScore = expectedScores.get(Tuples.pair(to, from));
             }
             if (expectedScore == null) {
-                fail(String.format("Unexpected result pair: from = %s to = %s", from, to));
+                fail(formatWithLocale("Unexpected result pair: from = %s to = %s", from, to));
             } else {
                 assertEquals(expectedScore.doubleValue(), row.getNumber("similarity").doubleValue());
             }

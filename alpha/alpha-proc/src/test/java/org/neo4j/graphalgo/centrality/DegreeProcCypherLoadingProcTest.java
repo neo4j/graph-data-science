@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.getCypherAggregation;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class DegreeProcCypherLoadingProcTest extends BaseProcTest {
 
@@ -100,7 +101,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(INCOMING_RELS, getCypherAggregation("single","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(INCOMING_RELS, getCypherAggregation("single","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(incomingExpected, actual);
@@ -116,7 +117,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD nodeId, score";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(INCOMING_RELS, getCypherAggregation("sum","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(INCOMING_RELS, getCypherAggregation("sum","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(incomingWeightedExpected, actual);
@@ -130,7 +131,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(INCOMING_RELS, getCypherAggregation("single","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(INCOMING_RELS, getCypherAggregation("single","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -148,7 +149,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(INCOMING_RELS, getCypherAggregation("sum","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(INCOMING_RELS, getCypherAggregation("sum","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -166,7 +167,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD nodeId, score";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(BOTH_RELS, getCypherAggregation("single","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(BOTH_RELS, getCypherAggregation("single","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(bothExpected, actual);
@@ -182,7 +183,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD nodeId, score";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(BOTH_RELS, getCypherAggregation("sum","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(BOTH_RELS, getCypherAggregation("sum","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(bothWeightedExpected, actual);
@@ -196,7 +197,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(BOTH_RELS, getCypherAggregation("single","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(BOTH_RELS, getCypherAggregation("single","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -214,7 +215,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(BOTH_RELS, getCypherAggregation("sum","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(BOTH_RELS, getCypherAggregation("sum","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -232,7 +233,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD nodeId, score";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(OUTGOING_RELS, getCypherAggregation("single","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(OUTGOING_RELS, getCypherAggregation("single","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(outgoingExpected, actual);
@@ -248,7 +249,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD nodeId, score";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(OUTGOING_RELS, getCypherAggregation("sum","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(OUTGOING_RELS, getCypherAggregation("sum","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(outgoingWeightedExpected, actual);
@@ -262,7 +263,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(OUTGOING_RELS, getCypherAggregation("single","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(OUTGOING_RELS, getCypherAggregation("single","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
@@ -280,7 +281,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
                        "}) YIELD writeMillis, writeProperty";
         runQueryWithRowConsumer(
             query,
-            MapUtil.map("nodeQuery", NODES, "relQuery", String.format(OUTGOING_RELS, getCypherAggregation("sum","r.foo"))),
+            MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(OUTGOING_RELS, getCypherAggregation("sum","r.foo"))),
             row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");

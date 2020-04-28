@@ -75,6 +75,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHI
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * Base test that should be used for every algorithm procedure.
@@ -147,7 +148,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             GraphCreateConfig actual = maybeGraphCreateConfig.get();
             assertTrue(
                 actual instanceof GraphCreateFromStoreConfig,
-                String.format("GraphCreateConfig should be %s.", GraphCreateFromStoreConfig.class.getSimpleName())
+                formatWithLocale("GraphCreateConfig should be %s.", GraphCreateFromStoreConfig.class.getSimpleName())
             );
 
             GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) actual;
@@ -184,7 +185,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             assertTrue(maybeGraphCreateConfig.isPresent(), "Config should contain a GraphCreateConfig.");
             assertTrue(
                 maybeGraphCreateConfig.get() instanceof GraphCreateFromCypherConfig,
-                String.format("GraphCreateConfig should be %s.", GraphCreateFromCypherConfig.class.getSimpleName()));
+                formatWithLocale("GraphCreateConfig should be %s.", GraphCreateFromCypherConfig.class.getSimpleName()));
 
             GraphCreateFromCypherConfig actualConfig = (GraphCreateFromCypherConfig) maybeGraphCreateConfig.get();
 
@@ -331,7 +332,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                     assertEquals(IllegalArgumentException.class, rootCause.getClass());
                     assertThat(
                         rootCause.getMessage(),
-                        containsString(String.format(
+                        containsString(formatWithLocale(
                             "Invalid node projection, one or more labels not found: '%s'",
                             missingLabel
                         ))
@@ -390,7 +391,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                     assertEquals(IllegalArgumentException.class, rootCause.getClass());
                     assertThat(
                         rootCause.getMessage(),
-                        containsString(String.format(
+                        containsString(formatWithLocale(
                             "Invalid relationship projection, one or more relationship types not found: '%s'",
                             missingRelType
                         ))
@@ -435,7 +436,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
     }
 
-    String FAIL_ANY_CONFIG = String.format(
+    String FAIL_ANY_CONFIG = formatWithLocale(
         "`%s` and `%s` or `%s` and `%s`",
         NODE_PROJECTION_KEY,
         RELATIONSHIP_PROJECTION_KEY,
@@ -471,11 +472,11 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             String message = ex.getMessage();
             assertTrue(
                 message.contains("Missing information"),
-                String.format("Does not start with 'Missing information': %s", message)
+                formatWithLocale("Does not start with 'Missing information': %s", message)
             );
             assertTrue(
                 message.contains(expectedMessage),
-                String.format("Does not contain '%s': %s", expectedMessage, message)
+                formatWithLocale("Does not contain '%s': %s", expectedMessage, message)
             );
         });
     }
@@ -487,7 +488,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             if (inStatsClass) {
                 assertTrue(
                     methodExists(proc, "stats"),
-                    String.format("Expected %s to have a `stats` method", proc.getClass().getSimpleName())
+                    formatWithLocale("Expected %s to have a `stats` method", proc.getClass().getSimpleName())
                 );
             }
         });

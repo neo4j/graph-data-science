@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @DataClass
 @Value.Immutable(singleton = true)
@@ -79,7 +80,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
             });
             return builder.build();
         } else {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Expected String or Map for property mappings. Got %s.",
                 relPropertyMapping.getClass().getSimpleName()
             ));
@@ -126,7 +127,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 Map.Entry::getValue,
-                (u, v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); },
+                (u, v) -> { throw new IllegalStateException(formatWithLocale("Duplicate key %s", u)); },
                 LinkedHashMap::new
             ));
     }

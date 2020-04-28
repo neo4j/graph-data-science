@@ -40,6 +40,7 @@ import scala.collection.Seq;
 
 import java.util.Map;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.cypher.ScalaHelpers.pair;
 
 final class AstHelpers {
@@ -150,7 +151,7 @@ final class AstHelpers {
         if (value instanceof Map) {
             return map((Map<?, ?>) value);
         }
-        throw new IllegalArgumentException(String.format(
+        throw new IllegalArgumentException(formatWithLocale(
             "Unsupported type [%s] of value [%s]",
             value.getClass().getSimpleName(),
             value

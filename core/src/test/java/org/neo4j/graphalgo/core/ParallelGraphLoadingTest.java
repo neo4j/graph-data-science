@@ -60,6 +60,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransactio
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.core.utils.RawValues.combineIntInt;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ParallelGraphLoadingTest extends RandomGraphTestCase {
 
@@ -153,7 +154,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
                     final Relationship relationship = relationships.remove(relId);
                     assertNotNull(
                             relationship,
-                            String.format(
+                            formatWithLocale(
                                     "Relationship (%d)-[%d]->(%d) that does not exist in the graph",
                                     sourceId,
                                     relId,

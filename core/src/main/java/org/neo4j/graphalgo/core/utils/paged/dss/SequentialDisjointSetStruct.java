@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.core.utils.paged.dss;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 /**
  * Disjoint-set-struct is a data structure that keeps track of a set
  * of elements partitioned into a number of disjoint (non-overlapping) subsets.
@@ -88,14 +90,14 @@ public abstract class SequentialDisjointSetStruct implements DisjointSetStruct {
      */
     public SequentialDisjointSetStruct merge(SequentialDisjointSetStruct other) {
         if (!getClass().equals(other.getClass())) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                     "Cannot merge DisjointSetStructs of different types: %s and %s.",
                     getClass().getSimpleName(),
                     other.getClass().getSimpleName()));
         }
 
         if (other.size() != this.size()) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                     "Cannot merge DisjointSetStructs with different sizes: %d and %d.",
                     other.size(),
                     this.size()));

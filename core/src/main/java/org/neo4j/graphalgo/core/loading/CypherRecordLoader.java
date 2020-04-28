@@ -32,11 +32,13 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class CypherRecordLoader<R> {
 
@@ -44,11 +46,11 @@ abstract class CypherRecordLoader<R> {
         NODE, RELATIONSHIP;
 
         String capitalize() {
-            return name().substring(0, 1) + name().substring(1).toLowerCase();
+            return name().substring(0, 1) + name().substring(1).toLowerCase(Locale.ENGLISH);
         }
 
         String toLowerCase() {
-            return name().toLowerCase();
+            return name().toLowerCase(Locale.ENGLISH);
         }
     }
 
@@ -83,7 +85,7 @@ abstract class CypherRecordLoader<R> {
             updateCounts(result);
             return result();
         } catch (AuthorizationViolationException ex) {
-            throw new IllegalArgumentException(String.format("Query must be read only. Query: [%s]", loadQuery));
+            throw new IllegalArgumentException(formatWithLocale("Query must be read only. Query: [%s]", loadQuery));
         }
     }
 
@@ -121,7 +123,7 @@ abstract class CypherRecordLoader<R> {
         Set<String> missingColumns = new HashSet<>(getMandatoryColumns());
         missingColumns.removeAll(allColumns);
         if (!missingColumns.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Invalid %s query, required column(s) not found: '%s'",
                 queryType().toLowerCase(),
                 String.join("', '", missingColumns)
@@ -141,7 +143,7 @@ abstract class CypherRecordLoader<R> {
             .collect(Collectors.toList());
 
         if (!invalidNodeProperties.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "%s properties not found: '%s'. Available properties from the %s query are: '%s'",
                 queryType().capitalize(),
                 String.join("', '", invalidNodeProperties),

@@ -67,6 +67,7 @@ import static org.neo4j.graphalgo.core.Aggregation.MIN;
 import static org.neo4j.graphalgo.core.Aggregation.NONE;
 import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 import static org.neo4j.graphalgo.core.Aggregation.SUM;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 
@@ -240,7 +241,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .graph(graphStoreFactory);
 
-        Graph expected = fromGdl(String.format(
+        Graph expected = fromGdl(formatWithLocale(
             "(n1)" +
             "(n2)" +
             "(n3)" +
@@ -267,8 +268,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             "(n1)-[{weight: 1.0d}]->(n3)" +
             "(n2)-[{weight: %fd}]->(n3)";
 
-        Graph expected1 = fromGdl(String.format(expectedGraph, 42.0));
-        Graph expected2 = fromGdl(String.format(expectedGraph, 1337.0));
+        Graph expected1 = fromGdl(formatWithLocale(expectedGraph, 42.0));
+        Graph expected2 = fromGdl(formatWithLocale(expectedGraph, 1337.0));
         assertGraphEquals(Arrays.asList(expected1, expected2), graph);
     }
 
@@ -564,7 +565,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             .graphStore(NativeFactory.class);
 
         Graph p1Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("p1"));
-        Graph expectedP1Graph = fromGdl(String.format(
+        Graph expectedP1Graph = fromGdl(formatWithLocale(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)" +
             "(c), (d)",
@@ -574,7 +575,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         assertGraphEquals(expectedP1Graph, p1Graph);
 
         Graph p2Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("p2"));
-        Graph expectedP2Graph = fromGdl(String.format(
+        Graph expectedP2Graph = fromGdl(formatWithLocale(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)" +
             "(c), (d)",
@@ -642,7 +643,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             .graphStore(NativeFactory.class);
 
         Graph p1Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("p1"));
-        Graph expectedP1Graph = fromGdl(String.format(
+        Graph expectedP1Graph = fromGdl(formatWithLocale(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)",
             expectedNodeAP1,
@@ -651,7 +652,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         assertGraphEquals(expectedP1Graph, p1Graph);
 
         Graph p2Graph = graphs.getGraph(graphs.relationshipTypes(), Optional.of("p2"));
-        Graph expectedP2Graph = fromGdl(String.format(
+        Graph expectedP2Graph = fromGdl(formatWithLocale(
             "(a)-[{w: %fd}]->(a)" +
             "(b)-[{w: %fd}]->(b)",
             expectedNodeAP2,
@@ -683,13 +684,13 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             "(b)-[{w: %fd}]->(b)";
 
         Graph p1Graph = graphStore.getGraph(graphStore.relationshipTypes(), Optional.of("p1"));
-        Graph expectedP1GraphOption1 = fromGdl(String.format(expectedGraphTemplate, 43D, 46D));
-        Graph expectedP1GraphOption2 = fromGdl(String.format(expectedGraphTemplate, 42D, 46D));
+        Graph expectedP1GraphOption1 = fromGdl(formatWithLocale(expectedGraphTemplate, 43D, 46D));
+        Graph expectedP1GraphOption2 = fromGdl(formatWithLocale(expectedGraphTemplate, 42D, 46D));
         assertGraphEquals(Arrays.asList(expectedP1GraphOption1, expectedP1GraphOption2), p1Graph);
 
         Graph p2Graph = graphStore.getGraph(graphStore.relationshipTypes(), Optional.of("p2"));
-        Graph expectedP2GraphOption1 = fromGdl(String.format(expectedGraphTemplate, 1338D, 1341D));
-        Graph expectedP2GraphOption2 = fromGdl(String.format(expectedGraphTemplate, 1337D, 1341D));
+        Graph expectedP2GraphOption1 = fromGdl(formatWithLocale(expectedGraphTemplate, 1338D, 1341D));
+        Graph expectedP2GraphOption2 = fromGdl(formatWithLocale(expectedGraphTemplate, 1337D, 1341D));
         assertGraphEquals(Arrays.asList(expectedP2GraphOption1, expectedP2GraphOption2), p2Graph);
     }
 

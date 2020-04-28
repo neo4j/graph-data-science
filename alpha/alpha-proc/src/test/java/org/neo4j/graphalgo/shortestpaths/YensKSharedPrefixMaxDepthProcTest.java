@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * Graph:
@@ -75,7 +76,7 @@ class YensKSharedPrefixMaxDepthProcTest extends BaseProcTest {
             .addPlaceholder("maxDepth", "maxDepth")
             .yields("path");
 
-        final String cypher = String.format(
+        final String cypher = formatWithLocale(
             "MATCH (from:Node{name:$from}), (to:Node{name:$to}) %s RETURN path",
             algoCall
         );

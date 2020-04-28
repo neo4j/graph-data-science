@@ -35,6 +35,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
 
@@ -232,14 +233,14 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
         });
 
         runQueryWithRowConsumer(
-            String.format("MATCH (n) RETURN n.%s AS %s", writeProperty, writeProperty),
+            formatWithLocale("MATCH (n) RETURN n.%s AS %s", writeProperty, writeProperty),
             row -> {
                 assertTrue(row.getNumber(writeProperty).longValue() >= 42);
             }
         );
 
         runQueryWithRowConsumer(
-            String.format("MATCH (n) RETURN n.nodeId AS nodeId, n.%s AS %s", writeProperty, writeProperty),
+            formatWithLocale("MATCH (n) RETURN n.nodeId AS nodeId, n.%s AS %s", writeProperty, writeProperty),
             row -> {
                 final long nodeId = row.getNumber("nodeId").longValue();
                 final long componentId = row.getNumber(writeProperty).longValue();

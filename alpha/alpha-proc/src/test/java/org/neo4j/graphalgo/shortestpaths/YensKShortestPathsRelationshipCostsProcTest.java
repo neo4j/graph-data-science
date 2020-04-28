@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.compat.MapUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * Graph:
@@ -66,7 +67,7 @@ class YensKShortestPathsRelationshipCostsProcTest extends BaseProcTest {
             .addParameter("relationshipWeightProperty", "cost")
             .yields("resultCount");
 
-        String cypher = String.format(
+        String cypher = formatWithLocale(
             "MATCH (c:Node{name:'c'}), (a:Node{name:'a'}) %s RETURN resultCount",
             algoCall
         );

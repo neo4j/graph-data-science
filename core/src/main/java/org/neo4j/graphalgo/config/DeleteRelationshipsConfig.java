@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.core.loading.GraphStore;
 
 import java.util.Set;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 @ValueClass
 @Configuration("DeleteRelationshipsConfigImpl")
 @SuppressWarnings("immutables:subtype")
@@ -53,7 +55,7 @@ public interface DeleteRelationshipsConfig {
         Set<RelationshipType> relationshipTypes = graphStore.relationshipTypes();
 
         if (relationshipTypes.size() == 1) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Deleting the last relationship type ('%s') from a graph ('%s') is not supported. " +
                 "Use `gds.graph.drop()` to drop the entire graph instead.",
                 relationshipType(),
@@ -62,7 +64,7 @@ public interface DeleteRelationshipsConfig {
         }
 
         if (!relationshipTypes.contains(RelationshipType.of(relationshipType()))) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "No relationship type '%s' found in graph '%s'.",
                 relationshipType(),
                 graphName()

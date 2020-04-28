@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphWriteRelationshipProcTest extends BaseProcTest {
     private static final String TEST_GRAPH_NAME = "testGraph";
@@ -78,7 +79,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
 
     @Test
     void writeRelationship() {
-        String graphWriteQuery = String.format(
+        String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.writeRelationship('%s', 'NEW_REL1')" +
             "YIELD writeMillis, graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten",
             TEST_GRAPH_NAME
@@ -115,7 +116,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
         double sum,
         int relationshipsWritten
     ) {
-        String graphWriteQuery = String.format(
+        String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.writeRelationship('%s', '%s', '%s')" +
             "YIELD writeMillis, graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten",
             TEST_GRAPH_NAME,
@@ -132,7 +133,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
             assertEquals(relationshipsWritten, row.getNumber("propertiesWritten").longValue());
         });
 
-        String validationQuery = String.format(
+        String validationQuery = formatWithLocale(
             "MATCH (n)-[r:%s]->(m) " +
             "RETURN type(r) AS relType, count(r) AS count, toFloat(sum(r.%s)) AS sum",
             relType,
@@ -148,7 +149,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
     void shouldFailOnNonExistingRelationshipType() {
         QueryExecutionException ex = assertThrows(
             QueryExecutionException.class,
-            () -> runQuery(String.format(
+            () -> runQuery(formatWithLocale(
                 "CALL gds.graph.writeRelationship(" +
                 "   '%s', " +
                 "   'NEW_REL42'" +
@@ -167,7 +168,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
     void shouldFailOnNonExistingRelationshipProperty() {
         QueryExecutionException ex = assertThrows(
             QueryExecutionException.class,
-            () -> runQuery(String.format(
+            () -> runQuery(formatWithLocale(
                 "CALL gds.graph.writeRelationship(" +
                 "   '%s', " +
                 "   'NEW_REL1', " +

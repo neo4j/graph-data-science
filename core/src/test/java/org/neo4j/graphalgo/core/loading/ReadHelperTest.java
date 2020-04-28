@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ReadHelperTest {
 
@@ -108,7 +109,7 @@ class ReadHelperTest {
                 IllegalArgumentException.class,
                 () -> ReadHelper.extractValue(value, 42.0)
         );
-        String expectedErrorMessage = String.format(
+        String expectedErrorMessage = formatWithLocale(
                 "Unsupported type [%s] of value %s. Please use a numeric property.",
                 typePart,
                 valuePart
@@ -123,7 +124,7 @@ class ReadHelperTest {
                 IllegalArgumentException.class,
                 () -> ReadHelper.extractValue(aggregation, value, 42.0)
         );
-        String expectedErrorMessage = String.format(
+        String expectedErrorMessage = formatWithLocale(
                 "Unsupported type [%s] of value %s. Please use a numeric property.",
                 typePart,
                 valuePart

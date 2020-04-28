@@ -54,6 +54,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 
 class WeightedAllShortestPaths427Test extends AlgoTestBase {
@@ -476,7 +477,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
                             () -> assertEquals(
                                 expect,
                                 actual,
-                                String.format("Neo vs Algo (%d)-[*]->(%d)", neoSourceId, neoTargetId)
+                                formatWithLocale("Neo vs Algo (%d)-[*]->(%d)", neoSourceId, neoTargetId)
                             )
                         );
                     }
@@ -511,7 +512,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
                     return () -> assertEquals(
                         expect,
                         actual,
-                        String.format("Neo vs wASP (%d)-[*]->(%d)", expect.source, expect.target)
+                        formatWithLocale("Neo vs wASP (%d)-[*]->(%d)", expect.source, expect.target)
                     );
                 })
         );

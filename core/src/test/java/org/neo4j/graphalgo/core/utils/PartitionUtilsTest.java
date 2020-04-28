@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class PartitionUtilsTest {
 
@@ -51,7 +52,7 @@ class PartitionUtilsTest {
 
         @Override
         public String toString() {
-            return String.format("(%d, %d)", start, nodeCount);
+            return formatWithLocale("(%d, %d)", start, nodeCount);
         }
     }
 
@@ -75,11 +76,11 @@ class PartitionUtilsTest {
         assertEquals(2, tasks.size());
         assertTrue(
             tasks.stream().anyMatch((t) -> t.start == 0 && t.nodeCount == 128),
-            String.format("Expected task with start %d and nodeCount %d, but found %s", 0, 128, tasks)
+            formatWithLocale("Expected task with start %d and nodeCount %d, but found %s", 0, 128, tasks)
         );
         assertTrue(
             tasks.stream().anyMatch((t) -> t.start == 128 && t.nodeCount == 72),
-            String.format("Expected task with start %d and nodeCount %d, but found %s", 128, 72, tasks)
+            formatWithLocale("Expected task with start %d and nodeCount %d, but found %s", 128, 72, tasks)
         );
     }
 

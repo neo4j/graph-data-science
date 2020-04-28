@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public class TestLog extends AbstractLog {
     public static String DEBUG = "debug";
     public static String INFO = "info";
@@ -111,7 +113,7 @@ public class TestLog extends AbstractLog {
 
         @Override
         public void log(String format, Object... arguments) {
-            log(String.format(format, arguments));
+            log(formatWithLocale(format, arguments));
         }
 
         @Override

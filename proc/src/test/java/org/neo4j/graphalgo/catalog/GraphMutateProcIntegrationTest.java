@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.wcc.WccMutateProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphMutateProcIntegrationTest extends BaseProcTest {
 
@@ -172,7 +173,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion());
 
         // write new properties and relationships to Neo
-        String writeNodePropertiesQuery = String.format(
+        String writeNodePropertiesQuery = formatWithLocale(
             "CALL gds.graph.writeNodeProperties(" +
             "   '%s', " +
             "   ['pageRank', 'louvain', 'labelPropagation', 'wcc']" +
@@ -183,7 +184,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             assertEquals(row.getNumber("propertiesWritten").longValue(), 48L);
         });
 
-        String writeRelationshipTypeQuery = String.format(
+        String writeRelationshipTypeQuery = formatWithLocale(
             "CALL gds.graph.writeRelationship(" +
             "   '%s', " +
             "   'SIMILAR_TO', " +
@@ -194,7 +195,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         runQuery(writeRelationshipTypeQuery);
 
         // re-create named graph from written node and relationship properties
-        runQuery(String.format("CALL gds.graph.drop('%s')", TEST_GRAPH));
+        runQuery(formatWithLocale("CALL gds.graph.drop('%s')", TEST_GRAPH));
         runQuery(GdsCypher.call().withAnyLabel()
             .withNodeProperty("nodeId")
             .withNodeProperty("pageRank")

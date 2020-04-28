@@ -30,6 +30,9 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Optional;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 final class TriangleCountCompanion {
 
     static final String DESCRIPTION =

@@ -34,6 +34,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 @ValueClass
 @Configuration("GraphCreateFromStoreConfigImpl")
 @SuppressWarnings("immutables:subtype")
@@ -129,7 +131,7 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         propertyIntersection.retainAll(propertiesFromProjection);
 
         if (!propertyIntersection.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Incompatible %s projection and %s property specification. Both specify properties named %s",
                 type, type, propertyIntersection
             ));

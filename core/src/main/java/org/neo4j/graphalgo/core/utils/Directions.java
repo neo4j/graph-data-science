@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.graphdb.Direction;
 
+import java.util.Locale;
+
 /**
  * Utility class for converting string representation used in cypher queries
  * to neo4j kernel api Direction type.
@@ -65,7 +67,7 @@ public class Directions {
             return defaultDirection;
         }
 
-        switch (directionString.toLowerCase()) {
+        switch (directionString.toLowerCase(Locale.ENGLISH)) {
 
             case "outgoing":
             case "out":

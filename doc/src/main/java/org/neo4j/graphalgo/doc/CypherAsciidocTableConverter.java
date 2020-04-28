@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class CypherAsciidocTableConverter {
 
     private CypherAsciidocTableConverter() {}
@@ -42,7 +44,7 @@ public final class CypherAsciidocTableConverter {
         int columns = lines.get(0).split("\\|").length - 1;
 
         lines.remove(lines.size() - 1);
-        lines.add(String.format("%d+|%d rows", columns, lines.size() - 1));
+        lines.add(formatWithLocale("%d+|%d rows", columns, lines.size() - 1));
         lines.add("");
 
         return String.join(System.lineSeparator(), lines);

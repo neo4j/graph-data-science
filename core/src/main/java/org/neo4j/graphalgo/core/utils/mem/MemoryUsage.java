@@ -33,6 +33,8 @@ import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -177,7 +179,7 @@ public final class MemoryUsage {
         boolean available;
         var sysOut = System.out;
         try {
-            var swallowSysOut = new PrintStream(NullOutputStream.NULL_OUTPUT_STREAM);
+            var swallowSysOut = new PrintStream(NullOutputStream.NULL_OUTPUT_STREAM, true, StandardCharsets.UTF_8);
             System.setOut(swallowSysOut);
             VM.current();
             swallowSysOut.flush();

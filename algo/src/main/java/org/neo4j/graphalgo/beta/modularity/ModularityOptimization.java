@@ -45,6 +45,8 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 /**
  * Implementation of parallel modularity optimization based on:
  *
@@ -107,7 +109,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         if (maxIterations < 1) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Need to run at least one iteration, but got %d",
                 maxIterations
             ));
@@ -127,7 +129,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
 
         for (iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
-            progressLogger.logMessage(String.format(":: Iteration %d :: Start", iterationCounter + 1));
+            progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Start", iterationCounter + 1));
 
             boolean hasConverged;
 
@@ -142,7 +144,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
             hasConverged = !updateModularity();
 
-            progressLogger.logMessage(String.format(":: Iteration %d :: Finished", iterationCounter + 1));
+            progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Finished", iterationCounter + 1));
 
             if (hasConverged) {
                 this.didConverge = true;

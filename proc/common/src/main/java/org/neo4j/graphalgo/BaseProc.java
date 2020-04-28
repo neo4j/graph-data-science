@@ -41,6 +41,8 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public abstract class BaseProc {
 
     protected static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
@@ -102,7 +104,7 @@ public abstract class BaseProc {
     protected final void validateGraphName(String username, String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
         if (GraphStoreCatalog.exists(username, graphName)) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(formatWithLocale(
                 "A graph with name '%s' already exists.",
                 graphName
             ));
@@ -139,7 +141,7 @@ public abstract class BaseProc {
         long freeMemory = inspector.freeMemory();
         long minBytesProcedure = memoryTreeWithDimensions.memoryTree.memoryUsage().min;
         if (minBytesProcedure > freeMemory) {
-            throw new IllegalStateException(String.format(
+            throw new IllegalStateException(formatWithLocale(
                 "Procedure was blocked since minimum estimated memory (%s) exceeds current free memory (%s).",
                 MemoryUsage.humanReadable(minBytesProcedure),
                 MemoryUsage.humanReadable(freeMemory)

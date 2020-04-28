@@ -57,6 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagation>,
@@ -123,7 +124,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
         runQuery(cypher);
         // Create explicit graphs with both projection variants
         runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
-        runQuery(String.format(
+        runQuery(formatWithLocale(
             "CALL gds.graph.create.cypher('%s', '%s', '%s', {})",
             TEST_CYPHER_GRAPH_NAME,
             nodeQuery,

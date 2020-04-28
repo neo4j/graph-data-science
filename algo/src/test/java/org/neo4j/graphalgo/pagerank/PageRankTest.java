@@ -51,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class PageRankTest extends AlgoTestBase {
 
@@ -131,8 +132,8 @@ final class PageRankTest extends AlgoTestBase {
             graph = applyInTransaction(db, tx ->
                 new CypherLoaderBuilder()
                     .api(db)
-                    .nodeQuery(String.format("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
-                    .relationshipQuery(String.format(
+                    .nodeQuery(formatWithLocale("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
+                    .relationshipQuery(formatWithLocale(
                         "MATCH (n:%s)-[:%s]->(m:%s) RETURN id(n) as source,id(m) as target",
                         LABEL.name(),
                         RELATIONSHIP_TYPE,
@@ -189,8 +190,8 @@ final class PageRankTest extends AlgoTestBase {
             graph = applyInTransaction(db, tx ->
                 new CypherLoaderBuilder()
                     .api(db)
-                    .nodeQuery(String.format("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
-                    .relationshipQuery(String.format(
+                    .nodeQuery(formatWithLocale("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
+                    .relationshipQuery(formatWithLocale(
                         "MATCH (n:%s)<-[:%s]-(m:%s) RETURN id(n) as source,id(m) as target",
                         LABEL.name(),
                         RELATIONSHIP_TYPE,
@@ -235,8 +236,8 @@ final class PageRankTest extends AlgoTestBase {
         if (factoryType.isAssignableFrom(CypherFactory.class)) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
-                .nodeQuery(String.format("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
-                .relationshipQuery(String.format(
+                .nodeQuery(formatWithLocale("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
+                .relationshipQuery(formatWithLocale(
                     "MATCH (n:%s)-[:%s]->(m:%s) RETURN id(n) as source,id(m) as target",
                     LABEL.name(),
                     RELATIONSHIP_TYPE,
@@ -324,8 +325,8 @@ final class PageRankTest extends AlgoTestBase {
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
         LongStream.range(1, pageRank.iterations() + 1).forEach(iteration -> {
-            assertTrue(testLogger.containsMessage(TestLog.INFO, String.format("Iteration %d :: Start", iteration)));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, String.format("Iteration %d :: Start", iteration)));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d :: Start", iteration)));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d :: Start", iteration)));
         });
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
     }

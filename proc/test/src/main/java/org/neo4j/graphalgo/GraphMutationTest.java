@@ -47,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
@@ -214,7 +215,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
 
         runQuery(graphDb(), graphWriteQuery, Map.of("graph", graphName, "property", mutateProperty()));
 
-        String checkNeo4jGraphQuery = String.format("MATCH (n:B) RETURN n.%s AS property", mutateProperty());
+        String checkNeo4jGraphQuery = formatWithLocale("MATCH (n:B) RETURN n.%s AS property", mutateProperty());
 
         runQueryWithRowConsumer(
             graphDb(),
@@ -270,7 +271,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
     String expectedMutatedGraph();
 
     default String failOnExistingTokenMessage() {
-        return String.format(
+        return formatWithLocale(
             "Node property `%s` already exists in the in-memory graph.",
             mutateProperty()
         );

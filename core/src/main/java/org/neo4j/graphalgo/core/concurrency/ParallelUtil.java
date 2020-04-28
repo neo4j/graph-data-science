@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
@@ -27,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.BiLongConsumer;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 
 import java.util.ArrayList;
@@ -59,8 +59,8 @@ import java.util.function.Supplier;
 import java.util.stream.BaseStream;
 import java.util.stream.LongStream;
 
-import static java.lang.String.format;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ParallelUtil {
 
@@ -833,7 +833,7 @@ public final class ParallelUtil {
 
                 if (!completionService.trySubmit(ts) && !completionService.hasTasks()) {
                     if (++tries >= maxWaitRetries) {
-                        throw new IllegalThreadStateException(format(
+                        throw new IllegalThreadStateException(formatWithLocale(
                             "Attempted to submit tasks for %d times with a %d nanosecond delay (%d milliseconds) between each attempt, but ran out of time",
                             tries,
                             waitNanos,

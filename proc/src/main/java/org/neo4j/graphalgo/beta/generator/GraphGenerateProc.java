@@ -31,6 +31,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -40,6 +41,7 @@ import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_NAME_KEY;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_TYPE_KEY;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public final class GraphGenerateProc extends BaseProc {
@@ -84,7 +86,7 @@ public final class GraphGenerateProc extends BaseProc {
         GraphGenerationStats stats = new GraphGenerationStats(name, averageDegree, config);
 
         if (GraphStoreCatalog.exists(getUsername(), name)) {
-            throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded.", name));
+            throw new IllegalArgumentException(formatWithLocale("A graph with name '%s' is already loaded.", name));
         }
 
         try (ProgressTimer ignored = ProgressTimer.start(time -> stats.generateMillis = time)) {
@@ -126,7 +128,7 @@ public final class GraphGenerateProc extends BaseProc {
         String generatorString = config.requireString(RELATIONSHIP_PROPERTY_TYPE_KEY);
 
         RelationshipPropertyProducer propertyProducer;
-        switch (generatorString.toLowerCase()) {
+        switch (generatorString.toLowerCase(Locale.ENGLISH)) {
             case "random":
                 double min = config.getDouble(RELATIONSHIP_PROPERTY_MIN_KEY, 0.0);
                 double max = config.getDouble(RELATIONSHIP_PROPERTY_MAX_KEY, 1.0);

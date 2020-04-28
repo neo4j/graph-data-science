@@ -47,6 +47,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * Partition based parallel Page Rank based on
@@ -438,7 +439,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
             didConverge = false;
             ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
             for (ranIterations = 0; ranIterations < iterations && !didConverge; ranIterations++) {
-                getProgressLogger().logMessage(String.format(":: Iteration %d :: Start", ranIterations + 1));
+                getProgressLogger().logMessage(formatWithLocale(":: Iteration %d :: Start", ranIterations + 1));
                 // calculate scores
                 ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
 
@@ -455,7 +456,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
                     getProgressLogger().reset(graph.relationshipCount());
                 }
 
-                getProgressLogger().logMessage(String.format(":: Iteration %d :: Finished", ranIterations + 1));
+                getProgressLogger().logMessage(formatWithLocale(":: Iteration %d :: Finished", ranIterations + 1));
             }
         }
 

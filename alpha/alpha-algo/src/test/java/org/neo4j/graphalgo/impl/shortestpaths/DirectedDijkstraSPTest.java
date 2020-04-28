@@ -38,6 +38,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * expected path OUTGOING:  abcf
@@ -93,7 +94,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     private String name(long id) {
         String[] name = {""};
         runQueryWithRowConsumer(
-            String.format("MATCH (n:Node) WHERE id(n)=%d RETURN n.name as name", id),
+            formatWithLocale("MATCH (n:Node) WHERE id(n)=%d RETURN n.name as name", id),
             row -> name[0] = row.getString("name")
         );
         return name[0];
