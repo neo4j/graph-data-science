@@ -71,7 +71,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public RelationshipIntersect intersection() {
+    public RelationshipIntersect intersection(long maxDegree) {
         throw new UnsupportedOperationException(
             "org.neo4j.graphalgo.similarity.NullGraph.intersection is not implemented.");
     }

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.triangle;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AbstractRelationshipProjections;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -33,7 +34,11 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
@@ -104,5 +109,20 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
     @Override
     public String relationshipQuery() {
         return ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
+    }
+
+    @Test
+    void testMaxDegreeValidation() {
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.empty().withNumber("maxDegree", 1L));
+
+        applyOnProcedure(proc -> {
+            IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> proc.newConfig(Optional.of("g"), config)
+            );
+
+            String message = exception.getMessage();
+            assertTrue(message.contains("maxDegree") && message.contains("greater than 1") );
+        });
     }
 }

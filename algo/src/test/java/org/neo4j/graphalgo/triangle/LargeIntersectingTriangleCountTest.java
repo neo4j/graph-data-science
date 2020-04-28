@@ -49,6 +49,10 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
 
     private static long centerId;
 
+    ImmutableTriangleCountBaseConfig.Builder defaultConfigBuilder() {
+      return ImmutableTriangleCountBaseConfig.builder();
+    }
+
     @BeforeEach
     void setup() {
         RelationshipType type = RelationshipType.withName(RELATIONSHIP);
@@ -71,8 +75,8 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
         loadGraph();
         IntersectingTriangleCount.TriangleCountResult result = new IntersectingTriangleCount(
             graph,
+            defaultConfigBuilder().build(),
             Pools.DEFAULT,
-            1,
             AllocationTracker.EMPTY
         ).compute();
         assertEquals(TRIANGLE_COUNT, result.globalTriangles());
@@ -84,8 +88,8 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
         loadGraph();
         IntersectingTriangleCount.TriangleCountResult result = new IntersectingTriangleCount(
             graph,
+            defaultConfigBuilder().concurrency(4).build(),
             Pools.DEFAULT,
-            4,
             AllocationTracker.EMPTY
         ).compute();
         assertEquals(TRIANGLE_COUNT, result.globalTriangles());

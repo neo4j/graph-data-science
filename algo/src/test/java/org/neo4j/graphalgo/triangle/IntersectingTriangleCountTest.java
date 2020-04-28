@@ -187,7 +187,44 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         assertEquals(0, result.localTriangles().get(14)); // o
     }
 
+    @Test
+    void testTriangleCountingWithMaxDegree() {
+        runQuery(
+            "CREATE" +
+            "  (a)-[:T]->(b)"+
+            " ,(a)-[:T]->(c)"+
+            " ,(a)-[:T]->(d)"+
+            " ,(b)-[:T]->(c)"+
+            " ,(b)-[:T]->(d)"+
+
+            " ,(e)-[:T]->(f)"+
+            " ,(f)-[:T]->(g)"+
+            " ,(g)-[:T]->(e)"
+        );
+
+        TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
+            .builder()
+            .maxDegree(2)
+            .build();
+
+        TriangleCountResult result = projectAndCompute(config);
+
+        assertEquals(-1, result.localTriangles().get(0)); // a (deg = 3)
+        assertEquals(-1, result.localTriangles().get(1)); // b (deg = 3)
+        assertEquals(0, result.localTriangles().get(2));  // c (deg = 2)
+        assertEquals(0, result.localTriangles().get(3));  // d (deg = 2)
+
+        assertEquals(1, result.localTriangles().get(4)); // e (deg = 2)
+        assertEquals(1, result.localTriangles().get(5)); // f (deg = 2)
+        assertEquals(1, result.localTriangles().get(6)); // g (deg = 2)
+    }
+
     private TriangleCountResult projectAndCompute() {
+        TriangleCountStatsConfig config = ImmutableTriangleCountStatsConfig.builder().build();
+        return projectAndCompute(config);
+    }
+
+    private TriangleCountResult projectAndCompute(TriangleCountBaseConfig config) {
         Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .globalOrientation(Orientation.UNDIRECTED)
@@ -196,8 +233,8 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
 
         return new IntersectingTriangleCount(
             graph,
+            config,
             Pools.DEFAULT,
-            1,
             AllocationTracker.EMPTY
         ).compute();
     }

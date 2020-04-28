@@ -289,8 +289,8 @@ public class HugeGraph implements IdMapGraph {
     }
 
     @Override
-    public RelationshipIntersect intersection() {
-        return new HugeGraphIntersectImpl(adjacencyList, adjacencyOffsets);
+    public RelationshipIntersect intersection(long maxDegree) {
+        return new HugeGraphIntersectImpl(adjacencyList, adjacencyOffsets, maxDegree);
     }
 
     /**

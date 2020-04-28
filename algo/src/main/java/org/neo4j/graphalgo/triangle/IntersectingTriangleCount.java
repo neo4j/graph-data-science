@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -28,6 +29,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.PageFiller;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -50,38 +52,40 @@ import java.util.concurrent.atomic.LongAdder;
 public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult> {
 
     private Graph graph;
+    private final TriangleCountBaseConfig config;
     private ExecutorService executorService;
-    private final int concurrency;
-    private final LongAdder triangleCount;
     private final AtomicLong queue;
 
     // results
-    private HugeAtomicLongArray triangleCounts;
+    private final HugeAtomicLongArray triangleCounts;
     private long globalTriangleCount;
+
+    private LongAdder globalTriangleCounter;
 
     public IntersectingTriangleCount(
         Graph graph,
+        TriangleCountBaseConfig config,
         ExecutorService executorService,
-        int concurrency,
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
+        this.config = config;
         this.executorService = executorService;
-        this.concurrency = concurrency;
         triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
-        triangleCount = new LongAdder();
+        globalTriangleCounter = new LongAdder();
         queue = new AtomicLong();
         this.progressLogger = progressLogger;
     }
 
+    @TestOnly
     public IntersectingTriangleCount(
         Graph graph,
+        TriangleCountBaseConfig config,
         ExecutorService executorService,
-        int concurrency,
         AllocationTracker tracker
     ) {
-        this(graph, executorService, concurrency, tracker, ProgressLogger.NULL_LOGGER);
+        this(graph, config, executorService, tracker, ProgressLogger.NULL_LOGGER);
     }
 
     @Override
@@ -93,19 +97,19 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     public void release() {
         executorService = null;
         graph = null;
-        triangleCounts = null;
+        globalTriangleCounter = null;
     }
 
     @Override
     public TriangleCountResult compute() {
         queue.set(0);
-        triangleCount.reset();
+        globalTriangleCounter.reset();
         // create tasks
-        final Collection<? extends Runnable> tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(graph));
+        final Collection<? extends Runnable> tasks = ParallelUtil.tasks(config.concurrency(), () -> new IntersectTask(graph));
         // run
         ParallelUtil.run(tasks, executorService);
 
-        globalTriangleCount = triangleCount.longValue();
+        globalTriangleCount = globalTriangleCounter.longValue();
 
         return TriangleCountResult.of(
             triangleCounts,
@@ -115,17 +119,21 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
 
     private class IntersectTask implements Runnable, IntersectionConsumer {
 
-        private RelationshipIntersect intersect;
+        private final RelationshipIntersect intersect;
 
         IntersectTask(Graph graph) {
-            intersect = graph.intersection();
+            intersect = graph.intersection(config.maxDegree());
         }
 
         @Override
         public void run() {
             long node;
             while ((node = queue.getAndIncrement()) < graph.nodeCount() && running()) {
-                intersect.intersectAll(node, this);
+                if (graph.degree(node) <= config.maxDegree()) {
+                    intersect.intersectAll(node, this);
+                } else {
+                    triangleCounts.set(node, -1);
+                }
                 getProgressLogger().logProgress();
             }
         }
@@ -137,7 +145,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
                 triangleCounts.update(nodeA, (previous) -> previous + 1);
                 triangleCounts.update(nodeB, (previous) -> previous + 1);
                 triangleCounts.update(nodeC, (previous) -> previous + 1);
-                triangleCount.increment();
+                globalTriangleCounter.increment();
             }
         }
     }
