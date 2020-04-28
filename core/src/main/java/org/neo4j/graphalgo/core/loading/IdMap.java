@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
-import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.LabeledIdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
+public class IdMap implements LabeledIdMapping, NodeIterator, BatchNodeIterable {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
         .builder(IdMap.class)
@@ -135,6 +135,33 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
                 IdIterable::new);
     }
 
+    @Override
+    public boolean hasLabelInformation() {
+        return maybeLabelInformation.isPresent();
+    }
+
+    @Override
+    public Set<NodeLabel> availableNodeLabels() {
+        return maybeLabelInformation.map(Map::keySet).orElseGet(() -> Collections.singleton(ALL_NODES));
+    }
+
+    @Override
+    public Stream<NodeLabel> labels(long nodeId) {
+        return maybeLabelInformation
+            .map(elementIdentifierBitSetMap ->
+                elementIdentifierBitSetMap
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue().get(nodeId))
+                    .map(Map.Entry::getKey))
+            .orElseGet(() -> Stream.of(NodeLabel.ALL_NODES));
+    }
+
+    @Override
+    public Optional<Map<NodeLabel, BitSet>> maybeLabelInformation() {
+        return maybeLabelInformation;
+    }
+
     IdMap withFilteredLabels(BitSet unionBitSet, int concurrency) {
         if (maybeLabelInformation.isEmpty()) {
             return this;
@@ -156,29 +183,6 @@ public class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
             AllocationTracker.EMPTY
         );
         return new IdMap(newGraphIds, newNodeToGraphIds, newNodeCount);
-    }
-
-    public boolean hasLabelInformation() {
-        return maybeLabelInformation.isPresent();
-    }
-
-    public Set<NodeLabel> availableNodeLabels() {
-        return maybeLabelInformation.map(Map::keySet).orElseGet(() -> Collections.singleton(ALL_NODES));
-    }
-
-    public Stream<NodeLabel> labels(long nodeId) {
-        return maybeLabelInformation
-            .map(elementIdentifierBitSetMap ->
-                elementIdentifierBitSetMap
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> entry.getValue().get(nodeId))
-                    .map(Map.Entry::getKey))
-            .orElseGet(() -> Stream.of(NodeLabel.ALL_NODES));
-    }
-
-    public Optional<Map<NodeLabel, BitSet>> maybeLabelInformation() {
-        return maybeLabelInformation;
     }
 
     public static final class IdIterable implements PrimitiveLongIterable {
