@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsProc.StatsResult, LocalClusteringCoefficientStatsConfig> {
 
 
-    @Procedure(value = "gds.triangleCount.localClusteringCoefficient.stats", mode = READ)
+    @Procedure(value = "gds.localClusteringCoefficient.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -50,7 +50,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
         return stats(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(value = "gds.triangleCount.localClusteringCoefficient.stats.estimate", mode = READ)
+    @Procedure(value = "gds.localClusteringCoefficient.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

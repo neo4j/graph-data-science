@@ -41,7 +41,7 @@ public class LocalClusteringCoefficientStreamProc
     LocalClusteringCoefficientStreamProc.Result, LocalClusteringCoefficientStreamConfig> {
 
     @Description("")
-    @Procedure(name = "gds.triangleCount.localClusteringCoefficient.stream", mode = READ)
+    @Procedure(name = "gds.localClusteringCoefficient.stream", mode = READ)
     public Stream<Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -49,7 +49,7 @@ public class LocalClusteringCoefficientStreamProc
         return stream(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(value = "gds.triangleCount.localClusteringCoefficient.stream.estimate", mode = READ)
+    @Procedure(value = "gds.localClusteringCoefficient.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

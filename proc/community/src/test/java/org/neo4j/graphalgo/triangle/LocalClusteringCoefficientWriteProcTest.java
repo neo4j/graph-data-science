@@ -40,7 +40,7 @@ class LocalClusteringCoefficientWriteProcTest
 
     @Test
     void testWrite() {
-        var query = "CALL gds.triangleCount.localClusteringCoefficient.write('g', { writeProperty: 'localCC' })";
+        var query = "CALL gds.localClusteringCoefficient.write('g', { writeProperty: 'localCC' })";
 
         assertCypherResult(query, List.of(Map.of(
             "averageClusteringCoefficient", closeTo(expectedAverageClusteringCoefficient() / 5, 1e-10),
@@ -57,7 +57,7 @@ class LocalClusteringCoefficientWriteProcTest
 
     @Test
     void testWriteSeeded() {
-        var query = "CALL gds.triangleCount.localClusteringCoefficient.write('g', { " +
+        var query = "CALL gds.localClusteringCoefficient.write('g', { " +
                     "   writeProperty: 'localCC', " +
                     "   triangleCountProperty: 'seed' " +
                     "})";

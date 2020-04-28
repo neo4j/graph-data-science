@@ -33,7 +33,7 @@ class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficien
 
     @Test
     void testStreaming() {
-        var query = "CALL gds.triangleCount.localClusteringCoefficient.stream('g')";
+        var query = "CALL gds.localClusteringCoefficient.stream('g')";
 
         Map<Long, Double> actualResult = new HashMap<>();
         runQueryWithRowConsumer(query, row -> {
@@ -47,7 +47,7 @@ class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficien
 
     @Test
     void testStreamingSeeded() {
-        var query = "CALL gds.triangleCount.localClusteringCoefficient.stream('g', { triangleCountProperty: 'seed'})";
+        var query = "CALL gds.localClusteringCoefficient.stream('g', { triangleCountProperty: 'seed'})";
 
         Map<Long, Double> actualResult = new HashMap<>();
         runQueryWithRowConsumer(query, row -> {

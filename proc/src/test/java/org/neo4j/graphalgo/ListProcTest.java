@@ -155,14 +155,14 @@ class ListProcTest extends BaseProcTest {
         "gds.triangleCount.write",
         "gds.triangleCount.write.estimate",
 
-        "gds.triangleCount.localClusteringCoefficient.mutate",
-        "gds.triangleCount.localClusteringCoefficient.mutate.estimate",
-        "gds.triangleCount.localClusteringCoefficient.stats",
-        "gds.triangleCount.localClusteringCoefficient.stats.estimate",
-        "gds.triangleCount.localClusteringCoefficient.stream",
-        "gds.triangleCount.localClusteringCoefficient.stream.estimate",
-        "gds.triangleCount.localClusteringCoefficient.write",
-        "gds.triangleCount.localClusteringCoefficient.write.estimate"
+        "gds.localClusteringCoefficient.mutate",
+        "gds.localClusteringCoefficient.mutate.estimate",
+        "gds.localClusteringCoefficient.stats",
+        "gds.localClusteringCoefficient.stats.estimate",
+        "gds.localClusteringCoefficient.stream",
+        "gds.localClusteringCoefficient.stream.estimate",
+        "gds.localClusteringCoefficient.write",
+        "gds.localClusteringCoefficient.write.estimate"
     );
 
     private static final List<String> FUNCTIONS = asList(

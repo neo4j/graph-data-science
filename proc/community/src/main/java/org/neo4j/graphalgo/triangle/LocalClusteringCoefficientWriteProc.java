@@ -42,7 +42,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteProc.WriteResult, LocalClusteringCoefficientWriteConfig> {
 
-    @Procedure(value = "gds.triangleCount.localClusteringCoefficient.write", mode = WRITE)
+    @Procedure(value = "gds.localClusteringCoefficient.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -51,7 +51,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
         return write(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(value = "gds.triangleCount.localClusteringCoefficient.write.estimate", mode = READ)
+    @Procedure(value = "gds.localClusteringCoefficient.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateStats(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -93,7 +93,7 @@ class LocalClusteringCoefficientMutateProcTest
                 ALL_RELATIONSHIPS.name(),
                 RelationshipProjection.of(PROJECT_ALL, Orientation.UNDIRECTED)
             )
-            .algo("gds.triangleCount.localClusteringCoefficient")
+            .algo("localClusteringCoefficient")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
             .yields();
@@ -111,7 +111,7 @@ class LocalClusteringCoefficientMutateProcTest
 
     @Test
     void testMutateSeeded() {
-        var query = "CALL gds.triangleCount.localClusteringCoefficient.mutate('g', {" +
+        var query = "CALL gds.localClusteringCoefficient.mutate('g', {" +
                     "   mutateProperty: $mutateProperty," +
                     "   triangleCountProperty: 'seed'" +
                     "})";

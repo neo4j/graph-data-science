@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class LocalClusteringCoefficientMutateProc extends MutateProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateProc.MutateResult, LocalClusteringCoefficientMutateConfig> {
 
-    @Procedure(value = "gds.triangleCount.localClusteringCoefficient.mutate", mode = WRITE)
+    @Procedure(value = "gds.localClusteringCoefficient.mutate", mode = WRITE)
     @Description("")
     public Stream<MutateResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -50,7 +50,7 @@ public class LocalClusteringCoefficientMutateProc extends MutateProc<LocalCluste
         return mutate(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(value = "gds.triangleCount.localClusteringCoefficient.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.localClusteringCoefficient.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
