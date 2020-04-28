@@ -91,10 +91,11 @@ ext {
     docsArtifactsName = 'neo4j-graph-data-science-manual'
 }
 
-static def attachFailOnOutputString(Task task, String match) {
+static def validateOnStdErr(Task task) {
+    def errors = new ArrayList<String>()
     def listener = {
-        if (it.contains(match)) {
-            throw new GradleException("Encountered '$match' - treating as ERROR")
+        if (it.find("[aZ]")) {
+            errors.add(it.toString())
         }
     } as StandardOutputListener
     task.doFirst {
@@ -102,6 +103,9 @@ static def attachFailOnOutputString(Task task, String match) {
     }
     task.doLast {
         task.logging.removeStandardErrorListener(listener)
+        if (!errors.isEmpty()) {
+            throw new GradleException("Encountered ASCIIDOC errors: \n${errors.join("\n")}")
+        }
     }
 }
 
@@ -143,9 +147,9 @@ task docbook {
         def outFile = file("$outputDir/index.xml")
         outFile.text = outFile.text.replaceFirst("<book", "<book xml:id=\"$docId\"")
     }
-    // Fail if Asciidoctor logs warnings or errors
-    attachFailOnOutputString(it, 'asciidoctor: WARNING')
-    attachFailOnOutputString(it, 'asciidoctor: ERROR')
+
+    // Fail if Asciidoctor logs anything to stderr
+    validateOnStdErr(it)
 }
 
 task makeToc(type: XsltTask, dependsOn: docbook) {
@@ -281,7 +285,7 @@ html {
         }
     }
 
-    attachFailOnOutputString(it, 'Error:')
+    validateOnStdErr(it)
 }
 
 task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
@@ -336,8 +340,8 @@ task pdf {
         getAsciidoctor().convertFile(sourceFile, opts.get())
         file("$outputDir/index.pdf").renameTo(outputFile)   // workaround
     }
-    attachFailOnOutputString(it, 'asciidoctor: WARNING')
-    attachFailOnOutputString(it, 'asciidoctor: ERROR')
+    validateOnStdErr(it)
+    validateOnStdErr(it)
 }
 
 task packagePdf(type: Copy) {
