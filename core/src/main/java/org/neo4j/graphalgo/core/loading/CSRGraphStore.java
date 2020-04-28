@@ -252,12 +252,8 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public NumberType nodePropertyType(String propertyKey) {
-        return nodeProperties.values().stream()
-            .filter(propertyStore -> propertyStore.containsKey(propertyKey))
-            .map(propertyStore -> propertyStore.get(propertyKey).type())
-            .findFirst()
-            .orElse(NumberType.NO_NUMBER);
+    public NumberType nodePropertyType(NodeLabel label, String propertyKey) {
+        return nodeProperty(label, propertyKey).type();
     }
 
     @Override

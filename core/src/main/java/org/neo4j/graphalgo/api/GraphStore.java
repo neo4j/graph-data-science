@@ -56,8 +56,7 @@ public interface GraphStore {
 
     boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey);
 
-    // TODO: consider changing signatures to always expect a label (should it be the ALL_NODES label)
-    NumberType nodePropertyType(String propertyKey);
+    NumberType nodePropertyType(NodeLabel label, String propertyKey);
 
     PropertyState nodePropertyState(String propertyKey);
 

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.write;
 
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
