@@ -33,6 +33,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+
 final class PageRankProc {
 
     static final String PAGE_RANK_DESCRIPTION =
@@ -69,7 +71,7 @@ final class PageRankProc {
     }
 
     static DoubleHistogram computeHistogram(PageRank pageRank) {
-        DoubleHistogram histogram = new DoubleHistogram(5);
+        DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
         HugeDoubleArray scores = pageRank.result().array();
         for (long i = 0; i < scores.size(); i++) {
             histogram.recordValue(scores.get(i));

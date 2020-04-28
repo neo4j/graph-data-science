@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+
 final class NodeSimilarityProc {
 
     static final String NODE_SIMILARITY_DESCRIPTION =
@@ -64,7 +66,7 @@ final class NodeSimilarityProc {
     }
 
     static DoubleHistogram computeHistogram(Graph similarityGraph) {
-        DoubleHistogram histogram = new DoubleHistogram(5);
+        DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
         similarityGraph.forEachNode(nodeId -> {
             similarityGraph.forEachRelationship(nodeId, Double.NaN, (node1, node2, property) -> {
                 histogram.recordValue(property);

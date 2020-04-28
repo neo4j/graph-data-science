@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -43,7 +44,6 @@ import org.neo4j.graphalgo.impl.similarity.PearsonConfig;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.ApproxSimilaritySummaryResult;
 import org.neo4j.graphalgo.results.SimilarityExporter;
 import org.neo4j.graphalgo.results.SimilarityResult;
@@ -57,6 +57,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -173,7 +174,7 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
         @Nullable ApproxNearestNeighborsAlgorithm<SimilarityInput> algorithm
     ) {
         AtomicLong similarityPairs = new AtomicLong();
-        DoubleHistogram histogram = new DoubleHistogram(5);
+        DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
         Consumer<SimilarityResult> recorder = result -> {
             result.record(histogram);
             similarityPairs.getAndIncrement();

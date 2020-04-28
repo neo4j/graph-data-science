@@ -31,5 +31,7 @@ public final class ProcedureConstants {
     public static final String DIRECTION_KEY = "direction";
     public static final String CYPHER_QUERY_KEY = "cypher";
 
+    public static final int HISTOGRAM_PRECISION_DEFAULT = 5;
+
     private ProcedureConstants() {}
 }
