@@ -37,10 +37,10 @@ import java.util.Optional;
 public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, ConfigurableSeedConfig {
 
     @Override
-    @Nullable
     @Value.Default
     @Configuration.Key("triangleCountProperty")
-    default String seedProperty() {
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    default @Nullable String seedProperty() {
         return null;
     }
 
