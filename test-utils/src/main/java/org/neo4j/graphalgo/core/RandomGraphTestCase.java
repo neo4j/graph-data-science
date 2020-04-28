@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.TestWatcher;
 import org.neo4j.graphalgo.BaseTest;
 
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -69,7 +70,7 @@ public abstract class RandomGraphTestCase extends BaseTest {
     void shutdownGraph() {
         if (hasFailures) {
             try {
-                PrintWriter pw = new PrintWriter(System.out);
+                PrintWriter pw = new PrintWriter(System.out, true, StandardCharsets.UTF_8);
                 pw.println("Generated graph to reproduce any errors:");
                 pw.println();
                 CypherExporter.export(pw, db);

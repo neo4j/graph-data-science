@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -32,7 +33,7 @@ public enum Orientation {
 
     public static Orientation of(String value) {
         try {
-            return Orientation.valueOf(value.toUpperCase());
+            return Orientation.valueOf(value.toUpperCase(Locale.ENGLISH));
         } catch (IllegalArgumentException e) {
             String availableProjections = Arrays
                 .stream(Orientation.values())
@@ -50,7 +51,7 @@ public enum Orientation {
             return null;
         }
         if (object instanceof String) {
-            return of(((String) object).toUpperCase());
+            return of(((String) object).toUpperCase(Locale.ENGLISH));
         }
         if (object instanceof Orientation) {
             return (Orientation) object;

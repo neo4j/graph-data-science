@@ -268,7 +268,7 @@ public abstract class AlgoBaseProc<
             ConfigurableSeedConfig configurableSeedConfig = (ConfigurableSeedConfig) config;
             String seedProperty = configurableSeedConfig.seedProperty();
             if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "`%s`: `%s` not found in graph with node properties: %s",
                     configurableSeedConfig.propertyNameOverride(),
                     seedProperty,
@@ -334,7 +334,7 @@ public abstract class AlgoBaseProc<
                                  config.relationshipTypes().contains(entry.getKey().name()))
                 .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
                 .forEach(entry -> {
-                    throw new IllegalArgumentException(String.format(
+                    throw new IllegalArgumentException(formatWithLocale(
                         "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
                         entry.getKey().name,
                         entry.getValue().orientation()

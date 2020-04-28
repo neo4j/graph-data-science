@@ -32,6 +32,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -45,11 +46,11 @@ abstract class CypherRecordLoader<R> {
         NODE, RELATIONSHIP;
 
         String capitalize() {
-            return name().substring(0, 1) + name().substring(1).toLowerCase();
+            return name().substring(0, 1) + name().substring(1).toLowerCase(Locale.ENGLISH);
         }
 
         String toLowerCase() {
-            return name().toLowerCase();
+            return name().toLowerCase(Locale.ENGLISH);
         }
     }
 

@@ -221,12 +221,14 @@ public final class CypherMapWrapper {
 
         if (suggestions.size() == 1) {
             throw new IllegalArgumentException(String.format(
+                Locale.ENGLISH,
                 "Unexpected configuration key: %s",
                 suggestions.get(0)
             ));
         }
 
         throw new IllegalArgumentException(String.format(
+            Locale.ENGLISH,
             "Unexpected configuration keys: %s",
             String.join(", ", suggestions)
         ));

@@ -31,6 +31,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -127,7 +128,7 @@ public final class GraphGenerateProc extends BaseProc {
         String generatorString = config.requireString(RELATIONSHIP_PROPERTY_TYPE_KEY);
 
         RelationshipPropertyProducer propertyProducer;
-        switch (generatorString.toLowerCase()) {
+        switch (generatorString.toLowerCase(Locale.ENGLISH)) {
             case "random":
                 double min = config.getDouble(RELATIONSHIP_PROPERTY_MIN_KEY, 0.0);
                 double max = config.getDouble(RELATIONSHIP_PROPERTY_MAX_KEY, 1.0);

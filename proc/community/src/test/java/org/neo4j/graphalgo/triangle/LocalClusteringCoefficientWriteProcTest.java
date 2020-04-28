@@ -32,6 +32,7 @@ import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LocalClusteringCoefficientWriteProcTest
     extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientWriteConfig>
@@ -108,7 +109,7 @@ class LocalClusteringCoefficientWriteProcTest
             double lcc = row.getNumber("localCC").doubleValue();
             String name = row.getString("name");
             Double expectedLcc = expectedResult.get(name);
-            assertEquals(expectedLcc, lcc, String.format("Node with name `%s` has wrong coefficient", name));
+            assertEquals(expectedLcc, lcc, formatWithLocale("Node with name `%s` has wrong coefficient", name));
         });
     }
 

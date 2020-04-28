@@ -148,7 +148,7 @@ class CypherMapWrapperTest {
             () -> config.requireLong("fou")
         );
         assertEquals(
-            String.format("No value specified for the mandatory configuration parameter `fou` (%s)", expectedMessage),
+            String.format(Locale.ENGLISH, "No value specified for the mandatory configuration parameter `fou` (%s)", expectedMessage),
             error.getMessage()
         );
     }

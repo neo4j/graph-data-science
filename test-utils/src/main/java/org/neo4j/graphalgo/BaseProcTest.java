@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -170,7 +169,7 @@ public class BaseProcTest extends BaseTest {
                     return true;
                 });
             });
-            String reason = format(
+            String reason = formatWithLocale(
                 "Different amount of rows returned for actual result (%d) than expected (%d)",
                 actual.size(),
                 expected.size()
@@ -236,7 +235,7 @@ public class BaseProcTest extends BaseTest {
     ) {
         try {
             runQueryWithResultConsumer(query, queryParameters, BaseProcTest::consume);
-            fail(format("Expected an exception to be thrown by query:\n%s", query));
+            fail(formatWithLocale("Expected an exception to be thrown by query:\n%s", query));
         } catch (Throwable e) {
             assertThat(e, matcher);
         }

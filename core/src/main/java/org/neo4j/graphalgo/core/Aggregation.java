@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -111,7 +112,7 @@ public enum Aggregation {
             name = SINGLE.name();
         }
         try {
-            return Aggregation.valueOf(name.toUpperCase());
+            return Aggregation.valueOf(name.toUpperCase(Locale.ENGLISH));
         } catch (IllegalArgumentException e) {
             String availableStrategies = Arrays
                     .stream(Aggregation.values())
@@ -129,7 +130,7 @@ public enum Aggregation {
             return null;
         }
         if (object instanceof String) {
-            return lookup(((String) object).toUpperCase());
+            return lookup(((String) object).toUpperCase(Locale.ENGLISH));
         }
         if (object instanceof Aggregation) {
             return (Aggregation) object;
