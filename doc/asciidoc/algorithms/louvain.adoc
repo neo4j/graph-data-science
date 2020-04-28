@@ -15,6 +15,7 @@ This topic includes:
 * <<algorithms-louvain-examples, Examples>>
 ** <<algorithms-louvain-examples-stream, Streaming>>
 ** <<algorithms-louvain-examples-write, Writing>>
+** <<algorithms-louvain-examples-mutate, Mutate>>
 ** <<algorithms-louvain-examples-stream-weighted, Weights>>
 ** <<algorithms-louvain-examples-stream-seeded, Seeding>>
 ** <<algorithms-louvain-examples-stream-intermediate, Multi-Level>>
@@ -131,12 +132,6 @@ YIELD
 The configuration for the `mutate` mode is similar to the `write` mode.
 Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
-
-.The following will run the algorithm and store the results in `myGraph`:
-[source, cypher]
-----
-CALL gds.louvain.mutate('myGraph', { mutateProperty: 'communityId' })
-----
 
 
 [[algorithms-louvain-syntax-stream]]
@@ -391,6 +386,32 @@ YIELD communityCount, modularity, modularities
 
 When writing back the results, only a single row is returned by the procedure.
 The result contains meta information, like the number of identified communities and the modularity values.
+
+
+[[algorithms-louvain-examples-mutate]]
+== Mutate
+
+[role=query-example]
+--
+.The following will run the algorithm and store the results in `myGraph`:
+[source, cypher]
+----
+CALL gds.louvain.mutate('myGraph', { mutateProperty: 'communityId' })
+YIELD communityCount, modularity, modularities
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount | modularity         | modularities
+| 2              | 0.3571428571428571 | [0.3571428571428571]
+|1 row
+|===
+--
+
+In `mutate` mode, only a single row is returned by the procedure.
+The result contains meta information, like the number of identified communities and the modularity values.
+In contrast to the `write` mode the result is written to the GDS in-memory graph instead of the Neo4j database.
 
 
 [[algorithms-louvain-examples-stream-weighted]]
