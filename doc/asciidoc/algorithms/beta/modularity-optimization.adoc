@@ -47,9 +47,9 @@ CALL gds.beta.modularityOptimization.write(graphName: String|Map, configuration:
 YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, writeMillis, configuration
 ----
 
-include::../common-parameters.adoc[]
+include::../common-configuration/common-parameters.adoc[]
 
-include::../common-configuration.adoc[]
+include::../common-configuration/common-configuration.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -110,9 +110,9 @@ CALL gds.modularityOptimization.stream(graphNameOrConfig: String|Map, configurat
 YIELD nodeId, communityId
 ----
 
-include::../common-parameters.adoc[]
+include::../common-configuration/common-parameters.adoc[]
 
-include::../common-configuration.adoc[]
+include::../common-configuration/common-configuration.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1,1,4"]

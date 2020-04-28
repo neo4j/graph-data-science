@@ -61,9 +61,9 @@ YIELD
   componentDistribution: Map
 ----
 
-include::common-parameters-named-graph.adoc[]
+include::common-configuration/common-parameters-named-graph.adoc[]
 
-include::common-configuration-named-graph.adoc[]
+include::common-configuration/common-configuration-named-graph.adoc[]
 
 .Run WCC in write mode on an anonymous graph.
 [source, cypher]
@@ -75,9 +75,9 @@ YIELD
   componentDistribution: Map
 ----
 
-include::common-parameters-anonymous-graph.adoc[]
+include::common-configuration/common-parameters-anonymous-graph.adoc[]
 
-include::common-configuration-anonymous-graph.adoc[]
+include::common-configuration/common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -147,9 +147,9 @@ YIELD
   componentId: Integer
 ----
 
-include::common-parameters-named-graph.adoc[]
+include::common-configuration/common-parameters-named-graph.adoc[]
 
-include::common-configuration-named-graph.adoc[]
+include::common-configuration/common-configuration-named-graph.adoc[]
 
 .Run WCC in stream mode on an anonymous graph.
 [source, cypher]
@@ -160,9 +160,9 @@ YIELD
   componentId: Integer
 ----
 
-include::common-parameters-anonymous-graph.adoc[]
+include::common-configuration/common-parameters-anonymous-graph.adoc[]
 
-include::common-configuration-anonymous-graph.adoc[]
+include::common-configuration/common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -199,7 +199,7 @@ YIELD
   componentDistribution: Map,
 ----
 
-include::common-parameters-named-graph.adoc[]
+include::common-configuration/common-parameters-named-graph.adoc[]
 
 .Run WCC in stats mode on an anonymous graph.
 [source, cypher]
@@ -213,7 +213,7 @@ YIELD
   componentDistribution: Map,
 ----
 
-include::common-parameters-anonymous-graph.adoc[]
+include::common-configuration/common-parameters-anonymous-graph.adoc[]
 
 The configuration is the same as for the `write` mode.
 
@@ -244,7 +244,7 @@ CALL gds.wcc.<mode>.estimate(
 )
 ----
 
-include::common-parameters-named-graph.adoc[]
+include::common-configuration/common-parameters-named-graph.adoc[]
 
 .Run WCC in estimate mode on an anonymous graph.
 [source,cypher]
@@ -252,9 +252,9 @@ include::common-parameters-named-graph.adoc[]
 CALL gds.wcc.<mode>.estimate(configuration: Map)
 ----
 
-include::common-parameters-anonymous-graph.adoc[]
+include::common-configuration/common-parameters-anonymous-graph.adoc[]
 
-include::common-estimate-mode.adoc[]
+include::common-configuration/common-estimate-mode.adoc[]
 
 
 [[algorithms-wcc-examples]]

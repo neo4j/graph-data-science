@@ -55,7 +55,7 @@ CALL gds.beta.k1coloring.write(graphName: String, configuration: Map)
 YIELD nodes, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, writeMillis
 ----
 
-include::../common-parameters.adoc[]
+include::../common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]

@@ -86,9 +86,9 @@ YIELD
   writeProperty: String
 ----
 
-include::common-parameters-named-graph.adoc[]
+include::common-configuration/common-parameters-named-graph.adoc[]
 
-include::common-configuration-named-graph.adoc[]
+include::common-configuration/common-configuration-named-graph.adoc[]
 
 .Run Node Similarity in write mode on an anonymous graph.
 [source, cypher]
@@ -100,9 +100,9 @@ YIELD
   relationshipsWritten: Integer
 ----
 
-include::common-parameters-anonymous-graph.adoc[]
+include::common-configuration/common-parameters-anonymous-graph.adoc[]
 
-include::common-configuration-anonymous-graph.adoc[]
+include::common-configuration/common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -177,9 +177,9 @@ CALL gds.nodeSimilarity.stream(
   similarity: Float
 ----
 
-include::common-parameters-named-graph.adoc[]
+include::common-configuration/common-parameters-named-graph.adoc[]
 
-include::common-configuration-named-graph.adoc[]
+include::common-configuration/common-configuration-named-graph.adoc[]
 
 .Run Node Similarity in stream mode on an anonymous graph.
 [source, cypher]
@@ -191,9 +191,9 @@ YIELD
   similarity: Float
 ----
 
-include::common-parameters-anonymous-graph.adoc[]
+include::common-configuration/common-parameters-anonymous-graph.adoc[]
 
-include::common-configuration-anonymous-graph.adoc[]
+include::common-configuration/common-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -231,7 +231,7 @@ YIELD
   nodesCompared: Integer,
 ----
 
-include::common-parameters-named-graph.adoc[]
+include::common-configuration/common-parameters-named-graph.adoc[]
 
 .Run Node Similarity in stats mode on an anonymous graph.
 [source, cypher]
@@ -243,7 +243,7 @@ YIELD
   nodesCompared: Integer,
 ----
 
-include::common-parameters-anonymous-graph.adoc[]
+include::common-configuration/common-parameters-anonymous-graph.adoc[]
 
 The configuration is the same as for the `write` mode.
 
@@ -274,7 +274,7 @@ CALL gds.nodeSimilarity.<mode>.estimate(
 )
 ----
 
-include::common-parameters-named-graph.adoc[]
+include::common-configuration/common-parameters-named-graph.adoc[]
 
 .Run Node Similarity in estimate mode on an anonymous graph.
 [source,cypher]
@@ -282,9 +282,9 @@ include::common-parameters-named-graph.adoc[]
 CALL gds.nodeSimilarity.<mode>.estimate(configuration: Map)
 ----
 
-include::common-parameters-anonymous-graph.adoc[]
+include::common-configuration/common-parameters-anonymous-graph.adoc[]
 
-include::common-estimate-mode.adoc[]
+include::common-configuration/common-estimate-mode.adoc[]
 
 
 [[algorithms-node-similarity-examples]]
