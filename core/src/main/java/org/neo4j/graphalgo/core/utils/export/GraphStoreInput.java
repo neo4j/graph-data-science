@@ -107,8 +107,7 @@ public final class GraphStoreInput implements Input {
 
         @Override
         public synchronized boolean next(InputChunk chunk) {
-            if (id >= nodeCount)
-            {
+            if (id >= nodeCount) {
                 return false;
             }
             long startId = id;
@@ -237,17 +236,17 @@ public final class GraphStoreInput implements Input {
                     if (propKey != null) {
                         relationshipIterator
                             .forEachRelationship(id, Double.NaN, (s, t, propertyValue) -> {
-                            visitor.startId(s);
-                            visitor.endId(t);
-                            visitor.type(relType);
-                            visitor.property(propKey, propertyValue);
-                            try {
-                                visitor.endOfEntity();
-                            } catch (IOException e) {
-                                throw new UncheckedIOException(e);
-                            }
-                            return true;
-                        });
+                                visitor.startId(s);
+                                visitor.endId(t);
+                                visitor.type(relType);
+                                visitor.property(propKey, propertyValue);
+                                try {
+                                    visitor.endOfEntity();
+                                } catch (IOException e) {
+                                    throw new UncheckedIOException(e);
+                                }
+                                return true;
+                            });
                     } else {
                         relationshipIterator.forEachRelationship(id, (s, t) -> {
                             visitor.startId(s);
