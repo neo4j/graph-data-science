@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
 import org.neo4j.graphalgo.core.huge.ImmutableTopologyCSR;
-import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -124,7 +124,7 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
             }
         });
 
-        return GraphStore.of(
+        return CSRGraphStore.of(
             idsAndProperties.idMap(),
             idsAndProperties.properties(),
             relationships,

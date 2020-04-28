@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.functions;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.procedure.Context;

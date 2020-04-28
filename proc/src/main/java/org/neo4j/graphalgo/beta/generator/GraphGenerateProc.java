@@ -20,10 +20,11 @@
 package org.neo4j.graphalgo.beta.generator;
 
 import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -94,7 +95,7 @@ public final class GraphGenerateProc extends BaseProc {
 
             HugeGraph graph = generator.generate();
 
-            GraphStore graphStore = GraphStore.of(graph, DUMMY_RELATIONSHIP_NAME, Optional.of(generator
+            GraphStore graphStore = CSRGraphStore.of(graph, DUMMY_RELATIONSHIP_NAME, Optional.of(generator
                 .getMaybePropertyProducer()
                 .map(RelationshipPropertyProducer::getPropertyName)
                 .orElse("PROPERTY")), AllocationTracker.EMPTY);

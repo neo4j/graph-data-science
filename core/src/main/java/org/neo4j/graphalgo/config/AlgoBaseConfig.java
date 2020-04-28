@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.api.GraphStore;
 
 import java.util.Collection;
 import java.util.Collections;
