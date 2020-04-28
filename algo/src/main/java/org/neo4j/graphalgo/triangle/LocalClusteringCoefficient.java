@@ -59,7 +59,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         this.configuration = configuration;
         this.concurrency = configuration.concurrency();
         this.triangleCountProperty =
-            Optional.ofNullable(configuration.triangleCountProperty())
+            Optional.ofNullable(configuration.seedProperty())
                 .map(graph::nodeProperties)
                 .orElse(null);
     }

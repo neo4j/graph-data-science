@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AbstractRelationshipProjections;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.ConfigurableSeedConfigTest;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -41,6 +42,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalClusteringCoefficientBaseConfig> extends BaseProcTest
     implements AlgoBaseProcTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     UndirectedValidationTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
+    ConfigurableSeedConfigTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     MemoryEstimateTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     HeapControlTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result> {
 
@@ -132,5 +134,10 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     @Override
     public String relationshipQuery() {
         return ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
+    }
+
+    @Override
+    public String seedPropertyKeyOverride() {
+        return "triangleCountProperty";
     }
 }

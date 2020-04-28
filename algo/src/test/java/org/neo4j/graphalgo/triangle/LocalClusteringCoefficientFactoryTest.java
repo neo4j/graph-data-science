@@ -55,7 +55,7 @@ class LocalClusteringCoefficientFactoryTest {
     @ParameterizedTest
     void memoryEstimationWithSeedProperty(long nodeCount) {
         MemoryEstimation estimation =
-            new LocalClusteringCoefficientFactory<>().memoryEstimation(createConfig().triangleCountProperty("seed").build());
+            new LocalClusteringCoefficientFactory<>().memoryEstimation(createConfig().seedProperty("seed").build());
 
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
 
@@ -90,7 +90,7 @@ class LocalClusteringCoefficientFactoryTest {
     @ParameterizedTest
     void memoryEstimationLargePagesWithSeed(long nodeCount, long sizeOfHugeArray) {
         MemoryEstimation estimation =
-            new LocalClusteringCoefficientFactory<>().memoryEstimation(createConfig().triangleCountProperty("seed").build());
+            new LocalClusteringCoefficientFactory<>().memoryEstimation(createConfig().seedProperty("seed").build());
 
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
 

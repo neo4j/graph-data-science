@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -257,6 +258,18 @@ public abstract class AlgoBaseProc<
             if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
                 throw new IllegalArgumentException(String.format(
                     "Seed property `%s` not found in graph with node properties: %s",
+                    seedProperty,
+                    graphStore.nodePropertyKeys().values()
+                ));
+            }
+        }
+        if (config instanceof ConfigurableSeedConfig) {
+            ConfigurableSeedConfig configurableSeedConfig = (ConfigurableSeedConfig) config;
+            String seedProperty = configurableSeedConfig.seedProperty();
+            if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
+                throw new IllegalArgumentException(String.format(
+                    "`%s`: `%s` not found in graph with node properties: %s",
+                    configurableSeedConfig.propertyNameOverride(),
                     seedProperty,
                     graphStore.nodePropertyKeys().values()
                 ));
