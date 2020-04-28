@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.loading.InternalImporter.ImportResult;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
+import org.neo4j.util.FeatureToggles;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -37,6 +38,8 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 abstract class ScanningRecordsImporter<Record, T> {
 
     private static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
+
+    static final boolean USE_KERNEL_CURSORS = FeatureToggles.flag(ScanningRecordsImporter.class, "useKernelCursors", false);
 
     private final StoreScanner.Factory<Record> factory;
     private final String label;

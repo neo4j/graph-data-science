@@ -63,7 +63,13 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         int concurrency,
         Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
     ) {
-        super(NodeStoreScanner.FACTORY, "Node", loadingContext, dimensions, concurrency);
+        super(
+            USE_KERNEL_CURSORS ? NodeCursorScanner.FACTORY : NodeStoreScanner.FACTORY,
+            "Node",
+            loadingContext,
+            dimensions,
+            concurrency
+        );
         this.graphCreateConfig = graphCreateConfig;
         this.progressLogger = progressLogger;
         this.terminationFlag = loadingContext.terminationFlag();
