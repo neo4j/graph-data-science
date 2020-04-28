@@ -32,7 +32,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.graphalgo.core.loading.AbstractStorePageCacheScanner.DEFAULT_PREFETCH_SIZE;
+import static org.neo4j.graphalgo.core.loading.AbstractPageCacheScanner.DEFAULT_PREFETCH_SIZE;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
 abstract class ScanningRecordsImporter<Record, T> {

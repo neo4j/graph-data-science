@@ -27,7 +27,7 @@ import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
-public final class RelationshipStoreScanner extends AbstractStorePageCacheScanner<RelationshipReference, RelationshipRecord, RelationshipStore> {
+public final class RelationshipStoreScanner extends AbstractPageCacheScanner<RelationshipReference, RelationshipRecord, RelationshipStore> {
 
     static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipStoreScanner::new;
 

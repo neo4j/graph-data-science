@@ -27,7 +27,7 @@ import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-public final class NodeStoreScanner extends AbstractStorePageCacheScanner<NodeReference, NodeRecord, NodeStore> {
+public final class NodeStoreScanner extends AbstractPageCacheScanner<NodeReference, NodeRecord, NodeStore> {
 
     static final StoreScanner.Factory<NodeReference> FACTORY = NodeStoreScanner::new;
 

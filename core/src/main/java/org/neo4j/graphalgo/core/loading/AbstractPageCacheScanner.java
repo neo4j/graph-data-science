@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.neo4j.kernel.impl.store.RecordPageLocationCalculator.offsetForId;
 
 
-abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractBaseRecord, Store extends RecordStore<Record>> implements StoreScanner<Reference> {
+abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRecord, Store extends RecordStore<Record>> implements StoreScanner<Reference> {
 
     final class StoreScanCursor implements GdsCursor<Reference> {
 
@@ -125,7 +125,7 @@ abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractB
 
             int offset = this.offset;
             long recordId = page * (long) recordsPerPage;
-            int recordSize = AbstractStorePageCacheScanner.this.recordSize;
+            int recordSize = AbstractPageCacheScanner.this.recordSize;
             PageCursor pageCursor = this.pageCursor;
             Record record = this.record;
             Reference recordReference = this.recordReference;
@@ -155,7 +155,7 @@ abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractB
 
         private void preFetchPages() throws IOException {
             PageCursor pageCursor = this.pageCursor;
-            long prefetchSize = AbstractStorePageCacheScanner.this.prefetchSize;
+            long prefetchSize = AbstractPageCacheScanner.this.prefetchSize;
             long startPage = nextPageId.getAndAdd(prefetchSize);
             long endPage = Math.min(lastPage, startPage + prefetchSize);
             long preFetchedPage = startPage;
@@ -219,7 +219,7 @@ abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractB
     private final Store store;
     private final PagedFile pagedFile;
 
-    AbstractStorePageCacheScanner(
+    AbstractPageCacheScanner(
         int prefetchSize,
         GraphDatabaseService api
     ) {
