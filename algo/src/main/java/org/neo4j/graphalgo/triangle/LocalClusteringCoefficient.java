@@ -111,7 +111,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     }
 
     private double calculateCoefficient(double triangles, int degree) {
-        if (Double.isNaN(triangles)) {
+        if (Double.isNaN(triangles) || triangles == -1) {
             return Double.NaN;
         }
 
