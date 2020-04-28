@@ -254,7 +254,7 @@ public class GraphStoreExport {
                     entry -> entry.getKey().name,
                     entry -> entry.getValue().stream().collect(Collectors.toMap(
                         propertyKey -> propertyKey,
-                        propertyKey -> graphStore.nodeProperty(entry.getKey(), propertyKey).values()
+                        propertyKey -> graphStore.nodePropertyValues(entry.getKey(), propertyKey)
                     ))
                 ));
             }

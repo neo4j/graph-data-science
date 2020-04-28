@@ -164,6 +164,11 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
+    public GraphStoreSchema schema() {
+        return GraphStoreSchema.of(nodeSchema(), relationshipTypeSchema());
+    }
+
+    @Override
     public ZonedDateTime modificationTime() {
         return modificationTime;
     }
@@ -247,34 +252,6 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public NodeProperty nodeProperty(String propertyKey) {
-        if (nodes.maybeLabelInformation.isPresent()) {
-            var unionValues = new HashMap<NodeLabel, NodeProperties>();
-            var unionType = NumberType.NO_NUMBER;
-            var unionOrigin = PropertyState.PERSISTENT;
-
-            for (var labelAndPropertyStore : nodeProperties.entrySet()) {
-                var nodeLabel = labelAndPropertyStore.getKey();
-                var nodePropertyStore = labelAndPropertyStore.getValue();
-                if (nodePropertyStore.containsKey(propertyKey)) {
-                    var nodeProperty = nodePropertyStore.get(propertyKey);
-                    unionValues.put(nodeLabel, nodeProperty.values());
-                    unionType = nodeProperty.type();
-                    unionOrigin = nodeProperty.state();
-                }
-            }
-
-            return NodeProperty.of(
-                propertyKey,
-                unionType,
-                unionOrigin,
-                new UnionNodeProperties(unionValues, nodes.maybeLabelInformation.get())
-            );
-        }
-        return nodeProperties.get(ALL_NODES).get(propertyKey);
-    }
-
-    @Override
     public NumberType nodePropertyType(String propertyKey) {
         return nodeProperties.values().stream()
             .filter(propertyStore -> propertyStore.containsKey(propertyKey))
@@ -284,8 +261,18 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public NodeProperty nodeProperty(NodeLabel label, String propertyKey) {
-        return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey);
+    public PropertyState nodePropertyState(String propertyKey) {
+        return nodeProperty(propertyKey).state();
+    }
+
+    @Override
+    public NodeProperties nodePropertyValues(String propertyKey) {
+        return nodeProperty(propertyKey).values();
+    }
+
+    @Override
+    public NodeProperties nodePropertyValues(NodeLabel label, String propertyKey) {
+        return nodeProperty(label, propertyKey).values();
     }
 
     @Override
@@ -379,25 +366,6 @@ public final class CSRGraphStore implements GraphStore {
         });
     }
 
-    private void addRelationshipProperty(
-        RelationshipType relationshipType,
-        String propertyKey,
-        NumberType propertyType,
-        HugeGraph.PropertyCSR propertyCSR,
-        CSRGraphStore graphStore
-    ) {
-        graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
-            RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
-            if (propertyStore != null) {
-                 builder.from(propertyStore);
-            }
-            return builder.putIfAbsent(
-                propertyKey,
-                ImmutableRelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyCSR)
-            ).build();
-        });
-    }
-
     @Override
     public DeletionResult deleteRelationships(RelationshipType relationshipType) {
         return DeletionResult.of(builder ->
@@ -473,6 +441,61 @@ public final class CSRGraphStore implements GraphStore {
     @Override
     public long nodeCount() {
         return nodes.nodeCount();
+    }
+
+    private synchronized void updateGraphStore(Consumer<CSRGraphStore> updateFunction) {
+        updateFunction.accept(this);
+        this.modificationTime = TimeUtil.now();
+    }
+
+    private NodeProperty nodeProperty(NodeLabel label, String propertyKey) {
+        return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey);
+    }
+
+    private NodeProperty nodeProperty(String propertyKey) {
+        if (nodes.maybeLabelInformation.isPresent()) {
+            var unionValues = new HashMap<NodeLabel, NodeProperties>();
+            var unionType = NumberType.NO_NUMBER;
+            var unionOrigin = PropertyState.PERSISTENT;
+
+            for (var labelAndPropertyStore : nodeProperties.entrySet()) {
+                var nodeLabel = labelAndPropertyStore.getKey();
+                var nodePropertyStore = labelAndPropertyStore.getValue();
+                if (nodePropertyStore.containsKey(propertyKey)) {
+                    var nodeProperty = nodePropertyStore.get(propertyKey);
+                    unionValues.put(nodeLabel, nodeProperty.values());
+                    unionType = nodeProperty.type();
+                    unionOrigin = nodeProperty.state();
+                }
+            }
+
+            return NodeProperty.of(
+                propertyKey,
+                unionType,
+                unionOrigin,
+                new UnionNodeProperties(unionValues, nodes.maybeLabelInformation.get())
+            );
+        }
+        return nodeProperties.get(ALL_NODES).get(propertyKey);
+    }
+
+    private void addRelationshipProperty(
+        RelationshipType relationshipType,
+        String propertyKey,
+        NumberType propertyType,
+        HugeGraph.PropertyCSR propertyCSR,
+        CSRGraphStore graphStore
+    ) {
+        graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
+            RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
+            if (propertyStore != null) {
+                builder.from(propertyStore);
+            }
+            return builder.putIfAbsent(
+                propertyKey,
+                ImmutableRelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyCSR)
+            ).build();
+        });
     }
 
     private IdMapGraph createGraph(
@@ -609,16 +632,6 @@ public final class CSRGraphStore implements GraphStore {
         });
     }
 
-    private synchronized void updateGraphStore(Consumer<CSRGraphStore> updateFunction) {
-        updateFunction.accept(this);
-        this.modificationTime = TimeUtil.now();
-    }
-
-    @Override
-    public GraphStoreSchema schema() {
-        return GraphStoreSchema.of(nodeSchema(), relationshipTypeSchema());
-    }
-
     private NodeSchema nodeSchema() {
         NodeSchema.Builder nodePropsBuilder = NodeSchema.builder();
 
@@ -651,6 +664,22 @@ public final class CSRGraphStore implements GraphStore {
             relationshipPropsBuilder.addEmptyMapForRelationshipTypeWithoutProperties(type);
         }
         return relationshipPropsBuilder.build();
+    }
+
+    @ValueClass
+    interface NodeProperty {
+
+        String key();
+
+        NumberType type();
+
+        PropertyState state();
+
+        NodeProperties values();
+
+        static NodeProperty of(String key, NumberType type, PropertyState origin, NodeProperties values) {
+            return ImmutableNodeProperty.of(key, type, origin, values);
+        }
     }
 
     @ValueClass

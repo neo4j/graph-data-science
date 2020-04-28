@@ -141,9 +141,9 @@ public interface PropertyTranslator<T> {
         private final DataAccessFunction<T> newPropertiesFn;
 
         public static <T> PropertyTranslator<T> of(GraphStore graphStore, String seedProperty, DataAccessFunction<T> accessFunction) {
-            var propertyState = graphStore.nodeProperty(seedProperty).state();
+            var propertyState = graphStore.nodePropertyState(seedProperty);
             if (propertyState == GraphStore.PropertyState.PERSISTENT) {
-                return new OfLongIfChanged<T>(graphStore.nodeProperty(seedProperty).values(), accessFunction);
+                return new OfLongIfChanged<T>(graphStore.nodePropertyValues(seedProperty), accessFunction);
             } else {
                 return (OfLong<T>) accessFunction::getValue;
             }

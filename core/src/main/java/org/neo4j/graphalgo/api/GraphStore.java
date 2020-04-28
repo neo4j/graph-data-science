@@ -21,9 +21,7 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.graphalgo.core.schema.GraphStoreSchema;
 import org.neo4j.values.storable.NumberType;
@@ -40,7 +38,11 @@ public interface GraphStore {
         PERSISTENT, TRANSIENT
     }
 
+    GraphStoreSchema schema();
+
     ZonedDateTime modificationTime();
+
+    long nodeCount();
 
     LabeledIdMapping nodes();
 
@@ -54,6 +56,15 @@ public interface GraphStore {
 
     boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey);
 
+    // TODO: consider changing signatures to always expect a label (should it be the ALL_NODES label)
+    NumberType nodePropertyType(String propertyKey);
+
+    PropertyState nodePropertyState(String propertyKey);
+
+    NodeProperties nodePropertyValues(String propertyKey);
+
+    NodeProperties nodePropertyValues(NodeLabel label, String propertyKey);
+
     void addNodeProperty(
         NodeLabel nodeLabel,
         String propertyKey,
@@ -63,20 +74,13 @@ public interface GraphStore {
 
     void removeNodeProperty(NodeLabel nodeLabel, String propertyKey);
 
-    // TODO: remove and replace by nodePropertyState()
-    CSRGraphStore.NodeProperty nodeProperty(String propertyKey);
+    long relationshipCount();
 
-    NumberType nodePropertyType(String propertyKey);
-
-    NodeProperty nodeProperty(NodeLabel label, String propertyKey);
+    long relationshipCount(RelationshipType relationshipType);
 
     Set<RelationshipType> relationshipTypes();
 
     boolean hasRelationshipType(RelationshipType relationshipType);
-
-    long relationshipCount();
-
-    long relationshipCount(RelationshipType relationshipType);
 
     boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey);
 
@@ -115,24 +119,4 @@ public interface GraphStore {
     void canRelease(boolean canRelease);
 
     void release();
-
-    long nodeCount();
-
-    GraphStoreSchema schema();
-
-    @ValueClass
-    interface NodeProperty {
-
-        String key();
-
-        NumberType type();
-
-        CSRGraphStore.PropertyState state();
-
-        NodeProperties values();
-
-        static NodeProperty of(String key, NumberType type, CSRGraphStore.PropertyState origin, NodeProperties values) {
-            return ImmutableNodeProperty.of(key, type, origin, values);
-        }
-    }
 }
