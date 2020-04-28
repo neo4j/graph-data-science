@@ -28,17 +28,17 @@ import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 
-abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Store extends RecordStore<? extends AbstractBaseRecord>> implements StoreScanner<Reference> {
+abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor, Store extends RecordStore<? extends AbstractBaseRecord>> implements StoreScanner<Reference> {
 
-    final class StoreScanCursor implements GdsCursor<Reference> {
+    private final class ScanCursor implements StoreScanner.ScanCursor<Reference> {
+
+        private final Scan<EntityCursor> scan;
 
         private EntityCursor cursor;
 
-        private Scan<EntityCursor> scan;
-
         private Reference cursorReference;
 
-        StoreScanCursor(
+        ScanCursor(
             EntityCursor cursor,
             Reference reference,
             Scan<EntityCursor> entityCursorScan
@@ -76,7 +76,7 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
                 cursor = null;
                 cursorReference = null;
 
-                final GdsCursor<Reference> localCursor = cursors.get();
+                final StoreScanner.ScanCursor<Reference> localCursor = cursors.get();
                 // sanity check, should always be called from the same thread
                 if (localCursor == this) {
                     cursors.remove();
@@ -94,13 +94,13 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
 
     private final GraphDatabaseApiProxy.Transactions transactions;
     // global cursor pool to return this one to
-    private final ThreadLocal<GdsCursor<Reference>> cursors;
+    private final ThreadLocal<StoreScanner.ScanCursor<Reference>> cursors;
 
     private final Scan<EntityCursor> entityCursorScan;
 
     private final Store store;
 
-    AbstractCursorScanner(int prefetchSize, GraphDatabaseService api) {
+    AbstractCursorBasedScanner(int prefetchSize, GraphDatabaseService api) {
         var neoStores = GraphDatabaseApiProxy.neoStores(api);
         var store = store(neoStores);
         int recordSize = store.getRecordSize();
@@ -123,17 +123,17 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
     }
 
     @Override
-    public final GdsCursor<Reference> getCursor(KernelTransaction transaction) {
-        GdsCursor<Reference> gdsCursor = this.cursors.get();
+    public final StoreScanner.ScanCursor<Reference> getCursor(KernelTransaction transaction) {
+        StoreScanner.ScanCursor<Reference> scanCursor = this.cursors.get();
 
-        if (gdsCursor == null) {
+        if (scanCursor == null) {
             EntityCursor entityCursor = entityCursor(transaction);
             Reference reference = cursorReference(entityCursor);
-            gdsCursor = new StoreScanCursor(entityCursor, reference, entityCursorScan);
-            this.cursors.set(gdsCursor);
+            scanCursor = new ScanCursor(entityCursor, reference, entityCursorScan);
+            this.cursors.set(scanCursor);
         }
 
-        return gdsCursor;
+        return scanCursor;
     }
 
     @Override

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -52,7 +52,7 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
 
     public CypherFactory(
         GraphCreateFromCypherConfig graphCreateConfig,
-        GraphLoadingContext loadingContext
+        GraphLoaderContext loadingContext
     ) {
         super(graphCreateConfig, loadingContext, new GraphDimensionsCypherReader(loadingContext.api(), graphCreateConfig).call());
         this.cypherConfig = getCypherConfig(graphCreateConfig).orElseThrow(() -> new IllegalArgumentException("Expected GraphCreateConfig to be a cypher config."));

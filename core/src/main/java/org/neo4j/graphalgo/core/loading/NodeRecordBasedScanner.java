@@ -22,39 +22,36 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.io.layout.DatabaseFile;
 import org.neo4j.kernel.impl.store.NeoStores;
-import org.neo4j.kernel.impl.store.RelationshipStore;
+import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
-import org.neo4j.kernel.impl.store.record.RelationshipRecord;
+import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-public final class RelationshipStoreScanner extends AbstractPageCacheScanner<RelationshipReference, RelationshipRecord, RelationshipStore> {
+final class NodeRecordBasedScanner extends AbstractRecordBasedScanner<NodeReference, NodeRecord, NodeStore> {
 
-    static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipStoreScanner::new;
+    static final StoreScanner.Factory<NodeReference> FACTORY = NodeRecordBasedScanner::new;
 
-    private RelationshipStoreScanner(int prefetchSize, GraphDatabaseService api) {
+    private NodeRecordBasedScanner(int prefetchSize, GraphDatabaseService api) {
         super(prefetchSize, api);
     }
 
     @Override
-    public RelationshipStore store(NeoStores neoStores) {
-        return neoStores.getRelationshipStore();
+    NodeStore store(NeoStores neoStores) {
+        return neoStores.getNodeStore();
     }
 
     @Override
-    public RecordFormat<RelationshipRecord> recordFormat(RecordFormats formats) {
-        return formats.relationship();
+    RecordFormat<NodeRecord> recordFormat(RecordFormats formats) {
+        return formats.node();
     }
 
     @Override
-    public RelationshipReference recordReference(
-        RelationshipRecord record,
-        RelationshipStore store
-    ) {
-        return new RelationshipRecordReference(record);
+    NodeReference recordReference(NodeRecord record, NodeStore store) {
+        return new NodeRecordReference(record, store);
     }
 
     @Override
     public String storeFileName() {
-        return DatabaseFile.RELATIONSHIP_STORE.getName();
+        return DatabaseFile.NODE_STORE.getName();
     }
 }

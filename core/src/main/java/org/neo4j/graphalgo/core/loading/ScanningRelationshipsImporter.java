@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, ObjectLongMap<RelationshipType>> {
 
     private final GraphCreateConfig graphCreateConfig;
-    private final GraphLoadingContext loadingContext;
+    private final GraphLoaderContext loadingContext;
     private final ProgressLogger progressLogger;
 
     private final IdMapping idMap;
@@ -50,7 +50,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
 
     ScanningRelationshipsImporter(
         GraphCreateConfig graphCreateConfig,
-        GraphLoadingContext loadingContext,
+        GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressLogger progressLogger,
         IdMapping idMap,
@@ -58,7 +58,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int concurrency
     ) {
         super(
-            USE_KERNEL_CURSORS ? RelationshipScanCursorScanner.FACTORY : RelationshipStoreScanner.FACTORY,
+            USE_KERNEL_CURSORS ? RelationshipScanCursorBasedScanner.FACTORY : RelationshipRecordBasedScanner.FACTORY,
             "Relationship",
             loadingContext,
             dimensions,

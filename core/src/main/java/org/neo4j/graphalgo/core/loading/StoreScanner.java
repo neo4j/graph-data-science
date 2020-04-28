@@ -38,7 +38,7 @@ public interface StoreScanner<Reference> extends AutoCloseable {
         StoreScanner<Reference> newScanner(int prefetchSize, GraphDatabaseService api);
     }
 
-    interface GdsCursor<Reference> extends AutoCloseable {
+    interface ScanCursor<Reference> extends AutoCloseable {
         int bulkSize();
 
         boolean bulkNext(RecordConsumer<Reference> consumer);
@@ -47,7 +47,7 @@ public interface StoreScanner<Reference> extends AutoCloseable {
         void close();
     }
 
-    GdsCursor<Reference> getCursor(KernelTransaction transaction);
+    ScanCursor<Reference> getCursor(KernelTransaction transaction);
 
     long storeSize();
 

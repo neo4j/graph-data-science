@@ -66,7 +66,6 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
 
     @Override
     public void offer(final RelationshipReference record) {
-        // TODO
         if ((type == ANY_RELATIONSHIP_TYPE) || (type == record.typeTokenId())) {
             long source = idMap.toMappedNodeId(record.sourceNodeReference());
             long target = idMap.toMappedNodeId(record.targetNodeReference());

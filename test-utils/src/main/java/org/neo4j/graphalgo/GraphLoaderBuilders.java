@@ -23,7 +23,7 @@ package org.neo4j.graphalgo;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.api.ImmutableGraphLoadingContext;
+import org.neo4j.graphalgo.api.ImmutableGraphLoaderContext;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -142,7 +142,7 @@ final class GraphLoaderBuilders {
         GraphCreateConfig graphCreateConfig
     ) {
         return ImmutableGraphLoader.builder()
-            .context(ImmutableGraphLoadingContext.builder()
+            .context(ImmutableGraphLoaderContext.builder()
                 .api(api)
                 .executor(executorService.orElse(Pools.DEFAULT))
                 .tracker(tracker.orElse(AllocationTracker.EMPTY))

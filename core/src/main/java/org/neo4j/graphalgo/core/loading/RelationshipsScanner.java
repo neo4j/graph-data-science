@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -37,7 +37,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
 
     static InternalImporter.CreateScanner of(
         GraphDatabaseAPI api,
-        GraphLoadingContext loadingContext,
+        GraphLoaderContext loadingContext,
         ProgressLogger progressLogger,
         IdMapping idMap,
         StoreScanner<RelationshipReference> scanner,
@@ -139,7 +139,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
 
     @Override
     public void accept(KernelTransaction transaction) {
-        try (StoreScanner.GdsCursor<RelationshipReference> cursor = scanner.getCursor(transaction)) {
+        try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.getCursor(transaction)) {
             List<SingleTypeRelationshipImporter> importers = this.importerBuilders.stream()
                     .map(imports -> imports.withBuffer(idMap, cursor.bulkSize(), transaction.dataRead(), transaction.cursors()))
                     .collect(Collectors.toList());

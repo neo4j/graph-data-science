@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -37,7 +37,7 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
         QueryType queryType,
         GraphDatabaseAPI api,
         GraphCreateFromCypherConfig cypherConfig,
-        GraphLoadingContext loadingContext
+        GraphLoaderContext loadingContext
     ) {
         super(cypherQuery, NO_COUNT, api, cypherConfig, loadingContext);
         this.queryType = queryType;

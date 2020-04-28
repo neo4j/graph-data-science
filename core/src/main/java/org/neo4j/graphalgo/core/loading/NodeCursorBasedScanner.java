@@ -26,11 +26,11 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.NodeStore;
 
-public class NodeCursorScanner extends AbstractCursorScanner<NodeReference, NodeCursor, NodeStore> {
+final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeCursor, NodeStore> {
 
-    public static final StoreScanner.Factory<NodeReference> FACTORY = NodeCursorScanner::new;
+    static final StoreScanner.Factory<NodeReference> FACTORY = NodeCursorBasedScanner::new;
 
-    NodeCursorScanner(int prefetchSize, GraphDatabaseService api) {
+    private NodeCursorBasedScanner(int prefetchSize, GraphDatabaseService api) {
         super(prefetchSize, api);
     }
 

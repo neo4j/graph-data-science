@@ -140,7 +140,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     public void accept(KernelTransaction transaction) {
         Read read = transaction.dataRead();
         CursorFactory cursors = transaction.cursors();
-        try (StoreScanner.GdsCursor<NodeReference> cursor = scanner.getCursor(transaction)) {
+        try (StoreScanner.ScanCursor<NodeReference> cursor = scanner.getCursor(transaction)) {
             NodesBatchBuffer batches = new NodesBatchBufferBuilder()
                 .nodeLabelIds(labels)
                 .capacity(cursor.bulkSize())

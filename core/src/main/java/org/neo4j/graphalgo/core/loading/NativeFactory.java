@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
@@ -53,7 +53,7 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
 
     public NativeFactory(
         GraphCreateFromStoreConfig graphCreateConfig,
-        GraphLoadingContext loadingContext
+        GraphLoaderContext loadingContext
     ) {
         super(graphCreateConfig, loadingContext, new GraphDimensionsStoreReader(loadingContext.api(), graphCreateConfig).call());
         this.storeConfig = graphCreateConfig;

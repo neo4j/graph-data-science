@@ -26,11 +26,11 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RelationshipStore;
 
-public class RelationshipScanCursorScanner extends AbstractCursorScanner<RelationshipReference, RelationshipScanCursor, RelationshipStore> {
+final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanner<RelationshipReference, RelationshipScanCursor, RelationshipStore> {
 
-    public static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipScanCursorScanner::new;
+    static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipScanCursorBasedScanner::new;
 
-    RelationshipScanCursorScanner(int prefetchSize, GraphDatabaseService api) {
+    private RelationshipScanCursorBasedScanner(int prefetchSize, GraphDatabaseService api) {
         super(prefetchSize, api);
     }
 

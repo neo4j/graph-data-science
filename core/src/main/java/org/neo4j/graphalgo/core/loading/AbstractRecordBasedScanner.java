@@ -40,10 +40,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.kernel.impl.store.RecordPageLocationCalculator.offsetForId;
 
+abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBaseRecord, Store extends RecordStore<Record>> implements StoreScanner<Reference> {
 
-abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRecord, Store extends RecordStore<Record>> implements StoreScanner<Reference> {
-
-    final class StoreScanCursor implements GdsCursor<Reference> {
+    private final class ScanCursor implements StoreScanner.ScanCursor<Reference> {
 
         // last page to contain a value of interest, inclusive, but we mostly
         // treat is as exclusive since we want to special-case the last page
@@ -66,7 +65,7 @@ abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRe
         // the current offset into the page
         private int offset;
 
-        StoreScanCursor(PageCursor pageCursor, Record record, Reference reference) {
+        ScanCursor(PageCursor pageCursor, Record record, Reference reference) {
             this.lastOffset = offsetForId(maxId, pageSize, recordSize);
             this.lastPage = calculateLastPageId(maxId, recordsPerPage, lastOffset);
             this.pageCursor = pageCursor;
@@ -93,13 +92,13 @@ abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRe
         @Override
         public boolean bulkNext(RecordConsumer<Reference> consumer) {
             try {
-                return bulkNext0(consumer);
+                return bulkNextInternal(consumer);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
 
-        private boolean bulkNext0(RecordConsumer<Reference> consumer) throws IOException {
+        private boolean bulkNextInternal(RecordConsumer<Reference> consumer) throws IOException {
             if (recordId == -1L) {
                 return false;
             }
@@ -125,7 +124,7 @@ abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRe
 
             int offset = this.offset;
             long recordId = page * (long) recordsPerPage;
-            int recordSize = AbstractPageCacheScanner.this.recordSize;
+            int recordSize = AbstractRecordBasedScanner.this.recordSize;
             PageCursor pageCursor = this.pageCursor;
             Record record = this.record;
             Reference recordReference = this.recordReference;
@@ -155,7 +154,7 @@ abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRe
 
         private void preFetchPages() throws IOException {
             PageCursor pageCursor = this.pageCursor;
-            long prefetchSize = AbstractPageCacheScanner.this.prefetchSize;
+            long prefetchSize = AbstractRecordBasedScanner.this.prefetchSize;
             long startPage = nextPageId.getAndAdd(prefetchSize);
             long endPage = Math.min(lastPage, startPage + prefetchSize);
             long preFetchedPage = startPage;
@@ -191,7 +190,7 @@ abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRe
                 record = null;
                 recordReference = null;
 
-                final GdsCursor<Reference> localCursor = cursors.get();
+                final StoreScanner.ScanCursor<Reference> localCursor = cursors.get();
                 // sanity check, should always be called from the same thread
                 if (localCursor == this) {
                     cursors.remove();
@@ -205,7 +204,7 @@ abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRe
     // global pointer which block of pages need to be fetched next
     private final AtomicLong nextPageId;
     // global cursor pool to return this one to
-    private final ThreadLocal<GdsCursor<Reference>> cursors;
+    private final ThreadLocal<StoreScanner.ScanCursor<Reference>> cursors;
 
     // size in bytes of a single record - advance the offset by this much
     private final int recordSize;
@@ -219,10 +218,7 @@ abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRe
     private final Store store;
     private final PagedFile pagedFile;
 
-    AbstractPageCacheScanner(
-        int prefetchSize,
-        GraphDatabaseService api
-    ) {
+    AbstractRecordBasedScanner(int prefetchSize, GraphDatabaseService api) {
 
         var neoStores = GraphDatabaseApiProxy.neoStores(api);
         var store = store(neoStores);
@@ -258,8 +254,8 @@ abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRe
     }
 
     @Override
-    public final GdsCursor<Reference> getCursor(KernelTransaction transaction) {
-        GdsCursor<Reference> cursor = this.cursors.get();
+    public final StoreScanner.ScanCursor<Reference> getCursor(KernelTransaction transaction) {
+        StoreScanner.ScanCursor<Reference> cursor = this.cursors.get();
         if (cursor == null) {
             // Don't add as we want to always call next as the first cursor action,
             // which actually does the advance and returns the correct cursor.
@@ -280,7 +276,7 @@ abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRe
             }
             Record record = store.newRecord();
             Reference reference = recordReference(record, store);
-            cursor = new StoreScanCursor(pageCursor, record, reference);
+            cursor = new ScanCursor(pageCursor, record, reference);
             this.cursors.set(cursor);
         }
         return cursor;
@@ -306,14 +302,14 @@ abstract class AbstractPageCacheScanner<Reference, Record extends AbstractBaseRe
     abstract Store store(NeoStores neoStores);
 
     /**
-         * Return the record format to use.
-         */
+     * Return the record format to use.
+     */
     abstract RecordFormat<Record> recordFormat(RecordFormats formats);
 
     abstract Reference recordReference(Record record, Store store);
 
     /**
-         * Return the filename of the store file that the page cache maps
-         */
+     * Return the filename of the store file that the page cache maps
+     */
     abstract String storeFileName();
 }

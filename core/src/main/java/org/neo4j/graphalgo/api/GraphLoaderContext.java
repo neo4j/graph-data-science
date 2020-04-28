@@ -30,7 +30,7 @@ import org.neo4j.logging.Log;
 import java.util.concurrent.ExecutorService;
 
 @ValueClass
-public interface GraphLoadingContext {
+public interface GraphLoaderContext {
 
     GraphDatabaseAPI api();
 

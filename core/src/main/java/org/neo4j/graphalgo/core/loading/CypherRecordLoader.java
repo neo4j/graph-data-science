@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -57,7 +57,7 @@ abstract class CypherRecordLoader<R> {
     static final long NO_COUNT = -1L;
 
     final GraphCreateFromCypherConfig cypherConfig;
-    final GraphLoadingContext loadingContext;
+    final GraphLoaderContext loadingContext;
 
     protected final GraphDatabaseAPI api;
 
@@ -69,7 +69,7 @@ abstract class CypherRecordLoader<R> {
         long recordCount,
         GraphDatabaseAPI api,
         GraphCreateFromCypherConfig cypherConfig,
-        GraphLoadingContext loadingContext
+        GraphLoaderContext loadingContext
     ) {
         this.loadQuery = loadQuery;
         this.recordCount = recordCount;

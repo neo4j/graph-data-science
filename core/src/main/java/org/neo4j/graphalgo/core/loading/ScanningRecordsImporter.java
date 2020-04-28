@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.InternalImporter.ImportResult;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -32,7 +32,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.graphalgo.core.loading.AbstractPageCacheScanner.DEFAULT_PREFETCH_SIZE;
+import static org.neo4j.graphalgo.core.loading.AbstractRecordBasedScanner.DEFAULT_PREFETCH_SIZE;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
 abstract class ScanningRecordsImporter<Record, T> {
@@ -53,7 +53,7 @@ abstract class ScanningRecordsImporter<Record, T> {
     ScanningRecordsImporter(
         StoreScanner.Factory<Record> factory,
         String label,
-        GraphLoadingContext loadingContext,
+        GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         int concurrency
     ) {

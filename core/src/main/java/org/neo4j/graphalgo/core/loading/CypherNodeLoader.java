@@ -25,7 +25,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -63,7 +63,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         long nodeCount,
         GraphDatabaseAPI api,
         GraphCreateFromCypherConfig config,
-        GraphLoadingContext loadingContext,
+        GraphLoaderContext loadingContext,
         GraphDimensions outerDimensions
     ) {
         super(nodeQuery, nodeCount, api, config, loadingContext);

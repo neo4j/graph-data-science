@@ -53,13 +53,13 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
 
     protected final CONFIG graphCreateConfig;
     protected final ExecutorService threadPool;
-    protected final GraphLoadingContext loadingContext;
+    protected final GraphLoaderContext loadingContext;
     protected final GraphDimensions dimensions;
     protected final ProgressLogger progressLogger;
 
     public GraphStoreFactory(
         CONFIG graphCreateConfig,
-        GraphLoadingContext loadingContext,
+        GraphLoaderContext loadingContext,
         GraphDimensions dimensions
     ) {
         this.graphCreateConfig = graphCreateConfig;

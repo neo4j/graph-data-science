@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
@@ -36,7 +36,7 @@ import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 @ValueClass
 public interface GraphLoader {
 
-    GraphLoadingContext context();
+    GraphLoaderContext context();
 
     @Value.Default
     default String username() {

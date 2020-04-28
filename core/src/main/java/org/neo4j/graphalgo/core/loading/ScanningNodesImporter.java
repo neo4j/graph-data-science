@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.api.GraphLoadingContext;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -57,14 +57,14 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
 
     ScanningNodesImporter(
         GraphCreateFromStoreConfig graphCreateConfig,
-        GraphLoadingContext loadingContext,
+        GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressLogger progressLogger,
         int concurrency,
         Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
     ) {
         super(
-            USE_KERNEL_CURSORS ? NodeCursorScanner.FACTORY : NodeStoreScanner.FACTORY,
+            USE_KERNEL_CURSORS ? NodeCursorBasedScanner.FACTORY : NodeRecordBasedScanner.FACTORY,
             "Node",
             loadingContext,
             dimensions,
