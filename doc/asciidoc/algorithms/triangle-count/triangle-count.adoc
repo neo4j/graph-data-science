@@ -1,0 +1,254 @@
+[[algorithms-triangle-count]]
+= Triangle Count
+:entity: node
+:result: triangle count
+
+[abstract]
+--
+This section describes the Triangle Count algorithm in the Neo4j Graph Data Science library.
+--
+
+This topic includes:
+
+* <<algorithms-triangle-count-intro, Introduction>>
+* <<algorithms-triangle-count-syntax, Syntax>>
+** <<algorithms-triangle-count-syntax-stream, Stream>>
+** <<algorithms-triangle-count-syntax-stats, Stats>>
+** <<algorithms-triangle-count-syntax-mutate, Mutate>>
+** <<algorithms-triangle-count-syntax-write, Write>>
+* <<algorithms-triangle-count-examples, Examples>>
+** <<algorithms-triangle-count-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-triangle-count-examples-stream, Stream>>
+** <<algorithms-triangle-count-examples-stats, Stats>>
+** <<algorithms-triangle-count-examples-mutate, Mutate>>
+** <<algorithms-triangle-count-examples-write, Write>>
+** <<algorithms-triangle-count-examples-max-degree, Maximum degree>>
+
+
+[[algorithms-triangle-count-intro]]
+== Introduction
+
+The Triangle Count algorithm counts the number of triangles for each node in the graph.
+A triangle is a set of three nodes where each node has a relationship to the other two.
+In graph theory terminology, this is sometimes referred to as a 3-clique.
+
+Triangle counting has gained popularity in social network analysis, where it is used to detect communities and measure the cohesiveness of those communities.
+It can also be used to determine the stability of a graph, and is often used as part of the computation of network indices, such as clustering coefficients.
+// TODO: link to LCC page
+
+For more information on this algorithm, see:
+
+* Triangle count and clustering coefficient have been shown to be useful as features for classifying a given website as spam, or non-spam, content.
+This is described in http://chato.cl/papers/becchetti_2007_approximate_count_triangles.pdf["Efficient Semi-streaming Algorithms for Local Triangle Counting in Massive Graphs"].
+
+
+[[algorithms-triangle-count-syntax]]
+== Syntax
+
+This section covers the syntax used to execute the Triangle Count algorithm in each of its execution modes.
+To learn more about general syntax variants, see <<algorithms-syntax>>.
+
+
+[[algorithms-triangle-count-syntax-stream]]
+=== Stream
+
+.Run Triangle Count in stream mode on a named graph:
+[source, cypher]
+----
+CALL gds.triangleCount.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  triangleCount: Integer
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type      | Description
+| nodeId        | Integer   | Node ID.
+| triangleCount | Integer   | Number of triangles the node is part of.
+|===
+
+
+[[algorithms-triangle-count-syntax-stats]]
+=== Stats
+
+.Run Triangle Count in stream mode on a named graph:
+[source, cypher]
+----
+CALL gds.triangleCount.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  triangleCount: Integer,
+  nodeCount: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type    | Description
+| triangleCount | Integer | Total number of triangles in the graph.
+| nodeCount     | Integer | Number of nodes in the graph.
+| createMillis  | Integer | Milliseconds for creating the graph.
+| computeMillis | Integer | Milliseconds for running the algorithm.
+| configuration | Map     | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-triangle-count-syntax-mutate]]
+=== Mutate
+
+.Run Triangle Count in mutate mode on a named graph:
+[source, cypher]
+----
+CALL gds.triangleCount.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  triangleCount: Integer,
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| triangleCount         | Integer | Total number of triangles in the graph.
+| nodeCount             | Integer | Number of nodes in the graph.
+| nodePropertiesWritten | Integer | Number of properties added to the in-memory graph.
+| createMillis          | Integer | Milliseconds for creating the graph.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
+| configuration         | Map     | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-triangle-count-syntax-write]]
+=== Write
+
+.Run Triangle Count in write mode on a named graph:
+[source, cypher]
+----
+CALL gds.triangleCount.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  triangleCount: Integer,
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| triangleCount         | Integer | Total number of triangles in the graph.
+| nodeCount             | Integer | Number of nodes in the graph.
+| nodePropertiesWritten | Integer | Number of properties written to Neo4j.
+| createMillis          | Integer | Milliseconds for creating the graph.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| writeMillis           | Integer | Milliseconds for writing results back to Neo4j.
+| configuration         | Map     | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-triangle-count-syntax-anonymous]]
+=== Anonymous graphs
+
+It is also possible to execute the algorithm on a graph that is projected in conjunction with the algorithm execution.
+In this case, the graph does not have a name, and we call it anonymous.
+For more information, see <<algorithms-syntax>>.
+
+.Run Triangle Count in write mode on an anonymous graph:
+[source, cypher]
+----
+CALL gds.triangleCount.write(
+  configuration: Map
+)
+YIELD
+  triangleCount: Integer,
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, <<algorithms-triangle-count-syntax-write, specified above>>.
+
+
+[[algorithms-triangle-count-examples]]
+== Examples
+
+
+[[algorithms-triangle-count-examples-memory-estimation]]
+=== Memory Estimation
+
+
+[[algorithms-triangle-count-examples-stream]]
+=== Stream
+
+
+[[algorithms-triangle-count-examples-stats]]
+=== Stats
+
+
+[[algorithms-triangle-count-examples-mutate]]
+=== Mutate
+
+
+[[algorithms-triangle-count-examples-write]]
+=== Write
+
+
+[[algorithms-triangle-count-examples-max-degree]]
+=== Maximum Degree
+

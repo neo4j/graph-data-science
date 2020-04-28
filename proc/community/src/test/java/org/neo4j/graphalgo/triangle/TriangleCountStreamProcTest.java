@@ -36,8 +36,9 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
         var query = "CALL gds.triangleCount.stream('g')";
 
         var rowCount = new AtomicInteger();
+
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(1L, row.getNumber("triangles"));
+            assertEquals(1L, row.getNumber("triangleCount"));
             rowCount.incrementAndGet();
         });
 

@@ -116,11 +116,11 @@ public class TriangleCountStreamProc
     public static class Result {
 
         public final long nodeId;
-        public final long triangles;
+        public final long triangleCount;
 
-        public Result(long nodeId, long triangles) {
+        public Result(long nodeId, long triangleCount) {
             this.nodeId = nodeId;
-            this.triangles = triangles;
+            this.triangleCount = triangleCount;
         }
     }
 }
