@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
 
-public interface StoreScanner<Reference> {
+public interface StoreScanner<Reference> extends AutoCloseable {
 
     int DEFAULT_PREFETCH_SIZE = 100;
 
@@ -50,4 +50,7 @@ public interface StoreScanner<Reference> {
     GdsCursor<Reference> getCursor(KernelTransaction transaction);
 
     long storeSize();
+
+    @Override
+    void close();
 }

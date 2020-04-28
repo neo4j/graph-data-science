@@ -92,10 +92,11 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
     // how many records are there in a single page
     private final int recordsPerPage;
 
+    private final GraphDatabaseApiProxy.Transactions transactions;
     // global cursor pool to return this one to
     private final ThreadLocal<GdsCursor<Reference>> cursors;
 
-    private volatile Scan<EntityCursor> entityCursorScan;
+    private final Scan<EntityCursor> entityCursorScan;
 
     private final Store store;
 
@@ -105,7 +106,11 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
         int recordSize = store.getRecordSize();
         int recordsPerPage = store.getRecordsPerPage();
 
+        // Ideally, this tx would be given by the calling procedure.
+        this.transactions = GraphDatabaseApiProxy.newKernelTransaction(api);
+
         this.prefetchSize = prefetchSize;
+        this.entityCursorScan = entityCursorScan(transactions.ktx());
         this.cursors = new ThreadLocal<>();
         this.recordSize = recordSize;
         this.recordsPerPage = recordsPerPage;
@@ -113,17 +118,15 @@ abstract class AbstractCursorScanner<Reference, EntityCursor extends Cursor, Sto
     }
 
     @Override
+    public void close() {
+        transactions.close();
+    }
+
+    @Override
     public final GdsCursor<Reference> getCursor(KernelTransaction transaction) {
         GdsCursor<Reference> gdsCursor = this.cursors.get();
 
         if (gdsCursor == null) {
-            if (entityCursorScan == null) {
-                synchronized (this) {
-                    if (entityCursorScan == null) {
-                        this.entityCursorScan = entityCursorScan(transaction);
-                    }
-                }
-            }
             EntityCursor entityCursor = entityCursor(transaction);
             Reference reference = cursorReference(entityCursor);
             gdsCursor = new StoreScanCursor(entityCursor, reference, entityCursorScan);

@@ -296,6 +296,10 @@ abstract class AbstractStorePageCacheScanner<Reference, Record extends AbstractB
         return idsInPages * (long) recordSize;
     }
 
+    @Override
+    public void close() {
+    }
+
     /**
      * Return the store to use.
      */

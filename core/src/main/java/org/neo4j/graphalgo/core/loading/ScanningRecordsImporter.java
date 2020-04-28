@@ -68,36 +68,40 @@ abstract class ScanningRecordsImporter<Record, T> {
         final ImportSizing sizing = ImportSizing.of(concurrency, nodeCount);
         int numberOfThreads = sizing.numberOfThreads();
 
-        StoreScanner<Record> scanner = factory.newScanner(DEFAULT_PREFETCH_SIZE, api);
+        try (StoreScanner<Record> scanner = factory.newScanner(DEFAULT_PREFETCH_SIZE, api)) {
 
-        InternalImporter.CreateScanner creator = creator(nodeCount, sizing, scanner);
-        InternalImporter importer = new InternalImporter(numberOfThreads, creator);
-        ImportResult importResult = importer.runImport(threadPool);
+            InternalImporter.CreateScanner creator = creator(nodeCount, sizing, scanner);
+            InternalImporter importer = new InternalImporter(numberOfThreads, creator);
+            ImportResult importResult = importer.runImport(threadPool);
 
-        long requiredBytes = scanner.storeSize();
-        long recordsImported = importResult.recordsImported;
-        long propertiesImported = importResult.propertiesImported;
-        BigInteger bigNanos = BigInteger.valueOf(importResult.tookNanos);
-        double tookInSeconds = new BigDecimal(bigNanos)
-                .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
-                .doubleValue();
-        long bytesPerSecond = A_BILLION.multiply(BigInteger.valueOf(requiredBytes)).divide(bigNanos).longValueExact();
+            long requiredBytes = scanner.storeSize();
+            long recordsImported = importResult.recordsImported;
+            long propertiesImported = importResult.propertiesImported;
+            BigInteger bigNanos = BigInteger.valueOf(importResult.tookNanos);
+            double tookInSeconds = new BigDecimal(bigNanos)
+                    .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
+                    .doubleValue();
+            long bytesPerSecond = A_BILLION
+                .multiply(BigInteger.valueOf(requiredBytes))
+                .divide(bigNanos)
+                .longValueExact();
 
-        log.info(
-                "%s Store Scan: Imported %,d records and %,d properties from %s (%,d bytes); took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
-                label,
-                recordsImported,
-                propertiesImported,
-                humanReadable(requiredBytes),
-                requiredBytes,
-                tookInSeconds,
-                (double) recordsImported / tookInSeconds,
-                humanReadable(bytesPerSecond),
-                bytesPerSecond,
-                (double) recordsImported / tookInSeconds / numberOfThreads,
-                humanReadable(bytesPerSecond / numberOfThreads),
-                bytesPerSecond / numberOfThreads
-        );
+            log.info(
+                    "%s Store Scan: Imported %,d records and %,d properties from %s (%,d bytes); took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
+                    label,
+                    recordsImported,
+                    propertiesImported,
+                    humanReadable(requiredBytes),
+                    requiredBytes,
+                    tookInSeconds,
+                    (double) recordsImported / tookInSeconds,
+                    humanReadable(bytesPerSecond),
+                    bytesPerSecond,
+                    (double) recordsImported / tookInSeconds / numberOfThreads,
+                    humanReadable(bytesPerSecond / numberOfThreads),
+                    bytesPerSecond / numberOfThreads
+            );
+        }
 
         return build();
     }

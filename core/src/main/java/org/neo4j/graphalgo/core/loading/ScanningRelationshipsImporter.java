@@ -57,12 +57,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         Map<RelationshipType, RelationshipsBuilder> allBuilders,
         int concurrency
     ) {
-        super(
-                RelationshipStoreScanner.FACTORY,
-                "Relationship",
-                loadingContext,
-                dimensions,
-                concurrency);
+        super(RelationshipStoreScanner.FACTORY, "Relationship", loadingContext, dimensions, concurrency);
         this.graphCreateConfig = graphCreateConfig;
         this.loadingContext = loadingContext;
         this.progressLogger = progressLogger;
