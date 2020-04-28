@@ -139,7 +139,7 @@ public final class UnionGraph implements IdMapGraph {
     }
 
     @Override
-    public RelationshipIntersect intersection() {
+    public RelationshipIntersect intersection(long maxDegree) {
         throw new UnsupportedOperationException("#intersection is not supported for multiple relationship types");
     }
 

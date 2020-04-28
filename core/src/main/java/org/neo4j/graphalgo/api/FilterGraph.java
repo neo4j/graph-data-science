@@ -57,8 +57,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public RelationshipIntersect intersection() {
-        return graph.intersection();
+    public RelationshipIntersect intersection(long maxDegree) {
+        return graph.intersection(maxDegree);
     }
 
     @Override

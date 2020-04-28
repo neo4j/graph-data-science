@@ -20,11 +20,11 @@
 
 package org.neo4j.graphalgo.triangle;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -33,6 +33,18 @@ import java.util.Optional;
 @Configuration("TriangleCountBaseConfigImpl")
 @SuppressWarnings("immutables:subtype")
 public interface TriangleCountBaseConfig extends AlgoBaseConfig {
+
+    @Value.Default
+    default long maxDegree() {
+        return Long.MAX_VALUE;
+    }
+
+    @Value.Check
+    default void validateMaxDegree() {
+        if (maxDegree() < 2) {
+            throw new IllegalArgumentException("The 'maxDegree' parameter must be set to a value greater than 0.");
+        }
+    }
 
     static TriangleCountBaseConfig of(
         String username,

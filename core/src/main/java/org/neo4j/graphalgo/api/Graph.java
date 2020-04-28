@@ -57,5 +57,9 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
 
     void canRelease(boolean canRelease);
 
-    RelationshipIntersect intersection();
+    default RelationshipIntersect intersection() {
+        return intersection(Long.MAX_VALUE);
+    };
+
+    RelationshipIntersect intersection(long maxDegree);
 }

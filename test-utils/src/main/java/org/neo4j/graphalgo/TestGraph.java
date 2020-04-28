@@ -217,7 +217,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public RelationshipIntersect intersection() {
+    public RelationshipIntersect intersection(long maxDegree) {
         throw new UnsupportedOperationException();
     }
 

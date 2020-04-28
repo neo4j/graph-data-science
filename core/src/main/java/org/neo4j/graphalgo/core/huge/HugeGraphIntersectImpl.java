@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 
+import java.util.function.LongPredicate;
+
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
  * throw misleading {@link NullPointerException}s.
@@ -37,8 +39,9 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
     private AdjacencyList.DecompressingCursor cache;
     private AdjacencyList.DecompressingCursor cacheA;
     private AdjacencyList.DecompressingCursor cacheB;
+    private final LongPredicate degreeFilter;
 
-    HugeGraphIntersectImpl(final AdjacencyList adjacency, final AdjacencyOffsets offsets) {
+    HugeGraphIntersectImpl(final AdjacencyList adjacency, final AdjacencyOffsets offsets, long maxDegree) {
         assert adjacency != null;
         assert offsets != null;
         this.adjacency = adjacency;
@@ -47,10 +50,17 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
         cacheA = adjacency.rawDecompressingCursor();
         cacheB = adjacency.rawDecompressingCursor();
         empty = adjacency.rawDecompressingCursor();
+        this.degreeFilter = maxDegree < Long.MAX_VALUE
+            ? (node) -> degree(node) <= maxDegree
+            : (ignore) -> true;
     }
 
     @Override
     public void intersectAll(long nodeIdA, IntersectionConsumer consumer) {
+        if(!degreeFilter.test(nodeIdA)) {
+            return;
+        }
+
         AdjacencyOffsets offsets = this.offsets;
         AdjacencyList adjacency = this.adjacency;
 
@@ -65,29 +75,31 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
         boolean hasNext = true;
 
         while (hasNext) {
-            decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets, adjacency);
-            nodeIdC = decompressingCursorB.skipUntil(nodeIdB);
-            if (nodeIdC > nodeIdB) {
-                decompressingCursorA.copyFrom(mainDecompressingCursor);
-                currentA = decompressingCursorA.advance(nodeIdC);
+            if (degreeFilter.test(nodeIdB)) {
+                decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets, adjacency);
+                nodeIdC = decompressingCursorB.skipUntil(nodeIdB);
+                if (nodeIdC > nodeIdB && degreeFilter.test(nodeIdC)) {
+                    decompressingCursorA.copyFrom(mainDecompressingCursor);
+                    currentA = decompressingCursorA.advance(nodeIdC);
 
-                if (currentA == nodeIdC) {
-                    consumer.accept(nodeIdA, nodeIdB, nodeIdC);
-                }
+                    if (currentA == nodeIdC) {
+                        consumer.accept(nodeIdA, nodeIdB, nodeIdC);
+                    }
 
-                if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
-                    lead = decompressingCursorA;
-                    follow = decompressingCursorB;
-                } else {
-                    lead = decompressingCursorB;
-                    follow = decompressingCursorA;
-                }
+                    if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
+                        lead = decompressingCursorA;
+                        follow = decompressingCursorB;
+                    } else {
+                        lead = decompressingCursorB;
+                        follow = decompressingCursorA;
+                    }
 
-                while (lead.hasNextVLong() && follow.hasNextVLong()) {
-                    s = lead.nextVLong();
-                    t = follow.advance(s);
-                    if (t == s) {
-                        consumer.accept(nodeIdA, nodeIdB, s);
+                    while (lead.hasNextVLong() && follow.hasNextVLong()) {
+                        s = lead.nextVLong();
+                        t = follow.advance(s);
+                        if (t == s) {
+                            consumer.accept(nodeIdA, nodeIdB, s);
+                        }
                     }
                 }
             }
@@ -98,12 +110,12 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
         }
     }
 
-    private int degree(long node, AdjacencyOffsets offsets, AdjacencyList array) {
+    private int degree(long node) {
         long offset = offsets.get(node);
         if (offset == 0L) {
             return 0;
         }
-        return array.getDegree(offset);
+        return adjacency.getDegree(offset);
     }
 
     private AdjacencyList.DecompressingCursor cursor(

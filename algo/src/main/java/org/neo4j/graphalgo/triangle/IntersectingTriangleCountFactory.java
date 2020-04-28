@@ -46,8 +46,8 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
 
         return new IntersectingTriangleCount(
             graph,
+            configuration,
             Pools.DEFAULT,
-            configuration.concurrency(),
             tracker,
             progressLogger
         );

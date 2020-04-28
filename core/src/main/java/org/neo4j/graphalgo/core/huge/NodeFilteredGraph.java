@@ -45,8 +45,8 @@ public class NodeFilteredGraph extends FilterGraph implements IdMapGraph {
     }
 
     @Override
-    public RelationshipIntersect intersection() {
-        return new FilteredGraphIntersectImpl(filteredIdMap, super.intersection());
+    public RelationshipIntersect intersection(long maxDegree) {
+        return new FilteredGraphIntersectImpl(filteredIdMap, super.intersection(maxDegree));
     }
 
     @Override
