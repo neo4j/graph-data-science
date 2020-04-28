@@ -53,7 +53,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Collection;
 import java.util.Collections;

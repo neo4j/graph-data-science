@@ -201,7 +201,7 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
             " ,(g)-[:T]->(e)"
         );
 
-        TriangleCountStatsConfig config = ImmutableTriangleCountStatsConfig
+        TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
             .builder()
             .maxDegree(2)
             .build();

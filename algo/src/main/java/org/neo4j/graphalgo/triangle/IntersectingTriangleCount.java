@@ -72,7 +72,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         this.graph = graph;
         this.config = config;
         this.executorService = executorService;
-        triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount(), PageFiller.allZeros(config.concurrency()), tracker);
+        triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
         globalTriangleCounter = new LongAdder();
         queue = new AtomicLong();
         this.progressLogger = progressLogger;

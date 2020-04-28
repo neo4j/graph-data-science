@@ -42,7 +42,7 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
     @Value.Check
     default void validateMaxDegree() {
         if (maxDegree() < 2) {
-            throw new IllegalArgumentException("The 'maxDegree' parameter must be set to a value greater than 0.");
+            throw new IllegalArgumentException("The 'maxDegree' parameter must be set to a value greater than 1.");
         }
     }
 
