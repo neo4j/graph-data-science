@@ -281,7 +281,7 @@ In the following examples we will demonstrate using the Triangle Count algorithm
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]
 ----
-CALL gds.triangleCount.localClusteringCoefficient.write.estimate('myGraph', {
+CALL gds.localClusteringCoefficient.write.estimate('myGraph', {
   writeProperty: 'localClusteringCoefficient'
 })
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
@@ -304,7 +304,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]
 ----
-CALL gds.triangleCount.localClusteringCoefficient.stream('myGraph')
+CALL gds.localClusteringCoefficient.stream('myGraph')
 YIELD nodeId, localClusteringCoefficient
 RETURN gds.util.asNode(nodeId).name AS name, localClusteringCoefficient
 ORDER BY localClusteringCoefficient DESC
@@ -331,7 +331,7 @@ ORDER BY localClusteringCoefficient DESC
 --
 [source, cypher]
 ----
-CALL gds.triangleCount.localClusteringCoefficient.stats('myGraph')
+CALL gds.localClusteringCoefficient.stats('myGraph')
 YIELD averageClusteringCoefficient, nodeCount
 ----
 
@@ -351,7 +351,7 @@ YIELD averageClusteringCoefficient, nodeCount
 .The following will run the algorithm in `mutate` mode:
 [source, cypher]
 ----
-CALL gds.triangleCount.localClusteringCoefficient.mutate('myGraph', {
+CALL gds.localClusteringCoefficient.mutate('myGraph', {
   mutateProperty: 'localClusteringCoefficient'
 })
 YIELD averageClusteringCoefficient, nodeCount
@@ -376,7 +376,7 @@ NOTE: In contrast to `write` mode the result is written to the GDS in-memory gra
 .The following will run the algorithm in `write` mode:
 [source, cypher]
 ----
-CALL gds.triangleCount.localClusteringCoefficient.write('myGraph', {
+CALL gds.localClusteringCoefficient.write('myGraph', {
   writeProperty: 'localClusteringCoefficient'
 })
 YIELD averageClusteringCoefficient, nodeCount
@@ -412,7 +412,7 @@ CALL gds.triangleCount.mutate('myGraph', {
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]
 ----
-CALL gds.triangleCount.localClusteringCoefficient.stream('myGraph', {
+CALL gds.localClusteringCoefficient.stream('myGraph', {
   triangleCountProperty: 'triangles'
 })
 YIELD nodeId, localClusteringCoefficient
