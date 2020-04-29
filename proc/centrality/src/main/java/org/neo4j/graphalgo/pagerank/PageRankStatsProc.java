@@ -83,8 +83,8 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
     }
 
     @Override
-    protected Stream<StatsResult> stats(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {
-        PageRankStreamConfig config = computationResult.config();
+    protected Stream<StatsResult> stats(ComputationResult<PageRank, PageRank, PageRankStatsConfig> computationResult) {
+        PageRankStatsConfig config = computationResult.config();
 
         if (computationResult.isGraphEmpty()) {
             return Stream.of(
