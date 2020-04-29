@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringMutateProc;
+import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStatsProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStreamProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
@@ -80,6 +81,8 @@ class ListProcTest extends BaseProcTest {
 
         "gds.beta.k1coloring.mutate",
         "gds.beta.k1coloring.mutate.estimate",
+        "gds.beta.k1coloring.stats",
+        "gds.beta.k1coloring.stats.estimate",
         "gds.beta.k1coloring.stream",
         "gds.beta.k1coloring.stream.estimate",
         "gds.beta.k1coloring.write",
@@ -197,6 +200,7 @@ class ListProcTest extends BaseProcTest {
             GraphGenerateProc.class,
             GraphDeleteRelationshipProc.class,
             K1ColoringMutateProc.class,
+            K1ColoringStatsProc.class,
             K1ColoringWriteProc.class,
             K1ColoringStreamProc.class,
             LabelPropagationWriteProc.class,
