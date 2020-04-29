@@ -227,7 +227,7 @@ public class GraphStoreExport {
             Map<String, Map<String, NodeProperties>> nodeProperties;
 
             if (graphStore.nodes().hasLabelInformation()) {
-                var nodeLabelBitSetMap = graphStore.nodes().maybeLabelInformation().get();
+                var nodeLabelBitSetMap = graphStore.nodes().labelInformation();
 
                 nodeLabels = nodeLabelBitSetMap.entrySet().stream()
                     .collect(Collectors.toMap(

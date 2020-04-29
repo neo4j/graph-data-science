@@ -19,16 +19,17 @@
  */
 package org.neo4j.graphalgo.api;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.loading.IdMap;
 
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * A graph implementation where the nodes are backed by an {@link IdMap}.
  */
-public interface IdMapGraph extends Graph {
+public interface IdMapGraph extends Graph, LabeledIdMapping {
 
     IdMap idMap();
 
@@ -36,13 +37,18 @@ public interface IdMapGraph extends Graph {
     IdMapGraph concurrentCopy();
 
     @Override
-    default Stream<NodeLabel> nodeLabelStream(long nodeId) {
-        return idMap().labels(nodeId);
+    default Set<NodeLabel> nodeLabels(long nodeId) {
+        return idMap().nodeLabels(nodeId);
     }
 
     @Override
     default Set<NodeLabel> availableNodeLabels() {
         return idMap().availableNodeLabels();
+    }
+
+    @Override
+    default Map<NodeLabel, BitSet> labelInformation() {
+        return idMap().labelInformation();
     }
 
 }

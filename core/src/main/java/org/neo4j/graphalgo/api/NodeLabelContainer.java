@@ -22,16 +22,10 @@ package org.neo4j.graphalgo.api;
 import org.neo4j.graphalgo.NodeLabel;
 
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public interface NodeLabelContainer {
 
-    Stream<NodeLabel> nodeLabelStream(long nodeId);
-
-    default Set<NodeLabel> nodeLabels(long nodeId) {
-        return nodeLabelStream(nodeId).collect(Collectors.toSet());
-    }
+    Set<NodeLabel> nodeLabels(long nodeId);
 
     Set<NodeLabel> availableNodeLabels();
 }

@@ -41,7 +41,8 @@ public final class CanonicalAdjacencyMatrix {
         Map<Long, String> canonicalLabels = new HashMap<>();
         g.forEachNode(nodeId -> {
             String sortedLabels = g
-                .nodeLabelStream(nodeId)
+                .nodeLabels(nodeId)
+                .stream()
                 .filter(label -> label != NodeLabel.ALL_NODES)
                 .map(NodeLabel::name)
                 .sorted()

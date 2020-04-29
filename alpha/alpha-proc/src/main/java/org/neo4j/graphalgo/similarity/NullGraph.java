@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.stream.Stream;
 
 public class NullGraph implements Graph {
 
@@ -122,7 +121,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public Stream<NodeLabel> nodeLabelStream(long nodeId) {
+    public Set<NodeLabel> nodeLabels(long nodeId) {
         throw new UnsupportedOperationException(
             "org.neo4j.graphalgo.similarity.NullGraph.nodeLabelStream is not implemented.");
     }

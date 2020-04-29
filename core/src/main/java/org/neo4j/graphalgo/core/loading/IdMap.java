@@ -40,9 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.stream.Stream;
-
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import java.util.stream.Collectors;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
@@ -66,6 +64,8 @@ public class IdMap implements LabeledIdMapping, NodeIterator, BatchNodeIterable 
                 MemoryRange.of(dimensions.nodeLabels().size() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
         )
         .build();
+
+    private static final Set<NodeLabel> ALL_NODES_LABELS = Set.of(NodeLabel.ALL_NODES);
 
     protected long nodeCount;
 
@@ -142,24 +142,25 @@ public class IdMap implements LabeledIdMapping, NodeIterator, BatchNodeIterable 
 
     @Override
     public Set<NodeLabel> availableNodeLabels() {
-        return maybeLabelInformation.map(Map::keySet).orElseGet(() -> Collections.singleton(ALL_NODES));
+        return maybeLabelInformation.map(Map::keySet).orElseGet(() -> Collections.singleton(NodeLabel.ALL_NODES));
     }
 
     @Override
-    public Stream<NodeLabel> labels(long nodeId) {
+    public Set<NodeLabel> nodeLabels(long nodeId) {
         return maybeLabelInformation
             .map(elementIdentifierBitSetMap ->
                 elementIdentifierBitSetMap
                     .entrySet()
                     .stream()
                     .filter(entry -> entry.getValue().get(nodeId))
-                    .map(Map.Entry::getKey))
-            .orElseGet(() -> Stream.of(NodeLabel.ALL_NODES));
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet()))
+            .orElse(ALL_NODES_LABELS);
     }
 
     @Override
-    public Optional<Map<NodeLabel, BitSet>> maybeLabelInformation() {
-        return maybeLabelInformation;
+    public Map<NodeLabel, BitSet> labelInformation() {
+        return maybeLabelInformation.orElse(Collections.emptyMap());
     }
 
     IdMap withFilteredLabels(BitSet unionBitSet, int concurrency) {

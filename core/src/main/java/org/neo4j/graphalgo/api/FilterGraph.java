@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.stream.Stream;
 
 public abstract class FilterGraph implements Graph {
 
@@ -102,8 +101,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public Stream<NodeLabel> nodeLabelStream(long nodeId) {
-        return graph.nodeLabelStream(nodeId);
+    public Set<NodeLabel> nodeLabels(long nodeId) {
+        return graph.nodeLabels(nodeId);
     }
 
     @Override

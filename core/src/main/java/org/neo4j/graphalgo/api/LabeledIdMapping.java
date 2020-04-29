@@ -23,18 +23,13 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.NodeLabel;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
 
-public interface LabeledIdMapping extends IdMapping {
+public interface LabeledIdMapping extends IdMapping, NodeLabelContainer {
 
-    boolean hasLabelInformation();
+    default boolean hasLabelInformation() {
+        return !labelInformation().isEmpty();
+    };
 
-    Set<NodeLabel> availableNodeLabels();
-
-    Stream<NodeLabel> labels(long nodeId);
-
-    Optional<Map<NodeLabel, BitSet>> maybeLabelInformation();
+    Map<NodeLabel, BitSet> labelInformation();
 
 }
