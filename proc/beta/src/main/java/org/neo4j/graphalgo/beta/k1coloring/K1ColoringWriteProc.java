@@ -51,7 +51,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
         ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult =
             compute(graphNameOrConfig, configuration);
 
-        return computationResult.isGraphEmpty() ? Stream.empty() : write(computationResult);
+        return write(computationResult);
     }
 
     @Procedure(value = "gds.beta.k1coloring.write.estimate", mode = READ)

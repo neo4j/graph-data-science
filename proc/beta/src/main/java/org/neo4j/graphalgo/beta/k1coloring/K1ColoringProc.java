@@ -43,8 +43,8 @@ final class K1ColoringProc {
         }
 
         return procResultBuilder
-            .withRanIterations(computeResult.algorithm().ranIterations())
-            .withDidConverge(computeResult.algorithm().didConverge());
+            .withRanIterations(computeResult.isGraphEmpty() ? 0 : computeResult.algorithm().ranIterations())
+            .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.algorithm().didConverge());
     }
 
     static PropertyTranslator<HugeLongArray> nodePropertyTranslator() {

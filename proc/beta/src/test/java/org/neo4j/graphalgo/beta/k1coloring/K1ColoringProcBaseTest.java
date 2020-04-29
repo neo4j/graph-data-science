@@ -21,11 +21,24 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.HeapControlTest;
+import org.neo4j.graphalgo.IterationsConfigTest;
+import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-abstract class K1ColoringProcBaseTest extends BaseProcTest {
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
+abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends BaseProcTest  implements
+    AlgoBaseProcTest<K1Coloring, CONFIG, HugeLongArray>,
+    IterationsConfigTest<K1Coloring, CONFIG, HugeLongArray>,
+    MemoryEstimateTest<K1Coloring, CONFIG, HugeLongArray>,
+    HeapControlTest<K1Coloring, CONFIG, HugeLongArray> {
+
     private final String DB_CYPHER =
         "CREATE" +
         " (a)" +
@@ -35,17 +48,30 @@ abstract class K1ColoringProcBaseTest extends BaseProcTest {
         ",(a)-[:REL]->(b)" +
         ",(a)-[:REL]->(c)";
 
-    @BeforeEach
-    void setup() throws Exception {
-        registerProcs();
-        runQuery(DB_CYPHER);
+    @Override
+    public GraphDatabaseAPI graphDb() {
+        return db;
     }
 
-    abstract void registerProcs() throws Exception;
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            K1ColoringWriteProc.class,
+            K1ColoringStatsProc.class,
+            K1ColoringStreamProc.class,
+            K1ColoringMutateProc.class
+        );
+        runQuery(DB_CYPHER);
+    }
 
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @Override
+    public void assertResultEquals(HugeLongArray result1, HugeLongArray result2) {
+        assertArrayEquals(result1.toArray(), result2.toArray());
     }
 
     GdsCypher.ModeBuildStage algoBuildStage() {
