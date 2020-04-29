@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
-import org.neo4j.graphalgo.core.schema.GraphStoreSchema;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;

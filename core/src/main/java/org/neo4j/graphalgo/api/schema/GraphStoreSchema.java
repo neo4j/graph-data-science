@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.schema;
+package org.neo4j.graphalgo.api.schema;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.values.storable.NumberType;
