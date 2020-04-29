@@ -28,4 +28,8 @@ public interface NodeLabelContainer {
     Set<NodeLabel> nodeLabels(long nodeId);
 
     Set<NodeLabel> availableNodeLabels();
+
+    default boolean hasLabel(long nodeId, NodeLabel label) {
+        return nodeLabels(nodeId).contains(label);
+    }
 }

@@ -19,11 +19,9 @@
  */
 package org.neo4j.graphalgo.api;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.loading.IdMap;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -44,11 +42,6 @@ public interface IdMapGraph extends Graph, LabeledIdMapping {
     @Override
     default Set<NodeLabel> availableNodeLabels() {
         return idMap().availableNodeLabels();
-    }
-
-    @Override
-    default Map<NodeLabel, BitSet> labelInformation() {
-        return idMap().labelInformation();
     }
 
 }

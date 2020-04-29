@@ -136,11 +136,6 @@ public class IdMap implements LabeledIdMapping, NodeIterator, BatchNodeIterable 
     }
 
     @Override
-    public boolean hasLabelInformation() {
-        return maybeLabelInformation.isPresent();
-    }
-
-    @Override
     public Set<NodeLabel> availableNodeLabels() {
         return maybeLabelInformation.map(Map::keySet).orElseGet(() -> Collections.singleton(NodeLabel.ALL_NODES));
     }
@@ -159,8 +154,8 @@ public class IdMap implements LabeledIdMapping, NodeIterator, BatchNodeIterable 
     }
 
     @Override
-    public Map<NodeLabel, BitSet> labelInformation() {
-        return maybeLabelInformation.orElse(Collections.emptyMap());
+    public boolean hasLabel(long nodeId, NodeLabel label) {
+        return maybeLabelInformation.map(map -> map.get(label).get(nodeId)).orElse(false);
     }
 
     IdMap withFilteredLabels(BitSet unionBitSet, int concurrency) {
