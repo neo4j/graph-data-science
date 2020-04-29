@@ -449,7 +449,7 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     private NodeProperty nodeProperty(String propertyKey) {
-        if (nodes.maybeLabelInformation.isPresent()) {
+        if (nodes.availableNodeLabels().size() > 1) {
             var unionValues = new HashMap<NodeLabel, NodeProperties>();
             var unionType = NumberType.NO_NUMBER;
             var unionOrigin = PropertyState.PERSISTENT;
@@ -469,10 +469,11 @@ public final class CSRGraphStore implements GraphStore {
                 propertyKey,
                 unionType,
                 unionOrigin,
-                new UnionNodeProperties(unionValues, nodes.maybeLabelInformation.get())
+                new UnionNodeProperties(unionValues, nodes)
             );
+        } else {
+            return nodeProperties.get(nodes.availableNodeLabels().iterator().next()).get(propertyKey);
         }
-        return nodeProperties.get(ALL_NODES).get(propertyKey);
     }
 
     private void addRelationshipProperty(
@@ -513,24 +514,24 @@ public final class CSRGraphStore implements GraphStore {
         boolean containsAllNodes = true;
         BitSet unionBitSet = BitSet.newInstance();
 
-        if (this.nodes.maybeLabelInformation.isPresent() && !loadAllNodes) {
-            Map<NodeLabel, BitSet> labelInformation = this.nodes.maybeLabelInformation.get();
+        if (!nodes.containsOnlyAllNodesLabel() && !loadAllNodes) {
+            Map<NodeLabel, BitSet> labelInformation = nodes.labelInformation;
             validateNodeLabelFilter(filteredLabels, labelInformation);
             filteredLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
-            containsAllNodes = unionBitSet.cardinality() == this.nodes.nodeCount();
+            containsAllNodes = unionBitSet.cardinality() == nodes.nodeCount();
         }
 
-        Optional<IdMap> filteredNodes = loadAllNodes || !this.nodes.maybeLabelInformation.isPresent() || containsAllNodes
+        Optional<IdMap> filteredNodes = loadAllNodes || nodes.containsOnlyAllNodesLabel() || containsAllNodes
             ? Optional.empty()
-            : Optional.of(this.nodes.withFilteredLabels(unionBitSet, concurrency));
+            : Optional.of(nodes.withFilteredLabels(unionBitSet, concurrency));
 
         List<IdMapGraph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> {
-                Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels, nodes.maybeLabelInformation);
+                Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
 
                 HugeGraph initialGraph = HugeGraph.create(
-                    this.nodes,
+                    nodes,
                     filteredNodeProperties,
                     relTypeAndCSR.getValue(),
                     maybeRelationshipProperty.map(propertyKey -> relationshipProperties
@@ -552,14 +553,11 @@ public final class CSRGraphStore implements GraphStore {
         return UnionGraph.of(filteredGraphs);
     }
 
-    private Map<String, NodeProperties> filterNodeProperties(
-        Collection<NodeLabel> labels,
-        Optional<Map<NodeLabel, BitSet>> maybeElementIdentifierBitSetMap
-    ) {
+    private Map<String, NodeProperties> filterNodeProperties(Collection<NodeLabel> labels) {
         if (this.nodeProperties.isEmpty()) {
             return Collections.emptyMap();
         }
-        if (labels.size() == 1 || maybeElementIdentifierBitSetMap.isEmpty()) {
+        if (labels.size() == 1 || nodes.containsOnlyAllNodesLabel()) {
             return this.nodeProperties.get(labels.iterator().next()).nodePropertyValues();
         }
 
@@ -582,7 +580,7 @@ public final class CSRGraphStore implements GraphStore {
             .stream()
             .collect(Collectors.toMap(
                 Entry::getKey,
-                entry -> new UnionNodeProperties(entry.getValue(), maybeElementIdentifierBitSetMap.get())
+                entry -> new UnionNodeProperties(entry.getValue(), nodes)
             ));
     }
 

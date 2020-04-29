@@ -286,7 +286,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
         nodeImporter.importNodes(buffer, null);
 
-        IdMap idMap = IdMapBuilder.build(idMapBuilder, null, maxNodeId, 1, AllocationTracker.EMPTY);
+        IdMap idMap = IdMapBuilder.build(idMapBuilder, maxNodeId, 1, AllocationTracker.EMPTY);
         return new IdsAndProperties(idMap, Collections.emptyMap());
     }
 

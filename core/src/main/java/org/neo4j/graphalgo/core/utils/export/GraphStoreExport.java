@@ -227,9 +227,7 @@ public class GraphStoreExport {
 
             var nodeLabels = graphStore.nodes();
 
-            boolean onlyAllNodesLabel = nodeLabels.availableNodeLabels().contains(NodeLabel.ALL_NODES) && nodeLabels.availableNodeLabels().size() == 1;
-
-            if (!onlyAllNodesLabel) {
+            if (!nodeLabels.containsOnlyAllNodesLabel()) {
                 labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), AllocationTracker.EMPTY);
                 labelCounts.setAll(i -> {
                     int labelCount = 0;
@@ -256,7 +254,7 @@ public class GraphStoreExport {
             return new NodeStore(
                 graphStore.nodeCount(),
                 labelCounts,
-                onlyAllNodesLabel ? null : nodeLabels,
+                nodeLabels.containsOnlyAllNodesLabel() ? null : nodeLabels,
                 nodeProperties
             );
         }

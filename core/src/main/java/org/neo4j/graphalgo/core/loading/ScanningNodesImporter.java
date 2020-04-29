@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +88,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
         nodeLabelBitSetMapping = graphCreateConfig.nodeProjections().allProjections().size() == 1 && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
-            ? null
+            ? Collections.emptyMap()
             : initializeLabelBitSets(nodeCount, labelTokenNodeLabelMapping);
 
         nodePropertyImporter = initializeNodePropertyImporter(nodeCount);

@@ -29,25 +29,30 @@ import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
+import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 public final class IdMapBuilder {
 
     public static IdMap build(
         HugeLongArrayBuilder idMapBuilder,
-        Map<NodeLabel, BitSet> elementIdentifierLabelMapping,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
     ) {
-        Optional<Map<NodeLabel, BitSet>> maybeLabelInformation = elementIdentifierLabelMapping == null || elementIdentifierLabelMapping.isEmpty()
-            ? Optional.empty()
-            : Optional.of(elementIdentifierLabelMapping);
-        HugeLongArray graphIds = idMapBuilder.build();
+        return build(idMapBuilder, Collections.emptyMap(), highestNodeId, concurrency, tracker);
+    }
 
+    public static IdMap build(
+        HugeLongArrayBuilder idMapBuilder,
+        Map<NodeLabel, BitSet> labelInformation,
+        long highestNodeId,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
+        HugeLongArray graphIds = idMapBuilder.build();
         SparseNodeMapping nodeToGraphIds = buildSparseNodeMapping(graphIds, highestNodeId, concurrency, tracker);
-        return new IdMap(graphIds, nodeToGraphIds, maybeLabelInformation, idMapBuilder.size());
+        return new IdMap(graphIds, nodeToGraphIds, labelInformation, idMapBuilder.size());
     }
 
     @NotNull

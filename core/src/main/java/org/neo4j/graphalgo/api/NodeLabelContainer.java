@@ -32,4 +32,8 @@ public interface NodeLabelContainer {
     default boolean hasLabel(long nodeId, NodeLabel label) {
         return nodeLabels(nodeId).contains(label);
     }
+
+    default boolean containsOnlyAllNodesLabel() {
+        return availableNodeLabels().size() == 1 && availableNodeLabels().contains(NodeLabel.ALL_NODES);
+    }
 }
