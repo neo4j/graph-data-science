@@ -13,12 +13,13 @@ The Neo4j GDS library includes the following community detection algorithms, gro
 ** <<algorithms-louvain, Louvain>>
 ** <<algorithms-label-propagation, Label Propagation>>
 ** <<algorithms-wcc, Weakly Connected Components>>
+** <<algorithms-triangle-count, Triangle Count>>
+** <<algorithms-local-clustering-coefficient, Local Clustering Coefficient>>
 * Beta
 ** <<algorithms-k1coloring, K-1 Coloring>>
 ** <<algorithms-modularity-optimization, Modularity Optimization>>
 * Alpha
 ** <<algorithms-strongly-connected-components, Strongly Connected Components>>
-** <<algorithms-triangle-count-clustering-coefficient, Triangle Counting / Clustering Coefficient>>
 
 include::louvain.adoc[leveloffset=+1]
 
@@ -34,4 +35,6 @@ include::beta/modularity-optimization.adoc[leveloffset=+1]
 
 include::alpha/alpha-strongly-connected-components.adoc[leveloffset=+1]
 
-include::alpha/alpha-triangle-count.adoc[leveloffset=+1]
+include::triangle-count/triangle-count.adoc[leveloffset=+1]
+
+include::triangle-count/local-clustering-coefficient.adoc[leveloffset=+1]
