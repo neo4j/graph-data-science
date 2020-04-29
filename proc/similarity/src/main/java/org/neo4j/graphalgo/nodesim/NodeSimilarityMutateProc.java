@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.computeHistogram;
 import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.shouldComputeHistogram;
@@ -163,7 +164,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
             );
 
             if (shouldComputeHistogram(callContext)) {
-                DoubleHistogram histogram = new DoubleHistogram(5);
+                DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                 topKGraph.forEachNode(nodeId -> {
                     topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
                         relationshipsBuilder.addFromInternal(sourceNodeId, targetNodeId, property);

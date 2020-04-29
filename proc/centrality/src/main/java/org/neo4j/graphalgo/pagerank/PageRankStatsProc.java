@@ -23,16 +23,19 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.pagerank.PageRankProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
 public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankStatsProc.StatsResult, PageRankStatsConfig> {
@@ -79,12 +82,43 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
         return PageRankProc.algorithmFactory(config);
     }
 
+    @Override
+    protected Stream<StatsResult> stats(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {
+        PageRankStreamConfig config = computationResult.config();
+
+        if (computationResult.isGraphEmpty()) {
+            return Stream.of(
+                new StatsResult(
+                    computationResult.createMillis(),
+                    0,
+                    0,
+                    computationResult.result().didConverge(),
+                    Collections.emptyMap(),
+                    config.toMap()
+                )
+            );
+        }
+
+        PageRankProc.PageRankResultBuilder<StatsResult> resultBuilder = PageRankProc.resultBuilder(
+            new StatsResult.Builder(),
+            computationResult
+        );
+
+        if (shouldComputeHistogram(callContext)) {
+            try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
+                resultBuilder.withHistogram(PageRankProc.computeHistogram(computationResult.result()));
+            }
+        }
+        return Stream.of(resultBuilder.build());
+    }
+
     public static final class StatsResult {
 
         public long createMillis;
         public long computeMillis;
         public long ranIterations;
         public boolean didConverge;
+        public Map<String, Object> centralityDistribution;
         public Map<String, Object> configuration;
 
         StatsResult(
@@ -92,12 +126,14 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
             long computeMillis,
             long ranIterations,
             boolean didConverge,
+            Map<String, Object> centralityDistribution,
             Map<String, Object> configuration
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
+            this.centralityDistribution = centralityDistribution;
             this.configuration = configuration;
         }
 
@@ -110,6 +146,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
                     computeMillis,
                     ranIterations,
                     didConverge,
+                    distribution(),
                     config.toMap()
                 );
             }

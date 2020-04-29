@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.graphalgo.nodesim.NodeSimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
@@ -127,7 +128,7 @@ public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimil
                             .withLog(log)
                             .build();
                         if (shouldComputeHistogram(callContext)) {
-                            DoubleHistogram histogram = new DoubleHistogram(5);
+                            DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                             exporter.write(
                                 writeRelationshipType,
                                 Optional.of(writeProperty),

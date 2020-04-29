@@ -42,6 +42,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+
 abstract class SimilarityProc
     <ALGO extends SimilarityAlgorithm<ALGO, ?>, CONFIG extends SimilarityConfig>
     extends AlgoBaseProc<ALGO, SimilarityAlgorithmResult, CONFIG> {
@@ -127,7 +129,7 @@ abstract class SimilarityProc
         TerminationFlag terminationFlag
     ) {
         AtomicLong similarityPairs = new AtomicLong();
-        DoubleHistogram histogram = new DoubleHistogram(5);
+        DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
         Consumer<SimilarityResult> recorder = result -> {
             result.record(histogram);
             similarityPairs.getAndIncrement();
