@@ -49,8 +49,8 @@ ext {
         'gdsManual' : versionParts[0].split('\\.')[0..1].join('.'),
     ]
     if (1 < versionParts.size()) { versions.gdsManual += '-preview' }
-    versions['neo4jDocs'] = "3.5"
-    versions['neo4jDrivers'] = "1.7"
+    versions['neo4jDocs'] = "4.0"
+    versions['neo4jDrivers'] = "4.0"
 
     copyrightYear = '2020'
     docsBaseUri = "https://neo4j.com/docs"
