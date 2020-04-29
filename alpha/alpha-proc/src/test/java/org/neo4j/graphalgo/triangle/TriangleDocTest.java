@@ -133,7 +133,7 @@ class TriangleDocTest extends BaseProcTest {
                        "   }," +
                        "   concurrency: 4" +
                        " })" +
-                       " YIELD nodeId, triangles" +
+                       " YIELD nodeId, triangleCount as triangles" +
                        " RETURN gds.util.asNode(nodeId).name AS name, triangles" +
                        " ORDER BY triangles ASC";
 
