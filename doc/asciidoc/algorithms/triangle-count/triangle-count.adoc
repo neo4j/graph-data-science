@@ -35,7 +35,7 @@ The Triangle Count algorithm in the GDS library only finds triangles in undirect
 
 Triangle counting has gained popularity in social network analysis, where it is used to detect communities and measure the cohesiveness of those communities.
 It can also be used to determine the stability of a graph, and is often used as part of the computation of network indices, such as clustering coefficients.
-// TODO: link to LCC page
+Triangle Count algorithm in the Graph Data Science library is also used to compute the <<algorithms-local-clustering-coefficient, Local Clustering Coefficient>>
 
 For more information on this algorithm, see:
 
