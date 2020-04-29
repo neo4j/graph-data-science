@@ -75,7 +75,7 @@ include::specific-configuration.adoc[]
 |===
 | Name          | Type      | Description
 | nodeId        | Integer   | Node ID.
-| triangleCount | Integer   | Number of triangles the node is part of.
+| triangleCount | Integer   | Number of triangles the node is part of. `triangleCount: -1` indicates that this node has been excluded from computation using the `maxDegree` configuration parameter.
 |===
 
 
@@ -392,3 +392,39 @@ NOTE: The result is written to the Neo4j database.
 [[algorithms-triangle-count-examples-max-degree]]
 === Maximum Degree
 
+Triangle count implementation includes a `maxDegree` property that can be used to exclude nodes from processing if their degree is higher than the configured one.
+This can be useful to speed up the computation when there are super nodes in the graph.
+
+NOTE: The nodes excluded from the computation get `triangleCount: -1`
+
+.The following will run the algorithm in `stream` mode with `maxDegree` property:
+[role=query-example]
+--
+[source, cypher]
+----
+CALL gds.triangleCount.stream('myGraph', {
+  maxDegree: 4
+})
+YIELD nodeId, triangleCount as triangles
+RETURN gds.util.asNode(nodeId).name AS name, triangles
+ORDER BY name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | triangles
+| "Alice"   | 0
+| "Chris"   | 0
+| "Karin"   | 0
+| "Mark"    | 0
+| "Michael" | -1
+| "Will"    | 0
+|===
+--
+
+Running the algorithm on the sample graph with `maxDegree: 4` excludes the following node from the computation:
+
+- Michael having degree of 5
+
+As this node is part of all the triangles in the sample graph excluding it results in no triangles.
