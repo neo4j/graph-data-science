@@ -1,0 +1,434 @@
+[[algorithms-local-clustering-coefficient]]
+= Local Clustering Coefficient
+:entity: node
+:result: local clustering coefficient
+
+[abstract]
+--
+This section describes the Local Clustering Coefficient algorithm in the Neo4j Graph Data Science library.
+--
+
+This topic includes:
+
+* <<algorithms-local-clustering-coefficient-intro, Introduction>>
+* <<algorithms-local-clustering-coefficient-syntax, Syntax>>
+** <<algorithms-local-clustering-coefficient-syntax-stream, Stream>>
+** <<algorithms-local-clustering-coefficient-syntax-stats, Stats>>
+** <<algorithms-local-clustering-coefficient-syntax-mutate, Mutate>>
+** <<algorithms-local-clustering-coefficient-syntax-write, Write>>
+* <<algorithms-local-clustering-coefficient-examples, Examples>>
+** <<algorithms-local-clustering-coefficient-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-local-clustering-coefficient-examples-stream, Stream>>
+** <<algorithms-local-clustering-coefficient-examples-stats, Stats>>
+** <<algorithms-local-clustering-coefficient-examples-mutate, Mutate>>
+** <<algorithms-local-clustering-coefficient-examples-write, Write>>
+** <<algorithms-local-clustering-coefficient-examples-pre-computed, Pre-computed counts>>
+
+
+[[algorithms-local-clustering-coefficient-intro]]
+== Introduction
+
+Local Clustering Coefficient algorithm is making use of the <<algorithms-triangle-count, Triangle Count algorithm>> for its computation.
+
+There are two types of clustering coefficient:
+
+* Local clustering coefficient: Property of a node. Indicates the likelihood that the node's neighbours are also connected based on triangle counting.
+
+* Global clustering coefficient: based on triplets of nodes.
+
+NOTE: This algorithm *only* computes the Local Clustering Coefficient.
+
+For more information, see https://en.wikipedia.org/wiki/Clustering_coefficient[Clustering Coefficient].
+
+
+[[algorithms-local-clustering-coefficient-syntax]]
+== Syntax
+
+This section covers the syntax used to execute the Local Clustering Coefficient algorithm in each of its execution modes.
+To learn more about general syntax variants, see <<algorithms-syntax>>.
+
+
+[[algorithms-local-clustering-coefficient-syntax-stream]]
+=== Stream
+
+.Run Local Clustering Coefficient in stream mode on a named graph:
+[source, cypher]
+----
+CALL gds.localClusteringCoefficient.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  localClusteringCoefficient: Double
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::lcc-specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                       | Type      | Description
+| nodeId                     | Integer   | Node ID.
+| localClusteringCoefficient | Double    | The computed local clustering coefficient for the node.
+|===
+
+
+[[algorithms-local-clustering-coefficient-syntax-stats]]
+=== Stats
+
+.Run Local Clustering Coefficient in stream mode on a named graph:
+[source, cypher]
+----
+CALL gds.localClusteringCoefficient.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  averageClusteringCoefficient: Double,
+  nodeCount: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::lcc-specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                         | Type    | Description
+| averageClusteringCoefficient | Double  | The average clustering coefficient.
+| nodeCount                    | Integer | Number of nodes in the graph.
+| createMillis                 | Integer | Milliseconds for creating the graph.
+| computeMillis                | Integer | Milliseconds for running the algorithm.
+| configuration                | Map     | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-local-clustering-coefficient-syntax-mutate]]
+=== Mutate
+
+.Run Local Clustering Coefficient in mutate mode on a named graph:
+[source, cypher]
+----
+CALL gds.localClusteringCoefficient.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  averageClusteringCoefficient: Double,
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::lcc-specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                          | Type    | Description
+| averageClusteringCoefficient  | Double  | The average clustering coefficient.
+| nodeCount                     | Integer | Number of nodes in the graph.
+| nodePropertiesWritten         | Integer | Number of properties added to the in-memory graph.
+| createMillis                  | Integer | Milliseconds for creating the graph.
+| computeMillis                 | Integer | Milliseconds for running the algorithm.
+| mutateMillis                  | Integer | Milliseconds for adding properties to the in-memory graph.
+| configuration                 | Map     | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-local-clustering-coefficient-syntax-write]]
+=== Write
+
+.Run Local Clustering Coefficient in write mode on a named graph:
+[source, cypher]
+----
+CALL gds.localClusteringCoefficient.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  averageClusteringCoefficient: Double,
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::lcc-specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                          | Type    | Description
+| averageClusteringCoefficient  | Double  | The average clustering coefficient.
+| nodeCount                     | Integer | Number of nodes in the graph.
+| nodePropertiesWritten         | Integer | Number of properties written to Neo4j.
+| createMillis                  | Integer | Milliseconds for creating the graph.
+| computeMillis                 | Integer | Milliseconds for running the algorithm.
+| writeMillis                   | Integer | Milliseconds for writing results back to Neo4j.
+| configuration                 | Map     | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-local-clustering-coefficient-syntax-anonymous]]
+=== Anonymous graphs
+
+It is also possible to execute the algorithm on a graph that is projected in conjunction with the algorithm execution.
+In this case, the graph does not have a name, and we call it anonymous.
+For more information, see <<algorithms-syntax>>.
+
+.Run Local Clustering Coefficient in write mode on an anonymous graph:
+[source, cypher]
+----
+CALL gds.localClusteringCoefficient.write(
+  configuration: Map
+)
+YIELD
+  averageClusteringCoefficient: Double,
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+include::lcc-specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, <<algorithms-local-clustering-coefficient-syntax-write, specified above>>.
+
+
+[[algorithms-local-clustering-coefficient-examples]]
+== Examples
+
+image::triangle_count.png[]
+
+.The following will create a sample graph:
+[source, cypher, role=setup-query]
+----
+CREATE (alice:Person {name: 'Alice'}),
+       (michael:Person {name: 'Michael'}),
+       (karin:Person {name: 'Karin'}),
+       (chris:Person {name: 'Chris'}),
+       (will:Person {name: 'Will'}),
+       (mark:Person {name: 'Mark'}),
+       (michael)-[:KNOWS]->(karin),
+       (michael)-[:KNOWS]->(chris),
+       (will)-[:KNOWS]->(michael),
+       (mark)-[:KNOWS]->(michael),
+       (mark)-[:KNOWS]->(will),
+       (alice)-[:KNOWS]->(michael),
+       (will)-[:KNOWS]->(chris),
+       (chris)-[:KNOWS]->(karin)
+----
+
+[NOTE]
+====
+In the examples below we will use named graphs and standard projections as the norm.
+However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+====
+
+.The following statement will create the graph and store it in the graph catalog.
+[source, cypher, role=setup-query]
+----
+CALL gds.graph.create(
+    'myGraph',
+    'Person',
+    {
+        KNOWS: {
+            orientation: 'UNDIRECTED'
+        }
+    }
+)
+----
+
+WARNING: Local Clustering Coefficient algorithm requires the graph to be loaded using `UNDIRECTED` orientation
+
+In the following examples we will demonstrate using the Triangle Count algorithm on this graph (unless explicitly specified otherwise).
+
+
+[[algorithms-local-clustering-coefficient-examples-memory-estimation]]
+=== Memory Estimation
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.triangleCount.localClusteringCoefficient.write.estimate('myGraph', {
+  writeProperty: 'localClusteringCoefficient'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header", cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 16                | 288      | 288      | "288 Bytes"
+|===
+--
+
+
+[[algorithms-local-clustering-coefficient-examples-stream]]
+=== Stream
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.triangleCount.localClusteringCoefficient.stream('myGraph')
+YIELD nodeId, localClusteringCoefficient
+RETURN gds.util.asNode(nodeId).name AS name, localClusteringCoefficient
+ORDER BY localClusteringCoefficient DESC
+----
+
+.Results
+[opts="header", cols="1,1"]
+|===
+| name      | localClusteringCoefficient
+| "Karin"   | 1.0
+| "Mark"    | 1.0
+| "Chris"   | 0.6666666666666666
+| "Will"    | 0.6666666666666666
+| "Michael" | 0.3
+| "Alice"   | 0.0
+|===
+--
+
+[[algorithms-local-clustering-coefficient-examples-stats]]
+=== Stats
+
+.The following will run the algorithm in `stats` mode:
+[role=query-example]
+--
+[source, cypher]
+----
+CALL gds.triangleCount.localClusteringCoefficient.stats('myGraph')
+YIELD averageClusteringCoefficient, nodeCount
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| averageClusteringCoefficient | nodeCount
+| 0.6055555555555555           | 6
+|===
+--
+
+[[algorithms-local-clustering-coefficient-examples-mutate]]
+=== Mutate
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher]
+----
+CALL gds.triangleCount.localClusteringCoefficient.mutate('myGraph', {
+  mutateProperty: 'localClusteringCoefficient'
+})
+YIELD averageClusteringCoefficient, nodeCount
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| averageClusteringCoefficient | nodeCount
+| 0.6055555555555555           | 6
+|===
+--
+
+NOTE: In contrast to `write` mode the result is written to the GDS in-memory graph instead of the Neo4j database.
+
+
+[[algorithms-local-clustering-coefficient-examples-write]]
+=== Write
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher]
+----
+CALL gds.triangleCount.localClusteringCoefficient.write('myGraph', {
+  writeProperty: 'localClusteringCoefficient'
+})
+YIELD averageClusteringCoefficient, nodeCount
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| averageClusteringCoefficient | nodeCount
+| 0.6055555555555555           | 6
+|===
+--
+
+NOTE: The result is written to the Neo4j database.
+
+
+[[algorithms-local-clustering-coefficient-examples-pre-computed]]
+=== Pre-computed Counts
+
+By default Local Clustering Coefficient algorithm executes <<algorithms-triangle-count, Triangle Count>> as part of its computation.
+It is also possible to run the algorithm with node property (`triangleCountProperty`) containing pre-computed triangle counts.
+
+.The following computes the Triangle Counts and stores the result into the in-memory graph:
+[source, cypher, role=setup-query]
+----
+CALL gds.triangleCount.mutate('myGraph', {
+  mutateProperty: 'triangles'
+})
+----
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.triangleCount.localClusteringCoefficient.stream('myGraph', {
+  triangleCountProperty: 'triangles'
+})
+YIELD nodeId, localClusteringCoefficient
+RETURN gds.util.asNode(nodeId).name AS name, localClusteringCoefficient
+ORDER BY localClusteringCoefficient DESC
+----
+
+.Results
+[opts="header", cols="1,1"]
+|===
+| name      | localClusteringCoefficient
+| "Karin"   | 1.0
+| "Mark"    | 1.0
+| "Chris"   | 0.6666666666666666
+| "Will"    | 0.6666666666666666
+| "Michael" | 0.3
+| "Alice"   | 0.0
+|===
+--
