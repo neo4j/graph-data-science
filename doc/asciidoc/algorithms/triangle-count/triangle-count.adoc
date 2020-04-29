@@ -392,7 +392,7 @@ NOTE: The result is written to the Neo4j database.
 [[algorithms-triangle-count-examples-max-degree]]
 === Maximum Degree
 
-Triangle count implementation includes a `maxDegree` property that can be used to exclude nodes from processing if their degree is higher than the configured one.
+Triangle count implementation includes a `maxDegree` configuration parameter that can be used to exclude nodes from processing if their degree is higher than the configured one.
 This can be useful to speed up the computation when there are super nodes in the graph.
 
 NOTE: The nodes excluded from the computation get `triangleCount: -1`
