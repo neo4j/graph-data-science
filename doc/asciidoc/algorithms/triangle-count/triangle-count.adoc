@@ -228,26 +228,166 @@ The results are the same as for running write mode with a named graph, <<algorit
 [[algorithms-triangle-count-examples]]
 == Examples
 
+image::triangle_count.png[]
+
+.The following will create a sample graph:
+[source, cypher, role=setup-query]
+----
+CREATE (alice:Person {name: 'Alice'}),
+       (michael:Person {name: 'Michael'}),
+       (karin:Person {name: 'Karin'}),
+       (chris:Person {name: 'Chris'}),
+       (will:Person {name: 'Will'}),
+       (mark:Person {name: 'Mark'}),
+       (michael)-[:KNOWS]->(karin),
+       (michael)-[:KNOWS]->(chris),
+       (will)-[:KNOWS]->(michael),
+       (mark)-[:KNOWS]->(michael),
+       (mark)-[:KNOWS]->(will),
+       (alice)-[:KNOWS]->(michael),
+       (will)-[:KNOWS]->(chris),
+       (chris)-[:KNOWS]->(karin)
+----
+
+[NOTE]
+====
+In the examples below we will use named graphs and standard projections as the norm.
+However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
+====
+
+.The following statement will create the graph and store it in the graph catalog.
+[source, cypher, role=setup-query]
+----
+CALL gds.graph.create(
+    'myGraph',
+    'Person',
+    {
+        KNOWS: {
+            orientation: 'UNDIRECTED'
+        }
+    }
+)
+----
+
+TIP: Triangle Count algorithm requires the graph to be loaded using `UNDIRECTED` orientation
+
+In the following examples we will demonstrate using the Triangle Count algorithm on this graph (unless explicitly specified otherwise).
+
 
 [[algorithms-triangle-count-examples-memory-estimation]]
 === Memory Estimation
 
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.triangleCount.write.estimate('myGraph', { writeProperty: 'triangleCount' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header", cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 16                | 144      | 144      | "144 Bytes"
+|===
+--
 
 [[algorithms-triangle-count-examples-stream]]
 === Stream
 
+.The following will run the algorithm in `stream` mode:
+[role=query-example]
+--
+[source, cypher]
+----
+CALL gds.triangleCount.stream('myGraph')
+YIELD nodeId, triangleCount as triangles
+RETURN gds.util.asNode(nodeId).name AS name, triangles
+ORDER BY triangles DESC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | triangles
+| "Michael" | 3
+| "Chris"   | 2
+| "Will"    | 2
+| "Karin"   | 1
+| "Mark"    | 1
+| "Alice"   | 0
+|===
+--
 
 [[algorithms-triangle-count-examples-stats]]
 === Stats
 
+.The following will run the algorithm in `stats` mode:
+[role=query-example]
+--
+[source, cypher]
+----
+CALL gds.triangleCount.stats('myGraph')
+YIELD triangleCount, nodeCount
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| triangleCount | nodeCount
+| 3             | 6
+|===
+--
 
 [[algorithms-triangle-count-examples-mutate]]
 === Mutate
 
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher]
+----
+CALL gds.triangleCount.mutate('myGraph', {
+  mutateProperty: 'triangles'
+})
+YIELD triangleCount, nodeCount
+
+----
+.Results
+[opts="header",cols="1,1"]
+|===
+| triangleCount | nodeCount
+| 3             | 6
+|===
+--
+
+NOTE: In contrast to the `write` mode the result is written to the GDS in-memory graph instead of the Neo4j database.
 
 [[algorithms-triangle-count-examples-write]]
 === Write
 
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher]
+----
+CALL gds.triangleCount.write('myGraph', {
+  writeProperty: 'triangles'
+})
+YIELD triangleCount, nodeCount
+
+----
+.Results
+[opts="header",cols="1,1"]
+|===
+| triangleCount | nodeCount
+| 3             | 6
+|===
+--
+
+NOTE: The result is written to the Neo4j database.
 
 [[algorithms-triangle-count-examples-max-degree]]
 === Maximum Degree
