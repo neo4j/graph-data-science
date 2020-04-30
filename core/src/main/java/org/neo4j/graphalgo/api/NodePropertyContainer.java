@@ -22,15 +22,15 @@ package org.neo4j.graphalgo.api;
 import java.util.Set;
 
 /**
- * Getter interface for node properties for huge graphs.
+ * Getter interface for node properties.
  */
 public interface NodePropertyContainer {
 
     /**
-     * Return the property mapping for a property key
+     * Return the property values for a property key
      *
-     * @param propertyKey       the node property key
-     * @return the mapping associated with that key
+     * @param propertyKey the node property key
+     * @return the values associated with that key
      */
     NodeProperties nodeProperties(String propertyKey);
 

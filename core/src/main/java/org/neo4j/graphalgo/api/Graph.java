@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.NodeLabel;
 
 import java.util.Set;
 
-public interface Graph extends NodeMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipProperties, RelationshipAccess, NodePropertyContainer {
+public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties, RelationshipAccess {
 
     NodeMapping nodeMapping();
 
