@@ -134,10 +134,9 @@ function enableTocToggle() {
                 tocToggler.setAttribute('title', state.collapsed.title);
             });
         } else {
-            toc.slideDown(function(){
-                tocToggler.classList.replace(state.collapsed.cssClass, state.expanded.cssClass);
-                tocToggler.setAttribute('title', state.expanded.title);
-            });
+            toc.slideDown();
+            tocToggler.classList.replace(state.collapsed.cssClass, state.expanded.cssClass);
+            tocToggler.setAttribute('title', state.expanded.title);
         }
     });
 }
