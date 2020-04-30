@@ -102,4 +102,42 @@ function highlightLibraryHeader() {
             // console.log('href:', href, 'thisUrl:', thisUrl, 'thisName:', thisName);
         }
     );
+
+    enableTocToggle();
 }
+
+
+function enableTocToggle() {
+    var state = {
+        expanded: {
+            cssClass: 'fa-minus-square-o',
+            title: 'Collapse table of contents'
+        },
+        collapsed: {
+            cssClass: 'fa-plus-square-o',
+            title: 'Expand table of contents'
+        },
+    };
+    var toc = $('nav.toc');
+    var tocTitle = document.querySelector('div.toc-title');
+    var tocToggler = document.createElement('i');
+    tocToggler.classList.add('fa', state.collapsed.cssClass);
+    tocToggler.setAttribute('title', state.collapsed.title);
+    tocToggler.setAttribute('aria-hidden', 'true');
+    tocTitle.appendChild(tocToggler);
+    var isExpanded = toc.offsetParent !== null;
+    tocTitle.addEventListener("click", function() {
+        isExpanded = !isExpanded;
+        if (isExpanded) {
+            toc.slideUp(function() {
+                tocToggler.classList.replace(state.expanded.cssClass, state.collapsed.cssClass);
+                tocToggler.setAttribute('title', state.collapsed.title);
+            });
+        } else {
+            toc.slideDown();
+            tocToggler.classList.replace(state.collapsed.cssClass, state.expanded.cssClass);
+            tocToggler.setAttribute('title', state.expanded.title);
+        }
+    });
+}
+
