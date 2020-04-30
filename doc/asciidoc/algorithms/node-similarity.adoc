@@ -331,7 +331,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher, role=setup-query]
+[source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 ----
@@ -339,7 +339,7 @@ CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 Similarly, loading a graph with Cypher also requires to load the whole pool of nodes of the bipartite graph as well a the relationships that link them.
 
 .The following statement will create a graph with Cypher and store it in the catalog.
-[source, cypher, role=setup-query]
+[source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create.cypher(
     'myCypherGraph',
@@ -416,6 +416,28 @@ YIELD nodesCompared, relationshipsWritten
 --
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+=== Mutate
+
+[role=query-example, testName=123]
+--
+.The following will run the algorithm, and write back results:
+[source, cypher]
+----
+CALL gds.nodeSimilarity.mutate('myGraph', {
+    mutateRelationshipType: 'SIMILAR',
+    mutateProperty: 'score'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 4             | 10
+|===
+--
 
 
 [[algorithms-node-similarity-examples-limits]]

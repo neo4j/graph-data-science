@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityWriteProc;
@@ -35,6 +36,7 @@ class NodeSimilarityDocTest extends DocTestBase {
             NodeSimilarityStreamProc.class,
             NodeSimilarityWriteProc.class,
             NodeSimilarityStatsProc.class,
+            NodeSimilarityMutateProc.class,
             GraphCreateProc.class
         );
     }

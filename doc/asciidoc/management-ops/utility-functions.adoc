@@ -201,13 +201,13 @@ If the property value is missing for the given node, `null` is returned.
 === Examples
 
 .Create a graph in the catalog:
-[source, cypher, role=setup-query]
+[source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create('my-graph', 'User', 'LINK');
 ----
 
 .Run an algorithm that updates the named-graph:
-[source, cypher, role=setup-query]
+[source, cypher, role=graph-create-query]
 ----
 CALL gds.pageRank.mutate('my-graph', { mutateProperty: 'score' })
 ----

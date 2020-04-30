@@ -86,7 +86,7 @@ CREATE
 ----
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher, role=setup-query]
+[source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create('myGraph', 'Node', 'REL', { relationshipProperties: 'cost' })
 ----

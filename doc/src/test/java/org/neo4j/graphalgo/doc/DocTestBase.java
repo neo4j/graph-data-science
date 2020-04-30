@@ -65,7 +65,8 @@ abstract class DocTestBase extends BaseProcTest {
         return new QueryConsumingTreeProcessor(
             defaultSetupQueryConsumer(),
             defaultQueryExampleConsumer(),
-            defaultQueryExampleNoResultConsumer()
+            defaultQueryExampleNoResultConsumer(),
+            GraphStoreCatalog::removeAllLoadedGraphs
         );
     }
 
@@ -162,7 +163,7 @@ abstract class DocTestBase extends BaseProcTest {
                         IntStream.range(0, expectedColumns.size()).forEach(i -> {
                             String expected = cells.get(i).getText();
                             String actual = valueToString(actualRow.get(expectedColumns.get(i)));
-                            assertEquals(expected, actual);
+                            assertEquals(expected, actual, query);
                         });
                         return true;
                     });

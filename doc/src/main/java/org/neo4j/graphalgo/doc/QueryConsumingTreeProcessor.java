@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -48,44 +49,52 @@ import java.util.stream.IntStream;
 public class QueryConsumingTreeProcessor extends Treeprocessor {
 
     private static final String SETUP_QUERY_ROLE = "setup-query";
+    private static final String GRAPH_CREATE_QUERY_ROLE = "graph-create-query";
     private static final String QUERY_EXAMPLE_ROLE = "query-example";
     private static final String QUERY_EXAMPLE_NO_RESULT_ROLE = "query-example-no-result";
 
     private final SetupQueryConsumer setupQueryConsumer;
     private final QueryExampleConsumer queryExampleConsumer;
     private final QueryExampleNoResultConsumer queryExampleNoResultConsumer;
+    private final List<String> graphCreateQueries;
+    private final Runnable cleanup;
 
     public QueryConsumingTreeProcessor(
         SetupQueryConsumer setupQueryConsumer,
         QueryExampleConsumer queryExampleConsumer,
-        QueryExampleNoResultConsumer queryExampleNoResultConsumer
+        QueryExampleNoResultConsumer queryExampleNoResultConsumer,
+        Runnable cleanup
     ) {
         this.setupQueryConsumer = setupQueryConsumer;
         this.queryExampleConsumer = queryExampleConsumer;
         this.queryExampleNoResultConsumer = queryExampleNoResultConsumer;
+        this.cleanup = cleanup;
+
+        graphCreateQueries = new ArrayList<>();
     }
 
     @Override
     public Document process(Document document) {
         consumeSetupQueries(document);
+        collectSetupQueries(document, graphCreateQueries, GRAPH_CREATE_QUERY_ROLE);
         consumeQueryExamples(document);
         return document;
     }
 
     private void consumeSetupQueries(Document document) {
         List<String> setupQueries = new ArrayList<>();
-        collectSetupQueries(document, setupQueries);
+        collectSetupQueries(document, setupQueries, SETUP_QUERY_ROLE);
         setupQueryConsumer.consume(setupQueries);
     }
 
-    private void collectSetupQueries(StructuralNode node, List<String> setupQueries) {
+    private void collectSetupQueries(StructuralNode node, List<String> setupQueries, String setupQueryType) {
         node.getBlocks().stream()
-            .filter(block -> block instanceof StructuralNode)
+            .filter(Objects::nonNull)
             .forEach(it -> {
-                if (it.getRoles().contains(SETUP_QUERY_ROLE)) {
+                if (it.getRoles().contains(setupQueryType)) {
                     setupQueries.add(undoReplacements(it.getContent().toString()));
                 } else {
-                    collectSetupQueries(it, setupQueries);
+                    collectSetupQueries(it, setupQueries, setupQueryType);
                 }
             });
     }
@@ -94,13 +103,19 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
         node.getBlocks()
             .forEach(it -> {
                 if (it.getRoles().contains(QUERY_EXAMPLE_ROLE)) {
-                    processCypherExample(it);
+                    processExample(() -> processCypherExample(it));
                 } else if (it.getRoles().contains(QUERY_EXAMPLE_NO_RESULT_ROLE)) {
-                    processCypherNoResultExample(it);
+                    processExample(() -> processCypherNoResultExample(it));
                 } else {
                     consumeQueryExamples(it);
                 }
             });
+    }
+
+    private void processExample(Runnable example) {
+        setupQueryConsumer.consume(graphCreateQueries);
+        example.run();
+        cleanup.run();
     }
 
     private void processCypherExample(StructuralNode cypherExample) {
