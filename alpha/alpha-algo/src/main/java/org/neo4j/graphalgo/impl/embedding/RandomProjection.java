@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,14 +43,14 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     private final int sparsity;
     private final int iterations;
     private final int seed;
-    private final Optional<float[]> iterationWeights;
+    private final List<Double> iterationWeights;
 
     public RandomProjection(
         Graph graph,
         int embeddingDimension,
         int sparsity,
         int iterations,
-        Optional<float[]> iterationWeights,
+        List<Double> iterationWeights,
         float normalizationStrength,
         boolean normalizeL2,
         int seed,
@@ -70,7 +70,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         this.normalizeL2 = normalizeL2;
         this.seed = seed;
 
-        int embeddingSize = !iterationWeights.isPresent() ? embeddingDimension * iterations : embeddingDimension;
+        int embeddingSize = iterationWeights.isEmpty() ? embeddingDimension * iterations : embeddingDimension;
         this.embeddings.setAll((i) -> new float[embeddingSize]);
     }
 
@@ -95,16 +95,22 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
                 multiplyArrayValues(currentEmbedding, degreeScale);
             }
 
-            Optional<Float> maybeIterationWeight = iterationWeights.isPresent()
-                ? Optional.of(iterationWeights.get()[i])
-                : Optional.empty();
-
             int offset = embeddingDimension * i;
+            double weight = iterationWeights.isEmpty()
+                ? Double.NaN
+                : iterationWeights.get(i);
             LongStream.range(0, graph.nodeCount()).parallel().forEach(nodeId -> {
                 float[] embedding = embeddings.get(nodeId);
 
                 float[] newEmbedding = localCurrent.get(nodeId);
-                updateOrAppendNewEmbeddings(maybeIterationWeight, offset, embedding, newEmbedding);
+                if (normalizeL2) {
+                    l2Normalize(newEmbedding);
+                }
+                if (iterationWeights.isEmpty()) {
+                    System.arraycopy(newEmbedding, 0, embedding, offset, embeddingDimension);
+                } else {
+                    updateEmbeddings((float) weight, embedding, newEmbedding);
+                }
             });
         }
 
@@ -164,21 +170,9 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         }
     }
 
-    private void updateOrAppendNewEmbeddings(
-        Optional<Float> maybeIterationWeight,
-        int offset,
-        float[] embedding,
-        float[] newEmbedding
-    ) {
-        if (normalizeL2) {
-            l2Normalize(newEmbedding);
-        }
-        if (maybeIterationWeight.isPresent()) {
-            multiplyArrayValues(newEmbedding, maybeIterationWeight.get());
-            addArrayValues(embedding, newEmbedding);
-        } else {
-            System.arraycopy(newEmbedding, 0, embedding, offset, embeddingDimension);
-        }
+    private void updateEmbeddings(float weight, float[] embedding, float[] newEmbedding) {
+        multiplyArrayValues(newEmbedding, weight);
+        addArrayValues(embedding, newEmbedding);
     }
 
     private void addArrayValues(float[] lhs, float[] rhs) {

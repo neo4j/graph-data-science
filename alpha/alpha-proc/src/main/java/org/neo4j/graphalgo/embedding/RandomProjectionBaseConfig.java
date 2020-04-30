@@ -23,7 +23,8 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 
 public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsConfig
 {
@@ -36,8 +37,8 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
     }
 
     @Value.Default
-    default Optional<float[]> iterationWeights() {
-        return Optional.empty();
+    default List<Double> iterationWeights() {
+        return Collections.emptyList();
     }
 
     @Value.Default
@@ -57,9 +58,13 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
 
     @Value.Check
     default void validate() {
-        if (iterationWeights().isPresent()) {
-            if (iterationWeights().get().length == maxIterations()) {
-                throw new IllegalArgumentException("Parameter `iterationWeights` should have `maxIterations` entries.");
+        if (!iterationWeights().isEmpty()) {
+            if (iterationWeights().size() != maxIterations()) {
+                throw new IllegalArgumentException(String.format(
+                    "Parameter `iterationWeights` should have `maxIterations` entries, but was %s, %s.",
+                    iterationWeights().size(),
+                    maxIterations()
+                ));
             }
         }
     }
