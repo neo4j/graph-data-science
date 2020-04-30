@@ -20,20 +20,18 @@
 package org.neo4j.graphalgo.api;
 
 /**
- * bidirectional mapping between long neo4j-nodeId and
- * temporary int graph-nodeId.
+ * Bi-directional mapping between two id spaces.
  */
 public interface IdMapping {
 
     /**
-     * defines the lower bound of mapped node ids
+     * Defines the lower bound of mapped ids
      * TODO: function?
      */
     long START_NODE_ID = 0;
 
     /**
-     * Map neo4j nodeId to inner nodeId
-     * TODO rename?
+     * Map original nodeId to inner nodeId
      */
     long toMappedNodeId(long nodeId);
 
@@ -43,12 +41,12 @@ public interface IdMapping {
     long toOriginalNodeId(long nodeId);
 
     /**
-     * Returns true iff the nodeId is mapped, otherwise false
+     * Returns true iff the nodeId is mapped, otherwise false.
      */
     boolean contains(long nodeId);
 
     /**
-     * count of nodes
+     * Number of mapped nodeIds.
      */
     long nodeCount();
 }

@@ -138,7 +138,7 @@ public class NodeFilteredGraph extends FilterGraph {
 
     @Override
     public Set<NodeLabel> nodeLabels(long nodeId) {
-        return super.nodeLabels(filteredIdMap.toOriginalNodeId(nodeId));
+        return super.nodeMapping().nodeLabels(filteredIdMap.toOriginalNodeId(nodeId));
     }
 
     @Override

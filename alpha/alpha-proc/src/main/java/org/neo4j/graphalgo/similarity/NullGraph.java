@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.similarity;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.LabeledIdMapping;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -88,9 +88,9 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public LabeledIdMapping idMapping() {
+    public NodeMapping nodeMapping() {
         throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.idMapping is not implemented.");
+            "org.neo4j.graphalgo.similarity.NullGraph.nodeMapping is not implemented.");
     }
 
     @Override

@@ -25,18 +25,19 @@ import java.util.Map;
 
 public class UnionNodeProperties implements NodeProperties {
 
-    private final Map<NodeLabel, NodeProperties> labelToNodePropertiesMap;
-    private final NodeLabelContainer labeledIdMapping;
+    private final NodeMapping nodeMapping;
 
-    public UnionNodeProperties(Map<NodeLabel, NodeProperties> labelToNodePropertiesMap, NodeLabelContainer nodeLabelContainer) {
+    private final Map<NodeLabel, NodeProperties> labelToNodePropertiesMap;
+
+    public UnionNodeProperties(NodeMapping nodeMapping, Map<NodeLabel, NodeProperties> labelToNodePropertiesMap) {
+        this.nodeMapping = nodeMapping;
         this.labelToNodePropertiesMap = labelToNodePropertiesMap;
-        this.labeledIdMapping = nodeLabelContainer;
     }
 
     @Override
     public double nodeProperty(long nodeId) {
-        for (NodeLabel label : labeledIdMapping.availableNodeLabels()) {
-            if (labeledIdMapping.hasLabel(nodeId, label)) {
+        for (NodeLabel label : nodeMapping.availableNodeLabels()) {
+            if (nodeMapping.hasLabel(nodeId, label)) {
                 NodeProperties nodeProperties = labelToNodePropertiesMap.get(label);
                 if (nodeProperties != null) {
                     // This returns the property value for the first label that has the property.

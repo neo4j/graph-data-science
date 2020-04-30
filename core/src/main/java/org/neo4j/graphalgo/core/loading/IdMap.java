@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
-import org.neo4j.graphalgo.api.LabeledIdMapping;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -45,7 +45,7 @@ import java.util.function.LongPredicate;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public class IdMap implements LabeledIdMapping, NodeIterator, BatchNodeIterable {
+public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
         .builder(IdMap.class)

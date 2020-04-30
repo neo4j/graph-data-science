@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.LabeledIdMapping;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
@@ -179,7 +179,7 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public LabeledIdMapping nodes() {
+    public NodeMapping nodes() {
         return this.nodes;
     }
 
@@ -457,7 +457,7 @@ public final class CSRGraphStore implements GraphStore {
                 propertyKey,
                 unionType,
                 unionOrigin,
-                new UnionNodeProperties(unionValues, nodes)
+                new UnionNodeProperties(nodes, unionValues)
             );
         } else {
             return nodeProperties.get(nodes.availableNodeLabels().iterator().next()).get(propertyKey);
@@ -567,7 +567,7 @@ public final class CSRGraphStore implements GraphStore {
             .stream()
             .collect(Collectors.toMap(
                 Entry::getKey,
-                entry -> new UnionNodeProperties(entry.getValue(), nodes)
+                entry -> new UnionNodeProperties(nodes, entry.getValue())
             ));
     }
 

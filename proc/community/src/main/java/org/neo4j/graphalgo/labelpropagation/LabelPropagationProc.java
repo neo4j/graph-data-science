@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;

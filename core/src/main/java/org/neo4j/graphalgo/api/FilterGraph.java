@@ -71,8 +71,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public LabeledIdMapping idMapping() {
-        return graph.idMapping();
+    public NodeMapping nodeMapping() {
+        return graph.nodeMapping();
     }
 
     @Override

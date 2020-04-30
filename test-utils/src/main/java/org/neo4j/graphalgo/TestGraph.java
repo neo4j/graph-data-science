@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.LabeledIdMapping;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -84,7 +84,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public LabeledIdMapping idMapping() {
+    public NodeMapping nodeMapping() {
         return this;
     }
 

@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.graphalgo.core.utils.paged.PageFiller;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;

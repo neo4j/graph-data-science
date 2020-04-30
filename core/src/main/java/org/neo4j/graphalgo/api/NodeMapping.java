@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.NodeLabel;
 
 import java.util.Set;
 
-public interface NodeLabelContainer {
+public interface NodeMapping extends IdMapping {
 
     Set<NodeLabel> nodeLabels(long nodeId);
 
@@ -36,4 +36,5 @@ public interface NodeLabelContainer {
     default boolean containsOnlyAllNodesLabel() {
         return availableNodeLabels().size() == 1 && availableNodeLabels().contains(NodeLabel.ALL_NODES);
     }
+
 }

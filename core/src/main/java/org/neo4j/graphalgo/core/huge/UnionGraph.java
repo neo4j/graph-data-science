@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.LabeledIdMapping;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -59,8 +59,8 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public LabeledIdMapping idMapping() {
-        return first.idMapping();
+    public NodeMapping nodeMapping() {
+        return first.nodeMapping();
     }
 
     @Override

@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.LabeledIdMapping;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -160,7 +160,7 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public LabeledIdMapping idMapping() {
+    public NodeMapping nodeMapping() {
         return idMapping;
     }
 

@@ -86,8 +86,8 @@ class SimilarityGraphBuilder {
         this.tracker = tracker;
         this.baseGraph = baseGraph;
 
-        if (baseGraph.idMapping() instanceof IdMap) {
-            this.baseIdMap = (IdMap) baseGraph.idMapping();
+        if (baseGraph.nodeMapping() instanceof IdMap) {
+            this.baseIdMap = (IdMap) baseGraph.nodeMapping();
         } else {
             throw new IllegalArgumentException("Base graph must contain an IdMap.");
         }

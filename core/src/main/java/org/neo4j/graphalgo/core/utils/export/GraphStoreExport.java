@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.LabeledIdMapping;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.Settings;
@@ -165,7 +165,7 @@ public class GraphStoreExport {
 
         final HugeIntArray labelCounts;
 
-        final LabeledIdMapping nodeLabels;
+        final NodeMapping nodeLabels;
 
         final Map<String, Map<String, NodeProperties>> nodeProperties;
 
@@ -174,7 +174,7 @@ public class GraphStoreExport {
         NodeStore(
             long nodeCount,
             HugeIntArray labelCounts,
-            LabeledIdMapping nodeLabels,
+            NodeMapping nodeLabels,
             Map<String, Map<String, NodeProperties>> nodeProperties
         ) {
             this.nodeCount = nodeCount;
