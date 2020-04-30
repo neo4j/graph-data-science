@@ -108,6 +108,7 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.kShortestPaths.stream",
         "gds.alpha.ml.ann.write",
         "gds.alpha.ml.ann.stream",
+        "gds.alpha.randomProjection.stream",
         "gds.alpha.shortestPath.astar.stream"
     ));
 

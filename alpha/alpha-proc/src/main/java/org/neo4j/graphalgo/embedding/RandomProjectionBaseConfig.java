@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.config.IterationsConfig;
 import java.util.Collections;
 import java.util.List;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsConfig
 {
 
@@ -60,7 +62,7 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
     default void validate() {
         if (!iterationWeights().isEmpty()) {
             if (iterationWeights().size() != maxIterations()) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(formatWithLocale(
                     "Parameter `iterationWeights` should have `maxIterations` entries, but was %s, %s.",
                     iterationWeights().size(),
                     maxIterations()
