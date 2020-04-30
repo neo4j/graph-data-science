@@ -244,21 +244,22 @@ image::triangle_count.png[]
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
 ----
-CREATE (alice:Person {name: 'Alice'}),
-       (michael:Person {name: 'Michael'}),
-       (karin:Person {name: 'Karin'}),
-       (chris:Person {name: 'Chris'}),
-       (will:Person {name: 'Will'}),
-       (mark:Person {name: 'Mark'}),
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (michael:Person {name: 'Michael'}),
+  (karin:Person {name: 'Karin'}),
+  (chris:Person {name: 'Chris'}),
+  (will:Person {name: 'Will'}),
+  (mark:Person {name: 'Mark'}),
 
-       (michael)-[:KNOWS]->(karin),
-       (michael)-[:KNOWS]->(chris),
-       (will)-[:KNOWS]->(michael),
-       (mark)-[:KNOWS]->(michael),
-       (mark)-[:KNOWS]->(will),
-       (alice)-[:KNOWS]->(michael),
-       (will)-[:KNOWS]->(chris),
-       (chris)-[:KNOWS]->(karin)
+  (michael)-[:KNOWS]->(karin),
+  (michael)-[:KNOWS]->(chris),
+  (will)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(will),
+  (alice)-[:KNOWS]->(michael),
+  (will)-[:KNOWS]->(chris),
+  (chris)-[:KNOWS]->(karin)
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
@@ -276,13 +277,13 @@ However, anonymous graphs and/or <<cypher-projection, Cypher projections>> could
 [source, cypher, role=setup-query]
 ----
 CALL gds.graph.create(
-    'myGraph',
-    'Person',
-    {
-        KNOWS: {
-            orientation: 'UNDIRECTED'
-        }
+  'myGraph',
+  'Person',
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
     }
+  }
 )
 ----
 
@@ -380,8 +381,8 @@ CALL gds.triangleCount.mutate('myGraph', {
   mutateProperty: 'triangles'
 })
 YIELD triangleCount, nodeCount
-
 ----
+
 .Results
 [opts="header",cols="1,1"]
 |===
@@ -404,8 +405,8 @@ CALL gds.triangleCount.write('myGraph', {
   writeProperty: 'triangles'
 })
 YIELD triangleCount, nodeCount
-
 ----
+
 .Results
 [opts="header",cols="1,1"]
 |===
