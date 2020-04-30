@@ -26,6 +26,8 @@ include::label-propagation.adoc[leveloffset=+1]
 
 include::wcc.adoc[leveloffset=+1]
 
+include::triangle-count/triangle-count.adoc[leveloffset=+1]
+
 include::beta/k1coloring.adoc[leveloffset=+1]
 
 include::beta/modularity-optimization.adoc[leveloffset=+1]

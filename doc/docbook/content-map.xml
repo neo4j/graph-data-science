@@ -77,6 +77,9 @@
                 <d:tocentry linkend="algorithms-wcc">
                     <?dbhtml filename="algorithms/wcc/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-triangle-count">
+                    <?dbhtml filename="algorithms/triangle-count/index.html"?>
+                </d:tocentry>
 
                 <d:tocentry linkend="algorithms-k1coloring">
                     <?dbhtml filename="algorithms/k1coloring/index.html"?>
