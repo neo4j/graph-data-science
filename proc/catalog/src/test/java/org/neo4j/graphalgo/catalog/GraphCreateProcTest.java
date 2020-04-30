@@ -717,25 +717,6 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldFailOnTooBigGraphCypher() {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            applyOnProcedure(proc -> {
-                GraphCreateConfig config = GraphCreateFromCypherConfig.fromProcedureConfig(
-                    "",
-                    CypherMapWrapper.create(MapUtil.map(
-                        NODE_QUERY_KEY, "MATCH (n) RETURN n",
-                        RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r"))
-                );
-                proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c), () -> 42);
-            });
-        });
-
-        String message = ExceptionUtil.rootCause(exception).getMessage();
-        assertTrue(message.matches(
-            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
-    }
-
-    @Test
     void shouldNotFailOnTooBigGraphIfInSudoModeCypher() {
         applyOnProcedure(proc -> {
             GraphCreateConfig config = GraphCreateFromCypherConfig.fromProcedureConfig(
