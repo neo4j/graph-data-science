@@ -85,10 +85,6 @@ body > section, div.book, #search-results {
   max-width: 940px;
 }
 
-body > section, div.book, #search-results {
-  padding-top: 120px;
-  padding-bottom: 4.2em;
-}
 /*
  * END section and in general the main content of the page
  */
@@ -411,6 +407,16 @@ span#nav-current {
   display: none;
 }
 
+nav.toc {
+  display: none;
+}
+div.toc-title i.fa {
+  padding-left: 7px;
+}
+div.toc-title i.fa::before {
+  font-size: 90%;
+}
+
 @media only screen and (min-width: 320px) {
 
   header {
@@ -446,6 +452,11 @@ span#nav-current {
   div.searchbox { max-width: 210px; margin-left: 0; }
   td.gsc-search-button > input.gsc-search-button, #search-form-button { min-width: 27px; }
   td.gsc-input > input, #search-form > input { line-height: 22px; }
+
+  body > section, div.book, #search-results {
+    padding-top: 120px;
+    padding-bottom: 4.2em;
+  }
 
   #header-nav {
     position: absolute;
@@ -490,6 +501,10 @@ span#nav-current {
     overflow: auto;
   }
 
+  nav.toc {
+    display: block;
+  }
+
   div.toc {
     padding-bottom: 70px;
   }
@@ -500,6 +515,9 @@ span#nav-current {
     font-size: 1em;
   }
 
+  div.toc-title i.fa {
+    display: none;
+  }
 
   div.toc > nav.toc > ul {
     font-size: 0.80em;
