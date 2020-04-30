@@ -91,10 +91,10 @@ ext {
     docsArtifactsName = 'neo4j-graph-data-science-manual'
 }
 
-static def validateOnStdErr(Task task) {
+static def validateOnStdErr(Task task, String pattern = ["aZ"]) {
     def errors = new ArrayList<String>()
     def listener = {
-        if (it.find("[aZ]")) {
+        if (it.find(pattern)) {
             errors.add(it.toString())
         }
     } as StandardOutputListener
@@ -104,7 +104,10 @@ static def validateOnStdErr(Task task) {
     task.doLast {
         task.logging.removeStandardErrorListener(listener)
         if (!errors.isEmpty()) {
-            throw new GradleException("Encountered ASCIIDOC errors: \n${errors.join("\n")}")
+            throw new GradleException(
+                    "Encountered errors when building manual: " +
+                            "\n${errors.join("\n")}"
+            )
         }
     }
 }
@@ -285,8 +288,7 @@ html {
         }
     }
 
-    // FIXME: disabling the validation because it fails for INFO messages `Writing *.html files`
-//    validateOnStdErr(it)
+    validateOnStdErr(it, "Error:")
 }
 
 task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
