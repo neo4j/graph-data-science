@@ -148,7 +148,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
             RelationshipImporter importer = RelationshipImporter.of(nodes.idMap(), executor, tracker);
             importer.consume(topKConsumers);
-            Graph graph = importer.buildGraphStore(nodes.idMap(), tracker).getUnion();
+            Graph graph = importer.buildGraphStore(nodes.idMap(), config.concurrency(), tracker).getUnion();
 
             RelationshipImporter oldImporter = RelationshipImporter.of(nodes.idMap(), executor, tracker);
             RelationshipImporter newImporter = RelationshipImporter.of(nodes.idMap(), executor, tracker);
@@ -164,8 +164,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             );
             ParallelUtil.runWithConcurrency(1, setupTasks, executor);
 
-            GraphStore oldGraphStore = oldImporter.buildGraphStore(nodes.idMap(), tracker);
-            GraphStore newGraphStore = newImporter.buildGraphStore(nodes.idMap(), tracker);
+            GraphStore oldGraphStore = oldImporter.buildGraphStore(nodes.idMap(), config.concurrency(), tracker);
+            GraphStore newGraphStore = newImporter.buildGraphStore(nodes.idMap(), config.concurrency(), tracker);
 
             Collection<NeighborhoodTask> computeTasks = computeTasks(
                 sampleSize,
@@ -556,7 +556,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             inImporter().addFromInternal(target, source);
         }
 
-        default GraphStore buildGraphStore(IdMap idMap, AllocationTracker tracker) {
+        default GraphStore buildGraphStore(IdMap idMap, int concurrency, AllocationTracker tracker) {
             HugeGraph.Relationships outRelationships = outImporter().build();
             HugeGraph.Relationships inRelationships = inImporter().build();
 
@@ -569,6 +569,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 Collections.emptyMap(),
                 topology,
                 Collections.emptyMap(),
+                concurrency,
                 tracker
             );
         }

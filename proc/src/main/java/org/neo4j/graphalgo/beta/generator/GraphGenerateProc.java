@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.generator;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 
 import java.util.Locale;
 import java.util.Map;
@@ -95,10 +95,18 @@ public final class GraphGenerateProc extends BaseProc {
 
             HugeGraph graph = generator.generate();
 
-            GraphStore graphStore = CSRGraphStore.of(graph, DUMMY_RELATIONSHIP_NAME, Optional.of(generator
+            Optional<String> relationshipProperty = Optional.of(generator
                 .getMaybePropertyProducer()
                 .map(RelationshipPropertyProducer::getPropertyName)
-                .orElse("PROPERTY")), AllocationTracker.EMPTY);
+                .orElse("PROPERTY"));
+
+            GraphStore graphStore = CSRGraphStore.of(
+                graph,
+                DUMMY_RELATIONSHIP_NAME,
+                relationshipProperty,
+                config.readConcurrency(),
+                AllocationTracker.EMPTY
+            );
 
             stats.nodes = graphStore.nodeCount();
             stats.relationships = graphStore.relationshipCount();

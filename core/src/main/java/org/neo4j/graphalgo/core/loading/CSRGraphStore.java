@@ -44,7 +44,6 @@ import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -67,6 +66,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class CSRGraphStore implements GraphStore {
 
+    private final int concurrency;
+
     private final IdMap nodes;
 
     private final Map<NodeLabel, NodePropertyStore> nodeProperties;
@@ -86,6 +87,7 @@ public final class CSRGraphStore implements GraphStore {
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
         Map<RelationshipType, HugeGraph.TopologyCSR> relationships,
         Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
+        int concurrency,
         AllocationTracker tracker
     ) {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
@@ -113,6 +115,7 @@ public final class CSRGraphStore implements GraphStore {
             nodePropertyStores,
             relationships,
             relationshipPropertyStores,
+            concurrency,
             tracker
         );
     }
@@ -121,6 +124,7 @@ public final class CSRGraphStore implements GraphStore {
         HugeGraph graph,
         String relationshipType,
         Optional<String> relationshipProperty,
+        int concurrency,
         AllocationTracker tracker
     ) {
         HugeGraph.Relationships relationships = graph.relationships();
@@ -144,7 +148,7 @@ public final class CSRGraphStore implements GraphStore {
             );
         }
 
-        return CSRGraphStore.of(graph.idMap(), nodeProperties, topology, relationshipProperties, tracker);
+        return CSRGraphStore.of(graph.idMap(), nodeProperties, topology, relationshipProperties, concurrency, tracker);
     }
 
     private CSRGraphStore(
@@ -152,12 +156,14 @@ public final class CSRGraphStore implements GraphStore {
         Map<NodeLabel, NodePropertyStore> nodeProperties,
         Map<RelationshipType, HugeGraph.TopologyCSR> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
+        int concurrency,
         AllocationTracker tracker
     ) {
         this.nodes = nodes;
         this.nodeProperties = nodeProperties;
         this.relationships = relationships;
         this.relationshipProperties = relationshipProperties;
+        this.concurrency = concurrency;
         this.createdGraphs = new HashSet<>();
         this.modificationTime = TimeUtil.now();
         this.tracker = tracker;
@@ -379,30 +385,13 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public Graph getGraph(RelationshipType... relationshipTypes) {
-        return getGraph(nodeLabels(), Arrays.asList(relationshipTypes), Optional.empty(), 1);
-    }
-
-    @Override
-    public Graph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty) {
-        return getGraph(nodeLabels(), singletonList(relationshipType), relationshipProperty, 1);
-    }
-
-    @Override
-    public Graph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
-        validateInput(relationshipTypes, maybeRelationshipProperty);
-        return createGraph(nodeLabels(), relationshipTypes, maybeRelationshipProperty, 1);
-    }
-
-    @Override
     public Graph getGraph(
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
-        Optional<String> maybeRelationshipProperty,
-        int concurrency
+        Optional<String> maybeRelationshipProperty
     ) {
         validateInput(relationshipTypes, maybeRelationshipProperty);
-        return createGraph(nodeLabels, relationshipTypes, maybeRelationshipProperty, concurrency);
+        return createGraph(nodeLabels, relationshipTypes, maybeRelationshipProperty);
     }
 
     @Override
@@ -500,14 +489,13 @@ public final class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
-        return createGraph(nodeLabels, singletonList(relationshipType), maybeRelationshipProperty, 1);
+        return createGraph(nodeLabels, singletonList(relationshipType), maybeRelationshipProperty);
     }
 
     private IdMapGraph createGraph(
         Collection<NodeLabel> filteredLabels,
         Collection<RelationshipType> relationshipTypes,
-        Optional<String> maybeRelationshipProperty,
-        int concurrency
+        Optional<String> maybeRelationshipProperty
     ) {
         boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
 
@@ -629,11 +617,10 @@ public final class CSRGraphStore implements GraphStore {
     private NodeSchema nodeSchema() {
         NodeSchema.Builder nodePropsBuilder = NodeSchema.builder();
 
-        nodeProperties.forEach((label, propertyStore) -> {
+        nodeProperties.forEach((label, propertyStore) ->
             propertyStore.nodeProperties().forEach((propertyName, nodeProperty) -> {
                 nodePropsBuilder.addPropertyAndTypeForLabel(label, propertyName, nodeProperty.type());
-            });
-        });
+            }));
 
         for (NodeLabel nodeLabel : nodeLabels()) {
             nodePropsBuilder.addEmptyMapForLabelWithoutProperties(nodeLabel);

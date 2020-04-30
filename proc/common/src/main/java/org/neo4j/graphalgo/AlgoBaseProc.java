@@ -158,8 +158,7 @@ public abstract class AlgoBaseProc<
                 Graph filteredGraph = graphStore.getGraph(
                     config.nodeLabelIdentifiers(graphStore),
                     config.relationshipTypeIdentifiers(graphStore),
-                    Optional.empty(),
-                    config.concurrency()
+                    Optional.empty()
                 );
                 long relCount = filteredGraph.relationshipCount();
 
@@ -220,7 +219,7 @@ public abstract class AlgoBaseProc<
         Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
         Collection<RelationshipType> relationshipTypes = config.relationshipTypeIdentifiers(graphStore);
 
-        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty, config.concurrency());
+        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
     }
 
     private GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {

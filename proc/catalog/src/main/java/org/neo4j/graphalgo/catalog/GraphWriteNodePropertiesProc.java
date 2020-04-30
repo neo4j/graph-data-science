@@ -93,8 +93,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
             Graph subGraph = graphStore.getGraph(
                 Collections.singletonList(nodeLabel),
                 graphStore.relationshipTypes(),
-                Optional.empty(),
-                config.writeConcurrency()
+                Optional.empty()
             );
 
             NodePropertyExporter exporter = NodePropertyExporter

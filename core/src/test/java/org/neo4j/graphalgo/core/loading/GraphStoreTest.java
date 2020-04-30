@@ -116,7 +116,7 @@ class GraphStoreTest extends BaseTest {
 
         GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
 
-        Graph filteredGraph = graphStore.getGraph(labels, graphStore.relationshipTypes(), Optional.empty(), 1);
+        Graph filteredGraph = graphStore.getGraph(labels, graphStore.relationshipTypes(), Optional.empty());
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
     }
@@ -135,8 +135,7 @@ class GraphStoreTest extends BaseTest {
         Graph filteredAGraph = graphStore.getGraph(
             Collections.singletonList(LABEL_A),
             graphStore.relationshipTypes(),
-            Optional.empty(),
-            1
+            Optional.empty()
         );
 
         assertGraphEquals(fromGdl("(a:A:All)"), filteredAGraph);
@@ -144,8 +143,7 @@ class GraphStoreTest extends BaseTest {
         Graph filteredAllGraph = graphStore.getGraph(
             Collections.singletonList(NodeLabel.of("All")),
             graphStore.relationshipTypes(),
-            Optional.empty(),
-            1
+            Optional.empty()
         );
 
         Graph nonFilteredGraph = graphStore.getUnion();

@@ -41,7 +41,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +51,6 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
     public static final String TASK_LOADING = "LOADING";
 
     protected final CONFIG graphCreateConfig;
-    protected final ExecutorService threadPool;
     protected final GraphLoaderContext loadingContext;
     protected final GraphDimensions dimensions;
     protected final ProgressLogger progressLogger;
@@ -63,7 +61,6 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
         GraphDimensions dimensions
     ) {
         this.graphCreateConfig = graphCreateConfig;
-        this.threadPool = loadingContext.executor();
         this.loadingContext = loadingContext;
         this.dimensions = dimensions;
         this.progressLogger = initProgressLogger();
@@ -129,6 +126,7 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
             idsAndProperties.properties(),
             relationships,
             relationshipProperties,
+            graphCreateConfig.readConcurrency(),
             tracker
         );
     }

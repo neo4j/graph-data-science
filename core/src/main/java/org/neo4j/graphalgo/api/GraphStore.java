@@ -27,10 +27,13 @@ import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import static java.util.Collections.singletonList;
 
 public interface GraphStore {
 
@@ -100,17 +103,22 @@ public interface GraphStore {
 
     DeletionResult deleteRelationships(RelationshipType relationshipType);
 
-    Graph getGraph(RelationshipType... relationshipTypes);
+    default Graph getGraph(RelationshipType... relationshipType) {
+        return getGraph(nodeLabels(), Arrays.asList(relationshipType), Optional.empty());
+    }
 
-    Graph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty);
+    default Graph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty) {
+        return getGraph(nodeLabels(), singletonList(relationshipType), relationshipProperty);
+    }
 
-    Graph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty);
+    default Graph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+        return getGraph(nodeLabels(), relationshipTypes, maybeRelationshipProperty);
+    }
 
     Graph getGraph(
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
-        Optional<String> maybeRelationshipProperty,
-        int concurrency
+        Optional<String> maybeRelationshipProperty
     );
 
     Graph getUnion();

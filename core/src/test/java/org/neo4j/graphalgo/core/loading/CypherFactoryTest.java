@@ -231,8 +231,7 @@ class CypherFactoryTest extends BaseTest {
         Function<List<String>, Graph> getGraph = (List<String> labels) -> graphStore.getGraph(
             labels.stream().map(NodeLabel::of).collect(Collectors.toList()),
             Collections.singletonList(ALL_RELATIONSHIPS),
-            Optional.empty(),
-            1
+            Optional.empty()
         );
 
         assertEquals(4, graphStore.nodeCount());
