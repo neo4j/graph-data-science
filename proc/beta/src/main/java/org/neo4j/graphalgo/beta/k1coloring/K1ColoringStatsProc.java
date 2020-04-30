@@ -41,7 +41,8 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1ColoringStatsProc.StatsResult, K1ColoringStatsConfig> {
-    @Procedure(name = "gds.beta.k1coloring.stats", mode = WRITE)
+
+    @Procedure(name = "gds.beta.k1coloring.stats", mode = READ)
     @Description(K1_COLORING_DESCRIPTION)
     public Stream<StatsResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
