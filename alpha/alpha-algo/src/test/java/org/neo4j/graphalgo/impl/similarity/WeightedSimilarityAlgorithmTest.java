@@ -51,6 +51,18 @@ class WeightedSimilarityAlgorithmTest extends AlgoTestBase {
         dummySimilarityAlgorithm.prepareInputs(query, similarityConfig);
     }
 
+    @Test
+    void prepareInputsShouldHandleNullForDoubleValues() {
+        String goodQuery = "UNWIND [[null, 42, 81],[1, 42, 162]] AS x RETURN x[0] AS weight, x[1] AS category, x[2] AS item";
+        runPrepareWeightsOnQuery(goodQuery);
+    }
+
+    @Test
+    void prepareInputsShouldThrowOnNullForLongValues() {
+        String badQuery = "UNWIND [[2.5, 66, 81],[42.42, null, 162]] AS x RETURN x[0] AS weight, x[1] AS category, x[2] AS item";
+        assertThrows(IllegalArgumentException.class, () -> runPrepareWeightsOnQuery(badQuery));
+    }
+
     private static class DummySimilarityAlgorithm extends WeightedSimilarityAlgorithm<DummySimilarityAlgorithm> {
         DummySimilarityAlgorithm(SimilarityConfig config, GraphDatabaseAPI api) {
             super(config, api);

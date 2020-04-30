@@ -25,4 +25,10 @@ public final class NumberUtils {
     public static double getDoubleValue(Number value) {
         return Optional.ofNullable(value).map(Number::doubleValue).orElse(Double.NaN);
     }
+
+    public static long getLongValue(Number value) throws IllegalArgumentException {
+        return Optional.ofNullable(value).map(Number::longValue).orElseThrow(
+            () -> new IllegalArgumentException("Null cannot be converted to long")
+        );
+    }
 }
