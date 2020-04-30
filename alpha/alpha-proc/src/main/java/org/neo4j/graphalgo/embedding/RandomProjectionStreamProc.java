@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class RandomProjectionStreamProc extends StreamProc<RandomProjection, RandomProjection, RandomProjectionStreamProc.StreamResult, RandomProjectionStreamConfig> {
 
-    @Procedure(value = "gds.randomProjection.stream", mode = READ)
+    @Procedure(value = "gds.alpha.randomProjection.stream", mode = READ)
     @Description("foo")
     public Stream<RandomProjectionStreamProc.StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
