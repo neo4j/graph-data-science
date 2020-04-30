@@ -108,8 +108,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             });
         }
 
-        performScaling();
-
         return me();
     }
 
@@ -163,32 +161,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             return -entryValue;
         } else {
             return 0.0f;
-        }
-    }
-
-    private void performScaling() {
-        for (int i = 0; i < this.embeddings.get(0).length; i++) {
-            double totalEmbeddingValue = 0.0;
-            for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                float embeddingValue = this.embeddings.get(nodeId)[i];
-                totalEmbeddingValue += embeddingValue;
-            }
-            double avg = (totalEmbeddingValue / (double) graph.nodeCount());
-
-            double totalSquaredDiff = 0.0;
-            for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                float embeddingValue = this.embeddings.get(nodeId)[i];
-                double sqrtDiff = (embeddingValue - avg) * (embeddingValue - avg);
-                totalSquaredDiff += sqrtDiff;
-            }
-
-            totalSquaredDiff = totalSquaredDiff == 0 ? 1 : totalSquaredDiff;
-
-            for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                float embeddingValue = this.embeddings.get(nodeId)[i];
-                double scaledValue = ((embeddingValue - avg) * Math.sqrt(graph.nodeCount())) / (Math.sqrt(totalSquaredDiff));
-                this.embeddings.get(nodeId)[i] = (float) scaledValue;
-            }
         }
     }
 
