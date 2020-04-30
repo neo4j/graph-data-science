@@ -19,9 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.BitSet;
 import org.immutables.builder.Builder.AccessibleFields;
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -498,19 +496,9 @@ public final class CSRGraphStore implements GraphStore {
     ) {
         boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
 
-        boolean containsAllNodes = true;
-        BitSet unionBitSet = BitSet.newInstance();
-
-        if (!nodes.containsOnlyAllNodesLabel() && !loadAllNodes) {
-            Map<NodeLabel, BitSet> labelInformation = nodes.labelInformation;
-            validateNodeLabelFilter(filteredLabels, labelInformation);
-            filteredLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
-            containsAllNodes = unionBitSet.cardinality() == nodes.nodeCount();
-        }
-
-        Optional<IdMap> filteredNodes = loadAllNodes || nodes.containsOnlyAllNodesLabel() || containsAllNodes
+        Optional<IdMap> filteredNodes = loadAllNodes || nodes.containsOnlyAllNodesLabel()
             ? Optional.empty()
-            : Optional.of(nodes.withFilteredLabels(unionBitSet, concurrency));
+            : Optional.of(nodes.withFilteredLabels(filteredLabels, concurrency));
 
         List<Graph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> relationshipTypes.contains(relTypeAndCSR.getKey()))
@@ -569,20 +557,6 @@ public final class CSRGraphStore implements GraphStore {
                 Entry::getKey,
                 entry -> new UnionNodeProperties(nodes, entry.getValue())
             ));
-    }
-
-    private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, Map<NodeLabel, BitSet> labelInformation) {
-        List<ElementIdentifier> invalidLabels = nodeLabels
-            .stream()
-            .filter(label -> !new HashSet<>(labelInformation.keySet()).contains(label))
-            .collect(Collectors.toList());
-        if (!invalidLabels.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Specified labels %s do not correspond to any of the node projections %s.",
-                invalidLabels,
-                labelInformation.keySet()
-            ));
-        }
     }
 
     private void validateInput(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {

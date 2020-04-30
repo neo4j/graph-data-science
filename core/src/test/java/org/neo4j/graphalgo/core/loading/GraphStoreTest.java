@@ -138,7 +138,7 @@ class GraphStoreTest extends BaseTest {
             Optional.empty()
         );
 
-        assertGraphEquals(fromGdl("(a:A:All)"), filteredAGraph);
+        assertGraphEquals(fromGdl("(a:A)"), filteredAGraph);
 
         Graph filteredAllGraph = graphStore.getGraph(
             Collections.singletonList(NodeLabel.of("All")),

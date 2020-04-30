@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -38,7 +39,7 @@ public class NodeFilteredGraph extends FilterGraph {
 
     private final IdMap filteredIdMap;
 
-    public NodeFilteredGraph(HugeGraph graph, IdMap filteredIdMap) {
+    public NodeFilteredGraph(Graph graph, IdMap filteredIdMap) {
         super(graph);
         this.filteredIdMap = filteredIdMap;
     }
@@ -132,13 +133,23 @@ public class NodeFilteredGraph extends FilterGraph {
     }
 
     @Override
+    public NodeMapping nodeMapping() {
+        return filteredIdMap;
+    }
+
+    @Override
     public Set<NodeLabel> availableNodeLabels() {
         return filteredIdMap.availableNodeLabels();
     }
 
     @Override
     public Set<NodeLabel> nodeLabels(long nodeId) {
-        return super.nodeMapping().nodeLabels(filteredIdMap.toOriginalNodeId(nodeId));
+        return filteredIdMap.nodeLabels(nodeId);
+    }
+
+    @Override
+    public boolean hasLabel(long nodeId, NodeLabel label) {
+        return filteredIdMap.hasLabel(nodeId, label);
     }
 
     @Override
