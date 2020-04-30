@@ -33,6 +33,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 
+import static org.neo4j.graphalgo.triangle.IntersectingTriangleCount.EXCLUDED_NODE_TRIANGLE_COUNT;
+
 public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficient, LocalClusteringCoefficient.Result> {
 
     private final int concurrency;
@@ -111,7 +113,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     }
 
     private double calculateCoefficient(double triangles, int degree) {
-        if (Double.isNaN(triangles) || triangles == -1) {
+        if (Double.isNaN(triangles) || triangles == EXCLUDED_NODE_TRIANGLE_COUNT) {
             return Double.NaN;
         }
 

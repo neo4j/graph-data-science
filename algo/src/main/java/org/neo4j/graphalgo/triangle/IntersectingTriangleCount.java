@@ -51,6 +51,8 @@ import java.util.concurrent.atomic.LongAdder;
 @SuppressWarnings("FieldCanBeLocal")
 public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult> {
 
+    static final int EXCLUDED_NODE_TRIANGLE_COUNT = -1;
+
     private Graph graph;
     private final TriangleCountBaseConfig config;
     private ExecutorService executorService;
@@ -132,7 +134,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
                 if (graph.degree(node) <= config.maxDegree()) {
                     intersect.intersectAll(node, this);
                 } else {
-                    triangleCounts.set(node, -1);
+                    triangleCounts.set(node, EXCLUDED_NODE_TRIANGLE_COUNT);
                 }
                 getProgressLogger().logProgress();
             }

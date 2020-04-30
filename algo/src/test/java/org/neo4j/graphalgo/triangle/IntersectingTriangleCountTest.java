@@ -36,7 +36,7 @@ import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResul
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.triangle.IntersectingTriangleCount.EXCLUDED_NODE_TRIANGLE_COUNT;
 
 class IntersectingTriangleCountTest extends AlgoTestBase {
 
@@ -209,14 +209,15 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
 
         TriangleCountResult result = projectAndCompute(config);
 
-        assertEquals(-1, result.localTriangles().get(0)); // a (deg = 3)
-        assertEquals(-1, result.localTriangles().get(1)); // b (deg = 3)
+        assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(0)); // a (deg = 3)
+        assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(1)); // b (deg = 3)
         assertEquals(0, result.localTriangles().get(2));  // c (deg = 2)
         assertEquals(0, result.localTriangles().get(3));  // d (deg = 2)
 
         assertEquals(1, result.localTriangles().get(4)); // e (deg = 2)
         assertEquals(1, result.localTriangles().get(5)); // f (deg = 2)
         assertEquals(1, result.localTriangles().get(6)); // g (deg = 2)
+        assertEquals(1, result.globalTriangles());
     }
 
     private TriangleCountResult projectAndCompute() {
