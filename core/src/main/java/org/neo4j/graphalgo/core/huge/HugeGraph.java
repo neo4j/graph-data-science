@@ -20,16 +20,17 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.IdMapGraph;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.LabeledIdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Collection;
@@ -72,7 +73,7 @@ import java.util.function.LongPredicate;
  * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">more abount vlong</a>
  * @see <a href="https://shipilev.net/jvm-anatomy-park/4-tlab-allocation/">more abount TLAB allocation</a>
  */
-public class HugeGraph implements IdMapGraph {
+public class HugeGraph implements Graph {
 
     public static final double NO_PROPERTY_VALUE = Double.NaN;
     private static final int NO_SUCH_NODE = 0;
@@ -152,6 +153,15 @@ public class HugeGraph implements IdMapGraph {
     @Override
     public long nodeCount() {
         return idMapping.nodeCount();
+    }
+
+    public IdMap idMap() {
+        return idMapping;
+    }
+
+    @Override
+    public LabeledIdMapping idMapping() {
+        return idMapping;
     }
 
     @Override
@@ -259,11 +269,6 @@ public class HugeGraph implements IdMapGraph {
     @Override
     public long toOriginalNodeId(long nodeId) {
         return idMapping.toOriginalNodeId(nodeId);
-    }
-
-    @Override
-    public IdMap idMap() {
-        return idMapping;
     }
 
     @Override

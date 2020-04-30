@@ -20,13 +20,14 @@
 package org.neo4j.graphalgo.similarity;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.LabeledIdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
 import java.util.Set;
@@ -84,6 +85,12 @@ public class NullGraph implements Graph {
     @Override
     public int degree(long nodeId) {
         throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.degree is not implemented.");
+    }
+
+    @Override
+    public LabeledIdMapping idMapping() {
+        throw new UnsupportedOperationException(
+            "org.neo4j.graphalgo.similarity.NullGraph.idMapping is not implemented.");
     }
 
     @Override

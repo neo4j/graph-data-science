@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.api.LabeledIdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
@@ -484,7 +483,7 @@ public final class CSRGraphStore implements GraphStore {
         });
     }
 
-    private IdMapGraph createGraph(
+    private Graph createGraph(
         Collection<NodeLabel> nodeLabels,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
@@ -492,7 +491,7 @@ public final class CSRGraphStore implements GraphStore {
         return createGraph(nodeLabels, singletonList(relationshipType), maybeRelationshipProperty);
     }
 
-    private IdMapGraph createGraph(
+    private Graph createGraph(
         Collection<NodeLabel> filteredLabels,
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
@@ -513,7 +512,7 @@ public final class CSRGraphStore implements GraphStore {
             ? Optional.empty()
             : Optional.of(nodes.withFilteredLabels(unionBitSet, concurrency));
 
-        List<IdMapGraph> filteredGraphs = relationships.entrySet().stream()
+        List<Graph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> {
                 Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);

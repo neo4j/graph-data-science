@@ -229,7 +229,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
         value = {
             "TYPE1; (:Label)-[]->(:Label), (:Label)",
             "TYPE; (c:Label)<--(a:Label)-->(b:Label)-->(c)",
-            "*; (a)-->(b)-->(c)-->(a)-->(c)"
+            "*; (a:Ignore)-->(b:Label)-->(c:Label)-->(a)-->(c)"
         })
     default void testRunUnweightedOnWeightedMultiRelTypeGraph(String relType, String expectedGraph) {
         String weightedGraphName = "weightedGraph";

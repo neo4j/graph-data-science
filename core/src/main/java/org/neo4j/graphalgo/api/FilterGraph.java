@@ -71,6 +71,11 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
+    public LabeledIdMapping idMapping() {
+        return graph.idMapping();
+    }
+
+    @Override
     public long toMappedNodeId(long nodeId) {
         return graph.toMappedNodeId(nodeId);
     }

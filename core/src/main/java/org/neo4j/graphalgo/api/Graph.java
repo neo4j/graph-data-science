@@ -19,10 +19,23 @@
  */
 package org.neo4j.graphalgo.api;
 
-/**
- * Composition of often used source interfaces
- */
-public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipProperties, RelationshipAccess, NodeLabelContainer, NodePropertyContainer {
+import org.neo4j.graphalgo.NodeLabel;
+
+import java.util.Set;
+
+public interface Graph extends LabeledIdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipProperties, RelationshipAccess, NodeLabelContainer, NodePropertyContainer {
+
+    LabeledIdMapping idMapping();
+
+    @Override
+    default Set<NodeLabel> nodeLabels(long nodeId) {
+        return idMapping().nodeLabels(nodeId);
+    }
+
+    @Override
+    default Set<NodeLabel> availableNodeLabels() {
+        return idMapping().availableNodeLabels();
+    }
 
     default boolean isEmpty() {
         return nodeCount() == 0;
@@ -62,4 +75,9 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
     };
 
     RelationshipIntersect intersection(long maxDegree);
+
+    @Override
+    default Graph concurrentCopy() {
+        return this;
+    }
 }

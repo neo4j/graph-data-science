@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
@@ -137,8 +136,8 @@ class K1ColoringTest extends AlgoTestBase {
             Aggregation.NONE, Orientation.REVERSE, AllowSelfLoops.NO, AllocationTracker.EMPTY
         );
 
-        IdMapGraph naturalGraph = outGenerator.generate();
-        IdMapGraph reverseGraph = inGenerator.generate();
+        Graph naturalGraph = outGenerator.generate();
+        Graph reverseGraph = inGenerator.generate();
         Graph graph = UnionGraph.of(Arrays.asList(naturalGraph, reverseGraph));
 
         K1Coloring k1Coloring = new K1Coloring(

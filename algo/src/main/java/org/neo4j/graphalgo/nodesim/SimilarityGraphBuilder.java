@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.nodesim;
 
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
@@ -74,7 +73,9 @@ class SimilarityGraphBuilder {
         });
     }
 
-    private final IdMapGraph baseGraph;
+    private final Graph baseGraph;
+
+    private final IdMap baseIdMap;
 
     SimilarityGraphBuilder(
         Graph baseGraph,
@@ -83,30 +84,28 @@ class SimilarityGraphBuilder {
     ) {
         this.executorService = executorService;
         this.tracker = tracker;
+        this.baseGraph = baseGraph;
 
-        if (baseGraph instanceof IdMapGraph) {
-            this.baseGraph = (IdMapGraph) baseGraph;
+        if (baseGraph.idMapping() instanceof IdMap) {
+            this.baseIdMap = (IdMap) baseGraph.idMapping();
         } else {
-            throw new IllegalArgumentException("Base graph must be an id map graph.");
+            throw new IllegalArgumentException("Base graph must contain an IdMap.");
         }
     }
 
     Graph build(Stream<SimilarityResult> stream) {
-        IdMap idMap = baseGraph.idMap();
-
         Orientation orientation = baseGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
-            idMap,
+            baseIdMap,
             orientation,
             true,
             Aggregation.NONE,
             executorService,
             tracker
         );
-
         relationshipsBuilder.addFromInternal(stream);
         return HugeGraphUtil.create(
-            idMap,
+            baseIdMap,
             relationshipsBuilder.build(),
             tracker
         );
