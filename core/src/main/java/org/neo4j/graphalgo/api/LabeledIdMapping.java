@@ -19,22 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.NodeLabel;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
-
-public interface LabeledIdMapping extends IdMapping {
-
-    boolean hasLabelInformation();
-
-    Set<NodeLabel> availableNodeLabels();
-
-    Stream<NodeLabel> labels(long nodeId);
-
-    Optional<Map<NodeLabel, BitSet>> maybeLabelInformation();
+public interface LabeledIdMapping extends IdMapping, NodeLabelContainer {
 
 }

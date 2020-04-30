@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -29,11 +27,12 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.stream.Stream;
 
 public class NodeFilteredGraph extends FilterGraph implements IdMapGraph {
 
@@ -140,11 +139,6 @@ public class NodeFilteredGraph extends FilterGraph implements IdMapGraph {
     @Override
     public Set<NodeLabel> availableNodeLabels() {
         return filteredIdMap.availableNodeLabels();
-    }
-
-    @Override
-    public Stream<NodeLabel> nodeLabelStream(long nodeId) {
-        return super.nodeLabelStream(filteredIdMap.toOriginalNodeId(nodeId));
     }
 
     @Override

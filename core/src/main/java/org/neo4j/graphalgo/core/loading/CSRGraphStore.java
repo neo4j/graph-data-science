@@ -26,24 +26,24 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.IdMapGraph;
 import org.neo4j.graphalgo.api.LabeledIdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
+import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
-import org.neo4j.graphalgo.core.schema.GraphStoreSchema;
-import org.neo4j.graphalgo.core.schema.NodeSchema;
-import org.neo4j.graphalgo.core.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,7 +64,9 @@ import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class GraphStore {
+public final class CSRGraphStore implements GraphStore {
+
+    private final int concurrency;
 
     private final IdMap nodes;
 
@@ -85,6 +87,7 @@ public final class GraphStore {
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
         Map<RelationshipType, HugeGraph.TopologyCSR> relationships,
         Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
+        int concurrency,
         AllocationTracker tracker
     ) {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
@@ -107,11 +110,12 @@ public final class GraphStore {
             relationshipPropertyStores.put(relationshipType, builder.build());
         });
 
-        return new GraphStore(
+        return new CSRGraphStore(
             nodes,
             nodePropertyStores,
             relationships,
             relationshipPropertyStores,
+            concurrency,
             tracker
         );
     }
@@ -120,6 +124,7 @@ public final class GraphStore {
         HugeGraph graph,
         String relationshipType,
         Optional<String> relationshipProperty,
+        int concurrency,
         AllocationTracker tracker
     ) {
         HugeGraph.Relationships relationships = graph.relationships();
@@ -143,45 +148,58 @@ public final class GraphStore {
             );
         }
 
-        return GraphStore.of(graph.idMap(), nodeProperties, topology, relationshipProperties, tracker);
+        return CSRGraphStore.of(graph.idMap(), nodeProperties, topology, relationshipProperties, concurrency, tracker);
     }
 
-    private GraphStore(
+    private CSRGraphStore(
         IdMap nodes,
         Map<NodeLabel, NodePropertyStore> nodeProperties,
         Map<RelationshipType, HugeGraph.TopologyCSR> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
+        int concurrency,
         AllocationTracker tracker
     ) {
         this.nodes = nodes;
         this.nodeProperties = nodeProperties;
         this.relationships = relationships;
         this.relationshipProperties = relationshipProperties;
+        this.concurrency = concurrency;
         this.createdGraphs = new HashSet<>();
         this.modificationTime = TimeUtil.now();
         this.tracker = tracker;
     }
 
+    @Override
+    public GraphStoreSchema schema() {
+        return GraphStoreSchema.of(nodeSchema(), relationshipTypeSchema());
+    }
+
+    @Override
     public ZonedDateTime modificationTime() {
         return modificationTime;
     }
 
+    @Override
     public LabeledIdMapping nodes() {
         return this.nodes;
     }
 
+    @Override
     public Set<NodeLabel> nodeLabels() {
         return nodes.availableNodeLabels();
     }
 
+    @Override
     public Set<String> nodePropertyKeys(NodeLabel label) {
         return new HashSet<>(nodeProperties.getOrDefault(label, NodePropertyStore.empty()).keySet());
     }
 
+    @Override
     public Map<NodeLabel, Set<String>> nodePropertyKeys() {
         return nodeLabels().stream().collect(Collectors.toMap(Function.identity(), this::nodePropertyKeys));
     }
 
+    @Override
     public long nodePropertyCount() {
         // TODO: This is not the correct value. We would need to look into the bitsets in order to retrieve the correct value.
         return nodeProperties.values().stream()
@@ -189,13 +207,20 @@ public final class GraphStore {
                    .sum() * nodeCount();
     }
 
+    @Override
     public boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey) {
         return labels
             .stream()
             .allMatch(label -> nodeProperties.containsKey(label) && nodeProperties.get(label).containsKey(propertyKey));
     }
 
-    public void addNodeProperty(NodeLabel nodeLabel, String propertyKey, NumberType propertyType, NodeProperties propertyValues) {
+    @Override
+    public void addNodeProperty(
+        NodeLabel nodeLabel,
+        String propertyKey,
+        NumberType propertyType,
+        NodeProperties propertyValues
+    ) {
         if (!nodeLabels().contains(nodeLabel)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Adding '%s.%s' to the graph store failed. Node label '%s' does not exist in the store. Available node labels: %s",
@@ -214,6 +239,7 @@ public final class GraphStore {
         }));
     }
 
+    @Override
     public void removeNodeProperty(NodeLabel nodeLabel, String propertyKey) {
         updateGraphStore(graphStore -> {
             if (graphStore.nodeProperties.containsKey(nodeLabel)) {
@@ -231,69 +257,56 @@ public final class GraphStore {
         });
     }
 
-    public NodeProperty nodeProperty(String propertyKey) {
-        if (nodes.maybeLabelInformation.isPresent()) {
-            var unionValues = new HashMap<NodeLabel, NodeProperties>();
-            var unionType = NumberType.NO_NUMBER;
-            var unionOrigin = PropertyState.PERSISTENT;
-
-            for (var labelAndPropertyStore : nodeProperties.entrySet()) {
-                var nodeLabel = labelAndPropertyStore.getKey();
-                var nodePropertyStore = labelAndPropertyStore.getValue();
-                if (nodePropertyStore.containsKey(propertyKey)) {
-                    var nodeProperty = nodePropertyStore.get(propertyKey);
-                    unionValues.put(nodeLabel, nodeProperty.values());
-                    unionType = nodeProperty.type();
-                    unionOrigin = nodeProperty.state();
-                }
-            }
-
-            return NodeProperty.of(
-                propertyKey,
-                unionType,
-                unionOrigin,
-                new UnionNodeProperties(unionValues, nodes.maybeLabelInformation.get())
-            );
-        }
-        return nodeProperties.get(ALL_NODES).get(propertyKey);
+    @Override
+    public NumberType nodePropertyType(NodeLabel label, String propertyKey) {
+        return nodeProperty(label, propertyKey).type();
     }
 
-    public NumberType nodePropertyType(String propertyKey) {
-        return nodeProperties.values().stream()
-            .filter(propertyStore -> propertyStore.containsKey(propertyKey))
-            .map(propertyStore -> propertyStore.get(propertyKey).type())
-            .findFirst()
-            .orElse(NumberType.NO_NUMBER);
+    @Override
+    public PropertyState nodePropertyState(String propertyKey) {
+        return nodeProperty(propertyKey).state();
     }
 
-    public NodeProperty nodeProperty(NodeLabel label, String propertyKey) {
-        return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey);
+    @Override
+    public NodeProperties nodePropertyValues(String propertyKey) {
+        return nodeProperty(propertyKey).values();
     }
 
+    @Override
+    public NodeProperties nodePropertyValues(NodeLabel label, String propertyKey) {
+        return nodeProperty(label, propertyKey).values();
+    }
+
+    @Override
     public Set<RelationshipType> relationshipTypes() {
         return relationships.keySet();
     }
 
+    @Override
     public boolean hasRelationshipType(RelationshipType relationshipType) {
         return relationships.containsKey(relationshipType);
     }
 
+    @Override
     public long relationshipCount() {
         return relationships.values().stream()
             .mapToLong(HugeGraph.TopologyCSR::elementCount)
             .sum();
     }
 
+    @Override
     public long relationshipCount(RelationshipType relationshipType) {
         return relationships.get(relationshipType).elementCount();
     }
 
+    @Override
     public boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey) {
         return relTypes
             .stream()
             .allMatch(relType -> relationshipProperties.containsKey(relType) && relationshipProperties.get(relType).containsKey(propertyKey));
     }
 
+    @Override
     public NumberType relationshipPropertyType(String propertyKey) {
         return relationshipProperties.values().stream()
             .filter(propertyStore -> propertyStore.containsKey(propertyKey))
@@ -302,6 +315,7 @@ public final class GraphStore {
             .orElse(NumberType.NO_NUMBER);
     }
 
+    @Override
     public long relationshipPropertyCount() {
         return relationshipProperties
             .values()
@@ -314,6 +328,7 @@ public final class GraphStore {
             .sum();
     }
 
+    @Override
     public Set<String> relationshipPropertyKeys() {
         return relationshipProperties
             .values()
@@ -322,10 +337,12 @@ public final class GraphStore {
             .collect(Collectors.toSet());
     }
 
+    @Override
     public Set<String> relationshipPropertyKeys(RelationshipType relationshipType) {
         return relationshipProperties.getOrDefault(relationshipType, RelationshipPropertyStore.empty()).keySet();
     }
 
+    @Override
     public void addRelationshipType(
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
@@ -351,25 +368,7 @@ public final class GraphStore {
         });
     }
 
-    private void addRelationshipProperty(
-        RelationshipType relationshipType,
-        String propertyKey,
-        NumberType propertyType,
-        HugeGraph.PropertyCSR propertyCSR,
-        GraphStore graphStore
-    ) {
-        graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
-            RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
-            if (propertyStore != null) {
-                 builder.from(propertyStore);
-            }
-            return builder.putIfAbsent(
-                propertyKey,
-                ImmutableRelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyCSR)
-            ).build();
-        });
-    }
-
+    @Override
     public DeletionResult deleteRelationships(RelationshipType relationshipType) {
         return DeletionResult.of(builder ->
             updateGraphStore(graphStore -> {
@@ -385,30 +384,18 @@ public final class GraphStore {
         );
     }
 
-    public Graph getGraph(RelationshipType... relationshipTypes) {
-        return getGraph(nodeLabels(), Arrays.asList(relationshipTypes), Optional.empty(), 1);
-    }
-
-    public Graph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty) {
-        return getGraph(nodeLabels(), singletonList(relationshipType), relationshipProperty, 1);
-    }
-
-    public Graph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
-        validateInput(relationshipTypes, maybeRelationshipProperty);
-        return createGraph(nodeLabels(), relationshipTypes, maybeRelationshipProperty, 1);
-    }
-
+    @Override
     public Graph getGraph(
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
-        Optional<String> maybeRelationshipProperty,
-        int concurrency
+        Optional<String> maybeRelationshipProperty
     ) {
         validateInput(relationshipTypes, maybeRelationshipProperty);
-        return createGraph(nodeLabels, relationshipTypes, maybeRelationshipProperty, concurrency);
+        return createGraph(nodeLabels, relationshipTypes, maybeRelationshipProperty);
     }
 
-    public IdMapGraph getUnion() {
+    @Override
+    public Graph getUnion() {
         return UnionGraph.of(relationships
             .keySet()
             .stream()
@@ -426,16 +413,75 @@ public final class GraphStore {
             .collect(Collectors.toList()));
     }
 
+    @Override
     public void canRelease(boolean canRelease) {
         createdGraphs.forEach(graph -> graph.canRelease(canRelease));
     }
 
+    @Override
     public void release() {
         createdGraphs.forEach(Graph::release);
     }
 
+    @Override
     public long nodeCount() {
         return nodes.nodeCount();
+    }
+
+    private synchronized void updateGraphStore(Consumer<CSRGraphStore> updateFunction) {
+        updateFunction.accept(this);
+        this.modificationTime = TimeUtil.now();
+    }
+
+    private NodeProperty nodeProperty(NodeLabel label, String propertyKey) {
+        return this.nodeProperties.getOrDefault(label, NodePropertyStore.empty()).get(propertyKey);
+    }
+
+    private NodeProperty nodeProperty(String propertyKey) {
+        if (nodes.availableNodeLabels().size() > 1) {
+            var unionValues = new HashMap<NodeLabel, NodeProperties>();
+            var unionType = NumberType.NO_NUMBER;
+            var unionOrigin = PropertyState.PERSISTENT;
+
+            for (var labelAndPropertyStore : nodeProperties.entrySet()) {
+                var nodeLabel = labelAndPropertyStore.getKey();
+                var nodePropertyStore = labelAndPropertyStore.getValue();
+                if (nodePropertyStore.containsKey(propertyKey)) {
+                    var nodeProperty = nodePropertyStore.get(propertyKey);
+                    unionValues.put(nodeLabel, nodeProperty.values());
+                    unionType = nodeProperty.type();
+                    unionOrigin = nodeProperty.state();
+                }
+            }
+
+            return NodeProperty.of(
+                propertyKey,
+                unionType,
+                unionOrigin,
+                new UnionNodeProperties(unionValues, nodes)
+            );
+        } else {
+            return nodeProperties.get(nodes.availableNodeLabels().iterator().next()).get(propertyKey);
+        }
+    }
+
+    private void addRelationshipProperty(
+        RelationshipType relationshipType,
+        String propertyKey,
+        NumberType propertyType,
+        HugeGraph.PropertyCSR propertyCSR,
+        CSRGraphStore graphStore
+    ) {
+        graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
+            RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
+            if (propertyStore != null) {
+                builder.from(propertyStore);
+            }
+            return builder.putIfAbsent(
+                propertyKey,
+                ImmutableRelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyCSR)
+            ).build();
+        });
     }
 
     private IdMapGraph createGraph(
@@ -443,38 +489,37 @@ public final class GraphStore {
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
-        return createGraph(nodeLabels, singletonList(relationshipType), maybeRelationshipProperty, 1);
+        return createGraph(nodeLabels, singletonList(relationshipType), maybeRelationshipProperty);
     }
 
     private IdMapGraph createGraph(
         Collection<NodeLabel> filteredLabels,
         Collection<RelationshipType> relationshipTypes,
-        Optional<String> maybeRelationshipProperty,
-        int concurrency
+        Optional<String> maybeRelationshipProperty
     ) {
         boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
 
         boolean containsAllNodes = true;
         BitSet unionBitSet = BitSet.newInstance();
 
-        if (this.nodes.maybeLabelInformation.isPresent() && !loadAllNodes) {
-            Map<NodeLabel, BitSet> labelInformation = this.nodes.maybeLabelInformation.get();
+        if (!nodes.containsOnlyAllNodesLabel() && !loadAllNodes) {
+            Map<NodeLabel, BitSet> labelInformation = nodes.labelInformation;
             validateNodeLabelFilter(filteredLabels, labelInformation);
             filteredLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
-            containsAllNodes = unionBitSet.cardinality() == this.nodes.nodeCount();
+            containsAllNodes = unionBitSet.cardinality() == nodes.nodeCount();
         }
 
-        Optional<IdMap> filteredNodes = loadAllNodes || !this.nodes.maybeLabelInformation.isPresent() || containsAllNodes
+        Optional<IdMap> filteredNodes = loadAllNodes || nodes.containsOnlyAllNodesLabel() || containsAllNodes
             ? Optional.empty()
-            : Optional.of(this.nodes.withFilteredLabels(unionBitSet, concurrency));
+            : Optional.of(nodes.withFilteredLabels(unionBitSet, concurrency));
 
         List<IdMapGraph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> relationshipTypes.contains(relTypeAndCSR.getKey()))
             .map(relTypeAndCSR -> {
-                Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels, nodes.maybeLabelInformation);
+                Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
 
                 HugeGraph initialGraph = HugeGraph.create(
-                    this.nodes,
+                    nodes,
                     filteredNodeProperties,
                     relTypeAndCSR.getValue(),
                     maybeRelationshipProperty.map(propertyKey -> relationshipProperties
@@ -496,14 +541,11 @@ public final class GraphStore {
         return UnionGraph.of(filteredGraphs);
     }
 
-    private Map<String, NodeProperties> filterNodeProperties(
-        Collection<NodeLabel> labels,
-        Optional<Map<NodeLabel, BitSet>> maybeElementIdentifierBitSetMap
-    ) {
+    private Map<String, NodeProperties> filterNodeProperties(Collection<NodeLabel> labels) {
         if (this.nodeProperties.isEmpty()) {
             return Collections.emptyMap();
         }
-        if (labels.size() == 1 || maybeElementIdentifierBitSetMap.isEmpty()) {
+        if (labels.size() == 1 || nodes.containsOnlyAllNodesLabel()) {
             return this.nodeProperties.get(labels.iterator().next()).nodePropertyValues();
         }
 
@@ -526,7 +568,7 @@ public final class GraphStore {
             .stream()
             .collect(Collectors.toMap(
                 Entry::getKey,
-                entry -> new UnionNodeProperties(entry.getValue(), maybeElementIdentifierBitSetMap.get())
+                entry -> new UnionNodeProperties(entry.getValue(), nodes)
             ));
     }
 
@@ -572,23 +614,13 @@ public final class GraphStore {
         });
     }
 
-    private synchronized void updateGraphStore(Consumer<GraphStore> updateFunction) {
-        updateFunction.accept(this);
-        this.modificationTime = TimeUtil.now();
-    }
-
-    public GraphStoreSchema schema() {
-        return GraphStoreSchema.of(nodeSchema(), relationshipTypeSchema());
-    }
-
     private NodeSchema nodeSchema() {
         NodeSchema.Builder nodePropsBuilder = NodeSchema.builder();
 
-        nodeProperties.forEach((label, propertyStore) -> {
+        nodeProperties.forEach((label, propertyStore) ->
             propertyStore.nodeProperties().forEach((propertyName, nodeProperty) -> {
                 nodePropsBuilder.addPropertyAndTypeForLabel(label, propertyName, nodeProperty.type());
-            });
-        });
+            }));
 
         for (NodeLabel nodeLabel : nodeLabels()) {
             nodePropsBuilder.addEmptyMapForLabelWithoutProperties(nodeLabel);
@@ -615,8 +647,20 @@ public final class GraphStore {
         return relationshipPropsBuilder.build();
     }
 
-    public enum PropertyState {
-        PERSISTENT, TRANSIENT
+    @ValueClass
+    interface NodeProperty {
+
+        String key();
+
+        NumberType type();
+
+        PropertyState state();
+
+        NodeProperties values();
+
+        static NodeProperty of(String key, NumberType type, PropertyState origin, NodeProperties values) {
+            return ImmutableNodeProperty.of(key, type, origin, values);
+        }
     }
 
     @ValueClass
@@ -668,22 +712,6 @@ public final class GraphStore {
                 nodeProperties.remove(propertyKey);
                 return this;
             }
-        }
-    }
-
-    @ValueClass
-    public interface NodeProperty {
-
-        String key();
-
-        NumberType type();
-
-        PropertyState state();
-
-        NodeProperties values();
-
-        static NodeProperty of(String key, NumberType type, PropertyState origin, NodeProperties values) {
-            return ImmutableNodeProperty.of(key, type, origin, values);
         }
     }
 

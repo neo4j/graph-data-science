@@ -48,7 +48,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -150,11 +149,6 @@ public final class TestGraph implements Graph {
     @Override
     public Set<NodeLabel> nodeLabels(long nodeId) {
         return nodeLabels.getOrDefault(nodeId, Collections.emptySet());
-    }
-
-    @Override
-    public Stream<NodeLabel> nodeLabelStream(long nodeId) {
-        return nodeLabels(nodeId).stream();
     }
 
     @Override

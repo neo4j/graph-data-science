@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.api.IdMapGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 
@@ -64,17 +64,17 @@ public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
 
     @Test
     void shouldBeAbleToMutateAndDelete() {
-        IdMapGraph graphBefore = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
+        Graph graphBefore = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
 
         runQuery("CALL gds.wcc.mutate('testGraph', {mutateProperty: 'componentId'})");
-        IdMapGraph graphAfterMutate = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
+        Graph graphAfterMutate = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
         assertNotEquals(graphBefore.availableNodeProperties(), graphAfterMutate.availableNodeProperties());
 
         assertCypherResult(
             "CALL gds.graph.removeNodeProperties('testGraph', ['componentId']) YIELD propertiesRemoved",
             singletonList(map("propertiesRemoved", 4L))
         );
-        IdMapGraph graphAfterDelete = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
+        Graph graphAfterDelete = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
         TestSupport.assertGraphEquals(graphBefore, graphAfterDelete);
     }
 }

@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;

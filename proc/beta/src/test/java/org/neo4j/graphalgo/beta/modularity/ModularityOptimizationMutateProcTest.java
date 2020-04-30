@@ -30,11 +30,11 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.NumberType;
@@ -112,8 +112,8 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         runQuery(query);
 
         GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, TEST_GRAPH_NAME).graphStore();
-        NodeProperties communities = mutatedGraph.nodeProperty(mutateProperty()).values();
-        NodeProperties seeds = mutatedGraph.nodeProperty("seed1").values();
+        NodeProperties communities = mutatedGraph.nodePropertyValues(mutateProperty());
+        NodeProperties seeds = mutatedGraph.nodePropertyValues("seed1");
         for (int i = 0; i < mutatedGraph.nodeCount(); i++) {
             assertEquals(communities.nodeProperty(i), seeds.nodeProperty(i));
         }

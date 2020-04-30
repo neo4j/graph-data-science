@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Timeout;
 import org.neo4j.graphalgo.PrivateLookup;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Direction;

@@ -25,6 +25,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
@@ -41,7 +42,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
@@ -158,8 +158,7 @@ public abstract class AlgoBaseProc<
                 Graph filteredGraph = graphStore.getGraph(
                     config.nodeLabelIdentifiers(graphStore),
                     config.relationshipTypeIdentifiers(graphStore),
-                    Optional.empty(),
-                    config.concurrency()
+                    Optional.empty()
                 );
                 long relCount = filteredGraph.relationshipCount();
 
@@ -220,7 +219,7 @@ public abstract class AlgoBaseProc<
         Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
         Collection<RelationshipType> relationshipTypes = config.relationshipTypeIdentifiers(graphStore);
 
-        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty, config.concurrency());
+        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
     }
 
     private GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {

@@ -36,9 +36,9 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.Arrays;
@@ -118,11 +118,11 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         assertEquals(Collections.emptySet(), graphStore.nodePropertyKeys(NodeLabel.of("N2")));
         assertEquals(Collections.singleton("prop2"), graphStore.nodePropertyKeys(NodeLabel.of("N3")));
 
-        NodeProperties prop1 = graphStore.nodeProperty("prop1").values();
+        NodeProperties prop1 = graphStore.nodePropertyValues("prop1");
         assertEquals(1.0D, prop1.nodeProperty(0));
         assertTrue(Double.isNaN(prop1.nodeProperty(1)));
 
-        NodeProperties prop2 = graphStore.nodeProperty("prop2").values();
+        NodeProperties prop2 = graphStore.nodePropertyValues("prop2");
         assertTrue(Double.isNaN(prop2.nodeProperty(0)));
         assertEquals(2.0D, prop2.nodeProperty(1));
     }
@@ -159,9 +159,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         assertEquals(Sets.newHashSet("prop1", "prop2"), graphStore.nodePropertyKeys(allIdentifier));
         assertEquals(Collections.singleton("prop2"), graphStore.nodePropertyKeys(node2Identifier));
 
-        NodeProperties allProp1 = graphStore.nodeProperty(allIdentifier, "prop1").values();
-        NodeProperties allProp2 = graphStore.nodeProperty(allIdentifier, "prop2").values();
-        NodeProperties node2Prop2 = graphStore.nodeProperty(node2Identifier, "prop2").values();
+        NodeProperties allProp1 = graphStore.nodePropertyValues(allIdentifier, "prop1");
+        NodeProperties allProp2 = graphStore.nodePropertyValues(allIdentifier, "prop2");
+        NodeProperties node2Prop2 = graphStore.nodePropertyValues(node2Identifier, "prop2");
 
         LongStream.range(0, 3).forEach(nodeId -> {
             double allProp1Value = allProp1.nodeProperty(nodeId);

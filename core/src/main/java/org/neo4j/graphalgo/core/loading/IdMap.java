@@ -36,13 +36,10 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.stream.Stream;
-
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
@@ -67,9 +64,11 @@ public class IdMap implements LabeledIdMapping, NodeIterator, BatchNodeIterable 
         )
         .build();
 
+    private static final Set<NodeLabel> ALL_NODES_LABELS = Set.of(NodeLabel.ALL_NODES);
+
     protected long nodeCount;
 
-    final Optional<Map<NodeLabel, BitSet>> maybeLabelInformation;
+    final Map<NodeLabel, BitSet> labelInformation;
 
     private HugeLongArray graphIds;
     private SparseNodeMapping nodeToGraphIds;
@@ -79,16 +78,16 @@ public class IdMap implements LabeledIdMapping, NodeIterator, BatchNodeIterable 
     }
 
     public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, long nodeCount) {
-        this(graphIds, nodeToGraphIds, Optional.empty(), nodeCount);
+        this(graphIds, nodeToGraphIds, Collections.emptyMap(), nodeCount);
     }
 
     /**
      * initialize the map with pre-built sub arrays
      */
-    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, Optional<Map<NodeLabel, BitSet>> maybeLabelInformation, long nodeCount) {
+    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, Map<NodeLabel, BitSet> labelInformation, long nodeCount) {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
-        this.maybeLabelInformation = maybeLabelInformation;
+        this.labelInformation = labelInformation;
         this.nodeCount = nodeCount;
     }
 
@@ -136,34 +135,35 @@ public class IdMap implements LabeledIdMapping, NodeIterator, BatchNodeIterable 
     }
 
     @Override
-    public boolean hasLabelInformation() {
-        return maybeLabelInformation.isPresent();
-    }
-
-    @Override
     public Set<NodeLabel> availableNodeLabels() {
-        return maybeLabelInformation.map(Map::keySet).orElseGet(() -> Collections.singleton(ALL_NODES));
+        return labelInformation.isEmpty()
+            ? ALL_NODES_LABELS
+            : labelInformation.keySet();
     }
 
     @Override
-    public Stream<NodeLabel> labels(long nodeId) {
-        return maybeLabelInformation
-            .map(elementIdentifierBitSetMap ->
-                elementIdentifierBitSetMap
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> entry.getValue().get(nodeId))
-                    .map(Map.Entry::getKey))
-            .orElseGet(() -> Stream.of(NodeLabel.ALL_NODES));
+    public Set<NodeLabel> nodeLabels(long nodeId) {
+        if (labelInformation.isEmpty()) {
+            return ALL_NODES_LABELS;
+        } else {
+            Set<NodeLabel> set = new HashSet<>();
+            for (var labelAndBitSet : labelInformation.entrySet()) {
+                if (labelAndBitSet.getValue().get(nodeId)) {
+                    set.add(labelAndBitSet.getKey());
+                }
+            }
+            return set;
+        }
     }
 
     @Override
-    public Optional<Map<NodeLabel, BitSet>> maybeLabelInformation() {
-        return maybeLabelInformation;
+    public boolean hasLabel(long nodeId, NodeLabel label) {
+        BitSet bitSet = labelInformation.get(label);
+        return bitSet != null && bitSet.get(nodeId);
     }
 
     IdMap withFilteredLabels(BitSet unionBitSet, int concurrency) {
-        if (maybeLabelInformation.isEmpty()) {
+        if (labelInformation.isEmpty()) {
             return this;
         }
 

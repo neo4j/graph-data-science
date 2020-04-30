@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.functions;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.procedure.Context;
@@ -84,11 +84,11 @@ public class NodePropertyFunc {
             throw new IllegalArgumentException(formatWithLocale("Node id %d does not exist.", nodeId.longValue()));
         }
 
-        GraphStore.NodeProperty propertyValues = projectAll
-            ? graphStore.nodeProperty(propertyKey) // builds UnionNodeProperties and returns the first matching property
-            : graphStore.nodeProperty(NodeLabel.of(nodeLabel), propertyKey);
+        var propertyValues = projectAll
+            ? graphStore.nodePropertyValues(propertyKey) // builds UnionNodeProperties and returns the first matching property
+            : graphStore.nodePropertyValues(NodeLabel.of(nodeLabel), propertyKey);
 
-        double propertyValue = propertyValues.values().nodeProperty(internalId);
+        double propertyValue = propertyValues.nodeProperty(internalId);
         return Double.isNaN(propertyValue) ? null : propertyValue;
     }
 }

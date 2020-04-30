@@ -21,11 +21,11 @@ package org.neo4j.graphalgo.catalog;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphWriteNodePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -93,8 +93,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
             Graph subGraph = graphStore.getGraph(
                 Collections.singletonList(nodeLabel),
                 graphStore.relationshipTypes(),
-                Optional.empty(),
-                config.writeConcurrency()
+                Optional.empty()
             );
 
             NodePropertyExporter exporter = NodePropertyExporter
@@ -109,7 +108,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
                         ImmutableNodeProperty.of(
                             nodePropertyKey,
                             subGraph.nodeProperties(nodePropertyKey),
-                            NodeProperties.translatorFor(graphStore.nodePropertyType(nodePropertyKey))
+                            NodeProperties.translatorFor(graphStore.nodePropertyType(nodeLabel, nodePropertyKey))
                         )
                     )
                     .collect(Collectors.toList());

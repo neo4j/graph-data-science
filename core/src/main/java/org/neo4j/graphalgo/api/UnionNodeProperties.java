@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.NodeLabel;
 
 import java.util.Map;
@@ -27,17 +26,17 @@ import java.util.Map;
 public class UnionNodeProperties implements NodeProperties {
 
     private final Map<NodeLabel, NodeProperties> labelToNodePropertiesMap;
-    private final Map<NodeLabel, BitSet> elementIdentifierToBitSetMap;
+    private final NodeLabelContainer labeledIdMapping;
 
-    public UnionNodeProperties(Map<NodeLabel, NodeProperties> labelToNodePropertiesMap, Map<NodeLabel, BitSet> elementIdentifierToBitSetMap) {
+    public UnionNodeProperties(Map<NodeLabel, NodeProperties> labelToNodePropertiesMap, NodeLabelContainer nodeLabelContainer) {
         this.labelToNodePropertiesMap = labelToNodePropertiesMap;
-        this.elementIdentifierToBitSetMap = elementIdentifierToBitSetMap;
+        this.labeledIdMapping = nodeLabelContainer;
     }
 
     @Override
     public double nodeProperty(long nodeId) {
-        for (NodeLabel label : elementIdentifierToBitSetMap.keySet()) {
-            if (elementIdentifierToBitSetMap.get(label).get(nodeId)) {
+        for (NodeLabel label : labeledIdMapping.availableNodeLabels()) {
+            if (labeledIdMapping.hasLabel(nodeId, label)) {
                 NodeProperties nodeProperties = labelToNodePropertiesMap.get(label);
                 if (nodeProperties != null) {
                     // This returns the property value for the first label that has the property.

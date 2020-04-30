@@ -19,22 +19,22 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-import com.carrotsearch.hppc.BitSet;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.LabeledIdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.Settings;
-import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
@@ -163,25 +163,25 @@ public class GraphStoreExport {
 
         final long nodeCount;
 
-        @Nullable
         final HugeIntArray labelCounts;
 
-        @Nullable
-        final Map<String, BitSet> nodeLabels;
+        final LabeledIdMapping nodeLabels;
 
-        @Nullable
         final Map<String, Map<String, NodeProperties>> nodeProperties;
+
+        private final Set<NodeLabel> availableNodeLabels;
 
         NodeStore(
             long nodeCount,
-            @Nullable HugeIntArray labelCounts,
-            @Nullable Map<String, BitSet> nodeLabels,
-            @Nullable Map<String, Map<String, NodeProperties>> nodeProperties
+            HugeIntArray labelCounts,
+            LabeledIdMapping nodeLabels,
+            Map<String, Map<String, NodeProperties>> nodeProperties
         ) {
             this.nodeCount = nodeCount;
             this.labelCounts = labelCounts;
             this.nodeLabels = nodeLabels;
             this.nodeProperties = nodeProperties;
+            this.availableNodeLabels = nodeLabels != null ? nodeLabels.availableNodeLabels() : null;
         }
 
         boolean hasLabels() {
@@ -193,7 +193,7 @@ public class GraphStoreExport {
         }
 
         int labelCount() {
-            return !hasLabels() ? 0 : nodeLabels.size();
+            return !hasLabels() ? 0 : nodeLabels.availableNodeLabels().size();
         }
 
         int propertyCount() {
@@ -212,9 +212,9 @@ public class GraphStoreExport {
             String[] labels = new String[labelCount];
 
             int i = 0;
-            for (var nodeLabelToBitSet : nodeLabels.entrySet()) {
-                if (nodeLabelToBitSet.getValue().get(nodeId)) {
-                    labels[i++] = nodeLabelToBitSet.getKey();
+            for (var nodeLabel : availableNodeLabels) {
+                if (nodeLabels.hasLabel(nodeId, nodeLabel)) {
+                    labels[i++] = nodeLabel.name;
                 }
             }
 
@@ -223,23 +223,16 @@ public class GraphStoreExport {
 
         static NodeStore of(GraphStore graphStore) {
             HugeIntArray labelCounts = null;
-            Map<String, BitSet> nodeLabels = null;
             Map<String, Map<String, NodeProperties>> nodeProperties;
 
-            if (graphStore.nodes().hasLabelInformation()) {
-                var nodeLabelBitSetMap = graphStore.nodes().maybeLabelInformation().get();
+            var nodeLabels = graphStore.nodes();
 
-                nodeLabels = nodeLabelBitSetMap.entrySet().stream()
-                    .collect(Collectors.toMap(
-                        entry -> entry.getKey().name,
-                        Map.Entry::getValue
-                    ));
-
+            if (!nodeLabels.containsOnlyAllNodesLabel()) {
                 labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), AllocationTracker.EMPTY);
                 labelCounts.setAll(i -> {
                     int labelCount = 0;
-                    for (BitSet value : nodeLabelBitSetMap.values()) {
-                        if (value.get(i)) {
+                    for (var nodeLabel : nodeLabels.availableNodeLabels()) {
+                        if (nodeLabels.hasLabel(i, nodeLabel)) {
                             labelCount++;
                         }
                     }
@@ -254,11 +247,16 @@ public class GraphStoreExport {
                     entry -> entry.getKey().name,
                     entry -> entry.getValue().stream().collect(Collectors.toMap(
                         propertyKey -> propertyKey,
-                        propertyKey -> graphStore.nodeProperty(entry.getKey(), propertyKey).values()
+                        propertyKey -> graphStore.nodePropertyValues(entry.getKey(), propertyKey)
                     ))
                 ));
             }
-            return new NodeStore(graphStore.nodeCount(), labelCounts, nodeLabels, nodeProperties);
+            return new NodeStore(
+                graphStore.nodeCount(),
+                labelCounts,
+                nodeLabels.containsOnlyAllNodesLabel() ? null : nodeLabels,
+                nodeProperties
+            );
         }
     }
 

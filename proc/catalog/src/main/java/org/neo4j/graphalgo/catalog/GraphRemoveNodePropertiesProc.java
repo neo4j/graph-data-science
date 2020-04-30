@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.catalog;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphRemoveNodePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -78,7 +78,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         long sum = validNodeLabels.stream()
             .mapToLong(nodeLabel ->
                 config.nodeProperties().stream()
-                    .mapToLong(property -> graphStore.nodeProperty(nodeLabel, property).values().size())
+                    .mapToLong(property -> graphStore.nodePropertyValues(nodeLabel, property).size())
                     .sum())
             .sum();
 

@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.core.write;
 
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.loading.GraphStore;
+import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -140,9 +142,9 @@ public interface PropertyTranslator<T> {
         private final DataAccessFunction<T> newPropertiesFn;
 
         public static <T> PropertyTranslator<T> of(GraphStore graphStore, String seedProperty, DataAccessFunction<T> accessFunction) {
-            var propertyState = graphStore.nodeProperty(seedProperty).state();
+            var propertyState = graphStore.nodePropertyState(seedProperty);
             if (propertyState == GraphStore.PropertyState.PERSISTENT) {
-                return new OfLongIfChanged<T>(graphStore.nodeProperty(seedProperty).values(), accessFunction);
+                return new OfLongIfChanged<T>(graphStore.nodePropertyValues(seedProperty), accessFunction);
             } else {
                 return (OfLong<T>) accessFunction::getValue;
             }
