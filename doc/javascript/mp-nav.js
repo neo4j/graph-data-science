@@ -126,16 +126,18 @@ function enableTocToggle() {
     tocToggler.setAttribute('aria-hidden', 'true');
     tocTitle.appendChild(tocToggler);
     var isExpanded = toc.offsetParent !== null;
-    tocToggler.addEventListener("click", function() {
+    tocTitle.addEventListener("click", function() {
         isExpanded = !isExpanded;
         if (isExpanded) {
-            toc.slideUp();
-            tocToggler.classList.replace(state.expanded.cssClass, state.collapsed.cssClass);
-            tocToggler.setAttribute('title', state.collapsed.title);
+            toc.slideUp(function() {
+                tocToggler.classList.replace(state.expanded.cssClass, state.collapsed.cssClass);
+                tocToggler.setAttribute('title', state.collapsed.title);
+            });
         } else {
-            toc.slideDown();
-            tocToggler.classList.replace(state.collapsed.cssClass, state.expanded.cssClass);
-            tocToggler.setAttribute('title', state.expanded.title);
+            toc.slideDown(function(){
+                tocToggler.classList.replace(state.collapsed.cssClass, state.expanded.cssClass);
+                tocToggler.setAttribute('title', state.expanded.title);
+            });
         }
     });
 }
