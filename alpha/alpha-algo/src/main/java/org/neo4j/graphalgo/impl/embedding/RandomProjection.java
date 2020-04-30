@@ -77,7 +77,50 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     @Override
     public RandomProjection compute() {
         initRandomVectors();
+        propagateEmbeddings();
+        return me();
+    }
 
+    public HugeObjectArray<float[]> embeddings() {
+        return this.embeddings;
+    }
+
+    HugeObjectArray<float[]> currentEmbedding(int iteration) {
+        return iteration % 2 == 0
+            ? this.embeddingA
+            : this.embeddingB;
+    }
+
+    @Override
+    public RandomProjection me() {
+        return this;
+    }
+
+    @Override
+    public void release() {
+        this.embeddingA.release();
+        this.embeddingB.release();
+    }
+
+    void initRandomVectors() {
+        float probability = 1.0f / (2.0f * sparsity);
+        float sqrtSparsity = (float) Math.sqrt(sparsity);
+        float sqrtEmbeddingDimension = (float) Math.sqrt(embeddingDimension);
+        Random random = new HighQualityRandom(seed);
+
+        LongStream.range(0, graph.nodeCount()).parallel().forEach(nodeId -> {
+            int degree = graph.degree(nodeId);
+            float scaling = degree == 0
+                ? 1.0f
+                : (float) Math.pow(degree, normalizationStrength);
+
+            float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
+            float[] randomVector = computeRandomVector(random, probability, entryValue);
+            embeddingB.set(nodeId, randomVector);
+        });
+    }
+
+    void propagateEmbeddings() {
         for (int i = 0; i < iterations; i++) {
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
@@ -113,41 +156,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
                 }
             });
         }
-
-        return me();
-    }
-
-    public HugeObjectArray<float[]> embeddings() {
-        return this.embeddings;
-    }
-
-    @Override
-    public RandomProjection me() {
-        return this;
-    }
-
-    @Override
-    public void release() {
-        this.embeddingA.release();
-        this.embeddingB.release();
-    }
-
-    private void initRandomVectors() {
-        float probability = 1.0f / (2.0f * sparsity);
-        float sqrtSparsity = (float) Math.sqrt(sparsity);
-        float sqrtEmbeddingDimension = (float) Math.sqrt(embeddingDimension);
-        Random random = new HighQualityRandom(seed);
-
-        LongStream.range(0, graph.nodeCount()).parallel().forEach(nodeId -> {
-            int degree = graph.degree(nodeId);
-            float scaling = degree == 0
-                ? 1.0f
-                : (float) Math.pow(degree, normalizationStrength);
-
-            float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
-            float[] randomVector = computeRandomVector(random, probability, entryValue);
-            embeddingB.set(nodeId, randomVector);
-        });
     }
 
     private float[] computeRandomVector(Random random, float probability, float entryValue) {
