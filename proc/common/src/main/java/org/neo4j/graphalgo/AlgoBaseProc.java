@@ -360,7 +360,12 @@ public abstract class AlgoBaseProc<
 
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
-        validateMemoryUsageIfImplemented(config);
+        config.implicitCreateConfig().ifPresent(createConfig -> {
+            if (!createConfig.sudo()) {
+                validateMemoryUsageIfImplemented(config);
+            }
+        });
+
 
         GraphStore graphStore;
         Graph graph;

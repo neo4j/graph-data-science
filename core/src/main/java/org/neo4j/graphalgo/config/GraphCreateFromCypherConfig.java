@@ -75,6 +75,13 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         return loaderContext -> new CypherFactory(this, loaderContext);
     }
 
+    @Override
+    @Value.Default
+    @Value.Parameter(false)
+    default boolean sudo() {
+        return true;
+    }
+
     static GraphCreateFromCypherConfig of(
         String userName,
         String graphName,
