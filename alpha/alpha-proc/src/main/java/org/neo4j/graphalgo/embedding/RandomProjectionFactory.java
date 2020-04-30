@@ -34,6 +34,7 @@ public class RandomProjectionFactory<CONFIG extends RandomProjectionBaseConfig> 
     public RandomProjection build(
         Graph graph, CONFIG configuration, AllocationTracker tracker, Log log
     ) {
+        // TODO logging
         var progressLogger = new BatchingProgressLogger(log, 1, "RandomProjection", configuration.concurrency());
 
         return new RandomProjection(
@@ -45,6 +46,7 @@ public class RandomProjectionFactory<CONFIG extends RandomProjectionBaseConfig> 
             configuration.normalizationStrength(),
             configuration.normalizeL2(),
             configuration.seed(),
+            configuration.concurrency(),
             tracker
         );
     }

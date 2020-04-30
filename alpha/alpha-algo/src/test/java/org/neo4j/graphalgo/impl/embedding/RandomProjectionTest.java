@@ -71,6 +71,7 @@ class RandomProjectionTest extends AlgoTestBase {
             0.0f,
             false,
             0,
+            1,
             AllocationTracker.EMPTY
         );
 
@@ -104,6 +105,7 @@ class RandomProjectionTest extends AlgoTestBase {
             0.0f,
             false,
             0,
+            1,
             AllocationTracker.EMPTY
         );
 
@@ -137,6 +139,7 @@ class RandomProjectionTest extends AlgoTestBase {
             0.0f,
             false,
             0,
+            1,
             AllocationTracker.EMPTY
         );
 

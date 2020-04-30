@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.embedding;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -28,11 +29,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.LongStream;
 
 public class RandomProjection extends Algorithm<RandomProjection, RandomProjection> {
 
     private final Graph graph;
+    private final int concurrency;
     private final boolean normalizeL2;
     private final float normalizationStrength;
     private final HugeObjectArray<float[]> embeddings;
@@ -45,6 +46,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     private final int seed;
     private final List<Double> iterationWeights;
 
+    // TODO use config instead of single arguments
     public RandomProjection(
         Graph graph,
         int embeddingDimension,
@@ -54,6 +56,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         float normalizationStrength,
         boolean normalizeL2,
         int seed,
+        int concurrency,
         AllocationTracker tracker
     ) {
         this.graph = graph;
@@ -69,6 +72,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         this.normalizationStrength = normalizationStrength;
         this.normalizeL2 = normalizeL2;
         this.seed = seed;
+        this.concurrency = concurrency;
 
         int embeddingSize = iterationWeights.isEmpty() ? embeddingDimension * iterations : embeddingDimension;
         this.embeddings.setAll((i) -> new float[embeddingSize]);
@@ -108,7 +112,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         float sqrtEmbeddingDimension = (float) Math.sqrt(embeddingDimension);
         Random random = new HighQualityRandom(seed);
 
-        LongStream.range(0, graph.nodeCount()).parallel().forEach(nodeId -> {
+        ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
             int degree = graph.degree(nodeId);
             float scaling = degree == 0
                 ? 1.0f
@@ -125,7 +129,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
 
-            for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
                 float[] currentEmbedding = new float[embeddingDimension];
                 localCurrent.set(nodeId, currentEmbedding);
                 graph.forEachRelationship(nodeId, (source, target) -> {
@@ -136,13 +140,13 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
                 int degree = graph.degree(nodeId) == 0 ? 1 : graph.degree(nodeId);
                 float degreeScale = 1.0f / degree;
                 multiplyArrayValues(currentEmbedding, degreeScale);
-            }
+            });
 
             int offset = embeddingDimension * i;
             double weight = iterationWeights.isEmpty()
                 ? Double.NaN
                 : iterationWeights.get(i);
-            LongStream.range(0, graph.nodeCount()).parallel().forEach(nodeId -> {
+            ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
                 float[] embedding = embeddings.get(nodeId);
 
                 float[] newEmbedding = localCurrent.get(nodeId);
