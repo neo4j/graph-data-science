@@ -93,7 +93,10 @@ abstract class DocTestBase extends BaseProcTest {
     void runTest() throws URISyntaxException {
         asciidoctor.javaExtensionRegistry().treeprocessor(defaultTreeProcessor());
         File file = ASCIIDOC_PATH.resolve(adocFile()).toFile();
-        assertTrue(file.exists() && file.canRead());
+        assertTrue(
+            file.exists() && file.canRead(),
+            formatWithLocale("File %s doesn't exist or can't be read", file.getPath())
+        );
         asciidoctor.loadFile(file, Collections.emptyMap());
     }
 
