@@ -458,7 +458,7 @@ YIELD nodePropertiesWritten, componentCount;
 |===
 --
 
-[role=query-example, testGroup=seeding]
+[role=query-example, testType=no-result, testGroup=seeding]
 --
 .The following will create a new node in the Neo4j graph, with no component ID:
 [source, cypher]
@@ -466,12 +466,6 @@ YIELD nodePropertiesWritten, componentCount;
 MATCH (b:User {name: 'Bridget'})
 CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
 ----
-
-.Results
-[cols="1"]
-|===
-|No data returned.
-|===
 --
 
 Note, that we can not use our already created graph as it does not contain the component id.

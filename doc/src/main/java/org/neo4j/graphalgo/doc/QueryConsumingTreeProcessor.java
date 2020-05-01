@@ -100,21 +100,30 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     }
 
     private void consumeQueryExamples(StructuralNode node) {
-        List<StructuralNode> allQueryExamples = node.findBy(Map.of("role", QUERY_EXAMPLE_ROLE));
-
         Collection<StructuralNode> queryExamples = new ArrayList<>();
         Collection<StructuralNode> queryNoResultExamples = new ArrayList<>();
         Map<String, List<StructuralNode>> groupedQueryExamples = new HashMap<>();
 
+        collectQueryExamples(node, queryExamples, queryNoResultExamples, groupedQueryExamples);
+
+        queryExamples.forEach(q -> processExample(() -> processCypherExample(q)));
+        queryNoResultExamples.forEach(q -> processExample(() -> processCypherNoResultExample(q)));
+        processGroupedQueryExamples(groupedQueryExamples);
+    }
+
+    private void collectQueryExamples(
+        StructuralNode node,
+        Collection<StructuralNode> queryExamples,
+        Collection<StructuralNode> queryNoResultExamples,
+        Map<String, List<StructuralNode>> groupedQueryExamples
+    ) {
+        List<StructuralNode> allQueryExamples = node.findBy(Map.of("role", QUERY_EXAMPLE_ROLE));
         allQueryExamples.forEach(queryExample -> {
             Object testGroupAttribute = queryExample.getAttribute(TEST_GROUP_ATTRIBUTE);
             if (testGroupAttribute != null) {
-                List<StructuralNode> nodes = new ArrayList<>(1);
-                nodes.add(queryExample);
-                groupedQueryExamples.merge(testGroupAttribute.toString(), nodes, (oldNodes, newNodes) -> {
-                    oldNodes.addAll(newNodes);
-                    return oldNodes;
-                });
+                String testGroup = testGroupAttribute.toString();
+                groupedQueryExamples.putIfAbsent(testGroup, new ArrayList<>());
+                groupedQueryExamples.get(testGroup).add(queryExample);
             } else {
                 Object attribute = queryExample.getAttribute(TEST_TYPE_ATTRIBUTE);
                 if (attribute != null && attribute.toString().equals(TEST_TYPE_NO_RESULT)) {
@@ -124,10 +133,9 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
                 }
             }
         });
+    }
 
-        queryExamples.forEach(q -> processExample(() -> processCypherExample(q)));
-        queryNoResultExamples.forEach(q -> processExample(() -> processCypherNoResultExample(q)));
-
+    private void processGroupedQueryExamples(Map<String, List<StructuralNode>> groupedQueryExamples) {
         groupedQueryExamples.forEach((group, examples) -> {
             Collection<Runnable> groupQueries = new ArrayList<>();
             examples.forEach(example -> {
