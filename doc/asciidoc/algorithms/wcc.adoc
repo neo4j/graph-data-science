@@ -290,7 +290,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher, role=setup-query]
+[source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create(
     'myGraph',
@@ -437,7 +437,7 @@ It is then recommended to run WCC without seeds.
 To show this in practice, we will run the algorithm, then add another node to our graph, then run the algorithm again with the `seedProperty` configuration parameter.
 We will use the weighted variant of WCC.
 
-[role=query-example]
+[role=query-example, testGroup=seeding]
 --
 .The following will run the algorithm and write back results:
 [source, cypher]
@@ -458,7 +458,7 @@ YIELD nodePropertiesWritten, componentCount;
 |===
 --
 
-[role=query-example]
+[role=query-example, testGroup=seeding]
 --
 .The following will create a new node in the Neo4j graph, with no component ID:
 [source, cypher]
@@ -477,7 +477,7 @@ CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
 Note, that we can not use our already created graph as it does not contain the component id.
 We will therefore create a second graph that contains the previously computed component id.
 
-[role=query-example-no-result]
+[role=query-example, testType=no-result, testGroup=seeding]
 --
 .The following will create a new graph containing the previously computed component id:
 [source, cypher]
@@ -494,7 +494,7 @@ CALL gds.graph.create(
 ----
 --
 
-[role=query-example]
+[role=query-example, testGroup=seeding]
 --
 .The following will run the algorithm and stream results:
 [source, cypher]
@@ -522,7 +522,7 @@ RETURN gds.util.asNode(nodeId).name AS name, componentId ORDER BY componentId, n
 |===
 --
 
-[role=query-example]
+[role=query-example, testGroup=seeding]
 --
 .The following will run the algorithm and write back results:
 [source, cypher]

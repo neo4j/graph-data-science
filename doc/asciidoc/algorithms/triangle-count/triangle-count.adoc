@@ -271,7 +271,7 @@ This is because the Triangle Count algorithm is defined only for undirected grap
 include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=setup-query]
+[source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create(
   'myGraph',
