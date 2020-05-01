@@ -29,12 +29,10 @@ include::wcc.adoc[leveloffset=+1]
 
 include::triangle-count/triangle-count.adoc[leveloffset=+1]
 
+include::local-clustering-coefficient/local-clustering-coefficient.adoc[leveloffset=+1]
+
 include::beta/k1coloring.adoc[leveloffset=+1]
 
 include::beta/modularity-optimization.adoc[leveloffset=+1]
 
 include::alpha/alpha-strongly-connected-components.adoc[leveloffset=+1]
-
-include::triangle-count/triangle-count.adoc[leveloffset=+1]
-
-include::triangle-count/local-clustering-coefficient.adoc[leveloffset=+1]

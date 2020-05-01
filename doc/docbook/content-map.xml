@@ -80,6 +80,9 @@
                 <d:tocentry linkend="algorithms-triangle-count">
                     <?dbhtml filename="algorithms/triangle-count/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-local-clustering-coefficient">
+                    <?dbhtml filename="algorithms/local-clustering-coefficient/local-clustering-coefficient/index.html"?>
+                </d:tocentry>
 
                 <d:tocentry linkend="algorithms-k1coloring">
                     <?dbhtml filename="algorithms/k1coloring/index.html"?>
@@ -90,12 +93,6 @@
 
                 <d:tocentry linkend="algorithms-strongly-connected-components">
                     <?dbhtml filename="algorithms/strongly-connected-components/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-triangle-count">
-                    <?dbhtml filename="algorithms/triangle-count/triangle-count/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-local-clustering-coefficient">
-                    <?dbhtml filename="algorithms/triangle-count/local-clustering-coefficient/index.html"?>
                 </d:tocentry>
             </d:tocentry>
 

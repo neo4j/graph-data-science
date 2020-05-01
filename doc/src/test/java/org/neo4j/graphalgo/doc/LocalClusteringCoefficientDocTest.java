@@ -45,7 +45,7 @@ class LocalClusteringCoefficientDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/triangle-count/local-clustering-coefficient.adoc";
+        return "algorithms/local-clustering-coefficient/local-clustering-coefficient.adoc";
     }
 
 }
