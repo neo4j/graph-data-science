@@ -28,12 +28,9 @@ import org.asciidoctor.extension.Treeprocessor;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Extension for Asciidoctor.
@@ -56,8 +53,9 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     private final SetupQueryConsumer setupQueryConsumer;
     private final QueryExampleConsumer queryExampleConsumer;
     private final QueryExampleNoResultConsumer queryExampleNoResultConsumer;
-    private final List<String> graphCreateQueries;
     private final Runnable cleanup;
+
+    private List<String> graphCreateQueries;
 
     public QueryConsumingTreeProcessor(
         SetupQueryConsumer setupQueryConsumer,
@@ -76,40 +74,32 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     @Override
     public Document process(Document document) {
         consumeSetupQueries(document);
-        collectSetupQueries(document, graphCreateQueries, GRAPH_CREATE_QUERY_ROLE);
+        graphCreateQueries = collectSetupQueries(document, GRAPH_CREATE_QUERY_ROLE);
         consumeQueryExamples(document);
         return document;
     }
 
     private void consumeSetupQueries(Document document) {
-        List<String> setupQueries = new ArrayList<>();
-        collectSetupQueries(document, setupQueries, SETUP_QUERY_ROLE);
+        List<String> setupQueries = collectSetupQueries(document, SETUP_QUERY_ROLE);
         setupQueryConsumer.consume(setupQueries);
     }
 
-    private void collectSetupQueries(StructuralNode node, List<String> setupQueries, String setupQueryType) {
-        node.getBlocks().stream()
-            .filter(Objects::nonNull)
-            .forEach(it -> {
-                if (it.getRoles().contains(setupQueryType)) {
-                    setupQueries.add(undoReplacements(it.getContent().toString()));
-                } else {
-                    collectSetupQueries(it, setupQueries, setupQueryType);
-                }
-            });
+    private List<String> collectSetupQueries(StructuralNode node, String setupQueryType) {
+        List<StructuralNode> nodes = node.findBy(Map.of("role", setupQueryType));
+        return nodes
+            .stream()
+            .map(StructuralNode::getContent)
+            .map(Object::toString)
+            .map(this::undoReplacements)
+            .collect(Collectors.toList());
+
     }
 
     private void consumeQueryExamples(StructuralNode node) {
-        node.getBlocks()
-            .forEach(it -> {
-                if (it.getRoles().contains(QUERY_EXAMPLE_ROLE)) {
-                    processExample(() -> processCypherExample(it));
-                } else if (it.getRoles().contains(QUERY_EXAMPLE_NO_RESULT_ROLE)) {
-                    processExample(() -> processCypherNoResultExample(it));
-                } else {
-                    consumeQueryExamples(it);
-                }
-            });
+        List<StructuralNode> queryExamples = node.findBy(Map.of("role", QUERY_EXAMPLE_ROLE));
+        queryExamples.forEach(q -> processExample(() -> processCypherExample(q)));
+        List<StructuralNode> queryNoResultExamples = node.findBy(Map.of("role", QUERY_EXAMPLE_NO_RESULT_ROLE));
+        queryNoResultExamples.forEach(q -> processExample(() -> processCypherNoResultExample(q)));
     }
 
     private void processExample(Runnable example) {
@@ -119,8 +109,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     }
 
     private void processCypherExample(StructuralNode cypherExample) {
-        List<StructuralNode> blocks = cypherExample.getBlocks();
-        Table resultTable = (Table) blocks.get(1);
+        Table resultTable = (Table) findByContext(cypherExample, ":table");
         List<String> headers = resultTable != null ? headers(resultTable) : Collections.emptyList();
         List<Row> rows = resultTable != null ? resultTable.getBody() : Collections.emptyList();
         queryExampleConsumer.consume(getCypherQuery(cypherExample), headers, rows);
@@ -131,7 +120,15 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     }
 
     private String getCypherQuery(StructuralNode cypherExample) {
-        return undoReplacements(cypherExample.getBlocks().get(0).getContent().toString());
+        return findByContext(cypherExample, ":listing").getContent().toString();
+    }
+
+    private StructuralNode findByContext(StructuralNode node, String context) {
+        return node
+            .findBy(Map.of("context", context))
+            .stream()
+            .findFirst()
+            .orElseThrow(IllegalArgumentException::new);
     }
 
     private List<String> headers(Table table) {
@@ -144,42 +141,6 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
         return content
             .replaceAll("&gt;", ">")
             .replaceAll("&lt;", "<");
-    }
-
-    static class Testable {
-
-        private final List<String> columns;
-        private final List<Row> rows;
-
-        public Testable(List<String> columns, List<Row> rows) {
-            this.columns = columns;
-            this.rows = rows;
-        }
-
-        static Testable of(List<String> headers, List<Row> rows) {
-            return new Testable(headers, rows);
-        }
-
-        List<String> columns() {
-            return columns;
-        }
-
-        List<Row> rows() {
-            return rows;
-        }
-
-        List<Map<String, Object>> toMaps() {
-            return rows().stream()
-                .filter(row ->
-                    // Exclude final "n rows" row
-                    !(row.getCells().size() == 1 && row.getCells().get(0).getText().endsWith("rows"))
-                ).map(row -> {
-                    Map<String, Object> thing = new HashMap<>();
-                    IntStream.range(0, row.getCells().size())
-                        .forEach(i -> thing.put(columns().get(i), row.getCells().get(i).getText()));
-                    return thing;
-                }).collect(Collectors.toList());
-        }
     }
 
     @FunctionalInterface
@@ -196,5 +157,4 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     interface SetupQueryConsumer {
         void consume(List<String> setupQueries);
     }
-
 }
