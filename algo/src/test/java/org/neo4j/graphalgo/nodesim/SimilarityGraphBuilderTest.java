@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.stream.Stream;
@@ -61,7 +60,7 @@ class SimilarityGraphBuilderTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(Orientation.NATURAL)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         assertEquals(HugeGraph.class, graph.getClass());
 
@@ -89,7 +88,7 @@ class SimilarityGraphBuilderTest extends AlgoTestBase {
             .addRelationshipType("LOVES")
             .globalOrientation(Orientation.NATURAL)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         assertEquals(UnionGraph.class, graph.getClass());
 

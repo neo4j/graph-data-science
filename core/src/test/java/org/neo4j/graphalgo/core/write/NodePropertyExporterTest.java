@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import java.util.Arrays;
@@ -61,7 +60,7 @@ class NodePropertyExporterTest extends BaseTest {
         Graph graph = new StoreLoaderBuilder().api(db)
             .addNodeProperty("newProp1", "prop1", 42.0, Aggregation.NONE)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodePropertyExporter exporter = NodePropertyExporter.builder(db, graph, TerminationFlag.RUNNING_TRUE).build();
 
@@ -71,7 +70,7 @@ class NodePropertyExporterTest extends BaseTest {
             .addNodeProperty("prop1", "prop1", 42.0, Aggregation.NONE)
             .addNodeProperty("newProp1", "newProp1", 42.0, Aggregation.NONE)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         assertGraphEquals(
             fromGdl(
@@ -92,7 +91,7 @@ class NodePropertyExporterTest extends BaseTest {
             .addNodeProperty("newProp1", "prop1", 42.0, Aggregation.NONE)
             .addNodeProperty("newProp2", "prop2", 42.0, Aggregation.NONE)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodePropertyExporter exporter = NodePropertyExporter.builder(db, graph, TerminationFlag.RUNNING_TRUE).build();
 
@@ -108,7 +107,7 @@ class NodePropertyExporterTest extends BaseTest {
             .addNodeProperty("newProp1", "newProp1", 42.0, Aggregation.NONE)
             .addNodeProperty("newProp2", "newProp2", 42.0, Aggregation.NONE)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         assertGraphEquals(
             fromGdl(

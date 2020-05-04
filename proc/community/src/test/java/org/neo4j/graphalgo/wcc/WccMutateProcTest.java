@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.values.storable.NumberType;
 
@@ -92,7 +91,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
         var testGraphName = "wccGraph";
         var initialGraphStore = new StoreLoaderBuilder().api(db)
             .build()
-            .graphStore(NativeFactory.class);
+            .graphStore();
 
         GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
 
@@ -120,7 +119,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMut
         var updatedGraph = new StoreLoaderBuilder().api(db)
             .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         assertGraphEquals(fromGdl(expectedMutatedGraph()), updatedGraph);
     }

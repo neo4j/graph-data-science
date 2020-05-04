@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Arrays;
@@ -94,7 +93,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
         GraphStoreCatalog.set(
             graphCreateConfig,
-            graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
+            graphLoader(graphCreateConfig).build().build().graphStore()
         );
 
         String query = GdsCypher.call()

@@ -73,7 +73,7 @@ class ProgressLoggingTest extends BaseTest {
             .addRelationshipType(RELATIONSHIP)
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
             .build()
-            .load(NativeFactory.class);
+            .load();
 
         final String output = buffer.toString();
         assertTrue(output.length() > 0);
@@ -88,7 +88,7 @@ class ProgressLoggingTest extends BaseTest {
             .addRelationshipType(RELATIONSHIP)
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
             .build()
-            .load(NativeFactory.class);
+            .load();
 
         final StringWriter buffer = new StringWriter();
 

@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Node;
@@ -98,7 +97,7 @@ class SccTest extends AlgoTestBase {
             .addRelationshipType("TYPE")
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
     }
 
     private void assertBelongSameSet(HugeLongArray data, Long... expected) {

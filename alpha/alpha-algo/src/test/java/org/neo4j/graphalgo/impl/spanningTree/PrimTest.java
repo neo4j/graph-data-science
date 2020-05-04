@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
@@ -143,7 +142,7 @@ class PrimTest extends AlgoTestBase {
             .globalOrientation(Orientation.UNDIRECTED)
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         runInTransaction(db, tx -> {
             a = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "a").getId()));

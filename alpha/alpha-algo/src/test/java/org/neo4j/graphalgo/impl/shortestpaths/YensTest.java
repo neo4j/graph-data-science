@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Node;
 
@@ -94,7 +93,7 @@ class YensTest extends AlgoTestBase {
             )
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
     }
 
     @Test

@@ -29,9 +29,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.functions.NodePropertyFunc;
 import org.neo4j.values.storable.NumberType;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,7 +87,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         var testGraphName = "lpaGraph";
         var initialGraphStore = new StoreLoaderBuilder().api(db)
             .build()
-            .graphStore(NativeFactory.class);
+            .graphStore();
 
         GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
 
@@ -117,7 +115,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         var updatedGraph = new StoreLoaderBuilder().api(db)
             .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         assertGraphEquals(fromGdl(expectedMutatedGraph()), updatedGraph);
     }

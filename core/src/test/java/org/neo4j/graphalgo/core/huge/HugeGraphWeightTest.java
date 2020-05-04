@@ -105,7 +105,7 @@ final class HugeGraphWeightTest extends BaseTest {
             .api(db)
             .addRelationshipProperty(PropertyMapping.of("weight", 0))
             .build()
-            .load(NativeFactory.class);
+            .load();
     }
 
 }

@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.PrivateLookup;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -125,7 +124,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
                 .api(db)
                 .executorService(pool)
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
             fail("Should have thrown an Exception.");
         } catch (Exception e) {
             assertEquals(message, e.getMessage());
@@ -188,7 +187,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
             .executorService(pool);
         block.accept(loader);
         try {
-            return loader.build().graphStore(NativeFactory.class);
+            return loader.build().graphStore();
         } catch (Exception e) {
             markFailure();
             throw e;

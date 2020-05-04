@@ -64,7 +64,7 @@ final class LoadingTest extends BaseTest {
                 .addNodeLabel("Node")
                 .addRelationshipType("TYPE")
                 .build()
-                .load(NativeFactory.class);
+                .load();
 
         assertEquals(3, graph.nodeCount());
 

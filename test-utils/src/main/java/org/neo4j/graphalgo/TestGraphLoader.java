@@ -103,14 +103,14 @@ public final class TestGraphLoader {
 
     public <T extends GraphStoreFactory> Graph graph(Class<T> graphStoreFactory) {
         try (Transaction ignored = db.beginTx()) {
-            GraphStore graphStore = loader(graphStoreFactory).graphStore(graphStoreFactory);
+            GraphStore graphStore = loader(graphStoreFactory).graphStore();
             return graphStore.getUnion();
         }
     }
 
     public <T extends GraphStoreFactory> GraphStore graphStore(Class<T> graphStoreFactory) {
         try (Transaction ignored = db.beginTx()) {
-            return loader(graphStoreFactory).build(graphStoreFactory).build().graphStore();
+            return loader(graphStoreFactory).build().build().graphStore();
         }
     }
 

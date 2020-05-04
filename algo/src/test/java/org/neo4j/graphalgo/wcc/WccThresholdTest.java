@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
@@ -90,7 +89,7 @@ class WccThresholdTest extends AlgoTestBase {
                 ).build()))
             .build();
 
-        Graph graph = graphLoader.graph(NativeFactory.class);
+        Graph graph = graphLoader.graph();
 
         WccStreamConfig wccConfig = ImmutableWccStreamConfig
             .builder()

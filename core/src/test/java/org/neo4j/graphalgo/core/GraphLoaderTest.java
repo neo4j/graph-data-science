@@ -154,7 +154,7 @@ class GraphLoaderTest extends BaseTest {
                 .api(db)
                 .terminationFlag(terminationFlag)
                 .build()
-                .load(NativeFactory.class)
+                .load()
         );
     }
 }

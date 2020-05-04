@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -131,7 +130,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .addRelationshipType(type.name())
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
 
         DijkstraConfig config = DijkstraConfig.of(nodeIds[0], nodeIds[nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
@@ -162,7 +161,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .addRelationshipType(type.name())
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
 
         DijkstraConfig config = DijkstraConfig.of(nodeIds[0], nodeIds[nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
@@ -194,7 +193,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .addRelationshipType(type.name())
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
 
         DijkstraConfig config = DijkstraConfig.of(expected.nodeIds[0], expected.nodeIds[expected.nodeIds.length - 1]);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);
@@ -226,7 +225,7 @@ final class ShortestPathDijkstraTest extends AlgoTestBase {
                 .addRelationshipType("TYPE1")
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
 
         DijkstraConfig config = DijkstraConfig.of(head, tail);
         ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph, config);

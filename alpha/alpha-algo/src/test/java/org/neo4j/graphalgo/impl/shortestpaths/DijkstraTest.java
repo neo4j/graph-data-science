@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Node;
 
@@ -81,7 +80,7 @@ class DijkstraTest extends AlgoTestBase {
             .globalOrientation(Orientation.UNDIRECTED)
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         edgeBlackList = new LongArrayList();
 

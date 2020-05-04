@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.values.storable.Values;
 
 import java.util.Collections;
@@ -88,7 +87,7 @@ class RelationshipExporterTest extends BaseTest {
             )
             .addRelationshipProperty("newWeight", "weight2", 0, Aggregation.NONE)
             .build()
-            .graphStore(NativeFactory.class);
+            .graphStore();
 
         RelationshipExporter
             .of(db, graphStore.getGraph(RelationshipType.of("NEW_REL"), Optional.of("newWeight")), RUNNING_TRUE)
@@ -154,7 +153,7 @@ class RelationshipExporterTest extends BaseTest {
 
         Graph fromGraph = storeLoaderBuilder
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
 
         // export into new database
@@ -196,6 +195,6 @@ class RelationshipExporterTest extends BaseTest {
         if (loadRelProperty) {
             loader.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN));
         }
-        return loader.build().graph(NativeFactory.class);
+        return loader.build().graph();
     }
 }

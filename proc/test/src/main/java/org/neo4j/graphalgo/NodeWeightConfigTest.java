@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
@@ -126,7 +125,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
 
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig)
-                .build(NativeFactory.class)
+                .build()
                 .build()
                 .graphStore();
             GraphStoreCatalog.set(graphCreateConfig, graphStore);
@@ -192,7 +191,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
             .build();
 
         GraphStore graphStore = graphLoader(db, graphCreateConfig)
-            .build(NativeFactory.class)
+            .build()
             .build()
             .graphStore();
 

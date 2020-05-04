@@ -61,7 +61,7 @@ final class UndirectedLoopsTest extends BaseTest {
                 .api(db)
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
 
         LongArrayList nodes = new LongArrayList();
         graph.forEachNode(nodeId -> {

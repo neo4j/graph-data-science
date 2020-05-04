@@ -97,7 +97,7 @@ class GraphStoreTest extends BaseTest {
             .relationshipProjections(relationshipProjections())
             .build();
 
-        GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
+        GraphStore graphStore = graphLoader.graphStore();
 
         Graph filteredGraph = graphStore.getGraph(relTypes, relProperty);
 
@@ -114,7 +114,7 @@ class GraphStoreTest extends BaseTest {
             .addRelationshipProjection(RelationshipProjection.of("T1", Orientation.NATURAL))
             .build();
 
-        GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
+        GraphStore graphStore = graphLoader.graphStore();
 
         Graph filteredGraph = graphStore.getGraph(labels, graphStore.relationshipTypes(), Optional.empty());
 
@@ -130,7 +130,7 @@ class GraphStoreTest extends BaseTest {
             .putNodeProjectionsWithIdentifier("All", NodeProjection.all())
             .build();
 
-        GraphStore graphStore = graphLoader.graphStore(NativeFactory.class);
+        GraphStore graphStore = graphLoader.graphStore();
 
         Graph filteredAGraph = graphStore.getGraph(
             Collections.singletonList(LABEL_A),
@@ -156,7 +156,7 @@ class GraphStoreTest extends BaseTest {
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
             .build()
-            .graphStore(NativeFactory.class);
+            .graphStore();
 
         // add node properties
         ZonedDateTime initialTime = graphStore.modificationTime();
@@ -190,7 +190,7 @@ class GraphStoreTest extends BaseTest {
             .api(db)
             .addNodeProperty(PropertyMapping.of("nodeProp", 0D))
             .build()
-            .graphStore(NativeFactory.class);
+            .graphStore();
 
         assertTrue(graphStore.hasNodeProperty(Collections.singletonList(ALL_NODES), "nodeProp"));
         graphStore.removeNodeProperty(ALL_NODES, "nodeProp");
@@ -217,7 +217,7 @@ class GraphStoreTest extends BaseTest {
                 )
             )
             .build()
-            .graphStore(NativeFactory.class);
+            .graphStore();
 
         assertThat(graphStore.relationshipCount(), equalTo(4L));
         assertThat(graphStore.relationshipPropertyCount(), equalTo(7L));

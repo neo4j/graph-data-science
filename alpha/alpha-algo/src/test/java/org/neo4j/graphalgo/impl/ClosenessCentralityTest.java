@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
 
@@ -120,6 +119,6 @@ class ClosenessCentralityTest extends AlgoTestBase {
         graph = new StoreLoaderBuilder()
             .api(db)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
     }
 }

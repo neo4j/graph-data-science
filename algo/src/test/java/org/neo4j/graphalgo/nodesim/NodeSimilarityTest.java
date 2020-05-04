@@ -40,7 +40,6 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
@@ -234,7 +233,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -260,7 +259,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -286,7 +285,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -315,7 +314,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -341,7 +340,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -374,7 +373,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -403,7 +402,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -432,7 +431,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(UNDIRECTED)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -453,7 +452,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -510,7 +509,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -563,7 +562,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -604,7 +603,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .globalOrientation(orientation)
             .globalAggregation(Aggregation.NONE)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
@@ -631,7 +630,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(UNDIRECTED)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         IllegalArgumentException ex = Assertions.assertThrows(
             IllegalArgumentException.class,
@@ -775,7 +774,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         var graph =  new StoreLoaderBuilder()
             .api(db)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         var progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity", concurrency);
 
@@ -814,7 +813,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(NATURAL)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         var progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity", concurrency);
 

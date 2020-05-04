@@ -415,7 +415,7 @@ class LouvainTest extends AlgoTestBase {
 
                 return cypherLoaderBuilder
                     .build()
-                    .graph(factoryType);
+                    .graph();
             });
         } else {
             StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
@@ -435,7 +435,7 @@ class LouvainTest extends AlgoTestBase {
             }
             return storeLoaderBuilder
                 .build()
-                .graph(factoryType);
+                .graph();
         }
     }
 }

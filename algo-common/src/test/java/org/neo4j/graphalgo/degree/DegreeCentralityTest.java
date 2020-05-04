@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Label;
 
@@ -136,14 +135,14 @@ final class DegreeCentralityTest extends AlgoTestBase {
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                     .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target")
                     .build()
-                    .graph(factoryType));
+                    .graph());
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)
                 .addNodeLabel(label.name())
                 .addRelationshipType("TYPE1")
                 .build()
-                .graph(factoryType);
+                .graph();
         }
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
@@ -191,7 +190,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                     .relationshipQuery("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
                     .build()
-                    .graph(factoryType));
+                    .graph());
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)
@@ -199,7 +198,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
                 .addRelationshipType("TYPE1")
                 .globalOrientation(Orientation.REVERSE)
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
         }
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(graph, Pools.DEFAULT, 4, false, AllocationTracker.EMPTY);
@@ -243,7 +242,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN DISTINCT id(n) AS source, id(m) AS target")
                 .build()
-                .graph(factoryType));
+                .graph());
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)
@@ -252,7 +251,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
                 .globalOrientation(Orientation.UNDIRECTED)
                 .globalAggregation(Aggregation.SINGLE)
                 .build()
-                .graph(factoryType);
+                .graph();
         }
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(

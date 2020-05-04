@@ -213,7 +213,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             : withNameAndRelationshipQuery("", loadedGraphName, relationshipQuery());
 
         applyOnProcedure((proc) -> {
-            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore(graphStoreFactory);
+            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
             GraphStoreCatalog.set(
                 graphCreateConfig,
                 graphStore
@@ -280,7 +280,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         applyOnProcedure((proc) -> {
             GraphStoreCatalog.set(
                 graphCreateConfig,
-                graphLoader(graphCreateConfig).build(graphStoreFactory).build().graphStore()
+                graphLoader(graphCreateConfig).build().build().graphStore()
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);

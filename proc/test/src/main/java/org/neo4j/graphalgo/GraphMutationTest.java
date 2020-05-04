@@ -80,7 +80,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             );
             GraphStoreCatalog.set(
                 graphCreateConfig,
-                graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
+                graphLoader(graphCreateConfig).build().build().graphStore()
             );
             return loadedGraphName;
         });
@@ -185,7 +185,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
         });
 
         GraphLoader loader = storeLoaderBuilder.build();
-        GraphStoreCatalog.set(loader.createConfig(), loader.graphStore(NativeFactory.class));
+        GraphStoreCatalog.set(loader.createConfig(), loader.graphStore());
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)
@@ -234,7 +234,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             );
             GraphStoreCatalog.set(
                 graphCreateConfig,
-                graphLoader(graphCreateConfig).build(NativeFactory.class).build().graphStore()
+                graphLoader(graphCreateConfig).build().build().graphStore()
             );
             return loadedGraphName;
         });

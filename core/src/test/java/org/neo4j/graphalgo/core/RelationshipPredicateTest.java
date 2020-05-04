@@ -70,7 +70,7 @@ class RelationshipPredicateTest extends BaseTest {
         final Graph graph = new StoreLoaderBuilder()
             .api(db)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         // A -> B
         assertTrue(graph.exists(
@@ -116,7 +116,7 @@ class RelationshipPredicateTest extends BaseTest {
         final Graph graph = loader()
                 .globalOrientation(Orientation.REVERSE)
                 .build()
-                .load(NativeFactory.class);
+                .load();
 
         // B <- A
         assertTrue(graph.exists(
@@ -163,7 +163,7 @@ class RelationshipPredicateTest extends BaseTest {
         final Graph graph = loader()
                 .globalOrientation(Orientation.UNDIRECTED)
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
 
         // A -> B
         assertTrue(graph.exists(

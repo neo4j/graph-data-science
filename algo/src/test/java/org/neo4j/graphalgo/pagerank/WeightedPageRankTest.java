@@ -143,7 +143,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .relationshipQuery(
                         "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, 0 as weight")
                     .build()
-                    .graph(graphStoreFactory)
+                    .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -152,7 +152,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                 .addRelationshipType("TYPE1")
                 .addRelationshipProperty(PropertyMapping.of("weight", 0))
                 .build()
-                .graph(graphStoreFactory);
+                .graph();
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -197,7 +197,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .relationshipQuery(
                         "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, 1 as weight")
                     .build()
-                    .graph(graphStoreFactory)
+                    .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -206,7 +206,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .addRelationshipType("TYPE1")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1))
                     .build()
-                    .graph(graphStoreFactory);
+                    .graph();
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -251,7 +251,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .relationshipQuery(
                         "MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(r.weight, 0) AS weight")
                     .build()
-                    .graph(graphStoreFactory)
+                    .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -260,7 +260,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .addRelationshipType("TYPE2")
                     .addRelationshipProperty(PropertyMapping.of("weight", 0))
                     .build()
-                    .graph(graphStoreFactory);
+                    .graph();
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -305,7 +305,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                         .relationshipQuery(
                             "MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(r.weight, 0) AS weight")
                         .build()
-                        .graph(graphStoreFactory)
+                        .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -314,7 +314,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .addRelationshipType("TYPE3")
                     .addRelationshipProperty(PropertyMapping.of("weight", 0))
                     .build()
-                    .graph(graphStoreFactory);
+                    .graph();
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -359,7 +359,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .relationshipQuery(
                         "MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(r.weight, 0) AS weight")
                     .build()
-                    .graph(graphStoreFactory)
+                    .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -368,7 +368,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
                     .addRelationshipType("TYPE4")
                     .addRelationshipProperty(PropertyMapping.of("weight", 0))
                     .build()
-                    .graph(graphStoreFactory);
+                    .graph();
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED

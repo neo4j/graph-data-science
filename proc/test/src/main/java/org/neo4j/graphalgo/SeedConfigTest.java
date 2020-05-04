@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -104,7 +103,7 @@ public interface SeedConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
         GraphCreateConfig graphCreateConfig = emptyWithNameNative("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore(NativeFactory.class);
+            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
 
             GraphStoreCatalog.set(graphCreateConfig, graphStore);
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(

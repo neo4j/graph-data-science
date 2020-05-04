@@ -83,7 +83,7 @@ class DijkstraProcTest_152 extends BaseProcTest {
             .addRelationshipType("ROAD")
             .addRelationshipProperty(PropertyMapping.of("d", 0))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, DijkstraConfig.of(startNodeId, endNodeId));
         dijkstra.compute();
@@ -106,7 +106,7 @@ class DijkstraProcTest_152 extends BaseProcTest {
             .globalAggregation(Aggregation.NONE)
             .addRelationshipProperty(PropertyMapping.of("d", 0))
             .build()
-            .load(NativeFactory.class);
+            .load();
 
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, DijkstraConfig.of(startNodeId, endNodeId));
         dijkstra.compute();

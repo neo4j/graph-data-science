@@ -78,7 +78,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             .addNodeLabel(label.name())
             .addNodeProperty(PropertyMapping.of("bar", -1.0))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         NodeProperties nodeProperties = graph.nodeProperties("bar");
         long propertyCountDiff = nodeCount - nodeProperties.size();
@@ -114,7 +114,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         final Graph graph = new StoreLoaderBuilder()
             .api(db)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         assertEquals(nodeCount, graph.nodeCount());
     }
@@ -144,7 +144,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             .api(db)
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         assertEquals(11, graph.relationshipCount());
     }
@@ -172,7 +172,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             )
             .addNodeProperty(PropertyMapping.of("id", 42.0))
             .build()
-            .graphStore(NativeFactory.class);
+            .graphStore();
 
         Graph natural = graphStore.getGraph(RelationshipType.of("TYPE_NATURAL"));
         assertGraphEquals(fromGdl("({id: 0})-->({id: 1})"), natural);

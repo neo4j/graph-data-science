@@ -39,7 +39,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -101,7 +100,7 @@ final class LabelPropagationTest extends AlgoTestBase {
                 .build();
         }
 
-        return applyInTransaction(db, tx -> graphLoader.load(graphImpl));
+        return applyInTransaction(db, tx -> graphLoader.load());
     }
 
     @AllGraphTypesTest
@@ -127,7 +126,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             .addRelationshipType("FOLLOW")
             .addNodeProperty(PropertyMapping.of("seedId", 0.0))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         LabelPropagation lp = new LabelPropagation(
             graph,
@@ -254,7 +253,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             .addNodeLabel("User")
             .addRelationshipType("FOLLOW")
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         var testLogger = new TestProgressLogger(graph.relationshipCount(), "LabelPropagation", defaultConfig().concurrency());
 

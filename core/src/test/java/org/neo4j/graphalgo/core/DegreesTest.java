@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Label;
 
 import java.util.Arrays;
@@ -180,7 +179,7 @@ class DegreesTest extends AlgoTestBase {
                 RelationshipProjection.of("TYPE", Orientation.UNDIRECTED)
             )
             .build()
-            .graphStore(NativeFactory.class);
+            .graphStore();
 
         if (orientation == Orientation.NATURAL) {
             graph = graphStore.getGraph(RelationshipType.of("TYPE_OUT"));

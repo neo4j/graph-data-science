@@ -110,7 +110,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             ).graphName("myGraph")
             .api(db)
             .build()
-            .build(NativeFactory.class)
+            .build()
             .build()
             .graphStore();
 
@@ -152,7 +152,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             ).graphName("myGraph")
             .api(db)
             .build()
-            .build(NativeFactory.class)
+            .build()
             .build()
             .graphStore();
 
@@ -337,7 +337,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                     .type(rel2.name)
                     .addProperty(prop2, prop2, Double.NaN)
                     .build()
-            ).build().graphStore(NativeFactory.class);
+            ).build().graphStore();
 
         assertEquals(2, graphStore.relationshipTypes().size());
         assertEquals(graphStore.relationshipTypes(), new HashSet<>(asList(

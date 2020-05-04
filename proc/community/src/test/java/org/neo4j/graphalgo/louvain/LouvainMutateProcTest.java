@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.values.storable.NumberType;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -144,7 +143,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
             .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
             .addNodeProperty("seed", "seed", 42.0, Aggregation.NONE)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         assertGraphEquals(fromGdl(expectedMutatedGraph()), updatedGraph);
     }

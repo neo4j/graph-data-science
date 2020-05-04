@@ -82,7 +82,7 @@ class WeightedAllShortestPathsTest extends AlgoTestBase {
             .addRelationshipType(RELATIONSHIP)
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
             .build()
-            .load(NativeFactory.class);
+            .load();
     }
 
     @Test
@@ -114,7 +114,7 @@ class WeightedAllShortestPathsTest extends AlgoTestBase {
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .build()
-            .load(NativeFactory.class);
+            .load();
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
             new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4);

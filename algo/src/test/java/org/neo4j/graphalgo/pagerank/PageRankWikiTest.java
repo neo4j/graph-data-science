@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
 
@@ -115,7 +114,7 @@ final class PageRankWikiTest extends AlgoTestBase {
                 .addNodeLabel("Node")
                 .addRelationshipType("TYPE")
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
                 .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)

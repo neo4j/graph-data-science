@@ -124,14 +124,14 @@ final class ArticleRankTest extends AlgoTestBase {
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
                 .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                 .build()
-                .graph(factoryType));
+                .graph());
         } else {
             graph = new StoreLoaderBuilder()
                 .api(db)
                 .addNodeLabel(label.name())
                 .addRelationshipType("TYPE1")
                 .build()
-                .graph(factoryType);
+                .graph();
         }
 
         final CentralityResult rankResult = LabsPageRankAlgorithmType.ARTICLE_RANK

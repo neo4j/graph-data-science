@@ -150,7 +150,7 @@ class BetweennessCentralityTest extends AlgoTestBase {
         graph = new StoreLoaderBuilder()
             .api(db)
             .build()
-            .load(NativeFactory.class);
+            .load();
     }
 
     private String name(long id) {

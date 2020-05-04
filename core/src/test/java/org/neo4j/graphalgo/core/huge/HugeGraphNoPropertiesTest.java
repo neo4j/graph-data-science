@@ -89,7 +89,7 @@ final class HugeGraphNoPropertiesTest extends BaseTest {
             .api(db)
             .globalOrientation(orientation)
             .build()
-            .load(NativeFactory.class);
+            .load();
     }
 
 }

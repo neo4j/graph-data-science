@@ -101,7 +101,7 @@ class RelationshipPropertiesImportTest extends BaseTest {
             .globalOrientation(orientation)
             .addRelationshipProperty(PropertyMapping.of("w", 0.0))
             .build()
-            .load(NativeFactory.class);
+            .load();
     }
 
     private void checkProperties(int nodeId, Orientation orientation, double... expecteds) {

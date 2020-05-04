@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
@@ -100,7 +99,7 @@ class KSpanningTreeTest extends AlgoTestBase {
             .globalOrientation(Orientation.UNDIRECTED)
             .addRelationshipProperty(PropertyMapping.of("w", 1.0))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         runInTransaction(db, tx -> {
             a = Math.toIntExact(graph.toMappedNodeId(tx.findNode(node, "name", "a").getId()));

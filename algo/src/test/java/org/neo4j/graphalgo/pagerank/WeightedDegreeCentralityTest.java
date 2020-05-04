@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Label;
 
@@ -140,7 +139,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                 .relationshipQuery(
                     "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(type.weight, 1) AS weight")
                 .build()
-                .graph(graphStoreFactory)
+                .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -149,7 +148,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .addRelationshipType("TYPE1")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
-                    .graph(graphStoreFactory);
+                    .graph();
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
@@ -181,7 +180,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                 .addNodeLabel("Label1")
                 .addRelationshipType("TYPE1")
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
             new WeightedDegreeCentrality(
@@ -225,7 +224,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .relationshipQuery(
                         "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, coalesce(type.weight, 1) AS weight")
                     .build()
-                    .graph(graphStoreFactory)
+                    .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -234,7 +233,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .addRelationshipType("TYPE1")
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
-                    .graph(graphStoreFactory);
+                    .graph();
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
@@ -283,7 +282,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .relationshipQuery(
                         "MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, coalesce(type.weight, 1) AS weight")
                     .build()
-                    .graph(graphStoreFactory)
+                    .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -292,7 +291,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                 .addRelationshipType("TYPE3")
                 .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                 .build()
-                .graph(graphStoreFactory);
+                .graph();
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
@@ -340,7 +339,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .relationshipQuery(
                         "MATCH (n:Label1)<-[t:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target, coalesce(t.weight, 1) AS weight")
                     .build()
-                    .graph(graphStoreFactory)
+                    .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -349,7 +348,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
                     .addRelationshipProjection(RelationshipProjection.of("TYPE1", Orientation.REVERSE))
                     .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
                     .build()
-                    .graph(graphStoreFactory);
+                    .graph();
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(

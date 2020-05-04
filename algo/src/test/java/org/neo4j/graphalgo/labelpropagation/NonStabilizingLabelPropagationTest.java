@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -67,12 +66,12 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
                 .nodeQuery(ALL_NODES_QUERY)
                 .relationshipQuery("MATCH (u1)-[rel]-(u2) RETURN id(u1) AS source, id(u2) AS target")
                 .build()
-                .graph(CypherFactory.class));
+                .graph());
         } else {
             return new StoreLoaderBuilder()
                 .api(db)
                 .build()
-                .graph(NativeFactory.class);
+                .graph();
         }
     }
 

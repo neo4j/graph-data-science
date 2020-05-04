@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.result.CentralityResult;
@@ -140,7 +139,7 @@ final class PageRankTest extends AlgoTestBase {
                         LABEL.name()
                     ))
                     .build()
-                    .graph(factoryType)
+                    .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -148,7 +147,7 @@ final class PageRankTest extends AlgoTestBase {
                 .addNodeLabel(LABEL.name())
                 .addRelationshipType(RELATIONSHIP_TYPE)
                 .build()
-                .graph(factoryType);
+                .graph();
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
@@ -198,7 +197,7 @@ final class PageRankTest extends AlgoTestBase {
                         LABEL.name()
                     ))
                     .build()
-                    .graph(factoryType)
+                    .graph()
             );
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
                 .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
@@ -211,7 +210,7 @@ final class PageRankTest extends AlgoTestBase {
                 .addRelationshipType(RELATIONSHIP_TYPE)
                 .globalOrientation(Orientation.REVERSE)
                 .build()
-                .graph(factoryType);
+                .graph();
 
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
                 .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
@@ -244,7 +243,7 @@ final class PageRankTest extends AlgoTestBase {
                     LABEL.name()
                 ))
                 .build()
-                .graph(factoryType)
+                .graph()
             );
         } else {
             graph = new StoreLoaderBuilder()
@@ -252,7 +251,7 @@ final class PageRankTest extends AlgoTestBase {
                 .addNodeLabel(LABEL.name())
                 .addRelationshipType(RELATIONSHIP_TYPE)
                 .build()
-                .graph(factoryType);
+                .graph();
         }
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
@@ -299,7 +298,7 @@ final class PageRankTest extends AlgoTestBase {
             .addNodeLabel(LABEL.name())
             .addRelationshipType(RELATIONSHIP_TYPE)
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         var config = ImmutablePageRankStreamConfig.builder().build();
 

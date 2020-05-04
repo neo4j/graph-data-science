@@ -26,12 +26,6 @@ import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
-
-import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
 @ValueClass
 public interface GraphLoader {
@@ -44,48 +38,6 @@ public interface GraphLoader {
     }
 
     GraphCreateConfig createConfig();
-
-    default Graph graph(Class<? extends GraphStoreFactory> factoryType) {
-        return load(factoryType);
-    }
-
-    default GraphStore graphStore(Class<? extends GraphStoreFactory> factoryType) {
-        return build(factoryType).build().graphStore();
-    }
-
-    /**
-     * Returns an instance of the factory that can be used to load the graph.
-     */
-    default <T extends GraphStoreFactory> T build(final Class<T> factoryType) {
-        try {
-            GraphStoreFactory factory;
-
-            if (CypherFactory.class.isAssignableFrom(factoryType)) {
-                factory = new CypherFactory((GraphCreateFromCypherConfig) createConfig(), context());
-            } else {
-                factory = new NativeFactory((GraphCreateFromStoreConfig) createConfig(), context());
-            }
-
-            return factoryType.cast(factory);
-        } catch (Throwable throwable) {
-            throwIfUnchecked(throwable);
-            throw new RuntimeException(throwable.getMessage(), throwable);
-        }
-    }
-
-    /**
-     * Loads the graph using the provided GraphFactory, passing the built
-     * configuration as parameters.
-     * <p>
-     * The chosen implementation determines the performance characteristics
-     * during load and usage of the Graph.
-     *
-     * @return the freshly loaded graph
-     */
-    default Graph load(Class<? extends GraphStoreFactory> factoryType) {
-        return build(factoryType).build().graphStore().getUnion();
-    }
-
 
     default Graph graph() {
         return load();

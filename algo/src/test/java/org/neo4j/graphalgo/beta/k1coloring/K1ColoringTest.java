@@ -93,7 +93,7 @@ class K1ColoringTest extends AlgoTestBase {
                 .build();
         }
 
-        graph = applyInTransaction(db, tx -> graphLoader.load(graphImpl));
+        graph = applyInTransaction(db, tx -> graphLoader.load());
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,

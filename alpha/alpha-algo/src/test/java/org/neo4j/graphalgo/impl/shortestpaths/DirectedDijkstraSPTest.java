@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.Label;
 
 import java.util.Optional;
@@ -84,7 +83,7 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("REL_BOTH", RelationshipProjection.of("REL", Orientation.UNDIRECTED, Aggregation.NONE))
             .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
             .build()
-            .graphStore(NativeFactory.class);
+            .graphStore();
     }
 
     private long id(String name) {

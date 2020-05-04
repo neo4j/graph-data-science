@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -81,7 +80,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         ModularityOptimization pmo = new ModularityOptimization(
             graph,
@@ -110,7 +109,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         ModularityOptimization pmo = new ModularityOptimization(
             graph,
@@ -139,7 +138,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .addNodeProperty(PropertyMapping.of("seed2", -1))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         ModularityOptimization pmo = new ModularityOptimization(
             graph,
@@ -170,7 +169,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .addNodeProperty(PropertyMapping.of("seed1", -1))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         ModularityOptimization pmo = new ModularityOptimization(
             graph,
@@ -208,7 +207,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         var testLogger = new TestProgressLogger(
             graph.relationshipCount(),
@@ -245,7 +244,7 @@ class ModularityOptimizationTest extends AlgoTestBase {
             .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
             .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
             .build()
-            .graph(NativeFactory.class);
+            .graph();
 
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
