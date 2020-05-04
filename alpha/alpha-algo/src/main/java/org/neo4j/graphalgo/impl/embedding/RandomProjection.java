@@ -132,7 +132,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
                 float[] currentEmbedding = new float[embeddingDimension];
                 localCurrent.set(nodeId, currentEmbedding);
-                graph.forEachRelationship(nodeId, (source, target) -> {
+                graph.concurrentCopy().forEachRelationship(nodeId, (source, target) -> {
                     addArrayValues(currentEmbedding, localPrevious.get(target));
                     return true;
                 });
