@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.triangle;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -54,7 +53,7 @@ class TriangleDocTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(TriangleProc.class, TriangleCountStreamProc.class, TriangleCountWriteProc.class);
+        registerProcedures(TriangleProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);
     }
@@ -92,115 +91,4 @@ class TriangleDocTest extends BaseProcTest {
 
         assertEquals(expected, actual);
     }
-
-    @Test
-    void shouldWriteTriangleCount() {
-        @Language("Cypher")
-        String query = " CALL gds.triangleCount.write({" +
-                       "   nodeProjection: 'Person'," +
-                       "   relationshipProjection: {" +
-                       "     KNOWS: {" +
-                       "       type: 'KNOWS'," +
-                       "       orientation: 'UNDIRECTED'" +
-                       "     }" +
-                       "   }," +
-                       "   writeProperty: 'triangles'" +
-                       " })" +
-                       " YIELD nodeCount, triangleCount";
-
-        String expected = "+---------------------------+" + NL +
-                          "| nodeCount | triangleCount |" + NL +
-                          "+---------------------------+" + NL +
-                          "| 6         | 3             |" + NL +
-                          "+---------------------------+" + NL +
-                          "1 row" + NL;
-
-        String actual = runQuery(query, Result::resultAsString);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void shouldStreamTriangleCount() {
-        @Language("Cypher")
-        String query = " CALL gds.triangleCount.stream({" +
-                       "   nodeProjection: 'Person'," +
-                       "   relationshipProjection: {" +
-                       "     KNOWS: {" +
-                       "       type: 'KNOWS'," +
-                       "       orientation: 'UNDIRECTED'" +
-                       "     }" +
-                       "   }," +
-                       "   concurrency: 4" +
-                       " })" +
-                       " YIELD nodeId, triangleCount as triangles" +
-                       " RETURN gds.util.asNode(nodeId).name AS name, triangles" +
-                       " ORDER BY triangles ASC";
-
-        String expected = "+-----------------------+" + NL +
-                          "| name      | triangles |" + NL +
-                          "+-----------------------+" + NL +
-                          "| \"Alice\"   | 0         |" + NL +
-                          "| \"Karin\"   | 1         |" + NL +
-                          "| \"Mark\"    | 1         |" + NL +
-                          "| \"Chris\"   | 2         |" + NL +
-                          "| \"Will\"    | 2         |" + NL +
-                          "| \"Michael\" | 3         |" + NL +
-                          "+-----------------------+" + NL +
-                          "6 rows" + NL;
-
-        String actual = runQuery(query, Result::resultAsString);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    @Disabled("Requires the Yelp dataset, which we don't load for tests.")
-    void shouldWriteTriangleCountForYelpDataset() {
-        @Language("Cypher")
-        String query = " CALL gds.triangleCount.write({" +
-                       "   nodeProjection: 'Person'," +
-                       "   relationshipProjection: {" +
-                       "     FRIEND: {" +
-                       "       type: 'FRIEND'," +
-                       "       orientation: 'UNDIRECTED'" +
-                       "     }" +
-                       "   }," +
-                       "   concurrency: 4," +
-                       "   writeProperty: 'triangles'" +
-                       " })" +
-                       " YIELD nodeCount, triangleCount";
-
-        String expected = "+---------------------------+" + NL +
-                          "| nodeCount | triangleCount |" + NL +
-                          "+---------------------------+" + NL +
-                          "| ?         | ?             |" + NL +
-                          "+---------------------------+" + NL +
-                          "1 row" + NL;
-
-        String actual = runQuery(query, Result::resultAsString);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void shouldWriteWithCypherProjection() {
-        String query = " CALL gds.triangleCount.write({" +
-                       "   nodeQuery: 'MATCH (p:Person) RETURN id(p) AS id'," +
-                       "   relationshipQuery: 'MATCH (p1:Person)-[:KNOWS]-(p2:Person) RETURN id(p1) AS source, id(p2) AS target'," +
-                       "   writeProperty: 'triangle'" +
-                       " }) YIELD nodeCount, triangleCount";
-
-        String expected = "+---------------------------+" + NL +
-                          "| nodeCount | triangleCount |" + NL +
-                          "+---------------------------+" + NL +
-                          "| 6         | 3             |" + NL +
-                          "+---------------------------+" + NL +
-                          "1 row" + NL;
-
-        String actual = runQuery(query, Result::resultAsString);
-
-        assertEquals(expected, actual);
-    }
-
 }
