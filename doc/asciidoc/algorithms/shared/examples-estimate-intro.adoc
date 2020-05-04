@@ -1,0 +1,9 @@
+First off, we will estimate the cost of running the algorithm using the `estimate` procedure.
+This can be done with any execution mode.
+We will use the `{mode}` mode in this example.
+Estimating the algorithm is useful to understand the memory impact that running the algorithm on your graph will have.
+When you later actually run the algorithm in one of the execution modes the system will perform an estimation.
+If the estimation shows that there is a very high probability of the execution going over its memory limitations, the execution is prohibited.
+To read more about this, see <<estimate-heap-control>>.
+
+For more details on `estimate` in general, see <<memory-estimation>>.

@@ -96,14 +96,14 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     public static class StatsResult {
-        public final long triangleCount;
+        public final long globalTriangleCount;
         public final long nodeCount;
         public final long createMillis;
         public final long computeMillis;
         public final Map<String, Object> configuration;
 
         public StatsResult(
-            long triangleCount,
+            long globalTriangleCount,
             long nodeCount,
             long createMillis,
             long computeMillis,
@@ -112,7 +112,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.nodeCount = nodeCount;
-            this.triangleCount = triangleCount;
+            this.globalTriangleCount = globalTriangleCount;
             this.configuration = configuration;
         }
     }

@@ -239,6 +239,7 @@ The intention is to illustrate what the results look like and to provide a guide
 We will do this on a small social network graph of a handful nodes connected in a particular pattern.
 The example graph looks like this:
 
+[[algorithms-triangle-count-examples-graph]]
 image::triangle_count.png[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
@@ -267,11 +268,7 @@ We do this using a native projection targeting the `Person` nodes and the `KNOWS
 For the relationships we must use the `UNDIRECTED` orientation.
 This is because the Triangle Count algorithm is defined only for undirected graphs.
 
-[NOTE]
-====
-In the examples below we will use named graphs and native projections as the norm.
-However, anonymous graphs and/or <<cypher-projection, Cypher projections>> could also be used.
-====
+include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=setup-query]
@@ -289,17 +286,14 @@ CALL gds.graph.create(
 
 WARNING: The Triangle Count algorithm requires the graph to be created using the `UNDIRECTED` orientation for relationships.
 
-In the following examples we will demonstrate using the Triangle Count algorithm on this graph (unless explicitly specified otherwise).
+In the following examples we will demonstrate using the Triangle Count algorithm on this graph.
 
 
 [[algorithms-triangle-count-examples-memory-estimation]]
 === Memory Estimation
-First off, we will estimate the cost of running the algorithm using the `estimate` procedure.
-This can be done with any execution mode.
-We will use the `write` mode in this example.
-Estimating the algorithm is useful to understand the memory impact that running the algorithm on your graph will have.
-When you later actually run the algorithm in one of the execution modes the system will do an estimation and prohibit execution if the estimation shows that there is a very high probability of the execution going over its memory limitations.
-To read more about this, see <<estimate-heap-control>>.
+
+:mode: write
+include::../shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
 --
@@ -311,7 +305,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 
 .Results
-[opts="header", cols="1,1,1,1,1"]
+[opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 6         | 16                | 144      | 144      | "144 Bytes"
@@ -324,6 +318,9 @@ This is because we used the `UNDIRECTED` orientation, which will project each re
 
 [[algorithms-triangle-count-examples-stream]]
 === Stream
+
+:stream-details: For example, we can order the results to find the nodes with the highest triangle count.
+include::../shared/examples-stream-intro.adoc[]
 
 .The following will run the algorithm in `stream` mode:
 [role=query-example]
@@ -349,8 +346,17 @@ ORDER BY triangleCount DESC
 |===
 --
 
+Here we find that the 'Michael' node has the most triangles.
+This can be verified in the <<algorithms-triangle-count-examples-graph, example graph>>.
+Since the 'Alice' node only `KNOWS` one other node, it can not be part of any triangle, and indeed the algorithm reports a count of zero.
+
+
 [[algorithms-triangle-count-examples-stats]]
 === Stats
+
+:stats-details: The summary result contains the global triangle count, which is the total number of triangles in the entire graph.
+:stats-syntax: algorithms-triangle-count-syntax-stats
+include::../shared/examples-stats-intro.adoc[]
 
 .The following will run the algorithm in `stats` mode:
 [role=query-example]
@@ -358,19 +364,27 @@ ORDER BY triangleCount DESC
 [source, cypher]
 ----
 CALL gds.triangleCount.stats('myGraph')
-YIELD triangleCount, nodeCount
+YIELD globalTriangleCount, nodeCount
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
-| triangleCount | nodeCount
-| 3             | 6
+| globalTriangleCount | nodeCount
+| 3                   | 6
 |===
 --
 
+Here we can see that the graph has six nodes with a total number of three triangles.
+Comparing this to the <<algorithms-triangle-count-examples-stream, stream example>> we can see that the 'Michael' node has a triangle count equal to the global triangle count.
+In other words, that node is part of all of the triangles in the graph and thus has a very central position in the graph.
+
+
 [[algorithms-triangle-count-examples-mutate]]
 === Mutate
+
+:mutate-details: For example, using the triangle count to compute the <<algorithms-local-clustering-coefficient-examples-pre-computed, local clustering coefficient>>.
+include::../shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
 --
@@ -380,21 +394,26 @@ YIELD triangleCount, nodeCount
 CALL gds.triangleCount.mutate('myGraph', {
   mutateProperty: 'triangles'
 })
-YIELD triangleCount, nodeCount
+YIELD globalTriangleCount, nodeCount
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
-| triangleCount | nodeCount
-| 3             | 6
+| globalTriangleCount | nodeCount
+| 3                   | 6
 |===
 --
 
-NOTE: In contrast to the `write` mode the result is written to the GDS in-memory graph instead of the Neo4j database.
+The returned result is the same as in the `stats` example.
+Additionally, the graph 'myGraph' now has a node property `triangles` which stores the triangle count for each node.
+To find out how to inspect the new schema of the in-memory graph, see <<catalog-graph-list>>.
+
 
 [[algorithms-triangle-count-examples-write]]
 === Write
+
+include::../shared/examples-write-intro.adoc[]
 
 [role=query-example]
 --
@@ -404,26 +423,28 @@ NOTE: In contrast to the `write` mode the result is written to the GDS in-memory
 CALL gds.triangleCount.write('myGraph', {
   writeProperty: 'triangles'
 })
-YIELD triangleCount, nodeCount
+YIELD globalTriangleCount, nodeCount
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
-| triangleCount | nodeCount
-| 3             | 6
+| globalTriangleCount | nodeCount
+| 3                   | 6
 |===
 --
 
-The result is written to the Neo4j database.
+The returned result is the same as in the `stats` example.
+Additionally, each of the six nodes now has a new property `triangles` in the Neo4j database, containing the triangle count for that node.
+
 
 [[algorithms-triangle-count-examples-max-degree]]
 === Maximum Degree
 
 The Triangle Count algorithm supports a `maxDegree` configuration parameter that can be used to exclude nodes from processing if their degree is greater than the configured value.
 This can be useful to speed up the computation when there are nodes with a very high degree (so-called super nodes) in the graph.
-Super nodes have a great impact the performance of the Triangle Count algorithm.
-You can study the degree distribution of your projected graph by using `graph.list` (make this a link to that page)
+Super nodes have a great impact on the performance of the Triangle Count algorithm.
+To learn about the degree distribution of your graph, see <<catalog-graph-list>>.
 
 The nodes excluded from the computation get assigned a triangle count of `-1`.
 
@@ -441,7 +462,7 @@ ORDER BY name ASC
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
 | name      | triangleCount
 | "Alice"   | 0
@@ -453,6 +474,6 @@ ORDER BY name ASC
 |===
 --
 
-Running the algorithm on the sample graph with `maxDegree: 4` excludes the 'Michael' node from the computation, as it has a degree of 5.
+Running the algorithm on the example graph with `maxDegree: 4` excludes the 'Michael' node from the computation, as it has a degree of 5.
 
-As this node is part of all the triangles in the sample graph excluding it results in no triangles.
+As this node is part of all the triangles in the example graph excluding it results in no triangles.

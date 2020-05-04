@@ -61,7 +61,7 @@ class TriangleCountWriteProcTest
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
-            "triangleCount", 5L,
+            "globalTriangleCount", 5L,
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
