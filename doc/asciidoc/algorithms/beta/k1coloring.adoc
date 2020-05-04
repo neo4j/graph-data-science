@@ -212,7 +212,7 @@ CREATE (alice:User {name: 'Alice'}),
 This graph has a super node with name "Alice" that connects to all other nodes.
 It should therefore not be possible for any other node to be assigned the same color as the Alice node.
 
-[source, cypher, role=setup-query]
+[source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create(
     'myGraph',

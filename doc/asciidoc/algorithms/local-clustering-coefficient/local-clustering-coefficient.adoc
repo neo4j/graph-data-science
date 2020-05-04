@@ -255,7 +255,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher, role=setup-query]
+[source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create(
     'myGraph',
@@ -399,15 +399,18 @@ NOTE: The result is written to the Neo4j database.
 By default Local Clustering Coefficient algorithm executes <<algorithms-triangle-count, Triangle Count>> as part of its computation.
 It is also possible to run the algorithm with node property (`triangleCountProperty`) containing pre-computed triangle counts.
 
+[role=query-example, no-result, group=triangleCountProperty]
+--
 .The following computes the Triangle Counts and stores the result into the in-memory graph:
-[source, cypher, role=setup-query]
+[source, cypher]
 ----
 CALL gds.triangleCount.mutate('myGraph', {
   mutateProperty: 'triangles'
 })
 ----
+--
 
-[role=query-example]
+[role=query-example, group=triangleCountProperty]
 --
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]

@@ -47,12 +47,15 @@ import java.util.stream.Collectors;
  */
 public class QueryConsumingTreeProcessor extends Treeprocessor {
 
+    private static final String CODE_BLOCK_CONTEXT = ":listing";
+    private static final String TABLE_CONTEXT = ":table";
+
     private static final String SETUP_QUERY_ROLE = "setup-query";
     private static final String GRAPH_CREATE_QUERY_ROLE = "graph-create-query";
     private static final String QUERY_EXAMPLE_ROLE = "query-example";
-    private static final String TEST_TYPE_ATTRIBUTE = "testType";
     private static final String TEST_TYPE_NO_RESULT = "no-result";
-    private static final String TEST_GROUP_ATTRIBUTE = "testGroup";
+    private static final String TEST_GROUP_ATTRIBUTE = "group";
+    public static final String ROLE_SELECTOR = "role";
 
     private final SetupQueryConsumer setupQueryConsumer;
     private final QueryExampleConsumer queryExampleConsumer;
@@ -89,7 +92,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     }
 
     private List<String> collectSetupQueries(StructuralNode node, String setupQueryType) {
-        List<StructuralNode> nodes = node.findBy(Map.of("role", setupQueryType));
+        List<StructuralNode> nodes = node.findBy(Map.of(ROLE_SELECTOR, setupQueryType));
         return nodes
             .stream()
             .map(StructuralNode::getContent)
@@ -117,7 +120,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
         Collection<StructuralNode> queryNoResultExamples,
         Map<String, List<StructuralNode>> groupedQueryExamples
     ) {
-        List<StructuralNode> allQueryExamples = node.findBy(Map.of("role", QUERY_EXAMPLE_ROLE));
+        List<StructuralNode> allQueryExamples = node.findBy(Map.of(ROLE_SELECTOR, QUERY_EXAMPLE_ROLE));
         allQueryExamples.forEach(queryExample -> {
             Object testGroupAttribute = queryExample.getAttribute(TEST_GROUP_ATTRIBUTE);
             if (testGroupAttribute != null) {
@@ -125,8 +128,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
                 groupedQueryExamples.putIfAbsent(testGroup, new ArrayList<>());
                 groupedQueryExamples.get(testGroup).add(queryExample);
             } else {
-                Object attribute = queryExample.getAttribute(TEST_TYPE_ATTRIBUTE);
-                if (attribute != null && attribute.toString().equals(TEST_TYPE_NO_RESULT)) {
+                if (queryExample.hasAttribute(TEST_TYPE_NO_RESULT)) {
                     queryNoResultExamples.add(queryExample);
                 } else {
                     queryExamples.add(queryExample);
@@ -139,8 +141,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
         groupedQueryExamples.forEach((group, examples) -> {
             Collection<Runnable> groupQueries = new ArrayList<>();
             examples.forEach(example -> {
-                Object testType = example.getAttribute(TEST_TYPE_NO_RESULT);
-                if (testType != null && testType.toString().equals(TEST_TYPE_NO_RESULT)) {
+                if (example.hasAttribute(TEST_TYPE_NO_RESULT)) {
                     groupQueries.add(() -> processCypherExample(example));
                 } else {
                     groupQueries.add(() -> processCypherNoResultExample(example));
@@ -164,7 +165,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     }
 
     private void processCypherExample(StructuralNode cypherExample) {
-        Table resultTable = (Table) findByContext(cypherExample, ":table");
+        Table resultTable = (Table) findByContext(cypherExample, TABLE_CONTEXT);
         List<String> headers = resultTable != null ? headers(resultTable) : Collections.emptyList();
         List<Row> rows = resultTable != null ? resultTable.getBody() : Collections.emptyList();
         queryExampleConsumer.consume(getCypherQuery(cypherExample), headers, rows);
@@ -175,7 +176,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     }
 
     private String getCypherQuery(StructuralNode cypherExample) {
-        return undoReplacements(findByContext(cypherExample, ":listing").getContent().toString());
+        return undoReplacements(findByContext(cypherExample, CODE_BLOCK_CONTEXT).getContent().toString());
     }
 
     private StructuralNode findByContext(StructuralNode node, String context) {
