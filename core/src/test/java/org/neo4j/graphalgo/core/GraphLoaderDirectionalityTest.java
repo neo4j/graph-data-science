@@ -23,14 +23,14 @@ import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.GraphHelper.assertRelationships;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 class GraphLoaderDirectionalityTest extends BaseTest {
@@ -64,9 +64,9 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         "MATCH (n)<--(m) " +
         "RETURN id(n) AS source, id(m) AS target";
 
-    @AllGraphTypesTest
-    void loadUndirected(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_BOTH, Orientation.UNDIRECTED);
+    @AllGraphStoreFactoryTypesTest
+    void loadUndirected(TestSupport.FactoryType factoryType) {
+        Graph graph = loadDirectedGraph(factoryType, RELATIONSHIP_QUERY_BOTH, Orientation.UNDIRECTED);
         assertEquals(4L, graph.nodeCount());
         assertRelationships(graph, 0, 0, 1);
         assertRelationships(graph, 1, 0, 1, 2, 3);
@@ -74,9 +74,9 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         assertRelationships(graph, 3, 1);
     }
 
-    @AllGraphTypesTest
-    void loadNatural(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_OUTGOING, Orientation.NATURAL);
+    @AllGraphStoreFactoryTypesTest
+    void loadNatural(TestSupport.FactoryType factoryType) {
+        Graph graph = loadDirectedGraph(factoryType, RELATIONSHIP_QUERY_OUTGOING, Orientation.NATURAL);
 
         assertEquals(4L, graph.nodeCount());
         assertRelationships(graph, 0, 0, 1);
@@ -85,9 +85,9 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         assertRelationships(graph, 3);
     }
 
-    @AllGraphTypesTest
-    void loadReverse(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_INCOMING, Orientation.REVERSE);
+    @AllGraphStoreFactoryTypesTest
+    void loadReverse(TestSupport.FactoryType factoryType) {
+        Graph graph = loadDirectedGraph(factoryType, RELATIONSHIP_QUERY_INCOMING, Orientation.REVERSE);
 
         assertEquals(4L, graph.nodeCount());
         assertRelationships(graph, 0, 0);
@@ -96,9 +96,9 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         assertRelationships(graph, 3, 1);
     }
 
-    @AllGraphTypesTest
-    void loadNaturalWithoutAggregation(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadDirectedGraph(graphImpl, RELATIONSHIP_QUERY_OUTGOING, Orientation.NATURAL);
+    @AllGraphStoreFactoryTypesTest
+    void loadNaturalWithoutAggregation(TestSupport.FactoryType factoryType) {
+        Graph graph = loadDirectedGraph(factoryType, RELATIONSHIP_QUERY_OUTGOING, Orientation.NATURAL);
 
         assertEquals(4L, graph.nodeCount());
         assertRelationships(graph, 0, 0, 1);
@@ -107,9 +107,9 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         assertRelationships(graph, 3);
     }
 
-    @AllGraphTypesTest
-    void loadUndirectedWithAggregation(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadUndirectedGraph(graphImpl, Aggregation.SINGLE);
+    @AllGraphStoreFactoryTypesTest
+    void loadUndirectedWithAggregation(TestSupport.FactoryType factoryType) {
+        Graph graph = loadUndirectedGraph(factoryType, Aggregation.SINGLE);
 
         assertEquals(4L, graph.nodeCount());
         assertRelationships(graph, 0, 0, 1);
@@ -118,9 +118,9 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         assertRelationships(graph, 3, 1);
     }
 
-    @AllGraphTypesTest
-    void loadUndirectedWithoutAggregation(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadUndirectedGraph(graphImpl, Aggregation.NONE);
+    @AllGraphStoreFactoryTypesTest
+    void loadUndirectedWithoutAggregation(TestSupport.FactoryType factoryType) {
+        Graph graph = loadUndirectedGraph(factoryType, Aggregation.NONE);
 
         assertEquals(4L, graph.nodeCount());
         assertRelationships(graph, 0, 0, 0, 1);
@@ -129,10 +129,10 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         assertRelationships(graph, 3, 1);
     }
 
-    @AllGraphTypesTest
-    void loadUndirectedNodeWithSelfReference(Class<? extends GraphStoreFactory> graphImpl) {
+    @AllGraphStoreFactoryTypesTest
+    void loadUndirectedNodeWithSelfReference(TestSupport.FactoryType factoryType) {
         runUndirectedNodeWithSelfReference(
-            graphImpl,
+            factoryType,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node) " +
@@ -141,10 +141,10 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         );
     }
 
-    @AllGraphTypesTest
-    void loadUndirectedNodeWithSelfReference2(Class<? extends GraphStoreFactory> graphImpl) {
+    @AllGraphStoreFactoryTypesTest
+    void loadUndirectedNodeWithSelfReference2(TestSupport.FactoryType factoryType) {
         runUndirectedNodeWithSelfReference(
-            graphImpl,
+            factoryType,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node) " +
@@ -153,10 +153,10 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         );
     }
 
-    @AllGraphTypesTest
-    void loadUndirectedNodesWithMultipleSelfReferences(Class<? extends GraphStoreFactory> graphImpl) {
+    @AllGraphStoreFactoryTypesTest
+    void loadUndirectedNodesWithMultipleSelfReferences(TestSupport.FactoryType factoryType) {
         runUndirectedNodesWithMultipleSelfReferences(
-            graphImpl,
+            factoryType,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -170,10 +170,10 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         );
     }
 
-    @AllGraphTypesTest
-    void loadUndirectedNodesWithMultipleSelfReferences2(Class<? extends GraphStoreFactory> graphImpl) {
+    @AllGraphStoreFactoryTypesTest
+    void loadUndirectedNodesWithMultipleSelfReferences2(TestSupport.FactoryType factoryType) {
         runUndirectedNodesWithMultipleSelfReferences(
-            graphImpl,
+            factoryType,
             "CREATE" +
             "  (a:Node)" +
             ", (b:Node)" +
@@ -187,10 +187,10 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         );
     }
 
-    private void runUndirectedNodeWithSelfReference(Class<? extends GraphStoreFactory> graphImpl, String cypher) {
+    private void runUndirectedNodeWithSelfReference(TestSupport.FactoryType factoryType, String cypher) {
         Graph graph = loadGraph(
             cypher,
-            graphImpl,
+            factoryType,
             RELATIONSHIP_QUERY_UNDIRECTED_SINGLE,
             Orientation.UNDIRECTED,
             Aggregation.SINGLE
@@ -201,10 +201,10 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         assertRelationships(graph, 1, 0);
     }
 
-    private void runUndirectedNodesWithMultipleSelfReferences(Class<? extends GraphStoreFactory> graphImpl, String cypher) {
+    private void runUndirectedNodesWithMultipleSelfReferences(TestSupport.FactoryType factoryType, String cypher) {
         Graph graph = loadGraph(
             cypher,
-            graphImpl,
+            factoryType,
             RELATIONSHIP_QUERY_UNDIRECTED_SINGLE,
             Orientation.UNDIRECTED,
             Aggregation.SINGLE
@@ -218,26 +218,26 @@ class GraphLoaderDirectionalityTest extends BaseTest {
     }
 
     private Graph loadDirectedGraph(
-        Class<? extends GraphStoreFactory> graphImpl,
+        TestSupport.FactoryType factoryType,
         String relationshipQuery,
         Orientation orientation
     ) {
-        return loadGraph(DB_CYPHER, graphImpl, relationshipQuery, orientation, Aggregation.SINGLE);
+        return loadGraph(DB_CYPHER, factoryType, relationshipQuery, orientation, Aggregation.SINGLE);
     }
 
     private Graph loadUndirectedGraph(
-        Class<? extends GraphStoreFactory> graphImpl,
+        TestSupport.FactoryType factoryType,
         Aggregation aggregation
     ) {
-        String relQuery = aggregation.equals(Aggregation.SINGLE) ? RELATIONSHIP_QUERY_UNDIRECTED_SINGLE : RELATIONSHIP_QUERY_UNDIRECTED;
-        return loadGraph(DB_CYPHER, graphImpl,
+        String relQuery = aggregation == Aggregation.SINGLE ? RELATIONSHIP_QUERY_UNDIRECTED_SINGLE : RELATIONSHIP_QUERY_UNDIRECTED;
+        return loadGraph(DB_CYPHER, factoryType,
             relQuery, Orientation.UNDIRECTED, aggregation
         );
     }
 
     private Graph loadGraph(
         String dbQuery,
-        Class<? extends GraphStoreFactory> graphImpl,
+        TestSupport.FactoryType factoryType,
         String relationshipQuery,
         Orientation orientation,
         Aggregation aggregation
@@ -246,7 +246,7 @@ class GraphLoaderDirectionalityTest extends BaseTest {
 
         GraphLoader graphLoader;
 
-        if (graphImpl == CypherFactory.class) {
+        if (factoryType == CYPHER) {
 
             graphLoader = new CypherLoaderBuilder()
                 .api(db)

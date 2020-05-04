@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.values.storable.NumberType;
 
@@ -45,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
@@ -124,7 +124,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             .from(graphDb())
             .withLabels("A", "B")
             .withRelationshipTypes("REL")
-            .graphStore(NativeFactory.class);
+            .graphStore(NATIVE);
 
         String graphName = "myGraph";
         GraphStoreCatalog.set(withNameAndRelationshipProjections(
@@ -180,9 +180,8 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             .graphName(graphName)
             .addNodeLabels("A", "B");
 
-        relationshipProjections().projections().forEach((relationshipType, projection)-> {
-            storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection);
-        });
+        relationshipProjections().projections().forEach((relationshipType, projection)->
+            storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
 
         GraphLoader loader = storeLoaderBuilder.build();
         GraphStoreCatalog.set(loader.createConfig(), loader.graphStore());

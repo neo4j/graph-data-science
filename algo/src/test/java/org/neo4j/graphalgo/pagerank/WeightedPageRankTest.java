@@ -24,10 +24,9 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
 
@@ -37,6 +36,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
@@ -117,8 +117,8 @@ final class WeightedPageRankTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphTypesTest
-    void defaultWeightOf0MeansNoDiffusionOfPageRank(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    void defaultWeightOf0MeansNoDiffusionOfPageRank(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -136,7 +136,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -171,8 +171,8 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphTypesTest
-    void defaultWeightOf1ShouldBeTheSameAsPageRank(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    void defaultWeightOf1ShouldBeTheSameAsPageRank(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -190,7 +190,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -225,8 +225,8 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphTypesTest
-    void allWeightsTheSameShouldBeTheSameAsPageRank(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    void allWeightsTheSameShouldBeTheSameAsPageRank(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -244,7 +244,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -279,8 +279,8 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphTypesTest
-    void higherWeightsLeadToHigherPageRank(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    void higherWeightsLeadToHigherPageRank(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -298,7 +298,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                         .api(db)
                         .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -333,8 +333,8 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphTypesTest
-    void shouldExcludeNegativeWeights(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    void shouldExcludeNegativeWeights(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -352,7 +352,7 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")

@@ -31,14 +31,13 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -53,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -83,9 +83,9 @@ final class LabelPropagationTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    Graph loadGraph(Class<? extends GraphStoreFactory> graphImpl) {
+    Graph loadGraph(TestSupport.FactoryType factoryType) {
         GraphLoader graphLoader;
-        if (graphImpl == CypherFactory.class) {
+        if (factoryType == CYPHER) {
             graphLoader = new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (u:User) RETURN id(u) AS id")
@@ -103,9 +103,9 @@ final class LabelPropagationTest extends AlgoTestBase {
         return applyInTransaction(db, tx -> graphLoader.load());
     }
 
-    @AllGraphTypesTest
-    void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl);
+    @AllGraphStoreFactoryTypesTest
+    void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing(TestSupport.FactoryType factoryType) {
+        Graph graph = loadGraph(factoryType);
         LabelPropagation lp = new LabelPropagation(
             graph,
             ImmutableLabelPropagationStreamConfig.builder().maxIterations(1).build(),
@@ -145,15 +145,15 @@ final class LabelPropagationTest extends AlgoTestBase {
         assertArrayEquals(new long[]{2, 2, 3, 4, 4, 2}, labels.toArray());
     }
 
-    @AllGraphTypesTest
-    void testSingleThreadClustering(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl);
+    @AllGraphStoreFactoryTypesTest
+    void testSingleThreadClustering(TestSupport.FactoryType factoryType) {
+        Graph graph = loadGraph(factoryType);
         testClustering(graph, 100);
     }
 
-    @AllGraphTypesTest
-    void testMultiThreadClustering(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl);
+    @AllGraphStoreFactoryTypesTest
+    void testMultiThreadClustering(TestSupport.FactoryType factoryType) {
+        Graph graph = loadGraph(factoryType);
         testClustering(graph, 2);
     }
 

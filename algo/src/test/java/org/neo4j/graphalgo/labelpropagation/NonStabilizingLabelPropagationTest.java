@@ -23,14 +23,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 
@@ -59,8 +59,8 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    Graph loadGraph(Class<? extends GraphStoreFactory> graphImpl) {
-        if (graphImpl == CypherFactory.class) {
+    Graph loadGraph(TestSupport.FactoryType factoryType) {
+        if (factoryType == CYPHER) {
             return applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(ALL_NODES_QUERY)
@@ -78,9 +78,9 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
     // According to "Near linear time algorithm to detect community structures in large-scale networks"[1], for a graph of this shape
     // LabelPropagation will not converge unless the iteration is random. However, we don't seem to be affected by this.
     // [1]: https://arxiv.org/pdf/0709.2938.pdf, page 5
-    @AllGraphTypesTest
-    void testLabelPropagationDoesStabilize(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl);
+    @AllGraphStoreFactoryTypesTest
+    void testLabelPropagationDoesStabilize(TestSupport.FactoryType factoryType) {
+        Graph graph = loadGraph(factoryType);
         LabelPropagation labelPropagation = new LabelPropagation(
             graph,
             ImmutableLabelPropagationStreamConfig.builder().build(),

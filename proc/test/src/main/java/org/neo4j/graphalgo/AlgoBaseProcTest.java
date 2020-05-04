@@ -25,9 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.ImmutableGraphLoaderContext;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -40,7 +39,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -67,6 +65,7 @@ import static org.neo4j.graphalgo.BaseProcTest.anonymousGraphConfig;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
@@ -205,10 +204,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         assertTrue(exception.getMessage().contains(error));
     }
 
-    @AllGraphTypesTest
-    default void testRunOnLoadedGraph(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    default void testRunOnLoadedGraph(TestSupport.FactoryType factoryType) {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = (graphStoreFactory.isAssignableFrom(NativeFactory.class))
+        GraphCreateConfig graphCreateConfig = factoryType == CYPHER
             ? withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections())
             : withNameAndRelationshipQuery("", loadedGraphName, relationshipQuery());
 
@@ -270,10 +269,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         return ALL_RELATIONSHIPS_QUERY;
     }
 
-    @AllGraphTypesTest
-    default void testRunMultipleTimesOnLoadedGraph(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    default void testRunMultipleTimesOnLoadedGraph(TestSupport.FactoryType factoryType) {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = (graphStoreFactory.isAssignableFrom(NativeFactory.class))
+        GraphCreateConfig graphCreateConfig = factoryType == CYPHER
             ? withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections())
             : emptyWithNameCypher(TEST_USERNAME, loadedGraphName);
 

@@ -30,17 +30,15 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -59,6 +57,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
@@ -121,9 +121,9 @@ class LouvainTest extends AlgoTestBase {
         ", (l)-[:TYPE {weight: 1.0}]->(n)" +
         ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
-    @AllGraphTypesTest
-    void unweightedLouvain(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER, false);
+    @AllGraphStoreFactoryTypesTest
+    void unweightedLouvain(TestSupport.FactoryType factoryType) {
+        Graph graph = loadGraph(factoryType, DB_CYPHER, false);
 
         Louvain algorithm = new Louvain(
             graph,
@@ -157,9 +157,9 @@ class LouvainTest extends AlgoTestBase {
         assertEquals(0.38, modularities[modularities.length - 1], 0.01);
     }
 
-    @AllGraphTypesTest
-    void weightedLouvain(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER, true);
+    @AllGraphStoreFactoryTypesTest
+    void weightedLouvain(TestSupport.FactoryType factoryType) {
+        Graph graph = loadGraph(factoryType, DB_CYPHER, true);
 
         Louvain algorithm = new Louvain(
             graph,
@@ -193,11 +193,11 @@ class LouvainTest extends AlgoTestBase {
         assertEquals(0.37, modularities[modularities.length - 1], 0.01);
     }
 
-    @AllGraphTypesTest
-    void seededLouvain(Class<? extends GraphStoreFactory> graphImpl) {
-        assumeFalse(graphImpl == CypherFactory.class);
+    @AllGraphStoreFactoryTypesTest
+    void seededLouvain(TestSupport.FactoryType factoryType) {
+        assumeFalse(factoryType == CYPHER);
 
-        Graph graph = loadGraph(graphImpl, DB_CYPHER, true, "seed");
+        Graph graph = loadGraph(factoryType, DB_CYPHER, true, "seed");
 
         Louvain algorithm = new Louvain(
             graph,
@@ -228,9 +228,9 @@ class LouvainTest extends AlgoTestBase {
         assertEquals(0.38, modularities[modularities.length - 1], 0.01);
     }
 
-    @AllGraphTypesTest
-    void testTolerance(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER);
+    @AllGraphStoreFactoryTypesTest
+    void testTolerance(TestSupport.FactoryType factoryType) {
+        Graph graph = loadGraph(factoryType, DB_CYPHER);
 
         Louvain algorithm = new Louvain(
             graph,
@@ -251,9 +251,9 @@ class LouvainTest extends AlgoTestBase {
         assertEquals(1, algorithm.levels());
     }
 
-    @AllGraphTypesTest
-    void testMaxLevels(Class<? extends GraphStoreFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER);
+    @AllGraphStoreFactoryTypesTest
+    void testMaxLevels(TestSupport.FactoryType factoryType) {
+        Graph graph = loadGraph(factoryType, DB_CYPHER);
 
         Louvain algorithm = new Louvain(
             graph,
@@ -351,7 +351,7 @@ class LouvainTest extends AlgoTestBase {
 
     @Test
     void testLogging() {
-        var graph = loadGraph(NativeFactory.class, DB_CYPHER);
+        var graph = loadGraph(NATIVE, DB_CYPHER);
 
         var config = defaultConfigBuilder().build();
 
@@ -383,12 +383,12 @@ class LouvainTest extends AlgoTestBase {
         );
     }
 
-    private Graph loadGraph(Class<? extends GraphStoreFactory> graphImpl, String cypher, String... nodeProperties) {
-        return loadGraph(graphImpl, cypher, false, nodeProperties);
+    private Graph loadGraph(TestSupport.FactoryType factoryType, String cypher, String... nodeProperties) {
+        return loadGraph(factoryType, cypher, false, nodeProperties);
     }
 
     private Graph loadGraph(
-        Class<? extends GraphStoreFactory> factoryType,
+        TestSupport.FactoryType factoryType,
         String cypher,
         boolean loadRelationshipProperty,
         String... nodeProperties
@@ -406,7 +406,7 @@ class LouvainTest extends AlgoTestBase {
 
         PropertyMapping relationshipPropertyMapping = PropertyMapping.of("weight", 1.0);
 
-        if (factoryType == CypherFactory.class) {
+        if (factoryType == CYPHER) {
             return applyInTransaction(db, tx -> {
                 CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder()
                     .api(db)

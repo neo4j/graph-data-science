@@ -28,14 +28,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
@@ -63,15 +60,19 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class TestSupport {
 
+    public enum FactoryType {
+        NATIVE, CYPHER
+    }
+
     private TestSupport() {}
 
     @Retention(RetentionPolicy.RUNTIME)
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.TestSupport#allTypes")
-    public @interface AllGraphTypesTest {}
+    @MethodSource("org.neo4j.graphalgo.TestSupport#allFactoryTypes")
+    public @interface AllGraphStoreFactoryTypesTest {}
 
-    public static Stream<Class<? extends GraphStoreFactory>> allTypes() {
-        return Stream.of(NativeFactory.class, CypherFactory.class);
+    public static Stream<FactoryType> allFactoryTypes() {
+        return Stream.of(FactoryType.NATIVE, FactoryType.CYPHER);
     }
 
     public static Stream<Orientation> allDirectedProjections() {

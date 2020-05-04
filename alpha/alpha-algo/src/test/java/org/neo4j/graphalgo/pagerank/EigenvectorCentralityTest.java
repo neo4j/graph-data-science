@@ -23,11 +23,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.centrality.eigenvector.ImmutableEigenvectorCentralityConfig;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
@@ -39,6 +38,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
@@ -101,8 +101,8 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphTypesTest
-    void test(Class<? extends GraphStoreFactory> factoryType) {
+    @AllGraphStoreFactoryTypesTest
+    void test(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -120,7 +120,7 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")

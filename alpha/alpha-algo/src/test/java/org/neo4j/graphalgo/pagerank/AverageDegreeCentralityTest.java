@@ -24,15 +24,15 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 final class AverageDegreeCentralityTest extends AlgoTestBase {
@@ -103,12 +103,12 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphTypesTest
-    void averageOutgoingCentrality(Class<? extends GraphStoreFactory> factoryType) {
+    @AllGraphStoreFactoryTypesTest
+    void averageOutgoingCentrality(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -130,12 +130,12 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
         assertEquals(0.9, degreeCentrality.average(), 0.01);
     }
 
-    @AllGraphTypesTest
-    void averageIncomingCentrality(Class<? extends GraphStoreFactory> factoryType) {
+    @AllGraphStoreFactoryTypesTest
+    void averageIncomingCentrality(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -158,12 +158,12 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
         assertEquals(0.9, degreeCentrality.average(), 0.01);
     }
 
-    @AllGraphTypesTest
-    void totalCentrality(Class<? extends GraphStoreFactory> factoryType) {
+    @AllGraphStoreFactoryTypesTest
+    void totalCentrality(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")

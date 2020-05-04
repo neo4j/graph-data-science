@@ -27,12 +27,11 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.result.CentralityResult;
@@ -47,6 +46,7 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
@@ -109,8 +109,8 @@ final class PageRankTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphTypesTest
-    void testOnOutgoingRelationships(Class<? extends GraphStoreFactory> factoryType) {
+    @AllGraphStoreFactoryTypesTest
+    void testOnOutgoingRelationships(TestSupport.FactoryType factoryType) {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
@@ -127,7 +127,7 @@ final class PageRankTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx ->
                 new CypherLoaderBuilder()
                     .api(db)
@@ -166,8 +166,8 @@ final class PageRankTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphTypesTest
-    void testOnIncomingRelationships(Class<? extends GraphStoreFactory> factoryType) {
+    @AllGraphStoreFactoryTypesTest
+    void testOnIncomingRelationships(TestSupport.FactoryType factoryType) {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
@@ -185,7 +185,7 @@ final class PageRankTest extends AlgoTestBase {
 
         final Graph graph;
         final CentralityResult rankResult;
-        if (factoryType.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx ->
                 new CypherLoaderBuilder()
                     .api(db)
@@ -229,10 +229,10 @@ final class PageRankTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphTypesTest
-    void correctPartitionBoundariesForAllNodes(Class<? extends GraphStoreFactory> factoryType) {
+    @AllGraphStoreFactoryTypesTest
+    void correctPartitionBoundariesForAllNodes(TestSupport.FactoryType factoryType) {
         final Graph graph;
-        if (factoryType.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery(formatWithLocale("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))

@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
@@ -38,7 +38,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -55,7 +54,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import static org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -64,8 +64,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class K1ColoringTest extends AlgoTestBase {
 
-    @AllGraphTypesTest
-    void testK1Coloring(Class<? extends GraphStoreFactory> graphImpl) {
+    @AllGraphStoreFactoryTypesTest
+    void testK1Coloring(TestSupport.FactoryType factoryType) {
         final String DB_CYPHER =
             "CREATE" +
             " (a)" +
@@ -80,7 +80,7 @@ class K1ColoringTest extends AlgoTestBase {
         Graph graph;
 
         GraphLoader graphLoader;
-        if (graphImpl == CypherFactory.class) {
+        if (factoryType == CYPHER) {
             graphLoader = new CypherLoaderBuilder()
                 .api(db)
                 .graphName("cypher")

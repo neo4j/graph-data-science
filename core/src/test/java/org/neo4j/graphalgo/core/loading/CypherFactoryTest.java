@@ -49,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -138,7 +139,7 @@ class CypherFactoryTest extends BaseTest {
         Graph graph = TestGraphLoader
             .from(db)
             .withNodeProperties(PropertyMappings.of(prop1, prop2, prop3))
-            .graph(CypherFactory.class);
+            .graph(CYPHER);
 
         String gdl = "(a {prop1: 1, prop2: 0, prop3: 0})" +
                      "(b {prop1: 0, prop2: 2, prop3: 0})" +
@@ -166,7 +167,7 @@ class CypherFactoryTest extends BaseTest {
             .from(db)
             .withRelationshipProperties(PropertyMappings.of(prop1, prop2, prop3), false)
             .withDefaultAggregation(Aggregation.DEFAULT)
-            .graphStore(CypherFactory.class);
+            .graphStore(CYPHER);
 
         String expectedGraph =
             "  (a)-[{w: %f}]->(b)" +

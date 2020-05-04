@@ -23,10 +23,8 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -38,6 +36,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.TestSupport.getCypherAggregation;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
 import static org.neo4j.graphalgo.core.Aggregation.NONE;
@@ -101,21 +100,21 @@ public final class TestGraphLoader {
         return this;
     }
 
-    public <T extends GraphStoreFactory> Graph graph(Class<T> graphStoreFactory) {
+    public Graph graph(TestSupport.FactoryType factoryType) {
         try (Transaction ignored = db.beginTx()) {
-            GraphStore graphStore = loader(graphStoreFactory).graphStore();
+            GraphStore graphStore = loader(factoryType).graphStore();
             return graphStore.getUnion();
         }
     }
 
-    public <T extends GraphStoreFactory> GraphStore graphStore(Class<T> graphStoreFactory) {
+    public GraphStore graphStore(TestSupport.FactoryType factoryType) {
         try (Transaction ignored = db.beginTx()) {
-            return loader(graphStoreFactory).build().build().graphStore();
+            return loader(factoryType).build().build().graphStore();
         }
     }
 
-    private <T extends GraphStoreFactory> GraphLoader loader(Class<T> graphStoreFactory) {
-        return graphStoreFactory.isAssignableFrom(CypherFactory.class) ? cypherLoader() : storeLoader();
+    private GraphLoader loader(TestSupport.FactoryType factoryType) {
+        return factoryType == CYPHER ? cypherLoader() : storeLoader();
     }
 
     private GraphLoader cypherLoader() {
@@ -240,7 +239,7 @@ public final class TestGraphLoader {
 
     private static final String SUFFIX = "___";
 
-    public static String addSuffix(String propertyKey, int id) {
+    private static String addSuffix(String propertyKey, int id) {
         return formatWithLocale("%s%s%d", propertyKey, SUFFIX, id);
     }
 

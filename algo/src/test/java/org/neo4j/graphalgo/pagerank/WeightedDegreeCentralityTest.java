@@ -27,11 +27,10 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Label;
 
@@ -42,6 +41,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
@@ -113,8 +113,8 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphTypesTest
-    void buildWeightsArray(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    void buildWeightsArray(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, double[]> expected = new HashMap<>();
 
@@ -132,7 +132,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                 .api(db)
                 .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
@@ -198,8 +198,8 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         );
     }
 
-    @AllGraphTypesTest
-    void weightedOutgoingCentrality(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    void weightedOutgoingCentrality(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -217,7 +217,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
@@ -255,8 +255,8 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphTypesTest
-    void excludeNegativeWeights(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    void excludeNegativeWeights(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -275,7 +275,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
 
         final Graph graph;
 
-        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
@@ -313,8 +313,8 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphTypesTest
-    void weightedIncomingCentrality(Class<? extends GraphStoreFactory> graphStoreFactory) {
+    @AllGraphStoreFactoryTypesTest
+    void weightedIncomingCentrality(TestSupport.FactoryType factoryType) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -332,7 +332,7 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
 
         Graph graph;
-        if (graphStoreFactory.isAssignableFrom(CypherFactory.class)) {
+        if (factoryType == CYPHER) {
             graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
                     .api(db)
                     .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
