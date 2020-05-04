@@ -1,0 +1,7 @@
+In the `stream` execution mode, the algorithm returns the {result} for each {entity}.
+This allows us to inspect the results directly or post-process them in Cypher without any side effects.
+ifdef::stream-details[]
+{stream-details}
+endif::[]
+
+For more details on the `stream` mode in general, see <<running-algos-stream>>.

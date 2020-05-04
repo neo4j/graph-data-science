@@ -1,0 +1,9 @@
+In the `stats` execution mode, the algorithm returns a single row containing a summary of the algorithm result.
+ifdef::stats-details[]
+{stats-details}
+endif::[]
+It is useful to evaluate algorithm performance with the `computeMillis` return item, and it does not have any side effects.
+In the examples below we will omit returning the timings.
+The full signature of the procedure can be found in <<{stats-syntax}, the syntax section>>.
+
+For more details on the `stats` mode in general, see <<running-algos-stats>>.
