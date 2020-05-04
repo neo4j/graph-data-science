@@ -256,7 +256,9 @@ In the examples below we will use named graphs and standard projections as the n
 However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
 ====
 
-.The following statement will create the graph and store it in the graph catalog.
+include::../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create(
@@ -272,11 +274,14 @@ CALL gds.graph.create(
 
 WARNING: Local Clustering Coefficient algorithm requires the graph to be loaded using `UNDIRECTED` orientation
 
-In the following examples we will demonstrate using the Triangle Count algorithm on this graph (unless explicitly specified otherwise).
+In the following examples we will demonstrate using the Local Clustering algorithm on this graph.
 
 
 [[algorithms-local-clustering-coefficient-examples-memory-estimation]]
 === Memory Estimation
+
+:mode: write
+include::../shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
 --
@@ -297,13 +302,18 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 |===
 --
 
+Note that the relationship count is 16 although we only created 8 relationships in the original Cypher statement.
+This is because we used the `UNDIRECTED` orientation, which will project each relationship in each direction, effectively doubling the number of relationships.
 
 [[algorithms-local-clustering-coefficient-examples-stream]]
 === Stream
 
+:stream-details: For example, we can order the results to find the nodes with the highest local clustering coefficient.
+include::../shared/examples-stream-intro.adoc[]
+
 [role=query-example]
 --
-.The following will estimate the memory requirements for running the algorithm:
+.The following will run the algorithm in `stream` mode:
 [source, cypher]
 ----
 CALL gds.localClusteringCoefficient.stream('myGraph')
@@ -325,8 +335,15 @@ ORDER BY localClusteringCoefficient DESC
 |===
 --
 
+// TODO: analysis of the results, we would need the triangle counts for this;
+// should we point to the triangle count page?
+
 [[algorithms-local-clustering-coefficient-examples-stats]]
 === Stats
+
+:stats-details: The summary result contains the avearage clustering coefficient of the graph, which is the normalised sum over all local clustering coefficients.
+:stats-syntax: algorithms-local-clustering-coefficient-syntax-stats
+include::../shared/examples-stats-intro.adoc[]
 
 .The following will run the algorithm in `stats` mode:
 [role=query-example]
@@ -348,6 +365,8 @@ YIELD averageClusteringCoefficient, nodeCount
 [[algorithms-local-clustering-coefficient-examples-mutate]]
 === Mutate
 
+include::../shared/examples-mutate-intro.adoc[]
+
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
@@ -367,11 +386,15 @@ YIELD averageClusteringCoefficient, nodeCount
 |===
 --
 
-NOTE: In contrast to `write` mode the result is written to the GDS in-memory graph instead of the Neo4j database.
+The returned result is the same as in the `stats` example.
+Additionally, the graph 'myGraph' now has a node property `localClusteringCoefficient` which stores the local clustering coefficient for each node.
+To find out how to inspect the new schema of the in-memory graph, see <<catalog-graph-list>>.
 
 
 [[algorithms-local-clustering-coefficient-examples-write]]
 === Write
+
+include::../shared/examples-write-intro.adoc[]
 
 [role=query-example]
 --
@@ -392,7 +415,8 @@ YIELD averageClusteringCoefficient, nodeCount
 |===
 --
 
-NOTE: The result is written to the Neo4j database.
+The returned result is the same as in the `stats` example.
+Additionally, each of the six nodes now has a new property `localClusteringCoefficient` in the Neo4j database, containing the local clustering coefficient for that node.
 
 
 [[algorithms-local-clustering-coefficient-examples-pre-computed]]
@@ -437,3 +461,5 @@ ORDER BY localClusteringCoefficient DESC
 | "Alice"   | 0.0
 |===
 --
+
+// TODO: analysis of the result?
