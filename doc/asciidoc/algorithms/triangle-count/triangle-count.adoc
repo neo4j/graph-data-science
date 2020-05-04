@@ -377,8 +377,7 @@ YIELD globalTriangleCount, nodeCount
 
 Here we can see that the graph has six nodes with a total number of three triangles.
 Comparing this to the <<algorithms-triangle-count-examples-stream, stream example>> we can see that the 'Michael' node has a triangle count equal to the global triangle count.
-In other words, that node is part of all of the triangles in the graph.
-Thus, it has a very central position in the graph.
+In other words, that node is part of all of the triangles in the graph and thus has a very central position in the graph.
 
 
 [[algorithms-triangle-count-examples-mutate]]
