@@ -124,10 +124,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
         GraphCreateConfig graphCreateConfig = emptyWithNameNative("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphStore graphStore = graphLoader(graphCreateConfig)
-                .build()
-                .build()
-                .graphStore();
+            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
             GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
@@ -190,10 +187,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
             .relationshipProjections(RelationshipProjections.all())
             .build();
 
-        GraphStore graphStore = graphLoader(db, graphCreateConfig)
-            .build()
-            .build()
-            .graphStore();
+        GraphStore graphStore = graphLoader(db, graphCreateConfig).graphStore();
 
         GraphStoreCatalog.set(graphCreateConfig, graphStore);
     }

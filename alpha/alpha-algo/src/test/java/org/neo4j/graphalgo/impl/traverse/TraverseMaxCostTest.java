@@ -83,7 +83,7 @@ class TraverseMaxCostTest extends AlgoTestBase {
             .api(db)
             .addRelationshipProperty(PropertyMapping.of("distance", Double.MAX_VALUE))
             .build()
-            .load();
+            .graph();
 
         exitPredicate = (s, t, w) -> {
             Traverse.ExitPredicate.Result result = w >= maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;

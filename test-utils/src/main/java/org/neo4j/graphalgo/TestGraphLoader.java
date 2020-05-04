@@ -109,7 +109,7 @@ public final class TestGraphLoader {
 
     public GraphStore graphStore(TestSupport.FactoryType factoryType) {
         try (Transaction ignored = db.beginTx()) {
-            return loader(factoryType).build().build().graphStore();
+            return loader(factoryType).graphStore();
         }
     }
 

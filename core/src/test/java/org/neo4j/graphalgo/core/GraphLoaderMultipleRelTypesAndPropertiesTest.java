@@ -109,8 +109,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             ).graphName("myGraph")
             .api(db)
             .build()
-            .build()
-            .build()
             .graphStore();
 
         assertEquals(Collections.singleton("prop1"), graphStore.nodePropertyKeys(NodeLabel.of("N1")));
@@ -150,8 +148,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                 )
             ).graphName("myGraph")
             .api(db)
-            .build()
-            .build()
             .build()
             .graphStore();
 

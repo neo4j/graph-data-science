@@ -153,7 +153,7 @@ class GraphLoaderTest extends BaseTest {
                 .api(db)
                 .terminationFlag(terminationFlag)
                 .build()
-                .load()
+                .graph()
         );
     }
 }

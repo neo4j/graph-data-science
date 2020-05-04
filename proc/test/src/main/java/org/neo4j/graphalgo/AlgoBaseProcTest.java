@@ -279,7 +279,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         applyOnProcedure((proc) -> {
             GraphStoreCatalog.set(
                 graphCreateConfig,
-                graphLoader(graphCreateConfig).build().build().graphStore()
+                graphLoader(graphCreateConfig).graphStore()
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
             AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(loadedGraphName, configMap);

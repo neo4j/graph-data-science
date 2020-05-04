@@ -40,18 +40,14 @@ public interface GraphLoader {
     GraphCreateConfig createConfig();
 
     default Graph graph() {
-        return load();
+        return graphStore().getUnion();
     }
 
     default GraphStore graphStore() {
-        return build().build().graphStore();
+        return graphStoreFactory().build().graphStore();
     }
 
-    default Graph load() {
-        return build().build().graphStore().getUnion();
-    }
-
-    default GraphStoreFactory<? extends GraphCreateConfig> build() {
+    default GraphStoreFactory<? extends GraphCreateConfig> graphStoreFactory() {
         return createConfig().graphStoreFactory().get(context());
     }
 

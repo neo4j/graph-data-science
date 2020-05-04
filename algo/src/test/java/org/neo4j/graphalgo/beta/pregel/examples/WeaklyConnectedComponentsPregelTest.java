@@ -74,7 +74,7 @@ class WeaklyConnectedComponentsPregelTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
-            .load();
+            .graph();
     }
 
     @Test

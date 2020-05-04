@@ -81,7 +81,7 @@ class CypherFactoryTest extends BaseTest {
                 .nodeQuery(nodes)
                 .relationshipQuery(rels)
                 .build()
-                .load()
+                .graph()
         );
 
         assertGraphEquals(TestGraph.Builder.fromGdl(
@@ -108,7 +108,7 @@ class CypherFactoryTest extends BaseTest {
                     .relationshipQuery(relationships)
                     .build();
                 build
-                    .load();
+                    .graph();
             }
         );
 
@@ -199,7 +199,7 @@ class CypherFactoryTest extends BaseTest {
             .parameters(MapUtil.map("nodeProp", 42, "relProp", 21))
             .build();
 
-        Graph graph = applyInTransaction(db, tx -> loader.load());
+        Graph graph = applyInTransaction(db, tx -> loader.graph());
 
         assertGraphEquals(fromGdl("(a { nodeProp: 42 })-[{ w: 21 }]->(a)"), graph);
     }
@@ -228,7 +228,7 @@ class CypherFactoryTest extends BaseTest {
             .validateRelationships(false)
             .build();
 
-        GraphStore graphStore = applyInTransaction(db, tx -> loader.build().build().graphStore());
+        GraphStore graphStore = applyInTransaction(db, tx -> loader.graphStore());
 
         Function<List<String>, Graph> getGraph = (List<String> labels) -> graphStore.getGraph(
             labels.stream().map(NodeLabel::of).collect(Collectors.toList()),
@@ -260,7 +260,7 @@ class CypherFactoryTest extends BaseTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> applyInTransaction(db, tx -> loader.build().build().graphStore())
+            () -> applyInTransaction(db, tx -> loader.graphStore())
         );
 
         assertTrue(ex.getMessage().contains("does not specify a label"));
@@ -276,7 +276,7 @@ class CypherFactoryTest extends BaseTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> applyInTransaction(db, tx -> loader.build().build().graphStore())
+            () -> applyInTransaction(db, tx -> loader.graphStore())
         );
 
         assertTrue(ex.getMessage().contains("should be of type List"));
@@ -291,7 +291,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeStatement)
             .relationshipQuery(relStatement);
 
-        Graph graph = applyInTransaction(db, tx -> builder.build().load());
+        Graph graph = applyInTransaction(db, tx -> builder.build().graph());
 
         assertEquals(COUNT, graph.nodeCount());
         AtomicInteger relCount = new AtomicInteger();

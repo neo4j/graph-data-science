@@ -74,7 +74,7 @@ class LabelPropagationPregelTest extends AlgoTestBase {
             .globalOrientation(Orientation.UNDIRECTED)
             .globalAggregation(Aggregation.NONE)
             .build()
-            .load();
+            .graph();
     }
 
     @Test

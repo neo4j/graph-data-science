@@ -80,7 +80,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             );
             GraphStoreCatalog.set(
                 graphCreateConfig,
-                graphLoader(graphCreateConfig).build().build().graphStore()
+                graphLoader(graphCreateConfig).graphStore()
             );
             return loadedGraphName;
         });
@@ -233,7 +233,7 @@ public interface GraphMutationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT
             );
             GraphStoreCatalog.set(
                 graphCreateConfig,
-                graphLoader(graphCreateConfig).build().build().graphStore()
+                graphLoader(graphCreateConfig).graphStore()
             );
             return loadedGraphName;
         });

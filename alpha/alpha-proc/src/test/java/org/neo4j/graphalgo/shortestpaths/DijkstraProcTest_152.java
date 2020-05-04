@@ -106,7 +106,7 @@ class DijkstraProcTest_152 extends BaseProcTest {
             .globalAggregation(Aggregation.NONE)
             .addRelationshipProperty(PropertyMapping.of("d", 0))
             .build()
-            .load();
+            .graph();
 
         ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, DijkstraConfig.of(startNodeId, endNodeId));
         dijkstra.compute();

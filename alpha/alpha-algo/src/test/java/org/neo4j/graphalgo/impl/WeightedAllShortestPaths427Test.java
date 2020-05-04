@@ -406,7 +406,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
             .addRelationshipType("LINK")
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
-            .load();
+            .graph();
         List<Result> expected = calculateExpected(graph, true);
         WeightedAllShortestPaths shortestPaths = new WeightedAllShortestPaths(
             graph,
@@ -423,7 +423,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
             .addNodeLabel("Node")
             .addRelationshipType("LINK")
             .build()
-            .load();
+            .graph();
         List<Result> expectedNonWeighted = calculateExpected(graph, false);
         MSBFSAllShortestPaths shortestPaths = new MSBFSAllShortestPaths(
             graph,

@@ -166,10 +166,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
         GraphCreateConfig graphCreateConfig = emptyWithNameNative("", loadedGraphName);
 
         applyOnProcedure((proc) -> {
-            GraphStore graphStore = graphLoader(graphCreateConfig)
-                .build()
-                .build()
-                .graphStore();
+            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
 
             GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
@@ -329,10 +326,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
             .relationshipProjections(relationshipProjections)
             .build();
 
-        GraphStore graphStore = graphLoader(db, graphCreateConfig)
-            .build()
-            .build()
-            .graphStore();
+        GraphStore graphStore = graphLoader(db, graphCreateConfig).graphStore();
 
         GraphStoreCatalog.set(graphCreateConfig, graphStore);
     }

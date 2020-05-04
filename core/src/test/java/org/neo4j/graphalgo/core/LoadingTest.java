@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.Arrays;
 
@@ -64,7 +63,7 @@ final class LoadingTest extends BaseTest {
                 .addNodeLabel("Node")
                 .addRelationshipType("TYPE")
                 .build()
-                .load();
+                .graph();
 
         assertEquals(3, graph.nodeCount());
 

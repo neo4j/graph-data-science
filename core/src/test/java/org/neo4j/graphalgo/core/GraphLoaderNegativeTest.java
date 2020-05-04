@@ -36,7 +36,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
                 .api(db)
                 .addNodeLabel("foo")
                 .build()
-                .load(),
+                .graph(),
             "Node label not found: 'foo'"
         );
     }
@@ -49,7 +49,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
                 .api(db)
                 .addRelationshipType("foo")
                 .build()
-                .load(),
+                .graph(),
             ("Relationship type(s) not found: 'foo'")
         );
     }
@@ -60,7 +60,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
             IllegalArgumentException.class,
             () -> new StoreLoaderBuilder().api(db)
                 .addNodeProperty(PropertyMapping.of("foo", 0.0))
-                .build().load(),
+                .build().graph(),
             "Node properties not found: 'foo'"
         );
     }

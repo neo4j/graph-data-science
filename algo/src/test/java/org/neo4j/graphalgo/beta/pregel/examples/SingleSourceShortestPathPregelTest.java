@@ -73,7 +73,7 @@ class SingleSourceShortestPathPregelTest extends AlgoTestBase {
         graph = new StoreLoaderBuilder()
             .api(db)
             .build()
-            .load();
+            .graph();
     }
 
     @Test

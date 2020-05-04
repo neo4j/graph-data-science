@@ -71,7 +71,7 @@ class ClosenessCentralityDiscoTest extends AlgoTestBase {
             .api(db)
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
-            .load();
+            .graph();
 
         final MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,

@@ -260,7 +260,7 @@ class GraphLoaderDirectionalityTest extends BaseTest {
                 .globalAggregation(aggregation)
                 .build();
         }
-        return applyInTransaction(db, tx -> graphLoader.load());
+        return applyInTransaction(db, tx -> graphLoader.graph());
     }
 
 }

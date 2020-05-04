@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Relationship;
@@ -105,7 +104,7 @@ final class HugeGraphWeightTest extends BaseTest {
             .api(db)
             .addRelationshipProperty(PropertyMapping.of("weight", 0))
             .build()
-            .load();
+            .graph();
     }
 
 }

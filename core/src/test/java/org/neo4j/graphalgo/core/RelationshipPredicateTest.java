@@ -116,7 +116,7 @@ class RelationshipPredicateTest extends BaseTest {
         final Graph graph = loader()
                 .globalOrientation(Orientation.REVERSE)
                 .build()
-                .load();
+                .graph();
 
         // B <- A
         assertTrue(graph.exists(

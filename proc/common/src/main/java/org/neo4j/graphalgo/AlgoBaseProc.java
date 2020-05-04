@@ -128,7 +128,7 @@ public abstract class AlgoBaseProc<
         if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
-            GraphStoreFactory<?> graphStoreFactory = loader.build();
+            GraphStoreFactory<?> graphStoreFactory = loader.graphStoreFactory();
             estimateDimensions = graphStoreFactory.dimensions();
 
             if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {
@@ -233,7 +233,7 @@ public abstract class AlgoBaseProc<
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
-            GraphStore graphStore = loader.build().build().graphStore();
+            GraphStore graphStore = loader.graphStore();
 
             graphCandidate = ImmutableGraphStoreWithConfig.of(graphStore, createConfig);
         } else {

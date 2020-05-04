@@ -100,7 +100,7 @@ final class LabelPropagationTest extends AlgoTestBase {
                 .build();
         }
 
-        return applyInTransaction(db, tx -> graphLoader.load());
+        return applyInTransaction(db, tx -> graphLoader.graph());
     }
 
     @AllGraphStoreFactoryTypesTest

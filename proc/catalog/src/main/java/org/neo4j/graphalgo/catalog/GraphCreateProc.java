@@ -161,8 +161,7 @@ public class GraphCreateProc extends CatalogProc {
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-            GraphStoreFactory<?> graphStoreFactory = loader.build();
-            GraphStore graphStore =  graphStoreFactory.build().graphStore();
+            GraphStore graphStore =  loader.graphStore();
 
             builder
                 .withNodeCount(graphStore.nodeCount())
@@ -180,7 +179,7 @@ public class GraphCreateProc extends CatalogProc {
 
     public MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-        GraphStoreFactory graphStoreFactory = loader.build();
+        GraphStoreFactory<?> graphStoreFactory = loader.graphStoreFactory();
         GraphDimensions dimensions = updateDimensions(config, graphStoreFactory, graphStoreFactory.dimensions());
 
         MemoryTree memoryTree = estimate(graphStoreFactory, dimensions, config);
@@ -189,7 +188,7 @@ public class GraphCreateProc extends CatalogProc {
 
     private GraphDimensions updateDimensions(
         GraphCreateConfig config,
-        GraphStoreFactory graphStoreFactory,
+        GraphStoreFactory<?> graphStoreFactory,
         GraphDimensions dimensions
     ) {
         if (config.nodeCount() > -1) {
@@ -204,7 +203,7 @@ public class GraphCreateProc extends CatalogProc {
         return dimensions;
     }
 
-    public MemoryTree estimate(GraphStoreFactory factory, GraphDimensions dimensions, GraphCreateConfig config) {
+    public MemoryTree estimate(GraphStoreFactory<?> factory, GraphDimensions dimensions, GraphCreateConfig config) {
         return factory.memoryEstimation(dimensions).estimate(dimensions, config.readConcurrency());
     }
 
