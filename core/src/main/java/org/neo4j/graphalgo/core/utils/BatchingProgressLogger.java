@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.utils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.logging.Log;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
@@ -39,7 +38,7 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     private static long calculateBatchSize(long taskVolume, int concurrency) {
         // target 100 logs per full run (every 1 percent)
-        var batchSize = taskVolume / 100;
+        long batchSize = taskVolume / 100;
         // split batchSize into thread-local chunks
         batchSize /= concurrency;
         // batchSize needs to be a power of two

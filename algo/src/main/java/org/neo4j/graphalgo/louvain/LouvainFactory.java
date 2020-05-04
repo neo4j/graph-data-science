@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -46,7 +47,7 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
         final AllocationTracker tracker,
         final Log log
     ) {
-        var progressLogger = new BatchingProgressLogger(log, 1, "Louvain",
+        ProgressLogger progressLogger = new BatchingProgressLogger(log, 1, "Louvain",
             configuration.concurrency()
         );
 

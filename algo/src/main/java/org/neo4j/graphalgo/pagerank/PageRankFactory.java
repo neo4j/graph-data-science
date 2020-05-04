@@ -52,7 +52,7 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends Algorith
         AllocationTracker tracker,
         Log log
     ) {
-        var progressLogger = new BatchingProgressLogger(
+        ProgressLogger progressLogger = new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             getClass().getSimpleName(),

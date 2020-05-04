@@ -237,16 +237,16 @@ class K1ColoringTest extends AlgoTestBase {
 
     @Test
     void shouldLogProgress(){
-        var graph = RandomGraphGenerator.generate(
+        Graph graph = RandomGraphGenerator.generate(
             100,
             10,
             RelationshipDistribution.UNIFORM,
             42L
         );
 
-        var testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring", 8);
+        TestProgressLogger testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring", 8);
 
-        var k1Coloring = new K1Coloring(
+        K1Coloring k1Coloring = new K1Coloring(
             graph,
             100,
             DEFAULT_BATCH_SIZE,

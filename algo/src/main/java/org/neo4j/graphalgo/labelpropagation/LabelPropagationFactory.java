@@ -51,7 +51,7 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
         AllocationTracker tracker,
         Log log
     ) {
-        var progressLogger = new BatchingProgressLogger(
+        ProgressLogger progressLogger = new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             "LabelPropagation",

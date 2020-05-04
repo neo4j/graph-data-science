@@ -814,16 +814,16 @@ final class NodeSimilarityTest extends AlgoTestBase {
     @ParameterizedTest(name = "topK = {0}, concurrency = {1}")
     @MethodSource("topKAndConcurrencies")
     void shouldLogMessages(int topK, int concurrency) {
-        var graph =  new StoreLoaderBuilder()
+        Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .build()
             .graph(NativeFactory.class);
 
-        var progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity", concurrency);
+        TestProgressLogger progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity", concurrency);
 
-        var nodeSimilarity = new NodeSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().topN(100).topK(topK).concurrency(concurrency).build(),
             Pools.DEFAULT,
@@ -854,7 +854,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1,2})
     void shouldLogProgress(int concurrency) {
-        var graph =  new StoreLoaderBuilder()
+        Graph graph =  new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .loadAnyRelationshipType()
@@ -862,9 +862,9 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .build()
             .graph(NativeFactory.class);
 
-        var progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity", concurrency);
+        TestProgressLogger progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity", concurrency);
 
-        var nodeSimilarity = new NodeSimilarity(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder().degreeCutoff(0).concurrency(concurrency).build(),
             Pools.DEFAULT,

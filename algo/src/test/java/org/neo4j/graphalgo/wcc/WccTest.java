@@ -132,7 +132,7 @@ class WccTest extends AlgoTestBase {
 
     @Test
     void shouldLogProgress() {
-        var graph = new StoreLoaderBuilder()
+        Graph graph = new StoreLoaderBuilder()
             .api(db)
             .loadAnyLabel()
             .addRelationshipType(RELATIONSHIP_TYPE.name())
@@ -140,7 +140,7 @@ class WccTest extends AlgoTestBase {
             .build()
             .graph(NativeFactory.class);
 
-        var testLogger = new TestProgressLogger(graph.relationshipCount(), "Wcc", 2);
+        TestProgressLogger testLogger = new TestProgressLogger(graph.relationshipCount(), "Wcc", 2);
 
         new Wcc(
             graph,
