@@ -113,8 +113,8 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void buildWeightsArray(TestSupport.FactoryType factoryType) {
+    @Test
+    void buildWeightsArray() {
         final Label label = Label.label("Label1");
         final Map<Long, double[]> expected = new HashMap<>();
 
@@ -131,25 +131,13 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             expected.put(tx.findNode(label, "name", "j").getId(), new double[]{});
         });
 
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                .api(db)
-                .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
-                .relationshipQuery(
-                    "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(type.weight, 1) AS weight")
-                .build()
-                .graph()
-            );
-        } else {
-            graph = new StoreLoaderBuilder()
-                    .api(db)
-                    .addNodeLabel(label.name())
-                    .addRelationshipType("TYPE1")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-                    .build()
-                    .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE1")
+            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+            .build()
+            .graph();
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
             graph,
@@ -198,8 +186,8 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         );
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void weightedOutgoingCentrality(TestSupport.FactoryType factoryType) {
+    @Test
+    void weightedOutgoingCentrality() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -216,25 +204,13 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             expected.put(tx.findNode(label, "name", "j").getId(), 0.0);
         });
 
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
-                    .relationshipQuery(
-                        "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, coalesce(type.weight, 1) AS weight")
-                    .build()
-                    .graph()
-            );
-        } else {
-            graph = new StoreLoaderBuilder()
-                    .api(db)
-                    .addNodeLabel(label.name())
-                    .addRelationshipType("TYPE1")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-                    .build()
-                    .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE1")
+            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+            .build()
+            .graph();
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
                 graph,
@@ -255,8 +231,8 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void excludeNegativeWeights(TestSupport.FactoryType factoryType) {
+    @Test
+    void excludeNegativeWeights() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -273,26 +249,13 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             expected.put(tx.findNode(label, "name", "j").getId(), 0.0);
         });
 
-        final Graph graph;
-
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
-                    .relationshipQuery(
-                        "MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, coalesce(type.weight, 1) AS weight")
-                    .build()
-                    .graph()
-            );
-        } else {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(label.name())
-                .addRelationshipType("TYPE3")
-                .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-                .build()
-                .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE3")
+            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+            .build()
+            .graph();
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
                 graph,
@@ -313,8 +276,8 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void weightedIncomingCentrality(TestSupport.FactoryType factoryType) {
+    @Test
+    void weightedIncomingCentrality() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -331,25 +294,13 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             expected.put(tx.findNode(label, "name", "j").getId(), 0.0);
         });
 
-        Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
-                    .relationshipQuery(
-                        "MATCH (n:Label1)<-[t:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target, coalesce(t.weight, 1) AS weight")
-                    .build()
-                    .graph()
-            );
-        } else {
-            graph = new StoreLoaderBuilder()
-                    .api(db)
-                    .addNodeLabel(label.name())
-                    .addRelationshipProjection(RelationshipProjection.of("TYPE1", Orientation.REVERSE))
-                    .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-                    .build()
-                    .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipProjection(RelationshipProjection.of("TYPE1", Orientation.REVERSE))
+            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+            .build()
+            .graph();
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
                 graph,

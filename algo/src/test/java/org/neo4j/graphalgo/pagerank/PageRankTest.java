@@ -22,14 +22,10 @@ package org.neo4j.graphalgo.pagerank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -46,8 +42,6 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -109,8 +103,8 @@ final class PageRankTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void testOnOutgoingRelationships(TestSupport.FactoryType factoryType) {
+    @Test
+    void testOnOutgoingRelationships() {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
@@ -126,29 +120,12 @@ final class PageRankTest extends AlgoTestBase {
             expected.put(tx.findNode(LABEL, "name", "j").getId(), 0.15);
         });
 
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx ->
-                new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery(formatWithLocale("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
-                    .relationshipQuery(formatWithLocale(
-                        "MATCH (n:%s)-[:%s]->(m:%s) RETURN id(n) as source,id(m) as target",
-                        LABEL.name(),
-                        RELATIONSHIP_TYPE,
-                        LABEL.name()
-                    ))
-                    .build()
-                    .graph()
-            );
-        } else {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(LABEL.name())
-                .addRelationshipType(RELATIONSHIP_TYPE)
-                .build()
-                .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(LABEL.name())
+            .addRelationshipType(RELATIONSHIP_TYPE)
+            .build()
+            .graph();
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
             .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
@@ -166,8 +143,8 @@ final class PageRankTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void testOnIncomingRelationships(TestSupport.FactoryType factoryType) {
+    @Test
+    void testOnIncomingRelationships() {
         final Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
@@ -183,40 +160,20 @@ final class PageRankTest extends AlgoTestBase {
             expected.put(tx.findNode(LABEL, "name", "j").getId(), 0.15);
         });
 
-        final Graph graph;
         final CentralityResult rankResult;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx ->
-                new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery(formatWithLocale("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
-                    .relationshipQuery(formatWithLocale(
-                        "MATCH (n:%s)<-[:%s]-(m:%s) RETURN id(n) as source,id(m) as target",
-                        LABEL.name(),
-                        RELATIONSHIP_TYPE,
-                        LABEL.name()
-                    ))
-                    .build()
-                    .graph()
-            );
-            rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
-                .compute()
-                .result();
-        } else {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(LABEL.name())
-                .addRelationshipType(RELATIONSHIP_TYPE)
-                .globalOrientation(Orientation.REVERSE)
-                .build()
-                .graph();
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(LABEL.name())
+            .addRelationshipType(RELATIONSHIP_TYPE)
+            .globalOrientation(Orientation.REVERSE)
+            .build()
+            .graph();
 
-            rankResult = PageRankAlgorithmType.NON_WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
-                .compute()
-                .result();
-        }
+        rankResult = PageRankAlgorithmType.NON_WEIGHTED
+            .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
+            .compute()
+            .result();
+
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
@@ -229,30 +186,14 @@ final class PageRankTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void correctPartitionBoundariesForAllNodes(TestSupport.FactoryType factoryType) {
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                .api(db)
-                .nodeQuery(formatWithLocale("MATCH (n:%s) RETURN id(n) as id", LABEL.name()))
-                .relationshipQuery(formatWithLocale(
-                    "MATCH (n:%s)-[:%s]->(m:%s) RETURN id(n) as source,id(m) as target",
-                    LABEL.name(),
-                    RELATIONSHIP_TYPE,
-                    LABEL.name()
-                ))
-                .build()
-                .graph()
-            );
-        } else {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(LABEL.name())
-                .addRelationshipType(RELATIONSHIP_TYPE)
-                .build()
-                .graph();
-        }
+    @Test
+    void correctPartitionBoundariesForAllNodes() {
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(LABEL.name())
+            .addRelationshipType(RELATIONSHIP_TYPE)
+            .build()
+            .graph();
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
         PageRankAlgorithmType.NON_WEIGHTED

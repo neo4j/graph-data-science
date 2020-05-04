@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
@@ -103,26 +104,16 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void averageOutgoingCentrality(TestSupport.FactoryType factoryType) {
+    @Test
+    void averageOutgoingCentrality() {
         final Label label = Label.label("Label1");
 
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                .api(db)
-                .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
-                .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                .build()
-                .graph());
-        } else {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(label.name())
-                .addRelationshipType("TYPE1")
-                .build()
-                .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE1")
+            .build()
+            .graph();
 
         AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
         degreeCentrality.compute();

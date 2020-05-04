@@ -64,8 +64,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class K1ColoringTest extends AlgoTestBase {
 
-    @AllGraphStoreFactoryTypesTest
-    void testK1Coloring(TestSupport.FactoryType factoryType) {
+    @Test
+    void testK1Coloring() {
         final String DB_CYPHER =
             "CREATE" +
             " (a)" +
@@ -77,23 +77,10 @@ class K1ColoringTest extends AlgoTestBase {
 
         runQuery(DB_CYPHER);
 
-        Graph graph;
-
-        GraphLoader graphLoader;
-        if (factoryType == CYPHER) {
-            graphLoader = new CypherLoaderBuilder()
-                .api(db)
-                .graphName("cypher")
-                .nodeQuery(ALL_NODES_QUERY)
-                .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
-                .build();
-        } else {
-            graphLoader = new StoreLoaderBuilder()
-                .api(db)
-                .build();
-        }
-
-        graph = applyInTransaction(db, tx -> graphLoader.graph());
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .build()
+            .graph();
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,

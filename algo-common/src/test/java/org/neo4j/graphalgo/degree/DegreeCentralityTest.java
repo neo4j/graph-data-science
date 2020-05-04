@@ -20,13 +20,10 @@
 package org.neo4j.graphalgo.degree;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -37,8 +34,6 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class DegreeCentralityTest extends AlgoTestBase {
@@ -109,8 +104,8 @@ final class DegreeCentralityTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void outgoingCentrality(TestSupport.FactoryType factoryType) {
+    @Test
+    void outgoingCentrality() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -128,22 +123,12 @@ final class DegreeCentralityTest extends AlgoTestBase {
             }
         );
 
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
-                    .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                    .build()
-                    .graph());
-        } else {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(label.name())
-                .addRelationshipType("TYPE1")
-                .build()
-                .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE1")
+            .build()
+            .graph();
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
                 graph,
@@ -164,8 +149,8 @@ final class DegreeCentralityTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void incomingCentrality(TestSupport.FactoryType factoryType) {
+    @Test
+    void incomingCentrality() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -183,23 +168,14 @@ final class DegreeCentralityTest extends AlgoTestBase {
             }
         );
 
-        final Graph graph;
 
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
-                    .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
-                    .relationshipQuery("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                    .build()
-                    .graph());
-        } else {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(label.name())
-                .addRelationshipType("TYPE1")
-                .globalOrientation(Orientation.REVERSE)
-                .build()
-                .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE1")
+            .globalOrientation(Orientation.REVERSE)
+            .build()
+            .graph();
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(graph, Pools.DEFAULT, 4, false, AllocationTracker.EMPTY);
         degreeCentrality.compute();
@@ -215,8 +191,8 @@ final class DegreeCentralityTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void totalCentrality(TestSupport.FactoryType factoryType) {
+    @Test
+    void totalCentrality() {
         Label label = Label.label("Label1");
         Map<Long, Double> expected = new HashMap<>();
 
@@ -235,24 +211,14 @@ final class DegreeCentralityTest extends AlgoTestBase {
             expected.put(tx.findNode(label, "name", "j").getId(), 0.0);
         });
 
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                .api(db)
-                .nodeQuery("MATCH (n:Label1) RETURN id(n) AS id")
-                .relationshipQuery("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN DISTINCT id(n) AS source, id(m) AS target")
-                .build()
-                .graph());
-        } else {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(label.name())
-                .addRelationshipType("TYPE1")
-                .globalOrientation(Orientation.UNDIRECTED)
-                .globalAggregation(Aggregation.SINGLE)
-                .build()
-                .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE1")
+            .globalOrientation(Orientation.UNDIRECTED)
+            .globalAggregation(Aggregation.SINGLE)
+            .build()
+            .graph();
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
                 graph,

@@ -24,14 +24,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
@@ -52,14 +49,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.graphalgo.TestLog.INFO;
-import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
-import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
@@ -121,9 +114,9 @@ class LouvainTest extends AlgoTestBase {
         ", (l)-[:TYPE {weight: 1.0}]->(n)" +
         ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
-    @AllGraphStoreFactoryTypesTest
-    void unweightedLouvain(TestSupport.FactoryType factoryType) {
-        Graph graph = loadGraph(factoryType, DB_CYPHER, false);
+    @Test
+    void unweightedLouvain() {
+        Graph graph = loadGraph(DB_CYPHER, false);
 
         Louvain algorithm = new Louvain(
             graph,
@@ -157,9 +150,9 @@ class LouvainTest extends AlgoTestBase {
         assertEquals(0.38, modularities[modularities.length - 1], 0.01);
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void weightedLouvain(TestSupport.FactoryType factoryType) {
-        Graph graph = loadGraph(factoryType, DB_CYPHER, true);
+    @Test
+    void weightedLouvain() {
+        Graph graph = loadGraph(DB_CYPHER, true);
 
         Louvain algorithm = new Louvain(
             graph,
@@ -193,11 +186,9 @@ class LouvainTest extends AlgoTestBase {
         assertEquals(0.37, modularities[modularities.length - 1], 0.01);
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void seededLouvain(TestSupport.FactoryType factoryType) {
-        assumeFalse(factoryType == CYPHER);
-
-        Graph graph = loadGraph(factoryType, DB_CYPHER, true, "seed");
+    @Test
+    void seededLouvain() {
+        Graph graph = loadGraph(DB_CYPHER, true, "seed");
 
         Louvain algorithm = new Louvain(
             graph,
@@ -228,9 +219,9 @@ class LouvainTest extends AlgoTestBase {
         assertEquals(0.38, modularities[modularities.length - 1], 0.01);
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void testTolerance(TestSupport.FactoryType factoryType) {
-        Graph graph = loadGraph(factoryType, DB_CYPHER);
+    @Test
+    void testTolerance() {
+        Graph graph = loadGraph(DB_CYPHER);
 
         Louvain algorithm = new Louvain(
             graph,
@@ -251,9 +242,9 @@ class LouvainTest extends AlgoTestBase {
         assertEquals(1, algorithm.levels());
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void testMaxLevels(TestSupport.FactoryType factoryType) {
-        Graph graph = loadGraph(factoryType, DB_CYPHER);
+    @Test
+    void testMaxLevels() {
+        Graph graph = loadGraph(DB_CYPHER);
 
         Louvain algorithm = new Louvain(
             graph,
@@ -336,7 +327,7 @@ class LouvainTest extends AlgoTestBase {
             AllocationTracker.EMPTY
         ).generate();
 
-        assertTerminates((terminationFlag) -> {
+        assertTerminates((terminationFlag) ->
             new Louvain(
                 graph,
                 defaultConfigBuilder().concurrency(2).build(),
@@ -344,14 +335,14 @@ class LouvainTest extends AlgoTestBase {
                 progressLogger,
                 AllocationTracker.EMPTY
             )
-                .withTerminationFlag(terminationFlag)
-                .compute();
-        }, 500, 1000);
+            .withTerminationFlag(terminationFlag)
+            .compute(), 500, 1000
+        );
     }
 
     @Test
     void testLogging() {
-        var graph = loadGraph(NATIVE, DB_CYPHER);
+        var graph = loadGraph(DB_CYPHER);
 
         var config = defaultConfigBuilder().build();
 
@@ -383,22 +374,16 @@ class LouvainTest extends AlgoTestBase {
         );
     }
 
-    private Graph loadGraph(TestSupport.FactoryType factoryType, String cypher, String... nodeProperties) {
-        return loadGraph(factoryType, cypher, false, nodeProperties);
+    private Graph loadGraph(String cypher, String... nodeProperties) {
+        return loadGraph(cypher, false, nodeProperties);
     }
 
     private Graph loadGraph(
-        TestSupport.FactoryType factoryType,
         String cypher,
         boolean loadRelationshipProperty,
         String... nodeProperties
     ) {
         runQuery(cypher);
-
-        String nodeStatement = "MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2";
-        String relStatement = loadRelationshipProperty
-            ? "MATCH (u1:Node)-[rel]-(u2:Node) RETURN id(u1) AS source, id(u2) AS target, coalesce(rel.weight, 1.0) as weight"
-            : "MATCH (u1:Node)-[rel]-(u2:Node) RETURN id(u1) AS source, id(u2) AS target";
 
         PropertyMapping[] nodePropertyMappings = Arrays.stream(nodeProperties)
             .map(p -> PropertyMapping.of(p, -1))
@@ -406,36 +391,24 @@ class LouvainTest extends AlgoTestBase {
 
         PropertyMapping relationshipPropertyMapping = PropertyMapping.of("weight", 1.0);
 
-        if (factoryType == CYPHER) {
-            return applyInTransaction(db, tx -> {
-                CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery(nodeStatement)
-                    .relationshipQuery(relStatement);
-
-                return cypherLoaderBuilder
-                    .build()
-                    .graph();
-            });
-        } else {
-            StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel("Node")
-                .putRelationshipProjectionsWithIdentifier(
-                    "TYPE_OUT",
-                    RelationshipProjection.of("TYPE", Orientation.NATURAL)
-                )
-                .putRelationshipProjectionsWithIdentifier(
-                    "TYPE_IN",
-                    RelationshipProjection.of("TYPE", Orientation.REVERSE)
-                )
-                .addNodeProperties(nodePropertyMappings);
-            if (loadRelationshipProperty) {
-                storeLoaderBuilder.addRelationshipProperty(relationshipPropertyMapping);
-            }
-            return storeLoaderBuilder
-                .build()
-                .graph();
+        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node")
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_OUT",
+                RelationshipProjection.of("TYPE", Orientation.NATURAL)
+            )
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_IN",
+                RelationshipProjection.of("TYPE", Orientation.REVERSE)
+            )
+            .addNodeProperties(nodePropertyMappings);
+        if (loadRelationshipProperty) {
+            storeLoaderBuilder.addRelationshipProperty(relationshipPropertyMapping);
         }
+        return storeLoaderBuilder
+            .build()
+            .graph();
+
     }
 }

@@ -20,13 +20,10 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphdb.Label;
 
@@ -36,8 +33,6 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class WeightedPageRankTest extends AlgoTestBase {
@@ -117,8 +112,8 @@ final class WeightedPageRankTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void defaultWeightOf0MeansNoDiffusionOfPageRank(TestSupport.FactoryType factoryType) {
+    @Test
+    void defaultWeightOf0MeansNoDiffusionOfPageRank() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -135,25 +130,97 @@ final class WeightedPageRankTest extends AlgoTestBase {
             expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
         });
 
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
-                    .relationshipQuery(
-                        "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, 0 as weight")
-                    .build()
-                    .graph()
+       var graph = new StoreLoaderBuilder()
+           .api(db)
+           .addNodeLabel(label.name())
+           .addRelationshipType("TYPE1")
+           .addRelationshipProperty(PropertyMapping.of("weight", 0))
+           .build()
+           .graph();
+
+        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
+                .compute()
+                .result();
+
+        IntStream.range(0, expected.size()).forEach(i -> {
+            final long nodeId = graph.toOriginalNodeId(i);
+            assertEquals(
+                    expected.get(nodeId),
+                    rankResult.score(i),
+                    1e-2,
+                    "Node#" + nodeId
             );
-        } else {
-            graph = new StoreLoaderBuilder()
+        });
+    }
+
+    @Test
+    void defaultWeightOf1ShouldBeTheSameAsPageRank() {
+        final Label label = Label.label("Label1");
+        final Map<Long, Double> expected = new HashMap<>();
+
+        runInTransaction(db, tx -> {
+            expected.put(tx.findNode(label, "name", "a").getId(), 0.243007);
+            expected.put(tx.findNode(label, "name", "b").getId(), 1.9183995);
+            expected.put(tx.findNode(label, "name", "c").getId(), 1.7806315);
+            expected.put(tx.findNode(label, "name", "d").getId(), 0.21885);
+            expected.put(tx.findNode(label, "name", "e").getId(), 0.243007);
+            expected.put(tx.findNode(label, "name", "f").getId(), 0.21885);
+            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
+        });
+
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE1")
+            .addRelationshipProperty(PropertyMapping.of("weight", 1))
+            .build()
+            .graph();
+
+        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
+                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
+                .compute()
+                .result();
+
+        IntStream.range(0, expected.size()).forEach(i -> {
+            final long nodeId = graph.toOriginalNodeId(i);
+            assertEquals(
+                    expected.get(nodeId),
+                    rankResult.score(i),
+                    1e-2,
+                    "Node#" + nodeId
+            );
+        });
+    }
+
+    @Test
+    void allWeightsTheSameShouldBeTheSameAsPageRank() {
+        final Label label = Label.label("Label1");
+        final Map<Long, Double> expected = new HashMap<>();
+
+        runInTransaction(db, tx -> {
+            expected.put(tx.findNode(label, "name", "a").getId(), 0.243007);
+            expected.put(tx.findNode(label, "name", "b").getId(), 1.9183995);
+            expected.put(tx.findNode(label, "name", "c").getId(), 1.7806315);
+            expected.put(tx.findNode(label, "name", "d").getId(), 0.21885);
+            expected.put(tx.findNode(label, "name", "e").getId(), 0.243007);
+            expected.put(tx.findNode(label, "name", "f").getId(), 0.21885);
+            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
+        });
+
+        var graph = new StoreLoaderBuilder()
                 .api(db)
                 .addNodeLabel(label.name())
-                .addRelationshipType("TYPE1")
+                .addRelationshipType("TYPE2")
                 .addRelationshipProperty(PropertyMapping.of("weight", 0))
                 .build()
                 .graph();
-        }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
                 .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
@@ -171,116 +238,8 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void defaultWeightOf1ShouldBeTheSameAsPageRank(TestSupport.FactoryType factoryType) {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
-
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.243007);
-            expected.put(tx.findNode(label, "name", "b").getId(), 1.9183995);
-            expected.put(tx.findNode(label, "name", "c").getId(), 1.7806315);
-            expected.put(tx.findNode(label, "name", "d").getId(), 0.21885);
-            expected.put(tx.findNode(label, "name", "e").getId(), 0.243007);
-            expected.put(tx.findNode(label, "name", "f").getId(), 0.21885);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
-        });
-
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
-                    .relationshipQuery(
-                        "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, 1 as weight")
-                    .build()
-                    .graph()
-            );
-        } else {
-            graph = new StoreLoaderBuilder()
-                    .api(db)
-                    .addNodeLabel(label.name())
-                    .addRelationshipType("TYPE1")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 1))
-                    .build()
-                    .graph();
-        }
-
-        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
-                .compute()
-                .result();
-
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
-            assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
-            );
-        });
-    }
-
-    @AllGraphStoreFactoryTypesTest
-    void allWeightsTheSameShouldBeTheSameAsPageRank(TestSupport.FactoryType factoryType) {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
-
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.243007);
-            expected.put(tx.findNode(label, "name", "b").getId(), 1.9183995);
-            expected.put(tx.findNode(label, "name", "c").getId(), 1.7806315);
-            expected.put(tx.findNode(label, "name", "d").getId(), 0.21885);
-            expected.put(tx.findNode(label, "name", "e").getId(), 0.243007);
-            expected.put(tx.findNode(label, "name", "f").getId(), 0.21885);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
-        });
-
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
-                    .relationshipQuery(
-                        "MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(r.weight, 0) AS weight")
-                    .build()
-                    .graph()
-            );
-        } else {
-            graph = new StoreLoaderBuilder()
-                    .api(db)
-                    .addNodeLabel(label.name())
-                    .addRelationshipType("TYPE2")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
-                    .build()
-                    .graph();
-        }
-
-        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
-                .compute()
-                .result();
-
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
-            assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
-            );
-        });
-    }
-
-    @AllGraphStoreFactoryTypesTest
-    void higherWeightsLeadToHigherPageRank(TestSupport.FactoryType factoryType) {
+    @Test
+    void higherWeightsLeadToHigherPageRank() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -297,25 +256,14 @@ final class WeightedPageRankTest extends AlgoTestBase {
             expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
         });
 
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                        .api(db)
-                        .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
-                        .relationshipQuery(
-                            "MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(r.weight, 0) AS weight")
-                        .build()
-                        .graph()
-            );
-        } else {
-            graph = new StoreLoaderBuilder()
-                    .api(db)
-                    .addNodeLabel(label.name())
-                    .addRelationshipType("TYPE3")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
-                    .build()
-                    .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE3")
+            .addRelationshipProperty(PropertyMapping.of("weight", 0))
+            .build()
+            .graph();
+
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
                 .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
@@ -333,8 +281,8 @@ final class WeightedPageRankTest extends AlgoTestBase {
         });
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void shouldExcludeNegativeWeights(TestSupport.FactoryType factoryType) {
+    @Test
+    void shouldExcludeNegativeWeights() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -351,25 +299,13 @@ final class WeightedPageRankTest extends AlgoTestBase {
             expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
         });
 
-        final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                    .api(db)
-                    .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
-                    .relationshipQuery(
-                        "MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, coalesce(r.weight, 0) AS weight")
-                    .build()
-                    .graph()
-            );
-        } else {
-            graph = new StoreLoaderBuilder()
-                    .api(db)
-                    .addNodeLabel(label.name())
-                    .addRelationshipType("TYPE4")
-                    .addRelationshipProperty(PropertyMapping.of("weight", 0))
-                    .build()
-                    .graph();
-        }
+        var graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE4")
+            .addRelationshipProperty(PropertyMapping.of("weight", 0))
+            .build()
+            .graph();
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
                 .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
