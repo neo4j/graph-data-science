@@ -28,15 +28,18 @@ This topic includes:
 [[algorithms-local-clustering-coefficient-intro]]
 == Introduction
 
-Local Clustering Coefficient algorithm is making use of the <<algorithms-triangle-count, Triangle Count algorithm>> for its computation.
+The Local Clustering Coefficient algorithm computes the local clustering coefficient for each node in the graph.
+The local clustering coefficient _C~n~_ of a node _n_ describes the likelihood that the neighbours of _n_ are also connected.
+To compute _C~n~_ we use the number of triangles a node is a part of _T~n~_, and the degree of the node _d~n~_.
+The formula to compute the local clustering coefficient is as follows:
 
-There are two types of clustering coefficient:
+image::lcc_formula.svg[align="center"]
 
-* Local clustering coefficient: Property of a node. Indicates the likelihood that the node's neighbours are also connected based on triangle counting.
+As we can see the triangle count is required to compute the local clustering coefficient.
+To do this the <<algorithms-triangle-count, Triangle Count>> algorithm is utilised.
 
-* Global clustering coefficient: based on triplets of nodes.
-
-NOTE: This algorithm *only* computes the Local Clustering Coefficient.
+Additionally, the algorithm can compute the _average clustering coefficient_ for the whole graph.
+This is the normalised sum over all the local clustering coefficients.
 
 For more information, see https://en.wikipedia.org/wiki/Clustering_coefficient[Clustering Coefficient].
 
