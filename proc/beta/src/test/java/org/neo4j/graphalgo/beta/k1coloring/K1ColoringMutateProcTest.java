@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GraphMutationTest;
@@ -27,17 +28,21 @@ import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements GraphMutationTest<K1Coloring, K1ColoringMutateConfig, HugeLongArray> {
+public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringMutateConfig>
+    implements GraphMutationTest<K1Coloring, K1ColoringMutateConfig, HugeLongArray> {
+
+    @BeforeEach
+    void addGraphWriteNodePropertiesProc() throws Exception {
+        registerProcedures(GraphWriteNodePropertiesProc.class);
+    }
 
     @Override
     public String mutateProperty() {
@@ -47,11 +52,6 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements 
     @Override
     public NumberType mutatePropertyType() {
         return NumberType.INTEGRAL;
-    }
-
-    @Override
-    void registerProcs() throws Exception {
-        registerProcedures(K1ColoringMutateProc.class, GraphWriteNodePropertiesProc.class);
     }
 
     @Override
@@ -72,16 +72,6 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest implements 
     @Override
     public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringMutateConfig>> getProcedureClazz() {
         return K1ColoringMutateProc.class;
-    }
-
-    @Override
-    public GraphDatabaseAPI graphDb() {
-        return db;
-    }
-
-    @Override
-    public void assertResultEquals(HugeLongArray result1, HugeLongArray result2) {
-        assertArrayEquals(result1.toArray(), result2.toArray());
     }
 
     @Test

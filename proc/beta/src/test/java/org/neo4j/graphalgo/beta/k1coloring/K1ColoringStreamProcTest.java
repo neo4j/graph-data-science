@@ -21,21 +21,30 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class K1ColoringStreamProcTest extends K1ColoringProcBaseTest {
+class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamConfig> {
 
     @Override
-    void registerProcs() throws Exception {
-        registerProcedures(K1ColoringStreamProc.class);
+    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringStreamConfig>> getProcedureClazz() {
+        return K1ColoringStreamProc.class;
+    }
+
+    @Override
+    public K1ColoringStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return K1ColoringStreamConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Test

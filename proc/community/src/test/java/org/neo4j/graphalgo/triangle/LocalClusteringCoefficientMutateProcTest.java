@@ -37,6 +37,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LocalClusteringCoefficientMutateProcTest
     extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientMutateConfig>
@@ -54,7 +55,7 @@ class LocalClusteringCoefficientMutateProcTest
 
     @Override
     public String expectedMutatedGraph() {
-        return String.format(
+        return formatWithLocale(
             "  (a { mutatedLocalCC: %f })" +
             ", (b { mutatedLocalCC: %f })" +
             ", (c { mutatedLocalCC: %f })" +

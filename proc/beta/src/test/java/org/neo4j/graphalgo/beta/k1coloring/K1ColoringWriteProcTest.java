@@ -21,22 +21,38 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class K1ColoringWriteProcTest extends K1ColoringProcBaseTest {
+class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConfig> {
 
     @Override
-    void registerProcs() throws Exception {
-        registerProcedures(K1ColoringWriteProc.class);
+    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringWriteConfig>> getProcedureClazz() {
+        return K1ColoringWriteProc.class;
+    }
+
+    @Override
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        return !mapWrapper.containsKey("writeProperty")
+            ? mapWrapper.withEntry("writeProperty", "color")
+            : mapWrapper;
+    }
+
+    @Override
+    public K1ColoringWriteConfig createConfig(CypherMapWrapper configMap) {
+        return K1ColoringWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), configMap);
     }
 
     @Test

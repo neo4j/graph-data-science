@@ -20,12 +20,11 @@
 package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -41,20 +40,21 @@ import static org.neo4j.graphalgo.beta.k1coloring.K1ColoringProc.K1_COLORING_DES
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1ColoringWriteProc.WriteResult, K1ColoringWriteConfig> {
-    @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE)
+public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1ColoringStatsProc.StatsResult, K1ColoringStatsConfig> {
+
+    @Procedure(name = "gds.beta.k1coloring.stats", mode = READ)
     @Description(K1_COLORING_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<StatsResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult =
+        ComputationResult<K1Coloring, HugeLongArray, K1ColoringStatsConfig> computationResult =
             compute(graphNameOrConfig, configuration);
 
-        return write(computationResult);
+        return stats(computationResult);
     }
 
-    @Procedure(value = "gds.beta.k1coloring.write.estimate", mode = READ)
+    @Procedure(value = "gds.beta.k1coloring.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -64,47 +64,30 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected PropertyTranslator<HugeLongArray> nodePropertyTranslator(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult) {
-        return K1ColoringProc.nodePropertyTranslator();
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computeResult) {
-        WriteResult.Builder builder = new WriteResult.Builder(callContext, computeResult.tracker());
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringStatsConfig> computeResult) {
+        StatsResult.Builder builder = new StatsResult.Builder(callContext, computeResult.tracker());
         return K1ColoringProc.resultBuilder(builder, computeResult, callContext);
     }
 
     @Override
-    protected AlgorithmFactory<K1Coloring, K1ColoringWriteConfig> algorithmFactory(K1ColoringWriteConfig config) {
+    protected AlgorithmFactory<K1Coloring, K1ColoringStatsConfig> algorithmFactory(K1ColoringStatsConfig config) {
         return new K1ColoringFactory<>();
     }
 
     @Override
-    protected K1ColoringWriteConfig newConfig(
+    protected K1ColoringStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return K1ColoringWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return K1ColoringStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
-    public static class WriteResult {
-
-        public static final WriteResult EMPTY = new WriteResult(
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            false,
-            null
-        );
+    public static class StatsResult {
 
         public final long createMillis;
         public final long computeMillis;
-        public final long writeMillis;
 
         public final long nodeCount;
         public final long colorCount;
@@ -113,10 +96,9 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
 
         public Map<String, Object> configuration;
 
-        WriteResult(
+        StatsResult(
             long createMillis,
             long computeMillis,
-            long writeMillis,
             long nodeCount,
             long colorCount,
             long ranIterations,
@@ -125,7 +107,6 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
             this.nodeCount = nodeCount;
             this.colorCount = colorCount;
             this.ranIterations = ranIterations;
@@ -133,7 +114,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
             this.configuration = configuration;
         }
 
-        static class Builder extends K1ColoringProc.K1ColoringResultBuilder<WriteResult> {
+        static class Builder extends K1ColoringProc.K1ColoringResultBuilder<StatsResult> {
 
             Builder(
                 ProcedureCallContext context,
@@ -143,11 +124,10 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
             }
 
             @Override
-            protected WriteResult buildResult() {
-                return new WriteResult(
+            protected StatsResult buildResult() {
+                return new StatsResult(
                     createMillis,
                     computeMillis,
-                    writeMillis,
                     nodeCount,
                     colorCount,
                     ranIterations,
