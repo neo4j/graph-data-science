@@ -31,9 +31,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
@@ -154,10 +152,6 @@ public class GraphCreateProc extends CatalogProc {
         return estimateGraph(config);
     }
 
-    private Class<? extends GraphStoreFactory> getFactoryClazz(GraphCreateConfig config) {
-        return config.isCypher() ? CypherFactory.class : config.getGraphImpl();
-    }
-
     private GraphCreateResult createGraph(GraphCreateConfig config) {
         tryValidateMemoryUsage(config, c -> memoryTreeWithDimensions(c));
 
@@ -167,7 +161,7 @@ public class GraphCreateProc extends CatalogProc {
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-            GraphStoreFactory graphStoreFactory = loader.build(getFactoryClazz(config));
+            GraphStoreFactory<?> graphStoreFactory = loader.build();
             GraphStore graphStore =  graphStoreFactory.build().graphStore();
 
             builder
@@ -186,7 +180,7 @@ public class GraphCreateProc extends CatalogProc {
 
     public MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-        GraphStoreFactory graphStoreFactory = loader.build(getFactoryClazz(config));
+        GraphStoreFactory graphStoreFactory = loader.build();
         GraphDimensions dimensions = updateDimensions(config, graphStoreFactory, graphStoreFactory.dimensions());
 
         MemoryTree memoryTree = estimate(graphStoreFactory, dimensions, config);

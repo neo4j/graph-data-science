@@ -48,6 +48,10 @@ import java.util.stream.Collectors;
  */
 public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implements Assessable {
 
+    public interface Supplier {
+        GraphStoreFactory<? extends GraphCreateConfig> get(GraphLoaderContext loaderContext);
+    }
+
     public static final String TASK_LOADING = "LOADING";
 
     protected final CONFIG graphCreateConfig;

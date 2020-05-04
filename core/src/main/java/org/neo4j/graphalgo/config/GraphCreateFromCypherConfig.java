@@ -25,7 +25,9 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -74,6 +76,12 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
     @Value.Parameter(false)
     default boolean isCypher() {
         return true;
+    }
+
+    @Configuration.Ignore
+    @Override
+    default GraphStoreFactory.Supplier graphStoreFactory() {
+        return loaderContext -> new CypherFactory(this, loaderContext);
     }
 
     static GraphCreateFromCypherConfig of(

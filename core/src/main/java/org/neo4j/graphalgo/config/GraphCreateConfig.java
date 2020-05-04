@@ -82,6 +82,9 @@ public interface GraphCreateConfig extends BaseConfig {
     }
 
     @Configuration.Ignore
+    GraphStoreFactory.Supplier graphStoreFactory();
+
+    @Configuration.Ignore
     default Class<? extends GraphStoreFactory> getGraphImpl() {
         return isCypher()
             ? CypherFactory.class

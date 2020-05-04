@@ -86,4 +86,21 @@ public interface GraphLoader {
         return build(factoryType).build().graphStore().getUnion();
     }
 
+
+    default Graph graph() {
+        return load();
+    }
+
+    default GraphStore graphStore() {
+        return build().build().graphStore();
+    }
+
+    default Graph load() {
+        return build().build().graphStore().getUnion();
+    }
+
+    default GraphStoreFactory<? extends GraphCreateConfig> build() {
+        return createConfig().graphStoreFactory().get(context());
+    }
+
 }

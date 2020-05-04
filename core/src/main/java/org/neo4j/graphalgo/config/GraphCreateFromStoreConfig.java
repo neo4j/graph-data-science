@@ -28,7 +28,10 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
 import org.neo4j.graphalgo.annotation.Configuration.Key;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -66,6 +69,12 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
     default PropertyMappings relationshipProperties() {
         return PropertyMappings.of();
+    }
+
+    @Configuration.Ignore
+    @Override
+    default GraphStoreFactory.Supplier graphStoreFactory() {
+        return loaderContext -> new NativeFactory(this, loaderContext);
     }
 
     @Value.Check

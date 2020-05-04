@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -109,6 +110,13 @@ public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
             )
             .build();
     }
+
+    @Configuration.Ignore
+    @Override
+    default GraphStoreFactory.Supplier graphStoreFactory() {
+        // TODO: maybe we could introduce a RandomGraphFactory
+        throw new UnsupportedOperationException("RandomGraphGeneratorConfig requires explicit graph generation.");
+    };
 
     static RandomGraphGeneratorConfig of(
         String username,
