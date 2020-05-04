@@ -364,14 +364,14 @@ include::../shared/examples-stats-intro.adoc[]
 [source, cypher]
 ----
 CALL gds.triangleCount.stats('myGraph')
-YIELD triangleCount, nodeCount
+YIELD globalTriangleCount, nodeCount
 ----
 
 .Results
 [opts="header"]
 |===
-| triangleCount | nodeCount
-| 3             | 6
+| globalTriangleCount | nodeCount
+| 3                   | 6
 |===
 --
 
@@ -395,14 +395,14 @@ include::../shared/examples-mutate-intro.adoc[]
 CALL gds.triangleCount.mutate('myGraph', {
   mutateProperty: 'triangles'
 })
-YIELD triangleCount, nodeCount
+YIELD globalTriangleCount, nodeCount
 ----
 
 .Results
 [opts="header"]
 |===
-| triangleCount | nodeCount
-| 3             | 6
+| globalTriangleCount | nodeCount
+| 3                   | 6
 |===
 --
 
@@ -424,14 +424,14 @@ include::../shared/examples-write-intro.adoc[]
 CALL gds.triangleCount.write('myGraph', {
   writeProperty: 'triangles'
 })
-YIELD triangleCount, nodeCount
+YIELD globalTriangleCount, nodeCount
 ----
 
 .Results
 [opts="header"]
 |===
-| triangleCount | nodeCount
-| 3             | 6
+| globalTriangleCount | nodeCount
+| 3                   | 6
 |===
 --
 

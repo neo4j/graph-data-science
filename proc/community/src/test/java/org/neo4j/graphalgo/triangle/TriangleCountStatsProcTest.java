@@ -43,7 +43,7 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
-            "triangleCount", 1L,
+            "globalTriangleCount", 1L,
             "nodeCount", 3L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
