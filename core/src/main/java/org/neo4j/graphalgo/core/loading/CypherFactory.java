@@ -156,10 +156,10 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
     }
 
     private static Optional<GraphCreateFromCypherConfig> getCypherConfig(GraphCreateConfig config) {
-        if (!config.isCypher()) {
-            return Optional.empty();
+        if (config instanceof GraphCreateFromCypherConfig) {
+            return Optional.of((GraphCreateFromCypherConfig) config);
         }
-        return Optional.of((GraphCreateFromCypherConfig) config);
+        return Optional.empty();
     }
 
     private RelationshipImportResult loadRelationships(

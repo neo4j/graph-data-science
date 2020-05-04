@@ -153,9 +153,9 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     private GraphCreateResult createGraph(GraphCreateConfig config) {
-        tryValidateMemoryUsage(config, c -> memoryTreeWithDimensions(c));
+        tryValidateMemoryUsage(config, this::memoryTreeWithDimensions);
 
-        GraphCreateResult.Builder builder = config.isCypher()
+        GraphCreateResult.Builder builder = config instanceof GraphCreateFromCypherConfig
             ? new GraphCreateCypherResult.Builder((GraphCreateFromCypherConfig) config)
             : new GraphCreateNativeResult.Builder((GraphCreateFromStoreConfig) config);
 

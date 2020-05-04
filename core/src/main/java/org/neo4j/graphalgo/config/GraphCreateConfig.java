@@ -73,12 +73,6 @@ public interface GraphCreateConfig extends BaseConfig {
         return false;
     }
 
-    @Value.Default
-    @Value.Parameter(false)
-    default boolean isCypher() {
-        return false;
-    }
-
     @Configuration.Ignore
     GraphStoreFactory.Supplier graphStoreFactory();
 

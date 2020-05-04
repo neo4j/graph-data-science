@@ -326,7 +326,7 @@ public abstract class AlgoBaseProc<
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) { }
 
     protected void validateIsUndirectedGraph(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        if (!graphCreateConfig.isCypher()) {
+        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
             GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
             storeConfig.relationshipProjections().projections().entrySet().stream()
                 .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
