@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.impl.embedding.RandomProjection;
+import org.neo4j.graphalgo.impl.embedding.RandomProjectionBaseConfig;
 import org.neo4j.logging.Log;
 
 public class RandomProjectionFactory<CONFIG extends RandomProjectionBaseConfig> extends AlgorithmFactory<RandomProjection, CONFIG> {
@@ -34,19 +35,12 @@ public class RandomProjectionFactory<CONFIG extends RandomProjectionBaseConfig> 
     public RandomProjection build(
         Graph graph, CONFIG configuration, AllocationTracker tracker, Log log
     ) {
-        // TODO logging
-        var progressLogger = new BatchingProgressLogger(log, 1, "RandomProjection", configuration.concurrency());
+        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "RandomProjection", configuration.concurrency());
 
         return new RandomProjection(
             graph,
-            configuration.embeddingDimension(),
-            configuration.sparsity(),
-            configuration.maxIterations(),
-            configuration.iterationWeights(),
-            configuration.normalizationStrength(),
-            configuration.normalizeL2(),
-            configuration.seed(),
-            configuration.concurrency(),
+            configuration,
+            progressLogger,
             tracker
         );
     }

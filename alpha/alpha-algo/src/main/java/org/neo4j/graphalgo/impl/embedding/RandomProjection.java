@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.impl.embedding;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -29,6 +31,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class RandomProjection extends Algorithm<RandomProjection, RandomProjection> {
 
@@ -43,36 +47,28 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     private final int embeddingDimension;
     private final int sparsity;
     private final int iterations;
-    private final int seed;
     private final List<Double> iterationWeights;
 
-    // TODO use config instead of single arguments
     public RandomProjection(
         Graph graph,
-        int embeddingDimension,
-        int sparsity,
-        int iterations,
-        List<Double> iterationWeights,
-        float normalizationStrength,
-        boolean normalizeL2,
-        int seed,
-        int concurrency,
+        RandomProjectionBaseConfig config,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.graph = graph;
+        this.progressLogger = progressLogger;
 
         this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
 
-        this.embeddingDimension = embeddingDimension;
-        this.sparsity = sparsity;
-        this.iterations = iterations;
-        this.iterationWeights = iterationWeights;
-        this.normalizationStrength = normalizationStrength;
-        this.normalizeL2 = normalizeL2;
-        this.seed = seed;
-        this.concurrency = concurrency;
+        this.embeddingDimension = config.embeddingDimension();
+        this.sparsity = config.sparsity();
+        this.iterations = config.maxIterations();
+        this.iterationWeights = config.iterationWeights();
+        this.normalizationStrength = config.normalizationStrength();
+        this.normalizeL2 = config.normalizeL2();
+        this.concurrency = config.concurrency();
 
         int embeddingSize = iterationWeights.isEmpty() ? embeddingDimension * iterations : embeddingDimension;
         this.embeddings.setAll((i) -> new float[embeddingSize]);
@@ -110,32 +106,40 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         float probability = 1.0f / (2.0f * sparsity);
         float sqrtSparsity = (float) Math.sqrt(sparsity);
         float sqrtEmbeddingDimension = (float) Math.sqrt(embeddingDimension);
-        Random random = new HighQualityRandom(seed);
 
+        progressLogger.logMessage("Computing random vectors");
         ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
+            progressLogger.logProgress();
+
+            ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
             int degree = graph.degree(nodeId);
             float scaling = degree == 0
                 ? 1.0f
                 : (float) Math.pow(degree, normalizationStrength);
 
             float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
-            float[] randomVector = computeRandomVector(random, probability, entryValue);
+            float[] randomVector = computeRandomVector(random.get(), probability, entryValue);
             embeddingB.set(nodeId, randomVector);
         });
     }
 
     void propagateEmbeddings() {
         for (int i = 0; i < iterations; i++) {
+            progressLogger.reset(graph.relationshipCount());
+            progressLogger.logMessage(formatWithLocale("Start iteration %s", i));
+
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
 
             ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
                 float[] currentEmbedding = new float[embeddingDimension];
                 localCurrent.set(nodeId, currentEmbedding);
-                graph.concurrentCopy().forEachRelationship(nodeId, (source, target) -> {
+                ThreadLocal<RelationshipIterator> concurrentGraphCopy = ThreadLocal.withInitial(graph::concurrentCopy);
+                concurrentGraphCopy.get().forEachRelationship(nodeId, (source, target) -> {
                     addArrayValues(currentEmbedding, localPrevious.get(target));
                     return true;
                 });
+                progressLogger.logProgress(graph.degree(nodeId));
 
                 int degree = graph.degree(nodeId) == 0 ? 1 : graph.degree(nodeId);
                 float degreeScale = 1.0f / degree;
@@ -220,6 +224,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         public HighQualityRandom() {
             this(System.nanoTime());
         }
+
         public HighQualityRandom(long seed) {
             l.lock();
             u = seed ^ v;

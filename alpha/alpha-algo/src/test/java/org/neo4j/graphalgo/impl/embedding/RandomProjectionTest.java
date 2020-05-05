@@ -29,18 +29,24 @@ import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import java.util.Collections;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 class RandomProjectionTest extends AlgoTestBase {
+
+    static final RandomProjectionBaseConfig DEFAULT_CONFIG = ImmutableRandomProjectionBaseConfig.builder()
+        .embeddingDimension(128)
+        .maxIterations(1)
+        .build();
 
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node1)" +
         ", (b:Node1)" +
         ", (c:Node2)" +
+        ", (d:Isolated)" +
+        ", (e:Isolated)" +
         ", (a)-[:REL]->(b)" +
         ", (b)-[:REL]->(a)" +
         ", (a)-[:REL]->(c)" +
@@ -60,18 +66,12 @@ class RandomProjectionTest extends AlgoTestBase {
             .addNodeLabel("Node1")
             .build();
 
-        Graph graph = applyInTransaction(db, tx -> graphLoader.load(NativeFactory.class));
+        Graph graph = graphLoader.load(NativeFactory.class);
 
         RandomProjection randomProjection = new RandomProjection(
             graph,
-            128,
-            3,
-            1,
-            Collections.emptyList(),
-            0.0f,
-            false,
-            0,
-            1,
+            DEFAULT_CONFIG,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -92,20 +92,16 @@ class RandomProjectionTest extends AlgoTestBase {
     void shouldAverageNeighbors() {
         GraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
+            .addNodeLabel("Node1")
+            .addNodeLabel("Node2")
             .build();
 
         Graph graph = applyInTransaction(db, tx -> graphLoader.load(NativeFactory.class));
 
         RandomProjection randomProjection = new RandomProjection(
             graph,
-            128,
-            3,
-            1,
-            Collections.emptyList(),
-            0.0f,
-            false,
-            0,
-            1,
+            DEFAULT_CONFIG,
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -126,20 +122,19 @@ class RandomProjectionTest extends AlgoTestBase {
     void shouldDistributeValuesCorrectly() {
         GraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
+            .addNodeLabel("Node1")
+            .addNodeLabel("Node2")
             .build();
 
-        Graph graph = applyInTransaction(db, tx -> graphLoader.load(NativeFactory.class));
+        Graph graph = graphLoader.load(NativeFactory.class);
 
         RandomProjection randomProjection = new RandomProjection(
             graph,
-            512,
-            3,
-            1,
-            Collections.emptyList(),
-            0.0f,
-            false,
-            0,
-            1,
+            ImmutableRandomProjectionBaseConfig.builder()
+                .embeddingDimension(512)
+                .maxIterations(1)
+                .build(),
+            progressLogger,
             AllocationTracker.EMPTY
         );
 
@@ -164,6 +159,35 @@ class RandomProjectionTest extends AlgoTestBase {
             int numNegative = 512 - numZeros - numPositive;
             assertTrue(numPositive >= minNumPositive && numPositive <= maxNumPositive);
             assertTrue(numNegative >= minNumPositive && numNegative <= maxNumPositive);
+        }
+    }
+
+    @Test
+    void shouldYieldEmptyEmbeddingForIsolatedNodes() {
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Isolated")
+            .build();
+
+        Graph graph = graphLoader.load(NativeFactory.class);
+
+        RandomProjection randomProjection = new RandomProjection(
+            graph,
+            ImmutableRandomProjectionBaseConfig.builder()
+                .embeddingDimension(64)
+                .maxIterations(4)
+                .build(),
+            progressLogger,
+            AllocationTracker.EMPTY
+        );
+
+        RandomProjection computeResult = randomProjection.compute();
+        HugeObjectArray<float[]> embeddings = computeResult.embeddings();
+        for (int i = 0; i < embeddings.size(); i++) {
+            float[] embedding = embeddings.get(i);
+            for (float embeddingValue : embedding) {
+                assertEquals(0.0f, embeddingValue);
+            }
         }
     }
 }

@@ -17,9 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.embedding;
+package org.neo4j.graphalgo.impl.embedding;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 
@@ -28,6 +30,8 @@ import java.util.List;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
+@ValueClass
+@Configuration("RandomProjectionConfigImpl")
 public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsConfig
 {
 
@@ -51,11 +55,6 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
     @Value.Default
     default boolean normalizeL2() {
         return false;
-    }
-
-    @Value.Default
-    default int seed() {
-        return 0;
     }
 
     @Value.Check

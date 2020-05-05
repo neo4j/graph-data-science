@@ -38,7 +38,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RandomProjectionStreamProcTest extends BaseProcTest {
 
@@ -80,26 +79,6 @@ class RandomProjectionStreamProcTest extends BaseProcTest {
             List<Double> embeddings = (List<Double>) row.get("embeddings");
             assertEquals(expectedEmbeddingsDimension, embeddings.size());
             assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
-        });
-    }
-
-    @Test
-    void shouldYieldEmptyEmbeddingForIsolatedNodes() {
-        int embeddingDimension = 128;
-        int maxIterations = 4;
-        String query = GdsCypher.call()
-            .withNodeLabel("Isolated")
-            .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .algo("gds.alpha.randomProjection")
-            .streamMode()
-            .addParameter("embeddingDimension", embeddingDimension)
-            .addParameter("maxIterations", maxIterations)
-            .yields();
-
-        runQueryWithRowConsumer(query, row -> {
-            List<Double> embeddings = (List<Double>) row.get("embeddings");
-            assertEquals(embeddingDimension * maxIterations, embeddings.size());
-            assertTrue(embeddings.stream().allMatch(value -> value == 0.0));
         });
     }
 
