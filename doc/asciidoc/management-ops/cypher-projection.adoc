@@ -26,7 +26,7 @@ For production, it is recommended to adapt the domain model in a way that it can
 [NOTE]
 ====
 During graph creation, GDS performs automatic <<estimate-heap-control, memory estimation and potential execution blocking>> by default.
-This feature is currently disabled for the Cypher projection as the memory consumption might be overestimated.
+This feature is off by default for Cypher projections as the memory consumption might be overestimated.
 ====
 
 This section includes:
