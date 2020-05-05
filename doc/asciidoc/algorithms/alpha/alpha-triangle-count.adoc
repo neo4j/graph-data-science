@@ -1,59 +1,32 @@
-[[algorithms-triangle-count-clustering-coefficient]]
+[[algorithms-triplets-listing]]
 [.alpha]
-= Triangle Counting / Clustering Coefficient
+= Triplets Listing
 
 [abstract]
 --
-This section describes the Triangle Count or Clustering Coefficient algorithm in the Neo4j Graph Data Science library.
+This section describes the Triplets Listing algorithm in the Neo4j Graph Data Science library.
 --
-
-Triangle counting is a community detection graph algorithm that is used to determine the number of triangles passing through each node in the graph.
-A triangle is a set of three nodes, where each node has a relationship to all other nodes.
 
 include::alpha-note.adoc[tag=alpha-note]
 
 This section includes:
 
-* <<algorithms-triangle-count-clustering-coefficient-context, History and explanation>>
-* <<algorithms-triangle-count-clustering-coefficient-usecase, Use-cases - when to use the Triangle Counting / Clustering Coefficient algorithm>>
-* <<algorithms-triangle-count-clustering-coefficient-sample, Triangle Counting / Clustering Coefficient algorithm sample>>
-* <<algorithms-triangle-count-clustering-coefficient-syntax, Syntax>>
-* <<algorithms-triangle-count-clustering-coefficient-example, Example usage>>
-* <<algorithms-triangle-count-clustering-coefficient-cp, Cypher projection>>
-* <<algorithms-triangle-count-clustering-coefficient-support, Graph type support>>
+* <<algorithms-triplets-listing-context, History and explanation>>
+* <<algorithms-triplets-listing-usecase, Use-cases - when to use the Triplets Listing algorithm>>
+* <<algorithms-triplets-listing-syntax, Syntax>>
+* <<algorithms-triplets-listing-sample, Triplets Listing algorithm sample>>
+* <<algorithms-triplets-listing-support, Graph type support>>
 
 
-[[algorithms-triangle-count-clustering-coefficient-context]]
+[[algorithms-triplets-listing-context]]
 == History and explanation
 
-Triangle counting gained popularity in social network analysis, where it is used to detect communities and measure the cohesiveness of those communities.
-It can also be used to determine the stability of a graph, and is often used as part of the computation of network indices, such as the clustering coefficient.
 
-There are two types of clustering coefficient:
-
-Local clustering coefficient::
- The local clustering coefficient of a node is the likelihood that its neighbours are also connected.
- The computation of this score involves triangle counting.
-
-Global clustering coefficient::
- The global clustering coefficient is the normalized sum of those local clustering coefficients.
-
-The transitivity coefficient of a graph is sometimes used, which is three times the number of triangles divided by the number of triples in the graph.
-For more information, see http://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf["Finding, Counting and Listing all Triangles in Large Graphs, An Experimental Study"].
+[[algorithms-triplets-listing-usecase]]
+== Use-cases - when to use the Triplets Listing algorithm 
 
 
-[[algorithms-triangle-count-clustering-coefficient-usecase]]
-== Use-cases - when to use the Triangle Counting / Clustering Coefficient algorithm 
-
-* Triangle count and clustering coefficient have been shown to be useful as features for classifying a given website as spam, or non-spam, content.
-  This is described in http://chato.cl/papers/becchetti_2007_approximate_count_triangles.pdf["Efficient Semi-streaming Algorithms for Local Triangle Counting in Massive Graphs"].
-* Clustering coefficient has been used to investigate the community structure of Facebook's social graph, where they found dense neighbourhoods of users in an otherwise sparse global graph.
-  Find this study in https://arxiv.org/pdf/1111.4503.pdf["The Anatomy of the Facebook Social Graph"].
-* Clustering coefficient has been proposed to help explore thematic structure of the web, and detect communities of pages with a common topic based on the reciprocal links between them.
-  For more information, see http://www.pnas.org/content/99/9/5825[Curvature of co-links uncovers hidden thematic layers in the World Wide Web].
-
-
-[[algorithms-triangle-count-clustering-coefficient-syntax]]
+[[algorithms-triplets-listing-syntax]]
 == Syntax
 
 .The following will return a stream of triples with `nodeId` for each triangle:
@@ -80,88 +53,13 @@ YIELD nodeA, nodeB, nodeC
 | nodeC | Integer | The ID of node in the given triangle.
 |===
 
-.The following will count the number of triangles that a node is a member of, and return a stream with `nodeId` and `triangleCount`:
-[source, cypher]
-----
-CALL gds.alpha.triangleCount.stream(configuration: Map)
-YIELD nodeId, triangles
-----
-
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name            | Type    | Default                | Optional | Description
-| concurrency     | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name      | Type    | Description
-| nodeId    | Integer | The ID of node
-| triangles | Integer | The number of triangles a node is member of
-|===
-
-.The following will count the number of triangles that a node is a member of, and write it back. It will return the total triangle count and average clustering coefficient of the given graph:
-[source, cypher]
-----
-CALL gds.alpha.triangleCount.write(configuration: Map)
-YIELD createMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name                          | Type    | Default                | Optional | Description
-| concurrency                   | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency               | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency              | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| writeProperty                 | String  | 'triangles'            | no       | The property name the number of triangles a node is member of is written to.
-| clusteringCoefficientProperty | String  | 'coefficient'          | no       | The property name the clustering coefficient of the node is written to.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                          | Type    | Description
-| createMillis                  | Integer | Milliseconds for loading data.
-| computeMillis                 | Integer | Milliseconds for running the algorithm.
-| writeMillis                   | Integer | Milliseconds for writing result data back.
-| postProcessingMillis          | Integer | Milliseconds for computing percentiles and community count.
-| nodeCount                     | Integer | The number of nodes considered.
-| triangleCount                 | Integer | The number of triangles found.
-| averageClusteringCoefficient  | Float   | The average clustering coefficient of the given graph.
-| p1                            | Float   | The 1 percentile of number of triangles.
-| p5                            | Float   | The 5 percentile of number of triangles.
-| p10                           | Float   | The 10 percentile of number of triangles.
-| p25                           | Float   | The 25 percentile of number of triangles.
-| p50                           | Float   | The 50 percentile of number of triangles.
-| p75                           | Float   | The 75 percentile of number of triangles.
-| p90                           | Float   | The 90 percentile of number of triangles.
-| p95                           | Float   | The 95 percentile of number of triangles.
-| p99                           | Float   | The 99 percentile of number of triangles.
-| p100                          | Float   | The 100 percentile of number of triangles.
-| writeProperty                 | String  | The property name the number of triangles a node is member of is written to.
-| clusteringCoefficientProperty | String  | The property name clustering coefficient of the node is written to.
-|===
-
-.The following will count the number of triangles that a node is a member of, without writing back or presenting the results. It will return the total triangle count and average clustering coefficient of the given graph:
-[source, cypher]
-----
-CALL gds.alpha.triangleCount.stats(configuration: Map)
-YIELD createMillis, computeMillis, nodeCount, triangleCount, averageClusteringCoefficient
-----
-
-The stats mode used above can be used for trial runs or when only global results are desired. It has the same configuration and results as the write mode, except `writeProperty`, `clusteringCoefficientProperty` and `writeMillis`.
-
-[[algorithms-triangle-count-clustering-coefficient-sample]]
-== Triangle Counting / Clustering Coefficient algorithm sample
+[[algorithms-triplets-listing-sample]]
+== Triplets listing algorithm sample
 
 image::triangle_count.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
 CREATE (alice:Person {name: 'Alice'}),
        (michael:Person {name: 'Michael'}),
@@ -169,6 +67,7 @@ CREATE (alice:Person {name: 'Alice'}),
        (chris:Person {name: 'Chris'}),
        (will:Person {name: 'Will'}),
        (mark:Person {name: 'Mark'}),
+
        (michael)-[:KNOWS]->(karin),
        (michael)-[:KNOWS]->(chris),
        (will)-[:KNOWS]->(michael),
@@ -179,6 +78,8 @@ CREATE (alice:Person {name: 'Alice'}),
        (chris)-[:KNOWS]->(karin)
 ----
 
+[role=query-example]
+--
 .The following will return a stream of triples, with the name property for each node in each triangle:
 [source, cypher]
 ----
@@ -192,7 +93,10 @@ CALL gds.alpha.triangle.stream({
   }
 })
 YIELD nodeA, nodeB, nodeC
-RETURN gds.util.asNode(nodeA).name AS nodeA, gds.util.asNode(nodeB).name AS nodeB, gds.util.asNode(nodeC).name AS nodeC
+RETURN
+  gds.util.asNode(nodeA).name AS nodeA,
+  gds.util.asNode(nodeB).name AS nodeB,
+  gds.util.asNode(nodeC).name AS nodeC
 ----
 
 .Results
@@ -203,109 +107,13 @@ RETURN gds.util.asNode(nodeA).name AS nodeA, gds.util.asNode(nodeB).name AS node
 | Michael | Chris | Will
 | Michael | Will  | Mark
 |===
+--
 
-We can see that there are `KNOWS` triangles containing "Will, Michael, and Chris", "Will, Mark, and Michael", and "Michael, Karin, and Chris".
+We can see that there are `KNOWS` triangles containing
+"Will, Michael, and Chris", "Will, Mark, and Michael", and "Michael, Karin, and Chris".
 This means that everybody in the triangle knows each other.
 
-.The following will count the number of triangles that a node is member of, and write it back. It will return the total triangle count and average clustering coefficient of the given graph:
-[source, cypher]
-----
-CALL gds.alpha.triangleCount.write({
-  nodeProjection: 'Person',
-  relationshipProjection: {
-    KNOWS: {
-      type: 'KNOWS',
-      orientation: 'UNDIRECTED'
-    }
-  },
-  writeProperty: 'triangles',
-  clusteringCoefficientProperty: 'clusteringCoefficient'
-})
-YIELD nodeCount, triangleCount, averageClusteringCoefficient
-----
-
-.The following will count the number of triangles that a node is member of, and return a stream with `nodeId` and `triangleCount`:
-[source, cypher]
-----
-CALL gds.alpha.triangleCount.stream({
-  nodeProjection: 'Person',
-  relationshipProjection: {
-    KNOWS: {
-      type: 'KNOWS',
-      orientation: 'UNDIRECTED'
-    }
-  },
-  concurrency: 4
-})
-YIELD nodeId, triangles, coefficient
-RETURN gds.util.asNode(nodeId).name AS name, triangles, coefficient
-ORDER BY coefficient DESC
-----
-
-.Results
-[opts="header",cols="1,1,1"]
-|===
-| name      | triangles | coefficient
-| "Karin"   | 1         | 1.0
-| "Mark"    | 1         | 1.0
-| "Chris"   | 2         | 0.6666666666666666
-| "Will"    | 2         | 0.6666666666666666
-| "Michael" | 3         | 0.3
-| "Alice"   | 0         | 0.0
-|===
-
-We learn that Michael is part of the most triangles, but it's Karin and Mark who are the best at introducing their friends - all of the people who know them, know each other!
-
-
-[[algorithms-triangle-count-clustering-coefficient-example]]
-== Example usage
-
-In graph theory, a https://en.wikipedia.org/wiki/Clustering_coefficient[clustering coefficient] is a measure of the degree to which nodes in a graph tend to cluster together.
-Evidence suggests that in most real-world networks, and in particular social networks, nodes tend to create tightly knit groups characterised by a relatively high density of ties; this likelihood tends to be greater than the average probability of a tie randomly established between two nodes.
-
-We check if this holds true for Yelp's social network of friends:
-
-[source, cypher]
-----
-CALL gds.alpha.triangleCount.write({
-  nodeProjection: 'Person',
-  relationshipProjection: {
-    FRIEND: {
-      type: 'FRIEND',
-      orientation: 'UNDIRECTED'
-    }
-  },
-  concurrency: 4,
-  writeProperty: 'triangles',
-  clusteringCoefficientProperty: 'coefficient'
-})
-YIELD nodeCount, triangleCount, averageClusteringCoefficient
-----
-
-Average clustering coefficient is 0.0523, which is really low for a social network.
-This indicates that groups of friends are not tightly knit together, but rather sparse.
-We can assume that users are not on Yelp for finding and creating friends, like Facebook for example, but rather something else, like finding good restaurant recommendations.
-
-Local triangle count and clustering coefficient of nodes can be used as features in finding influencers in social networks.
-
-
-[[algorithms-triangle-count-clustering-coefficient-cp]]
-== Cypher projection
-
-include::../../management-ops/cypher-projection.adoc[tag=explanation]
-
-[source, cypher]
-----
-CALL gds.alpha.triangleCount.write({
-  nodeQuery: 'MATCH (p:Person) RETURN id(p) AS id',
-  relationshipQuery: 'MATCH (p1:Person)-[:KNOWS]-(p2:Person) RETURN id(p1) AS source, id(p2) AS target',
-  writeProperty: 'triangle',
-  clusteringCoefficientProperty: 'coefficient'
-}) YIELD nodeCount, triangleCount, averageClusteringCoefficient
-----
-
-
-[[algorithms-triangle-count-clustering-coefficient-support]]
+[[algorithms-triplets-listing-support]]
 == Graph type support
 
 The Triangle Count algorithms support the following graph type:
