@@ -124,9 +124,10 @@ public abstract class BaseProc {
         AlgoBaseProc.FreeMemoryInspector inspector
     ) {
         if (config.sudo()) {
-            log.debug("Okay.  (sudo mode requested, won't check for available memory.)");
+            log.debug("Sudo mode: Won't check for available memory.");
             return;
         }
+
         MemoryTreeWithDimensions memoryTreeWithDimensions = null;
         try {
             memoryTreeWithDimensions = runEstimation.apply(config);

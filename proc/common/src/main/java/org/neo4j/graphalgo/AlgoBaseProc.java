@@ -423,9 +423,14 @@ public abstract class AlgoBaseProc<
     }
 
     private void validateMemoryUsageIfImplemented(CONFIG config) {
-        if (config.implicitCreateConfig().map(BaseConfig::sudo).orElse(true)) {
-            tryValidateMemoryUsage(config, this::memoryEstimation);
+        var sudoImplicitCreate = config.implicitCreateConfig().map(BaseConfig::sudo).orElse(false);
+
+        if (sudoImplicitCreate) {
+            log.debug("Sudo mode: Won't check for available memory.");
+            return;
         }
+
+        tryValidateMemoryUsage(config, this::memoryEstimation);
     }
 
     protected Stream<MemoryEstimateResult> computeEstimate(
