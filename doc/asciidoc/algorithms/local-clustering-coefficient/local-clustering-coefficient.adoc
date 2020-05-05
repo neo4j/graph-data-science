@@ -229,32 +229,39 @@ The results are the same as for running write mode with a named graph, <<algorit
 [[algorithms-local-clustering-coefficient-examples]]
 == Examples
 
+In this section we will show examples of executing the Local Clustering Coefficient algorithm on a concrete graph.
+The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
+We will do this on a small social network graph of a handful nodes connected in a particular pattern.
+The example graph looks like this:
+
+[[algorithms-local-clustering-coefficient-examples-graph]]
 image::triangle_count.png[]
 
-.The following will create a sample graph:
+.The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
 ----
-CREATE (alice:Person {name: 'Alice'}),
-       (michael:Person {name: 'Michael'}),
-       (karin:Person {name: 'Karin'}),
-       (chris:Person {name: 'Chris'}),
-       (will:Person {name: 'Will'}),
-       (mark:Person {name: 'Mark'}),
-       (michael)-[:KNOWS]->(karin),
-       (michael)-[:KNOWS]->(chris),
-       (will)-[:KNOWS]->(michael),
-       (mark)-[:KNOWS]->(michael),
-       (mark)-[:KNOWS]->(will),
-       (alice)-[:KNOWS]->(michael),
-       (will)-[:KNOWS]->(chris),
-       (chris)-[:KNOWS]->(karin)
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (michael:Person {name: 'Michael'}),
+  (karin:Person {name: 'Karin'}),
+  (chris:Person {name: 'Chris'}),
+  (will:Person {name: 'Will'}),
+  (mark:Person {name: 'Mark'}),
+
+  (michael)-[:KNOWS]->(karin),
+  (michael)-[:KNOWS]->(chris),
+  (will)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(will),
+  (alice)-[:KNOWS]->(michael),
+  (will)-[:KNOWS]->(chris),
+  (chris)-[:KNOWS]->(karin)
 ----
 
-[NOTE]
-====
-In the examples below we will use named graphs and standard projections as the norm.
-However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
-====
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
+For the relationships we must use the `UNDIRECTED` orientation.
+This is because the Local Clustering Coefficient algorithm is defined only for undirected graphs.
 
 include::../shared/examples-named-native-note.adoc[]
 
@@ -262,19 +269,19 @@ include::../shared/examples-named-native-note.adoc[]
 [source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create(
-    'myGraph',
-    'Person',
-    {
-        KNOWS: {
-            orientation: 'UNDIRECTED'
-        }
+  'myGraph',
+  'Person',
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
     }
+  }
 )
 ----
 
-WARNING: Local Clustering Coefficient algorithm requires the graph to be loaded using `UNDIRECTED` orientation
+WARNING: The Local Clustering Coefficient algorithm requires the graph to be created using the `UNDIRECTED` orientation for relationships.
 
-In the following examples we will demonstrate using the Local Clustering algorithm on this graph.
+In the following examples we will demonstrate using the Local Clustering Coefficient algorithm on 'myGraph'.
 
 
 [[algorithms-local-clustering-coefficient-examples-memory-estimation]]
@@ -295,7 +302,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 
 .Results
-[opts="header", cols="1,1,1,1,1"]
+[opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 6         | 16                | 288      | 288      | "288 Bytes"
@@ -304,6 +311,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 
 Note that the relationship count is 16 although we only created 8 relationships in the original Cypher statement.
 This is because we used the `UNDIRECTED` orientation, which will project each relationship in each direction, effectively doubling the number of relationships.
+
 
 [[algorithms-local-clustering-coefficient-examples-stream]]
 === Stream
@@ -323,7 +331,7 @@ ORDER BY localClusteringCoefficient DESC
 ----
 
 .Results
-[opts="header", cols="1,1"]
+[opts="header"]
 |===
 | name      | localClusteringCoefficient
 | "Karin"   | 1.0
@@ -335,8 +343,10 @@ ORDER BY localClusteringCoefficient DESC
 |===
 --
 
-// TODO: analysis of the results, we would need the triangle counts for this;
-// should we point to the triangle count page?
+From the results we can see that the nodes 'Karin' and 'Mark' have the highest local clustering coefficients.
+This shows that they are the best at introducing their friends - all the people who know them, know each other!
+This can be verified in the <<algorithms-local-clustering-coefficient-examples-graph, example graph>>.
+
 
 [[algorithms-local-clustering-coefficient-examples-stats]]
 === Stats
@@ -355,12 +365,15 @@ YIELD averageClusteringCoefficient, nodeCount
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
 | averageClusteringCoefficient | nodeCount
 | 0.6055555555555555           | 6
 |===
 --
+
+The result shows that on average each node of our example graph has approximately 60% of its neighbours connected.
+
 
 [[algorithms-local-clustering-coefficient-examples-mutate]]
 === Mutate
@@ -379,7 +392,7 @@ YIELD averageClusteringCoefficient, nodeCount
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
 | averageClusteringCoefficient | nodeCount
 | 0.6055555555555555           | 6
@@ -422,12 +435,19 @@ Additionally, each of the six nodes now has a new property `localClusteringCoeff
 [[algorithms-local-clustering-coefficient-examples-pre-computed]]
 === Pre-computed Counts
 
-By default Local Clustering Coefficient algorithm executes <<algorithms-triangle-count, Triangle Count>> as part of its computation.
-It is also possible to run the algorithm with node property (`triangleCountProperty`) containing pre-computed triangle counts.
+By default, the Local Clustering Coefficient algorithm executes <<algorithms-triangle-count, Triangle Count>> as part of its computation.
+It is also possible to avoid the triangle count computation by configuring the Local Clustering Coefficient algorithm to read the triangle count from a node property.
+In order to do that we specify the `triangleCountProperty` configuration parameter.
+Please note that the Local Clustering Coefficient algorithm depends on the property holding actual triangle counts and not another number for the results to be actual local clustering coefficients.
+
+To illustrate this we make use of the <<algorithms-triangle-count, Triangle Count algorithm>>
+in `mutate` mode.
+The Triangle Count algorithm is going to store its result back into 'myGraph'.
+It is also possible to obtain the property value from the Neo4j database using a graph projection with a node property when creating the in-memory graph.
 
 [role=query-example, no-result, group=triangleCountProperty]
 --
-.The following computes the Triangle Counts and stores the result into the in-memory graph:
+.The following computes the triangle counts and stores the result into the in-memory graph:
 [source, cypher]
 ----
 CALL gds.triangleCount.mutate('myGraph', {
@@ -438,7 +458,7 @@ CALL gds.triangleCount.mutate('myGraph', {
 
 [role=query-example, group=triangleCountProperty]
 --
-.The following will estimate the memory requirements for running the algorithm:
+.The following will run the algorithm in `stream` mode using pre-computed triangle counts:
 [source, cypher]
 ----
 CALL gds.localClusteringCoefficient.stream('myGraph', {
@@ -450,7 +470,7 @@ ORDER BY localClusteringCoefficient DESC
 ----
 
 .Results
-[opts="header", cols="1,1"]
+[opts="header"]
 |===
 | name      | localClusteringCoefficient
 | "Karin"   | 1.0
@@ -462,4 +482,4 @@ ORDER BY localClusteringCoefficient DESC
 |===
 --
 
-// TODO: analysis of the result?
+As we can see the results are the same as in <<algorithms-local-clustering-coefficient-examples-stream, the `stream` example>> where we did not specify a `triangleCountProperty`.
