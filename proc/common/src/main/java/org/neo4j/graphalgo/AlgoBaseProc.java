@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
@@ -360,12 +361,8 @@ public abstract class AlgoBaseProc<
 
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
-        config.implicitCreateConfig().ifPresent(createConfig -> {
-            if (!createConfig.sudo()) {
-                validateMemoryUsageIfImplemented(config);
-            }
-        });
 
+        validateMemoryUsageIfImplemented(config);
 
         GraphStore graphStore;
         Graph graph;
@@ -426,7 +423,9 @@ public abstract class AlgoBaseProc<
     }
 
     private void validateMemoryUsageIfImplemented(CONFIG config) {
-        tryValidateMemoryUsage(config, this::memoryEstimation);
+        if (config.implicitCreateConfig().map(BaseConfig::sudo).orElse(true)) {
+            tryValidateMemoryUsage(config, this::memoryEstimation);
+        }
     }
 
     protected Stream<MemoryEstimateResult> computeEstimate(
