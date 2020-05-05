@@ -23,6 +23,12 @@ Their flexibility is convenient when exploring data and algorithms, and designin
 However, creating a graph from a Cypher projection can be significantly slower than creating it directly from the Neo4j store files.
 For production, it is recommended to adapt the domain model in a way that it can take advantage of the loading speed of <<native-projection, native projections>>.
 
+[NOTE]
+====
+During graph creation, GDS performs automatic <<estimate-heap-control, memory estimation and potential execution blocking>> by default.
+This feature is currently disabled for the Cypher projection as the memory consumption might be overestimated.
+====
+
 This section includes:
 
 * <<cypher-projection-syntax, Syntax>>
