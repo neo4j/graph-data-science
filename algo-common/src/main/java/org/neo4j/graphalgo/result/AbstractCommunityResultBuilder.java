@@ -19,13 +19,12 @@
  */
 package org.neo4j.graphalgo.result;
 
-import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.loading.SparseNodeMapping;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
@@ -34,8 +33,6 @@ import java.util.OptionalLong;
 import java.util.function.LongUnaryOperator;
 
 public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
-
-    private static final long EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT = 4L;
 
     private final AllocationTracker tracker;
     protected boolean buildHistogram;
@@ -59,7 +56,6 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
     }
 
     private LongUnaryOperator communityFunction = null;
-    private OptionalLong maybeExpectedCommunityCount = OptionalLong.empty();
 
     protected AbstractCommunityResultBuilder(
         ProcedureCallContext callContext,
@@ -76,11 +72,6 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
     protected abstract WRITE_RESULT buildResult();
 
-    public AbstractCommunityResultBuilder<WRITE_RESULT> withExpectedNumberOfCommunities(long expectedNumberOfCommunities) {
-        this.maybeExpectedCommunityCount = OptionalLong.of(expectedNumberOfCommunities);
-        return this;
-    }
-
     public AbstractCommunityResultBuilder<WRITE_RESULT> withCommunityFunction(LongUnaryOperator communityFunction) {
         this.communityFunction = communityFunction;
         return this;
@@ -90,24 +81,12 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
     public WRITE_RESULT build() {
         final ProgressTimer timer = ProgressTimer.start();
 
-        if (communityFunction != null && (buildCommunityCount || buildHistogram)) {
-            long expectedNumberOfCommunities = maybeExpectedCommunityCount.orElse(EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT);
-            HugeLongLongMap communitySizeMap = new HugeLongLongMap(expectedNumberOfCommunities, tracker);
-            for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
-                final long communityId = communityFunction.applyAsLong(nodeId);
-                communitySizeMap.addTo(communityId, 1L);
+        if (communityFunction != null) {
+            if (buildCommunityCount && !buildHistogram) {
+                buildCommunityCount();
+            } else if (buildCommunityCount || buildHistogram){
+                buildCommunityCountAndHistogram();
             }
-
-            if (buildHistogram) {
-                final Histogram histogram = new Histogram(5);
-                for (LongLongCursor cursor : communitySizeMap) {
-                    histogram.recordValue(cursor.value);
-                }
-                maybeCommunityHistogram = Optional.of(histogram);
-            }
-
-            maybeCommunityCount = OptionalLong.of(communitySizeMap.size());
-            communitySizeMap.release();
         }
 
         timer.stop();
@@ -115,6 +94,48 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
         this.postProcessingDuration = timer.getDuration();
 
         return buildResult();
+    }
+
+    private void buildCommunityCount() {
+        long communityCount = 0L;
+
+        SparseNodeMapping componentSizes = buildComponentSizes();
+        for (int communityId = 0; communityId < componentSizes.getCapacity(); communityId++) {
+            long communitySize = componentSizes.get(communityId);
+            if (communitySize > 0) {
+                communityCount++;
+            }
+        }
+
+        maybeCommunityCount = OptionalLong.of(communityCount);
+    }
+
+    private void buildCommunityCountAndHistogram() {
+        SparseNodeMapping componentSizes = buildComponentSizes();
+
+        Histogram histogram = new Histogram(5);
+        long communityCount = 0;
+        for (int communityId = 0; communityId < componentSizes.getCapacity(); communityId++) {
+            long communitySize = componentSizes.get(communityId);
+            if (communitySize > 0) {
+                communityCount++;
+                histogram.recordValue(communitySize);
+            }
+        }
+
+        maybeCommunityCount = OptionalLong.of(communityCount);
+        maybeCommunityHistogram = Optional.of(histogram);
+    }
+
+    private SparseNodeMapping buildComponentSizes() {
+        SparseNodeMapping.GrowingBuilder componentSizeBuilder =
+            SparseNodeMapping.GrowingBuilder.create(0L, tracker);
+
+        for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
+            final long communityId = communityFunction.applyAsLong(nodeId);
+            componentSizeBuilder.addTo(communityId, 1L);
+        }
+        return componentSizeBuilder.build();
     }
 
 }
