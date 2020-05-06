@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.compat.UnsafeProxy;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -27,6 +29,8 @@ import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static org.apache.lucene.util.ArrayUtil.oversize;
 
 public final class SparseNodeMapping {
 
@@ -102,25 +106,30 @@ public final class SparseNodeMapping {
 
     public static final class Builder {
         private final long capacity;
+        private final long defaultValue;
+
         private final AtomicReferenceArray<long[]> pages;
         private final AllocationTracker tracker;
         private final ReentrantLock newPageLock;
 
-        public static Builder create(
-                long size,
-                AllocationTracker tracker) {
+        public static Builder create(long size, AllocationTracker tracker) {
+            return create(size, NOT_FOUND, tracker);
+        }
+
+        public static Builder create(long size, long defaultValue, AllocationTracker tracker) {
             int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
             long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
             AtomicReferenceArray<long[]> pages = new AtomicReferenceArray<>(numPages);
             tracker.add(MemoryUsage.sizeOfObjectArray(numPages));
-            return new Builder(capacity, pages, tracker);
+            return new Builder(capacity, pages, defaultValue, tracker);
         }
 
-        private Builder(long capacity, AtomicReferenceArray<long[]> pages, AllocationTracker tracker) {
+        private Builder(long capacity, AtomicReferenceArray<long[]> pages, long defaultValue, AllocationTracker tracker) {
             this.capacity = capacity;
             this.pages = pages;
             this.tracker = tracker;
-            newPageLock = new ReentrantLock(true);
+            this.defaultValue = defaultValue;
+            this.newPageLock = new ReentrantLock(true);
         }
 
         public void set(long index, long value) {
@@ -152,7 +161,137 @@ public final class SparseNodeMapping {
                 }
                 tracker.add(PAGE_SIZE_IN_BYTES);
                 page = new long[PAGE_SIZE];
-                Arrays.fill(page, -1L);
+                if (defaultValue != 0L) {
+                    Arrays.fill(page, defaultValue);
+                }
+                pages.set(pageIndex, page);
+                return page;
+            } finally {
+                newPageLock.unlock();
+            }
+        }
+    }
+
+    public static final class GrowingBuilder {
+        private final AllocationTracker tracker;
+        private final ReentrantLock newPageLock;
+        private final long defaultValue;
+
+        private AtomicReferenceArray<long[]> pages;
+
+        // array-internal values to access the raw memory locations of certain elements
+        // see #memoryOffset
+        private static final int base;
+        private static final int shift;
+
+        static {
+            UnsafeProxy.assertHasUnsafe();
+            base = UnsafeProxy.arrayBaseOffset(long[].class);
+            int scale = UnsafeProxy.arrayIndexScale(long[].class);
+            if (!BitUtil.isPowerOfTwo(scale)) {
+                throw new Error("data type scale not a power of two");
+            }
+            shift = 31 - Integer.numberOfLeadingZeros(scale);
+        }
+
+        private static long memoryOffset(int i) {
+            return ((long) i << shift) + base;
+        }
+
+        public static GrowingBuilder create(AllocationTracker tracker) {
+            return create(NOT_FOUND, tracker);
+        }
+
+        public static GrowingBuilder create(long defaultValue, AllocationTracker tracker) {
+            AtomicReferenceArray<long[]> pages = new AtomicReferenceArray<>(0);
+            return new GrowingBuilder(pages, defaultValue, tracker);
+        }
+
+        private GrowingBuilder(AtomicReferenceArray<long[]> pages, long defaultValue, AllocationTracker tracker) {
+            this.pages = pages;
+            this.tracker = tracker;
+            this.defaultValue = defaultValue;
+            this.newPageLock = new ReentrantLock(true);
+        }
+
+        public void set(long index, long value) {
+            int pageIndex = pageIndex(index);
+            int indexInPage = indexInPage(index);
+            long[] page = getPage(pageIndex);
+            page[indexInPage] = value;
+        }
+
+        public void addTo(long index, long value) {
+            int pageIndex = pageIndex(index);
+            int indexInPage = indexInPage(index);
+            long[] page = getPage(pageIndex);
+
+            long currentValue;
+            long offset = memoryOffset(indexInPage);
+
+            do {
+                currentValue = UnsafeProxy.getLongVolatile(page, offset);
+            }
+            while (!UnsafeProxy.compareAndSwapLong(
+                page,
+                offset,
+                currentValue,
+                currentValue + value
+            ));
+        }
+
+        public SparseNodeMapping build() {
+            int numPages = this.pages.length();
+            long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
+            long[][] pages = new long[numPages][];
+            Arrays.setAll(pages, this.pages::get);
+            return new SparseNodeMapping(capacity, pages);
+        }
+
+        private long[] getPage(int pageIndex) {
+            if (pageIndex >= pages.length()) {
+                grow(pageIndex + 1);
+            }
+
+            long[] page = pages.get(pageIndex);
+            if (page == null) {
+                page = allocateNewPage(pageIndex);
+            }
+            return page;
+        }
+
+        private void grow(int newSize) {
+            newPageLock.lock();
+            try {
+                if (newSize <= pages.length()) {
+                    return;
+                }
+
+                AtomicReferenceArray<long[]> newPages = new AtomicReferenceArray<>(oversize(newSize, MemoryUsage.BYTES_OBJECT_REF));
+                for (int pageIndex = 0; pageIndex < pages.length(); pageIndex++) {
+                    long[] page = pages.get(pageIndex);
+                    if (page != null) {
+                        newPages.set(pageIndex, page);
+                    }
+                }
+                this.pages = newPages;
+            } finally {
+                newPageLock.unlock();
+            }
+        }
+
+        private long[] allocateNewPage(int pageIndex) {
+            newPageLock.lock();
+            try {
+                long[] page = pages.get(pageIndex);
+                if (page != null) {
+                    return page;
+                }
+                tracker.add(PAGE_SIZE_IN_BYTES);
+                page = new long[PAGE_SIZE];
+                if (defaultValue != 0L) {
+                    Arrays.fill(page, defaultValue);
+                }
                 pages.set(pageIndex, page);
                 return page;
             } finally {
