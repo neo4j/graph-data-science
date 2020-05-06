@@ -55,10 +55,27 @@ final class SparseNodeMappingTest {
     }
 
     @Test
+    void shouldAddAndGet() {
+        SparseNodeMapping.GrowingBuilder array = SparseNodeMapping.GrowingBuilder.create(0L, AllocationTracker.EMPTY);
+        int index = integer(2, 8);
+        int value = integer(42, 1337);
+        array.addTo(index, value);
+        assertEquals(value, array.build().get(index));
+    }
+
+    @Test
     void shouldSetValuesInPageSizedChunks() {
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
         // larger than the desired size, but still within a single page
         array.set(integer(11, PS - 1), 1337);
+        // doesn't fail - good
+    }
+
+    @Test
+    void shouldAddValuesInPageSizedChunks() {
+        SparseNodeMapping.GrowingBuilder array = SparseNodeMapping.GrowingBuilder.create(AllocationTracker.EMPTY);
+        // larger than the desired size, but still within a single page
+        array.addTo(integer(11, PS - 1), 1337);
         // doesn't fail - good
     }
 
