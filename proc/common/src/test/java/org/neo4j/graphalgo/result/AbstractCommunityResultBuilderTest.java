@@ -83,7 +83,6 @@ final class AbstractCommunityResultBuilderTest {
         });
 
         builder
-            .withExpectedNumberOfCommunities(10L)
             .withCommunityFunction(n -> n % 10L)
             .withNodeCount(42)
             .build();
@@ -128,7 +127,6 @@ final class AbstractCommunityResultBuilderTest {
         });
 
         builder
-            .withExpectedNumberOfCommunities(42)
             .withCommunityFunction(n -> (int) (n / 10) + 1)
             .withNodeCount(42)
             .build();
