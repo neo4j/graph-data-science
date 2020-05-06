@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.utils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.logging.Log;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
@@ -65,9 +64,8 @@ public class BatchingProgressLogger implements ProgressLogger {
     @Override
     public void logProgress(Supplier<String> msgFactory) {
         progressCounter.increment();
-        long localProgress = callCounter.get().incrementAndGet();
-
-        if ((localProgress & (batchSize - 1)) == 0) {
+        var localProgress = callCounter.get();
+        if (localProgress.longValue() < batchSize && (localProgress.incrementAndGet() >= batchSize)) {
             String message = msgFactory != ProgressLogger.NO_MESSAGE ? msgFactory.get() : null;
             int percent = (int) ((progressCounter.sum() / (double) taskVolume) * 100);
             if (message == null || message.isEmpty()) {
@@ -75,6 +73,7 @@ public class BatchingProgressLogger implements ProgressLogger {
             } else {
                 log.info("[%s] %s %d%% %s", Thread.currentThread().getName(), task, percent, message);
             }
+            localProgress.setValue(0L);
         }
     }
 
@@ -84,11 +83,11 @@ public class BatchingProgressLogger implements ProgressLogger {
             return;
         }
         progressCounter.add(progress);
-        long localProgress = callCounter.get().incrementAndGet();
-
-        if ((localProgress & (batchSize -1)) == 0) {
+        var localProgress = callCounter.get();
+        if (localProgress.longValue() < batchSize && (localProgress.addAndGet(progress) >= batchSize)) {
             int percent = (int) ((progressCounter.sum() / (double) taskVolume) * 100);
             log.info("[%s] %s %d%%", Thread.currentThread().getName(), task, percent);
+            localProgress.setValue(localProgress.longValue() & (batchSize - 1));
         }
     }
 
