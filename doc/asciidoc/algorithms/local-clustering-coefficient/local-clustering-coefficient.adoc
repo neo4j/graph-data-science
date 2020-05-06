@@ -231,7 +231,7 @@ The results are the same as for running write mode with a named graph, <<algorit
 
 In this section we will show examples of executing the Local Clustering Coefficient algorithm on a concrete graph.
 The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
-We will do this on a small social network graph of a handful nodes connected in a particular pattern.
+We will do this on a small social network graph of a handful of nodes connected in a particular pattern.
 The example graph looks like this:
 
 [[algorithms-local-clustering-coefficient-examples-graph]]
