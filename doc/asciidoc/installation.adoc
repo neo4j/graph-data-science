@@ -23,6 +23,7 @@ The GDS library supports the following Neo4j versions:
 | `4.0.1`
 | `4.0.2`
 | `4.0.3`
+| `4.0.4`
 .9+<.^|`1.0.x`, `1.1.x`
 | `3.5.9`
 | `3.5.10`
