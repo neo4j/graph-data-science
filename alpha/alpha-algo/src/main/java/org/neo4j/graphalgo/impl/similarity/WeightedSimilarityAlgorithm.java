@@ -37,6 +37,8 @@ import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
+import static org.neo4j.graphalgo.impl.utils.NumberUtils.getDoubleValue;
+import static org.neo4j.graphalgo.impl.utils.NumberUtils.getLongValue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityAlgorithm<ME>> extends SimilarityAlgorithm<ME, WeightedInput> {
@@ -67,9 +69,9 @@ public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityA
             LongSet ids = new LongHashSet();
             result.accept(resultRow -> {
                 try {
-                    long item = resultRow.getNumber("item").longValue();
-                    long id = resultRow.getNumber("category").longValue();
-                    double weight = resultRow.getNumber("weight").doubleValue();
+                    long item = getLongValue(resultRow.getNumber("item"));
+                    long id = getLongValue(resultRow.getNumber("category"));
+                    double weight = getDoubleValue(resultRow.getNumber("weight"));
                     ids.add(id);
                     map.compute(item, (key, agg) -> {
                         if (agg == null) agg = new LongDoubleHashMap();

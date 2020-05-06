@@ -20,11 +20,13 @@
 package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.core.utils.Intersections;
+import org.neo4j.graphalgo.impl.utils.NumberUtils;
 import org.neo4j.graphalgo.results.SimilarityResult;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput {
     private final long id;
@@ -79,7 +81,11 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
             if (!row.containsKey("weights") || !row.containsKey("item")) {
                 throw new IllegalArgumentException("Input data requires 'item' and 'weights' for every row.");
             }
-            List<Number> weightList = SimilarityInput.extractValues(row.get("weights"));
+            List<Number> weightList = SimilarityInput
+                .extractValues(row.get("weights"))
+                .stream()
+                .map(NumberUtils::getDoubleValue)
+                .collect(Collectors.toList());
 
             long weightsSize = skipAnything ? skipSize(skipValue, skipNan, weightList) : weightList.size();
 

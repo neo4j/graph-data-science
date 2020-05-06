@@ -325,6 +325,14 @@ class CosineProcTest extends BaseProcTest {
         });
     }
 
+    @Test
+    void testCosineHandlesNullValues() {
+        runQuery("WITH [{item: 1, weights: [1, null, 3]}] AS data" +
+                 " CALL gds.alpha.similarity.cosine.stream({nodeProjection: '*', relationshipProjection: '*', data: data})" +
+                 " YIELD item1, item2, count1, count2, similarity\n" +
+                 " RETURN item1, item2, similarity");
+    }
+
     private Map<String, Object> flip(Map<String, Object> row) {
         return map("similarity", row.get("similarity"), "intersection", row.get("intersection"),
             "item1", row.get("item2"), "count1", row.get("count2"),

@@ -36,6 +36,7 @@ import java.util.Map;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator.CATEGORY_KEY;
 import static org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator.WEIGHT_KEY;
+import static org.neo4j.graphalgo.impl.utils.NumberUtils.getDoubleValue;
 
 public class SimilaritiesFunc {
 
@@ -64,8 +65,8 @@ public class SimilaritiesFunc {
         double[] weights2 = new double[len];
 
         for (int i = 0; i < len; i++) {
-            weights1[i] = vector1.get(i).doubleValue();
-            weights2[i] = vector2.get(i).doubleValue();
+            weights1[i] = getDoubleValue(vector1.get(i));
+            weights2[i] = getDoubleValue(vector2.get(i));
         }
 
         return Math.sqrt(Intersections.cosineSquare(weights1, weights2, len));
@@ -127,8 +128,8 @@ public class SimilaritiesFunc {
             double[] weights2 = new double[len];
 
             for (int i = 0; i < len; i++) {
-                weights1[i] = vector1.get(i).doubleValue();
-                weights2[i] = vector2.get(i).doubleValue();
+                weights1[i] = getDoubleValue(vector1.get(i));
+                weights2[i] = getDoubleValue(vector2.get(i));
             }
             return Intersections.pearson(weights1, weights2, len);
         }
@@ -146,8 +147,8 @@ public class SimilaritiesFunc {
         double[] weights2 = new double[len];
 
         for (int i = 0; i < len; i++) {
-            weights1[i] = vector1.get(i).doubleValue();
-            weights2[i] = vector2.get(i).doubleValue();
+            weights1[i] = getDoubleValue(vector1.get(i));
+            weights2[i] = getDoubleValue(vector2.get(i));
         }
 
         return Math.sqrt(Intersections.sumSquareDelta(weights1, weights2, len));
