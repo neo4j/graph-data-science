@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class SimilaritiesFuncTest extends BaseProcTest {
 
@@ -272,5 +273,20 @@ class SimilaritiesFuncTest extends BaseProcTest {
                 assertEquals(bobSim.get(), result.next().get("euclidSim"));
                 assertEquals(jimSim.get(), result.next().get("euclidSim"));
             });
+    }
+
+    @Test
+    void testSimilarityFunctionsHandlesNullValues() {
+        runQuery("RETURN gds.alpha.similarity.cosine([1, null, 2], [null, 1, 3])");
+
+        runQuery("RETURN gds.alpha.similarity.euclidean([1, null, 2], [null, 1, 3])");
+
+        runQuery("RETURN gds.alpha.similarity.euclideanDistance([1, null, 2], [null, 1, 3])");
+
+        runQuery("RETURN gds.alpha.similarity.pearson([1, null, 2], [null, 1, 3])");
+
+        runQuery("RETURN gds.alpha.similarity.overlap([1, null, 2], [null, 1, 3])");
+
+        runQuery("RETURN gds.alpha.similarity.jaccard([1, null, 2], [null, 1, 3])");
     }
 }
