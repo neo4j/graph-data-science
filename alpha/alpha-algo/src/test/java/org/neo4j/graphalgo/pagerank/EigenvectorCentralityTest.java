@@ -20,11 +20,9 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.centrality.eigenvector.ImmutableEigenvectorCentralityConfig;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
@@ -38,8 +36,6 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class EigenvectorCentralityTest extends AlgoTestBase {
@@ -101,8 +97,8 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @AllGraphStoreFactoryTypesTest
-    void test(TestSupport.FactoryType factoryType) {
+    @Test
+    void test() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -120,28 +116,25 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
         });
 
         final Graph graph;
-        if (factoryType == CYPHER) {
-            graph = applyInTransaction(db, tx -> new CypherLoaderBuilder()
-                .api(db)
-                .nodeQuery("MATCH (n:Label1) RETURN id(n) as id")
-                .relationshipQuery("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                .build()
-                .graph());
-        } else {
-            graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(label.name())
-                .addRelationshipType("TYPE1")
-                .build()
-                .graph();
-        }
+
+        graph = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel(label.name())
+            .addRelationshipType("TYPE1")
+            .build()
+            .graph();
 
         final CentralityResult rankResult = LabsPageRankAlgorithmType.EIGENVECTOR_CENTRALITY
             .create(
                 graph,
                 DEFAULT_EIGENVECTOR_CONFIG,
                 LongStream.empty(),
-                new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank", DEFAULT_EIGENVECTOR_CONFIG.concurrency())
+                new BatchingProgressLogger(
+                    NullLog.getInstance(),
+                    0,
+                    "PageRank",
+                    DEFAULT_EIGENVECTOR_CONFIG.concurrency()
+                )
             )
             .compute()
             .result();
@@ -149,10 +142,10 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
+                expected.get(nodeId),
+                rankResult.score(i),
+                1e-2,
+                "Node#" + nodeId
             );
         });
     }
