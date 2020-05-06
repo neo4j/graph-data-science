@@ -25,13 +25,11 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 class RandomProjectionTest extends AlgoTestBase {
 
@@ -66,7 +64,7 @@ class RandomProjectionTest extends AlgoTestBase {
             .addNodeLabel("Node1")
             .build();
 
-        Graph graph = graphLoader.load(NativeFactory.class);
+        Graph graph = graphLoader.graph();
 
         RandomProjection randomProjection = new RandomProjection(
             graph,
@@ -96,7 +94,7 @@ class RandomProjectionTest extends AlgoTestBase {
             .addNodeLabel("Node2")
             .build();
 
-        Graph graph = applyInTransaction(db, tx -> graphLoader.load(NativeFactory.class));
+        Graph graph = graphLoader.graph();
 
         RandomProjection randomProjection = new RandomProjection(
             graph,
@@ -126,7 +124,7 @@ class RandomProjectionTest extends AlgoTestBase {
             .addNodeLabel("Node2")
             .build();
 
-        Graph graph = graphLoader.load(NativeFactory.class);
+        Graph graph = graphLoader.graph();
 
         RandomProjection randomProjection = new RandomProjection(
             graph,
@@ -169,7 +167,7 @@ class RandomProjectionTest extends AlgoTestBase {
             .addNodeLabel("Isolated")
             .build();
 
-        Graph graph = graphLoader.load(NativeFactory.class);
+        Graph graph = graphLoader.graph();
 
         RandomProjection randomProjection = new RandomProjection(
             graph,
