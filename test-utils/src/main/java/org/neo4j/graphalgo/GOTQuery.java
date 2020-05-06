@@ -190,7 +190,7 @@ public class GOTQuery {
                                                   "person.book_intro_chapter = row.`Book Intro Chapter`,\n" +
                                                   "person.book_death_chapter = row.`Death Chapter`,\n" +
                                                   "person.book_of_death = row.`Book of Death`,\n" +
-                                                  "person.death_year = toINT(row.`Death Year`)\n" +
+                                                  "person.death_year = toInteger(row.`Death Year`)\n" +
                                                   "MERGE (person)-[:BELONGS_TO]->(house)\n" +
                                                   "MERGE (status:Status {name: status_value})\n" +
                                                   "MERGE (person)-[:HAS_STATUS]->(status)\n" +
@@ -250,9 +250,9 @@ public class GOTQuery {
                                                   "MERGE (p:Person {name: row.name})\n" +
                                                   "// set properties on the person node\n" +
                                                   "SET p.title = row.title,\n" +
-                                                  "p.death_year = toINT(row.DateoFdeath),\n" +
-                                                  "p.birth_year = toINT(row.dateOfBirth),\n" +
-                                                  "p.age = toINT(row.age),\n" +
+                                                  "p.death_year = toInteger(row.DateoFdeath),\n" +
+                                                  "p.birth_year = toInteger(row.dateOfBirth),\n" +
+                                                  "p.age = toInteger(row.age),\n" +
                                                   "p.gender = CASE WHEN row.male = '1' THEN 'male'\n" +
                                                   "  ELSE 'female'\n" +
                                                   "  END\n" +
