@@ -6,6 +6,7 @@
 * <<migration-node-sim, Node Similarity>>
 * <<migration-page-rank, PageRank>>
 * <<migration-wcc, Weakly Connected Components>>
+* <<migration-triangle-count, Triangle Count / Clustering Coefficient>>
 
 include::migration-lpa.adoc[leveloffset=+1]
 
@@ -16,3 +17,5 @@ include::migration-node-sim.adoc[leveloffset=+1]
 include::migration-page-rank.adoc[leveloffset=+1]
 
 include::migration-wcc.adoc[leveloffset=+1]
+
+include::migration-triangle-count.adoc[leveloffset=+1]

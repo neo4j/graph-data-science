@@ -1,0 +1,41 @@
+[[migration-triangle-count]]
+= Triangle Counting / Clustering Coefficient
+
+[abstract]
+--
+The `alpha` procedure group `gds.alpha.triangleCount` is being replaced by a pair of procedure groups:
+
+* <<algorithms-triangle-count, gds.triangleCount>>
+* <<algorithms-local-clustering-coefficient, gds.localClusteringCoefficient>>
+--
+
+.Common changes in Configuration
+[opts=header]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.2
+| `direction`          | -
+| `concurrency`        | `concurrency`
+| `readConcurrency`    | `readConcurrency` footnote:triangle-count-read[Only when using anonymous graph]
+| `writeConcurrency`   | `writeConcurrency` footnote:triangle-count-write[Only for `write` mode]
+| `writeProperty`      | `writeProperty` footnote:triangle-count-write[]
+| `write`              | -
+| `graph`              | -
+|===
+
+.Changes in Configuration of `gds.triangleCount`
+[opts=header]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.2
+| -                    | `maxDegree`
+|===
+
+.Changes in Configuration of `gds.localClusteringCoefficient`
+[opts=header]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.2
+| -                    | `triangleCountProperty`
+|===
+
+
+
+
