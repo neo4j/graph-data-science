@@ -42,14 +42,14 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleStream.Result>, TriangleCountBaseConfig> {
 
-    static final String DESCRIPTION = "Triangle Stream streams the nodeIds of each triangle in the graph.";
+    private static final String DESCRIPTION = "Triangles streams the nodeIds of each triangle in the graph.";
 
     @Override
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleCountBaseConfig config) {
         validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
-    @Procedure(name = "gds.alpha.triangle.stream", mode = READ)
+    @Procedure(name = "gds.alpha.triangles", mode = READ)
     @Description(DESCRIPTION)
     public Stream<TriangleStream.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

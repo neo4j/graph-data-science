@@ -66,7 +66,7 @@ class TriangleDocTest extends BaseProcTest {
     @Test
     void shouldStreamTriangles() {
         @Language("Cypher")
-        String query = " CALL gds.alpha.triangle.stream({" +
+        String query = " CALL gds.alpha.triangles({" +
                        "   nodeProjection: 'Person'," +
                        "   relationshipProjection: {" +
                        "     KNOWS: {" +

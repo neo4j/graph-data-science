@@ -227,7 +227,7 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.ml.ann.stream`
 | `gds.alpha.ml.ann.write`
 .1+<.^| Triangle Finding
-| `gds.alpha.triangle.stream`
+| `gds.alpha.triangles`
 |===
 
 The following table lists all functions in the GDS library:

@@ -101,7 +101,7 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.spanningTree.kmin.write",
         "gds.alpha.spanningTree.maximum.write",
         "gds.alpha.spanningTree.minimum.write",
-        "gds.alpha.triangle.stream",
+        "gds.alpha.triangles",
         "gds.alpha.eigenvector.write",
         "gds.alpha.eigenvector.stream",
         "gds.alpha.kShortestPaths.write",

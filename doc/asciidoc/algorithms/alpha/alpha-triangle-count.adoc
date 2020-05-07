@@ -32,7 +32,7 @@ This section includes:
 .The following will return a stream of triples with `nodeId` for each triangle:
 [source, cypher]
 ----
-CALL gds.alpha.triangle.stream(configuration: Map)
+CALL gds.alpha.triangles(configuration: Map)
 YIELD nodeA, nodeB, nodeC
 ----
 
@@ -83,7 +83,7 @@ CREATE (alice:Person {name: 'Alice'}),
 .The following will return a stream of triples, with the name property for each node in each triangle:
 [source, cypher]
 ----
-CALL gds.alpha.triangle.stream({
+CALL gds.alpha.triangles({
   nodeProjection: 'Person',
   relationshipProjection: {
     KNOWS: {

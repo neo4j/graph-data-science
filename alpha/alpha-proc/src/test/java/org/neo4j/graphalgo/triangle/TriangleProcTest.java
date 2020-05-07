@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.triangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
 
 import java.util.HashSet;
 
@@ -90,12 +88,18 @@ class TriangleProcTest extends BaseProcTest {
     void testStreaming() {
         HashSet<Integer> sums = new HashSet<>();
         TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
-        String query = GdsCypher
-            .call()
-            .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds", "alpha", "triangle")
-            .streamMode()
-            .yields();
+
+        String query = "CALL gds.alpha.triangles({" +
+        "  nodeProjection: 'Node'," +
+        "  relationshipProjection: {" +
+        "    TYPE: {" +
+        "      orientation: 'UNDIRECTED'" +
+        "    }" +
+        "  }" +
+        "})" +
+        "YIELD nodeA, nodeB, nodeC";
+
+
         runQueryWithRowConsumer(query, row -> {
             long nodeA = row.getNumber("nodeA").longValue();
             long nodeB = row.getNumber("nodeB").longValue();
