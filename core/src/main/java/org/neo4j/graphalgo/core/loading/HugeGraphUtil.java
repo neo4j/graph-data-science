@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
@@ -89,7 +90,7 @@ public final class HugeGraphUtil {
         final ExecutorService executorService;
 
         private final BitSet seenOriginalIds;
-        private final SparseNodeMapping.Builder originalToInternalBuilder;
+        private final HugeSparseLongArray.Builder originalToInternalBuilder;
 
         private long nextAvailableId;
         private IdMap idMap;
@@ -102,7 +103,7 @@ public final class HugeGraphUtil {
             this.executorService = executorService;
             this.tracker = tracker;
 
-            this.originalToInternalBuilder = SparseNodeMapping.Builder.create(maxOriginalId + 1, tracker);
+            this.originalToInternalBuilder = HugeSparseLongArray.Builder.create(maxOriginalId + 1, tracker);
             this.nextAvailableId = 0;
             seenOriginalIds = new BitSet(maxOriginalId);
         }
@@ -120,7 +121,7 @@ public final class HugeGraphUtil {
 
         public IdMap build() {
             if (idMap == null) {
-                SparseNodeMapping originalToInternal = originalToInternalBuilder.build();
+                HugeSparseLongArray originalToInternal = originalToInternalBuilder.build();
 
                 HugeLongArray internalToNeo = HugeLongArray.newArray(nextAvailableId, tracker);
                 new SetBitsIterable(seenOriginalIds).forEach(nodeId -> internalToNeo.set(

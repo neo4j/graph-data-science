@@ -17,12 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading;
+package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -32,7 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static org.apache.lucene.util.ArrayUtil.oversize;
 
-public final class SparseNodeMapping {
+public final class HugeSparseLongArray {
 
     private static final long NOT_FOUND = -1L;
 
@@ -44,14 +42,14 @@ public final class SparseNodeMapping {
     private final long capacity;
     private final long[][] pages;
 
-    private SparseNodeMapping(long capacity, long[][] pages) {
+    private HugeSparseLongArray(long capacity, long[][] pages) {
         this.capacity = capacity;
         this.pages = pages;
     }
 
     /**
      * @param maxId highest id that we need to represent
-     *             (equals size in {@link SparseNodeMapping.Builder#create(long, AllocationTracker)})
+     *             (equals size in {@link HugeSparseLongArray.Builder#create(long, AllocationTracker)})
      * @param maxEntries number of identifiers we need to store
      */
     public static MemoryRange memoryEstimation(long maxId, long maxEntries) {
@@ -63,7 +61,7 @@ public final class SparseNodeMapping {
         final long maxEntriesForWorstCase = Math.min(maxId, maxEntries * PAGE_SIZE);
         int numPagesForMaxEntriesWorstCase = PageUtil.numPagesFor(maxEntriesForWorstCase, PAGE_SHIFT, PAGE_MASK);
 
-        long classSize = MemoryUsage.sizeOfInstance(SparseNodeMapping.class);
+        long classSize = MemoryUsage.sizeOfInstance(HugeSparseLongArray.class);
         long pagesSize = MemoryUsage.sizeOfObjectArray(numPagesForSize);
         long minRequirements = numPagesForMaxEntriesBestCase * PAGE_SIZE_IN_BYTES;
         long maxRequirements = numPagesForMaxEntriesWorstCase * PAGE_SIZE_IN_BYTES;
@@ -143,12 +141,12 @@ public final class SparseNodeMapping {
             page[indexInPage] = value;
         }
 
-        public SparseNodeMapping build() {
+        public HugeSparseLongArray build() {
             int numPages = this.pages.length();
             long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
             long[][] pages = new long[numPages][];
             Arrays.setAll(pages, this.pages::get);
-            return new SparseNodeMapping(capacity, pages);
+            return new HugeSparseLongArray(capacity, pages);
         }
 
         private long[] allocateNewPage(int pageIndex) {
@@ -221,12 +219,12 @@ public final class SparseNodeMapping {
             ));
         }
 
-        public SparseNodeMapping build() {
+        public HugeSparseLongArray build() {
             int numPages = this.pages.length();
             long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
             long[][] pages = new long[numPages][];
             Arrays.setAll(pages, this.pages::get);
-            return new SparseNodeMapping(capacity, pages);
+            return new HugeSparseLongArray(capacity, pages);
         }
 
         private long[] getPage(int pageIndex) {

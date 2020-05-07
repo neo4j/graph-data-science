@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import org.neo4j.graphalgo.core.loading.SparseNodeMapping;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
@@ -46,7 +45,7 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  *
  * <ul>
  * <li>The array is of a fixed size and cannot grow or shrink dynamically.</li>
- * <li>The array is not optimized for sparseness and has a large memory overhead if the values written to it are very sparse (see {@link SparseNodeMapping} for a different implementation that can profit from sparse data).</li>
+ * <li>The array is not optimized for sparseness and has a large memory overhead if the values written to it are very sparse (see {@link HugeSparseLongArray} for a different implementation that can profit from sparse data).</li>
  * <li>The array does not support default values and returns the same default for unset values that a regular {@code long[]} does ({@code 0}).</li>
  * </ul>
  *

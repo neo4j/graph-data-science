@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
+import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
 import java.util.Collections;
 import java.util.Map;
@@ -51,18 +52,18 @@ public final class IdMapBuilder {
         AllocationTracker tracker
     ) {
         HugeLongArray graphIds = idMapBuilder.build();
-        SparseNodeMapping nodeToGraphIds = buildSparseNodeMapping(graphIds, highestNodeId, concurrency, tracker);
+        HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(graphIds, highestNodeId, concurrency, tracker);
         return new IdMap(graphIds, nodeToGraphIds, labelInformation, idMapBuilder.size());
     }
 
     @NotNull
-    static SparseNodeMapping buildSparseNodeMapping(
+    static HugeSparseLongArray buildSparseNodeMapping(
         HugeLongArray graphIds,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
     ) {
-        SparseNodeMapping.Builder nodeMappingBuilder = SparseNodeMapping.Builder.create(highestNodeId == 0 ? 1 : highestNodeId, tracker);
+        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.Builder.create(highestNodeId == 0 ? 1 : highestNodeId, tracker);
         ParallelUtil.readParallel(
                 concurrency,
                 graphIds.size(),

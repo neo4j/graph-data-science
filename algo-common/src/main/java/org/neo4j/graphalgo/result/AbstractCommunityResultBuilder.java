@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.result;
 import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.loading.SparseNodeMapping;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
@@ -99,7 +99,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
     private void buildCommunityCount() {
         long communityCount = 0L;
 
-        SparseNodeMapping componentSizes = buildComponentSizes();
+        var componentSizes = buildComponentSizes();
         for (int communityId = 0; communityId < componentSizes.getCapacity(); communityId++) {
             long communitySize = componentSizes.get(communityId);
             if (communitySize > 0) {
@@ -111,9 +111,9 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
     }
 
     private void buildCommunityCountAndHistogram() {
-        SparseNodeMapping componentSizes = buildComponentSizes();
+        var componentSizes = buildComponentSizes();
 
-        Histogram histogram = new Histogram(5);
+        var histogram = new Histogram(5);
         long communityCount = 0;
         for (int communityId = 0; communityId < componentSizes.getCapacity(); communityId++) {
             long communitySize = componentSizes.get(communityId);
@@ -127,13 +127,11 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
         maybeCommunityHistogram = Optional.of(histogram);
     }
 
-    private SparseNodeMapping buildComponentSizes() {
-        SparseNodeMapping.GrowingBuilder componentSizeBuilder =
-            SparseNodeMapping.GrowingBuilder.create(0L, tracker);
+    private HugeSparseLongArray buildComponentSizes() {
+        var componentSizeBuilder = HugeSparseLongArray.GrowingBuilder.create(0L, tracker);
 
         for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
-            final long communityId = communityFunction.applyAsLong(nodeId);
-            componentSizeBuilder.addTo(communityId, 1L);
+            componentSizeBuilder.addTo(communityFunction.applyAsLong(nodeId), 1L);
         }
         return componentSizeBuilder.build();
     }

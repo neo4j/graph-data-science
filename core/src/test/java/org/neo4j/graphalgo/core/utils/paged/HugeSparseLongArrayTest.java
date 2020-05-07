@@ -17,14 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading;
+package org.neo4j.graphalgo.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PrivateLookup;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import java.lang.invoke.MethodHandle;
 import java.util.concurrent.atomic.AtomicReferenceArray;
@@ -40,14 +38,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
-final class SparseNodeMappingTest {
+final class HugeSparseLongArrayTest {
 
     private static final int PS = PageUtil.pageSizeFor(Long.BYTES);
-    private static final MethodHandle PAGES = PrivateLookup.field(SparseNodeMapping.Builder.class, AtomicReferenceArray.class, "pages");
+    private static final MethodHandle PAGES = PrivateLookup.field(HugeSparseLongArray.Builder.class, AtomicReferenceArray.class, "pages");
 
     @Test
     void shouldSetAndGet() {
-        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(10, AllocationTracker.EMPTY);
         int index = integer(2, 8);
         int value = integer(42, 1337);
         array.set(index, value);
@@ -56,7 +54,7 @@ final class SparseNodeMappingTest {
 
     @Test
     void shouldAddAndGet() {
-        SparseNodeMapping.GrowingBuilder array = SparseNodeMapping.GrowingBuilder.create(0L, AllocationTracker.EMPTY);
+        HugeSparseLongArray.GrowingBuilder array = HugeSparseLongArray.GrowingBuilder.create(0L, AllocationTracker.EMPTY);
         int index = integer(2, 8);
         int value = integer(42, 1337);
         array.addTo(index, value);
@@ -65,7 +63,7 @@ final class SparseNodeMappingTest {
 
     @Test
     void shouldSetValuesInPageSizedChunks() {
-        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(10, AllocationTracker.EMPTY);
         // larger than the desired size, but still within a single page
         array.set(integer(11, PS - 1), 1337);
         // doesn't fail - good
@@ -73,7 +71,7 @@ final class SparseNodeMappingTest {
 
     @Test
     void shouldAddValuesInPageSizedChunks() {
-        SparseNodeMapping.GrowingBuilder array = SparseNodeMapping.GrowingBuilder.create(AllocationTracker.EMPTY);
+        HugeSparseLongArray.GrowingBuilder array = HugeSparseLongArray.GrowingBuilder.create(AllocationTracker.EMPTY);
         // larger than the desired size, but still within a single page
         array.addTo(integer(11, PS - 1), 1337);
         // doesn't fail - good
@@ -82,7 +80,7 @@ final class SparseNodeMappingTest {
     // capacity check is only an assert
     @Test
     void shouldUseCapacityInPageSizedChunks() {
-        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(10, AllocationTracker.EMPTY);
         // larger than the desired size, but still within a single page
         try {
             array.set(integer(PS, 2 * PS - 1), 1337);
@@ -93,11 +91,11 @@ final class SparseNodeMappingTest {
 
     @Test
     void shouldHaveContains() {
-        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(10, AllocationTracker.EMPTY);
         int index = integer(2, 8);
         int value = integer(42, 1337);
         array.set(index, value);
-        SparseNodeMapping longArray = array.build();
+        HugeSparseLongArray longArray = array.build();
         for (int i = 0; i < 10; i++) {
             if (i == index) {
                 assertTrue(longArray.contains(i), "Expected index " + i + " to be contained, but it was not");
@@ -109,11 +107,11 @@ final class SparseNodeMappingTest {
 
     @Test
     void shouldReturnNegativeOneForMissingValues() {
-        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(10, AllocationTracker.EMPTY);
         int index = integer(2, 8);
         int value = integer(42, 1337);
         array.set(index, value);
-        SparseNodeMapping longArray = array.build();
+        HugeSparseLongArray longArray = array.build();
         for (int i = 0; i < 10; i++) {
             boolean expectedContains = i == index;
             long actual = longArray.get(i);
@@ -126,21 +124,21 @@ final class SparseNodeMappingTest {
 
     @Test
     void shouldReturnNegativeOneForOutOfRangeValues() {
-        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(10, AllocationTracker.EMPTY);
         array.set(integer(2, 8), integer(42, 1337));
         assertEquals(-1L, array.build().get(integer(100, 200)));
     }
 
     @Test
     void shouldReturnNegativeOneForUnsetPages() {
-        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(PS + 10, AllocationTracker.EMPTY);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(PS + 10, AllocationTracker.EMPTY);
         array.set(5000, integer(42, 1337));
         assertEquals(-1L, array.build().get(integer(100, 200)));
     }
 
     @Test
     void shouldNotFailOnGetsThatAreoutOfBounds() {
-        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(10, AllocationTracker.EMPTY);
         array.set(integer(2, 8), integer(42, 1337));
         assertEquals(-1L, array.build().get(integer(100_000_000, 200_000_000)));
         // doesn't fail - good
@@ -149,7 +147,7 @@ final class SparseNodeMappingTest {
     @Test
     void shouldNotCreateAnyPagesOnInitialization() throws Throwable {
         AllocationTracker tracker = AllocationTracker.create();
-        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(2 * PS, tracker);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(2 * PS, tracker);
 
         final AtomicReferenceArray<long[]> pages = getPages(array);
         for (int i = 0; i < pages.length(); i++) {
@@ -165,7 +163,7 @@ final class SparseNodeMappingTest {
     @Test
     void shouldCreateAndTrackSparsePagesOnDemand() throws Throwable {
         AllocationTracker tracker = AllocationTracker.create();
-        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(2 * PS, tracker);
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(2 * PS, tracker);
 
         int index = integer(PS, 2 * PS - 1);
         int value = integer(42, 1337);
@@ -187,7 +185,7 @@ final class SparseNodeMappingTest {
     @Test
     void shouldComputeMemoryEstimationForBestCase() {
         long size = integer(Integer.MAX_VALUE);
-        final MemoryRange memoryRange = SparseNodeMapping.memoryEstimation(size, size);
+        final MemoryRange memoryRange = HugeSparseLongArray.memoryEstimation(size, size);
         assertEquals(memoryRange.min, memoryRange.max);
     }
 
@@ -195,17 +193,17 @@ final class SparseNodeMappingTest {
     void shouldComputeMemoryEstimationForWorstCase() {
         long size = integer(Integer.MAX_VALUE);
         long highestId = between(size + 4096L, size * 4096L).Long();
-        final MemoryRange memoryRange = SparseNodeMapping.memoryEstimation(highestId, size);
+        final MemoryRange memoryRange = HugeSparseLongArray.memoryEstimation(highestId, size);
         assertTrue(memoryRange.min < memoryRange.max);
     }
 
     @Test
     void shouldComputeMemoryEstimation() {
-        assertEquals(MemoryRange.of(40L), SparseNodeMapping.memoryEstimation(0L, 0L));
-        assertEquals(MemoryRange.of(32832L), SparseNodeMapping.memoryEstimation(100L, 100L));
-        assertEquals(MemoryRange.of(97_689_080L), SparseNodeMapping.memoryEstimation(100_000_000_000L, 1L));
-        assertEquals(MemoryRange.of(177_714_824L, 327_937_656_296L), SparseNodeMapping.memoryEstimation(100_000_000_000L, 10_000_000L));
-        assertEquals(MemoryRange.of(898_077_656L, 800_488_297_688L), SparseNodeMapping.memoryEstimation(100_000_000_000L, 100_000_000L));
+        assertEquals(MemoryRange.of(40L), HugeSparseLongArray.memoryEstimation(0L, 0L));
+        assertEquals(MemoryRange.of(32832L), HugeSparseLongArray.memoryEstimation(100L, 100L));
+        assertEquals(MemoryRange.of(97_689_080L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 1L));
+        assertEquals(MemoryRange.of(177_714_824L, 327_937_656_296L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 10_000_000L));
+        assertEquals(MemoryRange.of(898_077_656L, 800_488_297_688L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 100_000_000L));
     }
 
     @Test
@@ -249,11 +247,11 @@ final class SparseNodeMappingTest {
         long min = classSize + pagesSize + minRequirements;
         long max = classSize + pagesSize + maxRequirements;
 
-        assertEquals(MemoryRange.of(min, max), SparseNodeMapping.memoryEstimation(size, maxEntries));
+        assertEquals(MemoryRange.of(min, max), HugeSparseLongArray.memoryEstimation(size, maxEntries));
     }
 
     @SuppressWarnings("unchecked")
-    private static AtomicReferenceArray<long[]> getPages(SparseNodeMapping.Builder array) throws Throwable {
+    private static AtomicReferenceArray<long[]> getPages(HugeSparseLongArray.Builder array) throws Throwable {
         return (AtomicReferenceArray<long[]>) PAGES.invoke(array);
     }
 }

@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -57,7 +58,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
         .rangePerGraphDimension(
             "Mapping from Neo4j identifiers to internal identifiers",
-            (dimensions, concurrency) -> SparseNodeMapping.memoryEstimation(
+            (dimensions, concurrency) -> HugeSparseLongArray.memoryEstimation(
                 dimensions.highestNeoId(),
                 dimensions.nodeCount()
             )
@@ -76,20 +77,20 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     private final Map<NodeLabel, BitSet> labelInformation;
 
     private final HugeLongArray graphIds;
-    private final SparseNodeMapping nodeToGraphIds;
+    private final HugeSparseLongArray nodeToGraphIds;
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
     }
 
-    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, long nodeCount) {
+    public IdMap(HugeLongArray graphIds, HugeSparseLongArray nodeToGraphIds, long nodeCount) {
         this(graphIds, nodeToGraphIds, Collections.emptyMap(), nodeCount);
     }
 
     /**
      * initialize the map with pre-built sub arrays
      */
-    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, Map<NodeLabel, BitSet> labelInformation, long nodeCount) {
+    public IdMap(HugeLongArray graphIds, HugeSparseLongArray nodeToGraphIds, Map<NodeLabel, BitSet> labelInformation, long nodeCount) {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
         this.labelInformation = labelInformation;
@@ -191,7 +192,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             cursor++;
         }
 
-        SparseNodeMapping newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
+        HugeSparseLongArray newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
             newGraphIds,
             nodeToGraphIds.getCapacity(),
             concurrency,
@@ -264,7 +265,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
         FilteredIdMap(
             HugeLongArray graphIds,
-            SparseNodeMapping nodeToGraphIds,
+            HugeSparseLongArray nodeToGraphIds,
             Map<NodeLabel, BitSet> filteredLabelMap,
             long nodeCount
         ) {
