@@ -36,6 +36,40 @@ The `alpha` procedure group `gds.alpha.triangleCount` is being replaced by a pai
 | -                    | `triangleCountProperty`
 |===
 
+.Changes in YIELD fields of `gds.triangleCount`
+[opts=header]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+| `nodeId`        | `nodeId` footnote:triangle-count-stream-yield[Only for `stream` mode]
+| `triangles`     | `triangleCount` footnote:triangle-count-stream-yield[Only for `stream` mode]
+| `triangleCount` | `globalTriangleCount` footnote:triangle-count-write-yield[Not present in `stream` mode]
+| `nodeCount`     | `nodeCount` footnote:triangle-count-write-yield[]
+| `averageClusteringCoefficient` footnote:triangle-count-acc-yield[Moved to `gds.localClusteringCoefficient`] | -
+| `clusteringCoefficientProperty` footnote:triangle-count-ccwp-yield[Moved  as `writeProperty` to `gds.localClusteringCoefficient`] | -
+| `loadMillis`    | `createMillis`
+| `computeMillis` | `computeMillis`
+| `writeMillis`   | `writeMillis`
+| `write`         | -
+| -               | `configuration` footnote:wcc-gds-config[The configuration used to run the algorithm]
+| `writeProperty` footnote:triangle-count-config[Inlined into `configuration`] | -
+| `min, max, mean, p50, p75, p90, p95, p99, p999` | -
+|===
 
+.Changes in YIELD fields of `gds.localClusteringCoefficient`
+[opts=header]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+| `nodeId`        | `nodeId` footnote:lcc-stream-yield[Only for `stream` mode]
+| `localClusteringCoefficient` | `triangleCount` footnote:lcc-stream-yield[Only for `stream` mode]
+| `nodeCount`     | `nodeCount` footnote:lcc-write-yield[Not present in `stream` mode]
+| `averageClusteringCoefficient` | `averageClusteringCoefficient` footnote:lcc-write-yield[]
+| `loadMillis`    | `createMillis`
+| `computeMillis` | `computeMillis`
+| `writeMillis`   | `writeMillis`
+| `write`         | -
+| -               | `configuration` footnote:wcc-gds-config[The configuration used to run the algorithm]
+| `clusteringCoefficientProperty` footnote:lcc-config[Inlined as `writeProperty` into `configuration`] | -
+| `min, max, mean, p50, p75, p90, p95, p99, p999` | -
+|===
 
 
