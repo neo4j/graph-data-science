@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.triangle.TriangleCountMutateProc;
 import org.neo4j.graphalgo.triangle.TriangleCountStatsProc;
 import org.neo4j.graphalgo.triangle.TriangleCountStreamProc;
 import org.neo4j.graphalgo.triangle.TriangleCountWriteProc;
+import org.neo4j.graphalgo.triangle.TriangleProc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +38,7 @@ class TriangleCountDocTest extends DocTestBase {
             TriangleCountWriteProc.class,
             TriangleCountMutateProc.class,
             TriangleCountStatsProc.class,
+            TriangleProc.class,
             GraphCreateProc.class
         );
     }

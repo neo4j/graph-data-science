@@ -272,11 +272,11 @@ CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO', 'similarityScore')
 
 
 [[catalog-graph-export]]
-[.alpha]
+[.beta]
 == Create Neo4j databases from named graphs
 
 [.tier-note]
-*This procedure is in the beta tier. For more information on this tier of algorithm, see <<algorithms, here>>.
+This procedure is in the beta tier. For more information on this tier of algorithm, see <<algorithms, here>>.
 
 We can create new Neo4j databases from named in-memory graphs stored in the graph catalog.
 All nodes, relationships and properties present in an in-memory graph are written to a new Neo4j database.
