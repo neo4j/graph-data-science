@@ -23,9 +23,11 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -83,7 +85,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computeResult) {
-        return PageRankProc.resultBuilder(new MutateResult.Builder(), computeResult);
+        return PageRankProc.resultBuilder(new MutateResult.Builder(callContext, computeResult.tracker()), computeResult);
     }
 
     public static final class MutateResult {
@@ -94,6 +96,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
         public long mutateMillis;
         public long ranIterations;
         public boolean didConverge;
+        public Map<String, Object> centralityDistribution;
         public Map<String, Object> configuration;
 
         MutateResult(
@@ -103,6 +106,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
             long mutateMillis,
             long ranIterations,
             boolean didConverge,
+            Map<String, Object> centralityDistribution,
             Map<String, Object> configuration
         ) {
             this.nodePropertiesWritten = nodePropertiesWritten;
@@ -111,13 +115,24 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
             this.mutateMillis = mutateMillis;
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
+            this.centralityDistribution = centralityDistribution;
             this.configuration = configuration;
         }
 
         static class Builder extends PageRankProc.PageRankResultBuilder<MutateResult> {
 
+            Builder(
+                ProcedureCallContext context,
+                AllocationTracker tracker
+            ) {
+                super(
+                    context,
+                    tracker
+                );
+            }
+
             @Override
-            public MutateResult build() {
+            public MutateResult buildResult() {
                 return new MutateResult(
                     nodePropertiesWritten,
                     createMillis,
@@ -125,6 +140,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
                     mutateMillis,
                     ranIterations,
                     didConverge,
+                    distribution(),
                     config.toMap()
                 );
             }

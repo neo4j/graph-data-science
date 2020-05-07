@@ -23,9 +23,11 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -69,7 +71,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computeResult) {
-        return PageRankProc.resultBuilder(new WriteResult.Builder(), computeResult);
+        return PageRankProc.resultBuilder(new WriteResult.Builder(callContext, computeResult.tracker()), computeResult);
     }
 
     @Override
@@ -95,6 +97,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
         public long writeMillis;
         public long ranIterations;
         public boolean didConverge;
+        public Map<String, Object> centralityDistribution;
         public Map<String, Object> configuration;
 
         WriteResult(
@@ -104,6 +107,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
             long writeMillis,
             long ranIterations,
             boolean didConverge,
+            Map<String, Object> centralityDistribution,
             Map<String, Object> configuration
         ) {
             this.nodePropertiesWritten = nodePropertiesWritten;
@@ -112,13 +116,24 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
             this.writeMillis = writeMillis;
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
+            this.centralityDistribution = centralityDistribution;
             this.configuration = configuration;
         }
 
         static class Builder extends PageRankProc.PageRankResultBuilder<WriteResult> {
 
+            Builder(
+                ProcedureCallContext context,
+                AllocationTracker tracker
+            ) {
+                super(
+                    context,
+                    tracker
+                );
+            }
+
             @Override
-            public WriteResult build() {
+            public WriteResult buildResult() {
                 return new WriteResult(
                     nodePropertiesWritten,
                     createMillis,
@@ -126,6 +141,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
                     writeMillis,
                     ranIterations,
                     didConverge,
+                    distribution(),
                     config.toMap()
                 );
             }

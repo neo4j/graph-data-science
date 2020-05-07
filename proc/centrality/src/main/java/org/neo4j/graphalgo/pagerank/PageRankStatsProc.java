@@ -23,19 +23,18 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.pagerank.PageRankProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
 public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankStatsProc.StatsResult, PageRankStatsConfig> {
@@ -64,7 +63,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
 
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankStatsConfig> computeResult) {
-        return PageRankProc.resultBuilder(new StatsResult.Builder(), computeResult);
+        return PageRankProc.resultBuilder(new StatsResult.Builder(callContext, computeResult.tracker()), computeResult);
     }
 
     @Override
@@ -80,36 +79,6 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
     @Override
     protected AlgorithmFactory<PageRank, PageRankStatsConfig> algorithmFactory(PageRankStatsConfig config) {
         return PageRankProc.algorithmFactory(config);
-    }
-
-    @Override
-    protected Stream<StatsResult> stats(ComputationResult<PageRank, PageRank, PageRankStatsConfig> computationResult) {
-        PageRankStatsConfig config = computationResult.config();
-
-        if (computationResult.isGraphEmpty()) {
-            return Stream.of(
-                new StatsResult(
-                    computationResult.createMillis(),
-                    0,
-                    0,
-                    computationResult.result().didConverge(),
-                    Collections.emptyMap(),
-                    config.toMap()
-                )
-            );
-        }
-
-        PageRankProc.PageRankResultBuilder<StatsResult> resultBuilder = PageRankProc.resultBuilder(
-            new StatsResult.Builder(),
-            computationResult
-        );
-
-        if (shouldComputeHistogram(callContext)) {
-            try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
-                resultBuilder.withHistogram(PageRankProc.computeHistogram(computationResult.result()));
-            }
-        }
-        return Stream.of(resultBuilder.build());
     }
 
     public static final class StatsResult {
@@ -139,8 +108,18 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
 
         static class Builder extends PageRankProc.PageRankResultBuilder<StatsResult> {
 
+            Builder(
+                ProcedureCallContext context,
+                AllocationTracker tracker
+            ) {
+                super(
+                    context,
+                    tracker
+                );
+            }
+
             @Override
-            public StatsResult build() {
+            public StatsResult buildResult() {
                 return new StatsResult(
                     createMillis,
                     computeMillis,

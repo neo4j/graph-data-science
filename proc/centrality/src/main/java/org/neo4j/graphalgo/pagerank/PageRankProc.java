@@ -23,7 +23,7 @@ import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.helpers.collection.MapUtil;
@@ -32,6 +32,7 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.LongToDoubleFunction;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
@@ -41,12 +42,6 @@ final class PageRankProc {
         "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
 
     private PageRankProc() {}
-
-    static boolean shouldComputeHistogram(ProcedureCallContext callContext) {
-        return callContext
-            .outputFields()
-            .anyMatch(s -> s.equalsIgnoreCase("centralityDistribution"));
-    }
 
     static <CONFIG extends PageRankBaseConfig> AlgorithmFactory<PageRank, CONFIG> algorithmFactory(CONFIG config) {
         if (config.relationshipWeightProperty() == null) {
@@ -63,6 +58,7 @@ final class PageRankProc {
         procResultBuilder
             .withDidConverge(!computeResult.isGraphEmpty() && result.didConverge())
             .withRanIterations(!computeResult.isGraphEmpty() ? result.iterations() : 0)
+            .withCentralityFunction(!computeResult.isGraphEmpty() ? computeResult.result().result()::score : null)
             .withCreateMillis(computeResult.createMillis())
             .withComputeMillis(computeResult.computeMillis())
             .withConfig(computeResult.config());
@@ -70,16 +66,11 @@ final class PageRankProc {
         return procResultBuilder;
     }
 
-    static DoubleHistogram computeHistogram(PageRank pageRank) {
-        DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
-        HugeDoubleArray scores = pageRank.result().array();
-        for (long i = 0; i < scores.size(); i++) {
-            histogram.recordValue(scores.get(i));
-        }
-        return histogram;
-    }
-
     abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
+
+        private final boolean buildHistogram;
+
+        private final AllocationTracker tracker;
 
         protected long ranIterations;
 
@@ -88,6 +79,20 @@ final class PageRankProc {
         long postProcessingMillis = -1L;
 
         Optional<DoubleHistogram> maybeHistogram = Optional.empty();
+
+        LongToDoubleFunction centralityFunction = null;
+
+        protected PageRankResultBuilder(
+            ProcedureCallContext callContext,
+            AllocationTracker tracker
+        ) {
+            this.buildHistogram = callContext
+                .outputFields()
+                .anyMatch(s -> s.equalsIgnoreCase("centralityDistribution"));
+            this.tracker = tracker;
+        }
+
+        protected abstract PROC_RESULT buildResult();
 
         Map<String, Object> distribution() {
             if (maybeHistogram.isPresent()) {
@@ -122,8 +127,8 @@ final class PageRankProc {
             return this;
         }
 
-        PageRankResultBuilder<PROC_RESULT> withHistogram(DoubleHistogram histogram) {
-            this.maybeHistogram = Optional.of(histogram);
+        PageRankResultBuilder<PROC_RESULT> withCentralityFunction(LongToDoubleFunction centralityFunction) {
+            this.centralityFunction = centralityFunction;
             return this;
         }
 
@@ -133,6 +138,26 @@ final class PageRankProc {
 
         void setPostProcessingMillis(long postProcessingMillis) {
             this.postProcessingMillis = postProcessingMillis;
+        }
+
+        @Override
+        public PROC_RESULT build() {
+            ProgressTimer timer = ProgressTimer.start();
+
+            if (centralityFunction != null && buildHistogram) {
+                DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
+                for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+                    double centralityValue = centralityFunction.applyAsDouble(nodeId);
+                    histogram.recordValue(centralityValue);
+                }
+                maybeHistogram = Optional.of(histogram);
+            }
+
+            timer.stop();
+
+            this.postProcessingMillis = timer.getDuration();
+
+            return buildResult();
         }
     }
 
