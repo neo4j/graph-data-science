@@ -33,6 +33,7 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements GraphMutationTest<PageRank, PageRankMutateConfig, PageRank> {
 
@@ -125,7 +126,8 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
                 "mutateMillis",
                 "didConverge",
                 "ranIterations",
-                "configuration"
+                "configuration",
+                "centralityDistribution"
             );
 
         runQueryWithRowConsumer(
@@ -139,6 +141,8 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
 
                 assertEquals(false, row.get("didConverge"));
                 assertEquals(20L, row.get("ranIterations"));
+
+                assertNotNull(row.get("centralityDistribution"));
             }
         );
     }

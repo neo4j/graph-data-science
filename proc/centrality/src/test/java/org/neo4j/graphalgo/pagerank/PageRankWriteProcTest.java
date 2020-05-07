@@ -32,6 +32,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implements
@@ -151,6 +152,20 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
             }
         );
 
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
+    void testWriteYieldCentralityDistribution(ModeBuildStage queryBuilder, String testCaseName) {
+        String query = queryBuilder
+            .writeMode()
+            .addParameter("writeProperty", "writeProp")
+            .yields("centralityDistribution");
+
+        runQueryWithRowConsumer(
+            query,
+            row -> assertNotNull(row.get("centralityDistribution"))
+        );
     }
 
     @Override
