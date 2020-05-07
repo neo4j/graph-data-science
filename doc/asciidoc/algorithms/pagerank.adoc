@@ -118,6 +118,7 @@ include::common-configuration/common-configuration-anonymous-graph.adoc[]
 | computeMillis          | Integer | Milliseconds for running the algorithm.
 | writeMillis            | Integer | Milliseconds for writing result data back.
 | nodePropertiesWritten  | Integer | The number of properties that were written to Neo4j.
+| centralityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
 
@@ -527,17 +528,20 @@ CALL gds.pageRank.stats('myGraph', {
   maxIterations: 20,
   dampingFactor: 0.85
 })
-YIELD ranIterations
+YIELD centralityDistribution
+RETURN centralityDistribution.max AS max
 ----
 
 .Results
 [opts="header",cols="1"]
 |===
-| ranIterations
-| 20
+| max
+| 3.236204147338867
 |===
 --
 
+The above query returned a so called centrality histogram which can be used to monitor the distribution of page ranke values across all computed nodes.
+This can be useful for debugging and normalization purposes.
 
 [[algorithms-pagerank-usage]]
 == Usage
