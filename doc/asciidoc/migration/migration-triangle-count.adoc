@@ -1,13 +1,14 @@
 [[migration-triangle-count]]
 = Triangle Counting / Clustering Coefficient
 
-[abstract]
---
-The `alpha` procedure group `gds.alpha.triangleCount` is being replaced by a pair of procedure groups:
+The `alpha` procedures from the namespace `algo.triangleCount` are being replaced by a pair of procedure namespaces:
 
 * <<algorithms-triangle-count, gds.triangleCount>>
 * <<algorithms-local-clustering-coefficient, gds.localClusteringCoefficient>>
---
+
+Everything relating to clustering coefficients has been extracted into a separate algorithm backing `gds.localClusteringCoefficient` procedures.
+To compute both triangle count and local clustering coefficient values multiple procedures will be necessary.
+
 
 .Common changes in Configuration
 [opts=header]
@@ -22,24 +23,10 @@ The `alpha` procedure group `gds.alpha.triangleCount` is being replaced by a pai
 | `graph`              | -
 |===
 
-.Changes in Configuration of `gds.triangleCount`
+.Changes in YIELD fields of `algo.triangleCount`
 [opts=header]
 |===
 |Graph Algorithms v3.5 |Graph Data Science v1.2
-| -                    | `maxDegree`
-|===
-
-.Changes in Configuration of `gds.localClusteringCoefficient`
-[opts=header]
-|===
-|Graph Algorithms v3.5 |Graph Data Science v1.2
-| -                    | `triangleCountProperty`
-|===
-
-.Changes in YIELD fields of `gds.triangleCount`
-[opts=header]
-|===
-|Graph Algorithms v3.5 |Graph Data Science v1.0
 | `nodeId`        | `nodeId` footnote:triangle-count-stream-yield[Only for `stream` mode]
 | `triangles`     | `triangleCount` footnote:triangle-count-stream-yield[Only for `stream` mode]
 | `triangleCount` | `globalTriangleCount` footnote:triangle-count-write-yield[Not present in `stream` mode]
@@ -52,23 +39,6 @@ The `alpha` procedure group `gds.alpha.triangleCount` is being replaced by a pai
 | `write`         | -
 | -               | `configuration` footnote:wcc-gds-config[The configuration used to run the algorithm]
 | `writeProperty` footnote:triangle-count-config[Inlined into `configuration`] | -
-| `min, max, mean, p50, p75, p90, p95, p99, p999` | -
-|===
-
-.Changes in YIELD fields of `gds.localClusteringCoefficient`
-[opts=header]
-|===
-|Graph Algorithms v3.5 |Graph Data Science v1.0
-| `nodeId`        | `nodeId` footnote:lcc-stream-yield[Only for `stream` mode]
-| `localClusteringCoefficient` | `triangleCount` footnote:lcc-stream-yield[Only for `stream` mode]
-| `nodeCount`     | `nodeCount` footnote:lcc-write-yield[Not present in `stream` mode]
-| `averageClusteringCoefficient` | `averageClusteringCoefficient` footnote:lcc-write-yield[]
-| `loadMillis`    | `createMillis`
-| `computeMillis` | `computeMillis`
-| `writeMillis`   | `writeMillis`
-| `write`         | -
-| -               | `configuration` footnote:wcc-gds-config[The configuration used to run the algorithm]
-| `clusteringCoefficientProperty` footnote:lcc-config[Inlined as `writeProperty` into `configuration`] | -
 | `min, max, mean, p50, p75, p90, p95, p99, p999` | -
 |===
 
