@@ -52,6 +52,7 @@ def whitelist = [
                 [name: 'Eclipse Public License 1.0'],
         ]],
         [name: 'GNU General Public License, Version 3', url: 'http://www.gnu.org/licenses/gpl-3.0-standalone.html'],
+        [name: 'GNU General Public License (GPL), version 2, with the Classpath exception', url: 'http://openjdk.java.net/legal/gplv2+ce.html'],
         [name: 'Public Domain, per Creative Commons CC0', url: 'http://creativecommons.org/publicdomain/zero/1.0/']
 ]
 
@@ -89,7 +90,7 @@ allprojects { proj ->
 
             // Dependency license reporting
             downloadLicenses {
-                dependencyConfiguration = 'compile'
+                dependencyConfiguration = 'runtimeClasspath'
                 aliases = whitelist.collectEntries { lic ->
                     def actual = license(lic.name, lic.url)
                     def alternatives = lic.aliases.collect { it.url ? license(it.name, it.url) : it.name }
