@@ -540,8 +540,8 @@ RETURN centralityDistribution.max AS max
 |===
 --
 
-The above query returned a so called centrality histogram which can be used to monitor the distribution of page ranke values across all computed nodes.
-This can be useful for debugging and normalization purposes.
+The above query returned a so called centrality histogram which can be used to monitor the distribution of page rank values across all computed nodes.
+This can be useful for inspecting the computed scores or perform normalizations.
 
 [[algorithms-pagerank-usage]]
 == Usage
