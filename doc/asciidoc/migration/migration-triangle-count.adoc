@@ -38,7 +38,7 @@ The triangle enumeration procedure `algo.triangles.stream()` has been renamed to
 | `computeMillis` | `computeMillis`
 | `writeMillis`   | `writeMillis`
 | `write`         | -
-| -               | `configuration` footnote:wcc-gds-config[The configuration used to run the algorithm]
+| -               | `configuration` footnote:triangle-count-gds-config[The configuration used to run the algorithm]
 | `writeProperty` footnote:triangle-count-config[Inlined into `configuration`] | -
 | `min, max, mean, p50, p75, p90, p95, p99, p999` | -
 |===
