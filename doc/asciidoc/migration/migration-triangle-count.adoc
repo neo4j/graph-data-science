@@ -9,6 +9,7 @@ The `alpha` procedures from the namespace `algo.triangleCount` are being replace
 Everything relating to clustering coefficients has been extracted into a separate algorithm backing `gds.localClusteringCoefficient` procedures.
 To compute both triangle count and local clustering coefficient values multiple procedures will be necessary.
 
+The triangle enumeration procedure `algo.triangles.stream()` has been renamed to `gds.alpha.triangles()`.
 
 .Common changes in Configuration
 [opts=header]
@@ -43,3 +44,138 @@ To compute both triangle count and local clustering coefficient values multiple 
 |===
 
 
+.TriangleCount Stream Mode
+[opts=header,cols="1a,1a"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.2
+
+2+| Streaming triangle counts over named graph:
+|
+[source, cypher]
+----
+CALL algo.triangleCount.stream(null, null, {graph: 'myGraph'})
+YIELD nodeId, triangles
+----
+|
+[source, cypher]
+----
+CALL gds.triangleCount.stream('myGraph')
+YIELD nodeId, triangleCount
+----
+
+2+| Streaming local clustering coefficients over named graph:
+|
+[source, cypher]
+----
+CALL algo.triangleCount.stream(null, null, {graph: 'myGraph'})
+YIELD nodeId, coefficient
+----
+|
+[source, cypher]
+----
+CALL gds.localClusteringCoefficient.stream('myGraph')
+YIELD nodeId, localClusteringCoefficient
+----
+
+2+| Streaming both triangle counts and local clustering coefficients:
+|
+[source, cypher]
+----
+CALL algo.triangleCount.stream(null, null, {graph: 'myGraph'})
+YIELD nodeId, triangles, coefficient
+----
+|
+[source, cypher]
+----
+CALL gds.triangleCount.mutate('myGraph', {mutateProperty: 'tc'})
+YIELD globalTriangleCount
+CALL gds.localClusteringCoefficient.stream('myGraph', {triangleCountProperty: 'tc'})
+YIELD nodeId, localClusteringCoefficient
+WITH nodeId, localClusteringCoefficient, gds.util.nodeProperty('myGraph', nodeId, 'tc') AS triangleCount
+RETURN nodeId, triangleCount, localClusteringCoefficient
+----
+
+2+| Streaming triangle counts over anonymous graph:
+|
+[source, cypher]
+----
+CALL algo.triangleCount.stream(
+  'MyLabel',
+  'MY_RELATIONSHIP_TYPE'
+)
+----
+|
+[source, cypher]
+----
+CALL gds.triangleCount.stream({
+  nodeProjection: 'MyLabel',
+  relationshipProjection: { MY_RELATIONSHIP_TYPE: { orientation: 'UNDIRECTED' } }
+})
+----
+|===
+
+.TriangleCount Write Mode
+[opts=header,cols="1a,1a"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.2
+
+2+| Writing triangle counts from named graph:
+|
+[source, cypher]
+----
+CALL algo.triangleCount(null, null, {
+  graph: 'myGraph',
+  write: true,
+  writeProperty: 'tc'
+}) YIELD nodeCount, triangleCount
+----
+|
+[source, cypher]
+----
+CALL gds.triangleCount.write('myGraph', {writeProperty: 'tc'})
+YIELD nodeCount, globalTriangleCount
+----
+
+2+| Writing local clustering coefficients from named graph:
+|
+[source, cypher]
+----
+CALL algo.triangleCount(null, null, {
+  graph: 'myGraph',
+  write: true,
+  clusteringCoefficientProperty: 'lcc'
+}) YIELD nodeCount, averageClusteringCoefficient
+----
+|
+[source, cypher]
+----
+CALL gds.localClusteringCoefficient.write('myGraph', {writeProperty: 'lcc'})
+YIELD nodeCount, averageClusteringCoefficient
+----
+
+2+| Writing both triangle counts and local clustering coefficients:
+|
+[source, cypher]
+----
+CALL algo.triangleCount(null, null, {
+  graph: 'myGraph',
+  write: true,
+  writeProperty: 'tc',
+  clusteringCoefficientProperty: 'lcc'
+}) YIELD nodeCount, triangleCount, averageClusteringCoefficient
+----
+|
+[source, cypher]
+----
+CALL gds.triangleCount.mutate('myGraph', {
+  mutateProperty: 'tc'
+}) YIELD globalTriangleCount
+CALL gds.localClusteringCoefficient.write('myGraph', {
+  triangleCountProperty: 'tc', writeProperty: 'lcc'
+}) YIELD nodeCount, averageClusteringCoefficient
+CALL gds.graph.writeNodeProperties('myGraph', ['tc'])
+YIELD propertiesWritten
+RETURN nodeCount, globalTriangleCount, averageClusteringCoefficient
+----
+
+|===
