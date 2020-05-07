@@ -35,7 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig> {
 
-    private static final String DB_CYPHER = "CREATE  (a:Label1 {name: 'a'})";
+    private static final String DB_CYPHER = "CREATE " +
+                                            "  (a:Label1 {name: 'a'})" +
+                                            ", (b:Label1 {name: 'b'})" +
+                                            ", (a)-[:REL]->(b)";
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -78,7 +81,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
                 assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
 
                 assertEquals(true, row.get("didConverge"));
-                assertEquals(1L, row.get("ranIterations"));
+                assertEquals(2L, row.get("ranIterations"));
 
                 assertNotNull(row.get("centralityDistribution"));
             }

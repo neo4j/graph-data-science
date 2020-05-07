@@ -418,6 +418,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
     }
 
+    // NOTE: this test needs at least one relationship in order to pass
     @Test
     default void failOnImplicitLoadingWithAlteringRelationshipQuery() {
         Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
