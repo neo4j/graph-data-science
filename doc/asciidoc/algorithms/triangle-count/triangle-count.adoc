@@ -518,7 +518,7 @@ include::../alpha/alpha-note.adoc[]
 
 [role=query-example]
 --
-.The following will return a stream of node IDs, with the name property for each node in each triangle:
+.The following will compute a stream of node IDs for each triangle and return the name property of the nodes:
 [source, cypher]
 ----
 CALL gds.alpha.triangles('myGraph')
@@ -539,5 +539,5 @@ RETURN
 |===
 --
 
-We can see that there are three triangles containing the nodes "Will, Michael, and Chris", "Will, Mark, and Michael", and "Michael, Karin, and Chris".
+We can see that there are three triangles in the graph: "Will, Michael, and Chris", "Will, Mark, and Michael", and "Michael, Karin, and Chris".
 The node "Alice" is not part of any triangle and thus does not appear in the triangles listing.
