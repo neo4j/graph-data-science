@@ -159,11 +159,17 @@ class EmptyGraphProcTest extends BaseProcTest {
 
     @Test
     void testTriangleStream() {
-        String query = GdsCypher.call()
-            .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds.alpha.triangle")
-            .streamMode()
-            .yields();
+        String query =
+            "CALL gds.alpha.triangles({" +
+            "  nodeProjection: '*'," +
+            "  relationshipProjection: {" +
+            "    TYPE: {" +
+            "      type: '*'," +
+            "      orientation: 'UNDIRECTED'" +
+            "    }" +
+            "  }" +
+            "})";
+
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
     }
 
