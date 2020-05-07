@@ -89,9 +89,14 @@ YIELD nodeId, triangles, coefficient
 ----
 CALL gds.triangleCount.mutate('myGraph', {mutateProperty: 'tc'})
 YIELD globalTriangleCount
-CALL gds.localClusteringCoefficient.stream('myGraph', {triangleCountProperty: 'tc'})
-YIELD nodeId, localClusteringCoefficient
-WITH nodeId, localClusteringCoefficient, gds.util.nodeProperty('myGraph', nodeId, 'tc') AS triangleCount
+CALL gds.localClusteringCoefficient.stream(
+  'myGraph', {
+    triangleCountProperty: 'tc'
+}) YIELD nodeId, localClusteringCoefficient
+WITH
+  nodeId,
+  localClusteringCoefficient,
+  gds.util.nodeProperty('myGraph', nodeId, 'tc') AS triangleCount
 RETURN nodeId, triangleCount, localClusteringCoefficient
 ----
 
@@ -109,7 +114,11 @@ CALL algo.triangleCount.stream(
 ----
 CALL gds.triangleCount.stream({
   nodeProjection: 'MyLabel',
-  relationshipProjection: { MY_RELATIONSHIP_TYPE: { orientation: 'UNDIRECTED' } }
+  relationshipProjection: {
+    MY_RELATIONSHIP_TYPE: {
+      orientation: 'UNDIRECTED'
+    }
+  }
 })
 ----
 |===
@@ -132,8 +141,9 @@ CALL algo.triangleCount(null, null, {
 |
 [source, cypher]
 ----
-CALL gds.triangleCount.write('myGraph', {writeProperty: 'tc'})
-YIELD nodeCount, globalTriangleCount
+CALL gds.triangleCount.write('myGraph', {
+  writeProperty: 'tc'
+}) YIELD nodeCount, globalTriangleCount
 ----
 
 2+| Writing local clustering coefficients from named graph:
@@ -149,8 +159,9 @@ CALL algo.triangleCount(null, null, {
 |
 [source, cypher]
 ----
-CALL gds.localClusteringCoefficient.write('myGraph', {writeProperty: 'lcc'})
-YIELD nodeCount, averageClusteringCoefficient
+CALL gds.localClusteringCoefficient.write('myGraph', {
+  writeProperty: 'lcc'
+}) YIELD nodeCount, averageClusteringCoefficient
 ----
 
 2+| Writing both triangle counts and local clustering coefficients:
@@ -171,7 +182,8 @@ CALL gds.triangleCount.mutate('myGraph', {
   mutateProperty: 'tc'
 }) YIELD globalTriangleCount
 CALL gds.localClusteringCoefficient.write('myGraph', {
-  triangleCountProperty: 'tc', writeProperty: 'lcc'
+  triangleCountProperty: 'tc',
+  writeProperty: 'lcc'
 }) YIELD nodeCount, averageClusteringCoefficient
 CALL gds.graph.writeNodeProperties('myGraph', ['tc'])
 YIELD propertiesWritten
