@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.UnsafeProxy;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
@@ -177,26 +177,9 @@ public final class SparseNodeMapping {
         private final ReentrantLock newPageLock;
         private final long defaultValue;
 
+        private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
+
         private AtomicReferenceArray<long[]> pages;
-
-        // array-internal values to access the raw memory locations of certain elements
-        // see #memoryOffset
-        private static final int base;
-        private static final int shift;
-
-        static {
-            UnsafeProxy.assertHasUnsafe();
-            base = UnsafeProxy.arrayBaseOffset(long[].class);
-            int scale = UnsafeProxy.arrayIndexScale(long[].class);
-            if (!BitUtil.isPowerOfTwo(scale)) {
-                throw new Error("data type scale not a power of two");
-            }
-            shift = 31 - Integer.numberOfLeadingZeros(scale);
-        }
-
-        private static long memoryOffset(int i) {
-            return ((long) i << shift) + base;
-        }
 
         public static GrowingBuilder create(AllocationTracker tracker) {
             return create(NOT_FOUND, tracker);
@@ -217,8 +200,7 @@ public final class SparseNodeMapping {
         public void set(long index, long value) {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
-            long[] page = getPage(pageIndex);
-            page[indexInPage] = value;
+            ARRAY_HANDLE.setVolatile(getPage(pageIndex), indexInPage, value);
         }
 
         public void addTo(long index, long value) {
@@ -227,14 +209,13 @@ public final class SparseNodeMapping {
             long[] page = getPage(pageIndex);
 
             long currentValue;
-            long offset = memoryOffset(indexInPage);
 
             do {
-                currentValue = UnsafeProxy.getLongVolatile(page, offset);
+                currentValue = (long) ARRAY_HANDLE.getVolatile(page, indexInPage);
             }
-            while (!UnsafeProxy.compareAndSwapLong(
+            while (!ARRAY_HANDLE.compareAndSet(
                 page,
-                offset,
+                indexInPage,
                 currentValue,
                 currentValue + value
             ));
