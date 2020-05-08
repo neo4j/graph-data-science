@@ -10,7 +10,7 @@ This section describes the Total Neighbors algorithm in the Neo4j Graph Data Sci
 Total Neighbors computes the closeness of nodes, based on the number of unique neighbors that they have.
 It is based on the idea that the more connected a node is, the more likely it is to receive new links.
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 This section includes:
 

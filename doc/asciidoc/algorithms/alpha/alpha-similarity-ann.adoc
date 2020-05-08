@@ -7,7 +7,7 @@
 This section describes the Approximate Nearest Neighbors algorithm in the Neo4j Graph Data Science library.
 --
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 
 The Approximate Nearest Neighbors algorithm constructs a k-Nearest Neighbors Graph for a set of objects based on a provided similarity algorithm.

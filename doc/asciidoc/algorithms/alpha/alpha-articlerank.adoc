@@ -9,7 +9,7 @@ This section describes the ArticleRank algorithm in the Neo4j Graph Data Science
 
 ArticleRank is a variant of the <<algorithms-pagerank, Page Rank algorithm>>, which measures the *transitive* influence or connectivity of nodes.
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 This section includes:
 

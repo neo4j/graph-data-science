@@ -9,7 +9,7 @@ This section describes the Resource Allocation algorithm in the Neo4j Graph Data
 
 link:https://arxiv.org/pdf/0901.0553.pdf[Resource Allocation] is a measure used to compute the closeness of nodes based on their shared neighbors.
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 This section includes:
 

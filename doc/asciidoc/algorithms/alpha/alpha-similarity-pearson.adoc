@@ -10,7 +10,7 @@ This section describes the Pearson Similarity algorithm in the Neo4j Graph Data 
 
 link:https://en.wikipedia.org/wiki/Pearson_correlation_coefficient[Pearson similarity] is the covariance of the two _n_-dimensional vectors divided by the product of their standard deviations.
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 This section includes:
 

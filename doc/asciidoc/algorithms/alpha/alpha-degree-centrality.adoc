@@ -11,7 +11,7 @@ Degree centrality measures the number of incoming and outgoing relationships fro
 
 The Degree Centrality algorithm can help us find popular nodes in a graph.
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 This section includes:
 
