@@ -23,15 +23,10 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Optional;
-
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class TriangleCountCompanion {
 
@@ -48,35 +43,16 @@ final class TriangleCountCompanion {
         TriangleCountResultBuilder<PROC_RESULT> procResultBuilder,
         AlgoBaseProc.ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult
     ) {
-        var result = Optional.ofNullable(computeResult.result())
-            .orElse(EmptyResult.EMPTY_RESULT);
-
-        return procResultBuilder
-            .withTriangleCount(result.globalTriangles())
-            .buildHistogram()
-            .withCommunityFunction(result.localTriangles()::get);
+        var result = Optional.ofNullable(computeResult.result()).orElse(EmptyResult.EMPTY_RESULT);
+        return procResultBuilder.withTriangleCount(result.globalTriangles());
     }
 
-    abstract static class TriangleCountResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
+    abstract static class TriangleCountResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
 
         long triangleCount = 0;
 
-        TriangleCountResultBuilder(ProcedureCallContext callContext, AllocationTracker tracker) {
-            super(callContext, tracker);
-        }
-
         TriangleCountResultBuilder<PROC_RESULT> withTriangleCount(long triangleCount) {
             this.triangleCount = triangleCount;
-            return this;
-        }
-
-        TriangleCountResultBuilder<PROC_RESULT> buildCommunityCount() {
-            this.buildCommunityCount = true;
-            return this;
-        }
-
-        TriangleCountResultBuilder<PROC_RESULT> buildHistogram() {
-            this.buildHistogram = true;
             return this;
         }
 

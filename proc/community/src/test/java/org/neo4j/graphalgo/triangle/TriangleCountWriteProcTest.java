@@ -81,6 +81,37 @@ class TriangleCountWriteProcTest
         assertWriteResult(expectedResult, "triangles");
     }
 
+    @Test
+    void testWriteWithMaxDegree() {
+        var query = GdsCypher.call()
+            .loadEverything(Orientation.UNDIRECTED)
+            .algo("triangleCount")
+            .writeMode()
+            .addParameter("writeProperty", "triangles")
+            .addParameter("maxDegree", 2)
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+            "globalTriangleCount", 0L,
+            "nodeCount", 5L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "configuration", isA(Map.class),
+            "nodePropertiesWritten", 5L,
+            "writeMillis", greaterThan(-1L)
+        )));
+
+        Map<String, Long> expectedResult = Map.of(
+            "a", -1L,
+            "b", -1L,
+            "c", -1L,
+            "d", -1L,
+            "e", 0L
+        );
+
+        assertWriteResult(expectedResult, "triangles");
+    }
+
     @Override
     public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig>> getProcedureClazz() {
         return TriangleCountWriteProc.class;

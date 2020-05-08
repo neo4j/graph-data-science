@@ -23,11 +23,9 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -96,10 +94,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig> computeResult) {
-        return TriangleCountCompanion.resultBuilder(
-            new TriangleCountWriteBuilder(callContext, computeResult.tracker()),
-            computeResult
-        );
+        return TriangleCountCompanion.resultBuilder(new TriangleCountWriteBuilder(), computeResult);
     }
 
     public static class WriteResult extends TriangleCountStatsProc.StatsResult {
@@ -131,15 +126,8 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
 
     static class TriangleCountWriteBuilder extends TriangleCountCompanion.TriangleCountResultBuilder<WriteResult> {
 
-        TriangleCountWriteBuilder(
-            ProcedureCallContext callContext,
-            AllocationTracker tracker
-        ) {
-            super(callContext, tracker);
-        }
-
         @Override
-        protected WriteResult buildResult() {
+        public WriteResult build() {
             return new WriteResult(
                 triangleCount,
                 nodeCount,

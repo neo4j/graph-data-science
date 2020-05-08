@@ -51,6 +51,29 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
         )));
     }
 
+    @Test
+    void testStatsWithMaxDegree() {
+        // Add a single node and connect it to the triangle
+        // to be able to apply the maxDegree filter.
+        runQuery("MATCH (n) " +
+                 "WITH n LIMIT 1 " +
+                 "CREATE (d)-[:REL]->(n)");
+
+        var query = GdsCypher.call()
+            .loadEverything(Orientation.UNDIRECTED)
+            .algo("triangleCount")
+            .statsMode()
+            .addParameter("maxDegree", 2)
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+            "globalTriangleCount", 0L,
+            "nodeCount", 4L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "configuration", isA(Map.class)
+        )));
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsConfig>> getProcedureClazz() {

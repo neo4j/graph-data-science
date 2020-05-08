@@ -25,7 +25,10 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GraphMutationTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.TestGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.List;
@@ -36,6 +39,8 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class TriangleCountMutateProcTest
     extends TriangleCountBaseProcTest<TriangleCountMutateConfig>
@@ -89,6 +94,59 @@ class TriangleCountMutateProcTest
             "mutateMillis", greaterThan(-1L),
             "nodePropertiesWritten", 3L
         )));
+    }
+
+    @Test
+    void testMutateWithMaxDegree() {
+        // Add a single node and connect it to the triangle
+        // to be able to apply the maxDegree filter.
+        runQuery("MATCH (n) " +
+                 "WITH n LIMIT 1 " +
+                 "CREATE (d)-[:REL]->(n)");
+
+        var createQuery = GdsCypher.call()
+            .loadEverything(Orientation.UNDIRECTED)
+            .graphCreate("testGraph")
+            .yields();
+
+        runQuery(createQuery);
+
+        var query = GdsCypher.call()
+            .explicitCreation("testGraph")
+            .algo("triangleCount")
+            .mutateMode()
+            .addParameter("mutateProperty", mutateProperty())
+            .addParameter("maxDegree", 2)
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+            "globalTriangleCount", 0L,
+            "nodeCount", 4L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "configuration", isA(Map.class),
+            "nodePropertiesWritten", 4L,
+            "mutateMillis", greaterThan(-1L)
+        )));
+
+        Graph actualGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
+
+        assertGraphEquals(
+            fromGdl(
+                "  (a { mutatedTriangleCount: -1 })" +
+                ", (b { mutatedTriangleCount: 0 })" +
+                ", (c { mutatedTriangleCount: 0 })" +
+                ", (d { mutatedTriangleCount: 0 })" +
+                // Graph is UNDIRECTED, e.g. each rel twice
+                ", (a)-->(b)" +
+                ", (b)-->(a)" +
+                ", (b)-->(c)" +
+                ", (c)-->(b)" +
+                ", (a)-->(c)" +
+                ", (c)-->(a)" +
+                ", (d)-->(a)" +
+                ", (a)-->(d)"
+            ), actualGraph);
     }
 
     @Override

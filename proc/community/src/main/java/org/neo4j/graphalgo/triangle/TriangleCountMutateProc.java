@@ -23,11 +23,9 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -97,10 +95,7 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateConfig> computeResult) {
-        return TriangleCountCompanion.resultBuilder(
-            new TriangleCountMutateBuilder(callContext, computeResult.tracker()),
-            computeResult
-        );
+        return TriangleCountCompanion.resultBuilder(new TriangleCountMutateBuilder(), computeResult);
     }
 
     public static class MutateResult extends TriangleCountStatsProc.StatsResult {
@@ -131,15 +126,8 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
 
     static class TriangleCountMutateBuilder extends TriangleCountCompanion.TriangleCountResultBuilder<MutateResult> {
 
-        TriangleCountMutateBuilder(
-            ProcedureCallContext callContext,
-            AllocationTracker tracker
-        ) {
-            super(callContext, tracker);
-        }
-
         @Override
-        protected MutateResult buildResult() {
+        public MutateResult build() {
             return new MutateResult(
                 triangleCount,
                 nodeCount,
