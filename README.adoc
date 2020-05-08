@@ -20,7 +20,7 @@ For further instructions, see our https://neo4j.com/docs/graph-data-science/curr
 |Neo4j 4.0.3
 
 |GDS 1.2.0
-|Neo4j 4.0.4
+|Neo4j 4.0.0 – 4.0.4
 |===
 
 NOTE: Preview releases are not automatically made available in Neo4j Desktop. They need to be installed manually.
