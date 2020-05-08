@@ -1,4 +1,5 @@
 // tag::alpha-note[]
+[.alpha-symbol]
 [.tier-note]
 This algorithm is in the alpha tier. For more information on this tier of algorithm, see <<algorithms, here>>.
 // end::alpha-note[]
