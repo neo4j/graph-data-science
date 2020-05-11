@@ -81,7 +81,7 @@
                     <?dbhtml filename="algorithms/triangle-count/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="algorithms-local-clustering-coefficient">
-                    <?dbhtml filename="algorithms/local-clustering-coefficient/local-clustering-coefficient/index.html"?>
+                    <?dbhtml filename="algorithms/local-clustering-coefficient/index.html"?>
                 </d:tocentry>
 
                 <d:tocentry linkend="algorithms-k1coloring">
