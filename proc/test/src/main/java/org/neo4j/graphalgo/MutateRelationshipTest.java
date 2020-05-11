@@ -19,15 +19,109 @@
  */
 package org.neo4j.graphalgo;
 
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface MutateRelationshipTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
     extends MutateTest<ALGORITHM, CONFIG, RESULT> {
 
     String mutateRelationshipType();
+
+    @Test
+    @Override
+    default void testWriteBackGraphMutationOnFilteredGraph() {
+        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
+        GraphStoreCatalog.removeAllLoadedGraphs();
+
+        if (mutateRelationshipType().equals("REL")) {
+            throw new IllegalArgumentException("mutateRelationshipType must not be `REL`");
+        }
+
+        runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
+        String graphName = "myGraph";
+
+        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
+            .api(graphDb())
+            .graphName(graphName)
+            .addNodeLabels("A", "B");
+
+        relationshipProjections().projections().forEach((relationshipType, projection)->
+            storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
+
+        GraphLoader loader = storeLoaderBuilder.build();
+        GraphStoreCatalog.set(loader.createConfig(), loader.graphStore());
+
+        applyOnProcedure(procedure ->
+            getProcedureMethods(procedure)
+                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+                .forEach(mutateMethod -> {
+                    CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
+                        "nodeLabels",
+                        Collections.singletonList("A")
+                    );
+
+                    Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
+                    try {
+                        mutateMethod.invoke(procedure, graphName, config);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                })
+        );
+
+        String graphWriteQuery =
+            "CALL gds.graph.writeRelationship(" +
+            "   $graph, " +
+            "   $relationshipType, " +
+            "   $relationshipProperty " +
+            ") YIELD writeMillis, graphName, relationshipsWritten, propertiesWritten";
+
+        runQuery(graphDb(), graphWriteQuery, Map.of(
+            "graph", graphName,
+            "relationshipType", mutateRelationshipType(),
+            "relationshipProperty", mutateProperty())
+        );
+
+        String checkNeo4jGraphNegativeQuery = formatWithLocale(
+            "MATCH ()-[r:REL]->() RETURN r.%s AS property",
+            mutateProperty()
+        );
+
+        runQueryWithRowConsumer(
+            graphDb(),
+            checkNeo4jGraphNegativeQuery,
+            Map.of(),
+            ((transaction, resultRow) -> assertNull(resultRow.get("property")))
+        );
+
+        String checkNeo4jGraphPositiveQuery = formatWithLocale(
+            "MATCH ()-[r:%s]->() RETURN r.%s AS property",
+            mutateRelationshipType(),
+            mutateProperty()
+        );
+
+        runQueryWithRowConsumer(
+            graphDb(),
+            checkNeo4jGraphPositiveQuery,
+            Map.of(),
+            ((transaction, resultRow) -> assertNotNull(resultRow.get("property")))
+        );
+    }
 
     @Override
     default String failOnExistingTokenMessage() {

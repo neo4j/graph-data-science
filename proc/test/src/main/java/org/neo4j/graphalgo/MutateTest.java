@@ -200,6 +200,9 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
         TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
+    @Test
+    void testWriteBackGraphMutationOnFilteredGraph();
+
     String expectedMutatedGraph();
 
     default String failOnExistingTokenMessage() {

@@ -30,6 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
@@ -40,6 +41,7 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<ALGORITHM, R
     extends MutateTest<ALGORITHM, CONFIG, RESULT> {
 
     @Test
+    @Override
     default void testWriteBackGraphMutationOnFilteredGraph() {
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
         GraphStoreCatalog.removeAllLoadedGraphs();
@@ -84,13 +86,22 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<ALGORITHM, R
 
         runQuery(graphDb(), graphWriteQuery, Map.of("graph", graphName, "property", mutateProperty()));
 
-        String checkNeo4jGraphQuery = formatWithLocale("MATCH (n:B) RETURN n.%s AS property", mutateProperty());
+        String checkNeo4jGraphNegativeQuery = formatWithLocale("MATCH (n:B) RETURN n.%s AS property", mutateProperty());
 
         runQueryWithRowConsumer(
             graphDb(),
-            checkNeo4jGraphQuery,
+            checkNeo4jGraphNegativeQuery,
             Map.of(),
             ((transaction, resultRow) -> assertNull(resultRow.get("property")))
+        );
+
+        String checkNeo4jGraphPositiveQuery = formatWithLocale("MATCH (n:A) RETURN n.%s AS property", mutateProperty());
+
+        runQueryWithRowConsumer(
+            graphDb(),
+            checkNeo4jGraphPositiveQuery,
+            Map.of(),
+            ((transaction, resultRow) -> assertNotNull(resultRow.get("property")))
         );
     }
 
