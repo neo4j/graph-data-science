@@ -53,6 +53,15 @@ final class HugeSparseLongArrayTest {
     }
 
     @Test
+    void shouldSetIfAbsent() {
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(10, AllocationTracker.EMPTY);
+        int index = integer(2, 8);
+        int value = integer(42, 1337);
+        assertTrue(array.setIfAbsent(index, value));
+        assertFalse(array.setIfAbsent(index, value));
+    }
+
+    @Test
     void shouldAddAndGet() {
         HugeSparseLongArray.GrowingBuilder array = HugeSparseLongArray.GrowingBuilder.create(0L, AllocationTracker.EMPTY);
         int index = integer(2, 8);
