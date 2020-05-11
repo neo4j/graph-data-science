@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
@@ -29,7 +28,6 @@ import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -110,7 +108,7 @@ public class GraphStoreExport {
 
             Input input = new GraphStoreInput(
                 NodeStore.of(graphStore),
-                RelationshipStore.of(graphStore),
+                RelationshipStore.of(graphStore, config.defaultRelationshipType()),
                 config.batchSize()
             );
 
@@ -304,8 +302,8 @@ public class GraphStoreExport {
             );
         }
 
-        static RelationshipStore of(GraphStore graphStore) {
-            Map<Pair<RelationshipType, Optional<String>>, Graph> graphs = graphStore
+        static RelationshipStore of(GraphStore graphStore, String defaultRelationshipType) {
+            var graphs = graphStore
                 .relationshipTypes()
                 .stream()
                 .flatMap(relType -> {
@@ -319,7 +317,12 @@ public class GraphStoreExport {
                     }
                 })
                 .collect(Collectors.toMap(
-                    relTypeAndProperty -> relTypeAndProperty,
+                    relTypeAndProperty -> Tuples.pair(
+                        relTypeAndProperty.getOne().equals(RelationshipType.ALL_RELATIONSHIPS)
+                            ? RelationshipType.of(defaultRelationshipType)
+                            : relTypeAndProperty.getOne(),
+                        relTypeAndProperty.getTwo()
+                    ),
                     relTypeAndProperty -> graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
                 ));
 

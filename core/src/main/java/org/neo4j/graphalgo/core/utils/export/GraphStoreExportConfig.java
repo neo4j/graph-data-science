@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.cli.Converters;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.configuration.helpers.NormalizedDatabaseName;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -43,6 +44,11 @@ public interface GraphStoreExportConfig extends BaseConfig {
     @Value.Default
     default boolean enableDebugLog() {
         return false;
+    }
+
+    @Value.Default
+    default String defaultRelationshipType() {
+        return RelationshipType.ALL_RELATIONSHIPS.name;
     }
 
     @Value.Default
