@@ -19,12 +19,13 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.EuclideanConfig;
 import org.neo4j.graphalgo.impl.similarity.EuclideanConfigImpl;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
+import org.neo4j.graphalgo.results.SimilarityStatsResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -57,6 +58,15 @@ public class EuclideanProc extends SimilarityProc<EuclideanAlgorithm, EuclideanC
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return write(graphNameOrConfig, configuration);
+    }
+
+    @Procedure(name = "gds.alpha.similarity.euclidean.stats", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<SimilarityStatsResult> euclideanStats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return stats(graphNameOrConfig, configuration);
     }
 
     @Override

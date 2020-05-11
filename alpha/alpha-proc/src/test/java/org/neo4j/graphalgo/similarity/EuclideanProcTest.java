@@ -41,6 +41,18 @@ import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class EuclideanProcTest extends BaseProcTest {
 
+    private static final String STATEMENT_STATS =
+        " MATCH (i:Item)" +
+        " WITH i ORDER BY id(i)" +
+        " MATCH (p:Person)" +
+        " OPTIONAL MATCH (p)-[r:LIKES]->(i)" +
+        " WITH {item:id(p), weights: collect(coalesce(r.stars, 0))} AS userData" +
+        " WITH collect(userData) AS data, $config AS config" +
+        " WITH config {.*, data: data} AS input" +
+        " CALL gds.alpha.similarity.euclidean.stats(input)" +
+        " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations" +
+        " RETURN *";
+
     private static final String STATEMENT_STREAM =
         " MATCH (i:Item)" +
         " WITH i ORDER BY id(i)" +
@@ -390,6 +402,19 @@ class EuclideanProcTest extends BaseProcTest {
             assertSameSource(results, 3, 3L);
             assertFalse(results.hasNext());
         });
+    }
+
+    @Test
+    void statsTest() {
+        Map<String, Object> params = map("config", anonymousGraphConfig(), "missingValue", 0);
+
+        Map<String, Object> row = runQuery(STATEMENT_STATS, params, Result::next);
+        assertEquals((double) row.get("p25"), 3.16, 0.01);
+        assertEquals((double) row.get("p50"), 4.00, 0.01);
+        assertEquals((double) row.get("p75"), 5.10, 0.01);
+        assertEquals((double) row.get("p95"), 5.48, 0.01);
+        assertEquals((double) row.get("p99"), 5.48, 0.01);
+        assertEquals((double) row.get("p100"), 5.48, 0.01);
     }
 
     @Test

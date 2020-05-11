@@ -207,6 +207,10 @@ include::alpha-similarity.adoc[tag=weighted-note]
  MERGE (karin)-[:LIKES {score: 10}]->(portuguese)
 ----
 
+
+[[algorithm-similarity-euclidean-stream]]
+=== Stream
+
 .The following will return a stream of node pairs, along with their intersection and euclidean similarities:
 [source, cypher]
 ----
@@ -355,6 +359,10 @@ We can do that by passing in the `topK` parameter.
 These results will not necessarily be symmetrical.
 For example, the person most similar to Arya is Karin, but the person most similar to Karin is Praveena.
 
+
+[[algorithm-similarity-euclidean-write]]
+=== Write
+
 .The following will find the most similar user for each user, and store a relationship between those users:
 [source, cypher]
 ----
@@ -397,6 +405,29 @@ We then could write a query to find out what types of cuisine that other people 
 | Italian
 | Lebanese
 |===
+
+
+[[algorithm-similarity-euclidean-stats]]
+=== Stats
+
+.The following will find the most similar user for each user, and store a relationship between those users:
+[source, cypher]
+----
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.euclidean.stats({
+  nodeProjection: '*',
+  relationshipProjection: '*',
+  data: data,
+  topK: 1
+ })
+ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+----
+
+
 
 [[algorithms-similarity-euclidean-source-target-ids]]
 == Specifying source and target ids
