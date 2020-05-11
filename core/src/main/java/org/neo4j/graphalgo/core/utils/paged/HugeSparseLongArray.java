@@ -229,17 +229,21 @@ public final class HugeSparseLongArray {
             int indexInPage = indexInPage(index);
             long[] page = getPage(pageIndex);
 
-            long currentValue;
+            long expectedCurrentValue = (long) ARRAY_HANDLE.getVolatile(page, indexInPage);
 
-            do {
-                currentValue = (long) ARRAY_HANDLE.getVolatile(page, indexInPage);
+            while (true) {
+                var newValueToStore = expectedCurrentValue + value;
+                long actualCurrentValue = (long) ARRAY_HANDLE.compareAndExchange(
+                    page,
+                    indexInPage,
+                    expectedCurrentValue,
+                    newValueToStore
+                );
+                if (actualCurrentValue == expectedCurrentValue) {
+                    return ;
+                }
+                expectedCurrentValue = actualCurrentValue;
             }
-            while (!ARRAY_HANDLE.compareAndSet(
-                page,
-                indexInPage,
-                currentValue,
-                currentValue + value
-            ));
         }
 
         public HugeSparseLongArray build() {
