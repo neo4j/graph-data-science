@@ -41,6 +41,18 @@ import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class PearsonProcTest extends BaseProcTest {
 
+    private static final String STATEMENT_STATS =
+        " MATCH (i:Item)" +
+        " WITH i ORDER BY id(i)" +
+        " MATCH (p:Person)" +
+        " OPTIONAL MATCH (p)-[r:LIKES]->(i)" +
+        " WITH {item: id(p), weights: collect(coalesce(r.stars, 0))} AS userData" +
+        " WITH collect(userData) AS data, $config AS config" +
+        " WITH config {.*, data: data} AS input" +
+        " CALL gds.alpha.similarity.pearson.stats(input)" +
+        " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations" +
+        " RETURN *";
+
     private static final String STATEMENT_STREAM =
         " MATCH (i:Item)" +
         " WITH i ORDER BY i" +
@@ -402,6 +414,20 @@ class PearsonProcTest extends BaseProcTest {
             assertSameSource(results, 3, 3L);
             assertFalse(results.hasNext());
         });
+    }
+
+    @Test
+    void statsTest() {
+        Map<String, Object> params = map("config", anonymousGraphConfig("topK", 0));
+
+        Map<String, Object> row = runQuery(STATEMENT_STATS, params, Result::next);
+        assertEquals(0.86, (double) row.get("p25"), 0.01);
+        assertEquals(0.94, (double) row.get("p50"), 0.01);
+        assertEquals(0.98, (double) row.get("p75"), 0.01);
+        assertEquals(0.98, (double) row.get("p90"), 0.01);
+        assertEquals(1.0, (double) row.get("p95"), 0.01);
+        assertEquals(1.0, (double) row.get("p99"), 0.01);
+        assertEquals(1.0, (double) row.get("p100"), 0.01);
     }
 
     @Test

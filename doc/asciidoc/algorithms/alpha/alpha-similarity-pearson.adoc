@@ -221,6 +221,9 @@ MERGE (karin)-[:RATED {score: 9}]->(gruffalo)
 ----
 
 
+[[algorithm-similarity-pearson-stream]]
+=== Stream
+
 .The following will return a stream of node pairs along with their Pearson similarities:
 [source, cypher]
 ----
@@ -331,6 +334,9 @@ These results will not necessarily be symmetrical.
 For example, the person most similar to Arya is Karin, but the person most similar to Karin is Zhen.
 
 
+[[algorithm-similarity-pearson-write]]
+=== Write
+
 .The following will find the most similar user for each user, and store a relationship between those users:
 [source, cypher]
 ----
@@ -373,6 +379,29 @@ RETURN movie.name AS movie
 | `movie`
 | Jerry Maguire
 |===
+
+
+[[algorithm-similarity-pearson-stats]]
+=== Stats
+
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+MATCH (p:Person), (m:Movie)
+OPTIONAL MATCH (p)-[rated:RATED]->(m)
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS data
+CALL gds.alpha.similarity.pearson.stats({
+ nodeProjection: '*',
+ relationshipProjection: '*',
+ data: data,
+ topK: 1,
+ similarityCutoff: 0.1
+})
+YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+----
+
 
 [[algorithms-similarity-pearson-source-target-ids]]
 == Specifying source and target ids

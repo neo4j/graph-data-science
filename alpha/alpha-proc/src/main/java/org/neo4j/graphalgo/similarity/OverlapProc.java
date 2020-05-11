@@ -62,7 +62,7 @@ public class OverlapProc extends SimilarityProc<OverlapAlgorithm, OverlapConfig>
 
     @Procedure(name = "gds.alpha.similarity.overlap.stats", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<SimilarityStatsResult> euclideanStats(
+    public Stream<SimilarityStatsResult> overlapStats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

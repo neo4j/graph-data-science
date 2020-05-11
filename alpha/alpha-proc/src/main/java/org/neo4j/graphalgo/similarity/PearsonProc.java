@@ -19,12 +19,13 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.similarity.PearsonAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.PearsonConfig;
 import org.neo4j.graphalgo.impl.similarity.PearsonConfigImpl;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
+import org.neo4j.graphalgo.results.SimilarityStatsResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -59,6 +60,15 @@ public final class PearsonProc extends SimilarityProc<PearsonAlgorithm, PearsonC
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return write(graphNameOrConfig, configuration);
+    }
+
+    @Procedure(name = "gds.alpha.similarity.pearson.stats", mode = WRITE)
+    @Description(DESCRIPTION)
+    public Stream<SimilarityStatsResult> pearsonStats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return stats(graphNameOrConfig, configuration);
     }
 
     @Override
