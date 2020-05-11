@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -32,10 +33,55 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NodeSimilarityStatsProcTest extends NodeSimilarityProcTest<NodeSimilarityStatsConfig> {
+
+    @Test
+    void testStatsYields() {
+        String query = GdsCypher
+            .call()
+            .loadEverything()
+            .algo("nodeSimilarity")
+            .statsMode()
+            .addParameter("similarityCutoff", 0.0)
+            .yields(
+                "createMillis",
+                "computeMillis",
+                "postProcessingMillis",
+                "nodesCompared ",
+                "similarityPairs",
+                "similarityDistribution",
+                "configuration"
+            );
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(3, row.getNumber("nodesCompared").longValue());
+            assertEquals(6, row.getNumber("similarityPairs").longValue());
+            assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
+            assertThat("Missing createMillis", -1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat("Missing postProcessingMillis", -1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
+
+            Map<String, Double> distribution = (Map<String, Double>) row.get("similarityDistribution");
+            assertThat("Missing min", -1.0, lessThan(distribution.get("min")));
+            assertThat("Missing max", -1.0, lessThan(distribution.get("max")));
+            assertThat("Missing mean", -1.0, lessThan(distribution.get("mean")));
+            assertThat("Missing stdDev", -1.0, lessThan(distribution.get("stdDev")));
+            assertThat("Missing p1", -1.0, lessThan(distribution.get("p1")));
+            assertThat("Missing p5", -1.0, lessThan(distribution.get("p5")));
+            assertThat("Missing p10", -1.0, lessThan(distribution.get("p10")));
+            assertThat("Missing p25", -1.0, lessThan(distribution.get("p25")));
+            assertThat("Missing p50", -1.0, lessThan(distribution.get("p50")));
+            assertThat("Missing p75", -1.0, lessThan(distribution.get("p75")));
+            assertThat("Missing p90", -1.0, lessThan(distribution.get("p90")));
+            assertThat("Missing p95", -1.0, lessThan(distribution.get("p95")));
+            assertThat("Missing p99", -1.0, lessThan(distribution.get("p99")));
+            assertThat("Missing p100", -1.0, lessThan(distribution.get("p100")));
+        });
+    }
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTest#allGraphVariations")

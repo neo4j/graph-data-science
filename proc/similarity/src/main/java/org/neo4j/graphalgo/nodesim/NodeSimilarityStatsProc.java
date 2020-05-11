@@ -90,6 +90,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
                     0,
                     0,
                     0,
+                    0,
                     Collections.emptyMap(),
                     config.toMap()
                 )
@@ -112,7 +113,9 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
         public long createMillis;
         public long computeMillis;
         public long postProcessingMillis;
+
         public long nodesCompared;
+        public long similarityPairs;
         public Map<String, Object> similarityDistribution;
         public Map<String, Object> configuration;
 
@@ -121,6 +124,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
             long computeMillis,
             long postProcessingMillis,
             long nodesCompared,
+            long similarityPairs,
             Map<String, Object> communityDistribution,
             Map<String, Object> configuration
 
@@ -129,6 +133,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.nodesCompared = nodesCompared;
+            this.similarityPairs = similarityPairs;
             this.similarityDistribution = communityDistribution;
             this.configuration = configuration;
         }
@@ -142,6 +147,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
                     computeMillis,
                     postProcessingMillis,
                     nodesCompared,
+                    relationshipsWritten,
                     distribution(),
                     config.toMap()
                 );

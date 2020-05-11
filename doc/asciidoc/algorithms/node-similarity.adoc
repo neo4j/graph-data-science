@@ -646,13 +646,13 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [source, cypher]
 ----
 CALL gds.nodeSimilarity.stats('myGraph')
-YIELD nodesCompared
+YIELD nodesCompared, similarityPairs
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header",cols="2"]
 |===
-| nodesCompared
-| 4
+| nodesCompared | similarityPairs
+| 4             | 10
 |===
 --
