@@ -118,6 +118,10 @@ O(A,B) = 2 / min(3,4)
   (gatsby)-[:HAS_GENRE]->(classics)
 ----
 
+
+[[algorithms-similarity-overlap-stream]]
+=== Stream
+
 .The following will return a stream of node pairs, along with their intersection and overlap similarities:
 [source, cypher]
 ----
@@ -214,6 +218,9 @@ We can do that by passing in the `topK` parameter.
 |===
 // end::stream-topk[]
 
+[[algorithms-similarity-overlap-write]]
+=== Write
+
 .The following will find the most similar genre for each genre, and store a relationship between those genres:
 [source, cypher]
 ----
@@ -260,6 +267,28 @@ We then could write a query to find out the genre hierarchy for a specific genre
 | ["Fantasy", "Science Fiction", "Classics"]
 |===
 // end::query[]
+
+
+[[algorithms-similarity-overlap-stats]]
+=== Stats
+
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+ MATCH (book:Book)-[:HAS_GENRE]->(genre)
+ WITH {item:id(genre), categories: collect(id(book))} AS userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.overlap.stats({
+  nodeProjection: '*',
+  relationshipProjection: '*',
+  data: data,
+  topK: 2,
+  similarityCutoff: 0.5
+ })
+ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+----
+
 
 [[algorithms-similarity-overlap-source-target-ids]]
 == Specifying source and target ids

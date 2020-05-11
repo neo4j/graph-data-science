@@ -410,7 +410,7 @@ We then could write a query to find out what types of cuisine that other people 
 [[algorithm-similarity-euclidean-stats]]
 === Stats
 
-.The following will find the most similar user for each user, and store a relationship between those users:
+.The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher]
 ----
  MATCH (p:Person), (c:Cuisine)

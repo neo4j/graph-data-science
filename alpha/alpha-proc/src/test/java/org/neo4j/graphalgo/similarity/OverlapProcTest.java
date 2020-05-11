@@ -56,6 +56,15 @@ class OverlapProcTest extends BaseProcTest {
                                             " ,(b)-[:LIKES]->(i2)" +
                                             " ,(c)-[:LIKES]->(i3)";
 
+    private static final String STATEMENT_STATS =
+        " MATCH (p:Person)-[:LIKES]->(i:Item)" +
+        " WITH {item: id(p), categories: collect(distinct id(i))} AS userData" +
+        " WITH collect(userData) AS data, $config AS config" +
+        " WITH config {.*, data: data} AS input" +
+        " CALL gds.alpha.similarity.overlap.stats(input)" +
+        " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations" +
+        " RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations";
+
     private static final String STATEMENT_STREAM =
         " MATCH (p:Person)-[:LIKES]->(i:Item)" +
         " WITH {item: id(p), categories: collect(distinct id(i))} AS userData" +
@@ -308,6 +317,19 @@ class OverlapProcTest extends BaseProcTest {
             assertSameSource(results, 2, 2L);
             assertFalse(results.hasNext());
         });
+    }
+
+    @Test
+    void statsTest() {
+        Map<String, Object> params = map("config", anonymousGraphConfig("similarityCutoff", 0.0));
+
+        Map<String, Object> row = runQuery(STATEMENT_STATS, params, Result::next);
+        assertEquals((double) row.get("p25"), 1.0, 0.01);
+        assertEquals((double) row.get("p50"), 1.0, 0.01);
+        assertEquals((double) row.get("p75"), 1.0, 0.01);
+        assertEquals((double) row.get("p95"), 1.0, 0.01);
+        assertEquals((double) row.get("p99"), 1.0, 0.01);
+        assertEquals((double) row.get("p100"), 1.0, 0.01);
     }
 
     @Test
