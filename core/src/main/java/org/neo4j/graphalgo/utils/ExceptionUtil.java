@@ -106,8 +106,14 @@ public final class ExceptionUtil {
 
     private static void validateNodeIsLoaded(long mappedId, long neoId, String side) {
         if (mappedId == -1) {
-            throw new IllegalStateException(
-                formatWithLocale("Failed to load relationship with unknown %s-node id %s.", side, neoId));
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "Failed to load a relationship because its %s-node with id %s is not part of the node query or projection. " +
+                    "To ignore the relationship, set the configuration parameter `relationshipValidation` to false.",
+                    side,
+                    neoId
+                )
+            );
         }
     }
 

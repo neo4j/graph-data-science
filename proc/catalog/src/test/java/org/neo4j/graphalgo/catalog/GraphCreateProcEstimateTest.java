@@ -281,7 +281,7 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
                        "'MATCH (n)-[]->(m) RETURN id(n) AS source, id(m) AS target')" +
                        "YIELD nodeCount, relationshipCount";
 
-        assertError(query, emptyMap(), "Failed to load relationship with unknown source-node id");
+        assertError(query, emptyMap(), "Failed to load a relationship because its source-node with id 1 is not part of the node query or projection.");
     }
 
     @Test
@@ -293,6 +293,6 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
             .addParameter("validateRelationships", true)
             .yields("nodeCount");
 
-        assertError(query, emptyMap(), "Failed to load relationship with unknown source-node id");
+        assertError(query, emptyMap(), "Failed to load a relationship because its source-node with id 1 is not part of the node query or projection.");
     }
 }
