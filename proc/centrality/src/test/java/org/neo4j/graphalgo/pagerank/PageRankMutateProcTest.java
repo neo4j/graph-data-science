@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.values.storable.NumberType;
 
@@ -35,7 +35,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements GraphMutationTest<PageRank, PageRankMutateConfig, PageRank> {
+class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements MutateNodePropertyTest<PageRank, PageRankMutateConfig, PageRank> {
 
     private static final String DB_CYPHER =
         "CREATE" +

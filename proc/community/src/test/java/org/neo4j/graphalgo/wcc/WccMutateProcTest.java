@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.wcc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements GraphMutationTest<Wcc, WccMutateConfig, DisjointSetStruct> {
+class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements MutateNodePropertyTest<Wcc, WccMutateConfig, DisjointSetStruct> {
 
     @Override
     public String mutateProperty() {

@@ -22,10 +22,9 @@ package org.neo4j.graphalgo.triangle;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.TestGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -44,7 +43,7 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class TriangleCountMutateProcTest
     extends TriangleCountBaseProcTest<TriangleCountMutateConfig>
-    implements GraphMutationTest<IntersectingTriangleCount, TriangleCountMutateConfig, IntersectingTriangleCount.TriangleCountResult> {
+    implements MutateNodePropertyTest<IntersectingTriangleCount, TriangleCountMutateConfig, IntersectingTriangleCount.TriangleCountResult> {
 
     @Override
     public String mutateProperty() {

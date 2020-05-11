@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GdsCypher.ExecutionModes.MUTATE;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 
-class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements GraphMutationTest<ModularityOptimization, ModularityOptimizationMutateConfig, ModularityOptimization> {
+class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements MutateNodePropertyTest<ModularityOptimization, ModularityOptimizationMutateConfig, ModularityOptimization> {
 
     private static final String TEST_GRAPH_NAME = "myGraph";
 
