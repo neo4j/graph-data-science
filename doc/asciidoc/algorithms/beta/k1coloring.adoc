@@ -7,7 +7,7 @@
 This section describes the K-1 Coloring algorithm in the Neo4j Graph Data Science library.
 --
 
-include::beta-note.adoc[tag=beta-note]
+include::beta-note.adoc[]
 
 This topic includes:
 

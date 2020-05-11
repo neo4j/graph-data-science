@@ -12,7 +12,7 @@ A set is considered a strongly connected component if there is a directed path b
 It is often used early in a graph analysis process to help us get an idea of how our graph is structured.
 
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 This section includes:
 

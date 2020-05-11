@@ -13,7 +13,7 @@ It is often used to find nodes that serve as a bridge from one part of a graph t
 
 // TODO: If we want to call out the paper: http://www.algo.uni-konstanz.de/publications/b-fabc-01.pdf
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 In the following example, Alice is the main connection in the graph:
 

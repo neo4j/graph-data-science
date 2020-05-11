@@ -9,7 +9,7 @@ This section describes the Common Neighbors algorithm in the Neo4j Graph Data Sc
 
 Common neighbors captures the idea that two strangers who have a friend in common are more likely to be introduced than those who don't have any friends in common.
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 This section includes:
 

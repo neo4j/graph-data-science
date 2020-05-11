@@ -12,7 +12,7 @@ Random Walk is an algorithm that provides random paths in a graph.
 A random walk means that we start at one node, choose a neighbor to navigate to at random or based on a provided probability distribution, and then do the same from that node, keeping the resulting path in a list.
 It’s similar to how a drunk person traverses a city.
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 This section includes:
 

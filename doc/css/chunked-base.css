@@ -815,11 +815,11 @@ p.tier-note:before {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-section.alpha p.tier-note:before {
+p.alpha-symbol:before {
   content: "\03b1";
 }
 
-section.beta p.tier-note:before {
+p.beta-symbol:before {
   content: "\03b2";
 }
 

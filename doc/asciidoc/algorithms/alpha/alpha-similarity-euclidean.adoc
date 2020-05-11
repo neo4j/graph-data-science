@@ -12,7 +12,7 @@ This section describes the Euclidean Distance algorithm in the Neo4j Graph Data 
 Euclidean distance measures the straight line distance between two points in n-dimensional space.
 
 [.alpha-note]
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 This section includes:
 

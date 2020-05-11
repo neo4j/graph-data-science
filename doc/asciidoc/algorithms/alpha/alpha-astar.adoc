@@ -10,7 +10,7 @@ This section describes the A* algorithm in the Neo4j Graph Data Science library.
 The A* (pronounced “A-star”) algorithm improves on the classic Dijkstra algorithm.
 It is based upon the observation that some searches are informed, and that by being informed we can make better choices over which paths to take through the graph.
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 This section includes:
 

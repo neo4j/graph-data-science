@@ -9,7 +9,7 @@ This section describes the One Hot Encoding function in the Neo4j Graph Data Sci
 
 The One Hot Encoding function is used to convert categorical data into a numerical format that can be used by Machine Learning libraries.
 
-include::alpha-note.adoc[tag=alpha-note]
+include::alpha-note.adoc[]
 
 [[algorithms-one-hot-encoding-sample]]
 == One Hot Encoding sample
