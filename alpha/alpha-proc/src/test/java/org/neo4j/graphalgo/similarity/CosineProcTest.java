@@ -57,6 +57,17 @@ class CosineProcTest extends BaseProcTest {
         ", (b)-[:LIKES {stars:3}]->(i2)" +
         ", (c)-[:LIKES {stars:4}]->(i3)";
 
+    private static final String STATEMENT_STATS =
+        " MATCH (i:Item)" +
+        " WITH i ORDER BY id(i)" +
+        " MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)" +
+        " WITH {item: id(p), weights: collect(coalesce(r.stars, $missingValue))} AS userData" +
+        " WITH collect(userData) AS data, $config AS config" +
+        " WITH config {.*, data: data} AS input" +
+        " CALL gds.alpha.similarity.cosine.stats(input)" +
+        " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations" +
+        " RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations";
+
     private static final String STATEMENT_STREAM =
         " MATCH (i:Item)" +
         " WITH i ORDER BY id(i)" +
@@ -227,6 +238,26 @@ class CosineProcTest extends BaseProcTest {
             results -> {
                 assert01(results.next());
                 assert02(results.next());
+                assertFalse(results.hasNext());
+            }
+        );
+    }
+
+    @Test
+    void cosineStatsTest() {
+        runQueryWithResultConsumer(STATEMENT_STATS, map("config", anonymousGraphConfig("concurrency", 1, "topK", 0, "showComputations", true), "missingValue", 0),
+            results -> {
+                assertTrue(results.hasNext());
+                Map<String, Object> row = results.next();
+                assertEquals(0.404144287109375, row.get("p75"));
+                assertEquals(0.404144287109375, row.get("p90"));
+                assertEquals(0.9128704071044922, row.get("p95"));
+                assertEquals(0.9128704071044922, row.get("p99"));
+                assertEquals(0.9128704071044922, row.get("p999"));
+                assertEquals(0.9128704071044922, row.get("p100"));
+                assertEquals(4L, row.get("nodes"));
+                assertEquals(6L, row.get("similarityPairs"));
+                assertEquals(6L, row.get("computations"));
                 assertFalse(results.hasNext());
             }
         );

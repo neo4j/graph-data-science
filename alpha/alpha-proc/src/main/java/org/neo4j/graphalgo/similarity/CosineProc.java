@@ -19,12 +19,13 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.similarity.CosineAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.CosineConfig;
 import org.neo4j.graphalgo.impl.similarity.CosineConfigImpl;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
+import org.neo4j.graphalgo.results.SimilarityStatsResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -57,6 +58,15 @@ public class CosineProc extends SimilarityProc<CosineAlgorithm, CosineConfig> {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return write(graphNameOrConfig, configuration);
+    }
+
+    @Procedure(name = "gds.alpha.similarity.cosine.stats", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<SimilarityStatsResult> cosineStats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return stats(graphNameOrConfig, configuration);
     }
 
     @Override

@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
 import org.neo4j.graphalgo.results.SimilarityExporter;
 import org.neo4j.graphalgo.results.SimilarityResult;
+import org.neo4j.graphalgo.results.SimilarityStatsResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.logging.Log;
 
@@ -83,6 +84,44 @@ abstract class SimilarityProc
         return writeAndAggregateResults(result, config, compute.algorithm().getTerminationFlag());
     }
 
+    Stream<SimilarityStatsResult> stats(
+        Object graphNameOrConfig,
+        Map<String, Object> configuration
+    ) {
+        ComputationResult<ALGO, SimilarityAlgorithmResult, CONFIG> compute = compute(
+            graphNameOrConfig,
+            configuration
+        );
+
+        SimilarityAlgorithmResult result = compute.result();
+        assert result != null;
+
+        if (result.isEmpty()) {
+            return Stream.of(SimilarityStatsResult.from(
+                0,
+                0,
+                0,
+                new AtomicLong(0),
+                -1,
+                new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT)
+            ));
+        }
+
+        AtomicLong similarityPairs = new AtomicLong();
+        DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
+        result.stream().forEach(recorder -> {
+            recorder.record(histogram);
+            similarityPairs.getAndIncrement();
+        });
+        return Stream.of(SimilarityStatsResult.from(
+            result.nodes(),
+            result.sourceIdsLength(),
+            result.targetIdsLength(),
+            similarityPairs,
+            result.computations().map(Computations::count).orElse(-1L),
+            histogram
+        ));
+    }
     abstract ALGO newAlgo(CONFIG config);
 
     @Override
@@ -118,7 +157,7 @@ abstract class SimilarityProc
                 -1,
                 writeRelationshipType,
                 writeProperty,
-                new DoubleHistogram(5)
+                new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT)
             )
         );
     }
