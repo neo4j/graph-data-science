@@ -103,6 +103,8 @@ public final class HugeSparseLongArray {
     }
 
     public static final class Builder {
+        private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
+
         private final long capacity;
         private final long defaultValue;
 
@@ -139,6 +141,27 @@ public final class HugeSparseLongArray {
                 page = allocateNewPage(pageIndex);
             }
             page[indexInPage] = value;
+        }
+
+        /**
+         * @return true iff the value was absent and was added, false if there already was a value at this position.
+         */
+        public boolean setIfAbsent(long index, long value) {
+            assert index < capacity;
+            final int pageIndex = pageIndex(index);
+            final int indexInPage = indexInPage(index);
+            long[] page = pages.get(pageIndex);
+            if (page == null) {
+                page = allocateNewPage(pageIndex);
+            }
+
+            long storedValue = (long) ARRAY_HANDLE.compareAndExchange(
+                page,
+                indexInPage,
+                NOT_FOUND,
+                value
+            );
+            return storedValue == NOT_FOUND;
         }
 
         public HugeSparseLongArray build() {

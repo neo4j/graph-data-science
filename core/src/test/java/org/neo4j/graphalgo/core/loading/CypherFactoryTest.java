@@ -282,6 +282,25 @@ class CypherFactoryTest extends BaseTest {
         assertTrue(ex.getMessage().contains("should be of type List"));
     }
 
+    @Test
+    void failOnDuplicateNodeIds() {
+        GraphLoader loader = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery("UNWIND [42, 42] AS id RETURN id")
+            .relationshipQuery("UNWIND [42, 42] AS id RETURN id AS source, id AS target")
+            .build();
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> applyInTransaction(db, tx -> loader.graphStore())
+        );
+
+        assertEquals(
+            "Node(42) was added multiple times. Please make sure that the nodeQuery returns distinct ids.",
+            ex.getMessage()
+        );
+    }
+
     private void loadAndTestGraph(
         String nodeStatement,
         String relStatement
