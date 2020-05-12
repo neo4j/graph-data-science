@@ -164,7 +164,7 @@ class EmptyGraphProcTest extends BaseProcTest {
         String query = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .algo("gds.alpha.harmonic")
+            .algo("gds.alpha.closeness.harmonic")
             .streamMode()
             .yields();
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
@@ -175,7 +175,7 @@ class EmptyGraphProcTest extends BaseProcTest {
         String query = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .algo("gds.alpha.harmonic")
+            .algo("gds.alpha.closeness.harmonic")
             .writeMode()
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));

@@ -57,7 +57,7 @@ public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, Har
         "Harmonic centrality is a way of detecting nodes that are " +
         "able to spread information very efficiently through a graph.";
 
-    @Procedure(name = "gds.alpha.harmonic.stream", mode = READ)
+    @Procedure(name = "gds.alpha.closeness.harmonic.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -78,7 +78,7 @@ public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, Har
             .map(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), algorithm.getCentralityScore(nodeId)));
     }
 
-    @Procedure(value = "gds.alpha.harmonic.write", mode = WRITE)
+    @Procedure(value = "gds.alpha.closeness.harmonic.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<CentralityScore.Stats> write(
         @Name(value = "graphName") Object graphNameOrConfig,

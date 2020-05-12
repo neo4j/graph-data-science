@@ -15,6 +15,7 @@ The Neo4j GDS library includes the following centrality algorithms, grouped by q
 ** <<algorithms-articlerank, ArticleRank>>
 ** <<algorithms-betweenness-centrality, Betweenness Centrality>>
 ** <<algorithms-closeness-centrality, Closeness Centrality>>
+** <<algorithms-harmonic-centrality, Harmonic Centrality>>
 ** <<algorithms-degree-centrality, Degree Centrality>>
 ** <<algorithms-eigenvector, Eigenvector Centrality>>
 
@@ -25,6 +26,8 @@ include::alpha/alpha-articlerank.adoc[leveloffset=+1]
 include::alpha/alpha-betweenness-centrality.adoc[leveloffset=+1]
 
 include::alpha/alpha-closeness-centrality.adoc[leveloffset=+1]
+
+include::alpha/alpha-harmonic-centrality.adoc[leveloffset=+1]
 
 include::alpha/alpha-degree-centrality.adoc[leveloffset=+1]
 

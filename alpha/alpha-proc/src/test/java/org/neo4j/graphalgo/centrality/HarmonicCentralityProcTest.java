@@ -54,7 +54,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
         var query = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .algo("gds.alpha.harmonic")
+            .algo("gds.alpha.closeness.harmonic")
             .streamMode()
             .yields("nodeId", "centrality");
 
@@ -74,7 +74,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
         var query = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
-            .algo("gds.alpha.harmonic")
+            .algo("gds.alpha.closeness.harmonic")
             .writeMode()
             .addParameter("writeProperty", "centralityScore")
             .yields();
