@@ -1,0 +1,109 @@
+/*
+ * Copyright (c) 2017-2020 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.graphalgo.impl.harmonic;
+
+import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
+import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
+import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
+
+import java.util.concurrent.ExecutorService;
+
+public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCentrality> {
+
+    private final int concurrency;
+    private final AllocationTracker allocationTracker;
+    private final ExecutorService executorService;
+    private final PagedAtomicDoubleArray inverseFarness;
+
+    private Graph graph;
+
+    public HarmonicCentrality(Graph graph, AllocationTracker allocationTracker, int concurrency, ExecutorService executorService) {
+        this.graph = graph;
+        this.allocationTracker = allocationTracker;
+        this.concurrency = concurrency;
+        this.executorService = executorService;
+        inverseFarness = PagedAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
+    }
+
+    @Override
+    public HarmonicCentrality compute() {
+        final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
+            double len = sourceNodeIds.size();
+            inverseFarness.add(nodeId, len * (1.0 / depth));
+//            progressLogger.logProgress((double) nodeId / (graph.nodeCount() - 1));
+        };
+
+        new MultiSourceBFS(
+            graph,
+            graph,
+            consumer,
+            allocationTracker
+        ).run(concurrency, executorService);
+
+        return this;
+    }
+
+    @Override
+    public HarmonicCentrality me() {
+        return this;
+    }
+
+    @Override
+    public void release() {
+        graph = null;
+    }
+
+    public double getCentralityScore(long nodeId) {
+        return  inverseFarness.get(nodeId) / (double)(graph.nodeCount() - 1);
+    }
+
+
+//    public void export(final String propertyName, final Exporter exporter) {
+//        exporter.write(
+//            propertyName,
+//            inverseFarness,
+//            (PropertyTranslator.OfDouble<PagedAtomicDoubleArray>)
+//                (data, nodeId) -> data.get((int) nodeId) / (double) (nodeCount - 1));
+//    }
+//    /**
+//     * Result class used for streaming
+//     */
+//    final class Result {
+//
+//        public final long nodeId;
+//        public final double centrality;
+//
+//        public Result(long nodeId, double centrality) {
+//            this.nodeId = nodeId;
+//            this.centrality = centrality;
+//        }
+//
+//        @Override
+//        public String toString() {
+//            return "Result{" +
+//                   "nodeId=" + nodeId +
+//                   ", centrality=" + centrality +
+//                   '}';
+//        }
+//    }
+}
