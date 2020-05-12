@@ -205,18 +205,22 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<alpha-algorithms-single-source-shortest-path, Single Source Shortest Path>>
 | `gds.alpha.shortestPath.deltaStepping.write`
 | `gds.alpha.shortestPath.deltaStepping.stream`
-.2+<.^|<<alpha-algorithms-similarity-cosine, Cosine Similarity>>
+.3+<.^|<<alpha-algorithms-similarity-cosine, Cosine Similarity>>
+| `gds.alpha.similarity.cosine.stats`
 | `gds.alpha.similarity.cosine.stream`
 | `gds.alpha.similarity.cosine.write`
-.2+<.^|<<alpha-algorithms-similarity-euclidean, Euclidean Similarity>>
+.3+<.^|<<alpha-algorithms-similarity-euclidean, Euclidean Similarity>>
+| `gds.alpha.similarity.euclidean.stats`
 | `gds.alpha.similarity.euclidean.stream`
 | `gds.alpha.similarity.euclidean.write`
-.2+<.^|<<alpha-algorithms-similarity-overlap, Overlap Similarity>>
+.3+<.^|<<alpha-algorithms-similarity-overlap, Overlap Similarity>>
+| `gds.alpha.similarity.overlap.stats`
 | `gds.alpha.similarity.overlap.stream`
 | `gds.alpha.similarity.overlap.write`
-.2+<.^|<<alpha-algorithms-similarity-pearson, Pearson Similarity>>
-| `gds.alpha.similarity.pearson.write`
+.3+<.^|<<alpha-algorithms-similarity-pearson, Pearson Similarity>>
+| `gds.alpha.similarity.pearson.stats`
 | `gds.alpha.similarity.pearson.stream`
+| `gds.alpha.similarity.pearson.write`
 .5+<.^|<<alpha-algorithms-minimum-weight-spanning-tree, Spanning Tree>>
 | `gds.alpha.spanningTree.write`
 | `gds.alpha.spanningTree.kmax.write`
