@@ -157,7 +157,7 @@ public class YensKShortestPathsDijkstra {
             double costs = this.costs.getOrDefault(node, Double.MAX_VALUE);
             graph.forEachRelationship(
                     node,
-                    0.0D,
+                    1.0D,
                     longToIntConsumer((s, t, w) -> {
                         if (!filter.accept(s, t)) {
                             return true;

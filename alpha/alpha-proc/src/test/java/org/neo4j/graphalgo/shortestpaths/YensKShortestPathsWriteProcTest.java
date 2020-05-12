@@ -42,7 +42,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
  *         (3)---(2)
  *
  */
-class YensKShortestPathsProcTest extends BaseProcTest {
+class YensKShortestPathsWriteProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
