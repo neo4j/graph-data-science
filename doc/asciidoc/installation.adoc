@@ -55,7 +55,15 @@ dbms.security.procedures.whitelist=gds.*
 
 == Neo4j Server
 
-If you are using a standalone Neo4j Server, the library will need to be installed and configured manually.
+The GDS library is intended to be used on a standalone Neo4j server.
+
+[NOTE]
+====
+Running the GDS library in a Neo4j causal cluster is not supported.
+We strongly advice against running GDS in a cluster as this potentially leads to data corruption or cluster outage.
+====
+
+On a standalone Neo4j Server, the library will need to be installed and configured manually.
 
 1. Download `neo4j-graph-data-science-[version]-standalone.jar` from the https://neo4j.com/download-center/[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
 
