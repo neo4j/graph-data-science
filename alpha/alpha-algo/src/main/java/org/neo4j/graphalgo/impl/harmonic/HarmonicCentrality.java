@@ -57,7 +57,6 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCe
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             double len = sourceNodeIds.size();
             inverseFarness.add(nodeId, len * (1.0 / depth));
-//            progressLogger.logProgress((double) nodeId / (graph.nodeCount() - 1));
         };
 
         new MultiSourceBFS(

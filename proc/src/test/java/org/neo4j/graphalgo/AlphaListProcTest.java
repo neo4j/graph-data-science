@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.centrality.ArticleRankProc;
 import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
+import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
 import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -80,6 +81,8 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.degree.write",
         "gds.alpha.degree.stream",
         "gds.alpha.dfs.stream",
+        "gds.alpha.harmonic.write",
+        "gds.alpha.harmonic.stream",
         "gds.alpha.scc.write",
         "gds.alpha.scc.stream",
         "gds.alpha.shortestPath.deltaStepping.write",
@@ -153,6 +156,7 @@ class AlphaListProcTest extends BaseProcTest {
             DegreeCentralityProc.class,
             DijkstraProc.class,
             EigenvectorCentralityProc.class,
+            HarmonicCentralityProc.class,
             IsFiniteFunc.class,
             KShortestPathsProc.class,
             KSpanningTreeProc.class,

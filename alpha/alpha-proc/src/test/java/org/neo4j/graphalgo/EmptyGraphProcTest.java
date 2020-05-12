@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
+import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
 import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
 import org.neo4j.graphalgo.scc.SccProc;
 import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
@@ -45,6 +46,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             AllShortestPathsProc.class,
             BetweennessCentralityProc.class,
             ClosenessCentralityProc.class,
+            HarmonicCentralityProc.class,
             KSpanningTreeProc.class,
             SpanningTreeProc.class,
             SampledBetweennessCentralityProc.class,
@@ -152,6 +154,28 @@ class EmptyGraphProcTest extends BaseProcTest {
             .withAnyLabel()
             .withAnyRelationshipType()
             .algo("gds.alpha.closeness")
+            .writeMode()
+            .yields();
+        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
+    }
+
+    @Test
+    void testHarmonicCentralityStream() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.harmonic")
+            .streamMode()
+            .yields();
+        runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
+    }
+
+    @Test
+    void testHarmonicCentralityWrite() {
+        String query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.alpha.harmonic")
             .writeMode()
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
