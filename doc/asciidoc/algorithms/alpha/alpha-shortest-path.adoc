@@ -59,11 +59,17 @@ The algorithm assumes that adding a relationship to a path can never make a path
 [source, cypher]
 ----
 CALL gds.alpha.shortestPath.write(configuration: Map)
-YIELD nodeCount, totalCost, createMillis, computeMillis, writeMillis
-
+YIELD
+  // general write return columns
+  nodeCount: Integer,
+  totalCost: Float
 ----
 
-.Configuration
+include::../common-configuration/common-parameters-anonymous-graph.adoc[]
+
+include::../common-configuration/common-configuration-anonymous-graph.adoc[]
+
+.Algorithm specific configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                       | Type    | Default  | Optional | Description
@@ -88,10 +94,17 @@ YIELD nodeCount, totalCost, createMillis, computeMillis, writeMillis
 [source, cypher]
 ----
 CALL gds.alpha.shortestPath.stream(configuration: Map)
-YIELD nodeId, cost
+YIELD
+  // general write return columns
+  nodeId: Integer,
+  cost: Float
 ----
 
-.Configuration
+include::../common-configuration/common-parameters-anonymous-graph.adoc[]
+
+include::../common-configuration/common-configuration-anonymous-graph.adoc[]
+
+.Algorithm specific configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                       | Type   | Default  | Optional | Description
@@ -105,7 +118,7 @@ YIELD nodeId, cost
 |===
 | Name   | Type    | Description
 | nodeId | Integer | Node ID
-| cost   | Integer | The cost it takes to get from start node to specific node.
+| cost   | Float   | The cost it takes to get from start node to specific node.
 |===
 
 
@@ -153,7 +166,7 @@ CALL gds.alpha.shortestPath.stream({
   },
   startNode: start,
   endNode: end,
-  weightProperty: 'cost'
+  relationshipWeightProperty: 'cost'
 })
 YIELD nodeId, cost
 RETURN gds.util.asNode(nodeId).name AS name, cost
@@ -192,7 +205,7 @@ CALL gds.alpha.shortestPath.write({
   },
   startNode: start,
   endNode: end,
-  weightProperty: 'cost',
+  relationshipWeightProperty: 'cost',
   writeProperty: 'sssp'
 })
 YIELD nodeCount, totalCost
@@ -221,7 +234,7 @@ CALL gds.alpha.shortestPath.write({
   relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) AS source, id(m) AS target, r.cost AS weight',
   startNode: start,
   endNode: end,
-  weightProperty: 'weight',
+  relationshipWeightProperty: 'weight',
   writeProperty: 'sssp'
 })
 YIELD nodeCount, totalCost
