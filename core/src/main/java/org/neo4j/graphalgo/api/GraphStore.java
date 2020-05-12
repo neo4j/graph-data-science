@@ -29,6 +29,7 @@ import org.neo4j.values.storable.NumberType;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -59,6 +60,8 @@ public interface GraphStore {
 
     boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey);
 
+    List<String> nodePropertyKeys(Collection<NodeLabel> labels);
+
     NumberType nodePropertyType(NodeLabel label, String propertyKey);
 
     PropertyState nodePropertyState(String propertyKey);
@@ -85,6 +88,8 @@ public interface GraphStore {
     boolean hasRelationshipType(RelationshipType relationshipType);
 
     boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey);
+
+    List<String> relationshipPropertyKeys(Collection<RelationshipType> relTypes);
 
     NumberType relationshipPropertyType(String propertyKey);
 

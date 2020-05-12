@@ -60,7 +60,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
@@ -282,19 +281,18 @@ public abstract class AlgoBaseProc<
                 throw new IllegalArgumentException(formatWithLocale(
                     "Node weight property `%s` not found in graph with node properties: %s",
                     weightProperty,
-                    graphStore.nodePropertyKeys().values()
+                    graphStore.nodePropertyKeys(filterLabels)
                 ));
             }
         }
         if (config instanceof RelationshipWeightConfig) {
-            Set<String> properties = graphStore.relationshipPropertyKeys();
 
             String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
-            if (weightProperty != null && !properties.contains(weightProperty)) {
+            if (weightProperty != null && !graphStore.hasRelationshipProperty(config.relationshipTypeIdentifiers(graphStore), weightProperty)) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Relationship weight property `%s` not found in graph with relationship properties: %s",
                     weightProperty,
-                    properties
+                    graphStore.relationshipPropertyKeys(config.relationshipTypeIdentifiers(graphStore))
                 ));
             }
         }

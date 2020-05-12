@@ -34,9 +34,12 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -48,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends NodeWeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
@@ -133,6 +137,49 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
             String error = "Node weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found";
+            assertMissingProperty(error, () -> proc.compute(
+                loadedGraphName,
+                configMap
+            ));
+
+            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
+            assertMissingProperty(error, () -> proc.compute(
+                implicitConfigMap,
+                emptyMap()
+            ));
+        });
+    }
+
+    @Test
+    default void shouldFailWithInvalidNodeWeightPropertyOnFilteredGraph() {
+        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
+
+        runQuery(graphDb(), "CREATE" +
+                            "  (a:Node)" +
+                            ", (b:Ignore {foo: 42})" +
+                            ", (a)-[:Type]->(b)");
+
+        String loadedGraphName = "loadedGraph";
+
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(graphDb())
+            .graphName(loadedGraphName)
+            .addNodeLabel("Node")
+            .addNodeProjection(NodeProjection.builder()
+                .label("Ignore")
+                .addProperty("foo", "foo", 0)
+                .build()
+            ).build();
+
+        GraphStoreCatalog.set(graphLoader.createConfig(), graphLoader.graphStore());
+
+        applyOnProcedure((proc) -> {
+            CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
+                "nodeWeightProperty", "foo",
+                "nodeLabels", List.of("Node")
+            ));
+            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
+            String error = "Node weight property `foo` not found";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap

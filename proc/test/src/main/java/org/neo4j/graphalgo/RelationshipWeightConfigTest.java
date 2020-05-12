@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -176,6 +177,51 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
             String error = "Relationship weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found";
+            assertMissingProperty(error, () -> proc.compute(
+                loadedGraphName,
+                configMap
+            ));
+
+            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
+            assertMissingProperty(error, () -> proc.compute(
+                implicitConfigMap,
+                Collections.emptyMap()
+            ));
+        });
+    }
+
+    @Test
+    default void shouldFailWithInvalidRelationshipWeightPropertyOnFilteredGraph() {
+        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
+
+        runQuery(graphDb(), "CREATE" +
+                            "  (a:Node)" +
+                            ", (b:Node)" +
+                            ", (a)-[:Type]->(b)" +
+                            ", (a)-[:Ignore {foo: 42}]->(b)");
+
+        String loadedGraphName = "loadedGraph";
+
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(graphDb())
+            .graphName(loadedGraphName)
+            .addRelationshipType("Type")
+            .addRelationshipProjection(RelationshipProjection.builder()
+                .type("Ignore")
+                .addProperty("foo", "foo", 0)
+                .build()
+            ).build();
+
+        GraphStoreCatalog.set(graphLoader.createConfig(), graphLoader.graphStore());
+
+        applyOnProcedure((proc) -> {
+
+            CypherMapWrapper mapWrapper = CypherMapWrapper.create(map(
+                "relationshipWeightProperty", "foo",
+                "relationshipTypes", List.of("Type")
+            ));
+            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
+            String error = "Relationship weight property `foo` not found";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap
