@@ -101,7 +101,10 @@ class ShortestPathAStarProcTest extends BaseProcTest {
         String query = "MATCH (start:Node {name: 'SINGAPORE'}), (end:Node {name: 'CHIBA'}) " +
                        GdsCypher.call()
                            .withRelationshipProperty("cost")
-                           .loadEverything(Orientation.UNDIRECTED)
+                           .withAnyLabel()
+                           .withRelationshipType("TYPE", Orientation.UNDIRECTED)
+                           .withNodeProperty("longitude")
+                           .withNodeProperty("latitude")
                            .algo("gds.alpha.shortestPath.astar")
                            .streamMode()
                            .addVariable("startNode", "start")

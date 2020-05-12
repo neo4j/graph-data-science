@@ -26,32 +26,27 @@ import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
-import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPathAStar> {
 
-    private final GraphDatabaseAPI db;
-    private final KernelTransaction tx;
     private static final int PATH_END = -1;
 
     private Graph graph;
     private final int nodeCount;
     private final long startNode;
     private final long goalNode;
-    private final String propertyKeyLat;
-    private final String propertyKeyLon;
+    private final NodeProperties latitudes;
+    private final NodeProperties longitudes;
     private IntDoubleMap gCosts;
     private IntDoubleMap fCosts;
     private double totalCost;
@@ -65,27 +60,20 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
 
     public ShortestPathAStar(
         Graph graph,
-        GraphDatabaseAPI db,
-        KernelTransaction tx,
         long startNode,
         long goalNode,
-        String propertyKeyLat,
-        String propertyKeyLon
+        NodeProperties latitudes,
+        NodeProperties longitudes
     ) {
         this.graph = graph;
-        this.db = db;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
-        this.tx = tx;
         this.startNode = startNode;
         this.goalNode = goalNode;
-        this.propertyKeyLat = propertyKeyLat;
-        this.propertyKeyLon = propertyKeyLon;
+        this.latitudes = latitudes;
+        this.longitudes = longitudes;
         this.gCosts = new IntDoubleScatterMap(nodeCount);
         this.fCosts = new IntDoubleScatterMap(nodeCount);
-        this.openNodes = SharedIntPriorityQueue.min(
-                nodeCount,
-                fCosts,
-                Double.MAX_VALUE);
+        this.openNodes = SharedIntPriorityQueue.min(nodeCount, fCosts, Double.MAX_VALUE);
         this.path = new IntIntScatterMap(nodeCount);
         this.closedNodes = new SimpleBitSet(nodeCount);
         this.shortestPath = new IntArrayDeque();
@@ -96,16 +84,16 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
     public ShortestPathAStar compute() {
         reset();
         int startNodeInternal = Math.toIntExact(graph.toMappedNodeId(startNode));
-        double startNodeLat = getNodeCoordinate(startNodeInternal, propertyKeyLat);
-        double startNodeLon = getNodeCoordinate(startNodeInternal, propertyKeyLon);
+        double startNodeLat = getLatitude(startNodeInternal);
+        double startNodeLon = getLongitude(startNodeInternal);
         int goalNodeInternal = Math.toIntExact(graph.toMappedNodeId(goalNode));
-        double goalNodeLat = getNodeCoordinate(goalNodeInternal, propertyKeyLat);
-        double goalNodeLon = getNodeCoordinate(goalNodeInternal, propertyKeyLon);
+        double goalNodeLat = getLatitude(goalNodeInternal);
+        double goalNodeLon = getLongitude(goalNodeInternal);
         double initialHeuristic = computeHeuristic(startNodeLat, startNodeLon, goalNodeLat, goalNodeLon);
         gCosts.put(startNodeInternal, 0.0);
         fCosts.put(startNodeInternal, initialHeuristic);
         openNodes.add(startNodeInternal, 0.0);
-        run(goalNodeInternal, propertyKeyLat, propertyKeyLon);
+        run(goalNodeInternal);
         if (path.containsKey(goalNodeInternal)) {
             totalCost = gCosts.get(goalNodeInternal);
             int node = goalNodeInternal;
@@ -117,9 +105,9 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
         return this;
     }
 
-    private void run(int goalNodeId, String propertyKeyLat, String propertyKeyLon) {
-        double goalLat = getNodeCoordinate(goalNodeId, propertyKeyLat);
-        double goalLon = getNodeCoordinate(goalNodeId, propertyKeyLon);
+    private void run(int goalNodeId) {
+        double goalLat = getLatitude(goalNodeId);
+        double goalLon = getLongitude(goalNodeId);
         while (!openNodes.isEmpty() && running()) {
             int currentNodeId = openNodes.pop();
             if (currentNodeId == goalNodeId) {
@@ -131,8 +119,8 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
                     currentNodeId,
                     0.0D,
                     longToIntConsumer((source, target, weight) -> {
-                        double neighbourLat = getNodeCoordinate(target, propertyKeyLat);
-                        double neighbourLon = getNodeCoordinate(target, propertyKeyLon);
+                        double neighbourLat = getLatitude(target);
+                        double neighbourLon = getLongitude(target);
                         double heuristic = computeHeuristic(neighbourLat, neighbourLon, goalLat, goalLon);
                         boolean weightChanged = updateCosts(source, target, weight + currentNodeCost, heuristic);
                         if (!closedNodes.contains(target)) {
@@ -161,10 +149,12 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
         return distance;
     }
 
-    private double getNodeCoordinate(int nodeId, String coordinateType) {
-        long neo4jId = graph.toOriginalNodeId(nodeId);
-        Node node = getNodeById(tx, neo4jId);
-        return (double) node.getProperty(coordinateType);
+    private double getLongitude(long nodeId) {
+        return longitudes.nodeProperty(nodeId);
+    }
+
+    private double getLatitude(long nodeId) {
+        return latitudes.nodeProperty(nodeId);
     }
 
     private boolean updateCosts(int source, int target, double newCost, double heuristic) {

@@ -56,7 +56,11 @@ class ShortestPathAStarDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (start:Station {name: 'King\\'s Cross St. Pancras'}), (end:Station {name: 'Kentish Town'})" +
                        " CALL gds.alpha.shortestPath.astar.stream({" +
-                       "   nodeProjection: '*'," +
+                       "   nodeProjection: {\n" +
+                       "     Station: {\n" +
+                       "       properties: ['longitude', 'latitude']\n" +
+                       "     }\n" +
+                       "   }," +
                        "   relationshipProjection: {" +
                        "     CONNECTION: {" +
                        "       type: 'CONNECTION'," +
@@ -92,7 +96,7 @@ class ShortestPathAStarDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (start:Station {name: \"King's Cross St. Pancras\"}), (end:Station {name: \"Kentish Town\"})" +
                        " CALL gds.alpha.shortestPath.astar.stream({" +
-                       "  nodeQuery: 'MATCH (p:Station) RETURN id(p) AS id'," +
+                       "  nodeQuery: 'MATCH (p:Station) RETURN id(p) AS id, p.latitude AS latitude, p.longitude AS longitude'," +
                        "  relationshipQuery: 'MATCH (p1:Station)-[r:CONNECTION]->(p2:Station) RETURN id(p1) AS source, id(p2) AS target, r.time AS time'," +
                        "  startNode: start," +
                        "  endNode: end," +
