@@ -23,7 +23,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringMutateConfig>
-    implements GraphMutationTest<K1Coloring, K1ColoringMutateConfig, HugeLongArray> {
+    implements MutateNodePropertyTest<K1Coloring, K1ColoringMutateConfig, HugeLongArray> {
 
     @BeforeEach
     void addGraphWriteNodePropertiesProc() throws Exception {

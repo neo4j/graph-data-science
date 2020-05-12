@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.MutateRelationshipTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.values.storable.NumberType;
 
@@ -38,13 +38,11 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class NodeSimilarityMutateProcTest
     extends NodeSimilarityProcTest<NodeSimilarityMutateConfig>
-    implements GraphMutationTest<NodeSimilarity, NodeSimilarityMutateConfig, NodeSimilarityResult> {
-
-    private static final String MUTATE_RELATIONSHIP_TYPE = "SIMILAR_TO";
+    implements MutateRelationshipTest<NodeSimilarity, NodeSimilarityMutateConfig, NodeSimilarityResult> {
 
     @Override
-    public boolean mutatesNodes() {
-        return false;
+    public String mutateRelationshipType() {
+        return "SIMILAR_TO";
     }
 
     @Override
@@ -73,7 +71,7 @@ class NodeSimilarityMutateProcTest
             mapWrapper = mapWrapper.withString("mutateProperty", mutateProperty());
         }
         if (!mapWrapper.containsKey("mutateRelationshipType")) {
-            mapWrapper = mapWrapper.withString("mutateRelationshipType", MUTATE_RELATIONSHIP_TYPE);
+            mapWrapper = mapWrapper.withString("mutateRelationshipType", mutateRelationshipType());
         }
         return mapWrapper;
     }
@@ -108,14 +106,6 @@ class NodeSimilarityMutateProcTest
         );
     }
 
-    @Override
-    public String failOnExistingTokenMessage() {
-        return formatWithLocale(
-            "Relationship type `%s` already exists in the in-memory graph.",
-            MUTATE_RELATIONSHIP_TYPE
-        );
-    }
-
     @Test
     void testMutateYields() {
         String query = GdsCypher.call()
@@ -124,7 +114,7 @@ class NodeSimilarityMutateProcTest
             .algo("nodeSimilarity")
             .mutateMode()
             .addParameter("similarityCutoff", 0.0)
-            .addParameter("mutateRelationshipType", MUTATE_RELATIONSHIP_TYPE)
+            .addParameter("mutateRelationshipType", mutateRelationshipType())
             .addParameter("mutateProperty", mutateProperty())
             .yields(
                 "computeMillis",

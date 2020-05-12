@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.louvain;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements GraphMutationTest<Louvain, LouvainMutateConfig, Louvain> {
+public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements MutateNodePropertyTest<Louvain, LouvainMutateConfig, Louvain> {
 
     @Override
     public String mutateProperty() {

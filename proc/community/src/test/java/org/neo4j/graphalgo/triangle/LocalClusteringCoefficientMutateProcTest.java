@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.triangle;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.GraphMutationTest;
+import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -41,7 +41,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LocalClusteringCoefficientMutateProcTest
     extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientMutateConfig>
-    implements GraphMutationTest<LocalClusteringCoefficient, LocalClusteringCoefficientMutateConfig, LocalClusteringCoefficient.Result> {
+    implements MutateNodePropertyTest<LocalClusteringCoefficient, LocalClusteringCoefficientMutateConfig, LocalClusteringCoefficient.Result> {
 
     @Override
     public String mutateProperty() {
