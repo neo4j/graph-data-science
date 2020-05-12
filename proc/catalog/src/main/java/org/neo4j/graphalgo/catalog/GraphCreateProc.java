@@ -180,7 +180,7 @@ public class GraphCreateProc extends CatalogProc {
     public MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphStoreFactory<?> graphStoreFactory = loader.graphStoreFactory();
-        GraphDimensions dimensions = updateDimensions(config, graphStoreFactory, graphStoreFactory.dimensions());
+        GraphDimensions dimensions = updateDimensions(config, graphStoreFactory, graphStoreFactory.estimationDimensions());
 
         MemoryTree memoryTree = estimate(graphStoreFactory, dimensions, config);
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
@@ -204,7 +204,7 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     public MemoryTree estimate(GraphStoreFactory<?> factory, GraphDimensions dimensions, GraphCreateConfig config) {
-        return factory.memoryEstimation(dimensions).estimate(dimensions, config.readConcurrency());
+        return factory.memoryEstimation().estimate(dimensions, config.readConcurrency());
     }
 
     public static class GraphCreateResult {

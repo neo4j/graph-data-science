@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -40,7 +41,11 @@ class NativeFactoryTest {
             .maxRelCount(500_000_000L)
             .build();
 
-        MemoryEstimation memoryEstimation = NativeFactory.getMemoryEstimation(dimensions, RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL));
+        MemoryEstimation memoryEstimation = NativeFactory.getMemoryEstimation(
+            NodeProjections.all(),
+            RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL)
+        );
+
         MemoryTree estimate = memoryEstimation.estimate(dimensions, 1);
         assertEquals(3_405_981_448L, estimate.memoryUsage().min);
         assertEquals(4_606_168_240L, estimate.memoryUsage().max);
@@ -54,13 +59,15 @@ class NativeFactoryTest {
             .putRelationshipCount(RelationshipType.of("TYPE2"), 250_000_000L)
             .build();
 
+        NodeProjections nodeProjections = NodeProjections.all();
+
         RelationshipProjections relationshipProjections = RelationshipProjections
             .builder()
             .putProjection(RelationshipType.of("TYPE1"), RelationshipProjection.of("TYPE1", Orientation.NATURAL))
             .putProjection(RelationshipType.of("TYPE2"), RelationshipProjection.of("TYPE2", Orientation.NATURAL))
             .build();
 
-        MemoryTree estimate = NativeFactory.getMemoryEstimation(dimensions, relationshipProjections).estimate(dimensions, 1);
+        MemoryTree estimate = NativeFactory.getMemoryEstimation(nodeProjections, relationshipProjections).estimate(dimensions, 1);
         long idMapMemoryUsage = IdMap.memoryEstimation().estimate(dimensions, 1).memoryUsage().min;
         int instanceSize = 72;
 

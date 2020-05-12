@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.core.loading;
 import org.eclipse.collections.api.block.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.NodeLabel;
@@ -34,6 +37,8 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +48,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -298,6 +304,51 @@ class CypherFactoryTest extends BaseTest {
         assertEquals(
             "Node(42) was added multiple times. Please make sure that the nodeQuery returns distinct ids.",
             ex.getMessage()
+        );
+    }
+
+    @ParameterizedTest(name =  "{0}")
+    @MethodSource("memoryEstimationVariants")
+    void testMemoryEstimation(String description, String nodeQuery, String relQuery, long min, long max) {
+        GraphLoader loader = new CypherLoaderBuilder()
+            .api(db)
+            .nodeQuery(nodeQuery)
+            .relationshipQuery(relQuery)
+            .build();
+
+        CypherFactory factory = (CypherFactory) loader.graphStoreFactory();
+        MemoryEstimation memoryEstimation = factory.memoryEstimation();
+        MemoryTree estimate = memoryEstimation.estimate(factory.estimationDimensions(), 4);
+
+        assertEquals(min ,estimate.memoryUsage().min);
+        assertEquals(max ,estimate.memoryUsage().max);
+    }
+
+    private static Stream<Arguments> memoryEstimationVariants() {
+        return Stream.of(
+            Arguments.of(
+                "Topology Only",
+                "MATCH (n) RETURN id(n) as id",
+                "MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target",
+                522928,
+                522928
+            ),
+
+            Arguments.of(
+                "Node properties",
+                "MATCH (n) RETURN id(n) as id, n.id as idProp",
+                "MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target",
+                523000,
+                719720
+            ),
+
+            Arguments.of(
+                "Relationship properties",
+                "MATCH (n) RETURN id(n) as id",
+                "MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target, r.prop as prop",
+                867304,
+                867304
+            )
         );
     }
 

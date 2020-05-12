@@ -62,39 +62,21 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        return memoryEstimation(dimensions);
+        return getMemoryEstimation(storeConfig.nodeProjections(), storeConfig.relationshipProjections());
     }
 
-    @Override
-    public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
-        return getMemoryEstimation(dimensions, storeConfig);
-    }
+    public static MemoryEstimation getMemoryEstimation(NodeProjections nodeProjections, RelationshipProjections relationshipProjections) {
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(HugeGraph.class);
 
-    public static MemoryEstimation getMemoryEstimation(GraphDimensions dimensions, RelationshipProjections relationshipProjections) {
-        GraphCreateFromStoreConfig config = ImmutableGraphCreateFromStoreConfig
-            .builder()
-            .graphName("")
-            .username("")
-            .nodeProjections(NodeProjections.all())
-            .relationshipProjections(relationshipProjections)
-            .build();
+        // node information
+        builder.add("nodeIdMap", IdMap.memoryEstimation());
 
-        return getMemoryEstimation(dimensions, config);
-    }
-
-    public static MemoryEstimation getMemoryEstimation(GraphDimensions dimensions, GraphCreateFromStoreConfig config) {
-        MemoryEstimations.Builder builder = MemoryEstimations
-            .builder(HugeGraph.class)
-            .add("nodeIdMap", IdMap.memoryEstimation());
-
-        // nodes
-        dimensions
-            .nodePropertyTokens()
-            .keySet()
+        // nodeProperties
+        nodeProjections.allProperties()
             .forEach(property -> builder.add(property, NodePropertyMap.memoryEstimation()));
 
         // relationships
-        config.relationshipProjections().projections().forEach((relationshipType, relationshipProjection) -> {
+        relationshipProjections.projections().forEach((relationshipType, relationshipProjection) -> {
 
             boolean undirected = relationshipProjection.orientation() == Orientation.UNDIRECTED;
 

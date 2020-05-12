@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -84,7 +85,7 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmF
                     .build();
 
                 long maxGraphSize = NativeFactory
-                    .getMemoryEstimation(sparseDimensions, relationshipProjections)
+                    .getMemoryEstimation(NodeProjections.all(), relationshipProjections)
                     .estimate(sparseDimensions, concurrency)
                     .memoryUsage()
                     .max;
