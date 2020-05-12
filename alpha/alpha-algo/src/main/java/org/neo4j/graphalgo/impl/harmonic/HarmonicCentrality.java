@@ -31,18 +31,25 @@ import java.util.concurrent.ExecutorService;
 public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCentrality> {
 
     private final int concurrency;
+    private final long nodeCount;
     private final AllocationTracker allocationTracker;
     private final ExecutorService executorService;
     private final PagedAtomicDoubleArray inverseFarness;
 
     private Graph graph;
 
-    public HarmonicCentrality(Graph graph, AllocationTracker allocationTracker, int concurrency, ExecutorService executorService) {
+    public HarmonicCentrality(
+        Graph graph,
+        AllocationTracker allocationTracker,
+        int concurrency,
+        ExecutorService executorService
+    ) {
         this.graph = graph;
         this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
         inverseFarness = PagedAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
+        this.nodeCount = graph.nodeCount();
     }
 
     @Override
@@ -74,36 +81,6 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCe
     }
 
     public double getCentralityScore(long nodeId) {
-        return  inverseFarness.get(nodeId) / (double)(graph.nodeCount() - 1);
+        return inverseFarness.get(nodeId) / (double) (nodeCount - 1);
     }
-
-
-//    public void export(final String propertyName, final Exporter exporter) {
-//        exporter.write(
-//            propertyName,
-//            inverseFarness,
-//            (PropertyTranslator.OfDouble<PagedAtomicDoubleArray>)
-//                (data, nodeId) -> data.get((int) nodeId) / (double) (nodeCount - 1));
-//    }
-//    /**
-//     * Result class used for streaming
-//     */
-//    final class Result {
-//
-//        public final long nodeId;
-//        public final double centrality;
-//
-//        public Result(long nodeId, double centrality) {
-//            this.nodeId = nodeId;
-//            this.centrality = centrality;
-//        }
-//
-//        @Override
-//        public String toString() {
-//            return "Result{" +
-//                   "nodeId=" + nodeId +
-//                   ", centrality=" + centrality +
-//                   '}';
-//        }
-//    }
 }
