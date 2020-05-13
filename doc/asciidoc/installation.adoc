@@ -24,7 +24,7 @@ The GDS library supports the following Neo4j versions:
 | `4.0.2`
 | `4.0.3`
 | `4.0.4`
-.9+<.^|`1.0.x`, `1.1.x`
+.10+<.^|`1.0.x`, `1.1.x`
 | `3.5.9`
 | `3.5.10`
 | `3.5.11`
@@ -34,6 +34,7 @@ The GDS library supports the following Neo4j versions:
 | `3.5.15`
 | `3.5.16`
 | `3.5.17`
+| `3.5.18`
 |===
 
 
