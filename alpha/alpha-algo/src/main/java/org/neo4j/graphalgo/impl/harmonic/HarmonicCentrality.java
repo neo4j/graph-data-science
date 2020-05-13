@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.harmonic;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
 import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
@@ -34,7 +35,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCe
     private final long nodeCount;
     private final AllocationTracker allocationTracker;
     private final ExecutorService executorService;
-    private final PagedAtomicDoubleArray inverseFarness;
+    private final HugeAtomicDoubleArray inverseFarness;
 
     private Graph graph;
 
@@ -48,7 +49,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCe
         this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        inverseFarness = PagedAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
+        inverseFarness = HugeAtomicDoubleArray.newArray(graph.nodeCount(), allocationTracker);
         this.nodeCount = graph.nodeCount();
     }
 
@@ -56,7 +57,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality, HarmonicCe
     public HarmonicCentrality compute() {
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             double len = sourceNodeIds.size();
-            inverseFarness.add(nodeId, len * (1.0 / depth));
+            inverseFarness.update(nodeId, currentValue -> currentValue + (len * (1.0 / depth)));
         };
 
         new MultiSourceBFS(

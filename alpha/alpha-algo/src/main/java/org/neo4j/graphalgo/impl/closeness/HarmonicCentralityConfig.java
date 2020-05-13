@@ -36,6 +36,7 @@ import java.util.Optional;
 public interface HarmonicCentralityConfig extends
     AlgoBaseConfig,
     WritePropertyConfig {
+
     @Override
     @Value.Default
     default String writeProperty() {
@@ -51,4 +52,3 @@ public interface HarmonicCentralityConfig extends
         return new HarmonicCentralityConfigImpl(graphName, implicitCreateConfig, username, config);
     }
 }
-
