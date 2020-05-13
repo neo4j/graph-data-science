@@ -163,7 +163,8 @@ abstract class DocTestBase extends BaseProcTest {
                         IntStream.range(0, expectedColumns.size()).forEach(i -> {
                             String expected = cells.get(i).getText();
                             String actual = valueToString(actualRow.get(expectedColumns.get(i)));
-                            assertEquals(expected, actual, query);
+                            assertEquals(expected, actual,
+                                formatWithLocale("Query: %s", query));
                         });
                         return true;
                     });
