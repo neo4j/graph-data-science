@@ -14,6 +14,7 @@ This topic includes:
 ** <<algorithms-algo-syntax-stats, Stats>>
 ** <<algorithms-algo-syntax-mutate, Mutate>>
 ** <<algorithms-algo-syntax-write, Write>>
+** <<algorithms-algo-syntax-anonymous, Anonymous graphs>>
 * <<algorithms-algo-examples, Examples>>
 ** <<algorithms-algo-examples-memory-estimation, Memory Estimation>>
 ** <<algorithms-algo-examples-stream, Stream>>
@@ -48,6 +49,10 @@ This topic includes:
 
 [[algorithms-algo-syntax-write]]
 === Write
+
+
+[[algorithms-algo-syntax-anonymous]]
+=== Anonymous graphs
 
 
 [[algorithms-algo-examples]]
