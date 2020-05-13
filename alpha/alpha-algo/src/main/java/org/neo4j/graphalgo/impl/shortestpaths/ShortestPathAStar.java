@@ -117,7 +117,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
             double currentNodeCost = this.gCosts.getOrDefault(currentNodeId, Double.MAX_VALUE);
             graph.forEachRelationship(
                     currentNodeId,
-                    0.0D,
+                    1.0D,
                     longToIntConsumer((source, target, weight) -> {
                         double neighbourLat = getLatitude(target);
                         double neighbourLon = getLongitude(target);

@@ -29,7 +29,9 @@ import org.neo4j.graphdb.Node;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class ShortestPathAStarProcTest extends BaseProcTest {
@@ -84,6 +86,26 @@ class ShortestPathAStarProcTest extends BaseProcTest {
 
     @Test
     void testAStarResult() {
+        runTest(
+            Map.of("relationshipWeightProperty", "cost"),
+            0.0,
+            29.0,
+            723.0,
+            895.0,
+            996.0,
+            1353.0,
+            1652.0,
+            2392.0,
+            2979.0
+        );
+    }
+
+    @Test
+    void testMissingRelationshipWeightPropertyUses1AsDefaultCost() {
+        runTest(Map.of(), 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
+    }
+
+    private void runTest(Map<String, ?> additionalQueryParams, double... expectedDistanceCosts) {
         List<String> expectedNode = Arrays.asList(
             "SINGAPORE",
             "SINGAPORE STRAIT",
@@ -95,23 +117,25 @@ class ShortestPathAStarProcTest extends BaseProcTest {
             "WAYPOINT 87",
             "CHIBA"
         );
-        List<Double> expectedDistance = Arrays.asList(0.0, 29.0, 723.0, 895.0, 996.0, 1353.0, 1652.0, 2392.0, 2979.0);
+        List<Double> expectedDistance = Arrays.stream(expectedDistanceCosts).boxed().collect(toList());
         List<String> actualNode = new ArrayList<>();
         List<Double> actualDistance = new ArrayList<>();
-        String query = "MATCH (start:Node {name: 'SINGAPORE'}), (end:Node {name: 'CHIBA'}) " +
-                       GdsCypher.call()
-                           .withRelationshipProperty("cost")
-                           .withAnyLabel()
-                           .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-                           .withNodeProperty("longitude")
-                           .withNodeProperty("latitude")
-                           .algo("gds.alpha.shortestPath.astar")
-                           .streamMode()
-                           .addVariable("startNode", "start")
-                           .addVariable("endNode", "end")
-                           .addParameter("relationshipWeightProperty", "cost")
-                           .yields("nodeId", "cost")
-                           .concat(" RETURN nodeId, cost");
+        String query =
+            "MATCH (start:Node {name: 'SINGAPORE'}), (end:Node {name: 'CHIBA'}) " +
+            GdsCypher.call()
+                .withRelationshipProperty("cost")
+                .withAnyLabel()
+                .withRelationshipType("TYPE", Orientation.UNDIRECTED)
+                .withNodeProperty("longitude")
+                .withNodeProperty("latitude")
+                .algo("gds.alpha.shortestPath.astar")
+                .streamMode()
+                .addVariable("startNode", "start")
+                .addVariable("endNode", "end")
+                .addAllParameters(additionalQueryParams)
+                .yields("nodeId", "cost")
+                .concat(" RETURN nodeId, cost");
+
         runQueryWithRowConsumer(query, (tx, row) -> {
             long nodeId = row.getNumber("nodeId").longValue();
             Node node = tx.getNodeById(nodeId);
