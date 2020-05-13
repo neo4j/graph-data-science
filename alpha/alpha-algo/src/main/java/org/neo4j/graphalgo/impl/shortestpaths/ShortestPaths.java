@@ -93,7 +93,7 @@ public class ShortestPaths extends Algorithm<ShortestPaths, ShortestPaths> {
             // scan ALL relationships
             graph.forEachRelationship(
                     node,
-                    0.0D,
+                    1.0D,
                     longToIntConsumer((source, target, weight) -> {
                         // relax
                         final double targetCosts = this.costs.getOrDefault(target, Double.POSITIVE_INFINITY);

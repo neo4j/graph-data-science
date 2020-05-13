@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphdb.Node;
 
+import static java.lang.Math.toIntExact;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -42,9 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 final class ShortestPathsTest extends AlgoTestBase {
 
-    private Graph graph;
-
-    private static long head, tail, outstanding;
+    private long head, tail, outstanding;
 
     @BeforeEach
     void setup() {
@@ -92,24 +91,35 @@ final class ShortestPathsTest extends AlgoTestBase {
         head = getNode("s").getId();
         tail = getNode("x").getId();
         outstanding = getNode("q").getId();
-
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
-            .build()
-            .graph();
     }
 
     @Test
     void testPaths() {
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+            .build()
+            .graph();
 
-        final ShortestPaths sssp = new ShortestPaths(graph, head);
+        ShortestPaths sssp = new ShortestPaths(graph, head);
+        IntDoubleMap sp = sssp.compute().getShortestPaths();
 
-        final IntDoubleMap sp = sssp.compute()
-                .getShortestPaths();
+        assertEquals(8, sp.get(toIntExact(graph.toMappedNodeId(tail))),0.1);
+        assertEquals(Double.POSITIVE_INFINITY, sp.get(toIntExact(graph.toMappedNodeId(outstanding))),0.1);
+    }
 
-        assertEquals(8, sp.get(Math.toIntExact(graph.toMappedNodeId(tail))),0.1);
-        assertEquals(Double.POSITIVE_INFINITY, sp.get(Math.toIntExact(graph.toMappedNodeId(outstanding))),0.1);
+    @Test
+    void testPathsWithDefaultCost() {
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .build()
+            .graph();
+
+        ShortestPaths sssp = new ShortestPaths(graph, head);
+        IntDoubleMap sp = sssp.compute().getShortestPaths();
+
+        assertEquals(4, sp.get(toIntExact(graph.toMappedNodeId(tail))),0.1);
+        assertEquals(Double.POSITIVE_INFINITY, sp.get(toIntExact(graph.toMappedNodeId(outstanding))),0.1);
     }
 
     Node getNode(String name) {
