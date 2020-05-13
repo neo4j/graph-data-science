@@ -196,6 +196,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             newGraphIds,
             nodeToGraphIds.getCapacity(),
             concurrency,
+            IdMapBuilder.add(newGraphIds),
             AllocationTracker.EMPTY
         );
 

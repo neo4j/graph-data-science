@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 @Value.Enclosing
@@ -117,13 +118,21 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     @Override
     LoadResult result() {
-        IdMap idMap = IdMapBuilder.build(
-            builder,
-            importer.nodeLabelBitSetMapping,
-            maxNodeId,
-            cypherConfig.readConcurrency(),
-            loadingContext.tracker()
-        );
+        final IdMap idMap;
+        try {
+            idMap = IdMapBuilder.buildChecked(
+                builder,
+                importer.nodeLabelBitSetMapping,
+                maxNodeId,
+                cypherConfig.readConcurrency(),
+                loadingContext.tracker()
+            );
+        } catch (DuplicateNodeIdException e) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Node(%d) was added multiple times. Please make sure that the nodeQuery returns distinct ids.",
+                e.nodeId
+            ));
+        }
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter.result();
 
         Map<String, Integer> propertyIds = nodeProperties
