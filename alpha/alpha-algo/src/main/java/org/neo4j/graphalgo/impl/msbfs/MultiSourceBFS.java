@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;
@@ -81,9 +82,9 @@ public final class MultiSourceBFS implements Runnable {
     // how many sources can be traversed simultaneously
     static final int OMEGA = 64;
 
-    private final ThreadLocal<HugeLongArray> visits;
-    private final ThreadLocal<HugeLongArray> nexts;
-    private final ThreadLocal<HugeLongArray> seens;
+    private final CloseableThreadLocal<HugeLongArray> visits;
+    private final CloseableThreadLocal<HugeLongArray> nexts;
+    private final CloseableThreadLocal<HugeLongArray> seens;
 
     private final IdMapping nodeIds;
     private final RelationshipIterator relationships;
@@ -117,9 +118,9 @@ public final class MultiSourceBFS implements Runnable {
             RelationshipIterator relationships,
             BfsConsumer perNodeAction,
             long nodeCount,
-            ThreadLocal<HugeLongArray> visits,
-            ThreadLocal<HugeLongArray> nexts,
-            ThreadLocal<HugeLongArray> seens,
+            CloseableThreadLocal<HugeLongArray> visits,
+            CloseableThreadLocal<HugeLongArray> nexts,
+            CloseableThreadLocal<HugeLongArray> seens,
             long... startNodes) {
         assert startNodes != null && startNodes.length > 0;
         this.nodeIds = nodeIds;
@@ -139,9 +140,9 @@ public final class MultiSourceBFS implements Runnable {
             long nodeCount,
             long nodeOffset,
             int sourceNodeCount,
-            ThreadLocal<HugeLongArray> visits,
-            ThreadLocal<HugeLongArray> nexts,
-            ThreadLocal<HugeLongArray> seens) {
+            CloseableThreadLocal<HugeLongArray> visits,
+            CloseableThreadLocal<HugeLongArray> nexts,
+            CloseableThreadLocal<HugeLongArray> seens) {
         this.nodeIds = nodeIds;
         this.relationships = relationships;
         this.perNodeAction = perNodeAction;
@@ -477,7 +478,7 @@ public final class MultiSourceBFS implements Runnable {
         abstract MultiSourceBFS next(long from, int length);
     }
 
-    private static final class LocalHugeLongArray extends ThreadLocal<HugeLongArray> {
+    private static final class LocalHugeLongArray extends CloseableThreadLocal<HugeLongArray> {
         private final long size;
         private final AllocationTracker tracker;
 

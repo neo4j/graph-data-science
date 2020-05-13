@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 
 public class CloseableThreadLocal<T> implements Closeable {
 
-    public static <T> CloseableThreadLocal<T> withInitialValue(Supplier<T> initialValueSupplier) {
+    public static <T> CloseableThreadLocal<T> withInitial(Supplier<T> initialValueSupplier) {
         return new CloseableThreadLocal<T>() {
             @Override
             protected T initialValue() {

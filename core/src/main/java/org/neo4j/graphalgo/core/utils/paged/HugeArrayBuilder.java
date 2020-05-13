@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.utils.CloseableThreadLocal;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
@@ -26,13 +28,13 @@ abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
     private final Huge array;
     private final long length;
     private final AtomicLong allocationIndex;
-    private final ThreadLocal<BulkAdder<Array>> adders;
+    private final CloseableThreadLocal<BulkAdder<Array>> adders;
 
     HugeArrayBuilder(Huge array, final long length) {
         this.array = array;
         this.length = length;
         this.allocationIndex = new AtomicLong();
-        this.adders = ThreadLocal.withInitial(this::newBulkAdder);
+        this.adders = CloseableThreadLocal.withInitial(this::newBulkAdder);
     }
 
     private BulkAdder<Array> newBulkAdder() {
@@ -54,6 +56,7 @@ abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
     }
 
     public final Huge build() {
+        adders.close();
         return array;
     }
 

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 import com.carrotsearch.hppc.BitMixer;
 import com.carrotsearch.hppc.Containers;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -36,7 +37,7 @@ public final class HugeLongLongDoubleMap {
     private HugeLongArray keys1;
     private HugeLongArray keys2;
     private HugeDoubleArray values;
-    private ThreadLocal<HugeCursor<long[]>> keysCursor;
+    private CloseableThreadLocal<HugeCursor<long[]>> keysCursor;
 
     private int keyMixer;
     private long assigned;
@@ -192,6 +193,8 @@ public final class HugeLongLongDoubleMap {
         released += values.release();
         tracker.remove(released);
 
+        keysCursor.close();
+
         keys1 = null;
         keys2 = null;
         values = null;
@@ -270,7 +273,7 @@ public final class HugeLongLongDoubleMap {
             this.keys1 = HugeLongArray.newArray(arraySize, tracker);
             this.keys2 = HugeLongArray.newArray(arraySize, tracker);
             this.values = HugeDoubleArray.newArray(arraySize, tracker);
-            keysCursor = ThreadLocal.withInitial(keys1::newCursor);
+            keysCursor = CloseableThreadLocal.withInitial(keys1::newCursor);
         } catch (OutOfMemoryError e) {
             this.keys1 = prevKeys1;
             this.keys2 = prevKeys2;

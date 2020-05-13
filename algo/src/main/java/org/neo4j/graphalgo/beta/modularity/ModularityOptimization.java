@@ -26,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.beta.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.graphalgo.beta.k1coloring.K1Coloring;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringFactory;
@@ -39,6 +38,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.PageFiller;
+import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -211,35 +211,38 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
         this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
 
-        final ThreadLocal<RelationshipIterator> graphCopy = ThreadLocal.withInitial(graph::concurrentCopy);
-        double doubleTotalNodeWeight = ParallelUtil.parallelStream(
-            LongStream.range(0, nodeCount),
-            concurrency,
-            nodeStream ->
-                nodeStream.mapToDouble(nodeId -> {
-                    // Note: this map function has side effects - For performance reasons!!!11!
-                    if (seedProperty == null) {
-                        currentCommunities.set(nodeId, nodeId);
-                    }
+        double doubleTotalNodeWeight;
 
-                    MutableDouble cumulativeWeight = new MutableDouble(0.0D);
+        try (var graphCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
+            doubleTotalNodeWeight = ParallelUtil.parallelStream(
+                LongStream.range(0, nodeCount),
+                concurrency,
+                nodeStream ->
+                    nodeStream.mapToDouble(nodeId -> {
+                        // Note: this map function has side effects - For performance reasons!!!11!
+                        if (seedProperty == null) {
+                            currentCommunities.set(nodeId, nodeId);
+                        }
 
-                    graphCopy.get().forEachRelationship(nodeId, 1.0, (s, t, w) -> {
-                        cumulativeWeight.add(w);
-                        return true;
-                    });
+                        MutableDouble cumulativeWeight = new MutableDouble(0.0D);
 
-                    communityWeights.update(
-                        currentCommunities.get(nodeId),
-                        acc -> acc + cumulativeWeight.doubleValue()
-                    );
+                        graphCopy.get().forEachRelationship(nodeId, 1.0, (s, t, w) -> {
+                            cumulativeWeight.add(w);
+                            return true;
+                        });
 
-                    cumulativeNodeWeights.set(nodeId, cumulativeWeight.doubleValue());
+                        communityWeights.update(
+                            currentCommunities.get(nodeId),
+                            acc -> acc + cumulativeWeight.doubleValue()
+                        );
 
-                    return cumulativeWeight.doubleValue();
-                }).reduce(Double::sum)
-                    .orElseThrow(() -> new RuntimeException("Error initializing modularity optimization."))
-        );
+                        cumulativeNodeWeights.set(nodeId, cumulativeWeight.doubleValue());
+
+                        return cumulativeWeight.doubleValue();
+                    }).reduce(Double::sum)
+                        .orElseThrow(() -> new RuntimeException("Error initializing modularity optimization."))
+            );
+        }
 
         totalNodeWeight = doubleTotalNodeWeight / 2.0;
         currentCommunities.copyTo(nextCommunities, nodeCount);

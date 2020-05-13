@@ -21,11 +21,11 @@ package org.neo4j.graphalgo.impl.embedding;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import java.util.List;
 import java.util.Random;
@@ -131,20 +131,21 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
 
-            ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-                float[] currentEmbedding = new float[embeddingDimension];
-                localCurrent.set(nodeId, currentEmbedding);
-                ThreadLocal<RelationshipIterator> concurrentGraphCopy = ThreadLocal.withInitial(graph::concurrentCopy);
-                concurrentGraphCopy.get().forEachRelationship(nodeId, (source, target) -> {
-                    addArrayValues(currentEmbedding, localPrevious.get(target));
-                    return true;
-                });
-                progressLogger.logProgress(graph.degree(nodeId));
+            try (var concurrentGraphCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
+                ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
+                    float[] currentEmbedding = new float[embeddingDimension];
+                    localCurrent.set(nodeId, currentEmbedding);
+                    concurrentGraphCopy.get().forEachRelationship(nodeId, (source, target) -> {
+                        addArrayValues(currentEmbedding, localPrevious.get(target));
+                        return true;
+                    });
+                    progressLogger.logProgress(graph.degree(nodeId));
 
-                int degree = graph.degree(nodeId) == 0 ? 1 : graph.degree(nodeId);
-                float degreeScale = 1.0f / degree;
-                multiplyArrayValues(currentEmbedding, degreeScale);
-            });
+                    int degree = graph.degree(nodeId) == 0 ? 1 : graph.degree(nodeId);
+                    float degreeScale = 1.0f / degree;
+                    multiplyArrayValues(currentEmbedding, degreeScale);
+                });
+            }
 
             int offset = embeddingDimension * i;
             double weight = iterationWeights.isEmpty()
