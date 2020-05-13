@@ -15,6 +15,7 @@ This topic includes:
 * <<algorithms-node-similarity-syntax, Syntax>>
 * <<algorithms-node-similarity-examples, Examples>>
 ** <<algorithms-node-similarity-examples-stream, Streaming results>>
+** <<algorithms-node-similarity-examples-mutate, Mutate results>>
 ** <<algorithms-node-similarity-examples-write, Writing results>>
 ** <<algorithms-node-similarity-examples-limits, Limiting results>>
 *** <<algorithms-node-similarity-examples-limits-topk-bottomk, topK and bottomK>>
@@ -131,7 +132,7 @@ include::common-configuration/common-configuration-anonymous-graph.adoc[]
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
 
-
+[[algorithms-node-similarity-syntax-mutate]]
 === Mutate mode
 
 .Run Node Similarity in write mode on a graph stored in the catalog.
@@ -151,15 +152,6 @@ The configuration for the `mutate` mode is similar to the `write` mode.
 Instead of specifying a `writeRelationshipType` and `writeProperty`,
 we need to specify a `mutateRelationshipType` and `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
-
-.The following will run the algorithm and store the results in `myGraph`:
-[source, cypher]
-----
-CALL gds.nodeSimilarity.mutate('myGraph', {
-    mutateRelationshipType: 'SIMILAR',
-    mutateProperty: 'score'
-})
-----
 
 
 [[algorithms-node-similarity-syntax-stream]]
@@ -388,6 +380,32 @@ TopK is set to 10, topN is set to 0.
 Because of that the result set contains the top 10 similarity scores for each node.
 
 
+[[algorithms-node-similarity-examples-mutate]]
+=== Mutate results
+
+[role=query-example]
+--
+.The following will run the algorithm, and write back results:
+[source, cypher]
+----
+CALL gds.nodeSimilarity.mutate('myGraph', {
+    mutateRelationshipType: 'SIMILAR',
+    mutateProperty: 'score'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 4             | 10
+|===
+--
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+
 [[algorithms-node-similarity-examples-write]]
 === Writing results
 
@@ -416,28 +434,6 @@ YIELD nodesCompared, relationshipsWritten
 --
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
-
-=== Mutate
-
-[role=query-example, testName=123]
---
-.The following will run the algorithm, and write back results:
-[source, cypher]
-----
-CALL gds.nodeSimilarity.mutate('myGraph', {
-    mutateRelationshipType: 'SIMILAR',
-    mutateProperty: 'score'
-})
-YIELD nodesCompared, relationshipsWritten
-----
-
-.Results
-[opts="header"]
-|===
-| nodesCompared | relationshipsWritten
-| 4             | 10
-|===
---
 
 
 [[algorithms-node-similarity-examples-limits]]
