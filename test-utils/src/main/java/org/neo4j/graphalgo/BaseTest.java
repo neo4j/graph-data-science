@@ -47,6 +47,8 @@ public abstract class BaseTest {
 
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        builder.impermanent();
+        builder.noOpSystemGraphInitializer();
         builder.addExtension(new ConcurrencyControllerExtension());
     }
 
