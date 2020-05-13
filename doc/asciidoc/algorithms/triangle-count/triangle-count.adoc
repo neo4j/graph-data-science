@@ -16,6 +16,7 @@ This topic includes:
 ** <<algorithms-triangle-count-syntax-stats, Stats>>
 ** <<algorithms-triangle-count-syntax-mutate, Mutate>>
 ** <<algorithms-triangle-count-syntax-write, Write>>
+** <<algorithms-triangle-count-syntax-anonymous, Anonymous graphs>>
 ** <<algorithms-triangle-count-syntax-triangles-listing, Triangles Listing>>
 * <<algorithms-triangle-count-examples, Examples>>
 ** <<algorithms-triangle-count-examples-memory-estimation, Memory Estimation>>
