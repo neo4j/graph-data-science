@@ -43,7 +43,7 @@ class NodeSimilarityDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/node-similarity.adoc";
+        return "algorithms/node-similarity/node-similarity.adoc";
     }
 }
 
