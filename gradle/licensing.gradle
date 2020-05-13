@@ -85,6 +85,9 @@ allprojects { proj ->
                 // exclude 'test/resources/**'
                 // exclude 'main/resources/**'
                 include '**/*.java'
+
+                // These files were copied from lucene and need to keep their license headers
+                exclude '**/CloseableThreadLocal*.java'
             }
             tasks.check.dependsOn tasks.license
 
