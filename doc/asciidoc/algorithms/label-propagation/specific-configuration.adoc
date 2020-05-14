@@ -1,0 +1,10 @@
+.Algorithm specific configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                       | Type    | Default                | Optional | Description
+| maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
+| nodeWeightProperty         | String  | null                   | yes      | The property name of node that contain weight. Must be numeric.
+| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
+| seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
+| consecutiveIds             | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
+|===

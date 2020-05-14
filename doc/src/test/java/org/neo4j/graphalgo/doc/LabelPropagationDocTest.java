@@ -20,22 +20,28 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
+import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class LabelPropagationDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {
-        return Arrays.asList(LabelPropagationStreamProc.class, LabelPropagationWriteProc.class, GraphCreateProc.class);
+        return List.of(
+            LabelPropagationStreamProc.class,
+            LabelPropagationStatsProc.class,
+            LabelPropagationMutateProc.class,
+            LabelPropagationWriteProc.class,
+            GraphCreateProc.class);
     }
 
     @Override
     String adocFile() {
-        return "algorithms/label-propagation.adoc";
+        return "algorithms/label-propagation/label-propagation.adoc";
     }
 
 }
