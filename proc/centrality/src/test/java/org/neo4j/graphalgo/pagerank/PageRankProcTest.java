@@ -145,7 +145,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
                  "      TYPE3: {" +
                  "          type: 'TYPE3'," +
                  "          properties: ['equalWeight'], " +
-                 "          projection: 'UNDIRECTED'" +
+                 "          orientation: 'UNDIRECTED'" +
                  "      } " +
                  "   }" +
                  ")");

@@ -99,7 +99,7 @@ CALL gds.labelPropagation.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
-2+| Streaming over anonymous graph using relationship with `REVERSE` projection:
+2+| Streaming over anonymous graph using relationship with `REVERSE` orientation:
 |
 [source, cypher]
 ----

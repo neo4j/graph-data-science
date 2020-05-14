@@ -95,7 +95,7 @@ CALL gds.pageRank.stream({
   relationshipProjection: 'MY_RELATIONSHIP_TYPE'
 })
 ----
-2+| Streaming over anonymous graph with `REVERSE` relationship projection:
+2+| Streaming over anonymous graph with `REVERSE` relationship orientation:
 |
 [source, cypher]
 ----

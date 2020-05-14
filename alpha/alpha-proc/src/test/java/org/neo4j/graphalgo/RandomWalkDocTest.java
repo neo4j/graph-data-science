@@ -80,7 +80,7 @@ public class RandomWalkDocTest extends BaseProcTest {
                        "   relationshipProjection: {" +
                        "     LINKS: {" +
                        "       type: 'LINKS'," +
-                       "       projection: 'UNDIRECTED'" +
+                       "       orientation: 'UNDIRECTED'" +
                        "     }" +
                        "   }," +
                        "   start: id(home)," +

@@ -64,7 +64,7 @@ class ShortestPathAStarDocTest extends BaseProcTest {
                        "   relationshipProjection: {" +
                        "     CONNECTION: {" +
                        "       type: 'CONNECTION'," +
-                       "       projection: 'UNDIRECTED'," +
+                       "       orientation: 'UNDIRECTED'," +
                        "       properties: 'time'" +
                        "     }" +
                        "   }," +

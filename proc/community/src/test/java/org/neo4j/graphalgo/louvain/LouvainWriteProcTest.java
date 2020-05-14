@@ -130,7 +130,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
                        "    relationshipProjection: {" +
                        "      TYPE: {" +
                        "        type: 'TYPE'," +
-                       "        projection: 'UNDIRECTED'" +
+                       "        orientation: 'UNDIRECTED'" +
                        "      }" +
                        "    }" +
                        "})";

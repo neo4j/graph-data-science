@@ -67,7 +67,7 @@ class ShortestPathDocTest extends BaseProcTest {
                        "    ROAD: {" +
                        "        type: 'ROAD'," +
                        "        properties: 'cost'," +
-                       "        projection: 'UNDIRECTED'" +
+                       "        orientation: 'UNDIRECTED'" +
                        "      }" +
                        "    }," +
                        "    startNode: start," +
@@ -112,7 +112,7 @@ class ShortestPathDocTest extends BaseProcTest {
                        "    ROAD: {" +
                        "      type: 'ROAD'," +
                        "      properties: 'cost'," +
-                       "      projection: 'UNDIRECTED'" +
+                       "      orientation: 'UNDIRECTED'" +
                        "    }" +
                        "  }," +
                        "  startNode: start," +

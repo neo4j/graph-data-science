@@ -63,7 +63,7 @@ class RelationshipImporter {
                 ? this::importReverseWithProperties
                 : this::importReverse;
         } else {
-            throw new IllegalArgumentException(formatWithLocale("Unexpected projection: %s", orientation));
+            throw new IllegalArgumentException(formatWithLocale("Unexpected orientation: %s", orientation));
         }
     }
 

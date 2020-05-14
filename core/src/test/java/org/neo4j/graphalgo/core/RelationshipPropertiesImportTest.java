@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,7 +141,7 @@ class RelationshipPropertiesImportTest extends BaseTest {
             case UNDIRECTED:
                 return "<->";
             default:
-                throw new IllegalArgumentException("Unknown projection: " + orientation);
+                throw new IllegalArgumentException("Unknown orientation: " + orientation);
         }
     }
 }

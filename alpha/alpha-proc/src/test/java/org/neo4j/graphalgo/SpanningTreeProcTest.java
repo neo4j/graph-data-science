@@ -96,9 +96,20 @@ public class SpanningTreeProcTest extends BaseProcTest {
         for (int i = 0; i < 1024; i++) {
             insert1024NodesQuery = insert1024NodesQuery + "CREATE(x" + i + ":Node) ";
         }
-        String createQuery = "CALL gds.graph.create('spanningtree_example', 'Place', {EROAD:{type:'EROAD',projection:'Undirected',properties:'distance'}})";
+        String createQuery = "CALL gds.graph.create('spanningtree_example', 'Place', {" +
+                             "  EROAD: {" +
+                             "      type: 'EROAD'," +
+                             "      orientation: 'Undirected'," +
+                             "      properties: 'distance'" +
+                             "  }" +
+                             "})";
         String algoQuery = "MATCH (n:Place {id:\"Amsterdam\"})\n" +
-                           "CALL gds.alpha.spanningTree.minimum.write('spanningtree_example', {weightWriteProperty:'cost', startNodeId: id(n), writeProperty:'MNIST', relationshipWeightProperty:'distance'})\n" +
+                           "CALL gds.alpha.spanningTree.minimum.write('spanningtree_example', {" +
+                           "    weightWriteProperty:'cost'," +
+                           "    startNodeId: id(n)," +
+                           "    writeProperty:'MNIST'," +
+                           "    relationshipWeightProperty:'distance'" +
+                           "})\n" +
                            "YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount\n" +
                            "RETURN createMillis, computeMillis, writeMillis, effectiveNodeCount";
         runQuery(insert1024NodesQuery);

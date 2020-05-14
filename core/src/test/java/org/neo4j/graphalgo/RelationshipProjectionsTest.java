@@ -51,7 +51,7 @@ class RelationshipProjectionsTest {
         Map<String, Object> noProperties = map(
             "MY_TYPE", map(
                 "type", "T",
-                "projection", "NATURAL",
+                "orientation", "NATURAL",
                 "aggregation", "SINGLE"
             ),
             "ANOTHER", map(
@@ -135,7 +135,7 @@ class RelationshipProjectionsTest {
         Map<String, Object> projection = map(
             "MY_TYPE", map(
                 "type", "T",
-                "projection", "NATURAL",
+                "orientation", "NATURAL",
                 "aggregation", "SINGLE",
                 "properties", map(
                     "weight",

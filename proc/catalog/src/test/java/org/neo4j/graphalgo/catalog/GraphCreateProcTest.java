@@ -1156,7 +1156,7 @@ class GraphCreateProcTest extends BaseProcTest {
             "{" +
             "    B: {" +
             "        type: 'REL'," +
-            "        projection: 'NATURAL'," +
+            "        orientation: 'NATURAL'," +
             "        aggregation: 'NONE'," +
             "        properties: {" +
             "            weight: {" +
