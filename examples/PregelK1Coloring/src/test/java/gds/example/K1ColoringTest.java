@@ -68,7 +68,7 @@ final class K1ColoringTest extends AlgoTestBase {
             .loadAnyLabel()
             .loadAnyRelationshipType()
             .build()
-            .graph();
+            .graph(NativeFactory.class);
     }
 
     @AfterEach
