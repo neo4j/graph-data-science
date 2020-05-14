@@ -29,10 +29,12 @@ import org.neo4j.values.storable.NumberType;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
@@ -60,7 +62,12 @@ public interface GraphStore {
 
     boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey);
 
-    List<String> nodePropertyKeys(Collection<NodeLabel> labels);
+    default Collection<String> nodePropertyKeys(Collection<NodeLabel> labels) {
+        return labels
+            .stream()
+            .flatMap(label -> nodePropertyKeys(label).stream())
+            .collect(Collectors.toList());
+    }
 
     NumberType nodePropertyType(NodeLabel label, String propertyKey);
 
@@ -89,7 +96,20 @@ public interface GraphStore {
 
     boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey);
 
-    List<String> relationshipPropertyKeys(Collection<RelationshipType> relTypes);
+    default Collection<String> relationshipPropertyKeys(Collection<RelationshipType> relTypes) {
+        if (relTypes.isEmpty()) {
+            return List.of();
+        }
+        // intersection of propertyKeys
+        Iterator<RelationshipType> iterator = relTypes.iterator();
+        Set<String> result = relationshipPropertyKeys(iterator.next());
+        while (iterator.hasNext()) {
+            result.retainAll(relationshipPropertyKeys(iterator.next()));
+        }
+
+        return result;
+    }
+
 
     NumberType relationshipPropertyType(String propertyKey);
 

@@ -54,6 +54,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -157,7 +158,7 @@ public abstract class AlgoBaseProc<
             } else {
                 Graph filteredGraph = graphStore.getGraph(
                     config.nodeLabelIdentifiers(graphStore),
-                    config.relationshipTypeIdentifiers(graphStore),
+                    config.internalRelationshipTypes(graphStore),
                     Optional.empty()
                 );
                 long relCount = filteredGraph.relationshipCount();
@@ -217,7 +218,7 @@ public abstract class AlgoBaseProc<
             : Optional.empty();
 
         Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
-        Collection<RelationshipType> relationshipTypes = config.relationshipTypeIdentifiers(graphStore);
+        Collection<RelationshipType> relationshipTypes = config.internalRelationshipTypes(graphStore);
 
         return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
     }
@@ -279,8 +280,9 @@ public abstract class AlgoBaseProc<
             String weightProperty = ((NodeWeightConfig) config).nodeWeightProperty();
             if (weightProperty != null && !graphStore.hasNodeProperty(filterLabels, weightProperty)) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Node weight property `%s` not found in graph with node properties: %s",
+                    "Node weight property `%s` not found in graph with node labels: %s and node properties: %s",
                     weightProperty,
+                    StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
                     graphStore.nodePropertyKeys(filterLabels)
                 ));
             }
@@ -288,11 +290,13 @@ public abstract class AlgoBaseProc<
         if (config instanceof RelationshipWeightConfig) {
 
             String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
-            if (weightProperty != null && !graphStore.hasRelationshipProperty(config.relationshipTypeIdentifiers(graphStore), weightProperty)) {
+            Collection<RelationshipType> internalRelationshipTypes = config.internalRelationshipTypes(graphStore);
+            if (weightProperty != null && !graphStore.hasRelationshipProperty(internalRelationshipTypes, weightProperty)) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship weight property `%s` not found in graph with relationship properties: %s",
+                    "Relationship weight property `%s` not found in graph with relationship types: %s and relationship properties: %s",
                     weightProperty,
-                    graphStore.relationshipPropertyKeys(config.relationshipTypeIdentifiers(graphStore))
+                    StringJoining.join(internalRelationshipTypes.stream().map(RelationshipType::name)),
+                    graphStore.relationshipPropertyKeys(internalRelationshipTypes)
                 ));
             }
         }

@@ -52,7 +52,7 @@ public interface AlgoBaseConfig extends BaseConfig {
     }
 
     @Configuration.Ignore
-    default Collection<RelationshipType> relationshipTypeIdentifiers(GraphStore graphStore) {
+    default Collection<RelationshipType> internalRelationshipTypes(GraphStore graphStore) {
         return relationshipTypes().contains(PROJECT_ALL)
             ? graphStore.relationshipTypes()
             : relationshipTypes().stream().map(RelationshipType::of).collect(Collectors.toList());

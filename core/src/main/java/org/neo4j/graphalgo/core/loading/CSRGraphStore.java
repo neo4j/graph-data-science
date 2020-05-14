@@ -212,14 +212,6 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public List<String> nodePropertyKeys(Collection<NodeLabel> labels) {
-        return labels
-            .stream()
-            .flatMap(label -> nodePropertyKeys(label).stream())
-            .collect(Collectors.toList());
-    }
-
-    @Override
     public void addNodeProperty(
         NodeLabel nodeLabel,
         String propertyKey,
@@ -309,15 +301,6 @@ public final class CSRGraphStore implements GraphStore {
         return relTypes
             .stream()
             .allMatch(relType -> relationshipProperties.containsKey(relType) && relationshipProperties.get(relType).containsKey(propertyKey));
-    }
-
-    @Override
-    public List<String> relationshipPropertyKeys(Collection<RelationshipType> relTypes) {
-        return relTypes
-            .stream()
-            .flatMap(type -> relationshipPropertyKeys(type).stream())
-            .distinct()
-            .collect(Collectors.toList());
     }
 
     @Override
