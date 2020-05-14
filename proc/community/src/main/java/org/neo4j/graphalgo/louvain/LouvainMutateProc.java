@@ -93,6 +93,7 @@ public class LouvainMutateProc extends MutateProc<Louvain, Louvain, LouvainMutat
 
     public static final class MutateResult {
 
+        public long nodePropertiesWritten;
         public long createMillis;
         public long computeMillis;
         public long mutateMillis;
@@ -105,6 +106,7 @@ public class LouvainMutateProc extends MutateProc<Louvain, Louvain, LouvainMutat
         public Map<String, Object> configuration;
 
         MutateResult(
+            long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
             long mutateMillis,
@@ -116,6 +118,7 @@ public class LouvainMutateProc extends MutateProc<Louvain, Louvain, LouvainMutat
             Map<String, Object> communityDistribution,
             Map<String, Object> configuration
         ) {
+            this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.mutateMillis = mutateMillis;
@@ -137,6 +140,7 @@ public class LouvainMutateProc extends MutateProc<Louvain, Louvain, LouvainMutat
             @Override
             protected MutateResult buildResult() {
                 return new MutateResult(
+                    nodePropertiesWritten,
                     createMillis,
                     computeMillis,
                     mutateMillis,
