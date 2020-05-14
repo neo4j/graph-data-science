@@ -35,6 +35,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @DataClass
@@ -113,6 +114,10 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
             );
         }
         return NodeProjections.of(unmodifiableMap(projections));
+    }
+
+    public static NodeProjections single(NodeLabel label, NodeProjection projection) {
+        return NodeProjections.of(genericMap(label, projection));
     }
 
     public static NodeProjections all() {

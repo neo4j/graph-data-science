@@ -19,7 +19,15 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
@@ -39,17 +47,26 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.NODE;
-import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.RELATIONSHIP;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig> {
 
     private final GraphCreateFromCypherConfig cypherConfig;
+    private EstimationResult nodeEstimation;
+    private EstimationResult relationshipEstimation;
 
     public CypherFactory(
         GraphCreateFromCypherConfig graphCreateConfig,
@@ -60,37 +77,39 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
     }
 
     public final MemoryEstimation memoryEstimation() {
-        BatchLoadResult nodeCount;
-        BatchLoadResult relCount;
-        try (Ktx ktx = setReadOnlySecurityContext()) {
-            nodeCount = new CountingCypherRecordLoader(
-                nodeQuery(),
-                NODE,
-                loadingContext.api(),
-                cypherConfig,
-                loadingContext
-            ).load(ktx);
-            relCount = new CountingCypherRecordLoader(
-                relationshipQuery(),
-                RELATIONSHIP,
-                loadingContext.api(),
-                cypherConfig,
-                loadingContext
-            ).load(ktx);
-        }
-
-        GraphDimensions estimateDimensions = ImmutableGraphDimensions.builder()
-            .from(dimensions)
-            .nodeCount(nodeCount.rows())
-            .maxRelCount(relCount.rows())
+        var nodeProjection = NodeProjection
+            .builder()
+            .label(PROJECT_ALL)
+            .addAllProperties(getNodeEstimation().propertyMappings())
             .build();
 
-        return NativeFactory.getMemoryEstimation(estimateDimensions, RelationshipProjections.all());
+        var nodeProjections = NodeProjections.single(
+            NodeLabel.ALL_NODES,
+            nodeProjection
+        );
+
+        var relationshipProjection = RelationshipProjection
+            .builder()
+            .type(PROJECT_ALL)
+            .addAllProperties(getRelationshipEstimation().propertyMappings())
+            .build();
+
+        var relationshipProjections = RelationshipProjections.single(
+            RelationshipType.ALL_RELATIONSHIPS,
+            relationshipProjection
+        );
+
+        return NativeFactory.getMemoryEstimation(nodeProjections, relationshipProjections);
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(GraphDimensions dimensions) {
-        return NativeFactory.getMemoryEstimation(dimensions, RelationshipProjections.all());
+    public GraphDimensions estimationDimensions() {
+        return ImmutableGraphDimensions.builder()
+            .from(dimensions)
+            .highestNeoId(getNodeEstimation().estimatedRows())
+            .nodeCount(getNodeEstimation().estimatedRows())
+            .maxRelCount(getRelationshipEstimation().estimatedRows())
+            .build();
     }
 
     @Override
@@ -199,6 +218,46 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
         }
     }
 
+    private EstimationResult getNodeEstimation() {
+        if (nodeEstimation == null) {
+            nodeEstimation = runEstimationQuery(
+                nodeQuery(),
+                NodeRowVisitor.RESERVED_COLUMNS
+            );
+        }
+        return nodeEstimation;
+    }
+
+    private EstimationResult getRelationshipEstimation() {
+        if (relationshipEstimation == null) {
+            relationshipEstimation = runEstimationQuery(
+                relationshipQuery(),
+                RelationshipRowVisitor.RESERVED_COLUMNS
+            );
+        }
+        return relationshipEstimation;
+    }
+
+    private EstimationResult runEstimationQuery(String query, Collection<String> reservedColumns) {
+        EstimationResult estimationResult;
+
+        try (Ktx ktx = setReadOnlySecurityContext()) {
+            var explainQuery = formatWithLocale("EXPLAIN %s", query);
+            var result = ktx.run(tx -> tx.execute(explainQuery));
+
+            var estimatedRows = (Number) result.getExecutionPlanDescription().getArguments().get("EstimatedRows");
+
+            var propertyColumns = new ArrayList<>(result.columns());
+            propertyColumns.removeAll(reservedColumns);
+
+            estimationResult = ImmutableEstimationResult.of(estimatedRows.longValue(), propertyColumns.size());
+
+            result.close();
+        }
+
+        return estimationResult;
+    }
+
     static final class Ktx implements AutoCloseable {
         private final GraphDatabaseService db;
         private final GraphDatabaseApiProxy.Transactions top;
@@ -236,5 +295,31 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
                 top.close();
             }
         }
+    }
+
+    @ValueClass
+    interface EstimationResult {
+        long estimatedRows();
+        long propertyCount();
+
+        @Value.Derived
+        default Map<String, Integer> propertyTokens() {
+            return LongStream
+                .range(0, propertyCount())
+                .boxed()
+                .collect(Collectors.toMap(
+                    Object::toString,
+                    property -> NO_SUCH_PROPERTY_KEY
+                ));
+        }
+        @Value.Derived
+        default Collection<PropertyMapping> propertyMappings() {
+            return LongStream
+                .range(0, propertyCount())
+                .boxed()
+                .map(property -> PropertyMapping.of(property.toString(), 0))
+                .collect(Collectors.toList());
+        }
+
     }
 }

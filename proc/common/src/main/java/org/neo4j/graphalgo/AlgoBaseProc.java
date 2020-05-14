@@ -130,7 +130,7 @@ public abstract class AlgoBaseProc<
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
             GraphStoreFactory<?> graphStoreFactory = loader.graphStoreFactory();
-            estimateDimensions = graphStoreFactory.dimensions();
+            estimateDimensions = graphStoreFactory.estimationDimensions();
 
             if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {
                 estimateDimensions = ImmutableGraphDimensions.builder()
@@ -141,7 +141,7 @@ public abstract class AlgoBaseProc<
                     .build();
             }
 
-            estimationBuilder.add("graph", graphStoreFactory.memoryEstimation(estimateDimensions));
+            estimationBuilder.add("graph", graphStoreFactory.memoryEstimation());
         } else {
             String graphName = config.graphName().orElseThrow(IllegalStateException::new);
 

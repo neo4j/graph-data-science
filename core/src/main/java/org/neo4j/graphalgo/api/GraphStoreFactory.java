@@ -72,11 +72,15 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
 
     public abstract ImportResult build();
 
-    public abstract MemoryEstimation memoryEstimation(GraphDimensions dimensions);
+    public abstract MemoryEstimation memoryEstimation();
 
     public GraphDimensions dimensions() {
         return this.dimensions;
     }
+
+    public GraphDimensions estimationDimensions() {
+        return dimensions;
+    };
 
     protected abstract ProgressLogger initProgressLogger();
 
