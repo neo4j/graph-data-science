@@ -75,6 +75,14 @@ public final class GraphStoreCatalog {
         graphStore.release();
     }
 
+    public static int graphStoresCount() {
+        return (int) userCatalogs
+            .values()
+            .stream()
+            .mapToLong(userCatalog -> userCatalog.getGraphStores().values().size())
+            .sum();
+    }
+
     private static UserCatalog getUserCatalog(String username) {
         return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
     }

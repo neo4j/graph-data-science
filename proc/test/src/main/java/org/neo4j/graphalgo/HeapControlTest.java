@@ -20,11 +20,17 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.CSRGraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -65,6 +71,32 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
         String message = ExceptionUtil.rootCause(exception).getMessage();
         assertTrue(message.matches(
             "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
+    }
+
+    @Test
+    default void shouldFailOnInsufficientMemoryWithLoadedGraphs() {
+        GraphCreateFromStoreConfig storeConfig = GraphCreateFromStoreConfig.emptyWithName("", "graph1");
+        GraphStore graphStore = CSRGraphStore.of(
+            null,
+            Collections.emptyMap(),
+            Collections.emptyMap(),
+            Collections.emptyMap(),
+            1,
+            AllocationTracker.EMPTY
+        );
+        GraphStoreCatalog.set(storeConfig, graphStore);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            applyOnProcedure(proc -> {
+                CONFIG config = proc.newConfig(Optional.empty(), createMinimalImplicitConfig(CypherMapWrapper.empty()));
+                proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
+            });
+        });
+
+        String message = ExceptionUtil.rootCause(exception).getMessage();
+        assertTrue(message.matches(
+            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\). " +
+            "Note: you have 1 graphs currently loaded into memory."));
     }
 
     @Test
