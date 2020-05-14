@@ -158,6 +158,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
             .yields(
+                "nodePropertiesWritten",
                 "createMillis",
                 "computeMillis",
                 "mutateMillis",
@@ -172,6 +173,8 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
         runQueryWithRowConsumer(
             query,
             row -> {
+                assertEquals(15L, row.getNumber("nodePropertiesWritten"));
+
                 assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
