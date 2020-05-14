@@ -155,7 +155,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
     }
 
     private static void validateConfigKeys(Map<String, Object> map) {
-        ConfigKeyValidation.requireOnlyKeysFrom(List.of(TYPE_KEY, ORIENTATION_KEY, AGGREGATION_KEY), map.keySet());
+        ConfigKeyValidation.requireOnlyKeysFrom(List.of(TYPE_KEY, ORIENTATION_KEY, AGGREGATION_KEY, PROPERTIES_KEY), map.keySet());
     }
 
     @org.immutables.builder.Builder.AccessibleFields

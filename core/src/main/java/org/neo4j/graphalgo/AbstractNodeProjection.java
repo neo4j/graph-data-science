@@ -105,7 +105,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
     }
 
     private static void validateConfigKeys(Map<String, Object> map) {
-        ConfigKeyValidation.requireOnlyKeysFrom(List.of(LABEL_KEY), map.keySet());
+        ConfigKeyValidation.requireOnlyKeysFrom(List.of(LABEL_KEY, PROPERTIES_KEY), map.keySet());
     }
 
     @org.immutables.builder.Builder.AccessibleFields
