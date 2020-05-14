@@ -25,7 +25,7 @@ include::louvain/louvain.adoc[leveloffset=+1]
 
 include::label-propagation/label-propagation.adoc[leveloffset=+1]
 
-include::wcc.adoc[leveloffset=+1]
+include::wcc/wcc.adoc[leveloffset=+1]
 
 include::triangle-count/triangle-count.adoc[leveloffset=+1]
 
