@@ -10,7 +10,7 @@ buildscript {
         catalogDir = "$projectDir/docbook/catalog"
     }
     repositories {
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath "org.asciidoctor:asciidoctorj:$asciidoctorjVersion"
