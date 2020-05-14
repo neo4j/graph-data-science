@@ -22,7 +22,7 @@ This topic includes:
 ** <<algorithms-page-rank-examples-memory-estimation, Memory Estimation>>
 ** <<algorithms-page-rank-examples-stream, Stream>>
 ** <<algorithms-page-rank-examples-stats, Stats>>
-** <<algorithms-page-rank-examples-write, Mutate>>
+** <<algorithms-page-rank-examples-mutate, Mutate>>
 ** <<algorithms-page-rank-examples-write, Write>>
 ** <<algorithms-page-rank-examples-weighted, Weighted>>
 ** <<algorithms-page-rank-examples-tolerance, Tolerance>>
@@ -42,7 +42,7 @@ image::page-rank-formula.svg[align="center"]
 
 where,
 
-* we assume that a page _A_ has pages _T~1~_ to _T~n~_ which point to it (i.e., are citations).
+* we assume that a page _A_ has pages _T~1~_ to _T~n~_ which point to it.
 * _d_ is a damping factor which can be set between 0 and 1.
 It is usually set to 0.85.
 * _C(A)_ is defined as the number of links going out of page _A_.
@@ -71,6 +71,9 @@ There are some things to be aware of when using the Page Rank algorithm:
 * Rank sink can occur when a network of pages is forming an infinite cycle.
 * Dead-ends occur when pages have no out-links.
 If a page contains a link to another page which has no out-links, the link would be known as a dangling link.
+
+Changing the value of damping factor can help with these considerations.
+It can be interpreted as a probability of a web surfer to sometimes jump to a random page and therefore not getting stuck in sinks.
 
 
 [[algorithms-page-rank-syntax]]
@@ -261,7 +264,7 @@ The results are the same as for running write mode with a named graph, <<algorit
 [[algorithms-page-rank-examples]]
 == Examples
 
-In this section we will show examples of executing the Triangle Count algorithm on a concrete graph.
+In this section we will show examples of executing the PageRank algorithm on a concrete graph.
 The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
 The example graph looks like this:
 
@@ -270,32 +273,33 @@ image::page-rank-graph.svg[align="center"]
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
 ----
-CREATE (home:Page {name:'Home'})
-CREATE (about:Page {name:'About'})
-CREATE (product:Page {name:'Product'})
-CREATE (links:Page {name:'Links'})
-CREATE (a:Page {name:'Site A'})
-CREATE (b:Page {name:'Site B'})
-CREATE (c:Page {name:'Site C'})
-CREATE (d:Page {name:'Site D'})
+CREATE
+  (home:Page {name:'Home'}),
+  (about:Page {name:'About'}),
+  (product:Page {name:'Product'}),
+  (links:Page {name:'Links'}),
+  (a:Page {name:'Site A'}),
+  (b:Page {name:'Site B'}),
+  (c:Page {name:'Site C'}),
+  (d:Page {name:'Site D'}),
 
-CREATE (home)-[:LINKS {weight: 0.2}]->(about)
-CREATE (home)-[:LINKS {weight: 0.2}]->(links)
-CREATE (home)-[:LINKS {weight: 0.6}]->(product)
-CREATE (about)-[:LINKS {weight: 1.0}]->(home)
-CREATE (product)-[:LINKS {weight: 1.0}]->(home)
-CREATE (a)-[:LINKS {weight: 1.0}]->(home)
-CREATE (b)-[:LINKS {weight: 1.0}]->(home)
-CREATE (c)-[:LINKS {weight: 1.0}]->(home)
-CREATE (d)-[:LINKS {weight: 1.0}]->(home)
-CREATE (links)-[:LINKS {weight: 0.8}]->(home)
-CREATE (links)-[:LINKS {weight: 0.05}]->(a)
-CREATE (links)-[:LINKS {weight: 0.05}]->(b)
-CREATE (links)-[:LINKS {weight: 0.05}]->(c)
-CREATE (links)-[:LINKS {weight: 0.05}]->(d)
+  (home)-[:LINKS {weight: 0.2}]->(about),
+  (home)-[:LINKS {weight: 0.2}]->(links),
+  (home)-[:LINKS {weight: 0.6}]->(product),
+  (about)-[:LINKS {weight: 1.0}]->(home),
+  (product)-[:LINKS {weight: 1.0}]->(home),
+  (a)-[:LINKS {weight: 1.0}]->(home),
+  (b)-[:LINKS {weight: 1.0}]->(home),
+  (c)-[:LINKS {weight: 1.0}]->(home),
+  (d)-[:LINKS {weight: 1.0}]->(home),
+  (links)-[:LINKS {weight: 0.8}]->(home),
+  (links)-[:LINKS {weight: 0.05}]->(a),
+  (links)-[:LINKS {weight: 0.05}]->(b),
+  (links)-[:LINKS {weight: 0.05}]->(c),
+  (links)-[:LINKS {weight: 0.05}]->(d);
 ----
 
-This graph represents seven pages, linking to another.
+This graph represents eight pages, linking to one another.
 Each relationship has a property called `weight`, which describes the importance of the relationship.
 
 include::../shared/examples-named-native-note.adoc[]
@@ -538,14 +542,16 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Compared to the results from the <<algorithms-page-rank-examples-stream, stream>> example which is using the default value of `tolerance` the scores are considerably smaller when using `tolerance: 0.1`.
+In this e we are using `tolerance: 0.1`, the results are a bit different compared to the ones from <<algorithms-page-rank-examples-stream, stream example>> which is using the default value of `tolerance`.
+Note that the nodes 'About', 'Link' and 'Product' now have the same score, while with the default value of `tolerance` the node 'Product' has higher score than the other two.
 
 
 [[algorithms-page-rank-examples-damping]]
 === Damping Factor
 
 The damping factor configuration parameter accepts values between 0 and 1.
-If its value is too high then it takes ages for the scores to settle, if it's too low then we get repeated over-shoot, both above and below the average - the numbers just swing about the average like a pendulum and never settle down.
+If its value is too high then problems of sinks and spider traps may occur, and the values may oscillate so that the algorithm does not converge.
+If it's too low then all scores are pushed towards 1, and the result will not sufficiently reflect the structure of the graph.
 
 [role=query-example]
 --
@@ -576,8 +582,8 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Again, compared to the results from the <<algorithms-page-rank-examples-stream, stream>> example which is using the default value of `tolerance` the scores are considerably smaller when using `tolerance: 0.1`.
-The example graph that we are using is quite small and can't fully show the effects of changing the `dampingFactor` configuration parameter.
+Compared to the results from the <<algorithms-page-rank-examples-stream, stream example>> which is using the default value of `dampingFactor` the score values are closer to each other when using `dampingFactor: 0.05`.
+Also, note that the nodes 'About', 'Link' and 'Product' now have the same score, while with the default value of `dampingFactor` the node 'Product' has higher score than the other two.
 
 [[algorithms-page-rank-examples-personalised]]
 === Personalised PageRank
@@ -619,4 +625,4 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Comparing these results to the ones from the <<algorithms-page-rank-examples-stream, stream>> example (which is not using `sourceNodes` configuration parameter) shows us that the 'Site A' node that we used in the `sourceNodes` list received quite the `score` boost.
+Comparing these results to the ones from the <<algorithms-page-rank-examples-stream, stream example>> (which is not using `sourceNodes` configuration parameter) shows that the 'Site A' node  that we used in the `sourceNodes` list now scores second instead of fourth.

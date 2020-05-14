@@ -19,7 +19,7 @@ This topic includes:
 ** <<algorithms-algo-examples-memory-estimation, Memory Estimation>>
 ** <<algorithms-algo-examples-stream, Stream>>
 ** <<algorithms-algo-examples-stats, Stats>>
-** <<algorithms-algo-examples-write, Mutate>>
+** <<algorithms-algo-examples-mutate, Mutate>>
 ** <<algorithms-algo-examples-write, Write>>
 ** <<algorithms-algo-examples-unweighted, Unweighted>>
 ** <<algorithms-algo-examples-weighted, Weighted>>
