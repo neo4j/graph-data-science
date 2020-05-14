@@ -63,10 +63,17 @@ public interface GraphStore {
     boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey);
 
     default Collection<String> nodePropertyKeys(Collection<NodeLabel> labels) {
-        return labels
-            .stream()
-            .flatMap(label -> nodePropertyKeys(label).stream())
-            .collect(Collectors.toList());
+        if (labels.isEmpty()) {
+            return List.of();
+        }
+        // intersection of propertyKeys
+        Iterator<NodeLabel> iterator = labels.iterator();
+        Set<String> result = nodePropertyKeys(iterator.next());
+        while (iterator.hasNext()) {
+            result.retainAll(nodePropertyKeys(iterator.next()));
+        }
+
+        return result;
     }
 
     NumberType nodePropertyType(NodeLabel label, String propertyKey);
