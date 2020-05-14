@@ -19,15 +19,14 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.core.ConfigKeyValidation.StringAndScore;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,14 +36,12 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static org.neo4j.graphalgo.core.StringSimilarity.jaroWinkler;
+import static org.neo4j.graphalgo.core.ConfigKeyValidation.similarStrings;
 
 /**
  * Wrapper around configuration options map
  */
 public final class CypherMapWrapper {
-
-    private static final double REQUIRED_SIMILARITY = 0.8;
 
     private final Map<String, Object> config;
 
@@ -201,37 +198,7 @@ public final class CypherMapWrapper {
     }
 
     public void requireOnlyKeysFrom(Collection<String> allowedKeys) {
-        Collection<String> keys = new HashSet<>(config.keySet());
-        keys.removeAll(allowedKeys);
-        if (keys.isEmpty()) {
-            return;
-        }
-        List<String> suggestions = keys.stream()
-            .map(invalid -> {
-                List<String> candidates = similarStrings(invalid, allowedKeys);
-                if (candidates.isEmpty()) {
-                    return invalid;
-                }
-                if (candidates.size() == 1) {
-                    return String.format(Locale.ENGLISH, "%s (Did you mean [%s]?)", invalid, candidates.get(0));
-                }
-                return String.format(Locale.ENGLISH, "%s (Did you mean one of [%s]?)", invalid, String.join(", ", candidates));
-            })
-            .collect(Collectors.toList());
-
-        if (suggestions.size() == 1) {
-            throw new IllegalArgumentException(String.format(
-                Locale.ENGLISH,
-                "Unexpected configuration key: %s",
-                suggestions.get(0)
-            ));
-        }
-
-        throw new IllegalArgumentException(String.format(
-            Locale.ENGLISH,
-            "Unexpected configuration keys: %s",
-            String.join(", ", suggestions)
-        ));
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, config.keySet());
     }
 
     @SuppressWarnings("unchecked")
@@ -540,15 +507,6 @@ public final class CypherMapWrapper {
         ));
     }
 
-    private static List<String> similarStrings(CharSequence value, Collection<String> candidates) {
-        return candidates.stream()
-            .map(candidate -> ImmutableStringAndScore.of(candidate, jaroWinkler(value, candidate)))
-            .filter(candidate -> candidate.value() > REQUIRED_SIMILARITY)
-            .sorted()
-            .map(StringAndScore::string)
-            .collect(Collectors.toList());
-    }
-
     // FACTORIES
 
     public static CypherMapWrapper create(Map<String, Object> config) {
@@ -603,31 +561,5 @@ public final class CypherMapWrapper {
         Map<String, Object> newMap = new HashMap<>(config);
         newMap.keySet().removeAll(keys);
         return new CypherMapWrapper(newMap);
-    }
-
-    @Value.Style(
-        allParameters = true,
-        builderVisibility = Value.Style.BuilderVisibility.SAME,
-        jdkOnly = true,
-        overshadowImplementation = true,
-        typeAbstract = "*",
-        visibility = Value.Style.ImplementationVisibility.PACKAGE
-    )
-    @Value.Immutable(copy = false, builder = false)
-    interface StringAndScore extends Comparable<StringAndScore> {
-        String string();
-
-        double value();
-
-        default boolean isBetterThan(@Nullable StringAndScore other) {
-            return other == null || value() > other.value();
-        }
-
-        @Override
-        default int compareTo(StringAndScore other) {
-            // ORDER BY score DESC, string ASC
-            int result = Double.compare(other.value(), this.value());
-            return (result != 0) ? result : this.string().compareTo(other.string());
-        }
     }
 }
