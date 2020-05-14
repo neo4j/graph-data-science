@@ -1,8 +1,8 @@
 [[algorithms-page-rank]]
-= Page Rank
+= PageRank
 :entity: node
 :result: score
-:algorithm: Page Rank
+:algorithm: PageRank
 
 [abstract]
 --
@@ -33,10 +33,10 @@ This topic includes:
 [[algorithms-page-rank-intro]]
 == Introduction
 
-The Page Rank algorithm measures the importance of each node within the graph, based on the number incoming relationships and the importance of the corresponding source nodes.
+The PageRank algorithm measures the importance of each node within the graph, based on the number incoming relationships and the importance of the corresponding source nodes.
 The underlying assumption roughly speaking is that a page is only as important as the pages that link to it.
 
-Page Rank is introduced in the original Google paper as a function that solves the following equation:
+PageRank is introduced in the original Google paper as a function that solves the following equation:
 
 image::page-rank-formula.svg[align="center"]
 
@@ -65,7 +65,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-page-rank-considerations]]
 == Considerations
 
-There are some things to be aware of when using the Page Rank algorithm:
+There are some things to be aware of when using the PageRank algorithm:
 
 * If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
 * Rank sink can occur when a network of pages is forming an infinite cycle.
@@ -107,7 +107,7 @@ include::specific-configuration.adoc[]
 |===
 | Name    | Type    | Description
 | nodeId  | Integer | Node ID
-| score   | Float   | Page Rank
+| score   | Float   | PageRank score
 |===
 
 
@@ -386,7 +386,7 @@ NOTE: We are using `stream` mode to illustrate running the algorithm as `weighte
 [[algorithms-page-rank-examples-stats]]
 === Stats
 
-:stats-details: For example PageRank stats returns centrality histogram which can be used to monitor the distribution of page rank values across all computed nodes.
+:stats-details: For example PageRank stats returns centrality histogram which can be used to monitor the distribution of PageRank score values across all computed nodes.
 :stats-syntax: algorithms-page-rank-syntax-stats
 include::../shared/examples-stats-intro.adoc[]
 
@@ -589,10 +589,10 @@ Also, note that the nodes 'About', 'Link' and 'Product' now have the same score,
 === Personalised PageRank
 
 
-Personalized Page Rank is a variation of Page Rank which is biased towards a set of `sourceNodes`.
-This variant of Page Rank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
+Personalized PageRank is a variation of PageRank which is biased towards a set of `sourceNodes`.
+This variant of PageRank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
 
-The following examples show how to run Page Rank centered around 'Site A'.
+The following examples show how to run PageRank centered around 'Site A'.
 
 [role=query-example]
 --
