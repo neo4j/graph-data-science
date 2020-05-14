@@ -113,4 +113,39 @@ class ConfigKeyValidationTest extends BaseProcTest {
             rootCause(IllegalArgumentException.class, "Unexpected configuration key: maxiterations (Did you mean [maxIterations]?)")
         );
     }
+
+    @Test
+    void misspelledRelationshipProjectionKeyWithSuggestion() {
+        QueryExecutionException exception = Assertions.assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.testProc.test({ nodeProjection: '*', relationshipProjection: {" +
+                           "    FOO: {" +
+                           "        tpe: 'FOO'" +
+                           "    }" +
+                           "}, writeProperty: 'p'})")
+        );
+
+        assertThat(
+            exception,
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: tpe (Did you mean [type]?)")
+        );
+    }
+
+    @Test
+    void additionalRelationshipProjectionKey() {
+        QueryExecutionException exception = Assertions.assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.testProc.test({ nodeProjection: '*', relationshipProjection: {" +
+                           "    FOO: {" +
+                           "        type: 'FOO'," +
+                           "        some: 'some'" +
+                           "    }" +
+                           "}, writeProperty: 'p'})")
+        );
+
+        assertThat(
+            exception,
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: some")
+        );
+    }
 }

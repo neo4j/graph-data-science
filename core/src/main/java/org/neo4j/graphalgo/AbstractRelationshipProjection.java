@@ -23,7 +23,9 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.ConfigKeyValidation;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -68,6 +70,8 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         RelationshipProjection.Builder builder = RelationshipProjection.builder();
         String type = String.valueOf(map.getOrDefault(TYPE_KEY, relationshipType.name));
 
+        validateConfigKeys(map);
+
         builder.type(type);
         if (map.containsKey(ORIENTATION_KEY)) {
             builder.orientation(Orientation.of(nonEmptyString(map, ORIENTATION_KEY)));
@@ -78,6 +82,10 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
             return create(map, aggregation, properties -> builder.properties(properties).build());
         }
         return create(map, properties -> builder.properties(properties).build());
+    }
+
+    private static void validateConfigKeys(Map<String, Object> map) {
+        ConfigKeyValidation.requireOnlyKeysFrom(List.of(TYPE_KEY, ORIENTATION_KEY, AGGREGATION_KEY), map.keySet());
     }
 
     private static RelationshipProjection create(
