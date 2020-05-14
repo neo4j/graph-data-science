@@ -74,7 +74,7 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.nodeSimilarity.stream.estimate`
 | `gds.nodeSimilarity.stats`
 | `gds.nodeSimilarity.stats.estimate`
-.8+<.^|<<algorithms-pagerank-syntax, PageRank>>
+.8+<.^|<<algorithms-page-rank-syntax, PageRank>>
 | `gds.pageRank.mutate`
 | `gds.pageRank.mutate.estimate`
 | `gds.pageRank.write`

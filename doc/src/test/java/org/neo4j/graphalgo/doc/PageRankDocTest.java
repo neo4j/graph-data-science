@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
@@ -34,6 +35,7 @@ class PageRankDocTest extends DocTestBase {
         return Arrays.asList(
             PageRankStreamProc.class,
             PageRankWriteProc.class,
+            PageRankMutateProc.class,
             PageRankStatsProc.class,
             GraphCreateProc.class
         );
@@ -41,7 +43,7 @@ class PageRankDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/pagerank.adoc";
+        return "algorithms/page-rank/page-rank.adoc";
     }
 
 }

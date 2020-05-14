@@ -1,0 +1,622 @@
+[[algorithms-page-rank]]
+= Page Rank
+:entity: node
+:result: score
+:algorithm: Page Rank
+
+[abstract]
+--
+This section describes the PageRank algorithm in the Neo4j Graph Data Science library.
+--
+
+This topic includes:
+
+* <<algorithms-page-rank-intro, Introduction>>
+* <<algorithms-page-rank-considerations, Considerations>>
+* <<algorithms-page-rank-syntax, Syntax>>
+** <<algorithms-page-rank-syntax-stream, Stream>>
+** <<algorithms-page-rank-syntax-stats, Stats>>
+** <<algorithms-page-rank-syntax-mutate, Mutate>>
+** <<algorithms-page-rank-syntax-write, Write>>
+* <<algorithms-page-rank-examples, Examples>>
+** <<algorithms-page-rank-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-page-rank-examples-stream, Stream>>
+** <<algorithms-page-rank-examples-stats, Stats>>
+** <<algorithms-page-rank-examples-write, Mutate>>
+** <<algorithms-page-rank-examples-write, Write>>
+** <<algorithms-page-rank-examples-weighted, Weighted>>
+** <<algorithms-page-rank-examples-tolerance, Tolerance>>
+** <<algorithms-page-rank-examples-damping, Damping Factor>>
+** <<algorithms-page-rank-examples-personalised, Personalised PageRank>>
+
+
+[[algorithms-page-rank-intro]]
+== Introduction
+
+The Page Rank algorithm measures the importance of each node within the graph, based on the number incoming relationships and the importance of the corresponding source nodes.
+The underlying assumption roughly speaking is that a page is only as important as the pages that link to it.
+
+Page Rank is introduced in the original Google paper as a function that solves the following equation:
+
+image::page-rank-formula.svg[align="center"]
+
+where,
+
+* we assume that a page _A_ has pages _T~1~_ to _T~n~_ which point to it (i.e., are citations).
+* _d_ is a damping factor which can be set between 0 and 1.
+It is usually set to 0.85.
+* _C(A)_ is defined as the number of links going out of page _A_.
+
+This equation is used to iteratively update a candidate solution and arrive at an approximate solution to the same equation.
+
+For more information on this algorithm, see:
+
+* http://infolab.stanford.edu/~backrub/google.html[The original google paper^]
+* http://delab.csd.auth.gr/~dimitris/courses/ir_spring06/page_rank_computing/01531136.pdf[An Efficient Partition-Based Parallel PageRank Algorithm^]
+* https://arxiv.org/pdf/1407.5107.pdf[PageRank beyond the web^] for use cases
+
+[NOTE]
+====
+Running this algorithm requires sufficient memory availability.
+Before running this algorithm, we recommend that you read <<memory-estimation>>.
+====
+
+
+[[algorithms-page-rank-considerations]]
+== Considerations
+
+There are some things to be aware of when using the Page Rank algorithm:
+
+* If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
+* Rank sink can occur when a network of pages is forming an infinite cycle.
+* Dead-ends occur when pages have no out-links.
+If a page contains a link to another page which has no out-links, the link would be known as a dangling link.
+
+
+[[algorithms-page-rank-syntax]]
+== Syntax
+
+include::../shared/syntax-named-graph.adoc[]
+
+[[algorithms-page-rank-syntax-stream]]
+=== Stream
+
+.Run PageRank in stream mode on a named graph.
+[source, cypher]
+----
+CALL gds.pageRank.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  score: Float
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header"]
+|===
+| Name    | Type    | Description
+| nodeId  | Integer | Node ID
+| score   | Float   | Page Rank
+|===
+
+
+[[algorithms-page-rank-syntax-stats]]
+=== Stats
+
+.Run PageRank in stats mode on a named graph.
+[source, cypher]
+----
+CALL gds.pageRank.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| ranIterations          | Integer | The number of iterations run.
+| didConverge            | Boolean | Indicates if the algorithm converged.
+| createMillis           | Integer | Milliseconds for creating the graph.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| centralityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-page-rank-syntax-mutate]]
+=== Mutate
+
+.Run PageRank in mutate mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.pageRank.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| ranIterations          | Integer | The number of iterations run.
+| didConverge            | Boolean | Indicates if the algorithm converged.
+| createMillis           | Integer | Milliseconds for creating the graph.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| mutateMillis           | Integer | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten  | Integer | The number of properties that were written to Neo4j.
+| centralityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-page-rank-syntax-write]]
+=== Write
+
+.Run PageRank in write mode on a named graph.
+[source, cypher]
+----
+CALL gds.pageRank.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| ranIterations          | Integer | The number of iterations run.
+| didConverge            | Boolean | Indicates if the algorithm converged.
+| createMillis           | Integer | Milliseconds for creating the graph.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| writeMillis            | Integer | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer | The number of properties that were written to Neo4j.
+| centralityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+
+[[algorithms-page-rank-syntax-anonymous]]
+=== Anonymous graphs
+
+include::../shared/syntax-anonymous-graphs.adoc[]
+
+.Run PageRank in write mode on an anonymous graph:
+[source, cypher]
+----
+CALL gds.pageRank.write(
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, <<algorithms-page-rank-syntax-write, specified above>>.
+
+
+[[algorithms-page-rank-examples]]
+== Examples
+
+In this section we will show examples of executing the Triangle Count algorithm on a concrete graph.
+The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
+The example graph looks like this:
+
+image::page-rank-graph.svg[align="center"]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=setup-query]
+----
+CREATE (home:Page {name:'Home'})
+CREATE (about:Page {name:'About'})
+CREATE (product:Page {name:'Product'})
+CREATE (links:Page {name:'Links'})
+CREATE (a:Page {name:'Site A'})
+CREATE (b:Page {name:'Site B'})
+CREATE (c:Page {name:'Site C'})
+CREATE (d:Page {name:'Site D'})
+
+CREATE (home)-[:LINKS {weight: 0.2}]->(about)
+CREATE (home)-[:LINKS {weight: 0.2}]->(links)
+CREATE (home)-[:LINKS {weight: 0.6}]->(product)
+CREATE (about)-[:LINKS {weight: 1.0}]->(home)
+CREATE (product)-[:LINKS {weight: 1.0}]->(home)
+CREATE (a)-[:LINKS {weight: 1.0}]->(home)
+CREATE (b)-[:LINKS {weight: 1.0}]->(home)
+CREATE (c)-[:LINKS {weight: 1.0}]->(home)
+CREATE (d)-[:LINKS {weight: 1.0}]->(home)
+CREATE (links)-[:LINKS {weight: 0.8}]->(home)
+CREATE (links)-[:LINKS {weight: 0.05}]->(a)
+CREATE (links)-[:LINKS {weight: 0.05}]->(b)
+CREATE (links)-[:LINKS {weight: 0.05}]->(c)
+CREATE (links)-[:LINKS {weight: 0.05}]->(d)
+----
+
+This graph represents seven pages, linking to another.
+Each relationship has a property called `weight`, which describes the importance of the relationship.
+
+include::../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=graph-create-query]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'Page',
+  'LINKS',
+  {
+    relationshipProperties: 'weight'
+  }
+)
+----
+
+
+[[algorithms-page-rank-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.pageRank.write.estimate('myGraph', {
+  writeProperty: 'pageRank',
+  maxIterations: 20,
+  dampingFactor: 0.85
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 8         | 14                | 1560     | 1560     | "1560 Bytes"
+|===
+--
+
+
+[[algorithms-page-rank-examples-stream]]
+=== Stream
+
+:stream-details: For example, we can order the results to find the nodes with the highest PageRank score.
+include::../shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher]
+----
+CALL gds.pageRank.stream('myGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 3.2362017153762284
+| "About"   | 1.0611098567023873
+| "Links"   | 1.0611098567023873
+| "Product" | 1.0611098567023873
+| "Site A"  | 0.3292259009438567
+| "Site B"  | 0.3292259009438567
+| "Site C"  | 0.3292259009438567
+| "Site D"  | 0.3292259009438567
+|===
+--
+
+The above query is running the algorithm in `stream` mode as `unweighted`.
+Below is a <<algorithms-page-rank-examples-weighted, weighted example>>
+
+NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
+
+[[algorithms-page-rank-examples-stats]]
+=== Stats
+
+:stats-details: For example PageRank stats returns centrality histogram which can be used to monitor the distribution of page rank values across all computed nodes.
+:stats-syntax: algorithms-page-rank-syntax-stats
+include::../shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+CALL gds.pageRank.stats('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85
+})
+YIELD centralityDistribution
+RETURN centralityDistribution.max AS max
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| max
+| 3.236204147338867
+|===
+--
+
+The centrality histogram can be useful for inspecting the computed scores or perform normalizations.
+
+[[algorithms-page-rank-examples-mutate]]
+=== Mutate
+
+include::../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher]
+----
+CALL gds.pageRank.mutate('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  mutateProperty: 'pagerank'
+})
+YIELD nodePropertiesWritten, ranIterations
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| nodePropertiesWritten | ranIterations
+| 8                     | 20
+|===
+--
+
+
+[[algorithms-page-rank-examples-write]]
+=== Write
+
+include::../shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher]
+----
+CALL gds.pageRank.write('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  writeProperty: 'pagerank'
+})
+YIELD nodePropertiesWritten, ranIterations
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| nodePropertiesWritten | ranIterations
+| 8                     | 20
+|===
+--
+
+
+[[algorithms-page-rank-examples-weighted]]
+=== Weighted
+
+By default, the algorithm is considering the relationships of the graph to be `unweighted`, to change this behaviour we can use configuration parameter called `relationshipWeightProperty`.
+Below is an example of running the algorithm using this property.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode using relationship weights:
+[source, cypher]
+----
+CALL gds.pageRank.stream('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  relationshipWeightProperty: 'weight'
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 3.5528567278757683
+| "Product" | 1.9541301048360766
+| "About"   | 0.7513767024036497
+| "Links"   | 0.7513767024036497
+| "Site A"  | 0.18167360233856014
+| "Site B"  | 0.18167360233856014
+| "Site C"  | 0.18167360233856014
+| "Site D"  | 0.18167360233856014
+|===
+--
+
+NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
+
+
+[[algorithms-page-rank-examples-tolerance]]
+=== Tolerance
+
+The `tolerance` configuration parameter denotes the minimum change in scores between iterations.
+If all scores change less than the configured `tolerance` value the result stabilises, and the algorithm returns.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode using bigger `tolerance` value:
+[source, cypher]
+----
+CALL gds.pageRank.stream('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  tolerance: 0.1
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 2.8504480060189965
+| "About"   | 0.9325180530548096
+| "Links"   | 0.9325180530548096
+| "Product" | 0.9325180530548096
+| "Site A"  | 0.3035158541286364
+| "Site B"  | 0.3035158541286364
+| "Site C"  | 0.3035158541286364
+| "Site D"  | 0.3035158541286364
+|===
+--
+
+Compared to the results from the <<algorithms-page-rank-examples-stream, stream>> example which is using the default value of `tolerance` the scores are considerably smaller when using `tolerance: 0.1`.
+
+
+[[algorithms-page-rank-examples-damping]]
+=== Damping Factor
+
+The damping factor configuration parameter accepts values between 0 and 1.
+If its value is too high then it takes ages for the scores to settle, if it's too low then we get repeated over-shoot, both above and below the average - the numbers just swing about the average like a pendulum and never settle down.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode using smaller `dampingFactor` value:
+[source, cypher]
+----
+CALL gds.pageRank.stream('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.05
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 1.248730954737198
+| "About"   | 0.9708121816856135
+| "Links"   | 0.9708121816856135
+| "Product" | 0.9708121816856135
+| "Site A"  | 0.9597081215046129
+| "Site B"  | 0.9597081215046129
+| "Site C"  | 0.9597081215046129
+| "Site D"  | 0.9597081215046129
+|===
+--
+
+Again, compared to the results from the <<algorithms-page-rank-examples-stream, stream>> example which is using the default value of `tolerance` the scores are considerably smaller when using `tolerance: 0.1`.
+The example graph that we are using is quite small and can't fully show the effects of changing the `dampingFactor` configuration parameter.
+
+[[algorithms-page-rank-examples-personalised]]
+=== Personalised PageRank
+
+
+Personalized Page Rank is a variation of Page Rank which is biased towards a set of `sourceNodes`.
+This variant of Page Rank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
+
+The following examples show how to run Page Rank centered around 'Site A'.
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+MATCH (siteA:Page {name: 'Site A'})
+CALL gds.pageRank.stream('myGraph', {
+  maxIterations: 20,
+  dampingFactor: 0.85,
+  sourceNodes: [siteA]
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.4015879109501838
+| "Site A"  | 0.1690742586266424
+| "About"   | 0.11305649263085797
+| "Links"   | 0.11305649263085797
+| "Product" | 0.11305649263085797
+| "Site B"  | 0.01907425862664241
+| "Site C"  | 0.01907425862664241
+| "Site D"  | 0.01907425862664241
+|===
+--
+
+Comparing these results to the ones from the <<algorithms-page-rank-examples-stream, stream>> example (which is not using `sourceNodes` configuration parameter) shows us that the 'Site A' node that we used in the `sourceNodes` list received quite the `score` boost.
