@@ -136,7 +136,8 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Node weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found in graph with node labels: ['__ALL__'] and node properties: []";
+            String error = "Node weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found in graph " +
+                           "with node properties: [] in all node labels: ['__ALL__']";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap
@@ -179,7 +180,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
                 "nodeLabels", List.of("Node")
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Node weight property `foo` not found in graph with node labels: ['Node'] and node properties: []";
+            String error = "Node weight property `foo` not found in graph with node properties: [] in all node labels: ['Node']";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap

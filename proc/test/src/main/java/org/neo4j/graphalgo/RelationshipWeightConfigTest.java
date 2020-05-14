@@ -176,7 +176,8 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Relationship weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found in graph with relationship types: ['__ALL__'] and relationship properties: []";
+            String error = "Relationship weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found in graph " +
+                           "with relationship properties: [] in all relationship types: ['__ALL__']";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap
@@ -221,7 +222,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
                 "relationshipTypes", List.of("Type")
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Relationship weight property `foo` not found in graph with relationship types: ['Type'] and relationship properties: []";
+            String error = "Relationship weight property `foo` not found in graph with relationship properties: [] in all relationship types: ['Type']";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap
