@@ -245,12 +245,12 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
             var explainQuery = formatWithLocale("EXPLAIN %s", query);
             var result = ktx.run(tx -> tx.execute(explainQuery));
 
-            var estimatedRows = (double) result.getExecutionPlanDescription().getArguments().get("EstimatedRows");
+            var estimatedRows = (Number) result.getExecutionPlanDescription().getArguments().get("EstimatedRows");
 
             var propertyColumns = new ArrayList<>(result.columns());
             propertyColumns.removeAll(reservedColumns);
 
-            estimationResult = ImmutableEstimationResult.of((long) estimatedRows, propertyColumns.size());
+            estimationResult = ImmutableEstimationResult.of(estimatedRows.longValue(), propertyColumns.size());
 
             result.close();
         }
