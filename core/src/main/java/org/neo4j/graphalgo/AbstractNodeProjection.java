@@ -22,7 +22,9 @@ package org.neo4j.graphalgo;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
+import org.neo4j.graphalgo.core.ConfigKeyValidation;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -74,6 +76,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
     }
 
     public static NodeProjection fromMap(Map<String, Object> map, NodeLabel nodeLabel) {
+        validateConfigKeys(map);
         String label = String.valueOf(map.getOrDefault(LABEL_KEY, nodeLabel.name));
         return create(map, properties -> NodeProjection.of(label, properties));
     }
@@ -99,6 +102,10 @@ public abstract class AbstractNodeProjection extends ElementProjection {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    private static void validateConfigKeys(Map<String, Object> map) {
+        ConfigKeyValidation.requireOnlyKeysFrom(List.of(LABEL_KEY), map.keySet());
     }
 
     @org.immutables.builder.Builder.AccessibleFields

@@ -148,4 +148,39 @@ class ConfigKeyValidationTest extends BaseProcTest {
             rootCause(IllegalArgumentException.class, "Unexpected configuration key: some")
         );
     }
+
+    @Test
+    void misspelledNodeProjectionKeyWithSuggestion() {
+        QueryExecutionException exception = Assertions.assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.testProc.test({ nodeProjection: {" +
+                           "    FOO: {" +
+                           "        labl: 'Foo'" +
+                           "    }" +
+                           "}, relationshipProjection: '*' })")
+        );
+
+        assertThat(
+            exception,
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: labl (Did you mean [label]?)")
+        );
+    }
+
+    @Test
+    void additionalNodeProjectionKey() {
+        QueryExecutionException exception = Assertions.assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.testProc.test({ nodeProjection: {" +
+                           "    FOO: {" +
+                           "        label: 'Foo'," +
+                           "        some: 'some'" +
+                           "    }" +
+                           "}, relationshipProjection: '*' })")
+        );
+
+        assertThat(
+            exception,
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: some")
+        );
+    }
 }

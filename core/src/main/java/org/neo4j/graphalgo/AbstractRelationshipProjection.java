@@ -84,21 +84,6 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         return create(map, properties -> builder.properties(properties).build());
     }
 
-    private static void validateConfigKeys(Map<String, Object> map) {
-        ConfigKeyValidation.requireOnlyKeysFrom(List.of(TYPE_KEY, ORIENTATION_KEY, AGGREGATION_KEY), map.keySet());
-    }
-
-    private static RelationshipProjection create(
-        Map<String, Object> config,
-        Aggregation defaultAggregation,
-        Function<PropertyMappings, RelationshipProjection> constructor
-    ) {
-        Object properties = config.getOrDefault(PROPERTIES_KEY, emptyMap());
-        PropertyMappings propertyMappings = PropertyMappings.fromObject(properties, defaultAggregation);
-        return constructor.apply(propertyMappings);
-    }
-
-
     public static RelationshipProjection fromString(@Nullable String type) {
         return RelationshipProjection.builder().type(type).build();
     }
@@ -157,6 +142,20 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    private static RelationshipProjection create(
+        Map<String, Object> config,
+        Aggregation defaultAggregation,
+        Function<PropertyMappings, RelationshipProjection> constructor
+    ) {
+        Object properties = config.getOrDefault(PROPERTIES_KEY, emptyMap());
+        PropertyMappings propertyMappings = PropertyMappings.fromObject(properties, defaultAggregation);
+        return constructor.apply(propertyMappings);
+    }
+
+    private static void validateConfigKeys(Map<String, Object> map) {
+        ConfigKeyValidation.requireOnlyKeysFrom(List.of(TYPE_KEY, ORIENTATION_KEY, AGGREGATION_KEY), map.keySet());
     }
 
     @org.immutables.builder.Builder.AccessibleFields
