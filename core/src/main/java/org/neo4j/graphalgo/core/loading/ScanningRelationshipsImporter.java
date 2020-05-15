@@ -58,7 +58,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int concurrency
     ) {
         super(
-            USE_KERNEL_CURSORS ? RelationshipScanCursorBasedScanner.FACTORY : RelationshipRecordBasedScanner.FACTORY,
+            USE_KERNEL_CURSORS.get() ? RelationshipScanCursorBasedScanner.FACTORY : RelationshipRecordBasedScanner.FACTORY,
             "Relationship",
             loadingContext,
             dimensions,

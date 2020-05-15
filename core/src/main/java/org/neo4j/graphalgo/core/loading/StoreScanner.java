@@ -26,6 +26,10 @@ public interface StoreScanner<Reference> extends AutoCloseable {
 
     int DEFAULT_PREFETCH_SIZE = 100;
 
+    static void useKernelCursors(boolean flag) {
+        ScanningRecordsImporter.USE_KERNEL_CURSORS.set(flag);
+    }
+
     interface RecordConsumer<Reference> {
         /**
          * Imports the record at a given position and return the new position.

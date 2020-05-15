@@ -65,7 +65,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
     ) {
         super(
-            USE_KERNEL_CURSORS ? NodeCursorBasedScanner.FACTORY : NodeRecordBasedScanner.FACTORY,
+            USE_KERNEL_CURSORS.get() ? NodeCursorBasedScanner.FACTORY : NodeRecordBasedScanner.FACTORY,
             "Node",
             loadingContext,
             dimensions,

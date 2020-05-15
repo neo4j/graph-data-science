@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.StoreScanner;
 import org.neo4j.internal.kernel.api.LabelSet;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -45,10 +46,7 @@ class SecureTransactionTest extends BaseTest {
 
     @BeforeEach
     void setUp() {
-        System.setProperty(
-            "org.neo4j.graphalgo.core.loading.ScanningRecordsImporter.useKernelCursors",
-            "true"
-        );
+        StoreScanner.useKernelCursors(true);
         db.executeTransactionally(
             "CREATE (n:Node1 {prop1: 42}), (o:Node2 {prop2: 1337}), (n)-[:REL {prop3: 23}]->(o)"
         );

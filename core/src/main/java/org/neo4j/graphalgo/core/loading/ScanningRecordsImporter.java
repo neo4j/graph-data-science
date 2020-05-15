@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.neo4j.graphalgo.core.loading.AbstractRecordBasedScanner.DEFAULT_PREFETCH_SIZE;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
@@ -39,7 +40,7 @@ abstract class ScanningRecordsImporter<Record, T> {
 
     private static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
 
-    static final boolean USE_KERNEL_CURSORS = FeatureToggles.flag(ScanningRecordsImporter.class, "useKernelCursors", false);
+    static final AtomicBoolean USE_KERNEL_CURSORS = new AtomicBoolean(FeatureToggles.flag(ScanningRecordsImporter.class, "useKernelCursors", false));
 
     private final StoreScanner.Factory<Record> factory;
     private final String label;
