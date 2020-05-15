@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.io.layout.DatabaseFile;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RelationshipStore;
@@ -31,8 +33,8 @@ final class RelationshipRecordBasedScanner extends AbstractRecordBasedScanner<Re
 
     static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipRecordBasedScanner::new;
 
-    private RelationshipRecordBasedScanner(int prefetchSize, GraphDatabaseService api) {
-        super(prefetchSize, api);
+    private RelationshipRecordBasedScanner(int prefetchSize, SecureTransaction transaction) {
+        super(prefetchSize, transaction);
     }
 
     @Override

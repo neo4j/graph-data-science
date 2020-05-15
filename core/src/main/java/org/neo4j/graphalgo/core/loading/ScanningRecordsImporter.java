@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.loading.InternalImporter.ImportResult;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.util.FeatureToggles;
 
@@ -45,7 +45,7 @@ abstract class ScanningRecordsImporter<Record, T> {
     private final String label;
     private final ExecutorService threadPool;
 
-    final GraphDatabaseAPI api;
+    final SecureTransaction transaction;
     final GraphDimensions dimensions;
     final AllocationTracker tracker;
     final int concurrency;
@@ -59,7 +59,7 @@ abstract class ScanningRecordsImporter<Record, T> {
     ) {
         this.factory = factory;
         this.label = label;
-        this.api = loadingContext.api();
+        this.transaction = loadingContext.transaction();
         this.dimensions = dimensions;
         this.threadPool = loadingContext.executor();
         this.tracker = loadingContext.tracker();
@@ -71,7 +71,8 @@ abstract class ScanningRecordsImporter<Record, T> {
         final ImportSizing sizing = ImportSizing.of(concurrency, nodeCount);
         int numberOfThreads = sizing.numberOfThreads();
 
-        try (StoreScanner<Record> scanner = factory.newScanner(DEFAULT_PREFETCH_SIZE, api)) {
+        try (StoreScanner<Record> scanner = factory.newScanner(DEFAULT_PREFETCH_SIZE, transaction)) {
+            log.debug("%s Store Scan: Start using %s", label, scanner.getClass().getSimpleName());
 
             InternalImporter.CreateScanner creator = creator(nodeCount, sizing, scanner);
             InternalImporter importer = new InternalImporter(numberOfThreads, creator);

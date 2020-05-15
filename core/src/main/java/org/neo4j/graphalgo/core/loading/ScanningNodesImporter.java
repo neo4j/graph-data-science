@@ -94,7 +94,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         nodePropertyImporter = initializeNodePropertyImporter(nodeCount);
 
         return NodesScanner.of(
-            api,
+            transaction,
             scanner,
             dimensions.nodeLabelTokens(),
             progressLogger,

@@ -25,15 +25,14 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.internal.kernel.api.TokenRead;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
 
 public class GraphDimensionsCypherReader extends GraphDimensionsReader<GraphCreateFromCypherConfig> {
 
-    public GraphDimensionsCypherReader(GraphDatabaseAPI api, GraphCreateFromCypherConfig config) {
-        super(api, config);
+    public GraphDimensionsCypherReader(SecureTransaction tx, GraphCreateFromCypherConfig config) {
+        super(tx, config);
     }
 
     @Override

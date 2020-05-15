@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.api;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -35,6 +36,11 @@ public interface GraphLoaderContext {
     GraphDatabaseAPI api();
 
     Log log();
+
+    @Value.Default
+    default SecureTransaction transaction() {
+        return SecureTransaction.of(api());
+    }
 
     @Value.Default
     default ExecutorService executor() {

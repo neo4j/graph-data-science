@@ -21,13 +21,14 @@ package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.utils.StatementApi;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
@@ -53,8 +54,12 @@ public class NodePropertyExporter extends StatementApi {
     protected final LongUnaryOperator toOriginalId;
     protected final LongAdder propertiesWritten;
 
-    public static Builder builder(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
-        return new Builder(db, idMapping, terminationFlag);
+    public static Builder builder(GraphDatabaseService db, IdMapping idMapping, TerminationFlag terminationFlag) {
+        return builder(SecureTransaction.of(db), idMapping, terminationFlag);
+    }
+
+    public static Builder builder(SecureTransaction tx, IdMapping idMapping, TerminationFlag terminationFlag) {
+        return new Builder(tx, idMapping, terminationFlag);
     }
 
     @ValueClass
@@ -90,8 +95,8 @@ public class NodePropertyExporter extends StatementApi {
 
     public static class Builder extends ExporterBuilder<NodePropertyExporter> {
 
-        Builder(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
-            super(db, idMapping, terminationFlag);
+        Builder(SecureTransaction tx, IdMapping idMapping, TerminationFlag terminationFlag) {
+            super(tx, idMapping, terminationFlag);
         }
 
         @Override
@@ -101,7 +106,7 @@ public class NodePropertyExporter extends StatementApi {
                 : loggerAdapter;
 
             return new NodePropertyExporter(
-                db,
+                tx,
                 nodeCount,
                 toOriginalId,
                 terminationFlag,
@@ -117,7 +122,7 @@ public class NodePropertyExporter extends StatementApi {
     }
 
     protected NodePropertyExporter(
-        GraphDatabaseAPI db,
+        SecureTransaction tx,
         long nodeCount,
         LongUnaryOperator toOriginalId,
         TerminationFlag terminationFlag,
@@ -125,7 +130,7 @@ public class NodePropertyExporter extends StatementApi {
         int concurrency,
         ExecutorService executorService
     ) {
-        super(db);
+        super(tx);
         this.nodeCount = nodeCount;
         this.toOriginalId = toOriginalId;
         this.terminationFlag = terminationFlag;

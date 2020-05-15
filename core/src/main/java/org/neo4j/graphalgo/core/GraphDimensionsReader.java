@@ -38,7 +38,6 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.StatementConstants;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,8 +57,8 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
 
     protected T graphCreateConfig;
 
-    public GraphDimensionsReader(GraphDatabaseAPI api, T graphCreateConfig) {
-        super(api);
+    public GraphDimensionsReader(SecureTransaction tx, T graphCreateConfig) {
+        super(tx);
         this.graphCreateConfig = graphCreateConfig;
     }
 
@@ -78,7 +77,7 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
         long nodeCount = labelTokenNodeLabelMappings.keyStream()
             .mapToLong(dataRead::countsForNode)
             .sum();
-        final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
+        final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api());
         long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(ANY_LABEL)
             ? allNodesCount
             : Math.min(nodeCount, allNodesCount);

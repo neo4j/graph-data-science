@@ -21,12 +21,12 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 final class RelationshipsScanner extends StatementAction implements RecordScanner {
 
     static InternalImporter.CreateScanner of(
-        GraphDatabaseAPI api,
         GraphLoaderContext loadingContext,
         ProgressLogger progressLogger,
         IdMapping idMap,
@@ -52,7 +51,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             return InternalImporter.createEmptyScanner();
         }
         return new RelationshipsScanner.Creator(
-            api,
+            loadingContext.transaction(),
             progressLogger,
             idMap,
             scanner,
@@ -62,7 +61,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     }
 
     static final class Creator implements InternalImporter.CreateScanner {
-        private final GraphDatabaseAPI api;
+        private final SecureTransaction tx;
         private final ProgressLogger progressLogger;
         private final IdMapping idMap;
         private final StoreScanner<RelationshipReference> scanner;
@@ -70,13 +69,13 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         private final TerminationFlag terminationFlag;
 
         Creator(
-                GraphDatabaseAPI api,
+                SecureTransaction tx,
                 ProgressLogger progressLogger,
                 IdMapping idMap,
                 StoreScanner<RelationshipReference> scanner,
                 List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders,
                 TerminationFlag terminationFlag) {
-            this.api = api;
+            this.tx = tx;
             this.progressLogger = progressLogger;
             this.idMap = idMap;
             this.scanner = scanner;
@@ -87,7 +86,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         @Override
         public RecordScanner create(final int index) {
             return new RelationshipsScanner(
-                    api,
+                    tx,
                     terminationFlag,
                     progressLogger,
                     idMap,
@@ -116,14 +115,14 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     private long weightsImported;
 
     private RelationshipsScanner(
-            GraphDatabaseAPI api,
+            SecureTransaction tx,
             TerminationFlag terminationFlag,
             ProgressLogger progressLogger,
             IdMapping idMap,
             StoreScanner<RelationshipReference> scanner,
             int threadIndex,
             List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders) {
-        super(api);
+        super(tx);
         this.terminationFlag = terminationFlag;
         this.progressLogger = progressLogger;
         this.idMap = idMap;
@@ -139,6 +138,10 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
 
     @Override
     public void accept(KernelTransaction transaction) {
+        var tokenType = transaction.tokenRead().relationshipType("HAS_ALCOHOLPERCENTAGE");
+        var accessMode = transaction.securityContext().mode();
+        progressLogger.getLog().debug("[%s] Access Mode [%s]: %s ALLOWS -[:HAS_ALCOHOLPERCENTAGE]-> : %s", Thread.currentThread().getName(), accessMode, accessMode.name(), accessMode.allowsTraverseRelType(tokenType));
+
         try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.getCursor(transaction)) {
             List<SingleTypeRelationshipImporter> importers = this.importerBuilders.stream()
                     .map(imports -> imports.withBuffer(idMap, cursor.bulkSize(), transaction.dataRead(), transaction.cursors()))

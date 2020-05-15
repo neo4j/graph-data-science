@@ -31,32 +31,25 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsCypherReader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
-import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.core.loading.CypherRecordLoader.QueryType.NODE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
@@ -72,7 +65,7 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
         GraphCreateFromCypherConfig graphCreateConfig,
         GraphLoaderContext loadingContext
     ) {
-        super(graphCreateConfig, loadingContext, new GraphDimensionsCypherReader(loadingContext.api(), graphCreateConfig).call());
+        super(graphCreateConfig, loadingContext, new GraphDimensionsCypherReader(loadingContext.transaction().withRestrictedAccess(READ), graphCreateConfig).call());
         this.cypherConfig = getCypherConfig(graphCreateConfig).orElseThrow(() -> new IllegalArgumentException("Expected GraphCreateConfig to be a cypher config."));
     }
 
@@ -115,14 +108,14 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
     @Override
     public ImportResult build() {
         // Temporarily override the security context to enforce read-only access during load
-        try (Ktx ktx = setReadOnlySecurityContext()) {
+        return readOnlyTransaction().apply((tx, ktx) -> {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(
                 nodeQuery(),
                 NODE,
                 loadingContext.api(),
                 cypherConfig,
                 loadingContext
-            ).load(ktx);
+            ).load(tx);
 
             CypherNodeLoader.LoadResult nodes = new CypherNodeLoader(
                 nodeQuery(),
@@ -131,13 +124,13 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
                 cypherConfig,
                 loadingContext,
                 dimensions
-            ).load(ktx);
+            ).load(tx);
 
             RelationshipImportResult relationships = loadRelationships(
                 relationshipQuery(),
                 nodes.idsAndProperties(),
                 nodes.dimensions(),
-                ktx
+                tx
             );
 
             GraphStore graphStore = createGraphStore(
@@ -149,7 +142,7 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
 
             progressLogger.logMessage(loadingContext.tracker());
             return ImportResult.of(relationships.dimensions(), graphStore);
-        }
+        });
     }
 
     @Override
@@ -185,7 +178,7 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
         String relationshipQuery,
         IdsAndProperties idsAndProperties,
         GraphDimensions nodeLoadDimensions,
-        Ktx ktx
+        Transaction transaction
     ) {
         CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
             relationshipQuery,
@@ -196,7 +189,7 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
             nodeLoadDimensions
         );
 
-        CypherRelationshipLoader.LoadResult result = relationshipLoader.load(ktx);
+        CypherRelationshipLoader.LoadResult result = relationshipLoader.load(transaction);
 
         return RelationshipImportResult.of(
             relationshipLoader.allBuilders(),
@@ -205,17 +198,8 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
         );
     }
 
-    private Ktx setReadOnlySecurityContext() {
-        GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(loadingContext.api());
-        KernelTransaction ktx = transactions.ktx();
-        try {
-            AuthSubject subject = ktx.securityContext().subject();
-            SecurityContext securityContext = new SecurityContext(subject, READ);
-            return new Ktx(loadingContext.api(), transactions, securityContext);
-        } catch (NotInTransactionException ex) {
-            // happens only in tests
-            throw new IllegalStateException("Must run in a transaction.", ex);
-        }
+    private SecureTransaction readOnlyTransaction() {
+        return loadingContext.transaction().withRestrictedAccess(READ);
     }
 
     private EstimationResult getNodeEstimation() {
@@ -239,62 +223,17 @@ public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig
     }
 
     private EstimationResult runEstimationQuery(String query, Collection<String> reservedColumns) {
-        EstimationResult estimationResult;
-
-        try (Ktx ktx = setReadOnlySecurityContext()) {
+        return readOnlyTransaction().apply((tx, ktx) -> {
             var explainQuery = formatWithLocale("EXPLAIN %s", query);
-            var result = ktx.run(tx -> tx.execute(explainQuery));
+            try (var result = tx.execute(explainQuery)) {
+                var estimatedRows = (Number) result.getExecutionPlanDescription().getArguments().get("EstimatedRows");
 
-            var estimatedRows = (Number) result.getExecutionPlanDescription().getArguments().get("EstimatedRows");
+                var propertyColumns = new ArrayList<>(result.columns());
+                propertyColumns.removeAll(reservedColumns);
 
-            var propertyColumns = new ArrayList<>(result.columns());
-            propertyColumns.removeAll(reservedColumns);
-
-            estimationResult = ImmutableEstimationResult.of(estimatedRows.longValue(), propertyColumns.size());
-
-            result.close();
-        }
-
-        return estimationResult;
-    }
-
-    static final class Ktx implements AutoCloseable {
-        private final GraphDatabaseService db;
-        private final GraphDatabaseApiProxy.Transactions top;
-        private final SecurityContext securityContext;
-        private final KernelTransaction.Revertable revertTop;
-
-        private Ktx(
-            GraphDatabaseService db,
-            GraphDatabaseApiProxy.Transactions top,
-            SecurityContext securityContext
-        ) {
-            this.db = db;
-            this.top = top;
-            this.securityContext = securityContext;
-            this.revertTop = top.ktx().overrideWith(securityContext);
-        }
-
-        <T> T run(Function<Transaction, T> block) {
-            return block.apply(top.tx());
-        }
-
-        <T> T fork(Function<Transaction, T> block) {
-            GraphDatabaseApiProxy.Transactions txs = newKernelTransaction(db);
-            try (Transaction tx = txs.tx();
-                 KernelTransaction.Revertable ignore = txs.ktx().overrideWith(securityContext)) {
-                return block.apply(tx);
+                return ImmutableEstimationResult.of(estimatedRows.longValue(), propertyColumns.size());
             }
-        }
-
-        @Override
-        public void close() {
-            try {
-                this.revertTop.close();
-            } finally {
-                top.close();
-            }
-        }
+        });
     }
 
     @ValueClass

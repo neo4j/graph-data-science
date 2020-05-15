@@ -23,6 +23,7 @@ import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.ApproxNearestNeighborsAlgorithm;
@@ -181,7 +182,7 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
         };
 
         SimilarityExporter similarityExporter = new SimilarityExporter(
-            api,
+            SecureTransaction.of(api),
             config.writeRelationshipType(),
             config.writeProperty(),
             algorithm.getTerminationFlag()

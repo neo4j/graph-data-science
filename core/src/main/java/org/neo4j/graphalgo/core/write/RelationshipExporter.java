@@ -24,13 +24,14 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphalgo.utils.StatementApi;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
@@ -51,9 +52,13 @@ public final class RelationshipExporter extends StatementApi {
     private final ProgressLogger progressLogger;
     private final ExecutorService executorService;
 
-    public static RelationshipExporter.Builder of(GraphDatabaseAPI db, Graph graph, TerminationFlag terminationFlag) {
+    public static RelationshipExporter.Builder of(GraphDatabaseService db, Graph graph, TerminationFlag terminationFlag) {
+        return of(SecureTransaction.of(db), graph, terminationFlag);
+    }
+
+    public static RelationshipExporter.Builder of(SecureTransaction tx, Graph graph, TerminationFlag terminationFlag) {
         return new RelationshipExporter.Builder(
-            db,
+            tx,
             graph,
             terminationFlag
         );
@@ -64,8 +69,8 @@ public final class RelationshipExporter extends StatementApi {
         private final Graph graph;
         private RelationshipPropertyTranslator propertyTranslator;
 
-        Builder(GraphDatabaseAPI db, Graph graph, TerminationFlag terminationFlag) {
-            super(db, graph, terminationFlag);
+        Builder(SecureTransaction tx, Graph graph, TerminationFlag terminationFlag) {
+            super(tx, graph, terminationFlag);
             this.graph = graph;
             this.propertyTranslator = Values::doubleValue;
         }
@@ -82,7 +87,7 @@ public final class RelationshipExporter extends StatementApi {
                 : loggerAdapter;
 
             return new RelationshipExporter(
-                db,
+                tx,
                 graph,
                 propertyTranslator,
                 terminationFlag,
@@ -92,13 +97,13 @@ public final class RelationshipExporter extends StatementApi {
     }
 
     private RelationshipExporter(
-        GraphDatabaseAPI db,
+        SecureTransaction tx,
         Graph graph,
         RelationshipPropertyTranslator propertyTranslator,
         TerminationFlag terminationFlag,
         ProgressLogger progressLogger
     ) {
-        super(db);
+        super(tx);
         this.nodeCount = graph.nodeCount();
         this.graph = graph;
         this.propertyTranslator = propertyTranslator;

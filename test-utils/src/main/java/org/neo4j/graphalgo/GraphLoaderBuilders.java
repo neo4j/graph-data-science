@@ -30,9 +30,11 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -56,6 +58,7 @@ final class GraphLoaderBuilders {
     static GraphLoader storeLoader(
         // GraphLoader parameters
         GraphDatabaseAPI api,
+        Optional<SecurityContext> securityContext,
         Optional<ExecutorService> executorService,
         Optional<AllocationTracker> tracker,
         Optional<TerminationFlag> terminationFlag,
@@ -75,10 +78,10 @@ final class GraphLoaderBuilders {
         Optional<Orientation> globalOrientation,
         Optional<Aggregation> globalAggregation,
         Optional<Boolean> validateRelationships
-        ) {
+    ) {
 
         GraphCreateFromStoreConfig graphCreateConfig = GraphCreateConfigBuilders.storeConfig(
-            userName,
+            userName.or(() -> securityContext.map(s -> s.subject().username())),
             graphName,
             nodeLabels,
             relationshipTypes,
@@ -94,7 +97,16 @@ final class GraphLoaderBuilders {
             validateRelationships
         );
 
-        return createGraphLoader(api, executorService, tracker, terminationFlag, log, userName, graphCreateConfig);
+        return createGraphLoader(
+            api,
+            securityContext,
+            executorService,
+            tracker,
+            terminationFlag,
+            log,
+            userName,
+            graphCreateConfig
+        );
     }
 
     /**
@@ -106,6 +118,7 @@ final class GraphLoaderBuilders {
     static GraphLoader cypherLoader(
         // GraphLoader parameters
         GraphDatabaseAPI api,
+        Optional<SecurityContext> securityContext,
         Optional<AllocationTracker> tracker,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
@@ -119,7 +132,7 @@ final class GraphLoaderBuilders {
         Optional<Map<String, Object>> parameters
     ) {
         GraphCreateFromCypherConfig graphCreateConfig = GraphCreateConfigBuilders.cypherConfig(
-            userName,
+            userName.or(() -> securityContext.map(s -> s.subject().username())),
             graphName,
             nodeQuery,
             relationshipQuery,
@@ -128,12 +141,22 @@ final class GraphLoaderBuilders {
             parameters
         );
 
-        return createGraphLoader(api, Optional.empty(), tracker, terminationFlag, log, userName, graphCreateConfig);
+        return createGraphLoader(
+            api,
+            securityContext,
+            Optional.empty(),
+            tracker,
+            terminationFlag,
+            log,
+            userName,
+            graphCreateConfig
+        );
     }
 
     @NotNull
     private static GraphLoader createGraphLoader(
         GraphDatabaseAPI api,
+        Optional<SecurityContext> securityContext,
         Optional<ExecutorService> executorService,
         Optional<AllocationTracker> tracker,
         Optional<TerminationFlag> terminationFlag,
@@ -141,15 +164,17 @@ final class GraphLoaderBuilders {
         Optional<String> userName,
         GraphCreateConfig graphCreateConfig
     ) {
+        var transaction = SecureTransaction.of(api, securityContext.orElse(SecurityContext.AUTH_DISABLED));
         return ImmutableGraphLoader.builder()
             .context(ImmutableGraphLoaderContext.builder()
                 .api(api)
+                .transaction(transaction)
                 .executor(executorService.orElse(Pools.DEFAULT))
                 .tracker(tracker.orElse(AllocationTracker.EMPTY))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .log(log.orElse(NullLog.getInstance()))
                 .build())
-            .username(userName.orElse(""))
+            .username(userName.or(() -> securityContext.map(s -> s.subject().username())).orElse(""))
             .createConfig(graphCreateConfig)
             .build();
     }

@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.StatementConstants;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
@@ -35,13 +34,14 @@ import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE
 
 public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreateFromStoreConfig> {
 
-    public GraphDimensionsStoreReader(GraphDatabaseAPI api, GraphCreateFromStoreConfig config) {
-        super(api, config);
+    public GraphDimensionsStoreReader(SecureTransaction tx, GraphCreateFromStoreConfig config) {
+        super(tx, config);
     }
 
     @Override
     protected TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead) {
-        TokenElementIdentifierMappings<NodeLabel> labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<>(ANY_LABEL);
+        TokenElementIdentifierMappings<NodeLabel> labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<>(
+            ANY_LABEL);
         graphCreateConfig.nodeProjections()
             .projections()
             .forEach((nodeLabel, projection) -> {
@@ -53,7 +53,8 @@ public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreat
 
     @Override
     protected TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead) {
-        TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings = new TokenElementIdentifierMappings<>(ANY_RELATIONSHIP_TYPE);
+        TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings = new TokenElementIdentifierMappings<>(
+            ANY_RELATIONSHIP_TYPE);
         graphCreateConfig.relationshipProjections()
             .projections()
             .forEach((relType, projection) -> {

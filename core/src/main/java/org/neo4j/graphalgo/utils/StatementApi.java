@@ -19,11 +19,10 @@
  */
 package org.neo4j.graphalgo.utils;
 
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.Transactions;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
 public abstract class StatementApi {
@@ -36,15 +35,19 @@ public abstract class StatementApi {
         T apply(KernelTransaction transaction) throws Exception;
     }
 
-    protected final GraphDatabaseAPI api;
+    protected final SecureTransaction tx;
 
-    protected StatementApi(GraphDatabaseAPI api) {
-        this.api = api;
+    protected StatementApi(SecureTransaction tx) {
+        this.tx = tx;
+    }
+
+    protected GraphDatabaseAPI api() {
+        return tx.db();
     }
 
     protected final <T> T applyInTransaction(TxFunction<T> fun) {
-        try (Transactions transactions = newKernelTransaction(api)) {
-            return fun.apply(transactions.ktx());
+        try {
+            return tx.apply((tx, ktx) -> fun.apply(ktx));
         } catch (Exception e) {
             throwIfUnchecked(e);
             throw new RuntimeException(e);
@@ -52,8 +55,8 @@ public abstract class StatementApi {
     }
 
     protected final void acceptInTransaction(TxConsumer fun) {
-        try (Transactions transactions = newKernelTransaction(api)) {
-            fun.accept(transactions.ktx());
+        try {
+            tx.accept((tx, ktx) -> fun.accept(ktx));
         } catch (Exception e) {
             throwIfUnchecked(e);
             throw new RuntimeException(e);

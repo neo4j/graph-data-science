@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -92,7 +92,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
     // how many records are there in a single page
     private final int recordsPerPage;
 
-    private final GraphDatabaseApiProxy.Transactions transactions;
+    private final SecureTransaction transaction;
     // global cursor pool to return this one to
     private final ThreadLocal<StoreScanner.ScanCursor<Reference>> cursors;
 
@@ -100,17 +100,16 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
     private final Store store;
 
-    AbstractCursorBasedScanner(int prefetchSize, GraphDatabaseService api) {
-        var neoStores = GraphDatabaseApiProxy.neoStores(api);
+    AbstractCursorBasedScanner(int prefetchSize, SecureTransaction transaction) {
+        var neoStores = GraphDatabaseApiProxy.neoStores(transaction.db());
         var store = store(neoStores);
         int recordSize = store.getRecordSize();
         int recordsPerPage = store.getRecordsPerPage();
 
-        // Ideally, this tx would be given by the calling procedure.
-        this.transactions = GraphDatabaseApiProxy.newKernelTransaction(api);
-
+        this.transaction = transaction.fork();
         this.prefetchSize = prefetchSize;
-        this.entityCursorScan = entityCursorScan(transactions.ktx());
+        // get is OK here, since we are forking a new transaction
+        this.entityCursorScan = entityCursorScan(this.transaction.ktx().get());
         this.cursors = new ThreadLocal<>();
         this.recordSize = recordSize;
         this.recordsPerPage = recordsPerPage;
@@ -119,7 +118,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
     @Override
     public void close() {
-        transactions.close();
+        transaction.close();
     }
 
     @Override

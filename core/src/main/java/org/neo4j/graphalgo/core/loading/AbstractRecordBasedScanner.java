@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.PaddedAtomicLong;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
@@ -218,16 +218,16 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
     private final Store store;
     private final PagedFile pagedFile;
 
-    AbstractRecordBasedScanner(int prefetchSize, GraphDatabaseService api) {
+    AbstractRecordBasedScanner(int prefetchSize, SecureTransaction transaction) {
 
-        var neoStores = GraphDatabaseApiProxy.neoStores(api);
+        var neoStores = GraphDatabaseApiProxy.neoStores(transaction.db());
         var store = store(neoStores);
         int recordSize = store.getRecordSize();
         int recordsPerPage = store.getRecordsPerPage();
         int pageSize = recordsPerPage * recordSize;
 
         PagedFile pagedFile = null;
-        PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(api, PageCache.class);
+        PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(transaction.db(), PageCache.class);
         String storeFileName = storeFileName();
         try {
             for (PagedFile pf : pageCache.listExistingMappings()) {

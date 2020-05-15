@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongSet;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
@@ -28,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,7 +36,7 @@ import java.util.Collections;
 final class NodesScanner extends StatementAction implements RecordScanner {
 
     static InternalImporter.CreateScanner of(
-        GraphDatabaseAPI api,
+        SecureTransaction tx,
         StoreScanner<NodeReference> scanner,
         LongSet labels,
         ProgressLogger progressLogger,
@@ -44,7 +44,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
         TerminationFlag terminationFlag) {
         return new NodesScanner.Creator(
-                api,
+                tx,
                 scanner,
                 labels,
                 progressLogger,
@@ -54,7 +54,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     }
 
     static final class Creator implements InternalImporter.CreateScanner {
-        private final GraphDatabaseAPI api;
+        private final SecureTransaction tx;
         private final StoreScanner<NodeReference> scanner;
         private final LongSet labels;
         private final ProgressLogger progressLogger;
@@ -63,7 +63,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         private final TerminationFlag terminationFlag;
 
         Creator(
-            GraphDatabaseAPI api,
+            SecureTransaction tx,
             StoreScanner<NodeReference> scanner,
             LongSet labels,
             ProgressLogger progressLogger,
@@ -71,7 +71,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             @Nullable NativeNodePropertyImporter nodePropertyImporter,
             TerminationFlag terminationFlag
         ) {
-            this.api = api;
+            this.tx = tx;
             this.scanner = scanner;
             this.labels = labels;
             this.progressLogger = progressLogger;
@@ -83,7 +83,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         @Override
         public RecordScanner create(int index) {
             return new NodesScanner(
-                    api,
+                    tx,
                     terminationFlag,
                     scanner,
                     labels,
@@ -112,7 +112,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private long nodesImported;
 
     private NodesScanner(
-        GraphDatabaseAPI api,
+        SecureTransaction tx,
         TerminationFlag terminationFlag,
         StoreScanner<NodeReference> scanner,
         LongSet labels,
@@ -121,7 +121,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         NodeImporter importer,
         @Nullable NativeNodePropertyImporter nodePropertyImporter
     ) {
-        super(api);
+        super(tx);
         this.terminationFlag = terminationFlag;
         this.scanner = scanner;
         this.labels = labels;

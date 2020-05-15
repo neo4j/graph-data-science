@@ -78,10 +78,10 @@ abstract class CypherRecordLoader<R> {
         this.loadingContext = loadingContext;
     }
 
-    final R load(CypherFactory.Ktx ktx) {
+    final R load(Transaction transaction) {
         try {
             int bufferSize = (int) Math.min(recordCount, RecordsBatchBuffer.DEFAULT_BUFFER_SIZE);
-            BatchLoadResult result = ktx.run(tx -> loadSingleBatch(tx, bufferSize));
+            BatchLoadResult result = loadSingleBatch(transaction, bufferSize);
             updateCounts(result);
             return result();
         } catch (AuthorizationViolationException ex) {

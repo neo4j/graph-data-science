@@ -19,15 +19,15 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.utils.StatementApi;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
 public abstract class StatementAction extends StatementApi implements RenamesCurrentThread, Runnable, StatementApi.TxConsumer {
 
-    protected StatementAction(GraphDatabaseAPI api) {
-        super(api);
+    protected StatementAction(SecureTransaction tx) {
+        super(tx);
     }
 
     @Override

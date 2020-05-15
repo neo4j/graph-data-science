@@ -23,11 +23,11 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipProperties;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;
 
 import java.util.List;
@@ -48,13 +48,15 @@ public class WeightedPathExporter extends StatementApi {
     private final ExecutorService executorService;
     private final String propertyName;
 
-    public WeightedPathExporter(GraphDatabaseAPI api,
-                                ExecutorService executorService,
-                                IdMapping idMapping,
-                                RelationshipProperties relationshipProperties,
-                                String relPrefix,
-                                String propertyName) {
-        super(api);
+    public WeightedPathExporter(
+        SecureTransaction tx,
+        ExecutorService executorService,
+        IdMapping idMapping,
+        RelationshipProperties relationshipProperties,
+        String relPrefix,
+        String propertyName
+    ) {
+        super(tx);
         this.executorService = executorService;
         this.idMapping = idMapping;
         this.relationshipProperties = relationshipProperties;

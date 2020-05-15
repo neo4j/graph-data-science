@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -30,8 +30,8 @@ final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeRefere
 
     static final StoreScanner.Factory<NodeReference> FACTORY = NodeCursorBasedScanner::new;
 
-    private NodeCursorBasedScanner(int prefetchSize, GraphDatabaseService api) {
-        super(prefetchSize, api);
+    private NodeCursorBasedScanner(int prefetchSize, SecureTransaction transaction) {
+        super(prefetchSize, transaction);
     }
 
     @Override

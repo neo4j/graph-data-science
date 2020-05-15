@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
@@ -32,7 +33,9 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -55,6 +58,9 @@ public abstract class BaseProc {
     public Log log;
 
     @Context
+    public Transaction procedureTransaction;
+
+    @Context
     public KernelTransaction transaction;
 
     @Context
@@ -69,6 +75,7 @@ public abstract class BaseProc {
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
                 .api(api)
+                .transaction(SecureTransaction.of(api, procedureTransaction, transaction.securityContext()))
                 .log(log)
                 .tracker(tracker)
                 .terminationFlag(TerminationFlag.wrap(transaction))

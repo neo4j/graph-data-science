@@ -103,7 +103,6 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         }
 
         return RelationshipsScanner.of(
-            api,
             loadingContext,
             progressLogger,
             idMap,

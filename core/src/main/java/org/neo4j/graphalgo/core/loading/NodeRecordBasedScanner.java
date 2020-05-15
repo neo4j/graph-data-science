@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.io.layout.DatabaseFile;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.NodeStore;
@@ -31,8 +33,8 @@ final class NodeRecordBasedScanner extends AbstractRecordBasedScanner<NodeRefere
 
     static final StoreScanner.Factory<NodeReference> FACTORY = NodeRecordBasedScanner::new;
 
-    private NodeRecordBasedScanner(int prefetchSize, GraphDatabaseService api) {
-        super(prefetchSize, api);
+    private NodeRecordBasedScanner(int prefetchSize, SecureTransaction transaction) {
+        super(prefetchSize, transaction);
     }
 
     @Override

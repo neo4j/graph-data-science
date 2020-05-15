@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -159,7 +160,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
         builder.withResultCount(algorithm.getPaths().size());
         try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             new WeightedPathExporter(
-                api,
+                SecureTransaction.of(api),
                 Pools.DEFAULT,
                 graph,
                 graph,
