@@ -145,8 +145,15 @@ public abstract class BaseProc {
         long freeMemory = inspector.freeMemory();
         long minBytesProcedure = memoryTreeWithDimensions.memoryTree.memoryUsage().min;
         if (minBytesProcedure > freeMemory) {
+            String template = "Procedure was blocked since minimum estimated memory (%s) exceeds current free memory (%s).";
+            if (GraphStoreCatalog.graphStoresCount() > 0) {
+                template += formatWithLocale(
+                    " Note: you have %s graphs currently loaded into memory.",
+                    GraphStoreCatalog.graphStoresCount()
+                );
+            }
             throw new IllegalStateException(formatWithLocale(
-                "Procedure was blocked since minimum estimated memory (%s) exceeds current free memory (%s).",
+                template,
                 MemoryUsage.humanReadable(minBytesProcedure),
                 MemoryUsage.humanReadable(freeMemory)
             ));

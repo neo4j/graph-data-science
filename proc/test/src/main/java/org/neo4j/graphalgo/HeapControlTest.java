@@ -23,12 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
     String DB_CYPHER = "CREATE " +
@@ -63,8 +65,17 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
         });
 
         String message = ExceptionUtil.rootCause(exception).getMessage();
+        String messageTemplate = "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\).";
+        if (GraphStoreCatalog.graphStoresCount() > 0) {
+            messageTemplate += formatWithLocale(
+                " Note: you have %s graphs currently loaded into memory.",
+                GraphStoreCatalog.graphStoresCount()
+            );
+        }
+        System.out.println(message);
+        System.out.println(messageTemplate);
         assertTrue(message.matches(
-            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
+            messageTemplate));
     }
 
     @Test
