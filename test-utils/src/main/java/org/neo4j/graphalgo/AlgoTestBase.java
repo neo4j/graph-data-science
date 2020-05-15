@@ -23,10 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Result;
 import org.neo4j.logging.NullLog;
 
-import java.util.function.Consumer;
 
 public abstract class AlgoTestBase extends BaseTest {
 
@@ -39,10 +37,6 @@ public abstract class AlgoTestBase extends BaseTest {
 
     protected void runQuery(String query) {
         QueryRunner.runQuery(db, query);
-    }
-
-    protected void runQuery(String query, Consumer<Result.ResultRow> check) {
-        QueryRunner.runQueryWithRowConsumer(db, query, check);
     }
 
     protected void runQuery(GraphDatabaseService passedInDb, String query) {
