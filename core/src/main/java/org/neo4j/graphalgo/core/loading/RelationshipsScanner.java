@@ -138,10 +138,6 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
 
     @Override
     public void accept(KernelTransaction transaction) {
-        var tokenType = transaction.tokenRead().relationshipType("HAS_ALCOHOLPERCENTAGE");
-        var accessMode = transaction.securityContext().mode();
-        progressLogger.getLog().debug("[%s] Access Mode [%s]: %s ALLOWS -[:HAS_ALCOHOLPERCENTAGE]-> : %s", Thread.currentThread().getName(), accessMode, accessMode.name(), accessMode.allowsTraverseRelType(tokenType));
-
         try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.getCursor(transaction)) {
             List<SingleTypeRelationshipImporter> importers = this.importerBuilders.stream()
                     .map(imports -> imports.withBuffer(idMap, cursor.bulkSize(), transaction.dataRead(), transaction.cursors()))
