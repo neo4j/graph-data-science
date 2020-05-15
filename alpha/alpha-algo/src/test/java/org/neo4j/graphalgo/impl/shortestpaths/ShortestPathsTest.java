@@ -104,8 +104,8 @@ final class ShortestPathsTest extends AlgoTestBase {
         ShortestPaths sssp = new ShortestPaths(graph, head);
         IntDoubleMap sp = sssp.compute().getShortestPaths();
 
-        assertEquals(8, sp.get(toIntExact(graph.toMappedNodeId(tail))),0.1);
-        assertEquals(Double.POSITIVE_INFINITY, sp.get(toIntExact(graph.toMappedNodeId(outstanding))),0.1);
+        assertEquals(8, sp.get(toIntExact(graph.toMappedNodeId(tail))), 0.1);
+        assertEquals(Double.POSITIVE_INFINITY, sp.get(toIntExact(graph.toMappedNodeId(outstanding))), 0.1);
     }
 
     @Test
@@ -118,8 +118,8 @@ final class ShortestPathsTest extends AlgoTestBase {
         ShortestPaths sssp = new ShortestPaths(graph, head);
         IntDoubleMap sp = sssp.compute().getShortestPaths();
 
-        assertEquals(4, sp.get(toIntExact(graph.toMappedNodeId(tail))),0.1);
-        assertEquals(Double.POSITIVE_INFINITY, sp.get(toIntExact(graph.toMappedNodeId(outstanding))),0.1);
+        assertEquals(4, sp.get(toIntExact(graph.toMappedNodeId(tail))), 0.1);
+        assertEquals(Double.POSITIVE_INFINITY, sp.get(toIntExact(graph.toMappedNodeId(outstanding))), 0.1);
     }
 
     Node getNode(String name) {
