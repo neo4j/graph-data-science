@@ -12,12 +12,26 @@ task licenseFile {
     outputs.file(distributionLicenseFile)
 }
 
+task checkLicensesFile {
+    dependsOn generateLicensesFiles
+
+    doLast {
+        def licenceHeader = rootProject.file("$publicDir/etc/licenses/headers/LICENSES-header.txt").text
+        def generatedLicenseFile = file("$buildDir/reports/license/LICENSES.txt").text
+        if (generatedLicenseFile.equals(licenceHeader)) {
+            throw new GradleException("LICENSES.txt file is empty!")
+        }
+    }
+}
+
 shadowJar {
+    dependsOn checkLicensesFile
+
     archiveBaseName.set("neo4j-graph-data-science")
     archiveClassifier.set("standalone")
     exclude 'META-INF/versions/**/*'
     from licenseFile
-    from generateLicensesFiles
+    from file("$buildDir/reports/license")
 }
 
 task shadowCopy(type: Copy) {
