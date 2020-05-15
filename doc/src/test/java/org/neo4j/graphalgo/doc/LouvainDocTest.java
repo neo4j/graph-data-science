@@ -43,7 +43,7 @@ class LouvainDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/louvain.adoc";
+        return "algorithms/louvain/louvain.adoc";
     }
 
 }
