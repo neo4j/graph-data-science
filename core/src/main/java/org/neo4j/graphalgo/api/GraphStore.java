@@ -29,12 +29,11 @@ import org.neo4j.values.storable.NumberType;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
@@ -64,7 +63,7 @@ public interface GraphStore {
 
     default Collection<String> nodePropertyKeys(Collection<NodeLabel> labels) {
         if (labels.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         // intersection of propertyKeys
         Iterator<NodeLabel> iterator = labels.iterator();
@@ -105,7 +104,7 @@ public interface GraphStore {
 
     default Collection<String> relationshipPropertyKeys(Collection<RelationshipType> relTypes) {
         if (relTypes.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         // intersection of propertyKeys
         Iterator<RelationshipType> iterator = relTypes.iterator();
