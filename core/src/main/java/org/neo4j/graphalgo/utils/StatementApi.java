@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.utils;
 
 import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
@@ -41,7 +41,7 @@ public abstract class StatementApi {
         this.tx = tx;
     }
 
-    protected GraphDatabaseAPI api() {
+    protected GraphDatabaseService api() {
         return tx.db();
     }
 

@@ -109,7 +109,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         this.transaction = transaction.fork();
         this.prefetchSize = prefetchSize;
         // get is OK here, since we are forking a new transaction
-        this.entityCursorScan = entityCursorScan(this.transaction.ktx().get());
+        this.entityCursorScan = entityCursorScan(this.transaction.toplevelKernelTransaction().get());
         this.cursors = new ThreadLocal<>();
         this.recordSize = recordSize;
         this.recordsPerPage = recordsPerPage;
