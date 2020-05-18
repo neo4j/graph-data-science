@@ -29,13 +29,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.lang.annotation.Retention;
@@ -168,7 +168,8 @@ public final class TestSupport {
     ) {
         assert sleepMillis >= 100 && sleepMillis <= 10_000;
 
-        KernelTransaction kernelTx = GraphDatabaseApiProxy.newExplicitKernelTransaction(db, 10, TimeUnit.SECONDS);
+        var timeoutTx = db.beginTx(10, TimeUnit.SECONDS);
+        KernelTransaction kernelTx = ((InternalTransaction) timeoutTx).kernelTransaction();
         algorithm.withTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
 
         Runnable algorithmThread = () -> {

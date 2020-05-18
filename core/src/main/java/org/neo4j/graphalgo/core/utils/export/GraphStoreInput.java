@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core.utils.export;
 
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.compat.CompatInput;
+import org.neo4j.graphalgo.compat.PropertySizeCalculatorCompat;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExport.NodeStore;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExport.RelationshipStore;
 import org.neo4j.internal.batchimport.InputIterable;
@@ -31,15 +33,13 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.InputChunk;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
-import org.neo4j.values.storable.Value;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.function.ToIntFunction;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
-public final class GraphStoreInput implements Input {
+public final class GraphStoreInput implements CompatInput {
 
     private final NodeStore nodeStore;
 
@@ -78,7 +78,7 @@ public final class GraphStoreInput implements Input {
     }
 
     @Override
-    public Estimates calculateEstimates(ToIntFunction<Value[]> valueSizeCalculator) {
+    public Input.Estimates calculateEstimates(PropertySizeCalculatorCompat propertySizeCalculator) {
         long numberOfNodeProperties = nodeStore.propertyCount();
         long numberOfRelationshipProperties = relationshipStore.propertyCount();
 

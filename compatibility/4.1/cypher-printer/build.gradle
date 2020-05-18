@@ -1,0 +1,16 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Cypher Printer'
+
+dependencies {
+    api project(':neo4j-adapter')
+
+    annotationProcessor group: 'org.immutables', name: 'builder',               version: ver.'immutables'
+    annotationProcessor group: 'org.immutables', name: 'value',                 version: ver.'immutables'
+    compileOnly         group: 'org.immutables', name: 'builder',               version: ver.'immutables'
+    compileOnly         group: 'org.immutables', name: 'value-annotations',     version: ver.'immutables'
+    compileOnly         group: 'org.jetbrains',  name: 'annotations',           version: ver.'jetbrains-annotations'
+    compileOnly         group: 'org.neo4j',      name: 'neo4j-ast',             version: ver.'neo4j'
+    compileOnly         group: 'org.neo4j',      name: 'neo4j-expressions',     version: ver.'neo4j'
+    testCompileOnly     group: 'org.jetbrains',  name: 'annotations',           version: ver.'jetbrains-annotations'
+}

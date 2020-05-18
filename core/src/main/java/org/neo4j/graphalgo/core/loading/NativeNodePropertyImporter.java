@@ -26,11 +26,14 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.compat.KernelApiProxy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
+import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
+import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -73,7 +76,7 @@ public final class NativeNodePropertyImporter {
         CursorFactory cursors,
         Read read
     ) {
-        try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
+        try (PropertyCursor pc = KernelApiProxy.allocatePropertyCursor(cursors, PageCursorTracer.NULL, EmptyMemoryTracker.INSTANCE)) {
             read.nodeProperties(neoNodeId, propertiesReference, pc);
             int nodePropertiesRead = 0;
             while (pc.next()) {

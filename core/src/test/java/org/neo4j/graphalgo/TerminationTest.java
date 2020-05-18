@@ -21,10 +21,11 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.compat.KernelTransactionsProxy;
+import org.neo4j.graphalgo.compat.KernelApiProxy;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphdb.TransactionFailureException;
+import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.api.KernelTransactions;
 
 import java.util.ArrayList;
@@ -57,16 +58,18 @@ class TerminationTest extends BaseProcTest {
     private void terminateTransaction(long txId) {
         kernelTransactions.activeTransactions()
             .stream()
-            .filter(thx -> KernelTransactionsProxy.lastTransactionIdWhenStarted(thx) == txId)
-            .forEach(KernelTransactionsProxy::markForTermination);
+            .filter(thx -> thx.lastTransactionTimestampWhenStarted() == txId)
+            .forEach(ktx -> ktx.markForTermination(Status.Transaction.TransactionMarkedAsFailed));
     }
 
     // get map of currently running queries and its IDs
     private Map<String, Long> getQueryTransactionIds() {
         Map<String, Long> map = new HashMap<>();
         kernelTransactions.activeTransactions().forEach(kth -> {
-            String query = KernelTransactionsProxy.executingQueryTexts(kth);
-            map.put(query, KernelTransactionsProxy.lastTransactionIdWhenStarted(kth));
+            String query = kth.executingQuery()
+                .map(KernelApiProxy::queryText)
+                .orElse("");
+            map.put(query, kth.lastTransactionTimestampWhenStarted());
         });
         return map;
     }

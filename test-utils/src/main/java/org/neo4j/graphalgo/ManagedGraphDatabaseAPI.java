@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.graphalgo.compat.CompatGraphDatabaseAPI;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.ResultTransformer;
 import org.neo4j.graphdb.Transaction;
@@ -33,21 +34,19 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.factory.DatabaseInfo;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.storageengine.api.StoreId;
 
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public final class ManagedGraphDatabaseAPI implements GraphDatabaseAPI {
+public final class ManagedGraphDatabaseAPI extends CompatGraphDatabaseAPI {
     private static final String DB_NAME = GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 
-    private final GraphDatabaseAPI api;
     private final DatabaseManagementService dbms;
 
     public ManagedGraphDatabaseAPI(DatabaseManagementService dbms) {
-        this.api = (GraphDatabaseAPI) dbms.database(DB_NAME);
+        super((GraphDatabaseAPI) dbms.database(DB_NAME));
         this.dbms = dbms;
     }
 
@@ -64,11 +63,6 @@ public final class ManagedGraphDatabaseAPI implements GraphDatabaseAPI {
     @Override
     public DependencyResolver getDependencyResolver() {
         return api.getDependencyResolver();
-    }
-
-    @Override
-    public StoreId storeId() {
-        return api.storeId();
     }
 
     @Override

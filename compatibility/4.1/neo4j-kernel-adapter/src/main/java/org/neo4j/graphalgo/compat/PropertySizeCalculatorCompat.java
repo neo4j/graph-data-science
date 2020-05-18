@@ -17,35 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading;
+package org.neo4j.graphalgo.compat;
 
-import org.neo4j.graphalgo.compat.KernelApiProxy;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
-import org.neo4j.kernel.impl.store.NodeStore;
-import org.neo4j.kernel.impl.store.record.NodeRecord;
+import org.neo4j.memory.MemoryTracker;
+import org.neo4j.values.storable.Value;
 
-public final class NodeRecordReference implements NodeReference {
-
-    private final NodeRecord record;
-    private final NodeStore nodeStore;
-
-    NodeRecordReference(NodeRecord record, NodeStore nodeStore) {
-        this.record = record;
-        this.nodeStore = nodeStore;
-    }
-
-    @Override
-    public long nodeId() {
-        return record.getId();
-    }
-
-    @Override
-    public long[] labels() {
-        return KernelApiProxy.getNodeLabelFields(record, nodeStore, PageCursorTracer.NULL);
-    }
-
-    @Override
-    public long propertiesReference() {
-        return record.getNextProp();
-    }
+public interface PropertySizeCalculatorCompat {
+    int calculateSize(Value[] values, PageCursorTracer cursorTracer, MemoryTracker memoryTracker);
 }

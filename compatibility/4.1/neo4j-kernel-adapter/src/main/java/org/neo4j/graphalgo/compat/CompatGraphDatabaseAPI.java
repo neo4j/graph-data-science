@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.utils;
+package org.neo4j.graphalgo.compat;
 
-import java.util.Locale;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-public class StringFormatting {
+public abstract class CompatGraphDatabaseAPI implements GraphDatabaseAPI {
 
-    private StringFormatting() {}
+    protected final GraphDatabaseAPI api;
 
-    public static String formatWithLocale(String template, Object... inputs) {
-        return String.format(Locale.ENGLISH, template, inputs);
+    public CompatGraphDatabaseAPI(GraphDatabaseAPI api) {
+        this.api = api;
     }
 }

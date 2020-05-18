@@ -20,13 +20,16 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.compat.KernelApiProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
+import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.StatementConstants;
+import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.util.Collection;
 
@@ -172,7 +175,7 @@ class RelationshipImporter {
         return (batch, batchLength, relationshipProperties, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
             long[][] properties = new long[relationshipProperties.length][batchLength / BATCH_ENTRY_SIZE];
             if (atLeastOnePropertyToLoad) {
-                try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
+                try (PropertyCursor pc = KernelApiProxy.allocatePropertyCursor(cursors, PageCursorTracer.NULL, EmptyMemoryTracker.INSTANCE)) {
                     double[] relProps = new double[relationshipProperties.length];
                     for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
                         long relationshipReference = batch[RELATIONSHIP_REFERENCE_OFFSET + i];

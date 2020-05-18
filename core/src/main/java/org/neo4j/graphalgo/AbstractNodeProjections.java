@@ -25,7 +25,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.DataClass;
 
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;

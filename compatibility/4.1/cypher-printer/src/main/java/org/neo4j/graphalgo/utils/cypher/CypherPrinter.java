@@ -22,10 +22,9 @@ package org.neo4j.graphalgo.utils.cypher;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.cypher.internal.v4_0.ast.prettifier.ExpressionStringifier;
-import org.neo4j.cypher.internal.v4_0.ast.prettifier.ExpressionStringifier$;
-import org.neo4j.cypher.internal.v4_0.expressions.Expression;
-import scala.runtime.AbstractFunction1;
+import org.neo4j.cypher.internal.ast.prettifier.ExpressionStringifier;
+import org.neo4j.cypher.internal.ast.prettifier.ExpressionStringifier$;
+import org.neo4j.cypher.internal.expressions.Expression;
 
 @Value.Style(
     allParameters = true,
@@ -92,11 +91,17 @@ public final class CypherPrinter {
     }
 
     private static final ExpressionStringifier STRINGIFIER =
-        ExpressionStringifier$.MODULE$.apply(new CanonicalStringFallback(), false, false);
+        ExpressionStringifier$.MODULE$.apply(
+            new CanonicalStringFallback(),
+            /* alwaysParens */ false,
+            /* alwaysBacktick */ false,
+            /* preferSingleQuotes */ false,
+            /* sensitiveParamsAsParams */false
+        );
 
-    private static final class CanonicalStringFallback extends AbstractFunction1<Expression, String> {
+    private static final class CanonicalStringFallback implements ExpressionStringifier.Extension {
         @Override
-        public String apply(Expression expression) {
+        public String apply(ExpressionStringifier ctx, Expression expression) {
             return expression.asCanonicalStringVal();
         }
     }

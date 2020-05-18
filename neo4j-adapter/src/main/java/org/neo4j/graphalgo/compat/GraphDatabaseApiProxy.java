@@ -26,9 +26,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
-import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.recordstorage.RecordStorageEngine;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -39,7 +37,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -122,21 +119,6 @@ public final class GraphDatabaseApiProxy {
         Transaction tx = db.beginTx();
         KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
         return ImmutableTransactions.of(true, tx, ktx, Optional.ofNullable(context).map(ktx::overrideWith));
-    }
-
-    public static KernelTransaction newExplicitKernelTransaction(
-        GraphDatabaseService db,
-        long timeout,
-        TimeUnit timeoutUnit
-    ) {
-        return ((GraphDatabaseAPI) db)
-            .beginTransaction(KernelTransaction.Type.explicit,
-                LoginContext.AUTH_DISABLED,
-                ClientConnectionInfo.EMBEDDED_CONNECTION,
-                timeout,
-                timeoutUnit
-            )
-            .kernelTransaction();
     }
 
     @ValueClass

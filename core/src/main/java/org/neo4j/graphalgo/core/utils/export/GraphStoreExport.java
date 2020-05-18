@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.utils.export;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
@@ -32,6 +31,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.compat.KernelApiProxy;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
@@ -45,10 +45,13 @@ import org.neo4j.internal.batchimport.staging.ExecutionMonitors;
 import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.Neo4jLayout;
+import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
+import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.logging.internal.StoreLogService;
+import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.io.File;
 import java.io.IOException;
@@ -110,12 +113,14 @@ public class GraphStoreExport {
                 NodeStore.of(graphStore),
                 RelationshipStore.of(graphStore, config.defaultRelationshipType()),
                 config.batchSize()
-            );
+            ).toInput();
 
-            var importer = BatchImporterFactory.withHighestPriority().instantiate(
+            var importer = KernelApiProxy.instantiateBatchImporter(
+                BatchImporterFactory.withHighestPriority(),
                 databaseLayout,
                 fs,
                 null, // no external page cache
+                PageCacheTracer.NULL,
                 importConfig,
                 logService,
                 ExecutionMonitors.invisible(),
@@ -125,7 +130,8 @@ public class GraphStoreExport {
                 ImportLogic.NO_MONITOR,
                 jobScheduler,
                 Collector.EMPTY,
-                TransactionLogsInitializer.INSTANCE
+                TransactionLogInitializer.getLogFilesInitializer(),
+                EmptyMemoryTracker.INSTANCE
             );
             importer.doImport(input);
         } catch (IOException e) {
