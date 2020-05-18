@@ -3,8 +3,8 @@
 |===
 | Name                       | Type    | Default                | Optional | Description
 | maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
-| nodeWeightProperty         | String  | null                   | yes      | The property name of node that contain weight. Must be numeric.
-| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
-| seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
+| nodeWeightProperty         | String  | null                   | yes      | The name of a node property that contains node weights.
+| relationshipWeightProperty | String  | null                   | yes      | The name of a relationship property that contains relationship weights.
+| seedProperty               | String  | n/a                    | yes      | The name of a node property that defines an initial numeric label.
 | consecutiveIds             | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
 |===
