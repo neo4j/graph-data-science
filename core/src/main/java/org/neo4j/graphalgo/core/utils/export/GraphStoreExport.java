@@ -47,11 +47,9 @@ import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
-import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.logging.internal.StoreLogService;
-import org.neo4j.memory.EmptyMemoryTracker;
 
 import java.io.File;
 import java.io.IOException;
@@ -109,11 +107,11 @@ public class GraphStoreExport {
 
             lifeSupport.start();
 
-            Input input = new GraphStoreInput(
+            Input input = KernelApiProxy.batchInputFrom(new GraphStoreInput(
                 NodeStore.of(graphStore),
                 RelationshipStore.of(graphStore, config.defaultRelationshipType()),
                 config.batchSize()
-            ).toInput();
+            ));
 
             var importer = KernelApiProxy.instantiateBatchImporter(
                 BatchImporterFactory.withHighestPriority(),
@@ -129,9 +127,7 @@ public class GraphStoreExport {
                 RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider()),
                 ImportLogic.NO_MONITOR,
                 jobScheduler,
-                Collector.EMPTY,
-                TransactionLogInitializer.getLogFilesInitializer(),
-                EmptyMemoryTracker.INSTANCE
+                Collector.EMPTY
             );
             importer.doImport(input);
         } catch (IOException e) {

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.configuration.Config;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -32,7 +33,6 @@ import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -41,7 +41,6 @@ import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
-import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
@@ -61,13 +60,13 @@ import org.neo4j.kernel.impl.store.record.RecordLoad;
 import org.neo4j.logging.FormattedLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
-import org.neo4j.storageengine.api.LogFilesInitializer;
+import org.neo4j.values.storable.Value;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.function.ToIntFunction;
 
 public final class KernelApiProxy {
 
@@ -79,14 +78,14 @@ public final class KernelApiProxy {
         int recordSize,
         int recordsPerPage
     ) throws IOException {
-        recordFormat.read(record, cursor, mode, recordSize, recordsPerPage);
+        recordFormat.read(record, cursor, mode, recordSize);
     }
 
     public static long getHighestPossibleIdInUse(
         RecordStore<? extends AbstractBaseRecord> recordStore,
         PageCursorTracer pageCursorTracer
     ) {
-        return recordStore.getHighestPossibleIdInUse(pageCursorTracer);
+        return recordStore.getHighestPossibleIdInUse();
     }
 
     public static <RECORD extends AbstractBaseRecord> PageCursor openPageCursorForReading(
@@ -94,7 +93,7 @@ public final class KernelApiProxy {
         long pageId,
         PageCursorTracer pageCursorTracer
     ) {
-        return recordStore.openPageCursorForReading(pageId, pageCursorTracer);
+        return recordStore.openPageCursorForReading(pageId);
     }
 
     public static PageCursor pageFileIO(
@@ -103,39 +102,39 @@ public final class KernelApiProxy {
         int pageFileFlags,
         PageCursorTracer pageCursorTracer
     ) throws IOException {
-        return pagedFile.io(pageId, pageFileFlags, pageCursorTracer);
+        return pagedFile.io(pageId, pageFileFlags);
     }
 
     public static PropertyCursor allocatePropertyCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer, MemoryTracker memoryTracker) {
-        return cursorFactory.allocatePropertyCursor(cursorTracer, memoryTracker);
+        return cursorFactory.allocatePropertyCursor();
     }
 
     public static NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateNodeCursor(cursorTracer);
+        return cursorFactory.allocateNodeCursor();
     }
 
     public static RelationshipScanCursor allocateRelationshipScanCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateRelationshipScanCursor(cursorTracer);
+        return cursorFactory.allocateRelationshipScanCursor();
     }
 
     public static NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateNodeLabelIndexCursor(cursorTracer);
+        return cursorFactory.allocateNodeLabelIndexCursor();
     }
 
     public static long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
-        return NodeLabelsField.get(node, nodeStore, cursorTracer);
+        return NodeLabelsField.get(node, nodeStore);
     }
 
     public static void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
-        dataRead.nodeLabelScan(label, cursor, IndexOrder.NONE);
+        dataRead.nodeLabelScan(label, cursor);
     }
 
     public static OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base) {
-        return new OffHeapLongArray(length, defaultValue, base, EmptyMemoryTracker.INSTANCE);
+        return new OffHeapLongArray(length, defaultValue, base);
     }
 
     public static LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue) {
-        return numberArrayFactory.newLongArray(size, defaultValue, EmptyMemoryTracker.INSTANCE);
+        return numberArrayFactory.newLongArray(size, defaultValue);
     }
 
     public static BatchImporter instantiateBatchImporter(
@@ -158,7 +157,6 @@ public final class KernelApiProxy {
             directoryStructure,
             fileSystem,
             externalPageCache,
-            pageCacheTracer,
             config,
             logService,
             executionMonitor,
@@ -168,8 +166,7 @@ public final class KernelApiProxy {
             monitor,
             jobScheduler,
             badCollector,
-            TransactionLogInitializer.getLogFilesInitializer(),
-            EmptyMemoryTracker.INSTANCE
+            TransactionLogsInitializer.INSTANCE
         );
     }
 
@@ -178,7 +175,7 @@ public final class KernelApiProxy {
     }
 
     public static String queryText(ExecutingQuery query) {
-        return query.rawQueryText();
+        return query.queryText();
     }
 
     public static Log toPrintWriter(FormattedLog.Builder builder, PrintWriter writer) {
@@ -213,8 +210,8 @@ public final class KernelApiProxy {
         }
 
         @Override
-        public Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) throws IOException {
-            return delegate.calculateEstimates(propertySizeCalculator::calculateSize);
+        public Estimates calculateEstimates(ToIntFunction<Value[]> valueSizeCalculator) throws IOException {
+            return delegate.calculateEstimates((values, cursorTracer, memoryTracker) -> valueSizeCalculator.applyAsInt(values));
         }
     }
 

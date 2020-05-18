@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.compat.CompatInput;
-import org.neo4j.graphalgo.compat.PropertySizeCalculatorCompat;
+import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExport.NodeStore;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExport.RelationshipStore;
 import org.neo4j.internal.batchimport.InputIterable;
@@ -78,7 +78,7 @@ public final class GraphStoreInput implements CompatInput {
     }
 
     @Override
-    public Input.Estimates calculateEstimates(PropertySizeCalculatorCompat propertySizeCalculator) {
+    public Input.Estimates calculateEstimates(CompatPropertySizeCalculator propertySizeCalculator) {
         long numberOfNodeProperties = nodeStore.propertyCount();
         long numberOfRelationshipProperties = relationshipStore.propertyCount();
 
