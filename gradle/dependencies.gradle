@@ -25,7 +25,7 @@ ext {
             'hppc':                         '0.7.3',
             'immutables':                   '2.8.1',
             'javapoet':                     '1.11.1',
-            'jctools-core':                 '2.1.1',
+            'jctools-core':                 '3.0.0',
             'jetbrains-annotations':        '18.0.0',
             'jol':                          '0.10',
             'jqwik':                        '1.2.0',

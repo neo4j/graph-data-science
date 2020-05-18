@@ -21,16 +21,16 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import com.carrotsearch.hppc.BitSet;
 import org.jctools.queues.MpscLinkedQueue;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -236,9 +236,8 @@ public final class Pregel {
 
     @SuppressWarnings({"unchecked"})
     private HugeObjectArray<MpscLinkedQueue<Double>> initLinkedQueues(Graph graph, AllocationTracker tracker) {
-        Class<MpscLinkedQueue<Double>> queueClass = (Class<MpscLinkedQueue<Double>>) MpscLinkedQueue
-                .newMpscLinkedQueue()
-                .getClass();
+        // sad java 😞
+        Class<MpscLinkedQueue<Double>> queueClass = (Class<MpscLinkedQueue<Double>>) new MpscLinkedQueue<Double>().getClass();
 
         HugeObjectArray<MpscLinkedQueue<Double>> messageQueues = HugeObjectArray.newArray(
                 queueClass,
@@ -248,7 +247,7 @@ public final class Pregel {
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
                 concurrency,
-                nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, MpscLinkedQueue.newMpscLinkedQueue())));
+                nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, new MpscLinkedQueue<Double>())));
 
         return messageQueues;
     }
