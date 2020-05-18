@@ -15,7 +15,8 @@ dependencies {
     compileOnly         group: 'org.neo4j',                name: 'neo4j',              version: ver.'neo4j'
 
     api(
-        project(":annotations"),
+        project(':annotations'),
+        project(':cypher-printer'),
         project(':neo4j-adapter'),
         [ group: 'com.carrotsearch',   name: 'hppc',      version: ver.'hppc' ],
         [ group: 'org.openjdk.jol',    name: 'jol-core',  version: ver.'jol'  ],

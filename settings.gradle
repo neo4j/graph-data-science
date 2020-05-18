@@ -7,6 +7,11 @@ pluginManagement {
     }
 }
 
+ext {
+    neo4jMajorVersion = properties.getOrDefault('neo4jVersion', '4.0').toString().split('\\.')[0..1].join('.')
+    compatibilityModules = ["cypher-printer", "neo4j-kernel-adapter"]
+}
+
 rootProject.name = 'graph-data-science'
 
 def registerSubModules(File file) {
@@ -29,6 +34,13 @@ def registerSubModules(File file) {
                     parent = parent.getParentFile();
                 }
                 return true;
+            }
+            .filter { moduleDir ->
+                if (compatibilityModules.contains(moduleDir.getName())) {
+                    moduleDir.getParentFile().name == neo4jMajorVersion
+                } else {
+                    true
+                }
             }
             .forEach { moduleDir ->
                 def parent = moduleDir.getParentFile();
