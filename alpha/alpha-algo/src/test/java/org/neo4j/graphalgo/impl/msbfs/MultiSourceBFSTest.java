@@ -23,6 +23,7 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -67,17 +68,46 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             ", (a)-[:BAR]->(d)" +
             ", (b)-[:BAR]->(c)" +
             ", (b)-[:BAR]->(d)" +
-            ", (c)-[:BAR]->(a)" +
-            ", (c)-[:BAR]->(b)" +
             ", (c)-[:BAR]->(e)" +
-            ", (d)-[:BAR]->(a)" +
-            ", (d)-[:BAR]->(b)" +
-            ", (d)-[:BAR]->(f)" +
-            ", (e)-[:BAR]->(c)" +
-            ", (f)-[:BAR]->(d)";
+            ", (d)-[:BAR]->(f)";
 
     @Test
-    void testPaperExample() {
+    void testWithPredecessor() {
+        withGraph(
+            DB_CYPHER,
+            graph -> {
+                BfsWithPredecessorConsumer mock = mock(BfsWithPredecessorConsumer.class);
+                MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessing(
+                    graph,
+                    graph,
+                    (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
+                    AllocationTracker.EMPTY,
+                    0, 1
+                );
+
+                msbfs.run(AlgoBaseConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
+
+                verify(mock).accept(3, 1, 1, toList(1));
+                verify(mock).accept(3, 2, 1, toList(2));
+                verify(mock).accept(4, 1, 1, toList(1));
+                verify(mock).accept(4, 2, 1, toList(2));
+
+                verify(mock).accept(5, 3, 2, toList(1, 2));
+                verify(mock).accept(6, 4, 2, toList(1, 2));
+
+                verify(mock).accept(2, 3, 2, toList(1));
+                verify(mock).accept(2, 4, 2, toList(1));
+
+                verify(mock).accept(1, 3, 2, toList(2));
+                verify(mock).accept(1, 4, 2, toList(2));
+
+                verifyNoMoreInteractions(mock);
+            }
+        );
+    }
+
+    @Test
+    void testWithANP() {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
@@ -101,7 +131,59 @@ final class MultiSourceBFSTest extends AlgoTestBase {
     }
 
     @Test
-    void testPaperExampleWithAllSources() {
+    void testPredecessorWithAllSources() {
+        withGraph(DB_CYPHER, graph -> {
+            BfsWithPredecessorConsumer mock = mock(BfsWithPredecessorConsumer.class);
+            MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessing(
+                graph,
+                graph,
+                (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
+                AllocationTracker.EMPTY
+            );
+
+            msbfs.run(AlgoBaseConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
+
+            verify(mock).accept(1, 3, 1, toList(3));
+            verify(mock).accept(1, 4, 1, toList(4));
+            verify(mock).accept(2, 3, 1, toList(3));
+            verify(mock).accept(2, 4, 1, toList(4));
+            verify(mock).accept(3, 1, 1, toList(1));
+            verify(mock).accept(3, 2, 1, toList(2));
+            verify(mock).accept(3, 5, 1, toList(5));
+            verify(mock).accept(4, 1, 1, toList(1));
+            verify(mock).accept(4, 2, 1, toList(2));
+            verify(mock).accept(4, 6, 1, toList(6));
+            verify(mock).accept(5, 3, 1, toList(3));
+            verify(mock).accept(6, 4, 1, toList(4));
+
+            verify(mock).accept(1, 3, 2, toList(2, 5));
+            verify(mock).accept(1, 4, 2, toList(2, 6));
+            verify(mock).accept(2, 3, 2, toList(1, 5));
+            verify(mock).accept(2, 4, 2, toList(1, 6));
+            verify(mock).accept(3, 1, 2, toList(4));
+            verify(mock).accept(3, 2, 2, toList(4));
+            verify(mock).accept(4, 1, 2, toList(3));
+            verify(mock).accept(4, 2, 2, toList(3));
+            verify(mock).accept(5, 3, 2, toList(1, 2));
+            verify(mock).accept(6, 4, 2, toList(1, 2));
+
+            verify(mock).accept(3, 1, 3, toList(6));
+            verify(mock).accept(3, 2, 3, toList(6));
+            verify(mock).accept(4, 1, 3, toList(5));
+            verify(mock).accept(4, 2, 3, toList(5));
+            verify(mock).accept(5, 3, 3, toList(4));
+            verify(mock).accept(6, 4, 3, toList(3));
+
+            verify(mock).accept(5, 3, 4, toList(6));
+            verify(mock).accept(6, 4, 4, toList(5));
+
+            verifyNoMoreInteractions(mock);
+        });
+    }
+
+
+    @Test
+    void testANPWithAllSources() {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
@@ -294,6 +376,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         runQuery(cypher);
         block.accept(new StoreLoaderBuilder()
             .api(db)
+            .globalOrientation(Orientation.UNDIRECTED)
             .build()
             .graph());
     }

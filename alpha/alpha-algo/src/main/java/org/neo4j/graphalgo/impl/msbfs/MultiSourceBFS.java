@@ -102,6 +102,16 @@ public final class MultiSourceBFS implements Runnable {
         return new MultiSourceBFS(nodeIds, relationships, new ANPStrategy(perNodeAction), tracker, startNodes);
     }
 
+    public static MultiSourceBFS predecessorProcessing(
+        IdMapping nodeIds,
+        RelationshipIterator relationships,
+        BfsWithPredecessorConsumer perNodeAction,
+        AllocationTracker tracker,
+        long... startNodes
+    ) {
+        return new MultiSourceBFS(nodeIds, relationships, new PredecessorStrategy(perNodeAction), tracker, startNodes);
+    }
+
     private MultiSourceBFS(
         IdMapping nodeIds,
         RelationshipIterator relationships,

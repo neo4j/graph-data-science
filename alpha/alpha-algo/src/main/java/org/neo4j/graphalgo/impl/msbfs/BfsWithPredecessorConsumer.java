@@ -20,8 +20,7 @@
 package org.neo4j.graphalgo.impl.msbfs;
 
 @FunctionalInterface
-public interface BfsConsumer {
+public interface BfsWithPredecessorConsumer {
 
-    void accept(long nodeId, int depth, BfsSources sourceNodeIds);
+    void accept(long nodeId, long predecessorId, int depth, BfsSources sourceNodeIds);
 }
-
