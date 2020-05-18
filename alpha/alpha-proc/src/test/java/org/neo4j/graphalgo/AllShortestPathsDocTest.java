@@ -61,8 +61,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                        "   relationshipProjection: {" +
                        "     ROAD: {" +
                        "       type: 'ROAD'," +
-                       "       properties: 'cost'," +
-                       "       defaultValue: 1.0" +
+                       "       properties: 'cost'" +
                        "     }" +
                        "   }," +
                        "   relationshipWeightProperty: 'cost'" +

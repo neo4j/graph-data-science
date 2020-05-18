@@ -98,8 +98,7 @@ CALL gds.alpha.allShortestPaths.stream({
   relationshipProjection: {
     ROAD: {
       type: 'ROAD',
-      properties: 'cost',
-      defaultValue: 1.0
+      properties: 'cost'
     }
   },
   relationshipWeightProperty: 'cost'
