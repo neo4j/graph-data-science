@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
@@ -53,56 +52,66 @@ import java.util.concurrent.TimeUnit;
  * The sources iterator is only valid during the execution of the callback and
  * should not be stored.
  * <p>
- * We use a fixed {@code ω} (OMEGA) of 32, which allows us to implement the
+ * We use a fixed {@code ω} (OMEGA) of 64, which allows us to implement the
  * seen/visitNext bit sets as a packed long which improves memory locality
  * as suggested in 4.1. of the paper.
- * If the number of sources exceed 32, multiple instances of MS-BFS are run
+ * If the number of sources exceed 64, multiple instances of MS-BFS are run
  * in parallel.
  * <p>
  * If the MS-BFS runs in parallel, the callback may be executed from multiple threads
  * at the same time. The implementation should therefore be thread-safe.
  * <p>
- * The algorithm provides two invariants:
- * <ul>
- * <li>
- * For a single thread, a single node is traversed at most once at a given depth
- * – That is, the combination of {@code (nodeId, depth)} appears at most once per thread.
- * It may be that a node is traversed multiple times, but then always at different depths.
- * </li>
- * <li>
- * For multiple threads, the {@code (nodeId, depth)} may appear multiple times, but then always
- * for different sources.
- * </li>
- * </ul>
- * <p>
  * [1]: <a href="http://www.vldb.org/pvldb/vol8/p449-then.pdf">The More the Merrier: Efficient Multi-Source Graph Traversal</a>
  */
 public final class MultiSourceBFS implements Runnable {
 
+    interface ExecutionStrategy {
+
+        void run(
+            RelationshipIterator relationships,
+            long totalNodeCount,
+            SourceNodes sourceNodes,
+            HugeLongArray visitSet,
+            HugeLongArray nextSet,
+            HugeLongArray seenSet
+        );
+    }
+
     // how many sources can be traversed simultaneously
-    static final int OMEGA = 64;
+    public static final int OMEGA = 64;
 
     private final CloseableThreadLocal<HugeLongArray> visits;
     private final CloseableThreadLocal<HugeLongArray> nexts;
     private final CloseableThreadLocal<HugeLongArray> seens;
 
+    private final long nodeCount;
     private final IdMapping nodeIds;
     private final RelationshipIterator relationships;
-    private final BfsConsumer perNodeAction;
+    private final ExecutionStrategy strategy;
     private final long[] startNodes;
     private int sourceNodeCount;
     private long nodeOffset;
-    private long nodeCount;
 
-    public MultiSourceBFS(
-            IdMapping nodeIds,
-            RelationshipIterator relationships,
-            BfsConsumer perNodeAction,
-            AllocationTracker tracker,
-            long... startNodes) {
+    public static MultiSourceBFS aggregatedNeighborProcessing(
+        IdMapping nodeIds,
+        RelationshipIterator relationships,
+        BfsConsumer perNodeAction,
+        AllocationTracker tracker,
+        long... startNodes
+    ) {
+        return new MultiSourceBFS(nodeIds, relationships, new ANPStrategy(perNodeAction), tracker, startNodes);
+    }
+
+    private MultiSourceBFS(
+        IdMapping nodeIds,
+        RelationshipIterator relationships,
+        ExecutionStrategy strategy,
+        AllocationTracker tracker,
+        long... startNodes
+    ) {
         this.nodeIds = nodeIds;
         this.relationships = relationships;
-        this.perNodeAction = perNodeAction;
+        this.strategy = strategy;
         this.startNodes = (startNodes != null && startNodes.length > 0) ? startNodes : null;
         if (this.startNodes != null) {
             Arrays.sort(this.startNodes);
@@ -116,7 +125,7 @@ public final class MultiSourceBFS implements Runnable {
     private MultiSourceBFS(
             IdMapping nodeIds,
             RelationshipIterator relationships,
-            BfsConsumer perNodeAction,
+            ExecutionStrategy strategy,
             long nodeCount,
             CloseableThreadLocal<HugeLongArray> visits,
             CloseableThreadLocal<HugeLongArray> nexts,
@@ -125,7 +134,7 @@ public final class MultiSourceBFS implements Runnable {
         assert startNodes != null && startNodes.length > 0;
         this.nodeIds = nodeIds;
         this.relationships = relationships;
-        this.perNodeAction = perNodeAction;
+        this.strategy = strategy;
         this.startNodes = startNodes;
         this.nodeCount = nodeCount;
         this.visits = visits;
@@ -136,7 +145,7 @@ public final class MultiSourceBFS implements Runnable {
     private MultiSourceBFS(
             IdMapping nodeIds,
             RelationshipIterator relationships,
-            BfsConsumer perNodeAction,
+            ExecutionStrategy strategy,
             long nodeCount,
             long nodeOffset,
             int sourceNodeCount,
@@ -145,7 +154,7 @@ public final class MultiSourceBFS implements Runnable {
             CloseableThreadLocal<HugeLongArray> seens) {
         this.nodeIds = nodeIds;
         this.relationships = relationships;
-        this.perNodeAction = perNodeAction;
+        this.strategy = strategy;
         this.startNodes = null;
         this.nodeCount = nodeCount;
         this.nodeOffset = nodeOffset;
@@ -182,8 +191,6 @@ public final class MultiSourceBFS implements Runnable {
     public void run() {
         assert sourceLength() <= OMEGA : "more than " + OMEGA + " sources not supported";
 
-        long totalNodeCount = this.nodeCount;
-
         HugeLongArray visitSet = visits.get();
         HugeLongArray nextSet = nexts.get();
         HugeLongArray seenSet = seens.get();
@@ -195,7 +202,7 @@ public final class MultiSourceBFS implements Runnable {
             sourceNodes = prepareSpecifiedSources(visitSet, seenSet);
         }
 
-        runLocalMsbfs(totalNodeCount, sourceNodes, visitSet, nextSet, seenSet);
+        strategy.run(relationships, nodeCount, sourceNodes, visitSet, nextSet, seenSet);
     }
 
     private SourceNodes prepareOffsetSources(HugeLongArray visitSet, HugeLongArray seenSet) {
@@ -225,80 +232,6 @@ public final class MultiSourceBFS implements Runnable {
         }
 
         return sourceNodes;
-    }
-
-    private void runLocalMsbfs(
-            long totalNodeCount,
-            SourceNodes sourceNodes,
-            HugeLongArray visitSet,
-            HugeLongArray nextSet,
-            HugeLongArray seenSet) {
-
-        HugeCursor<long[]> visitCursor = visitSet.newCursor();
-        HugeCursor<long[]> nextCursor = nextSet.newCursor();
-        int depth = 0;
-
-        while (true) {
-            visitSet.initCursor(visitCursor);
-            while (visitCursor.next()) {
-                long[] array = visitCursor.array;
-                int offset = visitCursor.offset;
-                int limit = visitCursor.limit;
-                long base = visitCursor.base;
-                for (int i = offset; i < limit; ++i) {
-                    if (array[i] != 0L) {
-                        prepareNextVisit(array[i], base + i, nextSet);
-                    }
-                }
-            }
-
-
-            ++depth;
-
-            boolean hasNext = false;
-            long next;
-
-            nextSet.initCursor(nextCursor);
-            while (nextCursor.next()) {
-                long[] array = nextCursor.array;
-                int offset = nextCursor.offset;
-                int limit = nextCursor.limit;
-                long base = nextCursor.base;
-                for (int i = offset; i < limit; ++i) {
-                    if (array[i] != 0L) {
-                        next = visitNext(base + i, seenSet, nextSet);
-                        if (next != 0L) {
-                            sourceNodes.reset(next);
-                            perNodeAction.accept(base + i, depth, sourceNodes);
-                            hasNext = true;
-                        }
-                    }
-                }
-            }
-
-            if (!hasNext) {
-                return;
-            }
-
-            nextSet.copyTo(visitSet, totalNodeCount);
-            nextSet.fill(0L);
-        }
-    }
-
-    private void prepareNextVisit(long nodeVisit, long nodeId, HugeLongArray nextSet) {
-        relationships.forEachRelationship(
-                nodeId,
-                (src, tgt) -> {
-                    nextSet.or(tgt, nodeVisit);
-                    return true;
-                });
-    }
-
-    private long visitNext(long nodeId, HugeLongArray seenSet, HugeLongArray nextSet) {
-        long seen = seenSet.get(nodeId);
-        long next = nextSet.and(nodeId, ~seen);
-        seenSet.or(nodeId, next);
-        return next;
     }
 
     /* assert-only */ private boolean isSorted(long[] nodes) {
@@ -336,7 +269,7 @@ public final class MultiSourceBFS implements Runnable {
                     return new MultiSourceBFS(
                             nodeIds,
                             relationships.concurrentCopy(),
-                            perNodeAction,
+                            strategy,
                             sourceLength,
                             from,
                             length,
@@ -355,7 +288,7 @@ public final class MultiSourceBFS implements Runnable {
                 return new MultiSourceBFS(
                         nodeIds,
                         relationships.concurrentCopy(),
-                        perNodeAction,
+                        strategy,
                         nodeCount,
                         visits,
                         nexts,
@@ -380,7 +313,7 @@ public final class MultiSourceBFS implements Runnable {
                 ")}";
     }
 
-    private static final class SourceNodes implements BfsSources {
+    static final class SourceNodes implements BfsSources {
         private final long[] sourceNodes;
         private final int maxPos;
         private final int startPos;
@@ -438,7 +371,7 @@ public final class MultiSourceBFS implements Runnable {
         }
     }
 
-    private static abstract class ParallelMultiSources extends AbstractCollection<MultiSourceBFS> implements Iterator<MultiSourceBFS> {
+    private abstract static class ParallelMultiSources extends AbstractCollection<MultiSourceBFS> implements Iterator<MultiSourceBFS> {
         private final int threads;
         private final long sourceLength;
         private long start = 0L;

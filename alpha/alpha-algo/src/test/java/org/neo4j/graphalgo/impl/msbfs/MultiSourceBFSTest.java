@@ -80,7 +80,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
     void testPaperExample() {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
-            MultiSourceBFS msbfs = new MultiSourceBFS(
+            MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
                     graph,
                     graph,
                     (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
@@ -104,7 +104,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
     void testPaperExampleWithAllSources() {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
-            MultiSourceBFS msbfs = new MultiSourceBFS(
+            MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
                     graph,
                     graph,
                     (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
@@ -146,7 +146,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                 gb -> gb.newGridBuilder().createGrid(8, 4),
                 graph -> {
                     Set<Pair<Long, Integer>> seen = new HashSet<>();
-                    MultiSourceBFS msbfs = new MultiSourceBFS(
+                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
                             graph,
                             graph,
                             (i, d, s) -> {
@@ -171,7 +171,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         withGrid(
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
                 graph -> {
-                    MultiSourceBFS msbfs = new MultiSourceBFS(
+                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
                             graph,
                             graph,
                             (i, d, s) -> {
@@ -203,7 +203,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         withGrid(
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
                 graph -> {
-                    MultiSourceBFS msbfs = new MultiSourceBFS(
+                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
                             graph,
                             graph,
                             (i, d, s) -> {
@@ -263,7 +263,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         final long[] sources = new long[sourceCount];
         Arrays.setAll(sources, i -> i);
         final int[][] seen = new int[nodeCount][sourceCount];
-        MultiSourceBFS msbfs = new MultiSourceBFS(
+        MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
                 new DirectIdMapping(nodeCount),
                 iter,
                 (nodeId, depth, sourceNodeIds) -> {

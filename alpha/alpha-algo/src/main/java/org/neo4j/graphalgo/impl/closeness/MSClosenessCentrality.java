@@ -116,7 +116,9 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
             progressLogger.logProgress((double) nodeId / (nodeCount - 1));
         };
 
-        new MultiSourceBFS(graph, graph, consumer, tracker).run(concurrency, executorService);
+        MultiSourceBFS
+            .aggregatedNeighborProcessing(graph, graph, consumer, tracker)
+            .run(concurrency, executorService);
 
         return this;
     }

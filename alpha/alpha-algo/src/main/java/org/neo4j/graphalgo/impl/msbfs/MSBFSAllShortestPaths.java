@@ -127,7 +127,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
 
             final ProgressLogger progressLogger = getProgressLogger();
             final double maxNodeId = nodeCount - 1;
-            new MultiSourceBFS(
+            MultiSourceBFS.aggregatedNeighborProcessing(
                     graph,
                     graph,
                     (target, distance, sources) -> {
