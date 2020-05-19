@@ -145,13 +145,13 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
                               "       (other)-[:LIKES]->(cuisine) " +
                               " WHERE NOT((p)-[:LIKES]->(cuisine)) " +
                               " RETURN cuisine.name AS cuisine, COUNT(*) AS count " +
-                              " ORDER BY count DESC ";
+                              " ORDER BY cuisine ASC ";
 
         String expectedResult2 = "+--------------------+" + NL +
                                  "| cuisine    | count |" + NL +
                                  "+--------------------+" + NL +
-                                 "| \"Italian\"  | 2     |" + NL +
                                  "| \"French\"   | 1     |" + NL +
+                                 "| \"Italian\"  | 2     |" + NL +
                                  "| \"Lebanese\" | 1     |" + NL +
                                  "+--------------------+" + NL +
                                  "3 rows" + NL;
