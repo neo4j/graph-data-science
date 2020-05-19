@@ -34,7 +34,7 @@ ext {
             'junit-quickcheck-generators':  '0.8.1',
             'metrics-core':                 '4.0.2',
             'mockito':                      '3.3.3',
-            'neo4j':                        properties.getOrDefault('neo4jVersion', '4.0.4'),
+            'neo4j':                        properties.getOrDefault('neo4jVersion', neos.'4.0'),
             'qala-datagen':                 '2.3.0',
             'RoaringBitmap':                '0.7.45',
     ]
@@ -43,9 +43,5 @@ ext {
         junit5jupiter:      "org.junit.jupiter:junit-jupiter",
         junit5platform:     "org.junit.platform:junit-platform-launcher",
         junit5migration:    "org.junit.jupiter:junit-jupiter-migrationsupport",
-    ]
-    neos = [
-        '4.0': '4.0.4',
-        '4.1': '4.1.0-SNAPSHOT',
     ]
 }
