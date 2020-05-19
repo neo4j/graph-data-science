@@ -658,7 +658,7 @@ public abstract class GdsCypher {
         Optional<Map<String, Object>> map();
 
         default boolean isEmpty() {
-            return !string().isPresent() && !map().isPresent();
+            return string().isEmpty() && map().isEmpty();
         }
 
         default MinimalObject map(
