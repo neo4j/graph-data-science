@@ -27,6 +27,7 @@ task checkLicensesFile {
 shadowJar {
     dependsOn checkLicensesFile
 
+    mergeServiceFiles()
     archiveBaseName.set("neo4j-graph-data-science")
     archiveClassifier.set("standalone")
     exclude 'META-INF/versions/**/*'
