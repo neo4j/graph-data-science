@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.compat.KernelApiProxy;
+import org.neo4j.graphalgo.compat.KernelProxy;
 import org.neo4j.graphalgo.core.write.ExporterBuilder;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
@@ -111,7 +111,7 @@ class ProgressLoggingTest extends BaseTest {
     }
 
     private static Log testLogger(StringWriter writer) {
-        return KernelApiProxy.toPrintWriter(
+        return KernelProxy.toPrintWriter(
             FormattedLog.withLogLevel(Level.DEBUG).withCategory("Test"),
             new PrintWriter(writer)
         );

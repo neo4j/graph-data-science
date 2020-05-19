@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.compat.KernelApiProxy;
+import org.neo4j.graphalgo.compat.KernelProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.PaddedAtomicLong;
@@ -174,7 +174,7 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
             do {
                 record.setInUse(false);
                 pageCursor.setOffset(offset);
-                KernelApiProxy.read(recordFormat, record, pageCursor, RecordLoad.CHECK, recordSize, recordsPerPage);
+                KernelProxy.read(recordFormat, record, pageCursor, RecordLoad.CHECK, recordSize, recordsPerPage);
             } while (pageCursor.shouldRetry());
             verifyLoad(offset, record.getId());
         }
@@ -254,7 +254,7 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
         this.cursors = new ThreadLocal<>();
         this.recordSize = recordSize;
         this.recordsPerPage = recordsPerPage;
-        this.maxId = 1L + KernelApiProxy.getHighestPossibleIdInUse(store, PageCursorTracer.NULL);
+        this.maxId = 1L + KernelProxy.getHighestPossibleIdInUse(store, PageCursorTracer.NULL);
         this.pageSize = pageSize;
         this.recordFormat = recordFormat(neoStores.getRecordFormats());
         this.store = store;
@@ -274,10 +274,10 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
             PageCursor pageCursor;
             try {
                 if (pagedFile != null) {
-                    pageCursor = KernelApiProxy.pageFileIO(pagedFile, next, PagedFile.PF_READ_AHEAD | PagedFile.PF_SHARED_READ_LOCK, transaction.pageCursorTracer());
+                    pageCursor = KernelProxy.pageFileIO(pagedFile, next, PagedFile.PF_READ_AHEAD | PagedFile.PF_SHARED_READ_LOCK, transaction.pageCursorTracer());
                 } else {
                     long recordId = next * (long) recordSize;
-                    pageCursor = KernelApiProxy.openPageCursorForReading(store, recordId, transaction.pageCursorTracer());
+                    pageCursor = KernelProxy.openPageCursorForReading(store, recordId, transaction.pageCursorTracer());
                 }
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
@@ -295,7 +295,7 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
         if (pagedFile != null) {
             return pagedFile.file().length();
         }
-        long recordsInUse = 1L + KernelApiProxy.getHighestPossibleIdInUse(store, PageCursorTracer.NULL);
+        long recordsInUse = 1L + KernelProxy.getHighestPossibleIdInUse(store, PageCursorTracer.NULL);
         long idsInPages = ((recordsInUse + (recordsPerPage - 1L)) / recordsPerPage) * recordsPerPage;
         return idsInPages * (long) recordSize;
     }

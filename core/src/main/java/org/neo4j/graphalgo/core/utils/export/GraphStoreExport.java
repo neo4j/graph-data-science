@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.compat.KernelApiProxy;
+import org.neo4j.graphalgo.compat.KernelProxy;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
@@ -107,13 +107,13 @@ public class GraphStoreExport {
 
             lifeSupport.start();
 
-            Input input = KernelApiProxy.batchInputFrom(new GraphStoreInput(
+            Input input = KernelProxy.batchInputFrom(new GraphStoreInput(
                 NodeStore.of(graphStore),
                 RelationshipStore.of(graphStore, config.defaultRelationshipType()),
                 config.batchSize()
             ));
 
-            var importer = KernelApiProxy.instantiateBatchImporter(
+            var importer = KernelProxy.instantiateBatchImporter(
                 BatchImporterFactory.withHighestPriority(),
                 databaseLayout,
                 fs,

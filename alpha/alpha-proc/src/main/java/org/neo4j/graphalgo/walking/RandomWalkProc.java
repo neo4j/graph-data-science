@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.KernelApiProxy;
+import org.neo4j.graphalgo.compat.KernelProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -128,9 +128,9 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
             String label = start.toString();
             int labelId = transaction.tokenRead().nodeLabel(label);
             int countWithLabel = Math.toIntExact(transaction.dataRead().countsForNodeWithoutTxState(labelId));
-            NodeLabelIndexCursor cursor = KernelApiProxy.allocateNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer());
+            NodeLabelIndexCursor cursor = KernelProxy.allocateNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer());
 
-            KernelApiProxy.nodeLabelScan(transaction.dataRead(), labelId, cursor);
+            KernelProxy.nodeLabelScan(transaction.dataRead(), labelId, cursor);
             cursor.next();
             LongStream ids;
             if (limit == -1) {

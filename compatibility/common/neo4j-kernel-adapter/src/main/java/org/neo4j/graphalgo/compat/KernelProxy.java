@@ -61,36 +61,22 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
+import java.util.ServiceLoader;
 
-public final class KernelApiProxy {
+public final class KernelProxy {
 
     private static final KernelProxyApi IMPL;
 
     static {
         var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
-
-        KernelProxyApi instance = null;
-        try {
-            switch (neo4jVersion) {
-                case V_4_0:
-                    Class<?> kernel40 = Class.forName("org.neo4j.graphalgo.compat.KernelProxy40");
-                    instance = (KernelProxyApi) kernel40.getDeclaredConstructor().newInstance();
-                    break;
-                case V_4_1:
-                    Class<?> kernel41 = Class.forName("org.neo4j.graphalgo.compat.KernelProxy41");
-                    instance = (KernelProxyApi) kernel41.getDeclaredConstructor().newInstance();
-                    break;
-                case UNKNOWN:
-                    break;
-            }
-        } catch (ClassNotFoundException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException ignored) {
-        }
-
-        if (instance == null) {
-            throw new LinkageError("Could not load the " + KernelApiProxy.class + " implementation for " + neo4jVersion);
-        }
-        IMPL = instance;
+        KernelProxyFactory kernelProxyFactory = ServiceLoader
+            .load(KernelProxyFactory.class)
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .filter(f -> f.canLoad(neo4jVersion))
+            .findFirst()
+            .orElseThrow(() -> new LinkageError("Could not load the " + KernelProxy.class + " implementation for " + neo4jVersion));
+        IMPL = kernelProxyFactory.load();
     }
 
     public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
@@ -220,7 +206,7 @@ public final class KernelApiProxy {
         return IMPL.toPrintWriter(builder, writer);
     }
 
-    private KernelApiProxy() {
+    private KernelProxy() {
         throw new UnsupportedOperationException("No instances");
     }
 }

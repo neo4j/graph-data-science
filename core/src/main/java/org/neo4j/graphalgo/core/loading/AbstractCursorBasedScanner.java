@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.compat.KernelApiProxy;
+import org.neo4j.graphalgo.compat.KernelProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -139,7 +139,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
     @Override
     public final long storeSize() {
-        long recordsInUse = 1L + KernelApiProxy.getHighestPossibleIdInUse(store, PageCursorTracer.NULL);
+        long recordsInUse = 1L + KernelProxy.getHighestPossibleIdInUse(store, PageCursorTracer.NULL);
         long idsInPages = ((recordsInUse + (recordsPerPage - 1L)) / recordsPerPage) * recordsPerPage;
         return idsInPages * (long) recordSize;
     }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.KernelApiProxy;
+import org.neo4j.graphalgo.compat.KernelProxy;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
@@ -41,7 +41,7 @@ public final class NodeRecordReference implements NodeReference {
 
     @Override
     public long[] labels() {
-        return KernelApiProxy.getNodeLabelFields(record, nodeStore, PageCursorTracer.NULL);
+        return KernelProxy.getNodeLabelFields(record, nodeStore, PageCursorTracer.NULL);
     }
 
     @Override

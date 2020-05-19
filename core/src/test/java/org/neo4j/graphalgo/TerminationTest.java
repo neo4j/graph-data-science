@@ -21,7 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.compat.KernelApiProxy;
+import org.neo4j.graphalgo.compat.KernelProxy;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphdb.TransactionFailureException;
@@ -67,7 +67,7 @@ class TerminationTest extends BaseProcTest {
         Map<String, Long> map = new HashMap<>();
         kernelTransactions.activeTransactions().forEach(kth -> {
             String query = kth.executingQuery()
-                .map(KernelApiProxy::queryText)
+                .map(KernelProxy::queryText)
                 .orElse("");
             map.put(query, kth.lastTransactionTimestampWhenStarted());
         });

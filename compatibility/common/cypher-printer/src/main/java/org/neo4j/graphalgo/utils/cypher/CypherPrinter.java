@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.ServiceLoader;
 
 public final class CypherPrinter {
 
@@ -31,28 +31,14 @@ public final class CypherPrinter {
 
     static {
         var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
-
-        CypherPrinterApi instance = null;
-        try {
-            switch (neo4jVersion) {
-                case V_4_0:
-                    Class<?> printer40 = Class.forName("org.neo4j.graphalgo.utils.cypher.CypherPrinter40");
-                    instance = (CypherPrinterApi) printer40.getDeclaredConstructor().newInstance();
-                    break;
-                case V_4_1:
-                    Class<?> printer41 = Class.forName("org.neo4j.graphalgo.utils.cypher.CypherPrinter41");
-                    instance = (CypherPrinterApi) printer41.getDeclaredConstructor().newInstance();
-                    break;
-                case UNKNOWN:
-                    break;
-            }
-        } catch (ClassNotFoundException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException ignored) {
-        }
-
-        if (instance == null) {
-            throw new LinkageError("Could not load the " + CypherPrinter.class + " implementation for " + neo4jVersion);
-        }
-        IMPL = instance;
+        CypherPrinterFactory kernelProxyFactory = ServiceLoader
+            .load(CypherPrinterFactory.class)
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .filter(f -> f.canLoad(neo4jVersion))
+            .findFirst()
+            .orElseThrow(() -> new LinkageError("Could not load the " + CypherPrinter.class + " implementation for " + neo4jVersion));
+        IMPL = kernelProxyFactory.load();
     }
 
     /**
