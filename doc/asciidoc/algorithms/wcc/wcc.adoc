@@ -447,13 +447,13 @@ ORDER BY ComponentId, Name
 
 As we can see from the results, the node named 'Bridget' is now in its own component, due to its relationship weight being less than the configured threshold and thus ignored.
 
-NOTE: We are using stream mode to illustrate running the algorithm as weighted or unweighted, all the algorithm modes support this configuration parameter.
+NOTE: We are using stream mode to illustrate running the algorithm as weighted or unweighted, all the other  algorithm modes also support this configuration parameter.
 
 [[algorithms-wcc-examples-seeding]]
 === Seeded components
 
 It is possible to define preliminary component IDs for nodes using the `seedProperty` configuration parameter.
-This is helpful if we want to retain components from a previous run and is known that no components have been split by removing relationships.
+This is helpful if we want to retain components from a previous run and it is known that no components have been split by removing relationships.
 The property value needs to be a number.
 
 The algorithm first checks if there is a seeded component ID assigned to the node.
@@ -608,4 +608,3 @@ YIELD nodePropertiesWritten, componentCount;
 If the `seedProperty` configuration parameter has the same value as `writeProperty`, the algorithm only writes properties for nodes where the component ID has changed.
 If they differ, the algorithm writes properties for all nodes.
 ====
-
