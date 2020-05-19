@@ -47,10 +47,7 @@ public final class GraphDatabaseApiProxy {
 
     public enum Neo4jVersion {
         V_4_0,
-        V_4_1,
-        UNKNOWN;
-
-
+        V_4_1;
 
         public static Neo4jVersion parse(CharSequence version) {
             var majorVersion = Pattern.compile("\\.")
@@ -61,9 +58,10 @@ public final class GraphDatabaseApiProxy {
                 case "4.0":
                     return V_4_0;
                 case "4.1":
+                case "dev":
                     return V_4_1;
                 default:
-                    return UNKNOWN;
+                    throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
             }
         }
 
@@ -74,8 +72,6 @@ public final class GraphDatabaseApiProxy {
                     return "4.0";
                 case V_4_1:
                     return "4.1";
-                case UNKNOWN:
-                    return "Unknown";
                 default:
                     throw new IllegalArgumentException("Unexpected value: " + this + " (sad java 😞)");
             }
