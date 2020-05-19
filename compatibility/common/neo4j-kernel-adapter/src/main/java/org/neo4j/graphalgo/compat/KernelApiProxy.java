@@ -20,20 +20,17 @@
 package org.neo4j.graphalgo.compat;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
-import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.cache.LongArray;
 import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
 import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
-import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -41,7 +38,6 @@ import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
-import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
@@ -50,7 +46,6 @@ import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.query.ExecutingQuery;
-import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
@@ -58,18 +53,49 @@ import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
-import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.FormattedLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 
 public final class KernelApiProxy {
+
+    private static final KernelProxyApi IMPL;
+
+    static {
+        var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
+
+        KernelProxyApi instance = null;
+        try {
+            switch (neo4jVersion) {
+                case V_4_0:
+                    Class<?> kernel40 = Class.forName("org.neo4j.graphalgo.compat.KernelProxy40");
+                    instance = (KernelProxyApi) kernel40.getDeclaredConstructor().newInstance();
+                    break;
+                case V_4_1:
+                    Class<?> kernel41 = Class.forName("org.neo4j.graphalgo.compat.KernelProxy41");
+                    instance = (KernelProxyApi) kernel41.getDeclaredConstructor().newInstance();
+                    break;
+                case UNKNOWN:
+                    break;
+            }
+        } catch (ClassNotFoundException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException ignored) {
+        }
+
+        if (instance == null) {
+            throw new LinkageError("Could not load the " + KernelApiProxy.class + " implementation for " + neo4jVersion);
+        }
+        IMPL = instance;
+    }
+
+    public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
+        return IMPL.newDb(dbms);
+    }
 
     public static <RECORD extends AbstractBaseRecord> void read(
         RecordFormat<RECORD> recordFormat,
@@ -79,14 +105,14 @@ public final class KernelApiProxy {
         int recordSize,
         int recordsPerPage
     ) throws IOException {
-        recordFormat.read(record, cursor, mode, recordSize, recordsPerPage);
+        IMPL.read(recordFormat, record, cursor, mode, recordSize, recordsPerPage);
     }
 
     public static long getHighestPossibleIdInUse(
         RecordStore<? extends AbstractBaseRecord> recordStore,
         PageCursorTracer pageCursorTracer
     ) {
-        return recordStore.getHighestPossibleIdInUse(pageCursorTracer);
+        return IMPL.getHighestPossibleIdInUse(recordStore, pageCursorTracer);
     }
 
     public static <RECORD extends AbstractBaseRecord> PageCursor openPageCursorForReading(
@@ -94,7 +120,7 @@ public final class KernelApiProxy {
         long pageId,
         PageCursorTracer pageCursorTracer
     ) {
-        return recordStore.openPageCursorForReading(pageId, pageCursorTracer);
+        return IMPL.openPageCursorForReading(recordStore, pageId, pageCursorTracer);
     }
 
     public static PageCursor pageFileIO(
@@ -103,39 +129,49 @@ public final class KernelApiProxy {
         int pageFileFlags,
         PageCursorTracer pageCursorTracer
     ) throws IOException {
-        return pagedFile.io(pageId, pageFileFlags, pageCursorTracer);
+        return IMPL.pageFileIO(pagedFile, pageId, pageFileFlags, pageCursorTracer);
     }
 
-    public static PropertyCursor allocatePropertyCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer, MemoryTracker memoryTracker) {
-        return cursorFactory.allocatePropertyCursor(cursorTracer, memoryTracker);
+    public static PropertyCursor allocatePropertyCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    ) {
+        return IMPL.allocatePropertyCursor(cursorFactory, cursorTracer, memoryTracker);
     }
 
-    public static NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateNodeCursor(cursorTracer);
+    public static NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer) {
+        return IMPL.allocateNodeCursor(cursorFactory, cursorTracer);
     }
 
-    public static RelationshipScanCursor allocateRelationshipScanCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateRelationshipScanCursor(cursorTracer);
+    public static RelationshipScanCursor allocateRelationshipScanCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
+        return IMPL.allocateRelationshipScanCursor(cursorFactory, cursorTracer);
     }
 
-    public static NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateNodeLabelIndexCursor(cursorTracer);
+    public static NodeLabelIndexCursor allocateNodeLabelIndexCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
+        return IMPL.allocateNodeLabelIndexCursor(cursorFactory, cursorTracer);
     }
 
     public static long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
-        return NodeLabelsField.get(node, nodeStore, cursorTracer);
+        return IMPL.getNodeLabelFields(node, nodeStore, cursorTracer);
     }
 
     public static void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
-        dataRead.nodeLabelScan(label, cursor, IndexOrder.NONE);
+        IMPL.nodeLabelScan(dataRead, label, cursor);
     }
 
     public static OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base) {
-        return new OffHeapLongArray(length, defaultValue, base, EmptyMemoryTracker.INSTANCE);
+        return IMPL.newOffHeapLongArray(length, defaultValue, base);
     }
 
     public static LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue) {
-        return numberArrayFactory.newLongArray(size, defaultValue, EmptyMemoryTracker.INSTANCE);
+        return IMPL.newChunkedLongArray(numberArrayFactory, size, defaultValue);
     }
 
     public static BatchImporter instantiateBatchImporter(
@@ -154,7 +190,8 @@ public final class KernelApiProxy {
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
-        return factory.instantiate(
+        return IMPL.instantiateBatchImporter(
+            factory,
             directoryStructure,
             fileSystem,
             externalPageCache,
@@ -167,57 +204,21 @@ public final class KernelApiProxy {
             recordFormats,
             monitor,
             jobScheduler,
-            badCollector,
-            TransactionLogInitializer.getLogFilesInitializer(),
-            EmptyMemoryTracker.INSTANCE
+            badCollector
         );
     }
 
     public static Input batchInputFrom(CompatInput compatInput) {
-        return new InputFromCompatInput(compatInput);
+        return IMPL.batchInputFrom(compatInput);
     }
 
     public static String queryText(ExecutingQuery query) {
-        return query.rawQueryText();
+        return IMPL.queryText(query);
     }
 
     public static Log toPrintWriter(FormattedLog.Builder builder, PrintWriter writer) {
-        return builder.toPrintWriter(() -> writer);
+        return IMPL.toPrintWriter(builder, writer);
     }
-
-    private static final class InputFromCompatInput implements Input {
-        private final CompatInput delegate;
-
-        private InputFromCompatInput(CompatInput delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public InputIterable nodes(Collector badCollector) {
-            return delegate.nodes(badCollector);
-        }
-
-        @Override
-        public InputIterable relationships(Collector badCollector) {
-            return delegate.relationships(badCollector);
-        }
-
-        @Override
-        public IdType idType() {
-            return delegate.idType();
-        }
-
-        @Override
-        public ReadableGroups groups() {
-            return delegate.groups();
-        }
-
-        @Override
-        public Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) throws IOException {
-            return delegate.calculateEstimates(propertySizeCalculator::calculateSize);
-        }
-    }
-
 
     private KernelApiProxy() {
         throw new UnsupportedOperationException("No instances");

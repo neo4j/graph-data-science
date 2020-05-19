@@ -3,7 +3,7 @@ apply plugin: 'java-library'
 description = 'Neo4j Graph Data Science :: Cypher Printer 4.0'
 
 dependencies {
-    implementation project(':cypher-printer-api')
+    api project(':cypher-printer-api')
 
     compileOnly  group: 'org.jetbrains',  name: 'annotations',            version: ver.'jetbrains-annotations'
     compileOnly  group: 'org.neo4j',      name: 'neo4j-ast-4.0',          version: neos.'4.0'

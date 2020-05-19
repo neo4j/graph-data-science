@@ -21,11 +21,11 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-public abstract class CompatGraphDatabaseAPI implements GraphDatabaseAPI {
+import java.nio.file.Path;
 
-    protected final GraphDatabaseAPI api;
+public interface GdsGraphDatabaseAPI extends GraphDatabaseAPI {
 
-    public CompatGraphDatabaseAPI(GraphDatabaseAPI api) {
-        this.api = api;
-    }
+    void shutdown();
+
+    Path dbHome(Path workingDir);
 }

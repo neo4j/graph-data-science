@@ -19,13 +19,20 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.storageengine.api.StoreId;
 
-public abstract class CompatGraphDatabaseAPI implements GraphDatabaseAPI {
+import java.nio.file.Path;
 
-    protected final GraphDatabaseAPI api;
+final class CompatGraphDatabaseAPI40 extends CompatGraphDatabaseAPI {
 
-    public CompatGraphDatabaseAPI(GraphDatabaseAPI api) {
-        this.api = api;
+    CompatGraphDatabaseAPI40(DatabaseManagementService dbms) {
+        super(dbms);
+    }
+
+    @Override
+    public StoreId storeId() {
+        return api.storeId();
     }
 }

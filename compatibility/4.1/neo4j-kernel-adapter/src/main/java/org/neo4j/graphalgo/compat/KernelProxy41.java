@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.compat;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
@@ -69,9 +70,15 @@ import org.neo4j.scheduler.JobScheduler;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public final class KernelApiProxy {
+public final class KernelProxy41 implements KernelProxyApi {
 
-    public static <RECORD extends AbstractBaseRecord> void read(
+    @Override
+    public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
+        return new CompatGraphDatabaseAPI41(dbms);
+    }
+
+    @Override
+    public <RECORD extends AbstractBaseRecord> void read(
         RecordFormat<RECORD> recordFormat,
         RECORD record,
         PageCursor cursor,
@@ -82,14 +89,16 @@ public final class KernelApiProxy {
         recordFormat.read(record, cursor, mode, recordSize, recordsPerPage);
     }
 
-    public static long getHighestPossibleIdInUse(
+    @Override
+    public long getHighestPossibleIdInUse(
         RecordStore<? extends AbstractBaseRecord> recordStore,
         PageCursorTracer pageCursorTracer
     ) {
         return recordStore.getHighestPossibleIdInUse(pageCursorTracer);
     }
 
-    public static <RECORD extends AbstractBaseRecord> PageCursor openPageCursorForReading(
+    @Override
+    public <RECORD extends AbstractBaseRecord> PageCursor openPageCursorForReading(
         RecordStore<RECORD> recordStore,
         long pageId,
         PageCursorTracer pageCursorTracer
@@ -97,7 +106,8 @@ public final class KernelApiProxy {
         return recordStore.openPageCursorForReading(pageId, pageCursorTracer);
     }
 
-    public static PageCursor pageFileIO(
+    @Override
+    public PageCursor pageFileIO(
         PagedFile pagedFile,
         long pageId,
         int pageFileFlags,
@@ -106,39 +116,48 @@ public final class KernelApiProxy {
         return pagedFile.io(pageId, pageFileFlags, pageCursorTracer);
     }
 
-    public static PropertyCursor allocatePropertyCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer, MemoryTracker memoryTracker) {
+    @Override
+    public PropertyCursor allocatePropertyCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer, MemoryTracker memoryTracker) {
         return cursorFactory.allocatePropertyCursor(cursorTracer, memoryTracker);
     }
 
-    public static NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
+    @Override
+    public NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
         return cursorFactory.allocateNodeCursor(cursorTracer);
     }
 
-    public static RelationshipScanCursor allocateRelationshipScanCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
+    @Override
+    public RelationshipScanCursor allocateRelationshipScanCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
         return cursorFactory.allocateRelationshipScanCursor(cursorTracer);
     }
 
-    public static NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
+    @Override
+    public NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
         return cursorFactory.allocateNodeLabelIndexCursor(cursorTracer);
     }
 
-    public static long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
+    @Override
+    public long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
         return NodeLabelsField.get(node, nodeStore, cursorTracer);
     }
 
-    public static void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
+    @Override
+    public void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
         dataRead.nodeLabelScan(label, cursor, IndexOrder.NONE);
     }
 
-    public static OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base) {
+    @Override
+    public OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base) {
         return new OffHeapLongArray(length, defaultValue, base, EmptyMemoryTracker.INSTANCE);
     }
 
-    public static LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue) {
+    @Override
+    public LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue) {
         return numberArrayFactory.newLongArray(size, defaultValue, EmptyMemoryTracker.INSTANCE);
     }
 
-    public static BatchImporter instantiateBatchImporter(
+    @Override
+    public BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
@@ -173,15 +192,18 @@ public final class KernelApiProxy {
         );
     }
 
-    public static Input batchInputFrom(CompatInput compatInput) {
+    @Override
+    public Input batchInputFrom(CompatInput compatInput) {
         return new InputFromCompatInput(compatInput);
     }
 
-    public static String queryText(ExecutingQuery query) {
+    @Override
+    public String queryText(ExecutingQuery query) {
         return query.rawQueryText();
     }
 
-    public static Log toPrintWriter(FormattedLog.Builder builder, PrintWriter writer) {
+    @Override
+    public Log toPrintWriter(FormattedLog.Builder builder, PrintWriter writer) {
         return builder.toPrintWriter(() -> writer);
     }
 
@@ -216,10 +238,5 @@ public final class KernelApiProxy {
         public Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) throws IOException {
             return delegate.calculateEstimates(propertySizeCalculator::calculateSize);
         }
-    }
-
-
-    private KernelApiProxy() {
-        throw new UnsupportedOperationException("No instances");
     }
 }
