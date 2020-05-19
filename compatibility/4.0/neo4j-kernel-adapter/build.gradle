@@ -7,6 +7,7 @@ dependencies {
 
     annotationProcessor project(':annotations')
     annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
+    annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'4.0'
 
     compileOnly project(':annotations')
     compileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
