@@ -40,7 +40,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.neo4j.kernel.impl.store.RecordPageLocationCalculator.offsetForId;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBaseRecord, Store extends RecordStore<Record>> implements StoreScanner<Reference> {
 
@@ -68,7 +68,7 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
         private int offset;
 
         ScanCursor(PageCursor pageCursor, Record record, Reference reference) {
-            this.lastOffset = offsetForId(maxId, pageSize, recordSize);
+            this.lastOffset = (int) ((maxId * recordSize) % pageSize);
             this.lastPage = calculateLastPageId(maxId, recordsPerPage, lastOffset);
             this.pageCursor = pageCursor;
             this.record = record;
@@ -138,7 +138,7 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
                 offset = 0;
 
                 while (offset < endOffset) {
-                    record.setId(recordId++); // do we need this setId command here?
+                    record.setId(recordId++);
                     loadAtOffset(offset);
                     offset += recordSize;
                     if (record.inUse()) {
@@ -176,11 +176,17 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
                 pageCursor.setOffset(offset);
                 KernelApiProxy.read(recordFormat, record, pageCursor, RecordLoad.CHECK, recordSize, recordsPerPage);
             } while (pageCursor.shouldRetry());
-            verifyLoad();
+            verifyLoad(offset, record.getId());
         }
 
-        private void verifyLoad() {
-            pageCursor.checkAndClearBoundsFlag();
+        private void verifyLoad(int offset, long recordId) {
+            if (pageCursor.checkAndClearBoundsFlag()) {
+                throw new IndexOutOfBoundsException(formatWithLocale(
+                    "Attempt to load record %s at offset %s was out of bounds",
+                    recordId,
+                    offset
+                ));
+            };
         }
 
         @SuppressWarnings("ConstantConditions")
