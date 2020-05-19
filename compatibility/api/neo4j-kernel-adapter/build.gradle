@@ -1,0 +1,15 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter'
+
+dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
+
+    api project(':neo4j-adapter')
+    implementation project(':neo4j-kernel-adapter-4.0')
+    implementation project(':neo4j-kernel-adapter-4.1')
+    compileOnly project(':annotations')
+    compileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
+}
+

@@ -34,13 +34,58 @@ import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.kernel.internal.Version;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public final class GraphDatabaseApiProxy {
+
+    public enum Neo4jVersion {
+        V_4_0,
+        V_4_1,
+        UNKNOWN;
+
+
+
+        public static Neo4jVersion parse(CharSequence version) {
+            var majorVersion = Pattern.compile("\\.")
+                .splitAsStream(version)
+                .limit(2)
+                .collect(Collectors.joining("."));
+            switch (majorVersion) {
+                case "4.0":
+                    return V_4_0;
+                case "4.1":
+                    return V_4_1;
+                default:
+                    return UNKNOWN;
+            }
+        }
+
+        @Override
+        public String toString() {
+            switch (this) {
+                case V_4_0:
+                    return "4.0";
+                case V_4_1:
+                    return "4.1";
+                case UNKNOWN:
+                    return "Unknown";
+                default:
+                    throw new IllegalArgumentException("Unexpected value: " + this + " (sad java 😞)");
+            }
+        }
+    }
+
+    public static Neo4jVersion neo4jVersion() {
+        var neo4jVersion = Version.getNeo4jVersion();
+        return Neo4jVersion.parse(neo4jVersion);
+    }
 
     public static <T> T resolveDependency(GraphDatabaseService db, Class<T> dependency) {
         return ((GraphDatabaseAPI) db)
@@ -90,7 +135,11 @@ public final class GraphDatabaseApiProxy {
         return tx.execute(query, params);
     }
 
-    public static Result runQueryWithoutClosingTheResult(KernelTransaction tx, String query, Map<String, Object> params) {
+    public static Result runQueryWithoutClosingTheResult(
+        KernelTransaction tx,
+        String query,
+        Map<String, Object> params
+    ) {
         return tx.internalTransaction().execute(query, params);
     }
 

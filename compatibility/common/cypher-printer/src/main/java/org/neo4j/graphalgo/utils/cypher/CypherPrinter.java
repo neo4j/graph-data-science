@@ -19,26 +19,41 @@
  */
 package org.neo4j.graphalgo.utils.cypher;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.cypher.internal.v4_0.ast.prettifier.ExpressionStringifier;
-import org.neo4j.cypher.internal.v4_0.ast.prettifier.ExpressionStringifier$;
-import org.neo4j.cypher.internal.v4_0.expressions.Expression;
-import scala.runtime.AbstractFunction1;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 
-@Value.Style(
-    allParameters = true,
-    builderVisibility = Value.Style.BuilderVisibility.PUBLIC,
-    deepImmutablesDetection = true,
-    deferCollectionAllocation = true,
-    depluralize = true,
-    overshadowImplementation = true,
-    typeAbstract = "*",
-    typeImmutable = "_*",
-    visibility = Value.Style.ImplementationVisibility.PACKAGE
-)
+import java.lang.reflect.InvocationTargetException;
+
 public final class CypherPrinter {
+
+    private static final CypherPrinterApi IMPL;
+
+    static {
+        var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
+
+        CypherPrinterApi instance = null;
+        try {
+            switch (neo4jVersion) {
+                case V_4_0:
+                    Class<?> printer40 = Class.forName("org.neo4j.graphalgo.utils.cypher.CypherPrinter40");
+                    instance = (CypherPrinterApi) printer40.getDeclaredConstructor().newInstance();
+                    break;
+                case V_4_1:
+                    Class<?> printer41 = Class.forName("org.neo4j.graphalgo.utils.cypher.CypherPrinter41");
+                    instance = (CypherPrinterApi) printer41.getDeclaredConstructor().newInstance();
+                    break;
+                case UNKNOWN:
+                    break;
+            }
+        } catch (ClassNotFoundException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException ignored) {
+        }
+
+        if (instance == null) {
+            throw new LinkageError("Could not load the " + CypherPrinter.class + " implementation for " + neo4jVersion);
+        }
+        IMPL = instance;
+    }
 
     /**
      * Renders any java type as a Cypher expression. Supported types are
@@ -49,7 +64,7 @@ public final class CypherPrinter {
      * @return A Cypher expression string for the type or the empty string if the type was empty
      * @throws IllegalArgumentException if the given type is not supported
      */
-    public @NotNull String toCypherString(@Nullable Object value) {
+    public static @NotNull String toCypherString(@Nullable Object value) {
         return toCypherStringOr(value, "");
     }
 
@@ -62,47 +77,21 @@ public final class CypherPrinter {
      * @return A Cypher expression string for the type or the given fallback value if the type was empty
      * @throws IllegalArgumentException if the given type is not supported
      */
-    public @NotNull String toCypherStringOr(
+    public static @NotNull String toCypherStringOr(
         @Nullable Object value,
         @NotNull String ifEmpty
     ) {
-        Expression expression = AstHelpers.any(value);
-        if (expression != null) {
-            return STRINGIFIER.apply(expression);
-        }
-        return ifEmpty;
+        return IMPL.toCypherStringOr(value, ifEmpty);
     }
 
-    public CypherParameter parameter(String value) {
-        return _CypherParameter.of(value);
+    public static CypherPrinterApi.CypherParameter parameter(String value) {
+        return CypherPrinterApi.param(value);
     }
 
-    public CypherVariable variable(String value) {
-        return _CypherVariable.of(value);
+    public static CypherPrinterApi.CypherVariable variable(String value) {
+        return CypherPrinterApi.var(value);
     }
 
-    @Value.Immutable
-    interface CypherParameter {
-        String name();
-    }
-
-    @Value.Immutable
-    interface CypherVariable {
-        String name();
-    }
-
-    private static final ExpressionStringifier STRINGIFIER =
-        ExpressionStringifier$.MODULE$.apply(
-            new CanonicalStringFallback(),
-            /* alwaysParens */ false,
-            /* alwaysBacktick */ false
-        );
-
-    private static final class CanonicalStringFallback extends AbstractFunction1<Expression, String> {
-
-        @Override
-        public String apply(Expression expression) {
-            return expression.asCanonicalStringVal();
-        }
+    private CypherPrinter() {
     }
 }

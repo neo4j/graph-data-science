@@ -22,9 +22,6 @@ package org.neo4j.graphalgo.utils.cypher;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.cypher.internal.ast.prettifier.ExpressionStringifier;
-import org.neo4j.cypher.internal.ast.prettifier.ExpressionStringifier$;
-import org.neo4j.cypher.internal.expressions.Expression;
 
 @Value.Style(
     allParameters = true,
@@ -37,20 +34,7 @@ import org.neo4j.cypher.internal.expressions.Expression;
     typeImmutable = "_*",
     visibility = Value.Style.ImplementationVisibility.PACKAGE
 )
-public final class CypherPrinter {
-
-    /**
-     * Renders any java type as a Cypher expression. Supported types are
-     * primitives, CharSequences, Enums, Iterables, and Maps.
-     * Empty lists and maps, as well as null, are considered to be "empty"
-     * and will be ignored.
-     *
-     * @return A Cypher expression string for the type or the empty string if the type was empty
-     * @throws IllegalArgumentException if the given type is not supported
-     */
-    public @NotNull String toCypherString(@Nullable Object value) {
-        return toCypherStringOr(value, "");
-    }
+public interface CypherPrinterApi {
 
     /**
      * Renders any java type as a Cypher expression. Supported types are
@@ -61,24 +45,10 @@ public final class CypherPrinter {
      * @return A Cypher expression string for the type or the given fallback value if the type was empty
      * @throws IllegalArgumentException if the given type is not supported
      */
-    public @NotNull String toCypherStringOr(
+    @NotNull String toCypherStringOr(
         @Nullable Object value,
         @NotNull String ifEmpty
-    ) {
-        Expression expression = AstHelpers.any(value);
-        if (expression != null) {
-            return STRINGIFIER.apply(expression);
-        }
-        return ifEmpty;
-    }
-
-    public CypherParameter parameter(String value) {
-        return _CypherParameter.of(value);
-    }
-
-    public CypherVariable variable(String value) {
-        return _CypherVariable.of(value);
-    }
+    );
 
     @Value.Immutable
     interface CypherParameter {
@@ -90,19 +60,11 @@ public final class CypherPrinter {
         String name();
     }
 
-    private static final ExpressionStringifier STRINGIFIER =
-        ExpressionStringifier$.MODULE$.apply(
-            new CanonicalStringFallback(),
-            /* alwaysParens */ false,
-            /* alwaysBacktick */ false,
-            /* preferSingleQuotes */ false,
-            /* sensitiveParamsAsParams */false
-        );
+    static CypherParameter param(String value) {
+        return _CypherParameter.of(value);
+    }
 
-    private static final class CanonicalStringFallback implements ExpressionStringifier.Extension {
-        @Override
-        public String apply(ExpressionStringifier ctx, Expression expression) {
-            return expression.asCanonicalStringVal();
-        }
+    static CypherVariable var(String value) {
+        return _CypherVariable.of(value);
     }
 }

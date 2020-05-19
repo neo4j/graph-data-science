@@ -63,7 +63,6 @@ public abstract class GdsCypher {
 
     private static final int ADDITIONAL_PARAMETERS_FOR_IMPLICIT_GRAPH_CREATION = 4;
     private static final Pattern PERIOD = Pattern.compile(Pattern.quote("."));
-    private static final CypherPrinter PRINTER = new CypherPrinter();
 
     public static CreationBuildStage call() {
         return new StagedBuilder();
@@ -418,7 +417,7 @@ public abstract class GdsCypher {
         Map<String, Object> parameters
     ) {
         StringJoiner queryArguments = new StringJoiner(", ");
-        explicitGraphName.ifPresent(name -> queryArguments.add(PRINTER.toCypherString(name)));
+        explicitGraphName.ifPresent(name -> queryArguments.add(CypherPrinter.toCypherString(name)));
 
         if (implicitCreateConfig.isPresent()) {
             GraphCreateFromStoreConfig config = implicitCreateConfig.get();
@@ -429,8 +428,8 @@ public abstract class GdsCypher {
             Optional<Object> nodeProjection = toMinimalObject(config.nodeProjections()).toObject();
             Optional<Object> relationshipProjection = toMinimalObject(config.relationshipProjections()).toObject();
             if (executionMode == InternalExecutionMode.GRAPH_CREATE) {
-                queryArguments.add(PRINTER.toCypherString(nodeProjection.orElse(emptyMap())));
-                queryArguments.add(PRINTER.toCypherString(relationshipProjection.orElse(emptyMap())));
+                queryArguments.add(CypherPrinter.toCypherString(nodeProjection.orElse(emptyMap())));
+                queryArguments.add(CypherPrinter.toCypherString(relationshipProjection.orElse(emptyMap())));
             } else {
                 nodeProjection.ifPresent(np -> newParameters.put("nodeProjection", np));
                 relationshipProjection.ifPresent(rp -> newParameters.put("relationshipProjection", rp));
@@ -448,7 +447,7 @@ public abstract class GdsCypher {
         }
 
         if (!parameters.isEmpty()) {
-            queryArguments.add(PRINTER.toCypherStringOr(parameters, "{}"));
+            queryArguments.add(CypherPrinter.toCypherStringOr(parameters, "{}"));
         }
 
         return queryArguments.toString();
@@ -575,13 +574,13 @@ public abstract class GdsCypher {
 
         @Override
         public StagedBuilder addPlaceholder(String key, String placeholder) {
-            builder.putParameter(key, PRINTER.parameter(placeholder));
+            builder.putParameter(key, CypherPrinter.parameter(placeholder));
             return this;
         }
 
         @Override
         public StagedBuilder addVariable(String key, String variable) {
-            builder.putParameter(key, PRINTER.variable(variable));
+            builder.putParameter(key, CypherPrinter.variable(variable));
             return this;
         }
 

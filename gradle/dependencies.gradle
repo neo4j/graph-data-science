@@ -44,4 +44,8 @@ ext {
         junit5platform:     "org.junit.platform:junit-platform-launcher",
         junit5migration:    "org.junit.jupiter:junit-jupiter-migrationsupport",
     ]
+    neos = [
+        '4.0': '4.0.4',
+        '4.1': '4.1.0-SNAPSHOT',
+    ]
 }

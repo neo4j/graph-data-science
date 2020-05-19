@@ -43,7 +43,7 @@ import java.util.Map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.cypher.ScalaHelpers.pair;
 
-final class AstHelpers {
+final class AstHelpers41 {
 
     private static final InputPosition NO_POS = InputPosition.NONE();
 
@@ -131,15 +131,15 @@ final class AstHelpers {
         if (value instanceof Enum) {
             return string(((Enum<?>) value).name());
         }
-        if (value instanceof CypherPrinter.CypherParameter) {
-            String name = ((CypherPrinter.CypherParameter) value).name();
+        if (value instanceof CypherPrinterApi.CypherParameter) {
+            String name = ((CypherPrinterApi.CypherParameter) value).name();
             // 3.5 erroneously throws on an empty string, but we test for that
             //  reintroduce the 3.5 bug to maintain the same "feature"
             name.chars().iterator().nextInt();
             return parameter(name);
         }
-        if (value instanceof CypherPrinter.CypherVariable) {
-            String name = ((CypherPrinter.CypherVariable) value).name();
+        if (value instanceof CypherPrinterApi.CypherVariable) {
+            String name = ((CypherPrinterApi.CypherVariable) value).name();
             // 3.5 erroneously throws on an empty string, but we test for that
             //  reintroduce the 3.5 bug to maintain the same "feature"
             name.chars().iterator().nextInt();
@@ -162,5 +162,5 @@ final class AstHelpers {
         return PropertyKeyName.apply(String.valueOf(value), NO_POS);
     }
 
-    private AstHelpers() {}
+    private AstHelpers41() {}
 }
