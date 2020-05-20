@@ -16,6 +16,7 @@ dependencies {
     compileOnly group: 'org.neo4j',      name: 'neo4j',             version: ver.'neo4j'
 
     testImplementation project(':test-utils')
+    testImplementation project(':proc-test')
     testImplementation project(':proc-common')
     testImplementation project(':proc-catalog')
     // TODO: can remove when we've ported the triangle count doc test

@@ -37,11 +37,11 @@ public class Node2Vec extends Algorithm<Node2Vec, Node2Vec> {
 
     private static final double RETURN_PARAM = 1.0;
     private static final double IN_OUT_PARAM = 1.0;
-    private final Graph graph;
+    private Graph graph;
     private final Node2VecConfig config;
     private Word2Vec word2Vec;
 
-    Node2Vec(Graph graph, Node2VecConfig config) {
+    public Node2Vec(Graph graph, Node2VecConfig config) {
         this.graph = graph;
         this.config = config;
     }
@@ -84,7 +84,7 @@ public class Node2Vec extends Algorithm<Node2Vec, Node2Vec> {
 
     @Override
     public void release() {
-        throw new UnsupportedOperationException("org.neo4j.graphalgo.impl.Node2Vec.release is not implemented.");
+        graph = null;
     }
 
     public double[] embeddingForNode(long nodeId) {

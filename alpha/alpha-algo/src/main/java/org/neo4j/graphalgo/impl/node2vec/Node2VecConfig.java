@@ -30,7 +30,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("Node2VecConfigImpl")
-interface Node2VecConfig extends AlgoBaseConfig {
+public interface Node2VecConfig extends AlgoBaseConfig {
 
     @Value.Default
     @Configuration.IntegerRange(min = 2)
