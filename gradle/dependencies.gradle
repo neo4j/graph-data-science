@@ -1,4 +1,8 @@
 ext {
+    neos = [
+        '4.0': properties.getOrDefault('neo4jVersion40', '4.0.4'),
+        '4.1': properties.getOrDefault('neo4jVersion41', '4.1.0-SNAPSHOT'),
+    ]
     ver = [
             'asciidoctorj':                 '2.2.0',
             'auto-common':                  '0.10',
