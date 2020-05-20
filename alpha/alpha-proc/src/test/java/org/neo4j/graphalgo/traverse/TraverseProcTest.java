@@ -137,4 +137,16 @@ class TraverseProcTest extends BaseProcTest {
             assertContains(new String[]{"g", "e", "f", "d"}, nodeIds);
         });
     }
+
+    @Test
+    void failOnInvalidStartNode() {
+        String query = GdsCypher.call()
+            .loadEverything()
+            .algo("gds.alpha.dfs")
+            .streamMode()
+            .addParameter("startNode", 42)
+            .yields();
+
+        assertError(query, "node with id 42 was not loaded");
+    }
 }

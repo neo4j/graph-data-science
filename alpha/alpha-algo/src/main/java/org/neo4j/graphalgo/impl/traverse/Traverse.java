@@ -30,6 +30,7 @@ import java.util.function.ObjDoubleConsumer;
 import java.util.function.ObjLongConsumer;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.impl.utils.NodeMappingUtil.getMappedNodeId;
 
 public final class Traverse extends Algorithm<Traverse, Traverse> {
 
@@ -104,7 +105,7 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
 
     @Override
     public Traverse compute() {
-        long sourceNode = graph.toMappedNodeId(startNodeId);
+        long sourceNode = getMappedNodeId(startNodeId, graph);
         final LongHashSet result = new LongHashSet(nodeCount);
         nodes.clear();
         sources.clear();

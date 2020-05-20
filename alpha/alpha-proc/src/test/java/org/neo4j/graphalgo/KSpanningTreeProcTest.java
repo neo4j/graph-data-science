@@ -121,4 +121,17 @@ class KSpanningTreeProcTest extends BaseProcTest {
         assertEquals(communities.get("b"), communities.get("c"));
         assertNotEquals(communities.get("a"), communities.get("b"));
     }
+
+    @Test
+    void failOnInvalidStartNode() {
+        String query = GdsCypher.call()
+            .loadEverything()
+            .algo("gds.alpha.spanningTree.kmin")
+            .writeMode()
+            .addParameter("startNodeId", 42)
+            .addParameter("k", 2)
+            .yields();
+
+        assertError(query, "node with id 42 was not loaded");
+    }
 }

@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 
@@ -49,20 +51,20 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 class PrimTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (y:Node {name: 'y'})" +
-            ", (z:Node {name: 'z'})" +
-            ", (a)-[:TYPE {cost: 1.0}]->(b)" +
-            ", (a)-[:TYPE {cost: 2.0}]->(c)" +
-            ", (b)-[:TYPE {cost: 3.0}]->(c)" +
-            ", (b)-[:TYPE {cost: 4.0}]->(d)" +
-            ", (c)-[:TYPE {cost: 5.0}]->(e)" +
-            ", (d)-[:TYPE {cost: 6.0}]->(e)";
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (y:Node {name: 'y'})" +
+        ", (z:Node {name: 'z'})" +
+        ", (a)-[:TYPE {cost: 1.0}]->(b)" +
+        ", (a)-[:TYPE {cost: 2.0}]->(c)" +
+        ", (b)-[:TYPE {cost: 3.0}]->(c)" +
+        ", (b)-[:TYPE {cost: 4.0}]->(d)" +
+        ", (c)-[:TYPE {cost: 5.0}]->(e)" +
+        ", (d)-[:TYPE {cost: 6.0}]->(e)";
 
     private static final Label label = Label.label("Node");
     private static int a, b, c, d, e, y, z;
@@ -132,6 +134,17 @@ class PrimTest extends AlgoTestBase {
     void testMinimumFromE() {
         loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, e).compute());
+    }
+
+    @Test
+    void failOnInvalidStartNode() {
+        try {
+            loadGraph();
+            new Prim(graph, graph, Prim.MIN_OPERATOR, 42).compute();
+            fail();
+        } catch (Throwable e) {
+            assertTrue(e.getMessage().contains("node with id 42 was not loaded"));
+        }
     }
 
     private void loadGraph() {
