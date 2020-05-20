@@ -13,15 +13,21 @@ This topic includes:
 
 * <<algorithms-node-similarity-intro, Introduction>>
 * <<algorithms-node-similarity-syntax, Syntax>>
+** <<algorithms-node-similarity-syntax-stream, Stream>>
+** <<algorithms-node-similarity-syntax-stats, Stats>>
+** <<algorithms-node-similarity-syntax-mutate, Mutate>>
+** <<algorithms-node-similarity-syntax-write, Write>>
+** <<algorithms-node-similarity-syntax-anonymous, Anonymous graphs>>
 * <<algorithms-node-similarity-examples, Examples>>
-** <<algorithms-node-similarity-examples-stream, Streaming results>>
-** <<algorithms-node-similarity-examples-write, Writing results>>
+** <<algorithms-node-similarity-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-node-similarity-examples-stream, Stream>>
+** <<algorithms-node-similarity-examples-stats, Stats>>
+** <<algorithms-node-similarity-examples-mutate, Mutate>>
+** <<algorithms-node-similarity-examples-write, Write>>
 ** <<algorithms-node-similarity-examples-limits, Limiting results>>
 *** <<algorithms-node-similarity-examples-limits-topk-bottomk, topK and bottomK>>
 *** <<algorithms-node-similarity-examples-limits-topn-bottomn, topN and bottomN>>
 ** <<algorithms-node-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
-** <<algorithms-node-similarity-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-node-similarity-examples-stats, Stats>>
 
 [[algorithms-node-similarity-intro]]
 == Introduction
@@ -68,8 +74,118 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-node-similarity-syntax]]
 == Syntax
 
+[[algorithms-node-similarity-syntax-stream]]
+=== Stream mode
 
-=== Write mode
+.Run Node Similarity in stream mode on a named graph.
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  node1: Integer,
+  node2: Integer,
+  similarity: Float
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name       | Type    | Description
+| node1      | Integer | The Neo4j ID of the first node.
+| node2      | Integer | The Neo4j ID of the second node.
+| similarity | Float   | The similarity score for the two nodes.
+|===
+
+[[algorithms-node-similarity-syntax-stats]]
+=== Stats
+
+.Run Node Similarity in stats mode on a named graph.
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  similarityPairs: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                          | Type      | Description
+| createMillis                  | Integer   | Milliseconds for loading data.
+| computeMillis                 | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis          | Integer   | Milliseconds for computing component count and distribution statistics.
+| similarityPairs               | Integer   | The number of pairs of similar nodes computed.
+| similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
+| configuration                 | Map       | The configuration used for running the algorithm.
+|===
+
+[[algorithms-node-similarity-syntax-mutate]]
+=== Mutate
+
+.Run Node Similarity in write mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.nodeSimilarity.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  relationshipsWritten: Integer,
+  nodesCompared: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| nodesCompared          | Integer | The number of nodes compared.
+| relationshipsWritten   | Integer | The number of relationships created.
+| createMillis           | Integer | Milliseconds for loading data.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| mutateMillis           | Integer | Milliseconds for adding properties to the in-memory graph.
+| postProcessingMillis   | Integer | Milliseconds for computing percentiles.
+| similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+
+[[algorithms-node-similarity-syntax-write]]
+=== Write
 
 .Run Node Similarity in write mode on a graph stored in the catalog.
 [source, cypher]
@@ -79,43 +195,21 @@ CALL gds.nodeSimilarity.write(
   configuration: Map
 )
 YIELD
-  // general write return columns
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
   nodesCompared: Integer,
   relationshipsWritten: Integer,
-  writeRelationshipType: String,
-  writeProperty: String
+  similarityDistribution: Map,
+  configuration: Map
 ----
 
-include::common-configuration/common-parameters-named-graph.adoc[]
+include::../common-configuration/common-parameters-named-graph.adoc[]
 
-include::common-configuration/common-configuration-named-graph.adoc[]
+include::../common-configuration/common-configuration-named-graph.adoc[]
 
-.Run Node Similarity in write mode on an anonymous graph.
-[source, cypher]
-----
-CALL gds.nodeSimilarity.write(configuration: Map)
-YIELD
-  // general write return columns
-  nodesCompared: Integer,
-  relationshipsWritten: Integer
-----
-
-include::common-configuration/common-parameters-anonymous-graph.adoc[]
-
-include::common-configuration/common-configuration-anonymous-graph.adoc[]
-
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name                   | Type    | Default                | Optional | Description
-| similarityCutoff       | Float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result. Values must be between 0 and 1.
-| degreeCutoff           | Integer | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value cannot be lower than 1.
-| topK                   | Integer | 10                     | yes      | Limit on the number of scores per node. The K largest results are returned. This value cannot be lower than 1.
-| bottomK                | Integer | 10                     | yes      | Limit on the number of scores per node. The K smallest results are returned. This value cannot be lower than 1.
-| topN                   | Integer | 0                      | yes      | Global limit on the number of scores computed. The N largest total results are returned. This value cannot be negative, a value of 0 means no global limit.
-| bottomN                | Integer | 0                      | yes      | Global limit on the number of scores computed. The N smallest total results are returned. This value cannot be negative, a value of 0 means no global limit.
-| writeRelationshipType  | String  | SIMILAR                | no      | The relationship type used to represent a similarity score.
-|===
+include::specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -131,160 +225,33 @@ include::common-configuration/common-configuration-anonymous-graph.adoc[]
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
 
+[[algorithms-node-similarity-syntax-anonymous]]
+=== Anonymous graphs
 
-=== Mutate mode
+include::../shared/syntax-anonymous-graphs.adoc[]
 
-.Run Node Similarity in write mode on a graph stored in the catalog.
+.Run Node Similarity in write mode on an anonymous graph.
 [source, cypher]
 ----
-CALL gds.nodeSimilarity.mutate(
-  graphName: String,
+CALL gds.nodeSimilarity.write(
   configuration: Map
 )
-YIELD
-  // general mutate return columns
-  nodesCompared: Integer,
-  relationshipsWritten: Integer
-----
-
-The configuration for the `mutate` mode is similar to the `write` mode.
-Instead of specifying a `writeRelationshipType` and `writeProperty`,
-we need to specify a `mutateRelationshipType` and `mutateProperty`.
-Also, specifying `writeConcurrency` is not possible in `mutate` mode.
-
-.The following will run the algorithm and store the results in `myGraph`:
-[source, cypher]
-----
-CALL gds.nodeSimilarity.mutate('myGraph', {
-    mutateRelationshipType: 'SIMILAR',
-    mutateProperty: 'score'
-})
-----
-
-
-[[algorithms-node-similarity-syntax-stream]]
-=== Stream mode
-
-.Run Node Similarity in stream mode on a graph stored in the catalog.
-[source, cypher]
-----
-CALL gds.nodeSimilarity.stream(
-  graphName: String,
-  configuration: Map
-) YIELD
-  node1: Integer,
-  node2: Integer,
-  similarity: Float
-----
-
-include::common-configuration/common-parameters-named-graph.adoc[]
-
-include::common-configuration/common-configuration-named-graph.adoc[]
-
-.Run Node Similarity in stream mode on an anonymous graph.
-[source, cypher]
-----
-CALL gds.nodeSimilarity.stream(configuration: Map)
-YIELD
-  node1: Integer,
-  node2: Integer,
-  similarity: Float
-----
-
-include::common-configuration/common-parameters-anonymous-graph.adoc[]
-
-include::common-configuration/common-configuration-anonymous-graph.adoc[]
-
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name             | Type    | Default | Optional | Description
-| similarityCutoff | Float   | 1E-42   | yes      | Lower limit for the similarity score to be present in the result. . Values must be between 0 and 1.
-| degreeCutoff     | Integer | 1       | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| topK             | Integer | 10      | yes      | Limit on the number of scores per node. The K largest results are returned. This value cannot be lower than 1.
-| bottomK          | Integer | 10      | yes      | Limit on the number of scores per node. The K smallest results are returned. This value cannot be lower than 1.
-| topN             | Integer | 0       | yes      | Global limit on the number of scores computed. The N largest total results are returned. This value cannot be negative, a value of 0 means no global limit.
-| bottomN          | Integer | 0       | yes      | Global limit on the number of scores computed. The N smallest total results are returned. This value cannot be negative, a value of 0 means no global limit.
-|===
-
-.Results
-[opts="header",cols="1m,1,6"]
-|===
-| Name       | Type    | Description
-| node1      | Integer | The Neo4j ID of the first node.
-| node2      | Integer | The Neo4j ID of the second node.
-| similarity | Float   | The similarity score for the two nodes.
-|===
-
-
-=== Stats mode
-
-.Run Node Similarity in stats mode on a named graph.
-[source, cypher]
-----
-CALL gds.nodeSimilarity.stats(
-  graphName: String,
-  configuration: Map
-)
-YIELD
-  computeMillis: Integer,
-  nodesCompared: Integer,
-----
-
-include::common-configuration/common-parameters-named-graph.adoc[]
-
-.Run Node Similarity in stats mode on an anonymous graph.
-[source, cypher]
-----
-CALL gds.nodeSimilarity.stats(configuration: Map)
 YIELD
   createMillis: Integer,
   computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
   nodesCompared: Integer,
-----
-
-include::common-configuration/common-parameters-anonymous-graph.adoc[]
-
-The configuration is the same as for the `write` mode.
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                  | Type    | Description
-| createMillis                  | Integer | Milliseconds for loading data.
-| computeMillis                 | Integer | Milliseconds for running the algorithm.
-| postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
-| componentCount                | Integer | The number of computed components.
-| componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
-| configuration                 | Map     | The configuration used for running the algorithm.
-|===
-
-
-=== Estimate mode
-
-The following will estimate the memory requirements for running the algorithm.
-The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
-
-.Run Node Similarity in estimate mode on a named graph.
-[source,cypher]
-----
-CALL gds.nodeSimilarity.<mode>.estimate(
-  graphName: String,
+  relationshipsWritten: Integer,
+  similarityDistribution: Map,
   configuration: Map
-)
 ----
 
-include::common-configuration/common-parameters-named-graph.adoc[]
+include::../common-configuration/common-configuration-anonymous-graph.adoc[]
 
-.Run Node Similarity in estimate mode on an anonymous graph.
-[source,cypher]
-----
-CALL gds.nodeSimilarity.<mode>.estimate(configuration: Map)
-----
+include::specific-configuration.adoc[]
 
-include::common-configuration/common-parameters-anonymous-graph.adoc[]
-
-include::common-configuration/common-estimate-mode.adoc[]
+The results are the same as for running write mode with a named graph, <<algorithms-node-similarity-syntax-write, specified above>>.
 
 
 [[algorithms-node-similarity-examples]]
@@ -336,23 +303,40 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 ----
 
-Similarly, loading a graph with Cypher also requires to load the whole pool of nodes of the bipartite graph as well a the relationships that link them.
-
-.The following statement will create a graph with Cypher and store it in the catalog.
-[source, cypher, role=graph-create-query]
-----
-CALL gds.graph.create.cypher(
-    'myCypherGraph',
-    'MATCH (n) WHERE n:Person OR n:Instrument RETURN id(n) AS id',
-    'MATCH (p:Person)-[:LIKES]->(i:Instrument) RETURN id(p) AS source, id(i) AS target'
-)
-----
-
 In the following examples we will demonstrate using the Node Similarity algorithm on this graph.
+
+
+[[algorithms-node-similarity-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.nodeSimilarity.write.estimate('myGraph', {
+  writeRelationshipType: 'SIMILAR',
+  writeProperty: 'score'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header", cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 9         | 9                 | 2568     | 2568     | "2568 Bytes"
+|===
+--
 
 
 [[algorithms-node-similarity-examples-stream]]
 === Streaming results
+
+include::../shared/examples-stream-intro.adoc[]
 
 [role=query-example]
 --
@@ -387,13 +371,68 @@ We use default values for the procedure configuration parameter.
 TopK is set to 10, topN is set to 0.
 Because of that the result set contains the top 10 similarity scores for each node.
 
+[[algorithms-node-similarity-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-node-similarity-syntax-stats
+include::../shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stats('myGraph')
+YIELD nodesCompared, similarityPairs
+----
+
+.Results
+[opts="header",cols="2"]
+|===
+| nodesCompared | similarityPairs
+| 4             | 10
+|===
+--
+
+
+[[algorithms-node-similarity-examples-mutate]]
+=== Mutate results
+
+include::../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm, and write back results:
+[source, cypher]
+----
+CALL gds.nodeSimilarity.mutate('myGraph', {
+    mutateRelationshipType: 'SIMILAR',
+    mutateProperty: 'score'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 4             | 10
+|===
+--
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
 
 [[algorithms-node-similarity-examples-write]]
 === Writing results
 
-To instead write the similarity results back to the graph in Neo4j, use the following query.
-Each result is written as a new relationship between the compared nodes.
-The Jaccard similarity score is written as a property on the relationship.
+The `write` execution mode extends the `stats` mode with an important side effect: for each pair of nodes we create a relationship with the Jaccard similarity score as a property to the Neo4j database.
+The type of the new relationship is specified using the mandatory configuration parameter `writeRelationshipType`.
+The name of the new property is specified using the mandatory configuration parameter `writeProperty`.
+The result is a single summary row, similar to `stats`, but with some additional metrics.
+
+For more details on the `write` mode in general, see <<running-algos-write>>.
+
 
 [role=query-example]
 --
@@ -416,28 +455,6 @@ YIELD nodesCompared, relationshipsWritten
 --
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
-
-=== Mutate
-
-[role=query-example, testName=123]
---
-.The following will run the algorithm, and write back results:
-[source, cypher]
-----
-CALL gds.nodeSimilarity.mutate('myGraph', {
-    mutateRelationshipType: 'SIMILAR',
-    mutateProperty: 'score'
-})
-YIELD nodesCompared, relationshipsWritten
-----
-
-.Results
-[opts="header"]
-|===
-| nodesCompared | relationshipsWritten
-| 4             | 10
-|===
---
 
 
 [[algorithms-node-similarity-examples-limits]]
@@ -610,49 +627,5 @@ ORDER BY Person1
 | "Dave"  | "Alice" | 1.0
 | "Dave"  | "Bob"   | 0.6666666666666666
 3+|6 rows
-|===
---
-
-
-[[algorithms-node-similarity-examples-memory-estimation]]
-=== Memory Estimation
-
-[role=query-example]
---
-.The following will estimate the memory requirements for running the algorithm:
-[source, cypher]
-----
-CALL gds.nodeSimilarity.write.estimate('myGraph', {
-  writeRelationshipType: 'SIMILAR',
-  writeProperty: 'score'
-})
-YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
-----
-
-.Results
-[opts="header", cols="1,1,1,1,1"]
-|===
-| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 9         | 9                 | 2568     | 2568     | "2568 Bytes"
-|===
---
-
-[[algorithms-node-similarity-examples-stats]]
-=== Stats
-
-[role=query-example]
---
-.The following will run the algorithm and returns the result in form of statistical and measurement values
-[source, cypher]
-----
-CALL gds.nodeSimilarity.stats('myGraph')
-YIELD nodesCompared, similarityPairs
-----
-
-.Results
-[opts="header",cols="2"]
-|===
-| nodesCompared | similarityPairs
-| 4             | 10
 |===
 --
