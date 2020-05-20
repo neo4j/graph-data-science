@@ -22,7 +22,7 @@ This topic includes:
 ** <<algorithms-wcc-examples-memory-estimation, Memory Estimation>>
 ** <<algorithms-wcc-examples-stream, Stream>>
 ** <<algorithms-wcc-examples-stats, Stats>>
-** <<algorithms-wcc-examples-write, Mutate>>
+** <<algorithms-wcc-examples-mutate, Mutate>>
 ** <<algorithms-wcc-examples-write, Write>>
 ** <<algorithms-wcc-examples-weighted, Weighted>>
 ** <<algorithms-wcc-examples-seeding, Seeded components>>
@@ -379,6 +379,23 @@ The result shows that `myGraph` has two components and this can be verified by l
 === Mutate
 
 include::../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher]
+----
+CALL gds.wcc.mutate('myGraph', { mutateProperty: 'componentId' })
+YIELD nodePropertiesWritten, componentCount;
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten | componentCount
+| 6                     | 2
+|===
+--
 
 [[algorithms-wcc-examples-write]]
 === Write
