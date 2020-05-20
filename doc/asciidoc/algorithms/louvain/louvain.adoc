@@ -242,7 +242,7 @@ YIELD
   configuration: Map
 ----
 
-include::../common-configuration/common-configuration-anonymous-graph.adoc[]
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
