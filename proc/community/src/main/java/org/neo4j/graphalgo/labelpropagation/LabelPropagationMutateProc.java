@@ -91,6 +91,7 @@ public class LabelPropagationMutateProc extends MutateProc<LabelPropagation, Lab
 
     public static class MutateResult {
 
+        public long nodePropertiesWritten;
         public long createMillis;
         public long computeMillis;
         public long mutateMillis;
@@ -102,6 +103,7 @@ public class LabelPropagationMutateProc extends MutateProc<LabelPropagation, Lab
         public Map<String, Object> configuration;
 
         MutateResult(
+            long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
             long mutateMillis,
@@ -112,6 +114,7 @@ public class LabelPropagationMutateProc extends MutateProc<LabelPropagation, Lab
             Map<String, Object> communityDistribution,
             Map<String, Object> configuration
         ) {
+            this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.mutateMillis = mutateMillis;
@@ -132,6 +135,7 @@ public class LabelPropagationMutateProc extends MutateProc<LabelPropagation, Lab
             @Override
             protected MutateResult buildResult() {
                 return new MutateResult(
+                    nodePropertiesWritten,
                     createMillis,
                     computeMillis,
                     mutateMillis,

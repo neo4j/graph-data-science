@@ -129,16 +129,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             .algo("labelPropagation")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
-            .yields(
-                "createMillis",
-                "computeMillis",
-                "mutateMillis",
-                "postProcessingMillis",
-                "communityCount",
-                "didConverge",
-                "communityDistribution",
-                "configuration"
-            );
+            .yields();
 
         runQueryWithRowConsumer(
             query,
@@ -148,6 +139,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
                 assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
 
+                assertEquals(12L, row.getNumber("nodePropertiesWritten").longValue());
                 assertEquals(10L, row.getNumber("communityCount"));
                 assertTrue(row.getBoolean("didConverge"));
 
