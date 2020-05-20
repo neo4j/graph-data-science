@@ -43,6 +43,10 @@ public interface StoreScanner<Reference> extends AutoCloseable {
     }
 
     interface ScanCursor<Reference> extends AutoCloseable {
+        default int bufferSize() {
+            return bulkSize();
+        }
+
         int bulkSize();
 
         boolean bulkNext(RecordConsumer<Reference> consumer);

@@ -19,20 +19,24 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
-import org.neo4j.internal.kernel.api.NodeCursor;
+import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.NodeStore;
 
-final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeCursor, NodeStore, Void> {
+final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeLabelIndexCursor, NodeStore, Integer> {
 
-    static final StoreScanner.Factory<NodeReference> FACTORY = NodeCursorBasedScanner::new;
+    static Factory<NodeReference> factory(int labelId) {
+        return (prefetchSize, transaction) -> new NodeLabelIndexBasedScanner(labelId, prefetchSize, transaction);
+    }
 
-    private NodeCursorBasedScanner(int prefetchSize, SecureTransaction transaction) {
-        super(prefetchSize, transaction, null);
+    private final int labelId;
+
+    private NodeLabelIndexBasedScanner(int labelId, int prefetchSize, SecureTransaction transaction) {
+        super(prefetchSize, transaction, labelId);
+        this.labelId = labelId;
     }
 
     @Override
@@ -41,17 +45,19 @@ final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeRefere
     }
 
     @Override
-    NodeCursor entityCursor(KernelTransaction transaction) {
-        return Neo4jProxy.allocateNodeCursor(transaction.cursors(), transaction.pageCursorTracer());
+    NodeLabelIndexCursor entityCursor(KernelTransaction transaction) {
+        return transaction.cursors().allocateNodeLabelIndexCursor();
     }
 
     @Override
-    Scan<NodeCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
-        return transaction.dataRead().allNodesScan();
+    Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
+        var read = transaction.dataRead();
+        read.prepareForLabelScans();
+        return read.nodeLabelScan(labelId);
     }
 
     @Override
-    NodeReference cursorReference(NodeCursor cursor) {
-        return new NodeCursorReference(cursor);
+    NodeReference cursorReference(NodeLabelIndexCursor cursor) {
+        return new NodeLabelIndexReference(cursor, new long[]{labelId});
     }
 }

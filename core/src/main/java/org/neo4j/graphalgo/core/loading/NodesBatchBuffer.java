@@ -57,7 +57,8 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
     @Override
     public void offer(final NodeReference record) {
         if (nodeLabelIds.isEmpty()) {
-            add(record.nodeId(), record.propertiesReference(), new long[]{TokenConstants.ANY_LABEL});
+            long propertiesReference = properties == null ? -1 : record.propertiesReference();
+            add(record.nodeId(), propertiesReference, new long[]{TokenConstants.ANY_LABEL});
         } else {
             boolean atLeastOneLabelFound = false;
             var labels = record.labels();
@@ -70,7 +71,8 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
                 }
             }
             if (atLeastOneLabelFound) {
-                add(record.nodeId(), record.propertiesReference(), labels);
+                long propertiesReference = properties == null ? -1 : record.propertiesReference();
+                add(record.nodeId(), propertiesReference, labels);
             }
         }
     }

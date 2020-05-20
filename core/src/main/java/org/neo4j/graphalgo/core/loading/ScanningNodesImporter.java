@@ -65,7 +65,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
     ) {
         super(
-            USE_KERNEL_CURSORS.get() ? NodeCursorBasedScanner.FACTORY : NodeRecordBasedScanner.FACTORY,
+            scannerFactory(dimensions, propertyMappingsByNodeLabel),
             "Node",
             loadingContext,
             dimensions,
@@ -75,6 +75,34 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         this.progressLogger = progressLogger;
         this.terminationFlag = loadingContext.terminationFlag();
         this.propertyMappingsByNodeLabel = propertyMappingsByNodeLabel;
+    }
+
+    private static StoreScanner.Factory<NodeReference> scannerFactory(
+        GraphDimensions dimensions,
+        Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
+    ) {
+        if (!USE_KERNEL_CURSORS.get()) {
+            return NodeRecordBasedScanner.FACTORY;
+        }
+
+        var tokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
+        assert tokenNodeLabelMapping != null : "Only null in Cypher loader";
+
+        if (tokenNodeLabelMapping.size() == 1) {
+            for (var labelMapping : tokenNodeLabelMapping) {
+                var labelId = labelMapping.key;
+                var nodeLabels = labelMapping.value;
+                for (NodeLabel nodeLabel : nodeLabels) {
+                    var propertyMappings = propertyMappingsByNodeLabel.get(nodeLabel);
+                    if (propertyMappings != null && propertyMappings.hasMappings()) {
+                        return NodeCursorBasedScanner.FACTORY;
+                    }
+                }
+                return NodeLabelIndexBasedScanner.factory(labelId);
+            }
+        }
+
+        return NodeCursorBasedScanner.FACTORY;
     }
 
     @Override

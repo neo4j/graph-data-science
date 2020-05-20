@@ -30,7 +30,12 @@ import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 
-abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor, Store extends RecordStore<? extends AbstractBaseRecord>> implements StoreScanner<Reference> {
+abstract class AbstractCursorBasedScanner<
+    Reference,
+    EntityCursor extends Cursor,
+    Store extends RecordStore<? extends AbstractBaseRecord>,
+    Attachment
+    > implements StoreScanner<Reference> {
 
     private final class ScanCursor implements StoreScanner.ScanCursor<Reference> {
 
@@ -53,6 +58,13 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         @Override
         public int bulkSize() {
             return prefetchSize * recordsPerPage;
+        }
+
+        @Override
+        public int bufferSize() {
+            // This isn't really aligning at 64 if the value is already divisible by 64
+            // but we have to follow the same logic that kernel is doing, which might be a bug
+            return (bulkSize() / Long.SIZE + 1) * Long.SIZE;
         }
 
         @Override
@@ -102,7 +114,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
     private final Store store;
 
-    AbstractCursorBasedScanner(int prefetchSize, SecureTransaction transaction) {
+    AbstractCursorBasedScanner(int prefetchSize, SecureTransaction transaction, Attachment attachment) {
         var neoStores = GraphDatabaseApiProxy.neoStores(transaction.db());
         var store = store(neoStores);
         int recordSize = store.getRecordSize();
@@ -111,7 +123,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         this.transaction = transaction.fork();
         this.prefetchSize = prefetchSize;
         // get is OK here, since we are forking a new transaction
-        this.entityCursorScan = entityCursorScan(this.transaction.topLevelKernelTransaction().get());
+        this.entityCursorScan = entityCursorScan(this.transaction.topLevelKernelTransaction().get(), attachment);
         this.cursors = new ThreadLocal<>();
         this.recordSize = recordSize;
         this.recordsPerPage = recordsPerPage;
@@ -148,7 +160,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
     abstract EntityCursor entityCursor(KernelTransaction transaction);
 
-    abstract Scan<EntityCursor> entityCursorScan(KernelTransaction transaction);
+    abstract Scan<EntityCursor> entityCursorScan(KernelTransaction transaction, Attachment attachment);
 
     abstract Reference cursorReference(EntityCursor cursor);
 }
