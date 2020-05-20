@@ -25,7 +25,7 @@ This topic includes:
 ** <<algorithms-node-similarity-examples-stats, Stats>>
 ** <<algorithms-node-similarity-examples-mutate, Mutate>>
 ** <<algorithms-node-similarity-examples-write, Write>>
-** <<algorithms-node-similarity-examples-limits, Limiting results>>
+** <<algorithms-node-similarity-examples-limits, Limit results>>
 *** <<algorithms-node-similarity-examples-limits-topk-bottomk, topK and bottomK>>
 *** <<algorithms-node-similarity-examples-limits-topn-bottomn, topN and bottomN>>
 ** <<algorithms-node-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
@@ -337,7 +337,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 
 
 [[algorithms-node-similarity-examples-stream]]
-=== Streaming results
+=== Stream
 
 include::../shared/examples-stream-intro.adoc[]
 
@@ -399,7 +399,7 @@ YIELD nodesCompared, similarityPairs
 
 
 [[algorithms-node-similarity-examples-mutate]]
-=== Mutate results
+=== Mutate
 
 include::../shared/examples-mutate-intro.adoc[]
 
@@ -427,7 +427,7 @@ As we can see from the results, the number of created relationships is equal to 
 
 
 [[algorithms-node-similarity-examples-write]]
-=== Writing results
+=== Write
 
 The `write` execution mode extends the `stats` mode with an important side effect: for each pair of nodes we create a relationship with the Jaccard similarity score as a property to the Neo4j database.
 The type of the new relationship is specified using the mandatory configuration parameter `writeRelationshipType`.
@@ -461,7 +461,7 @@ As we can see from the results, the number of created relationships is equal to 
 
 
 [[algorithms-node-similarity-examples-limits]]
-=== Limiting results
+=== Limit results
 
 There are four limits that can be applied to the similarity results.
 Top limits the result to the highest similarity scores.

@@ -20,13 +20,13 @@ This topic includes:
 ** <<algorithms-louvain-syntax-anonymous, Anonymous graphs>>
 * <<algorithms-louvain-examples, Examples>>
 ** <<algorithms-louvain-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-louvain-examples-stream, Streaming>>
+** <<algorithms-louvain-examples-stream, Stream>>
 ** <<algorithms-louvain-examples-stats, Stats>>
 ** <<algorithms-louvain-examples-mutate, Mutate>>
-** <<algorithms-louvain-examples-write, Writing>>
-** <<algorithms-louvain-examples-stream-weighted, Weights>>
-** <<algorithms-louvain-examples-stream-seeded, Seeding>>
-** <<algorithms-louvain-examples-stream-intermediate, Multi-Level>>
+** <<algorithms-louvain-examples-write, Write>>
+** <<algorithms-louvain-examples-stream-weighted, Weighted>>
+** <<algorithms-louvain-examples-stream-seeded, Seeded>>
+** <<algorithms-louvain-examples-stream-intermediate, Stream intermediate communities>>
 
 
 [[algorithms-louvain-intro]]
@@ -448,7 +448,7 @@ The result contains meta information, like the number of identified communities 
 
 
 [[algorithms-louvain-examples-stream-weighted]]
-=== Running on weighted graphs
+=== Weighted
 
 The Louvain algorithm can also run on weighted graphs, taking the given relationship weights into concern when calculating the modularity.
 
@@ -481,7 +481,7 @@ Using the weighted relationships, we see that `Alice` and `Doug` have formed the
 
 
 [[algorithms-louvain-examples-stream-seeded]]
-=== Running with seed communities
+=== Seeded
 
 The Louvain algorithm can be run incrementally, by providing a seed property.
 With the seed property an initial community mapping can be supplied for a subset of the loaded nodes.
@@ -518,7 +518,7 @@ Note that the `consecutiveIds` configuration option cannot be used in combinatio
 
 
 [[algorithms-louvain-examples-stream-intermediate]]
-=== Streaming intermediate communities
+=== Stream intermediate communities
 
 As described before, Louvain is a hierarchical clustering algorithm.
 That means that after every clustering step all nodes that belong to the same cluster are reduced to a single node.
