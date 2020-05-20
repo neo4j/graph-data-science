@@ -17,14 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.walking;
+package org.neo4j.graphalgo.impl.node2vec;
 
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableLong;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IntBinaryPredicate;
+import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
@@ -36,10 +34,10 @@ import java.util.PrimitiveIterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
@@ -47,23 +45,20 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     private final int steps;
     private final NextNodeStrategy strategy;
     private final int concurrency;
-    private final int limit;
-    private final PrimitiveIterator.OfInt idStream;
+    private final int walksPerNode;
 
     public RandomWalk(
         Graph graph,
         int steps,
         NextNodeStrategy strategy,
         int concurrency,
-        int limit,
-        PrimitiveIterator.OfInt idStream
+        int walksPerNode
     ) {
         this.graph = graph;
         this.steps = steps;
         this.strategy = strategy;
         this.concurrency = concurrency;
-        this.limit = limit;
-        this.idStream = idStream;
+        this.walksPerNode = walksPerNode;
     }
 
     @Override
@@ -71,17 +66,18 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         int timeout = 100;
         int queueSize = 1000;
 
-        int batchSize = ParallelUtil.adjustedBatchSize(limit, concurrency, 100);
-        Collection<Runnable> tasks = new ArrayList<>((limit / batchSize) + 1);
+        int batchSize = ParallelUtil.adjustedBatchSize(walksPerNode, concurrency, 100);
+        Collection<Runnable> tasks = new ArrayList<>((walksPerNode / batchSize) + 1);
 
         ArrayBlockingQueue<long[]> queue = new ArrayBlockingQueue<>(queueSize);
         long[] TOMB = new long[0];
 
-        while (idStream.hasNext()) {
-            int[] ids = new int[batchSize];
+        PrimitiveIterator.OfLong idIterator = idStream().iterator();
+        while (idIterator.hasNext()) {
+            long[] ids = new long[batchSize];
             int i = 0;
-            while (i < batchSize && idStream.hasNext()) {
-                ids[i++] = idStream.nextInt();
+            while (i < batchSize && idIterator.hasNext()) {
+                ids[i++] = idIterator.nextLong();
             }
             int size = i;
             tasks.add(() -> {
@@ -107,19 +103,28 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     @Override
     public void release() { }
 
-    private long[] doWalk(int startNodeId) {
+    @NotNull
+    public LongStream idStream() {
+        LongStream idStream = LongStream.of();
+        for (int i = 0; i < walksPerNode; i++) {
+            idStream = LongStream.concat(idStream, LongStream.range(0, graph.nodeCount()));
+        }
+        return idStream;
+    }
+
+    private long[] doWalk(long startNodeId) {
         long[] nodeIds = new long[steps + 1];
-        int currentNodeId = startNodeId;
-        int previousNodeId = currentNodeId;
+        long currentNodeId = startNodeId;
+        long previousNodeId = currentNodeId;
         nodeIds[0] = toOriginalNodeId(currentNodeId);
         for (int i = 1; i <= steps; i++) {
-            int nextNodeId = Math.toIntExact(strategy.getNextNode(currentNodeId, previousNodeId));
+            long nextNodeId = strategy.getNextNode(currentNodeId, previousNodeId);
             previousNodeId = currentNodeId;
             currentNodeId = nextNodeId;
 
-            if (currentNodeId == -1 || !running()) {
+            if (currentNodeId == -1 || !terminationFlag.running()) {
                 // End walk when there is no way out and return empty result
-                return Arrays.copyOf(nodeIds, i);
+                return Arrays.copyOf(nodeIds, 1);
             }
             nodeIds[i] = toOriginalNodeId(currentNodeId);
         }
@@ -127,7 +132,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         return nodeIds;
     }
 
-    private long toOriginalNodeId(int currentNodeId) {
+    private long toOriginalNodeId(long currentNodeId) {
         return currentNodeId == -1 ? -1 : graph.toOriginalNodeId(currentNodeId);
     }
 
@@ -137,76 +142,56 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         } catch (InterruptedException e) {}
     }
 
-    public abstract static class NextNodeStrategy {
-        protected Graph graph;
-        protected Degrees degrees;
+    public static class NextNodeStrategy {
+        private final Graph graph;
+        private final double returnParam;
+        private final double inOutParam;
 
-        public NextNodeStrategy(Graph graph, Degrees degrees) {
+
+        public NextNodeStrategy(Graph graph, double returnParam, double inOutParam) {
             this.graph = graph;
-            this.degrees = degrees;
-        }
-
-        public abstract long getNextNode(long currentNodeId, long previousNodeId);
-    }
-
-    public static class RandomNextNodeStrategy extends NextNodeStrategy {
-
-        public RandomNextNodeStrategy(Graph graph, Degrees degrees) {
-            super(graph, degrees);
-        }
-
-        @Override
-        public long getNextNode(long currentNodeId, long previousNodeId) {
-            int degree = degrees.degree(currentNodeId);
-            if (degree == 0) {
-                return -1;
-            }
-            int randomEdgeIndex = ThreadLocalRandom.current().nextInt(degree);
-
-            MutableLong targetNodeId = new MutableLong(-1L);
-            MutableInt counter = new MutableInt(0);
-            graph.concurrentCopy().forEachRelationship(currentNodeId, (s, t) -> {
-                if (counter.getAndIncrement() == randomEdgeIndex) {
-                    targetNodeId.setValue(t);
-                    return false;
-                }
-                return true;
-            });
-
-            return targetNodeId.getValue();
-        }
-
-    }
-
-    public static class Node2VecStrategy extends NextNodeStrategy {
-        private double returnParam, inOutParam;
-
-
-        public Node2VecStrategy(Graph graph, Degrees degrees, double returnParam, double inOutParam) {
-            super(graph, degrees);
             this.returnParam = returnParam;
             this.inOutParam = inOutParam;
         }
 
         public long getNextNode(long currentNode, long previousNode) {
-            int currentNodeId = Math.toIntExact(currentNode);
-            int previousNodeId = Math.toIntExact(previousNode);
+            Graph threadLocalGraph = graph.concurrentCopy();
 
-            int degree = degrees.degree(currentNodeId);
+            int degree = threadLocalGraph.degree(currentNode);
             if (degree == 0) {
                 return -1;
             }
 
-            double[] distribution = buildProbabilityDistribution(currentNodeId, previousNodeId, returnParam, inOutParam, degree);
+            double[] distribution = buildProbabilityDistribution(
+                threadLocalGraph,
+                currentNode,
+                previousNode,
+                returnParam,
+                inOutParam,
+                degree
+            );
             int neighbourIndex = pickIndexFromDistribution(distribution, ThreadLocalRandom.current().nextDouble());
 
-            return graph.getTarget(currentNodeId, neighbourIndex);
+            return threadLocalGraph.getTarget(currentNode, neighbourIndex);
         }
 
-        private double[] buildProbabilityDistribution(int currentNodeId, int previousNodeId,
-                                                      double returnParam, double inOutParam, int degree) {
-            ProbabilityDistributionComputer consumer = new ProbabilityDistributionComputer(degree, currentNodeId, previousNodeId, returnParam, inOutParam);
-            graph.concurrentCopy().forEachRelationship(currentNodeId, longToIntConsumer(consumer));
+        private double[] buildProbabilityDistribution(
+            Graph threadLocalGraph,
+            long currentNodeId,
+            long previousNodeId,
+            double returnParam,
+            double inOutParam,
+            int degree
+        ) {
+            ProbabilityDistributionComputer consumer = new ProbabilityDistributionComputer(
+                threadLocalGraph.concurrentCopy(),
+                degree,
+                currentNodeId,
+                previousNodeId,
+                returnParam,
+                inOutParam
+            );
+            threadLocalGraph.forEachRelationship(currentNodeId, consumer);
             return consumer.probabilities();
         }
 
@@ -228,16 +213,25 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             return distribution.length - 1;
         }
 
-        private class ProbabilityDistributionComputer implements IntBinaryPredicate {
+        private class ProbabilityDistributionComputer implements RelationshipConsumer {
+            private final Graph threadLocalGraph;
             final double[] probabilities;
-            private final int currentNodeId;
-            private final int previousNodeId;
+            private final long currentNodeId;
+            private final long previousNodeId;
             private final double returnParam;
             private final double inOutParam;
             double probSum;
             int index;
 
-            public ProbabilityDistributionComputer(int degree, int currentNodeId, int previousNodeId, double returnParam, double inOutParam) {
+            public ProbabilityDistributionComputer(
+                Graph threadLocalGraph,
+                int degree,
+                long currentNodeId,
+                long previousNodeId,
+                double returnParam,
+                double inOutParam
+            ) {
+                this.threadLocalGraph = threadLocalGraph;
                 this.currentNodeId = currentNodeId;
                 this.previousNodeId = previousNodeId;
                 this.returnParam = returnParam;
@@ -248,15 +242,15 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             }
 
             @Override
-            public boolean test(int start, int end) {
-                int neighbourId = start == currentNodeId ? end : start;
+            public boolean accept(long start, long end) {
+                long neighbourId = start == currentNodeId ? end : start;
 
                 double probability;
 
                 if (neighbourId == previousNodeId) {
                     // node is previous node
                     probability = 1D / returnParam;
-                } else if (graph.exists(previousNodeId, neighbourId)) {
+                } else if (threadLocalGraph.exists(previousNodeId, neighbourId)) {
                     // node is also adjacent to previous node --> distance to previous node is 1
                     probability = 1D;
                 } else {

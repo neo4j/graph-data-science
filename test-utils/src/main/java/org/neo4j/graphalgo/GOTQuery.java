@@ -240,7 +240,7 @@ public class GOTQuery {
                                                   "(ignoreMe IN CASE WHEN row.`Book of Death` IS NOT NULL THEN [1]\n" +
                                                   "  ELSE []\n" +
                                                   "  END |\n" +
-                                                  "  MERGE (book:Book {sequence: toInt(row.`Book of Death`)})\n" +
+                                                  "  MERGE (book:Book {sequence: toInteger(row.`Book of Death`)})\n" +
                                                   "  MERGE (person)-[:DIED_IN]->(book)\n" +
                                                   ");\n" +
                                                   "\n" +
@@ -308,7 +308,7 @@ public class GOTQuery {
                                                   "(ignoreMe IN CASE WHEN row.culture IS NOT NULL THEN [1]\n" +
                                                   "  ELSE []\n" +
                                                   "  END |\n" +
-                                                  "  MERGE (culture:Culture {name: lower(row.culture)})\n" +
+                                                  "  MERGE (culture:Culture {name: toLower(row.culture)})\n" +
                                                   "  MERGE (p)-[:MEMBER_OF_CULTURE]->(culture)\n" +
                                                   ")\n" +
                                                   "FOREACH\n" +
@@ -399,7 +399,7 @@ public class GOTQuery {
                                                   "MATCH (p:Person)-[:DEFENDER_KING|ATTACKER_KING]-()\n" +
                                                   "SET p:King;\n" +
                                                   "\n" +
-                                                  "MATCH (p:Person) where lower(p.title) contains \"king\"\n" +
+                                                  "MATCH (p:Person) where toLower(p.title) contains \"king\"\n" +
                                                   "SET p:King;\n" +
                                                   "\n" +
                                                   "MATCH (p:Person) where p.title = \"Ser\"\n" +
