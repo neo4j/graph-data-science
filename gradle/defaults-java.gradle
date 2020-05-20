@@ -10,6 +10,11 @@ allprojects {
                     url = "file://${project.getProperty('pipelineRepository')}"
                 }
             }
+            maven {
+                name = 'teamcity-artifacts'
+                url = "file://${rootProject.projectDir}/neo4j-repo"
+            }
+            mavenLocal()
         }
 
         task sourcesJar(type: Jar) {
