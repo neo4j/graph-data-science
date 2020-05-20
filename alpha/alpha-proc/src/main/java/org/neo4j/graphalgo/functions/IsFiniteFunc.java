@@ -26,25 +26,25 @@ import org.neo4j.procedure.UserFunction;
 public class IsFiniteFunc {
 
     @UserFunction("gds.util.isFinite")
-    @Description("CALL gds.util.isFinite(value) - Return true iff the given argument is a finite value (not ±Infinity, NaN, or null).")
+    @Description("RETURN gds.util.isFinite(value) - Return true iff the given argument is a finite value (not ±Infinity, NaN, or null).")
     public boolean isFinite(@Name(value = "value") Number value) {
         return value != null && Double.isFinite(value.doubleValue());
     }
 
     @UserFunction("gds.util.isInfinite")
-    @Description("CALL gds.util.isInfinite(value) - Return true iff the given argument is not a finite value (not ±Infinity, NaN, or null).")
+    @Description("RETURN gds.util.isInfinite(value) - Return true iff the given argument is not a finite value (not ±Infinity, NaN, or null).")
     public boolean isInfinite(@Name(value = "value") Number value) {
         return value == null || !Double.isFinite(value.doubleValue());
     }
 
     @UserFunction("gds.util.infinity")
-    @Description("CALL gds.util.infinity() - Return infinity as a Cypher value.")
+    @Description("RETURN gds.util.infinity() - Return infinity as a Cypher value.")
     public double Infinity() {
         return Double.POSITIVE_INFINITY;
     }
 
     @UserFunction("gds.util.NaN")
-    @Description("CALL gds.util.NaN() - Returns NaN as a Cypher value.")
+    @Description("RETURN gds.util.NaN() - Returns NaN as a Cypher value.")
     public double NaN() {
         return Double.NaN;
     }
