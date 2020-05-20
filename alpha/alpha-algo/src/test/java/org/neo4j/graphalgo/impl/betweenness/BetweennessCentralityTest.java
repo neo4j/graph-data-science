@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -79,6 +80,16 @@ class BetweennessCentralityTest extends AlgoTestBase {
     void testBC() {
         setup();
         BetweennessCentrality algo = new BetweennessCentrality(graph, Pools.DEFAULT, 1);
+        algo.compute();
+        algo.resultStream()
+            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
+        verifyMock(testConsumer);
+    }
+
+    @Test
+    void testMSBC() {
+        setup();
+        MSBetweennessCentrality algo = new MSBetweennessCentrality(graph, false, 5, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         algo.compute();
         algo.resultStream()
             .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));

@@ -34,10 +34,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
 
-    private final BfsWithPredecessorConsumer perNodeAction;
+    private final BfsConsumer perNodeAction;
+    private final BfsWithPredecessorConsumer perNeighborAction;
 
-    PredecessorStrategy(BfsWithPredecessorConsumer perNodeAction) {
+    PredecessorStrategy(BfsWithPredecessorConsumer perNeighborAction) {
+        this((nodeId, depth, sourceNodeIds) -> {}, perNeighborAction);
+    }
+
+    PredecessorStrategy(BfsConsumer perNodeAction, BfsWithPredecessorConsumer perNeighborAction) {
         this.perNodeAction = perNodeAction;
+        this.perNeighborAction = perNeighborAction;
     }
 
     @Override
@@ -68,6 +74,8 @@ public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
                     long nodeId = base + i;
                     long visit = array[i];
                     if (visit != 0L) {
+                        sourceNodes.reset(visit);
+                        perNodeAction.accept(nodeId, depth.get(), sourceNodes);
                         relationships.forEachRelationship(nodeId, (source, target) -> {
                             // D ← visit[nodeId] & ∼seen[target]
                             long next = visitSet.get(nodeId) & ~seenSet.get(target);
@@ -87,7 +95,7 @@ public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
 
                                 // do BFS computation on target
                                 sourceNodes.reset(next);
-                                perNodeAction.accept(target, nodeId, depth.get(), sourceNodes);
+                                perNeighborAction.accept(target, nodeId, depth.get(), sourceNodes);
                                 hasNext.set(true);
                             }
 

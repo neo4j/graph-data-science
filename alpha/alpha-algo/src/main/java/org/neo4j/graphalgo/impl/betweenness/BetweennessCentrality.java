@@ -134,8 +134,11 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
         // bfs queue
         private final IntArrayDeque queue;
         // bc data structures
+        // fractions of bc for a single node
         private final double[] delta;
+        // number of shortest path that go through a node
         private final int[] sigma;
+        // distance from the start node
         private final int[] distance;
 
         private BCTask() {
@@ -180,10 +183,12 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
                     // This will break for very large graphs
                     int target = (int) targetId;
 
+                    // target found for the first time?
                     if (distance[target] < 0) {
                         queue.addLast(target);
                         distance[target] = distance[node] + 1;
                     }
+                    // shortest path to target via node?
                     if (distance[target] == distance[node] + 1) {
                         sigma[target] += sigma[node];
                         paths.append(target, node);
