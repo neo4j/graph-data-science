@@ -152,7 +152,7 @@ public final class SecureTransaction implements AutoCloseable {
      * or {@link #of(GraphDatabaseService, Transaction, SecurityContext)} with a non-{@code null} value for
      * the {@code Transaction} parameter.
      */
-    public Optional<KernelTransaction> toplevelKernelTransaction() {
+    public Optional<KernelTransaction> topLevelKernelTransaction() {
         return Optional.ofNullable(topTx).map(InternalTransaction::kernelTransaction);
     }
 
@@ -179,8 +179,8 @@ public final class SecureTransaction implements AutoCloseable {
      * The returned instance will operate under the same {@code SecurityContext} as {@code this} instance.
      * <p>
      * This is intended for when you need to keep track of a new transaction for a longer time, in which case you can
-     * use {@link #toplevelKernelTransaction()} to get the underlying transaction. That method will never return an
-     * empty {@code Optional} when it called on the returned instance.
+     * use {@link #topLevelKernelTransaction()} to get the underlying transaction. That method will never return an
+     * empty {@code Optional} when it's called on the returned instance.
      */
     public SecureTransaction fork() {
         InternalTransaction tx = (InternalTransaction) db.beginTx();

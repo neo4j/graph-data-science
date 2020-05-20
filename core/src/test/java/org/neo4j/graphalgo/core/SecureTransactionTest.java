@@ -62,7 +62,7 @@ class SecureTransactionTest extends BaseTest {
     void defaultIsFullAccess() {
         var graph = storeLoaderBuilder().securityContext(SecurityContext.AUTH_DISABLED).build().graph();
         assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0})-[w {prop3: 23.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
+            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0})-[{prop3: 23.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
             graph
         );
     }
@@ -155,7 +155,7 @@ class SecureTransactionTest extends BaseTest {
             .graph();
 
         assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 1.0, prop2: 2.0})-[w {prop3: 23.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
+            fromGdl("(a:Node1 {prop1: 1.0, prop2: 2.0})-[{prop3: 23.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
             graph
         );
     }
@@ -178,7 +178,7 @@ class SecureTransactionTest extends BaseTest {
             .graph();
 
         assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0})-[w {prop3: 3.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
+            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0})-[{prop3: 3.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
             graph
         );
     }

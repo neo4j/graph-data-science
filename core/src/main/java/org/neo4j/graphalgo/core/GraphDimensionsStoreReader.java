@@ -40,7 +40,7 @@ public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreat
 
     @Override
     protected TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead) {
-        TokenElementIdentifierMappings<NodeLabel> labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<>(
+        var labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<NodeLabel>(
             ANY_LABEL);
         graphCreateConfig.nodeProjections()
             .projections()
@@ -53,7 +53,7 @@ public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreat
 
     @Override
     protected TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead) {
-        TokenElementIdentifierMappings<RelationshipType> typeTokenRelTypeMappings = new TokenElementIdentifierMappings<>(
+        var typeTokenRelTypeMappings = new TokenElementIdentifierMappings<RelationshipType>(
             ANY_RELATIONSHIP_TYPE);
         graphCreateConfig.relationshipProjections()
             .projections()
