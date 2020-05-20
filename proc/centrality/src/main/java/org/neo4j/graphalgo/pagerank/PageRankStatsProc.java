@@ -85,6 +85,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
 
         public long createMillis;
         public long computeMillis;
+        public long postProcessingMillis;
         public long ranIterations;
         public boolean didConverge;
         public Map<String, Object> centralityDistribution;
@@ -93,6 +94,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
         StatsResult(
             long createMillis,
             long computeMillis,
+            long postProcessingMillis,
             long ranIterations,
             boolean didConverge,
             Map<String, Object> centralityDistribution,
@@ -100,6 +102,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
+            this.postProcessingMillis = postProcessingMillis;
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
             this.centralityDistribution = centralityDistribution;
@@ -123,6 +126,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
                 return new StatsResult(
                     createMillis,
                     computeMillis,
+                    postProcessingMillis,
                     ranIterations,
                     didConverge,
                     distribution(),

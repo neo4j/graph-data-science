@@ -58,7 +58,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
     }
 
     @Test
-    void testMutateYields() {
+    void testStatsYields() {
         String query = GdsCypher
             .call()
             .withAnyLabel()
@@ -68,6 +68,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
             .yields(
                 "createMillis",
                 "computeMillis",
+                "postProcessingMillis",
                 "didConverge",
                 "ranIterations",
                 "centralityDistribution",
@@ -79,6 +80,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
             row -> {
                 assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
 
                 assertEquals(true, row.get("didConverge"));
                 assertEquals(2L, row.get("ranIterations"));

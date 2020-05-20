@@ -126,6 +126,7 @@ YIELD
   didConverge: Boolean,
   createMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   centralityDistribution: Map,
   configuration: Map
 ----
@@ -139,13 +140,14 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                   | Type    | Description
-| ranIterations          | Integer | The number of iterations run.
-| didConverge            | Boolean | Indicates if the algorithm converged.
-| createMillis           | Integer | Milliseconds for creating the graph.
-| computeMillis          | Integer | Milliseconds for running the algorithm.
-| centralityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
-| configuration          | Map     | The configuration used for running the algorithm.
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map       | The configuration used for running the algorithm.
 |===
 
 
@@ -165,6 +167,7 @@ YIELD
   didConverge: Boolean,
   createMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   mutateMillis: Integer,
   centralityDistribution: Map,
   configuration: Map
@@ -179,15 +182,16 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                   | Type    | Description
-| ranIterations          | Integer | The number of iterations run.
-| didConverge            | Boolean | Indicates if the algorithm converged.
-| createMillis           | Integer | Milliseconds for creating the graph.
-| computeMillis          | Integer | Milliseconds for running the algorithm.
-| mutateMillis           | Integer | Milliseconds for adding properties to the in-memory graph.
-| nodePropertiesWritten  | Integer | The number of properties that were written to Neo4j.
-| centralityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
-| configuration          | Map     | The configuration used for running the algorithm.
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map       | The configuration used for running the algorithm.
 |===
 
 
@@ -207,6 +211,7 @@ YIELD
   didConverge: Boolean,
   createMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   writeMillis: Integer,
   centralityDistribution: Map,
   configuration: Map
@@ -221,15 +226,16 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                   | Type    | Description
-| ranIterations          | Integer | The number of iterations run.
-| didConverge            | Boolean | Indicates if the algorithm converged.
-| createMillis           | Integer | Milliseconds for creating the graph.
-| computeMillis          | Integer | Milliseconds for running the algorithm.
-| writeMillis            | Integer | Milliseconds for writing result data back.
-| nodePropertiesWritten  | Integer | The number of properties that were written to Neo4j.
-| centralityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
-| configuration          | Map     | The configuration used for running the algorithm.
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
+| writeMillis            | Integer   | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map       | The configuration used for running the algorithm.
 |===
 
 [[algorithms-page-rank-syntax-anonymous]]

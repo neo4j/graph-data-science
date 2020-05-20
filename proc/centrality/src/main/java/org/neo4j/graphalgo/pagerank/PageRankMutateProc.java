@@ -93,6 +93,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
         public long nodePropertiesWritten;
         public long createMillis;
         public long computeMillis;
+        public long postProcessingMillis;
         public long mutateMillis;
         public long ranIterations;
         public boolean didConverge;
@@ -103,6 +104,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
+            long postProcessingMillis,
             long mutateMillis,
             long ranIterations,
             boolean didConverge,
@@ -112,6 +114,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
+            this.postProcessingMillis = postProcessingMillis;
             this.mutateMillis = mutateMillis;
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
@@ -137,6 +140,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
                     nodePropertiesWritten,
                     createMillis,
                     computeMillis,
+                    postProcessingMillis,
                     mutateMillis,
                     ranIterations,
                     didConverge,

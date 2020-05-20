@@ -94,6 +94,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
         public long nodePropertiesWritten;
         public long createMillis;
         public long computeMillis;
+        public long postProcessingMillis;
         public long writeMillis;
         public long ranIterations;
         public boolean didConverge;
@@ -104,6 +105,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
+            long postProcessingMillis,
             long writeMillis,
             long ranIterations,
             boolean didConverge,
@@ -113,6 +115,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
+            this.postProcessingMillis = postProcessingMillis;
             this.writeMillis = writeMillis;
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
@@ -138,6 +141,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
                     nodePropertiesWritten,
                     createMillis,
                     computeMillis,
+                    postProcessingMillis,
                     writeMillis,
                     ranIterations,
                     didConverge,

@@ -123,6 +123,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
                 "nodePropertiesWritten",
                 "createMillis",
                 "computeMillis",
+                "postProcessingMillis",
                 "mutateMillis",
                 "didConverge",
                 "ranIterations",
@@ -137,6 +138,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
 
                 assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
 
                 assertEquals(false, row.get("didConverge"));

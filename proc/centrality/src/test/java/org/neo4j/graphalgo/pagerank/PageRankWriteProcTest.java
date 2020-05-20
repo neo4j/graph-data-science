@@ -160,11 +160,14 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
         String query = queryBuilder
             .writeMode()
             .addParameter("writeProperty", "writeProp")
-            .yields("centralityDistribution");
+            .yields("centralityDistribution", "postProcessingMillis");
 
         runQueryWithRowConsumer(
             query,
-            row -> assertNotNull(row.get("centralityDistribution"))
+            row -> {
+                assertNotNull(row.get("centralityDistribution"));
+                assertTrue(row.getNumber("postProcessingMillis").intValue() >= 0);
+            }
         );
     }
 
