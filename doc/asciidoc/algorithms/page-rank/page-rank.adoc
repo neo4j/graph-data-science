@@ -79,7 +79,7 @@ It can be interpreted as a probability of a web surfer to sometimes jump to a ra
 [[algorithms-page-rank-syntax]]
 == Syntax
 
-include::../shared/syntax-named-graph.adoc[]
+include::../shared/syntax-intro-named-graph.adoc[]
 
 [[algorithms-page-rank-syntax-stream]]
 === Stream

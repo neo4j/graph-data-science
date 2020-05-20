@@ -2,6 +2,7 @@
 = Louvain
 :entity: node
 :result: community ID
+:algorithm: Louvain
 
 [abstract]
 --
@@ -50,6 +51,8 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 
 [[algorithms-louvain-syntax]]
 == Syntax
+
+include::../shared/syntax-intro-named-graph.adoc[]
 
 [[algorithms-louvain-syntax-stream]]
 === Stream mode

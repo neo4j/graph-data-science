@@ -2,6 +2,7 @@
 = Local Clustering Coefficient
 :entity: node
 :result: local clustering coefficient
+:algorithm: Local Clustering Coefficient
 
 [abstract]
 --
@@ -48,8 +49,7 @@ For more information, see https://en.wikipedia.org/wiki/Clustering_coefficient[C
 [[algorithms-local-clustering-coefficient-syntax]]
 == Syntax
 
-This section covers the syntax used to execute the Local Clustering Coefficient algorithm in each of its execution modes.
-To learn more about general syntax variants, see <<algorithms-syntax>>.
+include::../shared/syntax-intro-named-graph.adoc[]
 
 
 [[algorithms-local-clustering-coefficient-syntax-stream]]

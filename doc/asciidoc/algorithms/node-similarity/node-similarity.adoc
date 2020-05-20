@@ -2,6 +2,7 @@
 = Node Similarity
 :entity: relationship
 :result: similarity score
+:algorithm: Node Similarity
 
 [abstract]
 --
@@ -73,6 +74,8 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 
 [[algorithms-node-similarity-syntax]]
 == Syntax
+
+include::../shared/syntax-intro-named-graph.adoc[]
 
 [[algorithms-node-similarity-syntax-stream]]
 === Stream mode

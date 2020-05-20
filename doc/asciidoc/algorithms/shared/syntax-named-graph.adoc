@@ -1,3 +1,0 @@
-This section covers the syntax used to execute the {algorithm} algorithm in each of its execution modes.
-The named graph variant of the syntax is described.
-To learn more about general syntax variants, see <<algorithms-syntax>>.

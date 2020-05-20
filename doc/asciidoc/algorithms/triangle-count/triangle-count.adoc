@@ -2,6 +2,7 @@
 = Triangle Count
 :entity: node
 :result: triangle count
+:algorithm: Triangle Count
 
 [abstract]
 --
@@ -49,9 +50,7 @@ This is described in http://chato.cl/papers/becchetti_2007_approximate_count_tri
 [[algorithms-triangle-count-syntax]]
 == Syntax
 
-This section covers the syntax used to execute the Triangle Count algorithm in each of its execution modes.
-The named graph variant of the syntax is described.
-To learn more about general syntax variants, see <<algorithms-syntax>>.
+include::../shared/syntax-intro-named-graph.adoc[]
 
 WARNING: The named graphs must be projected in the `UNDIRECTED` orientation for the Triangle Count algorithm.
 
