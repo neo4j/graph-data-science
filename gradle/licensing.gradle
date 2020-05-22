@@ -38,6 +38,8 @@ def whitelist = [
                 [name: 'ASL'],
                 [name: 'ASL 2.0'],
                 [name: 'the Apache License, ASL Version 2.0'],
+                [name: 'Apache License V2.0'],
+                [name: 'Apache License Version 2.0'],
                 [name: '', url: 'http://www.apache.org/licenses/LICENSE-2.0.txt'],
         ]],
         [name: 'MIT', url: 'https://opensource.org/licenses/MIT', aliases: [
@@ -53,7 +55,10 @@ def whitelist = [
         ]],
         [name: 'GNU General Public License, Version 3', url: 'http://www.gnu.org/licenses/gpl-3.0-standalone.html'],
         [name: 'GNU General Public License (GPL), version 2, with the Classpath exception', url: 'http://openjdk.java.net/legal/gplv2+ce.html'],
-        [name: 'Public Domain, per Creative Commons CC0', url: 'http://creativecommons.org/publicdomain/zero/1.0/']
+        [name: 'Public Domain, per Creative Commons CC0', url: 'http://creativecommons.org/publicdomain/zero/1.0/'],
+        [name: 'MPL-2.0', url: 'https://www.mozilla.org/MPL/2.0/', aliases: [
+                [name: 'Mozilla Public License Version 2.0']
+        ]]
 ]
 
 def product = [
