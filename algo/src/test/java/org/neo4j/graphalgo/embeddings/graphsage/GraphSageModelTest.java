@@ -26,8 +26,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.ddl4j.Tensor;
 import org.neo4j.graphalgo.ddl4j.functions.Weights;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -35,21 +33,41 @@ class GraphSageModelTest {
 
     @Test
     void smokeTestEmbedding() {
-        Weights weights = new Weights(Tensor.matrix(
+        Weights layer1Weights = new Weights(Tensor.matrix(
             new double[]{
-                0.1, 0.6, 0.3,
-                0.4, 0.5, 0.9,
-                0.01, 0.7, 0.5,
-                0.4, 0.8, 0.5,
+                0.1, 0.1, 0.1,
+                0.4, 0.3, 0.9,
+                0.01, 0.6, 0.5
             },
-            4,
+            3,
             3
         ));
-        Graph graph = TestGraph.Builder.fromGdl(
-            "(a)-[]->(b)-[]->(c), (a)-[]->(d) , (a)-[]->(e), (a)-[]->(f), (h), (g)-[]->(i), (i)-[]->(a), (i)-[]->(j), (j)-[]->(b)");
-        Layer mean = new MeanAggregatingLayer(graph, weights, 3);
 
-        GraphSageModel model = new GraphSageModel(List.of(mean));
+        Weights layer2Weights = new Weights(Tensor.matrix(
+            new double[]{
+                0.35, 0.1, 0.3,
+                0.25, 0.4, 0.9,
+                0.15, 0.3, 0.5
+            },
+            3,
+            3
+        ));
+
+        Graph graph = TestGraph.Builder.fromGdl(
+            "(a)-[]->(b)-[]->(c), " +
+            "(a)-[]->(d), " +
+            "(a)-[]->(e), " +
+            "(a)-[]->(f), " +
+            "(h), " +
+            "(g)-[]->(i), " +
+            "(i)-[]->(a), " +
+            "(i)-[]->(j), " +
+            "(j)-[]->(b)");
+
+        Layer layer1 = new MeanAggregatingLayer(graph, layer1Weights, 3);
+        Layer layer2 = new MeanAggregatingLayer(graph, layer2Weights, 2);
+
+        GraphSageModel model = new GraphSageModel(layer1, layer2);
         HugeObjectArray<double[]> features = HugeObjectArray.of(
             new double[]{1, 2, 12},
             new double[]{3, 4, 14},
@@ -68,8 +86,9 @@ class GraphSageModelTest {
         assertNotNull(result);
         assertEquals(10, result.size());
         for(int i = 0; i < result.size(); i++) {
-            // Equals to the number of rows in the weights
-            assertEquals(4, result.get(i).length);
+            // Equals to the number of rows in the weights,
+            // may be the weights should be Square Matrix with dimensions (nodeFeatures.size x nodeFeatures.size)
+            assertEquals(3, result.get(i).length);
         }
     }
 }
