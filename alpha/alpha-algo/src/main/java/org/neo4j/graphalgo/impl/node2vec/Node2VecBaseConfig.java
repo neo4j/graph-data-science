@@ -21,16 +21,9 @@ package org.neo4j.graphalgo.impl.node2vec;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Optional;
-
-@ValueClass
-@Configuration("Node2VecConfigImpl")
-public interface Node2VecConfig extends AlgoBaseConfig {
+public interface Node2VecBaseConfig extends AlgoBaseConfig {
 
     @Value.Default
     @Configuration.IntegerRange(min = 2)
@@ -77,20 +70,6 @@ public interface Node2VecConfig extends AlgoBaseConfig {
     @Value.Default
     default int iterations() {
         return 1;
-    }
-
-    static Node2VecConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new Node2VecConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            userInput
-        );
     }
 
 }

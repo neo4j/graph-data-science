@@ -21,21 +21,13 @@ package org.neo4j.graphalgo.node2vec;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.node2vec.Node2Vec;
-import org.neo4j.graphalgo.impl.node2vec.Node2VecStreamConfig;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-class Node2VecStreamProcTest extends BaseProcTest implements AlgoBaseProcTest<Node2Vec, Node2VecStreamConfig, Node2Vec> {
+class Node2VecWriteProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -54,40 +46,31 @@ class Node2VecStreamProcTest extends BaseProcTest implements AlgoBaseProcTest<No
     @BeforeEach
     void setUp() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(getProcedureClazz());
+        registerProcedures(Node2VecWriteProc.class);
     }
 
     @Test
     void embeddingsShouldHaveTheConfiguredDimension() {
-        int dimensions = 42;
+        long dimensions = 42;
         var query = GdsCypher.call()
             .loadEverything()
             .algo("gds.alpha.node2vec")
-            .streamMode()
-            .addParameter("dimensions", 42)
+            .writeMode()
+            .addParameter("writeProperty", "vector")
+            .addParameter("dimensions", dimensions)
             .yields();
+        runQuery(query);
 
-        runQueryWithRowConsumer(query, row -> assertEquals(dimensions, ((List<Double>) row.get("vector")).size()));
+        assertCypherResult(
+            "MATCH (n) RETURN size(n.vector) AS size",
+            List.of(
+                Map.of("size", dimensions),
+                Map.of("size", dimensions),
+                Map.of("size", dimensions),
+                Map.of("size", dimensions),
+                Map.of("size", dimensions)
+            )
+        );
     }
 
-    @Override
-    public Class<? extends AlgoBaseProc<Node2Vec, Node2Vec, Node2VecStreamConfig>> getProcedureClazz() {
-        return Node2VecStreamProc.class;
-    }
-
-    @Override
-    public GraphDatabaseAPI graphDb() {
-        return db;
-    }
-
-    @Override
-    public Node2VecStreamConfig createConfig(CypherMapWrapper userInput) {
-        return Node2VecStreamConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
-    }
-
-    @Override
-    public void assertResultEquals(Node2Vec result1, Node2Vec result2) {
-        // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
-        assertEquals(result1.embeddingForNode(0).length, result2.embeddingForNode(0).length);
-    }
 }

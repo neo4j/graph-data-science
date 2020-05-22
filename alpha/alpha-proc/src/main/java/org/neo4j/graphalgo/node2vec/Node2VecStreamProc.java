@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.node2vec.Node2Vec;
-import org.neo4j.graphalgo.impl.node2vec.Node2VecConfig;
+import org.neo4j.graphalgo.impl.node2vec.Node2VecStreamConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class Node2VecStreamProc extends StreamProc<Node2Vec, Node2Vec, Node2VecStreamProc.StreamResult, Node2VecConfig> {
+public class Node2VecStreamProc extends StreamProc<Node2Vec, Node2Vec, Node2VecStreamProc.StreamResult, Node2VecStreamConfig> {
 
     static final String NODE2VEC_DESCRIPTION = "The Node2Vec algorithm computes embeddings for nodes based on random walks.";
 
@@ -53,7 +53,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, Node2Vec, Node2VecS
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     )  {
-        ComputationResult<Node2Vec, Node2Vec, Node2VecConfig> computationResult = compute(
+        ComputationResult<Node2Vec, Node2Vec, Node2VecStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -66,21 +66,21 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, Node2Vec, Node2VecS
     }
 
     @Override
-    protected Node2VecConfig newConfig(
+    protected Node2VecStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return Node2VecConfig.of(username, graphName, maybeImplicitCreate, config);
+        return Node2VecStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<Node2Vec, Node2VecConfig> algorithmFactory(Node2VecConfig config) {
+    protected AlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory(Node2VecStreamConfig config) {
         return new AlphaAlgorithmFactory<>() {
             @Override
             public Node2Vec buildAlphaAlgo(
-                Graph graph, Node2VecConfig configuration, AllocationTracker tracker, Log log
+                Graph graph, Node2VecStreamConfig configuration, AllocationTracker tracker, Log log
             ) {
                 return new Node2Vec(graph, config);
             }
