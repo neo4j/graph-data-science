@@ -73,13 +73,13 @@ public class SimilaritiesFunc {
     }
 
     @UserAggregationFunction("gds.alpha.similarity.asVector")
-    @Description("Return gds.alpha.similarity.asVector(map) - Builds a vector of maps containing items and weights")
+    @Description("RETURN gds.alpha.similarity.asVector(map) - Builds a vector of maps containing items and weights")
     public SimilarityVectorAggregator asVector() {
         return new SimilarityVectorAggregator();
     }
 
     @UserFunction("gds.alpha.similarity.pearson")
-    @Description("Return gds.alpha.similarity.pearson(vector1, vector2) - Given two collection vectors, calculate pearson similarity")
+    @Description("RETURN gds.alpha.similarity.pearson(vector1, vector2) - Given two collection vectors, calculate pearson similarity")
     public double pearsonSimilarity(@Name("vector1") Object rawVector1, @Name("vector2") Object rawVector2, @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
         String listType = config.getOrDefault("vectorType", "numbers").toString();
 
