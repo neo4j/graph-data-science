@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("Node2VecWriteConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface Node2VecWriteConfig extends Node2VecBaseConfig, WritePropertyConfig {
 
     static Node2VecWriteConfig of(

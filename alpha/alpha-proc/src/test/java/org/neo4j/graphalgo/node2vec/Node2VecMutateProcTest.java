@@ -17,17 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.node2vec;
+package org.neo4j.graphalgo.node2vec;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.functions.NodePropertyFunc;
+import org.neo4j.graphdb.Result;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.Map;
 
-class Node2VecTest extends AlgoTestBase {
+class Node2VecMutateProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -44,25 +46,36 @@ class Node2VecTest extends AlgoTestBase {
         ", (c)-[:REL]->(b)";
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         runQuery(DB_CYPHER);
+        registerProcedures(GraphCreateProc.class, Node2VecMutateProc.class);
+        registerFunctions(NodePropertyFunc.class);
     }
 
     @Test
     void embeddingsShouldHaveTheConfiguredDimension() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .build()
-            .graph();
-        int dimensions = 128;
-        Node2Vec node2Vec = new Node2Vec(graph, ImmutableNode2VecStreamConfig.builder().dimensions(dimensions).build())
-            .compute();
+        long dimensions = 42;
+        var graphName = "my-graph";
+        var mutateProperty = "vector";
 
-        graph.forEachNode(node -> {
-            assertEquals(dimensions, node2Vec.embeddingForNode(node).length);
-            return true;
-            }
+
+        runQuery(GdsCypher.call().loadEverything().graphCreate(graphName).yields());
+
+        var query = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("gds.alpha.node2vec")
+            .mutateMode()
+            .addParameter("mutateProperty", mutateProperty)
+            .addParameter("dimensions", dimensions)
+            .yields();
+        runQuery(query);
+
+        var result = runQuery(
+            "MATCH (n) RETURN gds.util.nodeProperty($graphName, id(n), $propertyKey) AS vector",
+            Map.of("graphName", graphName, "propertyKey", mutateProperty),
+            Result::resultAsString
         );
-    }
+        System.out.println(result);
 
+    }
 }

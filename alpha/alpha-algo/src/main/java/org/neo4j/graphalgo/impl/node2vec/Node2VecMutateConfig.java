@@ -21,29 +21,28 @@ package org.neo4j.graphalgo.impl.node2vec;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
-@Configuration("Node2VecStreamConfigImpl")
+@Configuration("Node2VecMutateConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface Node2VecStreamConfig extends Node2VecBaseConfig, AlgoBaseConfig {
+public interface Node2VecMutateConfig extends Node2VecBaseConfig, MutatePropertyConfig {
 
-    static Node2VecStreamConfig of(
+    static Node2VecMutateConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new Node2VecStreamConfigImpl(
+        return new Node2VecMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
             userInput
         );
     }
-
 }
