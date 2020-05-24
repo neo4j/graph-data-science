@@ -23,13 +23,13 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.traverse.Traverse;
 import org.neo4j.graphalgo.impl.traverse.TraverseConfig;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,6 +41,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateEndNode;
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateStartNode;
 import static org.neo4j.procedure.Mode.READ;
 
 public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfig> {
@@ -108,6 +110,10 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
                     exitFunction = (s, t, w) -> Traverse.ExitPredicate.Result.FOLLOW;
                     aggregatorFunction = (s, t, w) -> .0;
                 }
+
+                validateStartNode(config.startNode(), graph);
+                config.targetNodes().stream().forEach(neoId -> validateEndNode(neoId, graph));
+
                 return isBfs
                     ? Traverse.bfs(graph, config.startNode(), exitFunction, aggregatorFunction)
                     : Traverse.dfs(graph, config.startNode(), exitFunction, aggregatorFunction);

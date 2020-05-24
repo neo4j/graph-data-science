@@ -17,20 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.utils;
+package org.neo4j.graphalgo.utils;
 
 import org.neo4j.graphalgo.api.Graph;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class NodeMappingUtil {
-    public static long getMappedNodeId(long nodeId, Graph graph) throws IllegalArgumentException {
-        long mappedId = graph.toMappedNodeId(nodeId);
-        if (mappedId != -1) {
-            return mappedId;
-        }
-        else {
-            throw new IllegalArgumentException(formatWithLocale("node with id %d was not loaded", nodeId));
+public final class InputNodeValidator {
+
+    public static void validateStartNode(long nodeId, Graph graph) throws IllegalArgumentException {
+        validateNodeIsLoaded(nodeId, graph.toMappedNodeId(nodeId), "startNode");
+    }
+
+    public static void validateEndNode(long nodeId, Graph graph) throws IllegalArgumentException {
+        validateNodeIsLoaded(nodeId, graph.toMappedNodeId(nodeId), "endNode");
+    }
+
+    private static void validateNodeIsLoaded(long nodeId, long mappedId, String nodeDescription) throws IllegalArgumentException {
+        if (mappedId == -1) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "%s with id %d was not loaded",
+                nodeDescription,
+                nodeId
+            ));
         }
     }
 }

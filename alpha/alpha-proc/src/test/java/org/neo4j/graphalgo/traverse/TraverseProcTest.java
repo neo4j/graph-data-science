@@ -147,6 +147,19 @@ class TraverseProcTest extends BaseProcTest {
             .addParameter("startNode", 42)
             .yields();
 
-        assertError(query, "node with id 42 was not loaded");
+        assertError(query, "startNode with id 42 was not loaded");
+    }
+
+    @Test
+    void failOnInvalidEndNode() {
+        String query = GdsCypher.call()
+            .loadEverything()
+            .algo("gds.alpha.dfs")
+            .streamMode()
+            .addParameter("startNode", 0)
+            .addParameter("targetNodes", Arrays.asList(0, 42, 1))
+            .yields();
+
+        assertError(query, "endNode with id 42 was not loaded");
     }
 }

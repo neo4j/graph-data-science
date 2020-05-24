@@ -29,8 +29,6 @@ import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 
 import java.util.function.DoubleUnaryOperator;
 
-import static org.neo4j.graphalgo.impl.utils.NodeMappingUtil.getMappedNodeId;
-
 /**
  * The algorithm computes the MST by traversing all nodes from a given
  * startNodeId. It aggregates all transitions into a MinPriorityQueue
@@ -65,7 +63,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         this.weights = weights;
         this.nodeCount = Math.toIntExact(idMapping.nodeCount());
         this.minMax = minMax;
-        this.startNodeId = (int) getMappedNodeId(startNodeId, graph);
+        this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
 
         this.k = k;
     }

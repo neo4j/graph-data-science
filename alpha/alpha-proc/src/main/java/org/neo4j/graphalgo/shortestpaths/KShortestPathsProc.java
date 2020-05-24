@@ -51,6 +51,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateEndNode;
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateStartNode;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -199,6 +201,8 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
                 AllocationTracker tracker,
                 Log log
             ) {
+                validateStartNode(configuration.startNode(), graph);
+                validateEndNode(configuration.endNode(), graph);
                 return new YensKShortestPaths(
                     graph,
                     configuration.startNode(),

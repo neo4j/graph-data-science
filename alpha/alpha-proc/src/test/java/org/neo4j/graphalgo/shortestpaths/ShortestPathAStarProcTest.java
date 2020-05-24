@@ -148,4 +148,42 @@ class ShortestPathAStarProcTest extends BaseProcTest {
         assertArrayEquals(expectedDistance.toArray(), actualDistance.toArray());
     }
 
+    @Test
+    void failOnInvalidStartNode() {
+        runQuery("CREATE (:Invalid)");
+
+        final String query =
+            "MATCH (start:Invalid), (end:Node {name: 'CHIBA'}) " +
+            GdsCypher.call()
+                .withNodeLabel("Node")
+                .withAnyRelationshipType()
+                .algo("gds.alpha.shortestPath.astar")
+                .streamMode()
+                .addVariable("startNode", "start")
+                .addVariable("endNode", "end")
+                .yields("nodeId", "cost")
+                .concat(" RETURN nodeId, cost");
+
+        assertError(query, "startNode with id 17 was not loaded");
+    }
+
+    @Test
+    void failOnInvalidEndNode() {
+        runQuery("CREATE (:Invalid)");
+
+        final String query =
+            "MATCH (end:Invalid), (start:Node {name: 'CHIBA'}) " +
+            GdsCypher.call()
+                .withNodeLabel("Node")
+                .withAnyRelationshipType()
+                .algo("gds.alpha.shortestPath.astar")
+                .streamMode()
+                .addVariable("startNode", "start")
+                .addVariable("endNode", "end")
+                .yields("nodeId", "cost")
+                .concat(" RETURN nodeId, cost");
+
+        assertError(query, "endNode with id 17 was not loaded");
+    }
+
 }

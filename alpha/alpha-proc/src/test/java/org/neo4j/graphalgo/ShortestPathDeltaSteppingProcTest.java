@@ -198,4 +198,23 @@ final class ShortestPathDeltaSteppingProcTest extends BaseProcTest {
         verify(consumer, times(11)).accept(anyDouble());
         verify(consumer, times(1)).accept(eq(8D, 0.1D));
     }
+
+    @Test
+    void failOnInvalidStartNode() {
+        runQuery("CREATE (:Invalid)");
+
+        final String query =
+            "MATCH(n:Invalid) " +
+            "WITH n CALL gds.alpha.shortestPath.deltaStepping.write({" +
+            "   nodeProjection: 'Node'," +
+            "   relationshipProjection: '*'," +
+            "   startNode: n, " +
+            "   delta: 3.0," +
+            "   writeProperty: 'sp'" +
+            "}) " +
+            "YIELD nodeCount " +
+            "RETURN nodeCount ";
+
+        assertError(query, "startNode with id 11 was not loaded");
+    }
 }

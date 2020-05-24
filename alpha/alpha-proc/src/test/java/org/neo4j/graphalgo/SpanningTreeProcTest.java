@@ -177,4 +177,17 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
         assertEquals(relCount, 4);
     }
+
+    @Test
+    void failOnInvalidStartNode() {
+        String query = GdsCypher.call()
+            .loadEverything()
+            .algo("gds.alpha.spanningTree.maximum")
+            .writeMode()
+            .addParameter("weightWriteProperty", "cost")
+            .addParameter("startNodeId", 42)
+            .yields();
+
+        assertError(query, "startNode with id 42 was not loaded");
+    }
 }

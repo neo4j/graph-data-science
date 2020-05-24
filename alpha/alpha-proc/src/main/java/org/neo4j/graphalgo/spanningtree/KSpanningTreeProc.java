@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -32,7 +33,6 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -43,6 +43,7 @@ import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateStartNode;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree, KSpanningTreeConfig> {
@@ -134,6 +135,7 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
                 AllocationTracker tracker,
                 Log log
             ) {
+                validateStartNode(configuration.startNodeId(), graph);
                 return new KSpanningTree(graph, graph, graph, minMax, configuration.startNodeId(), configuration.k());
             }
         };

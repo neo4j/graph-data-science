@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -32,7 +33,6 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.shortestpaths.DijkstraConfig;
 import org.neo4j.graphalgo.impl.shortestpaths.ShortestPathDijkstra;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateEndNode;
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateStartNode;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -137,6 +139,8 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
                 AllocationTracker tracker,
                 Log log
             ) {
+                validateStartNode(config.startNode(),graph);
+                validateEndNode(config.endNode(),graph);
                 return new ShortestPathDijkstra(graph, configuration);
             }
         };

@@ -162,6 +162,48 @@ class DijkstraProcTest extends BaseProcTest {
         verify(mock, times(1)).accept(anyLong(), eq(6.0));
     }
 
+    @Test
+    void failOnInvalidStartNode() {
+        runQuery("CREATE (:Invalid)");
+
+        final String query =
+            "MATCH (start:Invalid), (end:Node {type:'end'}) " +
+            "CALL gds.alpha.shortestPath.write({" +
+            "  nodeProjection: 'Node', " +
+            "  relationshipProjection: '*'," +
+            "  startNode: start, " +
+            "  endNode: end, " +
+            "  relationshipWeightProperty: 'cost', " +
+            "  writeProperty:'cost', " +
+            "  relationshipProperties: 'cost'" +
+            "}) " +
+            "YIELD nodeCount " +
+            "RETURN nodeCount ";
+
+        assertError(query, "startNode with id 5 was not loaded");
+    }
+
+    @Test
+    void failOnInvalidEndNode() {
+        runQuery("CREATE (:Invalid)");
+
+        final String query =
+            "MATCH (end:Invalid), (start:Node {type:'start'}) " +
+            "CALL gds.alpha.shortestPath.write({" +
+            "  nodeProjection: 'Node', " +
+            "  relationshipProjection: '*'," +
+            "  startNode: start, " +
+            "  endNode: end, " +
+            "  relationshipWeightProperty: 'cost', " +
+            "  writeProperty:'cost', " +
+            "  relationshipProperties: 'cost'" +
+            "}) " +
+            "YIELD nodeCount " +
+            "RETURN nodeCount ";
+
+        assertError(query, "endNode with id 5 was not loaded");
+    }
+
     private interface PathConsumer {
         void accept(long nodeId, double cost);
     }

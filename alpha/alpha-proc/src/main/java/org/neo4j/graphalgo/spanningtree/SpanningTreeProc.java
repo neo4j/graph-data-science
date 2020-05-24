@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningGraph;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateStartNode;
 import static org.neo4j.procedure.Mode.WRITE;
 
 // TODO: Always undirected
@@ -138,6 +139,7 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
                 AllocationTracker tracker,
                 Log log
             ) {
+                validateStartNode(configuration.startNodeId(), graph);
                 return new Prim(graph, graph, minMax, configuration.startNodeId());
             }
         };

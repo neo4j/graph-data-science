@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -31,7 +32,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.shortestpaths.ShortestPaths;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.ShortestPathResult;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateStartNode;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -125,6 +126,7 @@ public class ShortestPathsProc extends AlgoBaseProc<ShortestPaths, ShortestPaths
                 AllocationTracker tracker,
                 Log log
             ) {
+                validateStartNode(configuration.startNode(), graph);
                 return new ShortestPaths(graph, config.startNode());
             }
         };

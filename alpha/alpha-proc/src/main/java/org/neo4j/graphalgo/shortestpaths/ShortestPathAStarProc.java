@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateEndNode;
+import static org.neo4j.graphalgo.utils.InputNodeValidator.validateStartNode;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, ShortestPathAStar, ShortestPathAStarConfig> {
@@ -82,6 +84,8 @@ public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, Short
             public ShortestPathAStar buildAlphaAlgo(
                 Graph graph, ShortestPathAStarConfig configuration, AllocationTracker tracker, Log log
             ) {
+                validateStartNode(configuration.startNodeId(), graph);
+                validateEndNode(configuration.endNodeId(), graph);
                 return new ShortestPathAStar(
                     graph,
                     configuration.startNodeId(),

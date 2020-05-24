@@ -31,8 +31,6 @@ import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 
@@ -134,17 +132,6 @@ class PrimTest extends AlgoTestBase {
     void testMinimumFromE() {
         loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, e).compute());
-    }
-
-    @Test
-    void failOnInvalidStartNode() {
-        try {
-            loadGraph();
-            new Prim(graph, graph, Prim.MIN_OPERATOR, 42).compute();
-            fail();
-        } catch (Throwable e) {
-            assertTrue(e.getMessage().contains("node with id 42 was not loaded"));
-        }
     }
 
     private void loadGraph() {

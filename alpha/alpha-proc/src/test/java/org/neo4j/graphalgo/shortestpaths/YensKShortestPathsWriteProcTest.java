@@ -122,4 +122,24 @@ class YensKShortestPathsWriteProcTest extends BaseProcTest {
             );
         }
     }
+
+    @Test
+    void failOnInvalidEndNode() {
+        runQuery("CREATE (:Invalid)");
+
+        final String query =
+            "MATCH (end:Invalid), (start:Node {name:'a'}) " +
+            GdsCypher.call()
+                .withNodeLabel("Node")
+                .withAnyRelationshipType()
+                .algo("gds.alpha.kShortestPaths")
+                .writeMode()
+                .addVariable("startNode", "start")
+                .addVariable("endNode", "end")
+                .addParameter("k", 42)
+                .yields("resultCount")
+                .concat(" RETURN resultCount");
+
+        assertError(query, "endNode with id 6 was not loaded");
+    }
 }

@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
-import static org.neo4j.graphalgo.impl.utils.NodeMappingUtil.getMappedNodeId;
 
 /**
  * Sequential Single-Source minimum weight spanning tree algorithm (PRIM).
@@ -62,7 +61,7 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(idMapping.nodeCount());
         this.minMax = minMax;
-        this.startNodeId = (int) getMappedNodeId(startNodeId, graph);
+        this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
     }
 
     @Override

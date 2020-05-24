@@ -132,6 +132,6 @@ class KSpanningTreeProcTest extends BaseProcTest {
             .addParameter("k", 2)
             .yields();
 
-        assertError(query, "node with id 42 was not loaded");
+        assertError(query, "startNode with id 42 was not loaded");
     }
 }
