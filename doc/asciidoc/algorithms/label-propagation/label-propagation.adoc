@@ -25,7 +25,7 @@ This topic includes:
 ** <<algorithms-label-propagation-examples-write, Mutate>>
 ** <<algorithms-label-propagation-examples-write, Write>>
 ** <<algorithms-label-propagation-examples-weighted, Weighted>>
-** <<algorithms-label-propagation-examples-seeding, Seeded Components>>
+** <<algorithms-label-propagation-examples-seeding, Seeded communities>>
 
 
 [[algorithms-label-propagation-intro]]
@@ -509,7 +509,7 @@ Using the weighted relationships, the nodes `Alice` and `Charles` are now in the
 NOTE: We have used the `stream` mode to demonstrate running the algorithm using weights, the configuration parameters are available for all the modes of the algorithm.
 
 [[algorithms-label-propagation-examples-seeding]]
-=== Seeded Components
+=== Seeded communities
 
 At the beginning of the algorithm computation, every node is initialized with a unique label, and the labels propagate through the network.
 
