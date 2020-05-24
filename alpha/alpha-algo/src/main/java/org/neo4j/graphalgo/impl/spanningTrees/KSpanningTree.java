@@ -75,7 +75,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
             idMapping,
             graph,
             minMax,
-            startNodeId
+            graph.toOriginalNodeId(startNodeId)
         ).withTerminationFlag(getTerminationFlag());
 
         IntPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR ? IntPriorityQueue.min() : IntPriorityQueue.max();

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.spanningTrees;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
@@ -57,6 +58,22 @@ public class SpanningTree {
             p = parent[p];
         }
         return p;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SpanningTree that = (SpanningTree) o;
+
+        return new EqualsBuilder()
+            .append(head, that.head)
+            .append(nodeCount, that.nodeCount)
+            .append(effectiveNodeCount, that.effectiveNodeCount)
+            .append(parent, that.parent)
+            .isEquals();
     }
 
     public static final PropertyTranslator<SpanningTree> TRANSLATOR = new SpanningTreeTranslator();

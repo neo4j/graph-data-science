@@ -93,6 +93,23 @@ class KSpanningTreeTest extends AlgoTestBase {
         assertNotEquals(spanningTree.head(b), spanningTree.head(x));
     }
 
+    @Test
+    void testNeoIdsWithOffset() {
+        loadGraph();
+
+        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, 0, 2)
+            .compute();
+
+        runQuery("MATCH (n) DETACH DELETE n");
+        setupGraph();
+        loadGraph();
+
+        final SpanningTree otherSpanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, 5, 2)
+            .compute();
+
+        assertEquals(spanningTree, otherSpanningTree);
+    }
+
     private void loadGraph() {
         graph = new StoreLoaderBuilder()
             .api(db)
