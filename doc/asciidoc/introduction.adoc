@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This chapter provides an introduction to graph algorithms.
+This chapter provides a brief introduction of the main concepts in the Neo4j Graph Data Science library.
 --
 
 This library provides efficiently implemented, parallel versions of common graph algorithms for Neo4j, exposed as Cypher procedures.
