@@ -65,7 +65,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
     ) {
         super(
-            scannerFactory(dimensions, propertyMappingsByNodeLabel),
+            scannerFactory(dimensions),
             "Node",
             loadingContext,
             dimensions,
@@ -78,8 +78,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     }
 
     private static StoreScanner.Factory<NodeReference> scannerFactory(
-        GraphDimensions dimensions,
-        Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
+        GraphDimensions dimensions
     ) {
         if (!USE_KERNEL_CURSORS.get()) {
             return NodeRecordBasedScanner.FACTORY;
@@ -88,21 +87,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         var tokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
         assert tokenNodeLabelMapping != null : "Only null in Cypher loader";
 
-        if (tokenNodeLabelMapping.size() == 1) {
-            for (var labelMapping : tokenNodeLabelMapping) {
-                var labelId = labelMapping.key;
-                var nodeLabels = labelMapping.value;
-                for (NodeLabel nodeLabel : nodeLabels) {
-                    var propertyMappings = propertyMappingsByNodeLabel.get(nodeLabel);
-                    if (propertyMappings != null && propertyMappings.hasMappings()) {
-                        return NodeCursorBasedScanner.FACTORY;
-                    }
-                }
-                return NodeLabelIndexBasedScanner.factory(labelId);
-            }
-        }
-
-        return NodeCursorBasedScanner.FACTORY;
+        int[] labelIds = tokenNodeLabelMapping.keys().toArray();
+        return NodeLabelIndexBasedScanner.factory(labelIds);
     }
 
     @Override

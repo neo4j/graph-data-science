@@ -27,6 +27,8 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.FormattedLog;
+import org.neo4j.logging.Level;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -164,8 +166,8 @@ public final class TestGraphLoader {
     }
 
     private GraphLoader storeLoader() {
-        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().api(db);
-
+        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().api(db).log(FormattedLog
+            .withLogLevel(Level.DEBUG).toOutputStream(System.out)).concurrency(1);
         nodeLabels.forEach(storeLoaderBuilder::addNodeLabel);
 
         if (relTypes.isEmpty()) {

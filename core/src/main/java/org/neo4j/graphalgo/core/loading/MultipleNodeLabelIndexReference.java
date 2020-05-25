@@ -20,36 +20,38 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.internal.kernel.api.NodeCursor;
-import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Read;
 
-public class NodeLabelIndexReference implements NodeReference {
+public class MultipleNodeLabelIndexReference extends NodeLabelIndexReference {
 
-    private final NodeLabelIndexCursor labelIndexCursor;
+    private final CompositeNodeCursor compositeNodeCursor;
     private final Read dataRead;
     private final NodeCursor nodeCursor;
-    private final long[] labels;
 
-    NodeLabelIndexReference(NodeLabelIndexCursor labelIndexCursor, Read dataRead, NodeCursor nodeCursor, long[] labels) {
-        this.labelIndexCursor = labelIndexCursor;
+    MultipleNodeLabelIndexReference(
+        CompositeNodeCursor compositeNodeCursor,
+        Read dataRead,
+        NodeCursor nodeCursor
+    ) {
+        super(compositeNodeCursor, dataRead, nodeCursor, new long[]{});
+        this.compositeNodeCursor = compositeNodeCursor;
         this.dataRead = dataRead;
         this.nodeCursor = nodeCursor;
-        this.labels = labels;
     }
 
     @Override
     public long nodeId() {
-        return labelIndexCursor.nodeReference();
+        return compositeNodeCursor.nodeReference();
     }
 
     @Override
     public long[] labels() {
-        return labels;
+        return new long[]{ compositeNodeCursor.currentLabel() };
     }
 
     @Override
     public long propertiesReference() {
-        dataRead.singleNode(labelIndexCursor.nodeReference(), nodeCursor);
+        dataRead.singleNode(compositeNodeCursor.nodeReference(), nodeCursor);
         if (nodeCursor.next()) {
             return nodeCursor.propertiesReference();
         } else {

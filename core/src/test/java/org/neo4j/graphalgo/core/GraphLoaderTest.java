@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.loading.StoreScanner;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
@@ -49,6 +50,7 @@ class GraphLoaderTest extends BaseTest {
 
     @BeforeEach
     void setup() {
+        StoreScanner.useKernelCursors(true);
         runQuery(DB_CYPHER);
     }
 
@@ -89,6 +91,27 @@ class GraphLoaderTest extends BaseTest {
             .withNodeProperties(multipleProperties)
             .graph(factoryType);
         assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0, prop2: 42.0})-->(b:Node2 {prop1: 42.0, prop2: 2.0})"), graph);
+    }
+
+    @AllGraphStoreFactoryTypesTest
+    void testWithSingleLabelAndProperties(TestSupport.FactoryType factoryType) {
+        PropertyMappings properties = PropertyMappings.of(PropertyMapping.of("prop1", 42.0));
+        PropertyMappings multipleProperties = PropertyMappings.of(
+            PropertyMapping.of("prop1", 42.0),
+            PropertyMapping.of("prop2", 42.0)
+        );
+
+        Graph graph = TestGraphLoader.from(db)
+            .withLabels("Node1")
+            .withNodeProperties(properties)
+            .graph(factoryType);
+        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0})"), graph);
+
+        graph = TestGraphLoader.from(db)
+            .withLabels("Node1")
+            .withNodeProperties(multipleProperties)
+            .graph(factoryType);
+        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0, prop2: 42.0})"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest

@@ -27,26 +27,25 @@ import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.NodeStore;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
-final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeLabelIndexCursor, NodeStore, Integer> {
+final class MultipleNodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeReference, CompositeNodeCursor, NodeStore, int[]> {
 
     static Factory<NodeReference> factory(int[] labelIds) {
         if (Arrays.stream(labelIds).anyMatch(labelId -> labelId == ANY_LABEL)) {
             return NodeCursorBasedScanner.FACTORY;
-//        } else if (labelIds.length == 1) {
-//            return (prefetchSize, transaction) -> new NodeLabelIndexBasedScanner(labelIds[0], prefetchSize, transaction);
-        } else {
-            return MultipleNodeLabelIndexBasedScanner.factory(labelIds);
         }
+        return (prefetchSize, transaction) -> new MultipleNodeLabelIndexBasedScanner(labelIds, prefetchSize, transaction);
     }
 
-    private final int labelId;
+    private final int[] labelIds;
 
-    private NodeLabelIndexBasedScanner(int labelId, int prefetchSize, SecureTransaction transaction) {
-        super(prefetchSize, transaction, labelId);
-        this.labelId = labelId;
+    private MultipleNodeLabelIndexBasedScanner(int[] labelIds, int prefetchSize, SecureTransaction transaction) {
+        super(prefetchSize, transaction, labelIds);
+        this.labelIds = labelIds;
     }
 
     @Override
@@ -55,24 +54,31 @@ final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeRe
     }
 
     @Override
-    NodeLabelIndexCursor entityCursor(KernelTransaction transaction) {
-        return transaction.cursors().allocateNodeLabelIndexCursor();
+    CompositeNodeCursor entityCursor(KernelTransaction transaction) {
+        List<NodeLabelIndexCursor> cursors = Arrays
+            .stream(labelIds)
+            .mapToObj(i -> transaction.cursors().allocateNodeLabelIndexCursor())
+            .collect(Collectors.toList());
+        return new CompositeNodeCursor(cursors, labelIds);
     }
 
     @Override
-    Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
+    Scan<CompositeNodeCursor> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
         var read = transaction.dataRead();
         read.prepareForLabelScans();
-        return read.nodeLabelScan(labelId);
+        List<Scan<NodeLabelIndexCursor>> scans = Arrays
+            .stream(labelIds)
+            .mapToObj(read::nodeLabelScan)
+            .collect(Collectors.toList());
+        return new CompositeNodeScan(scans);
     }
 
     @Override
-    NodeReference cursorReference(KernelTransaction transaction, NodeLabelIndexCursor cursor) {
-        return new NodeLabelIndexReference(
+    NodeReference cursorReference(KernelTransaction transaction, CompositeNodeCursor cursor) {
+        return new MultipleNodeLabelIndexReference(
             cursor,
             transaction.dataRead(),
-            transaction.cursors().allocateNodeCursor(),
-            new long[]{labelId}
+            transaction.cursors().allocateNodeCursor()
         );
     }
 }

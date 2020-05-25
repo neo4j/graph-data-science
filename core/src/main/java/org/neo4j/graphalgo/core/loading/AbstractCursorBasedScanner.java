@@ -141,7 +141,7 @@ abstract class AbstractCursorBasedScanner<
 
         if (scanCursor == null) {
             EntityCursor entityCursor = entityCursor(transaction);
-            Reference reference = cursorReference(entityCursor);
+            Reference reference = cursorReference(transaction, entityCursor);
             scanCursor = new ScanCursor(entityCursor, reference, entityCursorScan);
             this.cursors.set(scanCursor);
         }
@@ -162,5 +162,5 @@ abstract class AbstractCursorBasedScanner<
 
     abstract Scan<EntityCursor> entityCursorScan(KernelTransaction transaction, Attachment attachment);
 
-    abstract Reference cursorReference(EntityCursor cursor);
+    abstract Reference cursorReference(KernelTransaction transaction, EntityCursor cursor);
 }

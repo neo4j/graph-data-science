@@ -51,7 +51,7 @@ final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanne
     }
 
     @Override
-    RelationshipReference cursorReference(RelationshipScanCursor cursor) {
+    RelationshipReference cursorReference(KernelTransaction transaction, RelationshipScanCursor cursor) {
         return new RelationshipScanCursorReference(cursor);
     }
 }
