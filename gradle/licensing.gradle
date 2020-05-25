@@ -73,6 +73,7 @@ def product = [
     ':neo4j-adapter',
     ':packaging',
     ':proc',
+    ':alpha-embeddings',
 ]
 
 allprojects { proj ->

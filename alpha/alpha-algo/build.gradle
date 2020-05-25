@@ -13,27 +13,6 @@ dependencies {
 
     implementation group: 'org.roaringbitmap',  name: 'RoaringBitmap',          version: ver.'RoaringBitmap'
 
-
-    implementation(group: 'org.deeplearning4j', name: 'deeplearning4j-nlp', version: ver.'deeplearning4j') {
-        exclude group: 'com.twelvemonkeys.common'
-        exclude group: 'com.twelvemonkeys.imageio'
-        exclude group: 'org.deeplearning4j', module: 'deeplearning4j-modelimport'
-        exclude group: 'org.deeplearning4j', module: 'deeplearning4j-datasets'
-        exclude group: 'org.deeplearning4j', module: 'deeplearning4j-datavec-iterators'
-        exclude group: 'org.deeplearning4j', module: 'deeplearning4j-tsne'
-        exclude group: 'org.deeplearning4j', module: 'deeplearning4j-ui-components'
-        exclude group: 'org.deeplearning4j', module: 'deeplearning4j-utility-iterators'
-        exclude group: 'com.github.vinhkhuc'
-        exclude group: 'com.github.jai-imageio'
-        exclude group: 'org.datavec'
-        exclude group: 'com.github.oshi'
-        exclude group: 'org.lucee'
-        exclude group: 'it.unimi.dsi'
-    }
-    implementation(group: 'org.nd4j',           name: 'nd4j-native-platform',   version: ver.'deeplearning4j') {
-        exclude group: 'com.github.oshi'
-    }
-
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     compileOnly group: 'org.neo4j',      name: 'neo4j',             version: ver.'neo4j'
