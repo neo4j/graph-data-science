@@ -3,24 +3,20 @@ import org.neo4j.doc.build.xslt.XsltTask
 
 buildscript {
     ext {
-        asciidoctorjVersion = '2.2.0'
-        asciidoctorjPdfVersion = '1.5.0-beta.8'
-        asciidoctorjDiagramVersion = '2.0.0'
-        asciidoctorGroovyDslVersion = '1.0.0.Alpha2'
         catalogDir = "$projectDir/docbook/catalog"
     }
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath "org.asciidoctor:asciidoctorj:$asciidoctorjVersion"
-        classpath "org.asciidoctor:asciidoctorj-pdf:$asciidoctorjPdfVersion"
-        classpath "org.asciidoctor:asciidoctorj-diagram:$asciidoctorjDiagramVersion"
-        classpath "org.asciidoctor:asciidoctorj-groovy-dsl:$asciidoctorGroovyDslVersion"
+        classpath "org.asciidoctor:asciidoctorj:$ver.doc.asciidoctorj"
+        classpath "org.asciidoctor:asciidoctorj-pdf:$ver.doc.asciidoctorjPdf"
+        classpath "org.asciidoctor:asciidoctorj-diagram:$ver.doc.asciidoctorjDiagram"
+        classpath "org.asciidoctor:asciidoctorj-groovy-dsl:$ver.doc.asciidoctorGroovyDsl"
         classpath 'net.sf.docbook:docbook-xsl:1.79.1:ns-resources@zip'
         classpath files(catalogDir)
-        classpath "org.dom4j:dom4j:2.1.1"
-        classpath "jaxen:jaxen:1.1.6"
+        classpath "org.dom4j:dom4j:$ver.doc.dom4j"
+        classpath "jaxen:jaxen:$ver.doc.jaxen"
     }
 }
 
@@ -33,11 +29,11 @@ plugins {
 description = 'Neo4j Graph Data Science :: Docs'
 
 dependencies {
-    implementation group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.asciidoctorj
-    implementation project(':test-utils')
-    testImplementation project(':proc')
+    implementation     project(':test-utils')
+    implementation     group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.doc.'asciidoctorj'
 
-    testImplementation group: 'org.reflections',  name: 'reflections',       version: '0.9.11'
+    testImplementation project(':proc')
+    testImplementation group: 'org.reflections', name: 'reflections',  version: ver.doc.'reflections'
 }
 
 apply plugin: 'ch.kk7.spawn'
