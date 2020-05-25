@@ -6,11 +6,22 @@
 This section provides explanations and examples for each of the utility functions in the Neo4j Graph Data Science library.
 --
 
-[[utility-functions-table]]
+Utility functions are grouped into the following categories:
+
+* <<utility-functions-system, System Functions>>
+* <<utility-functions-numeric, Numeric Functions>>
+* <<utility-functions-node-path, Node and Path Functions>>
+* <<utility-functions-catalog, Catalog Functions>>
+
+
+[[utility-functions-system]]
+== System Functions
+
+[[system-functions-table]]
 [opts=header,cols="1m,1"]
 |===
-| Name                | Description
-| gds.version         | Return the version of the installed Neo4j Graph Data Science library.
+| Name        | Description
+| gds.version | Return the version of the installed Neo4j Graph Data Science library.
 |===
 
 [role=query-example]
@@ -22,7 +33,7 @@ RETURN gds.version() AS version
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header"]
 |===
 | version
 | "1.3.0-alpha01"
@@ -44,6 +55,7 @@ RETURN gds.version() AS version
 | gds.util.isInfinite | Return true iff the given argument is not a finite value (not ±Infinity, NaN, or null).
 |===
 
+
 === Syntax
 
 [[Numeric-functions-syntax-table]]
@@ -55,6 +67,7 @@ RETURN gds.version() AS version
 | gds.util.isFinite(value: NUMBER)      | value to be checked if it is finite
 | gds.util.isInfinite(value: NUMBER)    | value to be checked if it is infinite.
 |===
+
 
 === Examples
 
@@ -68,7 +81,7 @@ RETURN gds.util.isFinite(value) AS isFinite
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header"]
 |===
 | isFinite
 | true
@@ -87,7 +100,7 @@ RETURN gds.util.isInfinite(value) AS isInfinite
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header"]
 |===
 | isInfinite
 | false
@@ -107,20 +120,22 @@ A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering
 [[Node-and-Path-functions-table]]
 [opts=header,cols="1m,1m"]
 |===
-| Name                | Description
-| gds.util.asNode     | Return the node object for the given node id or null if none exists.
-| gds.util.asNodes    | Return the node objects for the given node ids or an empty list if none exists.
+| Name             | Description
+| gds.util.asNode  | Return the node object for the given node id or null if none exists.
+| gds.util.asNodes | Return the node objects for the given node ids or an empty list if none exists.
 |===
+
 
 === Syntax
 
 [[Node-and-Path-functions-syntax-table]]
 [opts=header,cols="1m,1"]
 |===
-| Name                                                                                      | Parameters
-| gds.util.asNode(nodeId: NUMBER)                                                           | nodeId of a node in the neo4j-graph
-| gds.util.asNodes(nodeIds: NUMBER[])                                                       | list of nodeIds of nodes in the neo4j-graph
+| Name                                | Parameters
+| gds.util.asNode(nodeId: NUMBER)     | nodeId of a node in the neo4j-graph
+| gds.util.asNodes(nodeIds: NUMBER[]) | list of nodeIds of nodes in the neo4j-graph
 |===
+
 
 === Examples
 
@@ -147,7 +162,7 @@ RETURN gds.util.asNode(nodeId).name AS node
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header"]
 |===
 | node
 | "Alice"
@@ -166,7 +181,7 @@ RETURN [x in gds.util.asNodes(nodeIds)| x.name] AS nodes
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header"]
 |===
 | nodes
 | [Alice, Bridget]
@@ -187,6 +202,7 @@ Catalog functions allow accessing in-memory graphs directly from a Cypher query.
 | Name                  | Description
 | gds.util.nodeProperty | Allows accessing a node property stored in a named graph.
 |===
+
 
 === Syntax
 
