@@ -3,14 +3,14 @@
 
 [abstract]
 --
-This section describes the common execution modes for algorithms: `stream`, `write`, `mutate` and `stats`.
+This section describes the common execution modes for algorithms: `stream`, `stats`, `mutate` and `write`.
 --
 
 All algorithms are exposed as Neo4j procedures.
 They can be called directly from Cypher using Neo4j Browser, `cypher-shell`, or from your client code using a Neo4j Driver in the language of your choice.
 
 For a detailed guide on the syntax to run algorithms, please see the <<algorithms-syntax, Syntax overview>> section.
-In short, the main execution modes to consider are `stream`, `write`, `mutate` and `stats`, which we cover in this chapter.
+In short, algorithms are run using one of the execution modes `stream`, `stats`, `mutate` or `write`, which we cover in this chapter.
 
 The execution of any algorithm can be canceled by terminating the Cypher transaction that is executing the procedure call.
 For more on how transactions are used, see <<transaction-handling, Transaction Handling>>.
@@ -28,18 +28,11 @@ If the graph is very large, the result of a `stream` mode computation will also 
 Using the `ORDER BY` and `LIMIT` subclauses in the Cypher query could be useful to support 'top N'-style use cases.
 
 
-[[running-algos-write]]
-== Write
+[[running-algos-stats]]
+== Stats
 
-The `write` mode will write the results of the algorithm computation back to the Neo4j database.
-This is similar to how standard Cypher writing queries operate.
-A statistical summary of the computation is returned as a Cypher result row.
-This is the only execution mode that will make any modifications to the Neo4j database.
-
-The written data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
-The `write` mode can be very useful for use cases where the algorithm results would be inspected multiple times by separate queries since the computational results are handled entirely by the library.
-
-In order for the results from a `write` mode computation to be used in another algorithm, a new graph must be created from the Neo4j database with the updated graph.
+The `stats` mode returns statistical results for the algorithm computation like counts or a percentile distribution.
+The same results can be acquired from the `write` mode of the procedure, but an algorithm running in `stats` mode makes no modifications to the underlying Neo4j graph.
 
 
 [[running-algos-mutate]]
@@ -59,10 +52,17 @@ A statistical summary of the computation is returned as a Cypher result row.
 As for the `write` mode, mutated data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
 
 
-[[running-algos-stats]]
-== Stats
+[[running-algos-write]]
+== Write
 
-The `stats` mode returns statistical results for the algorithm computation like counts or a percentile distribution.
-The same results can be acquired from the `write` mode of the procedure, but an algorithm running in `stats` mode makes no modifications to the underlying Neo4j graph.
+The `write` mode will write the results of the algorithm computation back to the Neo4j database.
+This is similar to how standard Cypher writing queries operate.
+A statistical summary of the computation is returned as a Cypher result row.
+This is the only execution mode that will make any modifications to the Neo4j database.
+
+The written data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
+The `write` mode can be very useful for use cases where the algorithm results would be inspected multiple times by separate queries since the computational results are handled entirely by the library.
+
+In order for the results from a `write` mode computation to be used in another algorithm, a new graph must be created from the Neo4j database with the updated graph.
 
 
