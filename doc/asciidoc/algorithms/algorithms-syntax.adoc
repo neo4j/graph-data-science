@@ -1,6 +1,11 @@
 [[algorithms-syntax]]
 = Syntax overview
 
+[abstract]
+--
+This section describes the general syntax for running algorithms in the Neo4j Graph Data Science library, including execution modes and common configuration parameters.
+--
+
 The general algorithm syntax comes in two variants:
 
 * Named graph variant
