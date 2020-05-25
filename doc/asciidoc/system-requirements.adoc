@@ -45,7 +45,7 @@ See https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuratio
 
 The library uses multiple CPU cores for graph projections, algorithm computation, and results writing.
 Configuring the workloads to make best use of the available CPU cores in your system is important to achieve maximum performance.
-The concurrency used for the stages of projection, computation and writing is configured per algorithm execution, see <<algorithms-syntax-configuration-options>>
+The concurrency used for the stages of projection, computation and writing is configured per algorithm execution, see <<algorithms-syntax-configuration-parameters>>
 
 The maximum concurrency that can be used is limited depending on the license under which the library is being used:
 

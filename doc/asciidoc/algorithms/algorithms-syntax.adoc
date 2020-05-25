@@ -53,8 +53,8 @@ CALL gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
 The detailed sections in this chapter include concrete syntax overviews and examples.
 
 
-[[algorithms-syntax-configuration-options]]
-== Configuration options
+[[algorithms-syntax-configuration-parameters]]
+== Configuration parameters
 
 All algorithms allow adjustment of their runtime characteristics through a set of configuration parameters.
 Some of these parameters are algorithm specific, however, many of them are shared between the algorithms and execution modes.
