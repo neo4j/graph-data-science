@@ -57,10 +57,10 @@ The detailed sections in this chapter include concrete syntax overviews and exam
 == Configuration parameters
 
 All algorithms allow adjustment of their runtime characteristics through a set of configuration parameters.
-Some of these parameters are algorithm specific, however, many of them are shared between the algorithms and execution modes.
+Although some of the parameters are algorithm-specific, many are shared between algorithms and execution modes.
 
 [NOTE]
-To learn more about algorithm specific parameters and to find out if an algorithm supports a certain parameter, please consult the algorithm specific documentation page.
+To learn more about algorithm specific parameters and to find out if an algorithm supports a certain parameter, please consult the algorithm-specific documentation page.
 
 .List of the most commonly accepted configuration parameters
 concurrency - Integer::
