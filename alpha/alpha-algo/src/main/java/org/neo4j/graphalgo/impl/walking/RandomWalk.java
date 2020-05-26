@@ -119,7 +119,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
             if (currentNodeId == -1 || !running()) {
                 // End walk when there is no way out and return empty result
-                return Arrays.copyOf(nodeIds, i);
+                return Arrays.copyOf(nodeIds, 1);
             }
             nodeIds[i] = toOriginalNodeId(currentNodeId);
         }
