@@ -35,7 +35,8 @@ import java.util.PriorityQueue;
 
 public class CompositeNodeCursor extends DefaultCloseListenable implements NodeLabelIndexCursor {
 
-    private PriorityQueue<NodeLabelIndexCursor> cursorQueue;
+    private final PriorityQueue<NodeLabelIndexCursor> cursorQueue;
+    private boolean repopulateCursorQueue;
     private final List<NodeLabelIndexCursor> cursors;
     private NodeLabelIndexCursor current;
     private final LongArrayList currentLabels;
@@ -45,7 +46,8 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
 
     public CompositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
         this.cursors = cursors;
-        this.cursorQueue = null;
+        this.cursorQueue = new PriorityQueue<>(cursors.size(), Comparator.comparingLong(NodeIndexCursor::nodeReference));
+        this.repopulateCursorQueue = true;
         this.cursorLabelIdMapping = new IdentityHashMap<>();
         this.currentLabels = new LongArrayList();
 
@@ -84,8 +86,8 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
 
     @Override
     public boolean next() {
-        if (cursorQueue == null) {
-            cursorQueue = new PriorityQueue<>(Comparator.comparingLong(NodeIndexCursor::nodeReference));
+        if (repopulateCursorQueue) {
+            repopulateCursorQueue = false;
             cursors.forEach(cursor -> {
                 if (cursor.next()) {
                     cursorQueue.add(cursor);
@@ -99,6 +101,7 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
 
         if (cursorQueue.isEmpty()) {
             current = null;
+            repopulateCursorQueue = true;
             return false;
         } else {
             current = cursorQueue.poll();

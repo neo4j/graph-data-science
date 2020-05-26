@@ -176,8 +176,16 @@ class GraphLoaderTest extends BaseTest {
         Graph graph = TestGraphLoader.from(db)
             .withLabels("Node1", "Node2")
             .graph(factoryType);
-        CypherExporter.export(new PrintWriter(System.out), graph);
         assertGraphEquals(fromGdl("(a:Node1), (b:Node2), (c:Node1:Node2), (a)-->(b)"), graph);
+    }
+
+    @Test
+    void testLoadNodeWithMultipleLabelsOnPartialLabelMatch() {
+        runQuery("CREATE (n:Node1:Node2)");
+        Graph graph = TestGraphLoader.from(db)
+            .withLabels("Node1")
+            .graph(TestSupport.FactoryType.NATIVE);
+        assertGraphEquals(fromGdl("(a:Node1), (c:Node1)"), graph);
     }
 
     @Test
