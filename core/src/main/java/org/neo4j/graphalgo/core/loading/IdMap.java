@@ -193,7 +193,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         }
 
         HugeSparseLongArray newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
-            newGraphIds,
+            newNodeCount,
             nodeToGraphIds.getCapacity(),
             concurrency,
             IdMapBuilder.add(newGraphIds),

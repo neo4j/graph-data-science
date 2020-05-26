@@ -32,6 +32,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.StoreScanner;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
+import java.io.PrintWriter;
+
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
@@ -166,6 +168,16 @@ class GraphLoaderTest extends BaseTest {
             .withDefaultAggregation(Aggregation.SINGLE)
             .graph(factoryType);
         assertGraphEquals(fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 3.14D}]->(c), (b)-[{w: 3.14D}]->(c)"), graph);
+    }
+
+    @AllGraphStoreFactoryTypesTest
+    void testLoadCorrectLabelCombinations(TestSupport.FactoryType factoryType) {
+        runQuery("CREATE (n:Node1:Node2)");
+        Graph graph = TestGraphLoader.from(db)
+            .withLabels("Node1", "Node2")
+            .graph(factoryType);
+        CypherExporter.export(new PrintWriter(System.out), graph);
+        assertGraphEquals(fromGdl("(a:Node1), (b:Node2), (c:Node1:Node2), (a)-->(b)"), graph);
     }
 
     @Test

@@ -46,7 +46,7 @@ public class MultipleNodeLabelIndexReference extends NodeLabelIndexReference {
 
     @Override
     public long[] labels() {
-        return new long[]{ compositeNodeCursor.currentLabel() };
+        return compositeNodeCursor.currentLabel();
     }
 
     @Override

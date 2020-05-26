@@ -56,14 +56,14 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
             .streamMode()
             .yields();
 
-        List<Long> actualCommunities = new ArrayList<>();
+        Long[] actualCommunities = new Long[RESULT.size()];
         runQueryWithRowConsumer(query, row -> {
             int id = row.getNumber("nodeId").intValue();
             long community = row.getNumber("communityId").longValue();
-            actualCommunities.add(id, community);
+            actualCommunities[id] = community;
         });
 
-        assertEquals(RESULT, actualCommunities);
+        assertEquals(RESULT, Arrays.asList(actualCommunities));
     }
 
     @Test

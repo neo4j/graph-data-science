@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.DefaultCloseListenable;
 import org.neo4j.internal.kernel.api.KernelReadTracer;
@@ -37,6 +38,7 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
     private PriorityQueue<NodeLabelIndexCursor> cursorQueue;
     private final List<NodeLabelIndexCursor> cursors;
     private NodeLabelIndexCursor current;
+    private final LongArrayList currentLabels;
     private final IdentityHashMap<NodeLabelIndexCursor, Integer> cursorLabelIdMapping;
 
     private boolean closed = false;
@@ -45,6 +47,7 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
         this.cursors = cursors;
         this.cursorQueue = null;
         this.cursorLabelIdMapping = new IdentityHashMap<>();
+        this.currentLabels = new LongArrayList();
 
         for (int i = 0; i < cursors.size(); i++) {
             cursorLabelIdMapping.put(cursors.get(i), labelIds[i]);
@@ -55,8 +58,8 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
         return cursors.get(index);
     }
 
-    int currentLabel() {
-        return this.cursorLabelIdMapping.get(current);
+    long[] currentLabel() {
+        return this.currentLabels.toArray();
     }
 
     @Override
@@ -89,6 +92,7 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
                 }
             });
         }
+
         if (current != null && current.next()) {
             cursorQueue.add(current);
         }
@@ -96,9 +100,22 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
         if (cursorQueue.isEmpty()) {
             current = null;
             return false;
-        }
-        else {
+        } else {
             current = cursorQueue.poll();
+
+            currentLabels.clear();
+            currentLabels.add(cursorLabelIdMapping.get(current));
+
+            NodeLabelIndexCursor next = cursorQueue.peek();
+            while(next != null && next.nodeReference() == current.nodeReference()) {
+                cursorQueue.poll();
+                currentLabels.add(cursorLabelIdMapping.get(next));
+                if (next.next()) {
+                    cursorQueue.add(next);
+                }
+
+                next = cursorQueue.peek();
+            }
             return true;
         }
     }

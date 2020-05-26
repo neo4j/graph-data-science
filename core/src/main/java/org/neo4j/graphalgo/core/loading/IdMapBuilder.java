@@ -45,7 +45,7 @@ public final class IdMapBuilder {
     ) {
         HugeLongArray graphIds = idMapBuilder.build();
         HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
-            graphIds,
+            idMapBuilder.size(),
             highestNodeId,
             concurrency,
             add(graphIds),
@@ -63,7 +63,7 @@ public final class IdMapBuilder {
     ) throws DuplicateNodeIdException {
         HugeLongArray graphIds = idMapBuilder.build();
         HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
-            graphIds,
+            idMapBuilder.size(),
             highestNodeId,
             concurrency,
             addChecked(graphIds),
@@ -74,7 +74,7 @@ public final class IdMapBuilder {
 
     @NotNull
     static HugeSparseLongArray buildSparseNodeMapping(
-        HugeLongArray graphIds,
+        long nodeCount,
         long highestNodeId,
         int concurrency,
         Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder,
@@ -84,7 +84,7 @@ public final class IdMapBuilder {
             highestNodeId == 0 ? 1 : highestNodeId,
             tracker
         );
-        ParallelUtil.readParallel(concurrency, graphIds.size(), Pools.DEFAULT, nodeAdder.apply(nodeMappingBuilder));
+        ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(nodeMappingBuilder));
         return nodeMappingBuilder.build();
     }
 
