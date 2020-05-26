@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This chapter describes in detail each of the algorithms in the Neo4j Graph Data Science library, including algorithm tiers, execution modes and general syntax.
+This chapter describes each of the algorithms in the Neo4j Graph Data Science library, including algorithm tiers, execution modes and general syntax.
 --
 
 The Neo4j Graph Data Science (GDS) library contains many graph algorithms.
