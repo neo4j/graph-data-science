@@ -30,20 +30,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
-
 final class MultipleNodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeReference, CompositeNodeCursor, NodeStore, int[]> {
-
-    static Factory<NodeReference> factory(int[] labelIds) {
-        if (Arrays.stream(labelIds).anyMatch(labelId -> labelId == ANY_LABEL)) {
-            return NodeCursorBasedScanner.FACTORY;
-        }
-        return (prefetchSize, transaction) -> new MultipleNodeLabelIndexBasedScanner(labelIds, prefetchSize, transaction);
-    }
 
     private final int[] labelIds;
 
-    private MultipleNodeLabelIndexBasedScanner(int[] labelIds, int prefetchSize, SecureTransaction transaction) {
+    MultipleNodeLabelIndexBasedScanner(int[] labelIds, int prefetchSize, SecureTransaction transaction) {
         super(prefetchSize, transaction, labelIds);
         this.labelIds = labelIds;
     }

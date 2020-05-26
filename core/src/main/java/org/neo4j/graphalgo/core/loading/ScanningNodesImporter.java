@@ -88,7 +88,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         assert tokenNodeLabelMapping != null : "Only null in Cypher loader";
 
         int[] labelIds = tokenNodeLabelMapping.keys().toArray();
-        return NodeLabelIndexBasedScanner.factory(labelIds);
+        return NodeScannerFactory.create(labelIds);
     }
 
     @Override

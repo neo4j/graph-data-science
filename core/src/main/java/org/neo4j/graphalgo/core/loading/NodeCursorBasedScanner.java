@@ -29,9 +29,7 @@ import org.neo4j.kernel.impl.store.NodeStore;
 
 final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeCursor, NodeStore, Void> {
 
-    static final StoreScanner.Factory<NodeReference> FACTORY = NodeCursorBasedScanner::new;
-
-    private NodeCursorBasedScanner(int prefetchSize, SecureTransaction transaction) {
+    NodeCursorBasedScanner(int prefetchSize, SecureTransaction transaction) {
         super(prefetchSize, transaction, null);
     }
 

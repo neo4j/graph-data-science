@@ -26,25 +26,11 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.NodeStore;
 
-import java.util.Arrays;
-
-import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
-
 final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeLabelIndexCursor, NodeStore, Integer> {
-
-    static Factory<NodeReference> factory(int[] labelIds) {
-        if (Arrays.stream(labelIds).anyMatch(labelId -> labelId == ANY_LABEL)) {
-            return NodeCursorBasedScanner.FACTORY;
-//        } else if (labelIds.length == 1) {
-//            return (prefetchSize, transaction) -> new NodeLabelIndexBasedScanner(labelIds[0], prefetchSize, transaction);
-        } else {
-            return MultipleNodeLabelIndexBasedScanner.factory(labelIds);
-        }
-    }
 
     private final int labelId;
 
-    private NodeLabelIndexBasedScanner(int labelId, int prefetchSize, SecureTransaction transaction) {
+    NodeLabelIndexBasedScanner(int labelId, int prefetchSize, SecureTransaction transaction) {
         super(prefetchSize, transaction, labelId);
         this.labelId = labelId;
     }
