@@ -1,0 +1,19 @@
+[[node-embeddings]]
+= Node embeddings
+
+[abstract]
+--
+This chapter provides explanations and examples for the node embedding algorithms in the Neo4j Graph Data Science library.
+--
+
+Node embedding algorithms compute low-dimensional vector representations of nodes in a graph.
+These vectors, also called embeddings, can be used for machine learning.
+The Neo4j Graph Data Science library contains the following node embedding algorithms:
+
+* Alpha
+** <<algorithms-embeddings-node2vec, Node2Vec>>
+** Random Projection
+
+
+include::node-embeddings/node2vec.adoc[leveloffset=+1]
+

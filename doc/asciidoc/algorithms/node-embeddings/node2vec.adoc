@@ -1,0 +1,176 @@
+[[algorithms-embeddings-node2vec]]
+[.alpha]
+= Node2Vec
+
+[abstract]
+--
+This section describes the Node2Vec node embedding algorithm in the Neo4j Graph Data Science library.
+--
+
+Node2Vec is a node embedding algorithm that computes a vector representation of a node based on its neighborhood.
+The neighborhood is sampled through random walks.
+Using a number of random neighborhood samples, the algorithm trains a single hidden layer neural network.
+The target function of the neural network is to predict the likelihood that a node will occur in a walk based on the occurrence of another node.
+
+For more information on this algorithm, see:
+
+* https://arxiv.org/pdf/1607.00653.pdf[Grover, Aditya, and Jure Leskovec. "node2vec: Scalable feature learning for networks." Proceedings of the 22nd ACM SIGKDD international conference on Knowledge discovery and data mining. 2016.^]
+* https://snap.stanford.edu/node2vec/
+
+// TODO: Explain random walk p and q parameters
+
+[[algorithms-embeddings-node2vec-syntax]]
+== Syntax
+
+
+[[algorithms-embeddings-node2vec-syntax-stream]]
+=== Stream mode
+
+.Run Node2Vec in stream mode on a named graph.
+[source, cypher]
+----
+CALL gds.alpha.node2vec.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer,
+  vector: List<Float>
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name   | Type        | Description
+| nodeId | Integer     | The Neo4j node ID.
+| vector | List<Float> | The computed node embedding.
+|===
+
+
+
+[[algorithms-embeddings-node2vec-syntax-write]]
+=== Write
+
+.Run Node2Vec in write mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.alpha.node2vec.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  nodeCount: Integer,
+  propertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name               | Type    | Description
+| nodesCount         | Integer | The number of nodes processed.
+| propertiesWritten  | Integer | The number of node properties written.
+| createMillis       | Integer | Milliseconds for loading data.
+| computeMillis      | Integer | Milliseconds for running the algorithm.
+| writeMillis        | Integer | Milliseconds for writing result data back to Neo4j.
+| configuration      | Map     | The configuration used for running the algorithm.
+|===
+
+
+
+[[algorithms-embeddings-node2vec-syntax-anonymous]]
+=== Anonymous graphs
+
+include::../shared/syntax-anonymous-graphs.adoc[]
+
+.Run Node2Vec in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.alpha.node2vec.write(
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  nodeCount: Integer,
+  propertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-configuration-anonymous-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, <<algorithms-embeddings-node2vec-syntax-write, specified above>>.
+
+
+
+[[algorithms-embeddings-node2vec-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher, role=setup-query]
+----
+CREATE (alice:Person {name: 'Alice'})
+CREATE (bob:Person {name: 'Bob'})
+CREATE (carol:Person {name: 'Carol'})
+CREATE (dave:Person {name: 'Dave'})
+CREATE (eve:Person {name: 'Eve'})
+CREATE (guitar:Instrument {name: 'Guitar'})
+CREATE (synth:Instrument {name: 'Synthesizer'})
+CREATE (bongos:Instrument {name: 'Bongos'})
+CREATE (trumpet:Instrument {name: 'Trumpet'})
+
+CREATE (alice)-[:LIKES]->(guitar)
+CREATE (alice)-[:LIKES]->(synth)
+CREATE (alice)-[:LIKES]->(bongos)
+CREATE (bob)-[:LIKES]->(guitar)
+CREATE (bob)-[:LIKES]->(synth)
+CREATE (carol)-[:LIKES]->(bongos)
+CREATE (dave)-[:LIKES]->(guitar)
+CREATE (dave)-[:LIKES]->(synth)
+CREATE (dave)-[:LIKES]->(bongos);
+----
+
+[source, cypher, role=graph-create-query]
+----
+CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
+----
+
+[source, cypher, role=query-example, no-result, group=node2vec]
+----
+CALL gds.alpha.node2vec.stream('myGraph', {dimensions: 2})
+----
+
+[opts=header]
+.Results
+|===
+| nodeId | vector
+| 0 | [-0.14295829832553864, 0.08884537220001221]
+| 1 | [0.016700705513358116, 0.2253911793231964]
+| 2 | [-0.06589698046445847, 0.042405471205711365]
+| 3 | [0.05862073227763176, 0.1193704605102539]
+| 4 | [0.10888434946537018, -0.18204474449157715]
+| 5 | [0.16728264093399048, 0.14098615944385529]
+| 6 | [-0.007779224775731564, 0.02114257402718067]
+| 7 | [-0.213893860578537, 0.06195802614092827]
+| 8 | [0.2479933649301529, -0.137322798371315]
+|===

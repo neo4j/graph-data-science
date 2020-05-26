@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 /**
  * Extension for Asciidoctor.
  * It looks for two kinds of blocks in the AsciiDoc source:
@@ -184,7 +186,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
             .findBy(Map.of("context", context))
             .stream()
             .findFirst()
-            .orElseThrow(IllegalArgumentException::new);
+            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale("No nodes found for context '%s'", context)));
     }
 
     private List<String> headers(Table table) {

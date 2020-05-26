@@ -33,7 +33,9 @@ dependencies {
     implementation     group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.doc.'asciidoctorj'
 
     testImplementation project(':proc')
-    testImplementation group: 'org.reflections', name: 'reflections',  version: ver.doc.'reflections'
+    testImplementation project(':alpha-embeddings')
+
+    testImplementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 }
 
 apply plugin: 'ch.kk7.spawn'
