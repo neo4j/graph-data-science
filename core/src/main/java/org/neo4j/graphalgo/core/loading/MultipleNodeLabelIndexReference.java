@@ -22,18 +22,18 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Read;
 
-public class MultipleNodeLabelIndexReference extends NodeLabelIndexReference {
+public class MultipleNodeLabelIndexReference implements NodeReference {
 
     private final CompositeNodeCursor compositeNodeCursor;
     private final Read dataRead;
     private final NodeCursor nodeCursor;
+
 
     MultipleNodeLabelIndexReference(
         CompositeNodeCursor compositeNodeCursor,
         Read dataRead,
         NodeCursor nodeCursor
     ) {
-        super(compositeNodeCursor, dataRead, nodeCursor, new long[]{});
         this.compositeNodeCursor = compositeNodeCursor;
         this.dataRead = dataRead;
         this.nodeCursor = nodeCursor;

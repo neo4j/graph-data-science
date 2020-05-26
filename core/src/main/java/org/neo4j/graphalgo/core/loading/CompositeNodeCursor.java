@@ -20,11 +20,10 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongArrayList;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.DefaultCloseListenable;
 import org.neo4j.internal.kernel.api.KernelReadTracer;
-import org.neo4j.internal.kernel.api.LabelSet;
-import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeIndexCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 
@@ -33,7 +32,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class CompositeNodeCursor extends DefaultCloseListenable implements NodeLabelIndexCursor {
+public class CompositeNodeCursor extends DefaultCloseListenable implements Cursor {
 
     private final PriorityQueue<NodeLabelIndexCursor> cursorQueue;
     private boolean repopulateCursorQueue;
@@ -46,7 +45,10 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
 
     public CompositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
         this.cursors = cursors;
-        this.cursorQueue = new PriorityQueue<>(cursors.size(), Comparator.comparingLong(NodeIndexCursor::nodeReference));
+        this.cursorQueue = new PriorityQueue<>(
+            cursors.size(),
+            Comparator.comparingLong(NodeIndexCursor::nodeReference)
+        );
         this.repopulateCursorQueue = true;
         this.cursorLabelIdMapping = new IdentityHashMap<>();
         this.currentLabels = new LongArrayList();
@@ -56,32 +58,24 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
         }
     }
 
-    NodeLabelIndexCursor getCursor(int index) {
+    @Nullable NodeLabelIndexCursor getCursor(int index) {
         return cursors.get(index);
+    }
+
+    void removeCursor(int index) {
+        var cursor = cursors.get(index);
+        if (cursor != null) {
+            cursor.close();
+            cursors.set(index, null);
+        }
     }
 
     long[] currentLabel() {
         return this.currentLabels.toArray();
     }
 
-    @Override
-    public LabelSet labels() {
-        return current.labels();
-    }
-
-    @Override
-    public void node(NodeCursor cursor) {
-        current.node(cursor);
-    }
-
-    @Override
-    public long nodeReference() {
+    long nodeReference() {
         return current.nodeReference();
-    }
-
-    @Override
-    public float score() {
-        return current.score();
     }
 
     @Override
@@ -89,7 +83,7 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
         if (repopulateCursorQueue) {
             repopulateCursorQueue = false;
             cursors.forEach(cursor -> {
-                if (cursor.next()) {
+                if (cursor != null && cursor.next()) {
                     cursorQueue.add(cursor);
                 }
             });
@@ -110,7 +104,7 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
             currentLabels.add(cursorLabelIdMapping.get(current));
 
             NodeLabelIndexCursor next = cursorQueue.peek();
-            while(next != null && next.nodeReference() == current.nodeReference()) {
+            while (next != null && next.nodeReference() == current.nodeReference()) {
                 cursorQueue.poll();
                 currentLabels.add(cursorLabelIdMapping.get(next));
                 if (next.next()) {
@@ -125,16 +119,28 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
 
     @Override
     public void setTracer(KernelReadTracer tracer) {
-        cursors.forEach(cursor -> cursor.setTracer(tracer));
+        cursors.forEach(cursor -> {
+            if (cursor != null) {
+                cursor.setTracer(tracer);
+            }
+        });
     }
 
     @Override
     public void removeTracer() {
-        cursors.forEach(Cursor::removeTracer);
+        cursors.forEach(cursor -> {
+            if (cursor != null) {
+                cursor.removeTracer();
+            }
+        });
     }
 
     @Override
     public void close() {
+        if (this.isClosed()) {
+            return;
+        }
+
         this.closed = true;
         closeInternal();
 
@@ -145,7 +151,11 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements NodeL
 
     @Override
     public void closeInternal() {
-        cursors.forEach(Cursor::closeInternal);
+        cursors.forEach(cursor -> {
+            if (cursor != null) {
+                cursor.closeInternal();
+            }
+        });
     }
 
     @Override
