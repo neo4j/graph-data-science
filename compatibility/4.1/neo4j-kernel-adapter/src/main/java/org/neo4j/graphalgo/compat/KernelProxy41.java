@@ -42,6 +42,7 @@ import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -75,6 +76,11 @@ public final class KernelProxy41 implements KernelProxyApi {
     @Override
     public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
         return new CompatGraphDatabaseAPI41(dbms);
+    }
+
+    @Override
+    public AccessMode accessMode(CustomAccessMode customAccessMode) {
+        return new CompatAccessMode41(customAccessMode);
     }
 
     @Override

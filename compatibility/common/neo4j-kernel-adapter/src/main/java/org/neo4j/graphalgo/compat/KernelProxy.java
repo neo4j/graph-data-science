@@ -38,6 +38,7 @@ import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
@@ -81,6 +82,10 @@ public final class KernelProxy {
 
     public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
         return IMPL.newDb(dbms);
+    }
+
+    public static AccessMode accessMode(CustomAccessMode customAccessMode) {
+        return IMPL.accessMode(customAccessMode);
     }
 
     public static <RECORD extends AbstractBaseRecord> void read(

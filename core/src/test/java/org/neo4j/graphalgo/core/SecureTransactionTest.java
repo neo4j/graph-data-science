@@ -26,17 +26,14 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.compat.FilterAccessMode;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.StoreScanner;
-import org.neo4j.internal.kernel.api.LabelSet;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
-import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 
 import java.util.Arrays;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
@@ -69,7 +66,7 @@ class SecureTransactionTest extends BaseTest {
 
     @Test
     void noNodeAccessAllowed() {
-        AccessMode noNodesAllowed = new FilteredAccessMode() {
+        AccessMode noNodesAllowed = new FilterAccessMode() {
             @Override
             public boolean allowsTraverseAllLabels() {
                 return false;
@@ -79,7 +76,7 @@ class SecureTransactionTest extends BaseTest {
             public boolean allowsTraverseNode(long... labels) {
                 return false;
             }
-        };
+        }.toNeoAccessMode();
 
         var graph = storeLoaderBuilder()
             .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, noNodesAllowed))
@@ -91,12 +88,12 @@ class SecureTransactionTest extends BaseTest {
 
     @Test
     void noRelationshipAccessAllowed() {
-        AccessMode noRelsAllowed = new FilteredAccessMode() {
+        AccessMode noRelsAllowed = new FilterAccessMode() {
             @Override
             public boolean allowsTraverseRelType(int relType) {
                 return false;
             }
-        };
+        }.toNeoAccessMode();
 
         var graph = storeLoaderBuilder()
             .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, noRelsAllowed))
@@ -114,7 +111,7 @@ class SecureTransactionTest extends BaseTest {
         int labelTokenNode2 = SecureTransaction.of(db).apply((tx, ktx) ->
             ktx.tokenWrite().labelGetOrCreateForName("Node2"));
 
-        AccessMode noNode2Allowed = new FilteredAccessMode() {
+        AccessMode noNode2Allowed = new FilterAccessMode() {
             @Override
             public boolean allowsTraverseAllLabels() {
                 return false;
@@ -124,7 +121,7 @@ class SecureTransactionTest extends BaseTest {
             public boolean allowsTraverseNode(long... labels) {
                 return Arrays.stream(labels).noneMatch(l -> l == labelTokenNode2);
             }
-        };
+        }.toNeoAccessMode();
 
         var graph = storeLoaderBuilder()
             .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, noNode2Allowed))
@@ -142,12 +139,13 @@ class SecureTransactionTest extends BaseTest {
         int propertyKeyProp1 = SecureTransaction.of(db).apply((tx, ktx) ->
             ktx.tokenWrite().propertyKeyGetOrCreateForName("prop1"));
 
-        AccessMode prop1NotAllowed = new FilteredAccessMode() {
+        AccessMode prop1NotAllowed = new FilterAccessMode() {
+
             @Override
-            public boolean allowsReadNodeProperty(Supplier<LabelSet> labels, int propertyKey) {
+            public boolean allowsReadNodeProperty(int propertyKey) {
                 return propertyKey != propertyKeyProp1;
             }
-        };
+        }.toNeoAccessMode();
 
         var graph = storeLoaderBuilder()
             .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, prop1NotAllowed))
@@ -165,12 +163,12 @@ class SecureTransactionTest extends BaseTest {
         int propertyKeyProp3 = SecureTransaction.of(db).apply((tx, ktx) ->
             ktx.tokenWrite().propertyKeyGetOrCreateForName("prop3"));
 
-        AccessMode prop3NotAllowed = new FilteredAccessMode() {
+        AccessMode prop3NotAllowed = new FilterAccessMode() {
             @Override
-            public boolean allowsReadRelationshipProperty(IntSupplier relType, int propertyKey) {
+            public boolean allowsReadRelationshipProperty(int propertyKey) {
                 return propertyKey != propertyKeyProp3;
             }
-        };
+        }.toNeoAccessMode();
 
         var graph = storeLoaderBuilder()
             .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, prop3NotAllowed))
@@ -193,11 +191,5 @@ class SecureTransactionTest extends BaseTest {
             .addNodeProperty(PropertyMapping.of("prop2", 2))
             .addRelationshipType("REL")
             .addRelationshipProperty(PropertyMapping.of("prop3", 3));
-    }
-
-    static class FilteredAccessMode extends RestrictedAccessMode {
-        FilteredAccessMode() {
-            super(Static.FULL, Static.FULL);
-        }
     }
 }
