@@ -32,8 +32,9 @@ public class CompositeNodeScan implements Scan<CompositeNodeCursor> {
         this.scans = scans;
     }
 
+    // This methods needs to be synchronized as we need to make sure that every subscan is processing the same batch
     @Override
-    public boolean reserveBatch(CompositeNodeCursor cursor, int sizeHint) {
+    public synchronized boolean reserveBatch(CompositeNodeCursor cursor, int sizeHint) {
         boolean result = false;
         for (int i = 0; i < scans.size(); i++) {
             NodeLabelIndexCursor indexCursor = cursor.getCursor(i);
