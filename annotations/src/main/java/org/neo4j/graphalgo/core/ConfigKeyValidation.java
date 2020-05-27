@@ -45,6 +45,8 @@ public final class ConfigKeyValidation {
         List<String> suggestions = keys.stream()
             .map(invalid -> {
                 List<String> candidates = similarStrings(invalid, allowedKeys);
+                candidates.removeAll(configKeys);
+
                 if (candidates.isEmpty()) {
                     return invalid;
                 }
