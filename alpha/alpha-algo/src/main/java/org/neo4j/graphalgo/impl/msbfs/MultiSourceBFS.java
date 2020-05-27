@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -72,8 +73,9 @@ public final class MultiSourceBFS implements Runnable {
             long totalNodeCount,
             SourceNodes sourceNodes,
             HugeLongArray visitSet,
-            HugeLongArray nextSet,
-            HugeLongArray seenSet
+            HugeLongArray visitNextSet,
+            HugeLongArray seenSet,
+            @Nullable HugeLongArray seenNextSet
         );
     }
 
@@ -81,8 +83,9 @@ public final class MultiSourceBFS implements Runnable {
     public static final int OMEGA = 64;
 
     private final CloseableThreadLocal<HugeLongArray> visits;
-    private final CloseableThreadLocal<HugeLongArray> nexts;
+    private final CloseableThreadLocal<HugeLongArray> visitsNext;
     private final CloseableThreadLocal<HugeLongArray> seens;
+    private final CloseableThreadLocal<HugeLongArray> seensNext;
 
     private final long nodeCount;
     private final IdMapping nodeIds;
@@ -99,7 +102,7 @@ public final class MultiSourceBFS implements Runnable {
         AllocationTracker tracker,
         long... startNodes
     ) {
-        return new MultiSourceBFS(nodeIds, relationships, new ANPStrategy(perNodeAction), tracker, startNodes);
+        return new MultiSourceBFS(nodeIds, relationships, new ANPStrategy(perNodeAction), false, tracker, startNodes);
     }
 
     public static MultiSourceBFS predecessorProcessing(
@@ -109,7 +112,14 @@ public final class MultiSourceBFS implements Runnable {
         AllocationTracker tracker,
         long... startNodes
     ) {
-        return new MultiSourceBFS(nodeIds, relationships, new PredecessorStrategy(perNeighborAction), tracker, startNodes);
+        return new MultiSourceBFS(
+            nodeIds,
+            relationships,
+            new PredecessorStrategy(perNeighborAction),
+            true,
+            tracker,
+            startNodes
+        );
     }
 
     public static MultiSourceBFS predecessorProcessing(
@@ -120,13 +130,21 @@ public final class MultiSourceBFS implements Runnable {
         AllocationTracker tracker,
         long... startNodes
     ) {
-        return new MultiSourceBFS(nodeIds, relationships, new PredecessorStrategy(perNodeAction, perNeighborAction), tracker, startNodes);
+        return new MultiSourceBFS(
+            nodeIds,
+            relationships,
+            new PredecessorStrategy(perNodeAction, perNeighborAction),
+            true,
+            tracker,
+            startNodes
+        );
     }
 
     private MultiSourceBFS(
         IdMapping nodeIds,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
+        boolean initSeenNext,
         AllocationTracker tracker,
         long... startNodes
     ) {
@@ -139,19 +157,22 @@ public final class MultiSourceBFS implements Runnable {
         }
         nodeCount = nodeIds.nodeCount();
         this.visits = new LocalHugeLongArray(nodeCount, tracker);
-        this.nexts = new LocalHugeLongArray(nodeCount, tracker);
+        this.visitsNext = new LocalHugeLongArray(nodeCount, tracker);
         this.seens = new LocalHugeLongArray(nodeCount, tracker);
+        this.seensNext = initSeenNext ? new LocalHugeLongArray(nodeCount, tracker) : null;
     }
 
     private MultiSourceBFS(
-            IdMapping nodeIds,
-            RelationshipIterator relationships,
-            ExecutionStrategy strategy,
-            long nodeCount,
-            CloseableThreadLocal<HugeLongArray> visits,
-            CloseableThreadLocal<HugeLongArray> nexts,
-            CloseableThreadLocal<HugeLongArray> seens,
-            long... startNodes) {
+        IdMapping nodeIds,
+        RelationshipIterator relationships,
+        ExecutionStrategy strategy,
+        long nodeCount,
+        CloseableThreadLocal<HugeLongArray> visits,
+        CloseableThreadLocal<HugeLongArray> visitsNext,
+        CloseableThreadLocal<HugeLongArray> seens,
+        CloseableThreadLocal<HugeLongArray> seensNext,
+        long... startNodes
+    ) {
         assert startNodes != null && startNodes.length > 0;
         this.nodeIds = nodeIds;
         this.relationships = relationships;
@@ -159,20 +180,23 @@ public final class MultiSourceBFS implements Runnable {
         this.startNodes = startNodes;
         this.nodeCount = nodeCount;
         this.visits = visits;
-        this.nexts = nexts;
+        this.visitsNext = visitsNext;
         this.seens = seens;
+        this.seensNext = seensNext;
     }
 
     private MultiSourceBFS(
-            IdMapping nodeIds,
-            RelationshipIterator relationships,
-            ExecutionStrategy strategy,
-            long nodeCount,
-            long nodeOffset,
-            int sourceNodeCount,
-            CloseableThreadLocal<HugeLongArray> visits,
-            CloseableThreadLocal<HugeLongArray> nexts,
-            CloseableThreadLocal<HugeLongArray> seens) {
+        IdMapping nodeIds,
+        RelationshipIterator relationships,
+        ExecutionStrategy strategy,
+        long nodeCount,
+        long nodeOffset,
+        int sourceNodeCount,
+        CloseableThreadLocal<HugeLongArray> visits,
+        CloseableThreadLocal<HugeLongArray> visitsNext,
+        CloseableThreadLocal<HugeLongArray> seens,
+        CloseableThreadLocal<HugeLongArray> seensNext
+    ) {
         this.nodeIds = nodeIds;
         this.relationships = relationships;
         this.strategy = strategy;
@@ -181,8 +205,9 @@ public final class MultiSourceBFS implements Runnable {
         this.nodeOffset = nodeOffset;
         this.sourceNodeCount = sourceNodeCount;
         this.visits = visits;
-        this.nexts = nexts;
+        this.visitsNext = visitsNext;
         this.seens = seens;
+        this.seensNext = seensNext;
     }
 
     /**
@@ -206,15 +231,16 @@ public final class MultiSourceBFS implements Runnable {
 
     /**
      * Runs MS-BFS, always single-threaded. Requires that there are at most
-     * 32 startNodes. If there are more, {@link #run(int, ExecutorService)} must be used.
+     * 64 startNodes. If there are more, {@link #run(int, ExecutorService)} must be used.
      */
     @Override
     public void run() {
         assert sourceLength() <= OMEGA : "more than " + OMEGA + " sources not supported";
 
         HugeLongArray visitSet = visits.get();
-        HugeLongArray nextSet = nexts.get();
+        HugeLongArray visitNextSet = visitsNext.get();
         HugeLongArray seenSet = seens.get();
+        HugeLongArray seenNextSet = seensNext != null ? seensNext.get() : null;
 
         final SourceNodes sourceNodes;
         if (startNodes == null) {
@@ -223,7 +249,7 @@ public final class MultiSourceBFS implements Runnable {
             sourceNodes = prepareSpecifiedSources(visitSet, seenSet);
         }
 
-        strategy.run(relationships, nodeCount, sourceNodes, visitSet, nextSet, seenSet);
+        strategy.run(relationships, nodeCount, sourceNodes, visitSet, visitNextSet, seenSet, seenNextSet);
     }
 
     private SourceNodes prepareOffsetSources(HugeLongArray visitSet, HugeLongArray seenSet) {
@@ -295,8 +321,9 @@ public final class MultiSourceBFS implements Runnable {
                             from,
                             length,
                             visits,
-                            nexts,
-                            seens
+                            visitsNext,
+                            seens,
+                            seensNext
                     );
                 }
             };
@@ -312,8 +339,9 @@ public final class MultiSourceBFS implements Runnable {
                         strategy,
                         nodeCount,
                         visits,
-                        nexts,
+                        visitsNext,
                         seens,
+                        seensNext,
                         Arrays.copyOfRange(startNodes, (int) from, (int) (from + length))
                 );
             }

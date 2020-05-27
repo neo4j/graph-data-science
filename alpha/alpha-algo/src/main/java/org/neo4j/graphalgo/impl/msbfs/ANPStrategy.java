@@ -55,11 +55,12 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
         long totalNodeCount,
         MultiSourceBFS.SourceNodes sourceNodes,
         HugeLongArray visitSet,
-        HugeLongArray nextSet,
-        HugeLongArray seenSet
+        HugeLongArray visitNextSet,
+        HugeLongArray seenSet,
+        HugeLongArray seenNextSet
     ) {
         HugeCursor<long[]> visitCursor = visitSet.newCursor();
-        HugeCursor<long[]> nextCursor = nextSet.newCursor();
+        HugeCursor<long[]> nextCursor = visitNextSet.newCursor();
         int depth = 0;
 
         while (true) {
@@ -71,7 +72,7 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
                 long base = visitCursor.base;
                 for (int i = offset; i < limit; ++i) {
                     if (array[i] != 0L) {
-                        prepareNextVisit(relationships, array[i], base + i, nextSet);
+                        prepareNextVisit(relationships, array[i], base + i, visitNextSet);
                     }
                 }
             }
@@ -81,7 +82,7 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
             boolean hasNext = false;
             long next;
 
-            nextSet.initCursor(nextCursor);
+            visitNextSet.initCursor(nextCursor);
             while (nextCursor.next()) {
                 long[] array = nextCursor.array;
                 int offset = nextCursor.offset;
@@ -89,7 +90,7 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
                 long base = nextCursor.base;
                 for (int i = offset; i < limit; ++i) {
                     if (array[i] != 0L) {
-                        next = visitNext(base + i, seenSet, nextSet);
+                        next = visitNext(base + i, seenSet, visitNextSet);
                         if (next != 0L) {
                             sourceNodes.reset(next);
                             perNodeAction.accept(base + i, depth, sourceNodes);
@@ -103,8 +104,8 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
                 return;
             }
 
-            nextSet.copyTo(visitSet, totalNodeCount);
-            nextSet.fill(0L);
+            visitNextSet.copyTo(visitSet, totalNodeCount);
+            visitNextSet.fill(0L);
         }
     }
 

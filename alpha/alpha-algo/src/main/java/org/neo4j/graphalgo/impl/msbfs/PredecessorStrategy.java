@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.impl.msbfs;
 
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,10 +53,14 @@ public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
         long totalNodeCount,
         MultiSourceBFS.SourceNodes sourceNodes,
         HugeLongArray visitSet,
-        HugeLongArray nextSet,
-        HugeLongArray seenSet
+        HugeLongArray visitNextSet,
+        HugeLongArray seenSet,
+        HugeLongArray seenNextSet
     ) {
         var visitCursor = visitSet.newCursor();
+        var seenCursor = seenSet.newCursor();
+        var seenNextCursor = seenNextSet.newCursor();
+
         var depth = new AtomicInteger(0);
         var hasNext = new AtomicBoolean(false);
 
@@ -74,26 +79,25 @@ public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
                     long nodeId = base + i;
                     long visit = array[i];
                     if (visit != 0L) {
+                        // User-defined computation on source.
+                        // Happens exactly once for each node.
                         sourceNodes.reset(visit);
                         perNodeAction.accept(nodeId, depth.get(), sourceNodes);
+
                         relationships.forEachRelationship(nodeId, (source, target) -> {
                             // D ← visit[nodeId] & ∼seen[target]
                             long next = visitSet.get(nodeId) & ~seenSet.get(target);
 
                             if (next != 0L) {
                                 // visitNext[target] ← visitNext[target] | D
-                                nextSet.or(target, next);
+                                visitNextSet.or(target, next);
 
                                 // seen[target] ← seen[target] | D
-                                //
-                                // If we set seen[target] at this point, target
-                                // won't be visited again on the same level by
-                                // the same BFS. Since we want to trigger the
-                                // node action for all predecessors ending up in
-                                // target, we need to defer setting seen.
-                                seenSet.or(nodeId, next);
+                                seenNextSet.or(target, next);
 
-                                // do BFS computation on target
+                                // User-defined computation on source and target.
+                                // Happens as often as the target is discovered
+                                // per BFS-level from different source nodes.
                                 sourceNodes.reset(next);
                                 perNeighborAction.accept(target, nodeId, depth.get(), sourceNodes);
                                 hasNext.set(true);
@@ -108,8 +112,23 @@ public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
                     return;
                 }
 
-                nextSet.copyTo(visitSet, totalNodeCount);
-                nextSet.fill(0L);
+                // Update seen set with seen nodes from current level
+                HugeCursor<long[]> seen = seenSet.initCursor(seenCursor);
+                HugeCursor<long[]> seenNext = seenNextSet.initCursor(seenNextCursor);
+
+                while (seen.next()) {
+                    seenNext.next();
+                    long[] seenArray = seen.array;
+                    long[] seenNextArray = seenNext.array;
+                    int end = seen.limit;
+                    for (int pos = seen.offset; pos < end; ++pos) {
+                        seenArray[pos] |= seenNextArray[pos];
+                    }
+                }
+
+                // Prepare visit set for next level
+                visitNextSet.copyTo(visitSet, totalNodeCount);
+                visitNextSet.fill(0L);
             }
         }
     }
