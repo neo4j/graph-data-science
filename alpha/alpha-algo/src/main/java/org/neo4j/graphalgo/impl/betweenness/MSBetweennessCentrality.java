@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.betweenness;
 import com.carrotsearch.hppc.IntStack;
 import com.carrotsearch.hppc.LongIntHashMap;
 import com.carrotsearch.hppc.LongIntMap;
+import com.carrotsearch.hppc.procedures.LongIntProcedure;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
@@ -72,7 +73,6 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
     public AtomicDoubleArray compute() {
         var consumer = new MSBCBFSConsumer(concurrentBfs, nodeCount, centrality, undirected ? 2.0 : 1.0);
 
-        // TODO: parallelize over node batches
         for (long offset = 0; offset < nodeCount; offset += concurrentBfs) {
             var limit = Math.min(offset + concurrentBfs, nodeCount);
             var startNodes = LongStream.range(offset, limit).toArray();
@@ -82,7 +82,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
                 .predecessorProcessing(graph, graph, consumer, consumer, tracker, startNodes)
                 .run();
             // backward traversal for all start nodes
-            consumer.updateCentrality(startNodes);
+            consumer.updateCentrality();
         }
 
         return centrality;
@@ -165,14 +165,12 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
             }
         }
 
-        void updateCentrality(long[] sourceNodes) {
-            // TODO: parallelize
-            for (long sourceNode : sourceNodes) {
-                int startNodeId = idMapping.get(sourceNode);
-                var localStack = stacks[startNodeId];
-                var localPaths = paths[startNodeId];
-                var localDelta = deltas[startNodeId];
-                var localSigma = sigmas[startNodeId];
+        void updateCentrality() {
+            idMapping.forEach((LongIntProcedure) (sourceNodeId, localNodeId) -> {
+                var localStack = stacks[localNodeId];
+                var localPaths = paths[localNodeId];
+                var localDelta = deltas[localNodeId];
+                var localSigma = sigmas[localNodeId];
 
 //                System.out.println("sourceNode = " + sourceNode);
 //                System.out.println("localStack = " + localStack);
@@ -180,21 +178,17 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
 //                System.out.println("localDelta = " + Arrays.toString(localDelta));
 //                System.out.println("localSigma = " + Arrays.toString(localSigma));
 
-
                 while (!localStack.isEmpty()) {
                     int node = localStack.pop();
                     localPaths.forEach(node, v -> {
                         localDelta[v] += (double) localSigma[v] / (double) localSigma[node] * (localDelta[node] + 1.0);
                         return true;
                     });
-                    if (node != sourceNode) {
+                    if (node != sourceNodeId) {
                         centrality.add(node, localDelta[node] / divisor);
                     }
                 }
-
-//                System.out.println("centrality = " + centrality);
-//                System.out.println();
-            }
+            });
         }
 
         // Called exactly once if a node is visited for the first time.
