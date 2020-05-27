@@ -237,7 +237,7 @@ public abstract class AdjacencyBuilder {
                     startOffset = endOffset;
                 }
             } finally {
-                if (builder != null) {
+                if (builder != null && builder.isLockedByCurrentThread()) {
                     builder.unlock();
                 }
             }

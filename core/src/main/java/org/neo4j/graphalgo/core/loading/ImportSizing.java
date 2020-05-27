@@ -31,7 +31,7 @@ public final class ImportSizing {
     private static final long MAX_PAGE_SIZE = previousPowerOfTwo(Integer.MAX_VALUE);
 
     // don't attempt to page if the page size would be less than this value
-    private static final long MIN_PAGE_SIZE = 1024L;
+    public static final long MIN_PAGE_SIZE = 1024L;
 
     private static final String TOO_MANY_PAGES_REQUIRED =
             "Importing %d nodes would need %d arrays of %d-long nested arrays each, which cannot be created.";
