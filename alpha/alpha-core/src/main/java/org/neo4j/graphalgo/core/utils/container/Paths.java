@@ -26,6 +26,7 @@ import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
@@ -84,7 +85,7 @@ public class Paths {
         var pathStrings = new ArrayList<String>(paths.size());
 
         paths.forEach((IntObjectProcedure<Path>) (nodeId, path) -> {
-            pathStrings.add(String.format("%d = %s", nodeId, path));
+            pathStrings.add(String.format(Locale.ENGLISH, "%d = %s", nodeId, path));
         });
 
         return StringJoining.join(pathStrings, ", ");

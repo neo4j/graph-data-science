@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -114,7 +115,7 @@ class BetweennessCentralityComparisonTest extends AlgoTestBase {
 
         for (int i = 0; i < graph.nodeCount(); i++) {
             Assert.assertEquals(
-                String.format("node %d with wrong BC value", i),
+                String.format(Locale.ENGLISH, "node %d with wrong BC value", i),
                 bc.getCentrality().get(i),
                 msBc.getCentrality().get(i),
                 1E-3
