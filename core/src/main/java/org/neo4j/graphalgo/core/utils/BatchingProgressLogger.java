@@ -111,11 +111,13 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     @Override
-    public void reset(long newTaskVolume) {
+    public long reset(long newTaskVolume) {
+        var remainingVolume = taskVolume - progressCounter.sum();
         this.taskVolume = newTaskVolume;
         this.batchSize = calculateBatchSize(newTaskVolume, concurrency);
         progressCounter.reset();
         globalPercentage = -1;
+        return remainingVolume;
     }
 
     @Override

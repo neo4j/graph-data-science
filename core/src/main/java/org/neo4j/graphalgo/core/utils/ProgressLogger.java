@@ -48,7 +48,7 @@ public interface ProgressLogger {
         logMessage(() -> msg);
     }
 
-    void reset(long newTaskVolume);
+    long reset(long newTaskVolume);
 
     Log getLog();
 
@@ -90,8 +90,8 @@ public interface ProgressLogger {
         }
 
         @Override
-        public void reset(long newTaskVolume) {
-
+        public long reset(long newTaskVolume) {
+            return 0L;
         }
 
         @Override

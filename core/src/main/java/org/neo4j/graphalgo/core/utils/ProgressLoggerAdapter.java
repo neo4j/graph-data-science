@@ -83,7 +83,7 @@ public class ProgressLoggerAdapter implements ProgressLogger {
     }
 
     @Override
-    public void reset(long newTaskVolume) {
+    public long reset(long newTaskVolume) {
         throw new UnsupportedOperationException("Use BatchingProgressLogger instead");
     }
 }

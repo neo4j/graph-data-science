@@ -37,17 +37,17 @@ import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.internal.kernel.api.InternalIndexState;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.kernel.api.KernelTransaction;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -165,6 +165,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             private final IndexDescriptor index;
             private final int propertyId;
             private final NodePropertiesBuilder propertiesBuilder;
+            private long imported;
+            private long logged;
 
             IndexPropertyImporter(
                 SecureTransaction tx,
@@ -195,18 +197,6 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             @Override
             public void accept(KernelTransaction ktx) throws Exception {
                 var read = ktx.dataRead();
-                var schema = ktx.schemaRead();
-
-                ktx.internalTransaction().schema().awaitIndexOnline(index.getName(), 10, TimeUnit.SECONDS);
-                while (schema.indexGetState(index) == InternalIndexState.POPULATING) {
-                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
-                }
-
-                var indexState = schema.indexGetState(index);
-                if (indexState != InternalIndexState.ONLINE) {
-                    throw new IllegalStateException("Index " + index.getName() + " is not online");
-                }
-
                 try (var nvic = ktx.cursors().allocateNodeValueIndexCursor()) {
                     var indexReadSession = read.indexReadSession(index);
                     read.nodeIndexScan(indexReadSession, nvic, IndexOrder.NONE, true);
@@ -221,6 +211,12 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
                                     var value = ReadHelper.extractValue(propertyValue, mapping.defaultValue());
                                     var nodeId = hugeIdMap.toMappedNodeId(node);
                                     propertiesBuilder.set(nodeId, value);
+                                    imported += 1;
+                                    if ((imported & 0x1_FFFFL) == 0L) {
+                                        progressLogger.logProgress(imported - logged);
+                                        logged = imported;
+                                        terminationFlag.assertRunning();
+                                    }
                                 }
                             }
                         }
@@ -232,6 +228,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
                 return propertiesBuilder.build();
             }
         }
+
+        long indexStart = System.nanoTime();
 
         var indexScanningPropertyImporter = indexPropertyMappingsByNodeLabel
             .entrySet()
@@ -245,12 +243,35 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             })
             .collect(Collectors.toList());
 
+        var expectedProperties = ((long) indexScanningPropertyImporter.size()) * hugeIdMap.nodeCount();
+        var remainingVolume = progressLogger.reset(expectedProperties);
+
+        long recordsImported = 0L;
         ParallelUtil.run(indexScanningPropertyImporter, threadPool);
         for (IndexPropertyImporter propertyImporter : indexScanningPropertyImporter) {
             var nodeLabel = propertyImporter.nodeLabel;
             var storeProperties = nodeProperties.computeIfAbsent(nodeLabel, ignore -> new HashMap<>());
             storeProperties.put(propertyImporter.mapping, propertyImporter.build());
+            recordsImported += propertyImporter.imported;
         }
+
+        long tookNanos = System.nanoTime() - indexStart;
+        BigInteger bigNanos = BigInteger.valueOf(tookNanos);
+        double tookInSeconds = new BigDecimal(bigNanos)
+            .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
+            .doubleValue();
+        double recordsPerSecond = new BigDecimal(A_BILLION)
+            .multiply(BigDecimal.valueOf(recordsImported))
+            .divide(new BigDecimal(bigNanos), 9, RoundingMode.CEILING)
+            .doubleValue();
+
+        progressLogger.getLog().info(
+            "Property Index Scan: Imported %,d properties; took %.3f s, %,.2f Properties/s",
+            recordsImported,
+            tookInSeconds,
+            recordsPerSecond
+        );
+        progressLogger.reset(remainingVolume);
     }
 
     @NotNull

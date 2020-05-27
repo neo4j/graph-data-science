@@ -36,7 +36,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
 public abstract class ScanningRecordsImporter<Record, T> {
 
-    private static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
+    static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
 
     private final StoreScanner.Factory<Record> factory;
     private final String label;
