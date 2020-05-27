@@ -33,13 +33,8 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.IdMapBuilder;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
-import org.neo4j.graphalgo.core.loading.NodeImporter;
-import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
-import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -263,30 +258,19 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
     }
 
     private IdsAndProperties buildNodes(INPUT[] inputs) {
-        HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(inputs.length, AllocationTracker.EMPTY);
-        NodeImporter nodeImporter = new NodeImporter(idMapBuilder);
-        long maxNodeId = 0L;
+        long maxNeoId = Stream.of(inputs)
+            .mapToLong(SimilarityInput::getId)
+            .max().orElse(0L);
 
-        NodesBatchBuffer buffer = new NodesBatchBufferBuilder()
-            .nodeLabelIds(new LongHashSet())
-            .capacity(inputs.length)
-            .hasLabelInformation(false)
-            .readProperty(false)
-            .build();
+        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
+            maxNeoId, executor, tracker
+        );
 
         for (INPUT input : inputs) {
-            if (input.getId() > maxNodeId) {
-                maxNodeId = input.getId();
-            }
-            buffer.add(input.getId(), -1, null);
-            if (buffer.isFull()) {
-                nodeImporter.importNodes(buffer, null);
-                buffer.reset();
-            }
+            idMapBuilder.addNode(input.getId());
         }
-        nodeImporter.importNodes(buffer, null);
 
-        IdMap idMap = IdMapBuilder.build(idMapBuilder, Collections.emptyMap(), maxNodeId, 1, AllocationTracker.EMPTY);
+        IdMap idMap = idMapBuilder.build();
         return new IdsAndProperties(idMap, Collections.emptyMap());
     }
 
@@ -406,7 +390,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 int nodeId = Math.toIntExact(longNodeId);
 
                 for (LongCursor neighbor : graph.findOldNeighbors(longNodeId)) {
-                    oldImporter.addRelationship(longNodeId, neighbor.value);
+                    oldImporter.addRelationshipFromInternalId(longNodeId, neighbor.value);
                 }
 
                 long[] potentialNewNeighbors = graph.findNewNeighbors(longNodeId).toArray();
@@ -416,7 +400,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                     random
                 ) : potentialNewNeighbors;
                 for (long neighbor : newOutgoingNeighbors) {
-                    newImporter.addRelationship(longNodeId, neighbor);
+                    newImporter.addRelationshipFromInternalId(longNodeId, neighbor);
                 }
 
                 for (Long neighbor : newOutgoingNeighbors) {
@@ -545,15 +529,20 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                     long source = result.item1;
                     long target = result.item2;
                     if(source != -1 && target != -1 && source != target) {
-                        addRelationship(source, target);
+                        addRelationshipFromOriginalId(source, target);
                     }
                 });
             }
         }
 
-        default void addRelationship(long source, long target) {
+        default void addRelationshipFromInternalId(long source, long target) {
             outImporter().addFromInternal(source, target);
             inImporter().addFromInternal(target, source);
+        }
+
+        default void addRelationshipFromOriginalId(long source, long target) {
+            outImporter().add(source, target);
+            inImporter().add(target, source);
         }
 
         default GraphStore buildGraphStore(IdMap idMap, int concurrency, AllocationTracker tracker) {
