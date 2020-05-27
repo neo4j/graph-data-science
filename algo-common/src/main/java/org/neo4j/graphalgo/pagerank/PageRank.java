@@ -342,6 +342,18 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
 
             memoryUsage = memoryUsageFor(newConcurrency, partitions);
         }
+
+        if (newConcurrency < 1) {
+            throw new IllegalStateException(
+                formatWithLocale(
+                    "Requested concurrency of %d would require %s Heap but only %s are available. Page Rank needs at least %d heap in order to run.",
+                    concurrency,
+                    humanReadable(memoryUsageFor(concurrency, partitions)),
+                    humanReadable(memoryUsageFor(1, partitions))
+                )
+            );
+        }
+
         return newConcurrency;
     }
 
