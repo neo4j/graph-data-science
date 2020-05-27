@@ -139,8 +139,8 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
                 AllocationTracker tracker,
                 Log log
             ) {
-                validateStartNode(config.startNode(),graph);
-                validateEndNode(config.endNode(),graph);
+                validateStartNode(config.startNode(), graph);
+                validateEndNode(config.endNode(), graph);
                 return new ShortestPathDijkstra(graph, configuration);
             }
         };
