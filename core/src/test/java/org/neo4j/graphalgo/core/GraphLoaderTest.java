@@ -32,6 +32,8 @@ import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
+import java.util.List;
+
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
@@ -153,16 +155,16 @@ class GraphLoaderTest extends BaseTest {
             .graph(factoryType);
 
         Graph expected = fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
-                               "(b {prop1: 0, prop2: 2, prop3: 0})" +
-                               "(c {prop1: 0, prop2: 0, prop3: 3})" +
-                               "(a)-->(b), (a)-->(c), (b)-->(c)");
+                                 "(b {prop1: 0, prop2: 2, prop3: 0})" +
+                                 "(c {prop1: 0, prop2: 0, prop3: 3})" +
+                                 "(a)-->(b), (a)-->(c), (b)-->(c)");
         assertGraphEquals(expected, graph);
     }
 
     @AllGraphStoreFactoryTypesTest
     void testWithRelationshipProperty(TestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoader.from(db)
-            .withRelationshipProperties(PropertyMapping.of("weight","prop1", 3.14))
+            .withRelationshipProperties(PropertyMapping.of("weight", "prop1", 3.14))
             .withDefaultAggregation(Aggregation.SINGLE)
             .graph(factoryType);
         assertGraphEquals(fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 3.14D}]->(c), (b)-[{w: 3.14D}]->(c)"), graph);
@@ -184,6 +186,34 @@ class GraphLoaderTest extends BaseTest {
             .withLabels("Node1")
             .graph(TestSupport.FactoryType.NATIVE);
         assertGraphEquals(fromGdl("(a:Node1), (c:Node1)"), graph);
+    }
+
+    @AllGraphStoreFactoryTypesTest
+    void testPropertyViaIndex(TestSupport.FactoryType factoryType) {
+        var indexQueries = List.of(
+            "CREATE INDEX prop1 FOR (n:Node1) ON (n.prop1)",
+            "CREATE INDEX prop2 FOR (n:Node2) ON (n.prop2)"
+        );
+        indexQueries.forEach(this::runQuery);
+
+        PropertyMappings nodePropertyMappings = PropertyMappings.of(
+            PropertyMapping.of("prop1", "prop1", 41D),
+            PropertyMapping.of("prop2", "prop2", 42D),
+            PropertyMapping.of("prop3", "prop3", 43D)
+        );
+
+        Graph graph = TestGraphLoader
+            .from(db)
+            .withLabels("Node1", "Node2", "Node3")
+            .withNodeProperties(nodePropertyMappings)
+            .withDefaultAggregation(Aggregation.SINGLE)
+            .graph(factoryType);
+
+        Graph expected = fromGdl("(a:Node1 {prop1: 1, prop2: 42, prop3: 43})" +
+                                 "(b:Node2 {prop1: 41, prop2: 2, prop3: 43})" +
+                                 "(c:Node3 {prop1: 41, prop2: 42, prop3: 3})" +
+                                 "(a)-->(b), (a)-->(c), (b)-->(c)");
+        assertGraphEquals(expected, graph);
     }
 
     @Test

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.IntObjectMap;
+import org.eclipse.collections.api.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
@@ -33,11 +34,17 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
+import org.neo4j.internal.kernel.api.IndexQueryConstraints;
+import org.neo4j.internal.kernel.api.InternalIndexState;
+import org.neo4j.internal.kernel.api.SchemaReadCore;
+import org.neo4j.internal.schema.IndexDescriptor;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -50,6 +57,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     private final ProgressLogger progressLogger;
     private final TerminationFlag terminationFlag;
     private final Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel;
+    private final Map<NodeLabel, List<Pair<PropertyMapping, IndexDescriptor>>> indexPropertyMappingsByNodeLabel;
 
     @Nullable
     private NativeNodePropertyImporter nodePropertyImporter;
@@ -62,7 +70,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         GraphDimensions dimensions,
         ProgressLogger progressLogger,
         int concurrency,
-        Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
+        Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel,
+        Map<NodeLabel, List<Pair<PropertyMapping, IndexDescriptor>>> indexPropertyMappingsByNodeLabel
     ) {
         super(
             scannerFactory(dimensions),
@@ -75,6 +84,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         this.progressLogger = progressLogger;
         this.terminationFlag = loadingContext.terminationFlag();
         this.propertyMappingsByNodeLabel = propertyMappingsByNodeLabel;
+        this.indexPropertyMappingsByNodeLabel = indexPropertyMappingsByNodeLabel;
     }
 
     private static StoreScanner.Factory<NodeReference> scannerFactory(
@@ -132,6 +142,66 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter == null
             ? new HashMap<>()
             : nodePropertyImporter.result();
+
+
+        indexPropertyMappingsByNodeLabel.forEach((nodeLabel, properties) -> {
+                properties.forEach(mappingAndIndex -> {
+                    var mapping = mappingAndIndex.getOne();
+                    var index = mappingAndIndex.getTwo();
+                    var propertyId = index.schema().getPropertyId();
+
+                    var propertiesBuilder = NodePropertiesBuilder.of(
+                        hugeIdMap.nodeCount(),
+                        tracker,
+                        mapping.defaultValue(),
+                        propertyId,
+                        mapping.propertyKey(),
+                        concurrency
+                    );
+
+                    try {
+                        transaction.accept((tx, ktx) -> {
+                            var read = ktx.dataRead();
+                            var schema = (SchemaReadCore) read;
+                            while (schema.indexGetState(index) == InternalIndexState.POPULATING) {
+                                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
+                            }
+
+                            var indexState = schema.indexGetState(index);
+                            if (indexState != InternalIndexState.ONLINE) {
+                                throw new IllegalStateException("Index " + index.getName() + " is not online");
+                            }
+
+                            try (var nvic = ktx.cursors().allocateNodeValueIndexCursor(ktx.pageCursorTracer())) {
+                                var indexReadSession = read.indexReadSession(index);
+                                read.nodeIndexScan(indexReadSession, nvic, IndexQueryConstraints.unorderedValues());
+                                while (nvic.next()) {
+                                    if (nvic.hasValue()) {
+                                        var node = nvic.nodeReference();
+                                        var numberOfProperties = nvic.numberOfProperties();
+                                        for (int i = 0; i < numberOfProperties; i++) {
+                                            var propertyKey = nvic.propertyKey(i);
+                                            if (propertyId == propertyKey) {
+                                                var propertyValue = nvic.propertyValue(i);
+                                                var value = ReadHelper.extractValue(propertyValue, mapping.defaultValue());
+                                                var nodeId = hugeIdMap.toMappedNodeId(node);
+                                                propertiesBuilder.set(nodeId, value);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+
+
+                    var storeProperties = nodeProperties.computeIfAbsent(nodeLabel, ignore -> new HashMap<>());
+                    storeProperties.put(mapping, propertiesBuilder.build());
+                });
+            }
+        );
 
         return IdsAndProperties.of(hugeIdMap, nodeProperties);
     }
