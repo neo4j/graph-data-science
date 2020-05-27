@@ -34,10 +34,10 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.InternalIndexState;
 import org.neo4j.internal.kernel.api.SchemaReadCore;
 import org.neo4j.internal.schema.IndexDescriptor;
+import org.neo4j.internal.schema.IndexOrder;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -172,9 +172,9 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
                                 throw new IllegalStateException("Index " + index.getName() + " is not online");
                             }
 
-                            try (var nvic = ktx.cursors().allocateNodeValueIndexCursor(ktx.pageCursorTracer())) {
+                            try (var nvic = ktx.cursors().allocateNodeValueIndexCursor()) {
                                 var indexReadSession = read.indexReadSession(index);
-                                read.nodeIndexScan(indexReadSession, nvic, IndexQueryConstraints.unorderedValues());
+                                read.nodeIndexScan(indexReadSession, nvic, IndexOrder.NONE, true);
                                 while (nvic.next()) {
                                     if (nvic.hasValue()) {
                                         var node = nvic.nodeReference();
