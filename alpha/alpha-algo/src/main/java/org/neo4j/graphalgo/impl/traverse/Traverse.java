@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.traverse;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
-import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 
@@ -105,7 +105,8 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
     @Override
     public Traverse compute() {
         long sourceNode = graph.toMappedNodeId(startNodeId);
-        final LongHashSet result = new LongHashSet(nodeCount);
+        final LongArrayList result = new LongArrayList(nodeCount);
+        BitSet inResult = new BitSet(nodeCount);
         nodes.clear();
         sources.clear();
         visited.clear();
@@ -121,12 +122,18 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
             final double weight = weights.removeFirst();
             switch (exitPredicate.test(source, node, weight)) {
                 case BREAK:
-                    result.add(graph.toOriginalNodeId(node));
+                    if(!inResult.get(node)) {
+                        result.add(graph.toOriginalNodeId(node));
+                        inResult.set(node);
+                    }
                     break loop;
                 case CONTINUE:
                     continue loop;
                 case FOLLOW:
-                    result.add(graph.toOriginalNodeId(node));
+                    if(!inResult.get(node)) {
+                        result.add(graph.toOriginalNodeId(node));
+                        inResult.set(node);
+                    }
                     break;
             }
 
