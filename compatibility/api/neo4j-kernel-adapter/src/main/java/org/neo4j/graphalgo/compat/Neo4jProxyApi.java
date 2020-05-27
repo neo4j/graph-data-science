@@ -63,7 +63,7 @@ import org.neo4j.scheduler.JobScheduler;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public interface KernelProxyApi {
+public interface Neo4jProxyApi {
 
     GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms);
 

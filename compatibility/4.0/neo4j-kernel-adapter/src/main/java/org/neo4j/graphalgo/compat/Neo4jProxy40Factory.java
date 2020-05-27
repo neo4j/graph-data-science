@@ -22,15 +22,15 @@ package org.neo4j.graphalgo.compat;
 import org.neo4j.annotations.service.ServiceProvider;
 
 @ServiceProvider
-public final class KernelProxy41Factory implements KernelProxyFactory {
+public final class Neo4jProxy40Factory implements Neo4jProxyFactory {
 
     @Override
     public boolean canLoad(GraphDatabaseApiProxy.Neo4jVersion version) {
-        return version == GraphDatabaseApiProxy.Neo4jVersion.V_4_1;
+        return version == GraphDatabaseApiProxy.Neo4jVersion.V_4_0;
     }
 
     @Override
-    public KernelProxyApi load() {
-        return new KernelProxy41();
+    public Neo4jProxyApi load() {
+        return new Neo4jProxy40();
     }
 }

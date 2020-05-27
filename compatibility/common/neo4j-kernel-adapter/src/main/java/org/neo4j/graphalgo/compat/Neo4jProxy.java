@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
@@ -27,14 +26,11 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
-import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.cache.LongArray;
 import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
 import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -51,7 +47,6 @@ import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.query.ExecutingQuery;
-import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
@@ -64,26 +59,36 @@ import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
-import org.neo4j.values.storable.Value;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.function.ToIntFunction;
+import java.util.ServiceLoader;
 
-public final class KernelProxy40 implements KernelProxyApi {
+public final class Neo4jProxy {
 
-    @Override
-    public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
-        return new CompatGraphDatabaseAPI40(dbms);
+    private static final Neo4jProxyApi IMPL;
+
+    static {
+        var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
+        Neo4jProxyFactory neo4jProxyFactory = ServiceLoader
+            .load(Neo4jProxyFactory.class)
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .filter(f -> f.canLoad(neo4jVersion))
+            .findFirst()
+            .orElseThrow(() -> new LinkageError("Could not load the " + Neo4jProxy.class + " implementation for " + neo4jVersion));
+        IMPL = neo4jProxyFactory.load();
     }
 
-    @Override
-    public AccessMode accessMode(CustomAccessMode customAccessMode) {
-        return new CompatAccessMode40(customAccessMode);
+    public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
+        return IMPL.newDb(dbms);
     }
 
-    @Override
-    public <RECORD extends AbstractBaseRecord> void read(
+    public static AccessMode accessMode(CustomAccessMode customAccessMode) {
+        return IMPL.accessMode(customAccessMode);
+    }
+
+    public static <RECORD extends AbstractBaseRecord> void read(
         RecordFormat<RECORD> recordFormat,
         RECORD record,
         PageCursor cursor,
@@ -91,78 +96,76 @@ public final class KernelProxy40 implements KernelProxyApi {
         int recordSize,
         int recordsPerPage
     ) throws IOException {
-        recordFormat.read(record, cursor, mode, recordSize);
+        IMPL.read(recordFormat, record, cursor, mode, recordSize, recordsPerPage);
     }
 
-    @Override
-    public long getHighestPossibleIdInUse(
+    public static long getHighestPossibleIdInUse(
         RecordStore<? extends AbstractBaseRecord> recordStore,
         PageCursorTracer pageCursorTracer
     ) {
-        return recordStore.getHighestPossibleIdInUse();
+        return IMPL.getHighestPossibleIdInUse(recordStore, pageCursorTracer);
     }
 
-    @Override
-    public <RECORD extends AbstractBaseRecord> PageCursor openPageCursorForReading(
+    public static <RECORD extends AbstractBaseRecord> PageCursor openPageCursorForReading(
         RecordStore<RECORD> recordStore,
         long pageId,
         PageCursorTracer pageCursorTracer
     ) {
-        return recordStore.openPageCursorForReading(pageId);
+        return IMPL.openPageCursorForReading(recordStore, pageId, pageCursorTracer);
     }
 
-    @Override
-    public PageCursor pageFileIO(
+    public static PageCursor pageFileIO(
         PagedFile pagedFile,
         long pageId,
         int pageFileFlags,
         PageCursorTracer pageCursorTracer
     ) throws IOException {
-        return pagedFile.io(pageId, pageFileFlags);
+        return IMPL.pageFileIO(pagedFile, pageId, pageFileFlags, pageCursorTracer);
     }
 
-    @Override
-    public PropertyCursor allocatePropertyCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer, MemoryTracker memoryTracker) {
-        return cursorFactory.allocatePropertyCursor();
+    public static PropertyCursor allocatePropertyCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    ) {
+        return IMPL.allocatePropertyCursor(cursorFactory, cursorTracer, memoryTracker);
     }
 
-    @Override
-    public NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateNodeCursor();
+    public static NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer) {
+        return IMPL.allocateNodeCursor(cursorFactory, cursorTracer);
     }
 
-    @Override
-    public RelationshipScanCursor allocateRelationshipScanCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateRelationshipScanCursor();
+    public static RelationshipScanCursor allocateRelationshipScanCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
+        return IMPL.allocateRelationshipScanCursor(cursorFactory, cursorTracer);
     }
 
-    @Override
-    public NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateNodeLabelIndexCursor();
+    public static NodeLabelIndexCursor allocateNodeLabelIndexCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
+        return IMPL.allocateNodeLabelIndexCursor(cursorFactory, cursorTracer);
     }
 
-    @Override
-    public long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
-        return NodeLabelsField.get(node, nodeStore);
+    public static long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
+        return IMPL.getNodeLabelFields(node, nodeStore, cursorTracer);
     }
 
-    @Override
-    public void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
-        dataRead.nodeLabelScan(label, cursor);
+    public static void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
+        IMPL.nodeLabelScan(dataRead, label, cursor);
     }
 
-    @Override
-    public OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base) {
-        return new OffHeapLongArray(length, defaultValue, base);
+    public static OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base) {
+        return IMPL.newOffHeapLongArray(length, defaultValue, base);
     }
 
-    @Override
-    public LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue) {
-        return numberArrayFactory.newLongArray(size, defaultValue);
+    public static LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue) {
+        return IMPL.newChunkedLongArray(numberArrayFactory, size, defaultValue);
     }
 
-    @Override
-    public BatchImporter instantiateBatchImporter(
+    public static BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
@@ -178,10 +181,12 @@ public final class KernelProxy40 implements KernelProxyApi {
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
-        return factory.instantiate(
+        return IMPL.instantiateBatchImporter(
+            factory,
             directoryStructure,
             fileSystem,
             externalPageCache,
+            pageCacheTracer,
             config,
             logService,
             executionMonitor,
@@ -190,56 +195,23 @@ public final class KernelProxy40 implements KernelProxyApi {
             recordFormats,
             monitor,
             jobScheduler,
-            badCollector,
-            TransactionLogsInitializer.INSTANCE
+            badCollector
         );
     }
 
-    @Override
-    public Input batchInputFrom(CompatInput compatInput) {
-        return new InputFromCompatInput(compatInput);
+    public static Input batchInputFrom(CompatInput compatInput) {
+        return IMPL.batchInputFrom(compatInput);
     }
 
-    @Override
-    public String queryText(ExecutingQuery query) {
-        return query.queryText();
+    public static String queryText(ExecutingQuery query) {
+        return IMPL.queryText(query);
     }
 
-    @Override
-    public Log toPrintWriter(FormattedLog.Builder builder, PrintWriter writer) {
-        return builder.toPrintWriter(() -> writer);
+    public static Log toPrintWriter(FormattedLog.Builder builder, PrintWriter writer) {
+        return IMPL.toPrintWriter(builder, writer);
     }
 
-    private static final class InputFromCompatInput implements Input {
-        private final CompatInput delegate;
-
-        private InputFromCompatInput(CompatInput delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public InputIterable nodes(Collector badCollector) {
-            return delegate.nodes(badCollector);
-        }
-
-        @Override
-        public InputIterable relationships(Collector badCollector) {
-            return delegate.relationships(badCollector);
-        }
-
-        @Override
-        public IdType idType() {
-            return delegate.idType();
-        }
-
-        @Override
-        public ReadableGroups groups() {
-            return delegate.groups();
-        }
-
-        @Override
-        public Estimates calculateEstimates(ToIntFunction<Value[]> valueSizeCalculator) throws IOException {
-            return delegate.calculateEstimates((values, cursorTracer, memoryTracker) -> valueSizeCalculator.applyAsInt(values));
-        }
+    private Neo4jProxy() {
+        throw new UnsupportedOperationException("No instances");
     }
 }

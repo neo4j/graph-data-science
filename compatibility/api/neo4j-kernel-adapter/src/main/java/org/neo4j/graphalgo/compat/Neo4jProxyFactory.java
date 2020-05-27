@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.compat;
 import org.neo4j.annotations.service.Service;
 
 @Service
-public interface KernelProxyFactory {
+public interface Neo4jProxyFactory {
 
     boolean canLoad(GraphDatabaseApiProxy.Neo4jVersion version);
 
-    KernelProxyApi load();
+    Neo4jProxyApi load();
 }

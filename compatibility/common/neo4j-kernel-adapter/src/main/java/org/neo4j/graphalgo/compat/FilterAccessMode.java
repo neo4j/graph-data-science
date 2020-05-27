@@ -24,6 +24,6 @@ import org.neo4j.internal.kernel.api.security.AccessMode;
 public interface FilterAccessMode extends CustomAccessMode {
 
     default AccessMode toNeoAccessMode() {
-        return KernelProxy.accessMode(this);
+        return Neo4jProxy.accessMode(this);
     }
 }

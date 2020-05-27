@@ -71,7 +71,7 @@ import org.neo4j.scheduler.JobScheduler;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public final class KernelProxy41 implements KernelProxyApi {
+public final class Neo4jProxy41 implements Neo4jProxyApi {
 
     @Override
     public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {

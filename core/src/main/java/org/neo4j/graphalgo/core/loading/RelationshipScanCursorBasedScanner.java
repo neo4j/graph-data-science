@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.KernelProxy;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -42,7 +42,7 @@ final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanne
 
     @Override
     RelationshipScanCursor entityCursor(KernelTransaction transaction) {
-        return KernelProxy.allocateRelationshipScanCursor(transaction.cursors(), transaction.pageCursorTracer());
+        return Neo4jProxy.allocateRelationshipScanCursor(transaction.cursors(), transaction.pageCursorTracer());
     }
 
     @Override
