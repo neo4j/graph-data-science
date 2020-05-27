@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 
 import java.util.ServiceLoader;
 
-public final class CypherPrinter {
+public final class CypherPrinterProxy {
 
     private static final CypherPrinterApi IMPL;
 
@@ -37,7 +37,7 @@ public final class CypherPrinter {
             .map(ServiceLoader.Provider::get)
             .filter(f -> f.canLoad(neo4jVersion))
             .findFirst()
-            .orElseThrow(() -> new LinkageError("Could not load the " + CypherPrinter.class + " implementation for " + neo4jVersion));
+            .orElseThrow(() -> new LinkageError("Could not load the " + CypherPrinterProxy.class + " implementation for " + neo4jVersion));
         IMPL = kernelProxyFactory.load();
     }
 
@@ -78,6 +78,6 @@ public final class CypherPrinter {
         return CypherPrinterApi.var(value);
     }
 
-    private CypherPrinter() {
+    private CypherPrinterProxy() {
     }
 }

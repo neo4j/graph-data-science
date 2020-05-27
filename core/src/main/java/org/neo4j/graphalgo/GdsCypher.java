@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.utils.cypher.CypherPrinter;
+import org.neo4j.graphalgo.utils.cypher.CypherPrinterProxy;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -417,7 +417,7 @@ public abstract class GdsCypher {
         Map<String, Object> parameters
     ) {
         StringJoiner queryArguments = new StringJoiner(", ");
-        explicitGraphName.ifPresent(name -> queryArguments.add(CypherPrinter.toCypherString(name)));
+        explicitGraphName.ifPresent(name -> queryArguments.add(CypherPrinterProxy.toCypherString(name)));
 
         if (implicitCreateConfig.isPresent()) {
             GraphCreateFromStoreConfig config = implicitCreateConfig.get();
@@ -428,8 +428,8 @@ public abstract class GdsCypher {
             Optional<Object> nodeProjection = toMinimalObject(config.nodeProjections()).toObject();
             Optional<Object> relationshipProjection = toMinimalObject(config.relationshipProjections()).toObject();
             if (executionMode == InternalExecutionMode.GRAPH_CREATE) {
-                queryArguments.add(CypherPrinter.toCypherString(nodeProjection.orElse(emptyMap())));
-                queryArguments.add(CypherPrinter.toCypherString(relationshipProjection.orElse(emptyMap())));
+                queryArguments.add(CypherPrinterProxy.toCypherString(nodeProjection.orElse(emptyMap())));
+                queryArguments.add(CypherPrinterProxy.toCypherString(relationshipProjection.orElse(emptyMap())));
             } else {
                 nodeProjection.ifPresent(np -> newParameters.put("nodeProjection", np));
                 relationshipProjection.ifPresent(rp -> newParameters.put("relationshipProjection", rp));
@@ -447,7 +447,7 @@ public abstract class GdsCypher {
         }
 
         if (!parameters.isEmpty()) {
-            queryArguments.add(CypherPrinter.toCypherStringOr(parameters, "{}"));
+            queryArguments.add(CypherPrinterProxy.toCypherStringOr(parameters, "{}"));
         }
 
         return queryArguments.toString();
@@ -574,13 +574,13 @@ public abstract class GdsCypher {
 
         @Override
         public StagedBuilder addPlaceholder(String key, String placeholder) {
-            builder.putParameter(key, CypherPrinter.parameter(placeholder));
+            builder.putParameter(key, CypherPrinterProxy.parameter(placeholder));
             return this;
         }
 
         @Override
         public StagedBuilder addVariable(String key, String variable) {
-            builder.putParameter(key, CypherPrinter.variable(variable));
+            builder.putParameter(key, CypherPrinterProxy.variable(variable));
             return this;
         }
 
