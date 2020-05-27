@@ -35,16 +35,18 @@ def registerSubModules(File file) {
                 }
                 return true;
             }
-            .filter { moduleDir ->
-                if (compatibilityModules.contains(moduleDir.getName())) {
-                    moduleDir.getParentFile().name == neo4jMajorVersion
-                } else {
-                    true
-                }
-            }
             .forEach { moduleDir ->
                 def parent = moduleDir.getParentFile();
-                def projectName = parent.name == "proc" ? ":proc-${moduleDir.name}" : ":${moduleDir.name}";
+                def projectName = ":${moduleDir.name}";
+                if (parent.name == "proc") {
+                    projectName = ":proc-${moduleDir.name}";
+                } else if (parent.name == "api") {
+                    projectName = ":${moduleDir.name}-api";
+                } else if (parent.name == "4.0") {
+                    projectName = ":${moduleDir.name}-4.0";
+                } else if (parent.name == "4.1") {
+                    projectName = ":${moduleDir.name}-4.1";
+                }
                 include(projectName)
                 project(projectName).projectDir = moduleDir
             }
