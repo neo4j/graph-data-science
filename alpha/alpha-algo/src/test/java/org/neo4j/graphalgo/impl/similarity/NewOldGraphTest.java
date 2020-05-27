@@ -42,9 +42,9 @@ class NewOldGraphTest {
     @Test
     void allRelationshipsNewByDefault() {
         RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, TRACKER);
-        importer.addRelationship(0, 1);
-        importer.addRelationship(0, 2);
-        importer.addRelationship(0, 3);
+        importer.addRelationshipFromOriginalId(0, 1);
+        importer.addRelationshipFromOriginalId(0, 2);
+        importer.addRelationshipFromOriginalId(0, 3);
 
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         NewOldGraph graph = new NewOldGraph(importer.buildGraphStore(ID_MAP, TRACKER).getUnion(), visitedRelationships);
@@ -57,9 +57,9 @@ class NewOldGraphTest {
     @Test
     void newShouldFilterVisitedRelationships() {
         RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, TRACKER);
-        importer.addRelationship(0, 1);
-        importer.addRelationship(0, 2);
-        importer.addRelationship(0, 3);
+        importer.addRelationshipFromOriginalId(0, 1);
+        importer.addRelationshipFromOriginalId(0, 2);
+        importer.addRelationshipFromOriginalId(0, 3);
 
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
@@ -73,9 +73,9 @@ class NewOldGraphTest {
     @Test
     void oldShouldReturnVisitedRelationships() {
         RelationshipImporter importer = RelationshipImporter.of(ID_MAP, Pools.DEFAULT, TRACKER);
-        importer.addRelationship(0, 1);
-        importer.addRelationship(0, 2);
-        importer.addRelationship(0, 3);
+        importer.addRelationshipFromOriginalId(0, 1);
+        importer.addRelationshipFromOriginalId(0, 2);
+        importer.addRelationshipFromOriginalId(0, 3);
 
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
