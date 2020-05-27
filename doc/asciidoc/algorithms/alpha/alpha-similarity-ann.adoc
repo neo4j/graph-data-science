@@ -132,7 +132,7 @@ The corresponding k-Nearest Neighbors Graph can then be used as part of recommen
 .The following will create a sample graph:
 [source, cypher]
 ----
- CREATE 
+ CREATE
   (french:Cuisine {name:'French'}),
   (italian:Cuisine {name:'Italian'}),
   (indian:Cuisine {name:'Indian'}),
@@ -187,17 +187,17 @@ The corresponding k-Nearest Neighbors Graph can then be used as part of recommen
 [opts="header",cols="1,1,1"]
 |===
 | from | to | similarity
-| Arya     | Karin    | 0.6666666666666666 
-| Arya     | Praveena | 0.25              
-| Arya     | Michael  | 0.2               
-| Karin    | Arya     | 0.6666666666666666 
-| Karin    | Michael  | 0.25               
-| Michael  | Karin    | 0.25               
-| Michael  | Praveena | 0.25               
-| Michael  | Arya     | 0.2                
-| Praveena | Arya     | 0.25               
-| Praveena | Michael  | 0.25               
-| Zhen     | Michael  | 0.6666666666666666 
+| Arya     | Karin    | 0.6666666666666666
+| Arya     | Praveena | 0.25
+| Arya     | Michael  | 0.2
+| Karin    | Arya     | 0.6666666666666666
+| Karin    | Michael  | 0.25
+| Michael  | Karin    | 0.25
+| Michael  | Praveena | 0.25
+| Michael  | Arya     | 0.2
+| Praveena | Arya     | 0.25
+| Praveena | Michael  | 0.25
+| Zhen     | Michael  | 0.6666666666666666
 |===
 
 
@@ -242,7 +242,7 @@ We then could write a query to find out what types of cuisine that other people 
        (other)-[:LIKES]->(cuisine)
  WHERE not((p)-[:LIKES]->(cuisine))
  RETURN cuisine.name AS cuisine, count(*) AS count
- ORDER BY count DESC
+ ORDER BY cuisine DESC
 ----
 
 
@@ -250,8 +250,8 @@ We then could write a query to find out what types of cuisine that other people 
 [opts="header"]
 |===
 | cuisine    | count
-| "Italian"  | 2
 | "French"   | 1
+| "Italian"  | 2
 | "Lebanese" | 1
 |===
 
