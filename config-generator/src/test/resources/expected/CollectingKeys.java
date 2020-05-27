@@ -23,22 +23,41 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
-import java.util.Arrays;
+import java.util.Arrays
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class CollectingKeysConfig implements CollectingKeys {
 
-    private final int foo;
+    private int foo;
 
-    private final long bar;
+    private long bar;
 
-    private final double baz;
+    private double baz;
 
     public CollectingKeysConfig(int foo, @NotNull CypherMapWrapper config) {
-        this.foo = foo;
-        this.bar = config.requireLong("bar");
-        this.baz = config.requireDouble("baz");
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.foo = foo;
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.bar = config.requireLong("bar");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.baz = config.requireDouble("baz");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if(!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

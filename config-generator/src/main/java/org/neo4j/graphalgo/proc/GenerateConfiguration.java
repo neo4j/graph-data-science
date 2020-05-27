@@ -164,7 +164,7 @@ final class GenerateConfiguration {
             FieldSpec.builder(
                 member.typeSpecWithAnnotation(Nullable.class),
                 names.newName(member.methodName(), member),
-                Modifier.PRIVATE, Modifier.FINAL
+                Modifier.PRIVATE
             ).build()
         ).forEach(builder::addField);
         return builder.build();
@@ -178,6 +178,11 @@ final class GenerateConfiguration {
         String configParameterName = names.newName(CONFIG_VAR, CONFIG_VAR);
         boolean requiredMapParameter = false;
 
+        String errorsVarName = names.newName("errors");
+        if (!config.members().isEmpty()) {
+            configMapConstructor.addStatement("$1T<$2T> $3N = new $1T<>()", ArrayList.class, IllegalArgumentException.class, errorsVarName);
+        }
+
         for (ConfigParser.Member member : config.members()) {
             Optional<MemberDefinition> memberDefinition = memberDefinition(names, member);
             if (memberDefinition.isPresent()) {
@@ -189,18 +194,29 @@ final class GenerateConfiguration {
                     requiredMapParameter = true;
                     addConfigGetterToConstructor(
                         configMapConstructor,
-                        definition
+                        definition,
+                        errorsVarName
                     );
                 } else {
                     addParameterToConstructor(
                         configMapConstructor,
                         definition,
-                        parameter
+                        parameter,
+                        errorsVarName
                     );
                 }
             }
         }
 
+        if (!config.members().isEmpty()) {
+            String combinedErrorsVarName = names.newName("combinedErrors");
+            configMapConstructor.beginControlFlow("if(!$N.isEmpty())", errorsVarName)
+                .addStatement("$1T $2N = new $1T()", IllegalArgumentException.class, combinedErrorsVarName)
+                .addStatement("$1N.forEach($2N::addSuppressed)", errorsVarName, combinedErrorsVarName)
+                .addStatement("throw $N", combinedErrorsVarName)
+                .endControlFlow();
+        }
+        
         for (ConfigParser.Member member : config.members()) {
             if (member.validates()) {
                 configMapConstructor.addStatement("$N()", member.methodName());
@@ -259,7 +275,8 @@ final class GenerateConfiguration {
 
     private void addConfigGetterToConstructor(
         MethodSpec.Builder constructor,
-        MemberDefinition definition
+        MemberDefinition definition,
+        String errorsVarName
     ) {
         CodeBlock.Builder code = CodeBlock.builder().add(
             "$N.$L$L($S",
@@ -322,13 +339,18 @@ final class GenerateConfiguration {
             );
         }
 
-        constructor.addStatement("this.$N = $L", definition.fieldName(), codeBlock);
+        constructor.beginControlFlow("try")
+            .addStatement("this.$N = $L", definition.fieldName(), codeBlock)
+            .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
+            .addStatement("$N.add(e)", errorsVarName)
+            .endControlFlow();
     }
 
     private void addParameterToConstructor(
         MethodSpec.Builder constructor,
         MemberDefinition definition,
-        Parameter parameter
+        Parameter parameter,
+        String errorsVarName
     ) {
         TypeName paramType = TypeName.get(definition.parameterType());
 
@@ -355,7 +377,11 @@ final class GenerateConfiguration {
         }
         constructor
             .addParameter(paramType, definition.fieldName())
-            .addStatement("this.$N = $L", definition.fieldName(), valueProducer);
+            .beginControlFlow("try")
+            .addStatement("this.$N = $L", definition.fieldName(), valueProducer)
+            .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
+            .addStatement("$N.add(e)", errorsVarName)
+            .endControlFlow();
     }
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, ConfigParser.Member member) {
