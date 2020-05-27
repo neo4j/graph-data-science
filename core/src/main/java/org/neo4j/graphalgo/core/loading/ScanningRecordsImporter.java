@@ -40,8 +40,8 @@ public abstract class ScanningRecordsImporter<Record, T> {
 
     private final StoreScanner.Factory<Record> factory;
     private final String label;
-    private final ExecutorService threadPool;
 
+    protected final ExecutorService threadPool;
     protected final SecureTransaction transaction;
     protected final GraphDimensions dimensions;
     protected final AllocationTracker tracker;

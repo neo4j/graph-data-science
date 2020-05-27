@@ -30,14 +30,17 @@ import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.internal.kernel.api.InternalIndexState;
-import org.neo4j.internal.kernel.api.SchemaReadCore;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexOrder;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -107,9 +110,11 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
 
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
-        nodeLabelBitSetMapping = graphCreateConfig.nodeProjections().allProjections().size() == 1 && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
-            ? Collections.emptyMap()
-            : initializeLabelBitSets(nodeCount, labelTokenNodeLabelMapping);
+        nodeLabelBitSetMapping =
+            graphCreateConfig.nodeProjections().allProjections().size() == 1
+            && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
+                ? Collections.emptyMap()
+                : initializeLabelBitSets(nodeCount, labelTokenNodeLabelMapping);
 
         nodePropertyImporter = initializeNodePropertyImporter(nodeCount);
 
@@ -143,67 +148,109 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             ? new HashMap<>()
             : nodePropertyImporter.result();
 
-
-        indexPropertyMappingsByNodeLabel.forEach((nodeLabel, properties) -> {
-                properties.forEach(mappingAndIndex -> {
-                    var mapping = mappingAndIndex.getOne();
-                    var index = mappingAndIndex.getTwo();
-                    var propertyId = index.schema().getPropertyId();
-
-                    var propertiesBuilder = NodePropertiesBuilder.of(
-                        hugeIdMap.nodeCount(),
-                        tracker,
-                        mapping.defaultValue(),
-                        propertyId,
-                        mapping.propertyKey(),
-                        concurrency
-                    );
-
-                    try {
-                        transaction.accept((tx, ktx) -> {
-                            var read = ktx.dataRead();
-                            var schema = (SchemaReadCore) read;
-                            while (schema.indexGetState(index) == InternalIndexState.POPULATING) {
-                                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
-                            }
-
-                            var indexState = schema.indexGetState(index);
-                            if (indexState != InternalIndexState.ONLINE) {
-                                throw new IllegalStateException("Index " + index.getName() + " is not online");
-                            }
-
-                            try (var nvic = ktx.cursors().allocateNodeValueIndexCursor()) {
-                                var indexReadSession = read.indexReadSession(index);
-                                read.nodeIndexScan(indexReadSession, nvic, IndexOrder.NONE, true);
-                                while (nvic.next()) {
-                                    if (nvic.hasValue()) {
-                                        var node = nvic.nodeReference();
-                                        var numberOfProperties = nvic.numberOfProperties();
-                                        for (int i = 0; i < numberOfProperties; i++) {
-                                            var propertyKey = nvic.propertyKey(i);
-                                            if (propertyId == propertyKey) {
-                                                var propertyValue = nvic.propertyValue(i);
-                                                var value = ReadHelper.extractValue(propertyValue, mapping.defaultValue());
-                                                var nodeId = hugeIdMap.toMappedNodeId(node);
-                                                propertiesBuilder.set(nodeId, value);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-
-
-                    var storeProperties = nodeProperties.computeIfAbsent(nodeLabel, ignore -> new HashMap<>());
-                    storeProperties.put(mapping, propertiesBuilder.build());
-                });
-            }
-        );
+        if (!indexPropertyMappingsByNodeLabel.isEmpty()) {
+            importPropertiesFromIndex(hugeIdMap, nodeProperties);
+        }
 
         return IdsAndProperties.of(hugeIdMap, nodeProperties);
+    }
+
+    private void importPropertiesFromIndex(
+        IdMap hugeIdMap,
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties
+    ) {
+        class IndexPropertyImporter extends StatementAction {
+            private final NodeLabel nodeLabel;
+            private final PropertyMapping mapping;
+            private final IndexDescriptor index;
+            private final int propertyId;
+            private final NodePropertiesBuilder propertiesBuilder;
+
+            IndexPropertyImporter(
+                SecureTransaction tx,
+                NodeLabel nodeLabel,
+                PropertyMapping mapping,
+                IndexDescriptor index
+            ) {
+                super(tx);
+                this.nodeLabel = nodeLabel;
+                this.mapping = mapping;
+                this.index = index;
+                propertyId = index.schema().getPropertyId();
+                propertiesBuilder = NodePropertiesBuilder.of(
+                    hugeIdMap.nodeCount(),
+                    tracker,
+                    mapping.defaultValue(),
+                    propertyId,
+                    mapping.propertyKey(),
+                    concurrency
+                );
+            }
+
+            @Override
+            public String threadName() {
+                return "index-scan-" + index.getName();
+            }
+
+            @Override
+            public void accept(KernelTransaction ktx) throws Exception {
+                var read = ktx.dataRead();
+                var schema = ktx.schemaRead();
+
+                ktx.internalTransaction().schema().awaitIndexOnline(index.getName(), 10, TimeUnit.SECONDS);
+                while (schema.indexGetState(index) == InternalIndexState.POPULATING) {
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
+                }
+
+                var indexState = schema.indexGetState(index);
+                if (indexState != InternalIndexState.ONLINE) {
+                    throw new IllegalStateException("Index " + index.getName() + " is not online");
+                }
+
+                try (var nvic = ktx.cursors().allocateNodeValueIndexCursor()) {
+                    var indexReadSession = read.indexReadSession(index);
+                    read.nodeIndexScan(indexReadSession, nvic, IndexOrder.NONE, true);
+                    while (nvic.next()) {
+                        if (nvic.hasValue()) {
+                            var node = nvic.nodeReference();
+                            var numberOfProperties = nvic.numberOfProperties();
+                            for (int i = 0; i < numberOfProperties; i++) {
+                                var propertyKey = nvic.propertyKey(i);
+                                if (propertyId == propertyKey) {
+                                    var propertyValue = nvic.propertyValue(i);
+                                    var value = ReadHelper.extractValue(propertyValue, mapping.defaultValue());
+                                    var nodeId = hugeIdMap.toMappedNodeId(node);
+                                    propertiesBuilder.set(nodeId, value);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            NodeProperties build() {
+                return propertiesBuilder.build();
+            }
+        }
+
+        var indexScanningPropertyImporter = indexPropertyMappingsByNodeLabel
+            .entrySet()
+            .stream()
+            .flatMap(labelAndProperties -> {
+                return labelAndProperties.getValue().stream().map(mappingAndIndex -> {
+                    var mapping = mappingAndIndex.getOne();
+                    var index = mappingAndIndex.getTwo();
+                    return new IndexPropertyImporter(transaction, labelAndProperties.getKey(), mapping, index);
+                });
+            })
+            .collect(Collectors.toList());
+
+        ParallelUtil.run(indexScanningPropertyImporter, threadPool);
+        for (IndexPropertyImporter propertyImporter : indexScanningPropertyImporter) {
+            var nodeLabel = propertyImporter.nodeLabel;
+            var storeProperties = nodeProperties.computeIfAbsent(nodeLabel, ignore -> new HashMap<>());
+            storeProperties.put(propertyImporter.mapping, propertyImporter.build());
+        }
     }
 
     @NotNull

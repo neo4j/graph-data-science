@@ -45,7 +45,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.internal.helpers.collection.Iterators;
-import org.neo4j.internal.kernel.api.SchemaReadCore;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexValueCapability;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -56,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -93,7 +93,10 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         return getMemoryEstimation(storeConfig.nodeProjections(), storeConfig.relationshipProjections());
     }
 
-    public static MemoryEstimation getMemoryEstimation(NodeProjections nodeProjections, RelationshipProjections relationshipProjections) {
+    public static MemoryEstimation getMemoryEstimation(
+        NodeProjections nodeProjections,
+        RelationshipProjections relationshipProjections
+    ) {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(HugeGraph.class);
 
         // node information
@@ -142,8 +145,8 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             .stream()
             .map(entry -> {
                 Long relCount = entry.getKey().name.equals("*")
-                     ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
-                     : dimensions.relationshipCounts().getOrDefault(entry.getKey(), 0L);
+                    ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
+                    : dimensions.relationshipCounts().getOrDefault(entry.getKey(), 0L);
 
                 return entry.getValue().orientation() == Orientation.UNDIRECTED
                     ? relCount * 2
@@ -196,66 +199,76 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             closeTx = Optional.of(transaction.fork());
             ktx = closeTx.get().topLevelKernelTransaction().get();
         }
+        var tx = ktx.internalTransaction();
 
         var nodeLabelMapping = dimensions.tokenNodeLabelMapping();
         if (nodeLabelMapping != null) {
-            var read = ktx.dataRead();
-            if (read instanceof SchemaReadCore) {
-                SchemaReadCore schemaReadCore = (SchemaReadCore) read;
+            var schema = tx.schema();
+            var schemaRead = ktx.schemaRead();
 
-                var labelIds = StreamSupport.stream(nodeLabelMapping.keys().spliterator(), false);
-                var nonAllLabelIds = labelIds.filter(labelId -> labelId.value != ANY_LABEL);
+            var labelIds = StreamSupport.stream(nodeLabelMapping.keys().spliterator(), false);
+            var nonAllLabelIds = labelIds.filter(labelId -> labelId.value != ANY_LABEL);
 
-                var indexesForLabels = nonAllLabelIds.flatMap(label -> Iterators.
-                    stream(schemaReadCore.indexesGetForLabel(label.value)).filter(id ->
-                        id.getCapability().valueCapability(ValueCategory.NUMBER) == IndexValueCapability.YES &&
-                        id.schema().getPropertyIds().length == 1
-                    )
-                );
+            var indexesForLabels = nonAllLabelIds.flatMap(label ->
+                Iterators.stream(schemaRead.indexesGetForLabel(label.value)));
 
-                var indexPerLabelMappings = indexesForLabels.flatMap(id -> nodeLabelMapping
-                    .get(id.schema().getLabelId())
-                    .stream()
-                    .map(label -> Map.entry(label, id))
-                );
+            var validIndexes = indexesForLabels.filter(id ->
+                id != IndexDescriptor.NO_INDEX
+                && id.getCapability().valueCapability(ValueCategory.NUMBER) == IndexValueCapability.YES
+                && id.schema().getPropertyIds().length == 1
+            );
 
-                Map<NodeLabel, Map<Integer, IndexDescriptor>> indexLabelPropertyMappings = indexPerLabelMappings.collect(groupingBy(
+            var onlineIndexes = validIndexes.filter(id -> {
+                try {
+                    // give the index a second the get online
+                    schema.awaitIndexOnline(id.getName(), 1, TimeUnit.SECONDS);
+                    return true;
+                } catch (RuntimeException notOnline) {
+                    // index not available, load via store scanning instead
+                    return false;
+                }
+            });
+
+            var indexPerLabelMappings = onlineIndexes.flatMap(id -> nodeLabelMapping
+                .get(id.schema().getLabelId())
+                .stream()
+                .map(label -> Map.entry(label, id))
+            );
+
+            Map<NodeLabel, Map<Integer, IndexDescriptor>> indexLabelPropertyMappings = indexPerLabelMappings.collect(
+                groupingBy(
                     Map.Entry::getKey,
                     toMap(id -> id.getValue().schema().getPropertyId(), Map.Entry::getValue)
                 ));
 
-                indexLabelPropertyMappings.forEach((nodeLabel, indexPerPropertyKeyId) -> {
-                    var propertyMappings = propertyMappingsByNodeLabel.get(nodeLabel);
-                    if (propertyMappings != null) {
-                        var storeMappingsBuilder = PropertyMappings.builder();
-                        var indexMappings = new ArrayList<Pair<PropertyMapping, IndexDescriptor>>();
-                        propertyMappings.mappings().forEach(mapping -> {
-                            var propertyKey = dimensions.nodePropertyTokens().get(mapping.neoPropertyKey());
-                            if (propertyKey != null) {
-                                var indexDescriptor = indexPerPropertyKeyId.get(propertyKey);
-                                if (indexDescriptor != null) {
-                                    indexMappings.add(Tuples.pair(mapping, indexDescriptor));
-                                } else {
-                                    storeMappingsBuilder.addMapping(mapping);
-                                }
+            indexLabelPropertyMappings.forEach((nodeLabel, indexPerPropertyKeyId) -> {
+                var propertyMappings = propertyMappingsByNodeLabel.get(nodeLabel);
+                if (propertyMappings != null) {
+                    var storeMappingsBuilder = PropertyMappings.builder();
+                    var indexMappings = new ArrayList<Pair<PropertyMapping, IndexDescriptor>>();
+                    propertyMappings.mappings().forEach(mapping -> {
+                        var propertyKey = dimensions.nodePropertyTokens().get(mapping.neoPropertyKey());
+                        if (propertyKey != null) {
+                            var indexDescriptor = indexPerPropertyKeyId.get(propertyKey);
+                            if (indexDescriptor != null) {
+                                indexMappings.add(Tuples.pair(mapping, indexDescriptor));
+                            } else {
+                                storeMappingsBuilder.addMapping(mapping);
                             }
-                        });
-                        var storeMappings = storeMappingsBuilder.build();
-                        if (storeMappings.hasMappings()) {
-                            propertyMappingsByNodeLabel.put(nodeLabel, storeMappings);
-                        } else {
-                            propertyMappingsByNodeLabel.remove(nodeLabel);
                         }
-                        if (!indexMappings.isEmpty()) {
-                            indexedPropertyMappingsByNodeLabel.put(nodeLabel, indexMappings);
-                        }
+                    });
+                    var storeMappings = storeMappingsBuilder.build();
+                    if (storeMappings.hasMappings()) {
+                        propertyMappingsByNodeLabel.put(nodeLabel, storeMappings);
+                    } else {
+                        propertyMappingsByNodeLabel.remove(nodeLabel);
                     }
-                });
-            }
+                    if (!indexMappings.isEmpty()) {
+                        indexedPropertyMappingsByNodeLabel.put(nodeLabel, indexMappings);
+                    }
+                }
+            });
         }
-
-        closeTx.ifPresent(SecureTransaction::close);
-
 
 
         return new ScanningNodesImporter(
