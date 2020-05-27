@@ -20,12 +20,16 @@
 package org.neo4j.graphalgo.compat;
 
 import org.neo4j.dbms.api.DatabaseManagementService;
-
-import java.nio.file.Path;
+import org.neo4j.kernel.impl.factory.DbmsInfo;
 
 final class CompatGraphDatabaseAPI41 extends CompatGraphDatabaseAPI {
 
     CompatGraphDatabaseAPI41(DatabaseManagementService dbms) {
         super(dbms);
+    }
+
+    @Override
+    public DbmsInfo dbmsInfo() {
+        return api.dbmsInfo();
     }
 }

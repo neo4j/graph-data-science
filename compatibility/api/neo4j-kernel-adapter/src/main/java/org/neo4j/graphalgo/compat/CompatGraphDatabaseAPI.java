@@ -31,7 +31,6 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.impl.factory.DatabaseInfo;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.nio.file.Path;
@@ -76,11 +75,6 @@ public abstract class CompatGraphDatabaseAPI implements GdsGraphDatabaseAPI {
     @Override
     public NamedDatabaseId databaseId() {
         return api.databaseId();
-    }
-
-    @Override
-    public DatabaseInfo databaseInfo() {
-        return api.databaseInfo();
     }
 
     @Override

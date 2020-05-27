@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.compat;
 
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.kernel.impl.factory.DatabaseInfo;
 import org.neo4j.storageengine.api.StoreId;
 
 import java.nio.file.Path;
@@ -34,5 +34,10 @@ final class CompatGraphDatabaseAPI40 extends CompatGraphDatabaseAPI {
     @Override
     public StoreId storeId() {
         return api.storeId();
+    }
+
+    @Override
+    public DatabaseInfo databaseInfo() {
+        return api.databaseInfo();
     }
 }
