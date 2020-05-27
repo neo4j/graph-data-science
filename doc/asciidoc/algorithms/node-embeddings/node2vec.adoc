@@ -7,10 +7,10 @@
 This section describes the Node2Vec node embedding algorithm in the Neo4j Graph Data Science library.
 --
 
-Node2Vec is a node embedding algorithm that computes a vector representation of a node based on its neighborhood.
+Node2Vec is a node embedding algorithm that computes a vector representation of a node based on random walks in the graph.
 The neighborhood is sampled through random walks.
 Using a number of random neighborhood samples, the algorithm trains a single hidden layer neural network.
-The target function of the neural network is to predict the likelihood that a node will occur in a walk based on the occurrence of another node.
+The neural network is trained to predict the likelihood that a node will occur in a walk based on the occurrence of another node.
 
 For more information on this algorithm, see:
 
