@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.compat;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.kernel.impl.factory.DbmsInfo;
 
-final class CompatGraphDatabaseAPI41 extends CompatGraphDatabaseAPI {
+final class CompatGraphDatabaseAPI41 extends GdsGraphDatabaseAPI {
 
     CompatGraphDatabaseAPI41(DatabaseManagementService dbms) {
         super(dbms);

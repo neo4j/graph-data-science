@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.compat;
 
+/**
+ * see {@link CompatAccessMode}
+ */
 public interface CustomAccessMode {
 
     default boolean allowsTraverseAllLabels() {

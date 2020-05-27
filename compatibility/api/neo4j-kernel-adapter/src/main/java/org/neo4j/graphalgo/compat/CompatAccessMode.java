@@ -23,6 +23,13 @@ import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 
 import java.util.function.IntSupplier;
 
+/**
+ * The signature for {@code allowsReadNodeProperty} is different in 4.0 and 4.1.
+ * We have to implement this method, but we don't require the parameter that has changed.
+ * All methods that we re-implement on {@code AccessMode} have been duplicated in {@code CustomAccessMode}.
+ * Usages where we need to implement the {@code AccessMode} should implement {@code CustomAccessMode} instead and
+ * then call the {@link Neo4jProxyApi#accessMode(CustomAccessMode)} method to get the actual access mode.
+ */
 public abstract class CompatAccessMode extends RestrictedAccessMode {
     final CustomAccessMode custom;
 

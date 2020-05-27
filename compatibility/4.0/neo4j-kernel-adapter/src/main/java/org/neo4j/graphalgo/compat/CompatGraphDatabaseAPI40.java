@@ -23,9 +23,7 @@ import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.kernel.impl.factory.DatabaseInfo;
 import org.neo4j.storageengine.api.StoreId;
 
-import java.nio.file.Path;
-
-final class CompatGraphDatabaseAPI40 extends CompatGraphDatabaseAPI {
+final class CompatGraphDatabaseAPI40 extends GdsGraphDatabaseAPI {
 
     CompatGraphDatabaseAPI40(DatabaseManagementService dbms) {
         super(dbms);
