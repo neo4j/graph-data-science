@@ -40,8 +40,11 @@ public class CompositeNodeScan implements Scan<CompositeNodeCursor> {
             NodeLabelIndexCursor indexCursor = cursor.getCursor(i);
             if (indexCursor != null) {
                 var hasNextBatch = scans.get(i).reserveBatch(indexCursor, sizeHint);
-                cursor.removeCursor(i);
-                result |= hasNextBatch;
+                if (hasNextBatch) {
+                    result = true;
+                } else {
+                    cursor.removeCursor(i);
+                }
             }
         }
 
