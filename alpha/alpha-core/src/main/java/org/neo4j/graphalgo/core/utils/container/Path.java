@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.container;
 
 import org.apache.lucene.util.ArrayUtil;
 
+import java.util.Arrays;
 import java.util.function.IntPredicate;
 
 /**
@@ -58,5 +59,10 @@ public class Path {
 
     public void clear() {
         offset = 0;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(Arrays.stream(nodes, 0, offset).toArray());
     }
 }

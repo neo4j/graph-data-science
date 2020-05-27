@@ -80,7 +80,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
             // forward traversal for all start nodes
             MultiSourceBFS
                 .predecessorProcessing(graph, graph, consumer, consumer, tracker, startNodes)
-                .run(concurrency, executorService);
+                .run();
             // backward traversal for all start nodes
             consumer.updateCentrality(startNodes);
         }
@@ -96,6 +96,10 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
     @Override
     public void release() {
 
+    }
+
+    public AtomicDoubleArray getCentrality() {
+        return centrality;
     }
 
     public Stream<BetweennessCentrality.Result> resultStream() {
@@ -170,6 +174,13 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
                 var localDelta = deltas[startNodeId];
                 var localSigma = sigmas[startNodeId];
 
+//                System.out.println("sourceNode = " + sourceNode);
+//                System.out.println("localStack = " + localStack);
+//                System.out.println("localPaths = " + localPaths);
+//                System.out.println("localDelta = " + Arrays.toString(localDelta));
+//                System.out.println("localSigma = " + Arrays.toString(localSigma));
+
+
                 while (!localStack.isEmpty()) {
                     int node = localStack.pop();
                     localPaths.forEach(node, v -> {
@@ -180,6 +191,9 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
                         centrality.add(node, localDelta[node] / divisor);
                     }
                 }
+
+//                System.out.println("centrality = " + centrality);
+//                System.out.println();
             }
         }
 

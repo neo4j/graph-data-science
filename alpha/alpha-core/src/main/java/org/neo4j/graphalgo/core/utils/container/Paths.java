@@ -22,7 +22,10 @@ package org.neo4j.graphalgo.core.utils.container;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.IntObjectScatterMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
+import com.carrotsearch.hppc.procedures.IntObjectProcedure;
+import org.neo4j.graphalgo.utils.StringJoining;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
@@ -74,5 +77,16 @@ public class Paths {
         if (null != path) {
             path.clear();
         }
+    }
+
+    @Override
+    public String toString() {
+        var pathStrings = new ArrayList<String>(paths.size());
+
+        paths.forEach((IntObjectProcedure<Path>) (nodeId, path) -> {
+            pathStrings.add(String.format("%d = %s", nodeId, path));
+        });
+
+        return StringJoining.join(pathStrings, ", ");
     }
 }
