@@ -43,7 +43,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
     private final Graph graph;
     private final int nodeCount;
     private final boolean undirected;
-    private final int concurrentBfs;
+    private final int bfsCount;
     private final int concurrency;
     private final ExecutorService executorService;
     private final AllocationTracker tracker;
@@ -53,7 +53,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
     public MSBetweennessCentrality(
         Graph graph,
         boolean undirected,
-        int concurrentBfs,
+        int bfsCount,
         ExecutorService executorService,
         int concurrency,
         AllocationTracker tracker
@@ -61,7 +61,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.undirected = undirected;
-        this.concurrentBfs = concurrentBfs;
+        this.bfsCount = bfsCount;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.tracker = tracker;
@@ -70,10 +70,10 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
 
     @Override
     public AtomicDoubleArray compute() {
-        var consumer = new MSBCBFSConsumer(concurrentBfs, nodeCount, centrality, undirected ? 2.0 : 1.0);
+        var consumer = new MSBCBFSConsumer(bfsCount, nodeCount, centrality, undirected ? 2.0 : 1.0);
 
-        for (long offset = 0; offset < nodeCount; offset += concurrentBfs) {
-            var limit = Math.min(offset + concurrentBfs, nodeCount);
+        for (long offset = 0; offset < nodeCount; offset += bfsCount) {
+            var limit = Math.min(offset + bfsCount, nodeCount);
             var startNodes = LongStream.range(offset, limit).toArray();
             consumer.init(startNodes, offset > 0);
             // forward traversal for all start nodes
@@ -113,7 +113,6 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
     static class MSBCBFSConsumer implements BfsConsumer, BfsWithPredecessorConsumer {
 
         private final LongIntScatterMap idMapping;
-        private final int localNodeCount;
         private final double divisor;
         private final AtomicDoubleArray centrality;
 
@@ -123,19 +122,18 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
         private final int[][] sigmas;
         private final int[][] distances;
 
-        MSBCBFSConsumer(int localNodeCount, int nodeCount, AtomicDoubleArray centrality, double divisor) {
-            this.localNodeCount = localNodeCount;
+        MSBCBFSConsumer(int bfsCount, int nodeCount, AtomicDoubleArray centrality, double divisor) {
             this.centrality = centrality;
 
-            this.idMapping = new LongIntScatterMap(localNodeCount);
-            this.paths = new Paths[localNodeCount];
-            this.stacks = new IntStack[localNodeCount];
-            this.deltas = new double[localNodeCount][];
-            this.sigmas = new int[localNodeCount][];
-            this.distances = new int[localNodeCount][];
+            this.idMapping = new LongIntScatterMap(bfsCount);
+            this.paths = new Paths[bfsCount];
+            this.stacks = new IntStack[bfsCount];
+            this.deltas = new double[bfsCount][];
+            this.sigmas = new int[bfsCount][];
+            this.distances = new int[bfsCount][];
             this.divisor = divisor;
 
-            for (int i = 0; i < localNodeCount; i++) {
+            for (int i = 0; i < bfsCount; i++) {
                 paths[i] = new Paths();
                 stacks[i] = new IntStack();
                 deltas[i] = new double[nodeCount];
@@ -144,12 +142,8 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
             }
         }
 
-        void init(long[] sourceNodes, boolean clear) {
-            if (sourceNodes.length > localNodeCount) {
-                throw new IllegalArgumentException("too many source nodes");
-            }
-
-            for (int i = 0; i < sourceNodes.length; i++) {
+        void init(long[] startNodes, boolean clear) {
+            for (int i = 0; i < startNodes.length; i++) {
                 if (clear) {
                     Arrays.fill(sigmas[i], 0);
                     Arrays.fill(deltas[i], 0);
@@ -157,10 +151,10 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
                     paths[i].clear();
                     stacks[i].clear();
                 }
-                idMapping.put(sourceNodes[i], i);
+                idMapping.put(startNodes[i], i);
                 Arrays.fill(distances[i], -1);
-                sigmas[i][(int) sourceNodes[i]] = 1;
-                distances[i][(int) sourceNodes[i]] = 0;
+                sigmas[i][(int) startNodes[i]] = 1;
+                distances[i][(int) startNodes[i]] = 0;
             }
         }
 
@@ -171,16 +165,10 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
                 var localDelta = deltas[localNodeId];
                 var localSigma = sigmas[localNodeId];
 
-//                System.out.println("sourceNode = " + sourceNode);
-//                System.out.println("localStack = " + localStack);
-//                System.out.println("localPaths = " + localPaths);
-//                System.out.println("localDelta = " + Arrays.toString(localDelta));
-//                System.out.println("localSigma = " + Arrays.toString(localSigma));
-
                 while (!localStack.isEmpty()) {
                     int node = localStack.pop();
-                    localPaths.forEach(node, v -> {
-                        localDelta[v] += (double) localSigma[v] / (double) localSigma[node] * (localDelta[node] + 1.0);
+                    localPaths.forEach(node, predecessor -> {
+                        localDelta[predecessor] += (double) localSigma[predecessor] / (double) localSigma[node] * (localDelta[node] + 1.0);
                         return true;
                     });
                     if (node != sourceNodeId) {
@@ -190,36 +178,35 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
             });
         }
 
-        // Called exactly once if a node is visited for the first time.
+        // Called exactly once if `node` is visited for the first time.
         @Override
-        public void accept(long nodeId, int depth, BfsSources sourceNodeIds) {
-            while (sourceNodeIds.hasNext()) {
-                stacks[idMapping.get(sourceNodeIds.next())].push((int) nodeId);
+        public void accept(long node, int depth, BfsSources startNodes) {
+            while (startNodes.hasNext()) {
+                stacks[idMapping.get(startNodes.next())].push((int) node);
             }
         }
 
-        // Called if nodeId has been discovered by at least one BFS via the predecessorId
+        // Called if `node` has been discovered by at least one BFS via the `predecessor`.
         // Might be called multiple times for the same BFS, but with different predecessors.
         @Override
-        public void accept(long nodeId, long predecessorId, int depth, BfsSources sourceNodeIds) {
-            while (sourceNodeIds.hasNext()) {
-                accept(nodeId, predecessorId, depth, idMapping.get(sourceNodeIds.next()));
+        public void accept(long node, long predecessor, int depth, BfsSources startNodes) {
+            while (startNodes.hasNext()) {
+                accept(node, predecessor, depth, idMapping.get(startNodes.next()));
             }
         }
 
-        private void accept(long nodeId, long predecessorId, int depth, int startNodeId) {
-            // This will break for very large graphs
-            int source = (int) predecessorId;
-            int target = (int) nodeId;
+        private void accept(long node, long predecessor, int depth, int startNode) {
+            int source = (int) predecessor;
+            int target = (int) node;
             // target found for the first time?
-            int[] distance = distances[startNodeId];
+            int[] distance = distances[startNode];
             if (distance[target] < 0) {
                 distance[target] = depth;
             }
             // shortest path to target via source?
             if (distance[target] == distance[source] + 1) {
-                sigmas[startNodeId][target] += sigmas[startNodeId][source];
-                paths[startNodeId].append(target, source);
+                sigmas[startNode][target] += sigmas[startNode][source];
+                paths[startNode].append(target, source);
             }
         }
     }
