@@ -346,7 +346,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         if (newConcurrency < 1) {
             throw new IllegalStateException(
                 formatWithLocale(
-                    "Requested concurrency of %d would require %s Heap but only %s are available. Page Rank needs at least %d heap in order to run.",
+                    "Requested concurrency of %d would require %s Heap but only %s are available. Page Rank needs at least %d Heap in order to run.",
                     concurrency,
                     humanReadable(memoryUsageFor(concurrency, partitions)),
                     humanReadable(memoryUsageFor(1, partitions))
