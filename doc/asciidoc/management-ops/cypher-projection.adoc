@@ -28,7 +28,9 @@ This section includes:
 * <<cypher-projection-syntax, Syntax>>
 * <<cypher-projection-query-constraints, Cypher query constraints>>
 * <<cypher-projection-relationship-types, Relationship types>>
+* <<cypher-projection-relationship-orientation, Relationship orientation>>
 * <<cypher-projection-relationship-aggregation, Relationship aggregation>>
+* <<cypher-projection-parameters, Using query parameters>>
 
 
 [[cypher-projection-syntax]]
@@ -216,6 +218,48 @@ CALL gds.labelPropagation.stream(
     }
 )
 ----
+
+[[cypher-projection-relationship-orientation]]
+== Relationship orientation
+
+The native projection supports specifying an orientation per relationship type.
+The cypher projection can achieve the same feature by adjusting the `MATCH` clause of the relationship query.
+
+
+.Loading the relationships with orientation `NATURAL`
+[source,cypher]
+----
+CALL gds.graph.create.cypher(
+    'my-cypher-graph',
+    'MATCH (n:City) RETURN id(n) AS id',
+    'MATCH (n:City)-[r:ROAD|RAIL]->(m:City) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
+)
+----
+
+
+.Loading the relationships with orientation `UNDIRECTED`
+[source,cypher]
+----
+CALL gds.graph.create.cypher(
+    'my-cypher-graph',
+    'MATCH (n:City) RETURN id(n) AS id',
+    'MATCH (n:City)-[r:ROAD|RAIL]-(m:City) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
+)
+----
+
+Note the missing arrow in the `Match` clause of the relationship query.
+
+.Loading the relationships with orientation `REVERSE`
+[source,cypher]
+----
+CALL gds.graph.create.cypher(
+    'my-cypher-graph',
+    'MATCH (n:City) RETURN id(n) AS id',
+    'MATCH (n:City)<-[r:ROAD|RAIL]-(m:City) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
+)
+----
+
+The `REVERSE` orientation can also be achieved by swapping source and target in the `RESULT` clause.
 
 
 [[cypher-projection-relationship-aggregation]]
