@@ -27,18 +27,18 @@ import java.util.List;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("GraphRemoveNodePropertiesConfigImpl")
+@Configuration("GraphStreamNodePropertiesConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface GraphRemoveNodePropertiesConfig extends GraphExportNodePropertiesConfig {
+public interface GraphStreamNodePropertiesConfig extends  GraphExportNodePropertiesConfig {
 
-    static GraphRemoveNodePropertiesConfig of(
+    static GraphStreamNodePropertiesConfig of(
         String userName,
         String graphName,
         List<String> nodeProperties,
         List<String> nodeLabels,
         CypherMapWrapper config
     ) {
-        return new GraphRemoveNodePropertiesConfigImpl(
+        return new GraphStreamNodePropertiesConfigImpl(
             Optional.of(graphName),
             nodeProperties,
             nodeLabels,
@@ -46,4 +46,5 @@ public interface GraphRemoveNodePropertiesConfig extends GraphExportNodeProperti
             config
         );
     }
+
 }
