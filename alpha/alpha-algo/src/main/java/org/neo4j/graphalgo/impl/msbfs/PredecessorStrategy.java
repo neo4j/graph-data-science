@@ -115,20 +115,30 @@ public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
                 // Update seen set with seen nodes from current level
                 HugeCursor<long[]> seen = seenSet.initCursor(seenCursor);
                 HugeCursor<long[]> seenNext = seenNextSet.initCursor(seenNextCursor);
-
-                while (seen.next()) {
-                    seenNext.next();
-                    long[] seenArray = seen.array;
-                    long[] seenNextArray = seenNext.array;
-                    int end = seen.limit;
-                    for (int pos = seen.offset; pos < end; ++pos) {
-                        seenArray[pos] |= seenNextArray[pos];
-                    }
-                }
+                updateSeenSet(seen, seenNext);
 
                 // Prepare visit set for next level
                 visitNextSet.copyTo(visitSet, totalNodeCount);
                 visitNextSet.fill(0L);
+            }
+        }
+    }
+
+    private void updateSeenSet(HugeCursor<long[]> seen, HugeCursor<long[]> seenNext) {
+        while (seen.next()) {
+            seenNext.next();
+            long[] seenArray = seen.array;
+            long[] seenNextArray = seenNext.array;
+            int end = seen.limit;
+            int pos = seen.offset;
+            for (; pos < end - 4; pos += 4) {
+                seenArray[pos] |= seenNextArray[pos];
+                seenArray[pos + 1] |= seenNextArray[pos + 1];
+                seenArray[pos + 2] |= seenNextArray[pos + 2];
+                seenArray[pos + 3] |= seenNextArray[pos + 3];
+            }
+            for (; pos < end; pos++) {
+                seenArray[pos] |= seenNextArray[pos];
             }
         }
     }
