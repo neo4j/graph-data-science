@@ -33,21 +33,29 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Stream;
 
 class BetweennessCentralityComparisonTest extends AlgoTestBase {
 
     static Stream<Arguments> randomGraphParameters() {
+        var rand = new Random();
         return Stream.of(
-            Arguments.of(100, 4, RelationshipDistribution.UNIFORM, null),
-            Arguments.of(100, 4, RelationshipDistribution.RANDOM, null),
-            Arguments.of(100, 4, RelationshipDistribution.POWER_LAW, null)
+            Arguments.of(10, 2, RelationshipDistribution.UNIFORM, rand.nextLong()),
+            Arguments.of(10, 2, RelationshipDistribution.RANDOM, rand.nextLong()),
+            Arguments.of(10, 2, RelationshipDistribution.POWER_LAW, rand.nextLong()),
+            Arguments.of(100, 4, RelationshipDistribution.UNIFORM, rand.nextLong()),
+            Arguments.of(100, 4, RelationshipDistribution.RANDOM, rand.nextLong()),
+            Arguments.of(100, 4, RelationshipDistribution.POWER_LAW, rand.nextLong()),
+            Arguments.of(1_000, 10, RelationshipDistribution.UNIFORM, rand.nextLong()),
+            Arguments.of(1_000, 10, RelationshipDistribution.RANDOM, rand.nextLong()),
+            Arguments.of(1_000, 10, RelationshipDistribution.POWER_LAW, rand.nextLong())
         );
     }
 
     @ParameterizedTest
     @MethodSource("randomGraphParameters")
-    void shouldHaveSameResultOnRandomGraph(long nodeCount, long averageDegree, RelationshipDistribution distribution, Long seed) {
+    void shouldHaveSameResultOnRandomGraph(long nodeCount, long averageDegree, RelationshipDistribution distribution, long seed) {
         var graph = new RandomGraphGenerator(
             nodeCount,
             averageDegree,
