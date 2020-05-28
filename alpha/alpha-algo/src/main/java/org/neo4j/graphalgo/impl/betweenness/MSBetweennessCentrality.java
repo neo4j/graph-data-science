@@ -20,8 +20,7 @@
 package org.neo4j.graphalgo.impl.betweenness;
 
 import com.carrotsearch.hppc.IntStack;
-import com.carrotsearch.hppc.LongIntHashMap;
-import com.carrotsearch.hppc.LongIntMap;
+import com.carrotsearch.hppc.LongIntScatterMap;
 import com.carrotsearch.hppc.procedures.LongIntProcedure;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
@@ -113,7 +112,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
 
     static class MSBCBFSConsumer implements BfsConsumer, BfsWithPredecessorConsumer {
 
-        private final LongIntMap idMapping;
+        private final LongIntScatterMap idMapping;
         private final int localNodeCount;
         private final double divisor;
         private final AtomicDoubleArray centrality;
@@ -128,7 +127,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
             this.localNodeCount = localNodeCount;
             this.centrality = centrality;
 
-            this.idMapping = new LongIntHashMap(localNodeCount);
+            this.idMapping = new LongIntScatterMap(localNodeCount);
             this.paths = new Paths[localNodeCount];
             this.stacks = new IntStack[localNodeCount];
             this.deltas = new double[localNodeCount][];
