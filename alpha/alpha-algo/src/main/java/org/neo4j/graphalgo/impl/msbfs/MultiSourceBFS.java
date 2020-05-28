@@ -414,9 +414,8 @@ public final class MultiSourceBFS implements Runnable {
         }
 
         private void fetchNext() {
-            //noinspection StatementWithEmptyBody
-            while (++pos < maxPos && (sourceMask & (1L << pos)) == 0L)
-                ;
+            pos = Long.numberOfTrailingZeros(sourceMask);
+            sourceMask ^= Long.lowestOneBit(sourceMask);
         }
     }
 
