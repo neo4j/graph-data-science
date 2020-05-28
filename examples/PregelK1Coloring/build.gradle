@@ -5,7 +5,8 @@ plugins {
 }
 
 ext {
-    gdsVersion = '1.1.0-alpha01'
+    gdsVersion = '1.2.1'
+    neo4jVersion = '4.0.4'
 }
 
 description = 'Graph Data Science :: Pregel Training'
@@ -17,7 +18,7 @@ dependencies {
 
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
-    compileOnly 'org.neo4j:neo4j:3.5.16'
+    compileOnly "org.neo4j:neo4j:$neo4jVersion"
 
     // We need an annotation processor for our K1 configuration
     annotationProcessor "org.neo4j.gds:config-generator:$gdsVersion"
@@ -39,6 +40,7 @@ test {
     useJUnitPlatform()
 }
 
+// If you have no extra dependencies you do not require the standalone JAR
 shadowJar {
     baseName = "neo4j-gds-k1-pregel"
     classifier = "standalone"
