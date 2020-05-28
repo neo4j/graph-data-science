@@ -392,6 +392,7 @@ public final class MultiSourceBFS implements Runnable {
         }
 
         void reset(long sourceMask) {
+            assert sourceMask != 0;
             this.sourceMask = sourceMask;
             reset();
         }
@@ -410,7 +411,13 @@ public final class MultiSourceBFS implements Runnable {
 
         @Override
         public int size() {
-            return Long.bitCount(sourceMask);
+            // reset() _always_ calls into fetchNext() which
+            // finds the right-most set bit, updates pos to
+            // its position and flips it. The correct size()
+            // is therefore the number of set bits + 1.
+            // Note, that this is under the assumption that
+            // the source mask is never 0 on reset.
+            return Long.bitCount(sourceMask) + 1;
         }
 
         private void fetchNext() {
