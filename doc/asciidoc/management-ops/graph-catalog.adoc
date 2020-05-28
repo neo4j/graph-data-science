@@ -37,9 +37,10 @@ This chapter explains the available graph catalog operations.
 | <<catalog-graph-remove-node-properties, gds.graph.removeNodeProperties>> | Removes node properties from a named graph.
 | <<catalog-graph-delete-rel-type, gds.graph.deleteRelationships>>         | Deletes relationships of a given relationship type from a named graph.
 | <<catalog-graph-drop, gds.graph.drop>>                                   | Drops a named graph from the catalog.
+| <<catalog-graph-stream-node-properties, gds.graph.streamNodeProperties>>  | Streams node properties stored in a named graph.
 | <<catalog-graph-write-node-properties, gds.graph.writeNodeProperties>>   | Writes node properties stored in a named graph to Neo4j.
 | <<catalog-graph-write-relationship, gds.graph.writeRelationship>>        | Writes relationships stored in a named graph to Neo4j.
-| <<catalog-graph-export, gds.beta.graph.export>>                         | Exports a named graph into a new offline Neo4j database.
+| <<catalog-graph-export, gds.beta.graph.export>>                          | Exports a named graph into a new offline Neo4j database.
 |===
 
 [NOTE]
@@ -215,12 +216,41 @@ Once we have finished using the named graph we can remove it from the catalog to
 CALL gds.graph.drop('my-store-graph') YIELD graphName;
 ----
 
+[[catalog-graph-stream-node-properties]]
+== Stream node properties to Neo4j
+
+We can stream node properties stored in a named in-memory graph back to the user.
+This is useful if we ran multiple algorithms in `mutate` mode and want retrieve some or all of the results.
+This is similar to what the `stream` execution mode does, but allows more fine-grained control over the operations.
+
+.Stream multiple node properties to Neo4j:
+[source,cypher]
+----
+CALL gds.graph.streamNodeProperties('my-graph', ['componentId', 'pageRank', 'communityId'])
+----
+
+The above example requires all given properties to be present on at least one node projection, and the properties will be streamed for all such projections.
+
+The procedure can be configured to stream just the properties for some specific node projections.
+In the following example, we ran an algorithm on a sub-graph and subsequently streamed the newly created property to Neo4j.
+
+.Stream node properties of a specific node projection to Neo4j:
+[source,cypher]
+----
+CALL gds.graph.create('my-graph', ['A', 'B'], '*')
+CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
+CALL gds.graph.streamNodeProperties('my-graph', ['componentId'], ['A'])
+----
+
+When a list of projections that are not `*` is specified, as in the example above, a different validation and execution is applied;
+It is then required that all projections have all of the given properties, and they will be streamed for all of the projections.
+
+If any of the given projections is `'*'`, the procedure behaves like in the first example.
 
 [[catalog-graph-write-node-properties]]
 == Write node properties to Neo4j
 
-We can write node properties stored in a named in-memory graph back to Neo4j.
-This is useful if we ran multiple algorithms in `mutate` mode and want to write back some or all of the results.
+Similar to streaming properties stored in an in-memory graph it is also possible to write those back to Neo4j.
 This is similar to what the `write` execution mode does, but allows more fine-grained control over the operations.
 
 The properties to write are typically the `writeProperty` values that were used when running algorithms.
