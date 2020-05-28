@@ -29,7 +29,7 @@ public class ConnectedComponentsPregel implements PregelComputation {
     @Override
     public void compute(PregelContext pregel, final long nodeId, Queue<Double> messages) {
         if (pregel.isInitialSuperStep()) {
-            // Inremental computation
+            // Incremental computation
             double currentValue = pregel.getNodeValue(nodeId);
             if (Double.compare(currentValue, pregel.getInitialNodeValue()) == 0) {
                 pregel.sendMessages(nodeId, nodeId);
