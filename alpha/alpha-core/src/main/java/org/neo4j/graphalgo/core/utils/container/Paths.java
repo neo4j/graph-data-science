@@ -21,13 +21,12 @@ package org.neo4j.graphalgo.core.utils.container;
 
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.IntObjectScatterMap;
-import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
+import com.carrotsearch.hppc.procedures.ObjectProcedure;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
 /**
@@ -46,7 +45,6 @@ public class Paths {
     public Paths(int expectedElements) {
         paths = new IntObjectScatterMap<>(expectedElements);
     }
-
 
     public void append(int pathId, int nodeId) {
         final Path path;
@@ -70,7 +68,7 @@ public class Paths {
     }
 
     public void clear() {
-        paths.forEach((Consumer<IntObjectCursor<Path>>) p -> p.value.clear());
+        paths.values().forEach((ObjectProcedure<Path>) Path::clear);
     }
 
     public void clear(int pathId) {
