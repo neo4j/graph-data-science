@@ -20,13 +20,8 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraphStoreFactory;
@@ -34,7 +29,6 @@ import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
-import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
@@ -44,23 +38,11 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.internal.helpers.collection.Iterators;
-import org.neo4j.internal.schema.IndexDescriptor;
-import org.neo4j.internal.schema.IndexValueCapability;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.values.storable.ValueCategory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
-import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -177,108 +159,18 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
     }
 
     private IdsAndProperties loadNodes(int concurrency) {
-        Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel = graphCreateConfig
-            .nodeProjections()
-            .projections()
-            .entrySet()
-            .stream()
-            .collect(toMap(
-                Map.Entry::getKey,
-                entry -> entry.getValue().properties()
-            ));
-
-        Map<NodeLabel, List<Pair<PropertyMapping, IndexDescriptor>>> indexedPropertyMappingsByNodeLabel = new HashMap<>();
-
-        var transaction = loadingContext.transaction();
-        Optional<SecureTransaction> closeTx = Optional.empty();
-        KernelTransaction ktx;
-        var topLevelKtx = transaction.topLevelKernelTransaction();
-        if (topLevelKtx.isPresent()) {
-            ktx = topLevelKtx.get();
-        } else {
-            closeTx = Optional.of(transaction.fork());
-            ktx = closeTx.get().topLevelKernelTransaction().get();
-        }
-        var tx = ktx.internalTransaction();
-
-        var nodeLabelMapping = dimensions.tokenNodeLabelMapping();
-        if (nodeLabelMapping != null) {
-            var schema = tx.schema();
-            var schemaRead = ktx.schemaRead();
-
-            var labelIds = StreamSupport.stream(nodeLabelMapping.keys().spliterator(), false);
-            var nonAllLabelIds = labelIds.filter(labelId -> labelId.value != ANY_LABEL);
-
-            var indexesForLabels = nonAllLabelIds.flatMap(label ->
-                Iterators.stream(schemaRead.indexesGetForLabel(label.value)));
-
-            var validIndexes = indexesForLabels.filter(id ->
-                id != IndexDescriptor.NO_INDEX
-                && id.getCapability().valueCapability(ValueCategory.NUMBER) == IndexValueCapability.YES
-                && id.schema().getPropertyIds().length == 1
-            );
-
-            var onlineIndexes = validIndexes.filter(id -> {
-                try {
-                    // give the index a second the get online
-                    schema.awaitIndexOnline(id.getName(), 1, TimeUnit.SECONDS);
-                    return true;
-                } catch (RuntimeException notOnline) {
-                    // index not available, load via store scanning instead
-                    return false;
-                }
-            });
-
-            var indexPerLabelMappings = onlineIndexes.flatMap(id -> nodeLabelMapping
-                .get(id.schema().getLabelId())
-                .stream()
-                .map(label -> Map.entry(label, id))
-            );
-
-            Map<NodeLabel, Map<Integer, IndexDescriptor>> indexLabelPropertyMappings = indexPerLabelMappings.collect(
-                groupingBy(
-                    Map.Entry::getKey,
-                    toMap(id -> id.getValue().schema().getPropertyId(), Map.Entry::getValue)
-                ));
-
-            indexLabelPropertyMappings.forEach((nodeLabel, indexPerPropertyKeyId) -> {
-                var propertyMappings = propertyMappingsByNodeLabel.get(nodeLabel);
-                if (propertyMappings != null) {
-                    var storeMappingsBuilder = PropertyMappings.builder();
-                    var indexMappings = new ArrayList<Pair<PropertyMapping, IndexDescriptor>>();
-                    propertyMappings.mappings().forEach(mapping -> {
-                        var propertyKey = dimensions.nodePropertyTokens().get(mapping.neoPropertyKey());
-                        if (propertyKey != null) {
-                            var indexDescriptor = indexPerPropertyKeyId.get(propertyKey);
-                            if (indexDescriptor != null) {
-                                indexMappings.add(Tuples.pair(mapping, indexDescriptor));
-                            } else {
-                                storeMappingsBuilder.addMapping(mapping);
-                            }
-                        }
-                    });
-                    var storeMappings = storeMappingsBuilder.build();
-                    if (storeMappings.hasMappings()) {
-                        propertyMappingsByNodeLabel.put(nodeLabel, storeMappings);
-                    } else {
-                        propertyMappingsByNodeLabel.remove(nodeLabel);
-                    }
-                    if (!indexMappings.isEmpty()) {
-                        indexedPropertyMappingsByNodeLabel.put(nodeLabel, indexMappings);
-                    }
-                }
-            });
-        }
-
-
+        var properties = IndexPropertyMappings.prepareProperties(
+            graphCreateConfig,
+            dimensions,
+            loadingContext.transaction()
+        );
         return new ScanningNodesImporter(
             graphCreateConfig,
             loadingContext,
             dimensions,
             progressLogger,
             concurrency,
-            propertyMappingsByNodeLabel,
-            indexedPropertyMappingsByNodeLabel
+            properties
         ).call(loadingContext.log());
     }
 

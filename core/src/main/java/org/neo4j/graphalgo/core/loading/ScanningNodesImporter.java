@@ -20,26 +20,20 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.IntObjectMap;
-import org.eclipse.collections.api.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.loading.IndexPropertyMappings.LoadablePropertyMappings;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.internal.schema.IndexDescriptor;
-import org.neo4j.internal.schema.IndexOrder;
-import org.neo4j.kernel.api.KernelTransaction;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -52,6 +46,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
@@ -59,8 +54,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     private final GraphCreateFromStoreConfig graphCreateConfig;
     private final ProgressLogger progressLogger;
     private final TerminationFlag terminationFlag;
-    private final Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel;
-    private final Map<NodeLabel, List<Pair<PropertyMapping, IndexDescriptor>>> indexPropertyMappingsByNodeLabel;
+    private final LoadablePropertyMappings properties;
 
     @Nullable
     private NativeNodePropertyImporter nodePropertyImporter;
@@ -73,8 +67,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         GraphDimensions dimensions,
         ProgressLogger progressLogger,
         int concurrency,
-        Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel,
-        Map<NodeLabel, List<Pair<PropertyMapping, IndexDescriptor>>> indexPropertyMappingsByNodeLabel
+        LoadablePropertyMappings properties
     ) {
         super(
             scannerFactory(dimensions),
@@ -86,8 +79,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         this.graphCreateConfig = graphCreateConfig;
         this.progressLogger = progressLogger;
         this.terminationFlag = loadingContext.terminationFlag();
-        this.propertyMappingsByNodeLabel = propertyMappingsByNodeLabel;
-        this.indexPropertyMappingsByNodeLabel = indexPropertyMappingsByNodeLabel;
+        this.properties = properties;
     }
 
     private static StoreScanner.Factory<NodeReference> scannerFactory(
@@ -148,7 +140,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             ? new HashMap<>()
             : nodePropertyImporter.result();
 
-        if (!indexPropertyMappingsByNodeLabel.isEmpty()) {
+        if (!properties.indexedProperties().isEmpty()) {
             importPropertiesFromIndex(hugeIdMap, nodeProperties);
         }
 
@@ -159,100 +151,39 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         IdMap hugeIdMap,
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties
     ) {
-        class IndexPropertyImporter extends StatementAction {
-            private final NodeLabel nodeLabel;
-            private final PropertyMapping mapping;
-            private final IndexDescriptor index;
-            private final int propertyId;
-            private final NodePropertiesBuilder propertiesBuilder;
-            private long imported;
-            private long logged;
-
-            IndexPropertyImporter(
-                SecureTransaction tx,
-                NodeLabel nodeLabel,
-                PropertyMapping mapping,
-                IndexDescriptor index
-            ) {
-                super(tx);
-                this.nodeLabel = nodeLabel;
-                this.mapping = mapping;
-                this.index = index;
-                propertyId = index.schema().getPropertyId();
-                propertiesBuilder = NodePropertiesBuilder.of(
-                    hugeIdMap.nodeCount(),
-                    tracker,
-                    mapping.defaultValue(),
-                    propertyId,
-                    mapping.propertyKey(),
-                    concurrency
-                );
-            }
-
-            @Override
-            public String threadName() {
-                return "index-scan-" + index.getName();
-            }
-
-            @Override
-            public void accept(KernelTransaction ktx) throws Exception {
-                var read = ktx.dataRead();
-                try (var nvic = ktx.cursors().allocateNodeValueIndexCursor()) {
-                    var indexReadSession = read.indexReadSession(index);
-                    read.nodeIndexScan(indexReadSession, nvic, IndexOrder.NONE, true);
-                    while (nvic.next()) {
-                        if (nvic.hasValue()) {
-                            var node = nvic.nodeReference();
-                            var numberOfProperties = nvic.numberOfProperties();
-                            for (int i = 0; i < numberOfProperties; i++) {
-                                var propertyKey = nvic.propertyKey(i);
-                                if (propertyId == propertyKey) {
-                                    var propertyValue = nvic.propertyValue(i);
-                                    var value = ReadHelper.extractValue(propertyValue, mapping.defaultValue());
-                                    var nodeId = hugeIdMap.toMappedNodeId(node);
-                                    propertiesBuilder.set(nodeId, value);
-                                    imported += 1;
-                                    if ((imported & 0x1_FFFFL) == 0L) {
-                                        progressLogger.logProgress(imported - logged);
-                                        logged = imported;
-                                        terminationFlag.assertRunning();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            NodeProperties build() {
-                return propertiesBuilder.build();
-            }
-        }
-
         long indexStart = System.nanoTime();
+        progressLogger.logMessage("Property Index Scan :: Start");
 
-        var indexScanningPropertyImporter = indexPropertyMappingsByNodeLabel
+        var indexScanningImporters = properties.indexedProperties()
             .entrySet()
             .stream()
-            .flatMap(labelAndProperties -> {
-                return labelAndProperties.getValue().stream().map(mappingAndIndex -> {
-                    var mapping = mappingAndIndex.getOne();
-                    var index = mappingAndIndex.getTwo();
-                    return new IndexPropertyImporter(transaction, labelAndProperties.getKey(), mapping, index);
-                });
-            })
-            .collect(Collectors.toList());
+            .flatMap(labelAndProperties -> labelAndProperties
+                .getValue()
+                .mappings()
+                .stream()
+                .map(mappingAndIndex -> new IndexedNodePropertyImporter(
+                    transaction,
+                    labelAndProperties.getKey(),
+                    mappingAndIndex.property(),
+                    mappingAndIndex.index(),
+                    hugeIdMap,
+                    concurrency,
+                    progressLogger,
+                    terminationFlag,
+                    tracker
+                ))
+            ).collect(Collectors.toList());
 
-        var expectedProperties = ((long) indexScanningPropertyImporter.size()) * hugeIdMap.nodeCount();
+        var expectedProperties = ((long) indexScanningImporters.size()) * hugeIdMap.nodeCount();
         var remainingVolume = progressLogger.reset(expectedProperties);
 
         long recordsImported = 0L;
-        ParallelUtil.run(indexScanningPropertyImporter, threadPool);
-        for (IndexPropertyImporter propertyImporter : indexScanningPropertyImporter) {
-            var nodeLabel = propertyImporter.nodeLabel;
+        ParallelUtil.run(indexScanningImporters, threadPool);
+        for (IndexedNodePropertyImporter propertyImporter : indexScanningImporters) {
+            var nodeLabel = propertyImporter.nodeLabel();
             var storeProperties = nodeProperties.computeIfAbsent(nodeLabel, ignore -> new HashMap<>());
-            storeProperties.put(propertyImporter.mapping, propertyImporter.build());
-            recordsImported += propertyImporter.imported;
+            storeProperties.put(propertyImporter.mapping(), propertyImporter.build());
+            recordsImported += propertyImporter.imported();
         }
 
         long tookNanos = System.nanoTime() - indexStart;
@@ -265,12 +196,12 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             .divide(new BigDecimal(bigNanos), 9, RoundingMode.CEILING)
             .doubleValue();
 
-        progressLogger.getLog().info(
+        progressLogger.logMessage(formatWithLocale(
             "Property Index Scan: Imported %,d properties; took %.3f s, %,.2f Properties/s",
             recordsImported,
             tookInSeconds,
             recordsPerSecond
-        );
+        ));
         progressLogger.reset(remainingVolume);
     }
 
@@ -300,7 +231,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
 
     @Nullable
     private NativeNodePropertyImporter initializeNodePropertyImporter(long nodeCount) {
-        boolean loadProperties = propertyMappingsByNodeLabel
+        var propertyMappingsByLabel = properties.storedProperties();
+        boolean loadProperties = propertyMappingsByLabel
             .values()
             .stream()
             .anyMatch(mappings -> mappings.numberOfMappings() > 0);
@@ -310,7 +242,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
                 .builder()
                 .nodeCount(nodeCount)
                 .dimensions(dimensions)
-                .propertyMappings(propertyMappingsByNodeLabel)
+                .propertyMappings(propertyMappingsByLabel)
                 .tracker(tracker)
                 .build();
         } else {
