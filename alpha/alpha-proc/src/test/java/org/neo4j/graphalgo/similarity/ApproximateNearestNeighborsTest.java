@@ -47,7 +47,10 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
+import static org.neo4j.graphalgo.compat.Transactions.close;
+import static org.neo4j.graphalgo.compat.Transactions.commit;
 import static org.neo4j.graphalgo.core.loading.ImportSizing.MIN_PAGE_SIZE;
 
 class ApproximateNearestNeighborsTest extends AlgoTestBase {
@@ -63,20 +66,21 @@ class ApproximateNearestNeighborsTest extends AlgoTestBase {
         Transaction transaction = db.beginTx();
 
         for (long i = 0; i < MIN_PAGE_SIZE; i++) {
-            db.createNode(Label.label("IGNORE"));
+            createNode(db, transaction, Label.label("IGNORE"));
         }
 
         Collection<Long> categories = LongStream.range(0, 10).boxed().collect(Collectors.toList());
         List<Map<String, Object>> inputData = new ArrayList<>();
         for (long i = 0; i < 10; i++) {
-            Node node = db.createNode(Label.label("LOAD"));
+            Node node = createNode(db, transaction, Label.label("LOAD"));
             inputData.add(genericMap(
                 "item", node.getId(),
                 "categories", categories
             ));
         }
 
-        transaction.close();
+        commit(transaction);
+        close(transaction);
 
         JaccardConfig jaccardConfig = ImmutableJaccardConfig.builder().build();
         JaccardAlgorithm jaccardAlgorithm = new JaccardAlgorithm(jaccardConfig, db);
