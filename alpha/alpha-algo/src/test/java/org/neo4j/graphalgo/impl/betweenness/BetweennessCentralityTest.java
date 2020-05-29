@@ -22,153 +22,86 @@ package org.neo4j.graphalgo.impl.betweenness;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.GDLFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * (A)-->(B)-->(C)-->(D)-->(E)
- * 0.0   3.0   4.0   3.0   0.0
- */
-@ExtendWith(MockitoExtension.class)
-class BetweennessCentralityTest extends AlgoTestBase {
+class BetweennessCentralityTest {
 
+    /**
+     * (A)-->(B)-->(C)-->(D)-->(E)
+     * 0.0   3.0   4.0   3.0   0.0
+     */
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {name:'a'})" +
-        ", (b:Node {name: 'b'})" +
-        ", (c:Node {name: 'c'})" +
-        ", (d:Node {name: 'd'})" +
-        ", (e:Node {name: 'e'})" +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
         ", (a)-[:TYPE]->(b)" +
         ", (b)-[:TYPE]->(c)" +
         ", (c)-[:TYPE]->(d)" +
         ", (d)-[:TYPE]->(e)";
 
+    private static final double[] EXACT_CENTRALITIES = {0.0, 3.0, 4.0, 3.0, 0.0};
+    private static final double[] EMPTY_CENTRALITIES = {0.0, 0.0, 0.0, 0.0, 0.0};
+
+    private static GDLFactory gdlFactory;
     private static Graph graph;
-
-    interface TestConsumer {
-        void accept(String name, double centrality);
-    }
-
-    @Mock
-    private TestConsumer testConsumer;
 
     @BeforeEach
     void setupGraphDb() {
-        runQuery(DB_CYPHER);
-    }
-
-    void verifyMock(TestConsumer mock) {
-        verify(mock, times(1)).accept(eq("a"), eq(0.0));
-        verify(mock, times(1)).accept(eq("b"), eq(3.0));
-        verify(mock, times(1)).accept(eq("c"), eq(4.0));
-        verify(mock, times(1)).accept(eq("d"), eq(3.0));
-        verify(mock, times(1)).accept(eq("e"), eq(0.0));
+        gdlFactory = GDLFactory.of(DB_CYPHER);
+        graph = gdlFactory.build().graphStore().getUnion();
     }
 
     @Test
     void testBC() {
-        setup();
-        BetweennessCentrality algo = new BetweennessCentrality(graph, Pools.DEFAULT, 1);
-        algo.compute();
-        algo.resultStream()
-            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
-        verifyMock(testConsumer);
+        var bc = new BetweennessCentrality(graph, Pools.DEFAULT, 1);
+        assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
     }
 
     @Test
-    void testMSBC() {
-        setup();
-        MSBetweennessCentrality algo = new MSBetweennessCentrality(graph, false, 5, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
-        algo.compute();
-        algo.resultStream()
-            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
-        verifyMock(testConsumer);
+    void testMultiSourceBC() {
+        var bc = new MSBetweennessCentrality(graph, false, 5, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
+        assertResult(bc.compute(), EXACT_CENTRALITIES);
     }
 
     @Test
     void testRABrandesForceCompleteSampling() {
-        setup();
-        RABrandesBetweennessCentrality algo = new RABrandesBetweennessCentrality(
-            graph,
-            Pools.DEFAULT,
-            3,
-            new RandomSelectionStrategy(graph, 1.0)
-        );
-        algo.compute();
-        algo.resultStream()
-            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
-        verifyMock(testConsumer);
+        var bc = new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 3, new RandomSelectionStrategy(graph, 1.0));
+        assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
     }
 
     @Test
     void testRABrandesForceEmptySampling() {
-        setup();
-        RABrandesBetweennessCentrality algo = new RABrandesBetweennessCentrality(
-            graph,
-            Pools.DEFAULT,
-            3,
-            new RandomSelectionStrategy(graph, 0.0)
-        );
-        algo.compute();
-        algo.resultStream()
-            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
-
-        verify(testConsumer, times(1)).accept(eq("a"), eq(0.0));
-        verify(testConsumer, times(1)).accept(eq("b"), eq(0.0));
-        verify(testConsumer, times(1)).accept(eq("c"), eq(0.0));
-        verify(testConsumer, times(1)).accept(eq("d"), eq(0.0));
-        verify(testConsumer, times(1)).accept(eq("e"), eq(0.0));
+        var bc = new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 3, new RandomSelectionStrategy(graph, 0.0));
+        assertResult(bc.compute().getCentrality(), EMPTY_CENTRALITIES);
     }
 
     @Disabled
     void testRABrandes() {
-        setup();
-        RABrandesBetweennessCentrality algo = new RABrandesBetweennessCentrality(
-            graph,
-            Pools.DEFAULT,
-            3,
-            new RandomSelectionStrategy(graph, 0.3, 5)
-        );
-        algo.compute();
-        algo.resultStream()
-            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
-        verifyMock(testConsumer);
+        var bc = new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 3, new RandomSelectionStrategy(graph, 0.3, 5));
+        assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
     }
 
     @Test
-    void testPBC() {
-        setup();
-        BetweennessCentrality algo = new BetweennessCentrality(graph, Pools.DEFAULT, 4);
-        algo.compute();
-        algo.resultStream()
-            .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
-        verifyMock(testConsumer);
+    void testParallelBC() {
+        var bc = new BetweennessCentrality(graph, Pools.DEFAULT, 4);
+        assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
     }
 
-    private void setup() {
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .build()
-            .graph();
-    }
-
-    private String name(long id) {
-        String[] name = {""};
-        runQueryWithRowConsumer(
-            "MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name",
-            row -> name[0] = row.getString("name")
-        );
-        return name[0];
+    private void assertResult(AtomicDoubleArray result, double[] centralities) {
+        assertEquals(5, centralities.length, "Expected 5 centrality values");
+        assertEquals(centralities[0], result.get((int) gdlFactory.nodeId("a")));
+        assertEquals(centralities[1], result.get((int) gdlFactory.nodeId("b")));
+        assertEquals(centralities[2], result.get((int) gdlFactory.nodeId("c")));
+        assertEquals(centralities[3], result.get((int) gdlFactory.nodeId("d")));
+        assertEquals(centralities[4], result.get((int) gdlFactory.nodeId("e")));
     }
 }
