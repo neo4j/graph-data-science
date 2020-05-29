@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.gdl.GDLFactory;
 import org.neo4j.test.extension.Inject;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
 
 import static java.util.Arrays.stream;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
@@ -45,10 +46,18 @@ public class GraphStoreSupportExtension implements BeforeEachCallback {
     }
 
     private static String gdlGraph(Class<?> testClass) throws IllegalAccessException {
-        Field field = stream(testClass.getDeclaredFields())
-            .filter(f -> f.isAnnotationPresent(GDLGraph.class))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Missing GDLGraph annotation.") );
+        boolean found;
+        Optional<Field> maybeField;
+
+        do {
+            maybeField = stream(testClass.getDeclaredFields())
+                .filter(f -> f.isAnnotationPresent(GDLGraph.class))
+                .findFirst();
+            found = maybeField.isPresent();
+            testClass = testClass.getSuperclass();
+        } while (testClass != null && !found);
+
+        var field = maybeField.orElseThrow(() -> new IllegalArgumentException("Missing GDLGraph annotation."));
 
         if (field.getType() != String.class) {
             throw new IllegalArgumentException("Field `" + field.getName() + "` must be of type String.");
