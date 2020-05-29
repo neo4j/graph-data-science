@@ -19,15 +19,13 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
-import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.Intersections;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -51,7 +49,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     private final BitSet nodeFilter;
 
     private HugeObjectArray<long[]> vectors;
+    private HugeObjectArray<double[]> weights;
     private long nodesToCompare;
+
+    private final boolean weighted;
 
     public NodeSimilarity(
         Graph graph,
@@ -66,6 +67,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         this.progressLogger = progressLogger;
         this.tracker = tracker;
         this.nodeFilter = new BitSet(graph.nodeCount());
+        this.weighted = graph.hasRelationshipProperty();
     }
 
     @Override
@@ -77,10 +79,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     public void release() {
         graph.release();
     }
-
-    // The buffer is sized on the first call to the sizing strategy to hold exactly node degree elements
-    private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
-        (currentBufferLength, elementsCount, degree) -> elementsCount + degree;
 
     @Override
     public NodeSimilarityResult compute() {
@@ -148,22 +146,27 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         progressLogger.logMessage("Start :: NodeSimilarity#prepare");
 
         vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
+        if (weighted) {
+            weights = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
+        }
 
         DegreeComputer degreeComputer = new DegreeComputer();
-        VectorComputer vectorComputer = new VectorComputer();
+        VectorComputer vectorComputer = VectorComputer.of(graph, weighted);
         vectors.setAll(node -> {
             graph.forEachRelationship(node, degreeComputer);
             int degree = degreeComputer.degree;
             degreeComputer.reset();
             vectorComputer.reset(degree);
 
-
             if (degree >= config.degreeCutoff()) {
                 nodesToCompare++;
                 nodeFilter.set(node);
 
-                graph.forEachRelationship(node, vectorComputer);
                 progressLogger.logProgress(graph.degree(node));
+                vectorComputer.forEachRelationship(node);
+                if (weighted) {
+                    weights.set(node, ((VectorComputer.WeightedVectorComputer) vectorComputer).weights.buffer);
+                }
                 return vectorComputer.targetIds.buffer;
             }
 
@@ -215,7 +218,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                     long[] vector1 = vectors.get(node1);
                     return nodeStream(node1 + 1)
                         .mapToObj(node2 -> {
-                            double similarity = jaccard(vector1, vectors.get(node2));
+                            double similarity = weighted
+                                ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
+                                : jaccard(vector1, vectors.get(node2));
                             return Double.isNaN(similarity) ? null : new SimilarityResult(node1, node2, similarity);
                         })
                         .filter(Objects::nonNull);
@@ -233,7 +238,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                 long[] vector1 = vectors.get(node1);
                 nodeStream(node1 + 1)
                     .forEach(node2 -> {
-                        double similarity = jaccard(vector1, vectors.get(node2));
+                        double similarity = weighted
+                            ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
+                            : jaccard(vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
                             topKMap.put(node1, node2, similarity);
                             topKMap.put(node2, node1, similarity);
@@ -264,7 +271,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                     nodeStream()
                         .filter(node2 -> node1 != node2)
                         .forEach(node2 -> {
-                            double similarity = jaccard(vector1, vectors.get(node2));
+                            double similarity = weighted
+                                ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
+                                : jaccard(vector1, vectors.get(node2));
                             if (!Double.isNaN(similarity)) {
                                 topKMap.put(node1, node2, similarity);
                             }
@@ -283,9 +292,12 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         loggableAndTerminatableNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
+
                 nodeStream(node1 + 1)
                     .forEach(node2 -> {
-                        double similarity = jaccard(vector1, vectors.get(node2));
+                        double similarity = weighted
+                            ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
+                            : jaccard(vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
                             topNList.add(node1, node2, similarity);
                         }
@@ -314,6 +326,48 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
     }
 
+    private double weightedJaccard(long[] vector1, long[] vector2, double[] weights1, double[] weights2) {
+        assert vector1.length == weights1.length;
+        assert vector2.length == weights2.length;
+
+        int offset1 = 0;
+        int offset2 = 0;
+        int length1 = weights1.length;
+        int length2 = weights2.length;
+        double max = 0;
+        double min = 0;
+        while (offset1 < length1 && offset2 < length2) {
+            long target1 = vector1[offset1];
+            long target2 = vector2[offset2];
+            if (target1 == target2) {
+                double w1 = weights1[offset1];
+                double w2 = weights2[offset2];
+                if (w1 > w2) {
+                    max += w1;
+                    min += w2;
+                } else {
+                    min += w1;
+                    max += w2;
+                }
+                offset1++;
+                offset2++;
+            } else if (target1 < target2){
+                max += weights1[offset1];
+                offset1++;
+            } else {
+                max += weights2[offset2];
+                offset2++;
+            }
+        }
+        for (; offset1 < length1; offset1++) {
+            max += weights1[offset1];
+        }
+        for (; offset2 < length2; offset2++) {
+            max += weights2[offset2];
+        }
+        return min / max;
+    }
+
     private LongStream nodeStream() {
         return nodeStream(0);
     }
@@ -340,26 +394,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             workload = workload / 2;
         }
         return workload;
-    }
-
-    private static final class VectorComputer implements RelationshipConsumer {
-
-        long lastTarget = -1;
-        LongArrayList targetIds;
-
-        @Override
-        public boolean accept(long source, long target) {
-            if (source != target && lastTarget != target) {
-                targetIds.add(target);
-            }
-            lastTarget = target;
-            return true;
-        }
-
-        void reset(int degree) {
-            lastTarget = -1;
-            targetIds = new LongArrayList(degree, ARRAY_SIZING_STRATEGY);
-        }
     }
 
     private static final class DegreeComputer implements RelationshipConsumer {
