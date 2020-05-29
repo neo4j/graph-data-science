@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.extension;
 
+import org.neo4j.graphalgo.Orientation;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,4 +29,10 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GDLGraph {
+
+    Orientation orientation() default Orientation.NATURAL;
+
+    String graphName() default "testGraph";
+
+    String username() default "";
 }

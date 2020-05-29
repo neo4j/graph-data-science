@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.gdl;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -31,12 +32,13 @@ public interface GraphCreateFromGDLConfig extends GraphCreateConfig {
     @Value
     String gdlGraph();
 
+    @Value.Default
+    default Orientation orientation() {
+        return Orientation.NATURAL;
+    }
+
     @Override
     default GraphStoreFactory.Supplier graphStoreFactory() {
         return loaderContext -> GDLFactory.of(this);
-    }
-
-    static GraphCreateFromGDLConfig of(String username, String graphName, String gdlGraph) {
-        return ImmutableGraphCreateFromGDLConfig.of(username, graphName, gdlGraph);
     }
 }

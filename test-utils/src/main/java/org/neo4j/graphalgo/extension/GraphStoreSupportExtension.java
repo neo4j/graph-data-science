@@ -21,9 +21,12 @@ package org.neo4j.graphalgo.extension;
 
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.gdl.GDLFactory;
+import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGDLConfig;
 import org.neo4j.test.extension.Inject;
 
 import java.lang.reflect.Field;
@@ -37,15 +40,14 @@ public class GraphStoreSupportExtension implements BeforeEachCallback {
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
-
         Class<?> requiredTestClass = context.getRequiredTestClass();
 
-        String gdlGraph = gdlGraph(requiredTestClass);
+        GDLGraphSetup gdlGraphSetup = gdlGraph(requiredTestClass);
 
-        injectGraphStore(gdlGraph, context);
+        injectGraphStore(gdlGraphSetup, context);
     }
 
-    private static String gdlGraph(Class<?> testClass) throws IllegalAccessException {
+    private static GDLGraphSetup gdlGraph(Class<?> testClass) throws IllegalAccessException {
         boolean found;
         Optional<Field> maybeField;
 
@@ -63,11 +65,26 @@ public class GraphStoreSupportExtension implements BeforeEachCallback {
             throw new IllegalArgumentException("Field `" + field.getName() + "` must be of type String.");
         }
 
-        return field.get(null).toString();
+        var gdlGraph = field.get(null).toString();
+        var annotation = field.getAnnotation(GDLGraph.class);
+
+        return ImmutableGDLGraphSetup.of(
+            gdlGraph,
+            annotation.graphName(),
+            annotation.username(),
+            annotation.orientation()
+        );
     }
 
-    private static void injectGraphStore(String gdlGraph, ExtensionContext context) {
-        GDLFactory gdlFactory = GDLFactory.of(gdlGraph);
+    private static void injectGraphStore(GDLGraphSetup gdlGraphSetup, ExtensionContext context) {
+        var createConfig = ImmutableGraphCreateFromGDLConfig.builder()
+            .username(gdlGraphSetup.username())
+            .graphName(gdlGraphSetup.graphName())
+            .gdlGraph(gdlGraphSetup.gdlGraph())
+            .orientation(gdlGraphSetup.orientation())
+            .build();
+
+        GDLFactory gdlFactory = GDLFactory.of(createConfig);
         GraphStore graphStore = gdlFactory.build().graphStore();
         Graph graph = graphStore.getUnion();
 
@@ -88,5 +105,16 @@ public class GraphStoreSupportExtension implements BeforeEachCallback {
             testClass = testClass.getSuperclass();
         }
         while (testClass != null);
+    }
+
+    @ValueClass
+    interface GDLGraphSetup {
+        String gdlGraph();
+
+        String graphName();
+
+        String username();
+
+        Orientation orientation();
     }
 }

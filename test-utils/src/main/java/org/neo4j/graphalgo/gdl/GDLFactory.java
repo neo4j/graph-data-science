@@ -54,7 +54,11 @@ public final class GDLFactory extends GraphStoreFactory<GraphCreateFromGDLConfig
     }
 
     public static GDLFactory of(String username, String graphName, String gdlGraph) {
-        return of(GraphCreateFromGDLConfig.of(username, graphName, gdlGraph));
+        return of(ImmutableGraphCreateFromGDLConfig.builder()
+            .username(username)
+            .graphName(graphName)
+            .gdlGraph(gdlGraph)
+            .build());
     }
 
     public static GDLFactory of(GraphCreateFromGDLConfig config) {
@@ -114,7 +118,7 @@ public final class GDLFactory extends GraphStoreFactory<GraphCreateFromGDLConfig
                 relType -> relType,
                 relType -> HugeGraphUtil.createRelImporter(
                     nodes,
-                    Orientation.NATURAL,
+                    graphCreateConfig.orientation(),
                     false,
                     Aggregation.NONE,
                     loadingContext.executor(),

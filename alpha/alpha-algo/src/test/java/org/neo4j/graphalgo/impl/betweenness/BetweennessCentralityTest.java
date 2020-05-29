@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -36,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @GraphStoreExtension
 public class BetweennessCentralityTest {
 
-    @GDLGraph
+    @GDLGraph(orientation = Orientation.NATURAL)
     public static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node)" +
