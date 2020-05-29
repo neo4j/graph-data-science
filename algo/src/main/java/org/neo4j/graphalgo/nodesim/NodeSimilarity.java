@@ -201,7 +201,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                 long[] vector1 = vectors.get(node1);
                 return nodeStream(node1 + 1)
                     .mapToObj(node2 -> {
-                        double similarity = jaccard(vector1, vectors.get(node2));
+                        double similarity = weighted
+                            ? weightedJaccard(vector1, vectors.get(node2), weights.get(node1), weights.get(node2))
+                            : jaccard(vector1, vectors.get(node2));
                         return Double.isNaN(similarity) ? null : new SimilarityResult(node1, node2, similarity);
                     })
                     .filter(Objects::nonNull);

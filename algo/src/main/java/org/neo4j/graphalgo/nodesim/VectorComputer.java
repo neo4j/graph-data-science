@@ -26,14 +26,13 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 
-public abstract class VectorComputer {
+abstract class VectorComputer {
 
     final Graph graph;
-
-    long lastTarget = -1;
     LongArrayList targetIds;
+    private long lastTarget = -1;
 
-    public VectorComputer(Graph graph) {
+    VectorComputer(Graph graph) {
         this.graph = graph;
     }
 
@@ -44,7 +43,7 @@ public abstract class VectorComputer {
         targetIds = new LongArrayList(degree, ARRAY_SIZING_STRATEGY);
     }
 
-    boolean checkRelationship(long source, long target) {
+    boolean consumeRelationship(long source, long target) {
         boolean consume = false;
         if (source != target && lastTarget != target) {
             consume = true;
@@ -61,11 +60,9 @@ public abstract class VectorComputer {
         Graph graph,
         boolean weighted
     ) {
-        if (weighted) {
-            return new WeightedVectorComputer(graph);
-        } else {
-            return new UnweightedVectorComputer(graph);
-        }
+        return weighted
+            ? new WeightedVectorComputer(graph)
+            : new UnweightedVectorComputer(graph);
     }
 
     static final class UnweightedVectorComputer extends VectorComputer implements RelationshipConsumer {
@@ -76,7 +73,7 @@ public abstract class VectorComputer {
 
         @Override
         public boolean accept(long source, long target) {
-            if (checkRelationship(source, target)) {
+            if (consumeRelationship(source, target)) {
                 targetIds.add(target);
             }
             return true;
@@ -98,7 +95,7 @@ public abstract class VectorComputer {
 
         @Override
         public boolean accept(long source, long target, double property) {
-            if (checkRelationship(source, target)) {
+            if (consumeRelationship(source, target)) {
                 targetIds.add(target);
                 weights.add(property);
             }
@@ -107,7 +104,7 @@ public abstract class VectorComputer {
 
         @Override
         void forEachRelationship(long node) {
-            graph.forEachRelationship(node, 0.0D, this);
+            graph.forEachRelationship(node, 1.0D, this);
         }
 
         @Override
