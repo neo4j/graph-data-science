@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.AbstractRelationshipProjection;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.api.IdMapping;
@@ -34,6 +35,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
@@ -91,6 +94,7 @@ public final class HugeGraphUtil {
 
         private final BitSet seenOriginalIds;
         private final HugeSparseLongArray.Builder originalToInternalBuilder;
+        private final Map<NodeLabel, BitSet> labelInformation;
 
         private long nextAvailableId;
         private IdMap idMap;
@@ -105,7 +109,8 @@ public final class HugeGraphUtil {
 
             this.originalToInternalBuilder = HugeSparseLongArray.Builder.create(maxOriginalId + 1, tracker);
             this.nextAvailableId = 0;
-            seenOriginalIds = new BitSet(maxOriginalId);
+            this.seenOriginalIds = new BitSet(maxOriginalId);
+            this.labelInformation = new HashMap<>();
         }
 
         public void addNode(long originalId) {
@@ -119,6 +124,27 @@ public final class HugeGraphUtil {
             }
         }
 
+        public void addNode(long originalId, NodeLabel... nodeLabels) {
+            if (idMap != null) {
+                throw new UnsupportedOperationException("Cannot add new nodes after `idMap` has been called");
+            }
+            if (!seenOriginalIds.get(originalId)) {
+                long internalNodeId = nextAvailableId++;
+                originalToInternalBuilder.set(originalId, internalNodeId);
+                seenOriginalIds.set(originalId);
+
+                for (NodeLabel nodeLabel : nodeLabels) {
+                    labelInformation.compute(nodeLabel, (label, bitSet) -> {
+                        if (bitSet == null) {
+                            bitSet = new BitSet(seenOriginalIds.size());
+                        }
+                        bitSet.set(internalNodeId);
+                        return bitSet;
+                    });
+                }
+            }
+        }
+
         public IdMap build() {
             if (idMap == null) {
                 HugeSparseLongArray originalToInternal = originalToInternalBuilder.build();
@@ -129,7 +155,7 @@ public final class HugeGraphUtil {
                     nodeId
                 ));
 
-                idMap = new IdMap(internalToNeo, originalToInternal, internalToNeo.size());
+                idMap = new IdMap(internalToNeo, originalToInternal, labelInformation, internalToNeo.size());
             }
             return idMap;
         }
