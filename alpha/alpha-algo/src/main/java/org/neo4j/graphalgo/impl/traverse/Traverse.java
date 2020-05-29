@@ -105,7 +105,7 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
     @Override
     public Traverse compute() {
         long sourceNode = graph.toMappedNodeId(startNodeId);
-        final LongArrayList result = new LongArrayList(nodeCount);
+        LongArrayList result = new LongArrayList(nodeCount);
         BitSet inResult = new BitSet(nodeCount);
         nodes.clear();
         sources.clear();
