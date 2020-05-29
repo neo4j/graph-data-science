@@ -73,9 +73,6 @@ import java.io.PrintWriter;
 import java.lang.invoke.MethodHandles;
 import java.util.function.ToIntFunction;
 
-import static org.neo4j.configuration.SettingImpl.newBuilder;
-import static org.neo4j.configuration.SettingValueParsers.BOOL;
-
 public final class Neo4jProxy40 implements Neo4jProxyApi {
 
     @Override
@@ -238,7 +235,7 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
             //noinspection unchecked
             return (Setting<Boolean>) onlineBackupEnabled;
         } catch (Throwable e) {
-            return newBuilder("not.on.enterprise", BOOL, false).build();
+            throw new IllegalStateException("The online_backup_enabled setting requires Neo4j Enterprise Edition to be available.");
         }
     }
 
