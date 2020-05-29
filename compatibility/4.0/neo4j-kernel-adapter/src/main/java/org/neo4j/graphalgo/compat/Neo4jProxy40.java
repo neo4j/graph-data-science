@@ -273,8 +273,8 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
 
         @Override
         public Estimates calculateEstimates(ToIntFunction<Value[]> valueSizeCalculator) throws IOException {
-            return delegate.calculateEstimates((values, cursorTracer, memoryTracker) -> valueSizeCalculator.applyAsInt(
-                values));
+            return delegate.calculateEstimates((values, cursorTracer, memoryTracker) ->
+                valueSizeCalculator.applyAsInt(values));
         }
     }
 }
