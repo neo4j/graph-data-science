@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
@@ -84,18 +85,21 @@ final class NodeSimilarityTest extends AlgoTestBase {
         ", (i2:Item {name: 'p2'})" +
         ", (i3:Item {name: 'p3'})" +
         ", (i4:Item {name: 'p4'})" +
-        ", (a)-[:LIKES]->(i1)" +
-        ", (a)-[:LIKES]->(i2)" +
-        ", (a)-[:LIKES]->(i3)" +
-        ", (b)-[:LIKES]->(i1)" +
-        ", (b)-[:LIKES]->(i2)" +
-        ", (c)-[:LIKES]->(i3)" +
-        ", (d)-[:LIKES]->(i1)" +
-        ", (d)-[:LIKES]->(i2)" +
-        ", (d)-[:LIKES]->(i3)";
+        ", (a)-[:LIKES {prop: 1.0}]->(i1)" +
+        ", (a)-[:LIKES {prop: 1.0}]->(i2)" +
+        ", (a)-[:LIKES {prop: 2.0}]->(i3)" +
+        ", (b)-[:LIKES {prop: 1.0}]->(i1)" +
+        ", (b)-[:LIKES {prop: 1.0}]->(i2)" +
+        ", (c)-[:LIKES {prop: 1.0}]->(i3)" +
+        ", (d)-[:LIKES {prop: 0.5}]->(i1)" +
+        ", (d)-[:LIKES {prop: 1.0}]->(i2)" +
+        ", (d)-[:LIKES {prop: 1.0}]->(i3)";
 
     private static final Collection<String> EXPECTED_OUTGOING = new HashSet<>();
     private static final Collection<String> EXPECTED_INCOMING = new HashSet<>();
+
+    private static final Collection<String> EXPECTED_WEIGHTED_OUTGOING = new HashSet<>();
+    private static final Collection<String> EXPECTED_WEIGHTED_INCOMING = new HashSet<>();
 
     private static final Collection<String> EXPECTED_OUTGOING_TOP_N_1 = new HashSet<>();
     private static final Collection<String> EXPECTED_INCOMING_TOP_N_1 = new HashSet<>();
@@ -119,6 +123,17 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .writeRelationshipType("writeRelationshipType")
             .similarityCutoff(0.0);
     }
+    private static String resultString(long node1, long node2, double similarity) {
+        return formatWithLocale("%d,%d %f%n", node1, node2, similarity);
+    }
+
+    private static String resultString(SimilarityResult result) {
+        return resultString(result.node1, result.node2, result.similarity);
+    }
+
+    private static Stream<Integer> concurrencies() {
+        return Stream.of(1, 4);
+    }
 
     static {
         EXPECTED_OUTGOING.add(resultString(0, 1, 2 / 3.0));
@@ -134,6 +149,20 @@ final class NodeSimilarityTest extends AlgoTestBase {
         EXPECTED_OUTGOING.add(resultString(2, 1, 0.0));
         EXPECTED_OUTGOING.add(resultString(3, 1, 2 / 3.0));
         EXPECTED_OUTGOING.add(resultString(3, 2, 1 / 3.0));
+
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(0, 1, 2 / 4.0));
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(0, 2, 1 / 4.0));
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(0, 3, 2.5 / 4.0));
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(1, 2, 0.0));
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(1, 3, 2 / 4.0));
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(2, 3, 1 / 2.5));
+        // Add results in reverse direction because topK
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(1, 0, 2 / 4.0));
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(2, 0, 1 / 4.0));
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(3, 0, 2.5 / 4.0));
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(2, 1, 0.0));
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(3, 1, 2 / 4.0));
+        EXPECTED_WEIGHTED_OUTGOING.add(resultString(3, 2, 1 / 2.5));
 
         EXPECTED_OUTGOING_TOP_N_1.add(resultString(0, 3, 1.0));
 
@@ -170,6 +199,14 @@ final class NodeSimilarityTest extends AlgoTestBase {
         EXPECTED_INCOMING.add(resultString(6, 4, 1 / 2.0));
         EXPECTED_INCOMING.add(resultString(6, 5, 1 / 2.0));
 
+        EXPECTED_WEIGHTED_INCOMING.add(resultString(4, 5, 2.5 / 3.0));
+        EXPECTED_WEIGHTED_INCOMING.add(resultString(4, 6, 1.5 / 5.0));
+        EXPECTED_WEIGHTED_INCOMING.add(resultString(5, 6, 2.0 / 5.0));
+        // Add results in reverse direction because topK
+        EXPECTED_WEIGHTED_INCOMING.add(resultString(5, 4, 2.5 / 3.0));
+        EXPECTED_WEIGHTED_INCOMING.add(resultString(6, 4, 1.5 / 5.0));
+        EXPECTED_WEIGHTED_INCOMING.add(resultString(6, 5, 2.0 / 5.0));
+
         EXPECTED_INCOMING_TOP_N_1.add(resultString(4, 5, 3.0 / 3.0));
 
         EXPECTED_INCOMING_TOP_K_1.add(resultString(4, 5, 1.0));
@@ -193,18 +230,6 @@ final class NodeSimilarityTest extends AlgoTestBase {
         EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(6, 5, 1 / 2.0));
     }
 
-    private static String resultString(long node1, long node2, double similarity) {
-        return formatWithLocale("%d,%d %f%n", node1, node2, similarity);
-    }
-
-    private static String resultString(SimilarityResult result) {
-        return resultString(result.node1, result.node2, result.similarity);
-    }
-
-    private static Stream<Integer> concurrencies() {
-        return Stream.of(1, 4);
-    }
-
     static Stream<Arguments> supportedLoadAndComputeDirections() {
         Stream<Arguments> directions = Stream.of(
             arguments(NATURAL),
@@ -224,6 +249,33 @@ final class NodeSimilarityTest extends AlgoTestBase {
     @BeforeEach
     void setup() {
         runQuery(DB_CYPHER);
+    }
+
+    @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
+    @MethodSource("supportedLoadAndComputeDirections")
+    void shouldComputeWeightedForSupportedDirections(Orientation orientation, int concurrency) {
+        Graph graph =  new StoreLoaderBuilder()
+            .api(db)
+            .addRelationshipProperty(PropertyMapping.of("prop", 0.0))
+            .globalOrientation(orientation)
+            .build()
+            .graph();
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
+            graph,
+            configBuilder().concurrency(concurrency).build(),
+            Pools.DEFAULT,
+            progressLogger,
+            AllocationTracker.EMPTY
+        );
+
+        Set<String> result = nodeSimilarity
+            .computeToStream()
+            .map(NodeSimilarityTest::resultString)
+            .collect(Collectors.toSet());
+        nodeSimilarity.release();
+
+        assertEquals(orientation == REVERSE ? EXPECTED_WEIGHTED_INCOMING : EXPECTED_WEIGHTED_OUTGOING, result);
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
