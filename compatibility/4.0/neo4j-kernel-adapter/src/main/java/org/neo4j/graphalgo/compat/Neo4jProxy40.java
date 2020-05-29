@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.configuration.Config;
+import org.neo4j.configuration.ExternalSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
@@ -68,7 +70,11 @@ import org.neo4j.values.storable.Value;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.invoke.MethodHandles;
 import java.util.function.ToIntFunction;
+
+import static org.neo4j.configuration.SettingImpl.newBuilder;
+import static org.neo4j.configuration.SettingValueParsers.BOOL;
 
 public final class Neo4jProxy40 implements Neo4jProxyApi {
 
@@ -122,22 +128,32 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
-    public PropertyCursor allocatePropertyCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer, MemoryTracker memoryTracker) {
+    public PropertyCursor allocatePropertyCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    ) {
         return cursorFactory.allocatePropertyCursor();
     }
 
     @Override
-    public NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
+    public NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer) {
         return cursorFactory.allocateNodeCursor();
     }
 
     @Override
-    public RelationshipScanCursor allocateRelationshipScanCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
+    public RelationshipScanCursor allocateRelationshipScanCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
         return cursorFactory.allocateRelationshipScanCursor();
     }
 
     @Override
-    public NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
+    public NodeLabelIndexCursor allocateNodeLabelIndexCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
         return cursorFactory.allocateNodeLabelIndexCursor();
     }
 
@@ -210,6 +226,27 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
         return builder.toPrintWriter(() -> writer);
     }
 
+    @Override
+    public Setting<Boolean> onlineBackupEnabled() {
+        try {
+            Class<?> onlineSettingsClass = Class.forName(
+                "com.neo4j.kernel.impl.enterprise.configuration.OnlineBackupSettings");
+            var onlineBackupEnabled = MethodHandles
+                .lookup()
+                .findStaticGetter(onlineSettingsClass, "online_backup_enabled", Setting.class)
+                .invoke();
+            //noinspection unchecked
+            return (Setting<Boolean>) onlineBackupEnabled;
+        } catch (Throwable e) {
+            return newBuilder("not.on.enterprise", BOOL, false).build();
+        }
+    }
+
+    @Override
+    public Setting<String> additionalJvm() {
+        return ExternalSettings.additionalJvm;
+    }
+
     private static final class InputFromCompatInput implements Input {
         private final CompatInput delegate;
 
@@ -239,7 +276,8 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
 
         @Override
         public Estimates calculateEstimates(ToIntFunction<Value[]> valueSizeCalculator) throws IOException {
-            return delegate.calculateEstimates((values, cursorTracer, memoryTracker) -> valueSizeCalculator.applyAsInt(values));
+            return delegate.calculateEstimates((values, cursorTracer, memoryTracker) -> valueSizeCalculator.applyAsInt(
+                values));
         }
     }
 }

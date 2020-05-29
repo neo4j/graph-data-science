@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.compat;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.configuration.ExternalSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
@@ -70,6 +72,10 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.invoke.MethodHandles;
+
+import static org.neo4j.configuration.SettingImpl.newBuilder;
+import static org.neo4j.configuration.SettingValueParsers.BOOL;
 
 public final class Neo4jProxy41 implements Neo4jProxyApi {
 
@@ -211,6 +217,28 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     @Override
     public Log toPrintWriter(FormattedLog.Builder builder, PrintWriter writer) {
         return builder.toPrintWriter(() -> writer);
+    }
+
+
+    @Override
+    public Setting<Boolean> onlineBackupEnabled() {
+        try {
+            Class<?> onlineSettingsClass = Class.forName(
+                "com.neo4j.configuration.OnlineBackupSettings");
+            var onlineBackupEnabled = MethodHandles
+                .lookup()
+                .findStaticGetter(onlineSettingsClass, "online_backup_enabled", Setting.class)
+                .invoke();
+            //noinspection unchecked
+            return (Setting<Boolean>) onlineBackupEnabled;
+        } catch (Throwable e) {
+            return newBuilder("not.on.enterprise", BOOL, false).build();
+        }
+    }
+
+    @Override
+    public Setting<String> additionalJvm() {
+        return ExternalSettings.additional_jvm;
     }
 
     private static final class InputFromCompatInput implements Input {

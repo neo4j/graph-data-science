@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
@@ -209,6 +210,14 @@ public final class Neo4jProxy {
 
     public static Log toPrintWriter(FormattedLog.Builder builder, PrintWriter writer) {
         return IMPL.toPrintWriter(builder, writer);
+    }
+
+    public static Setting<Boolean> onlineBackupEnabled() {
+        return IMPL.onlineBackupEnabled();
+    }
+
+    public static Setting<String> additionalJvm() {
+        return IMPL.additionalJvm();
     }
 
     private Neo4jProxy() {
