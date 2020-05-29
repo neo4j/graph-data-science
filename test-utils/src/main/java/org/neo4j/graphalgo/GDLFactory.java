@@ -56,7 +56,8 @@ public final class GDLFactory extends GraphStoreFactory<GraphCreateFromGDLConfig
 
     public static GDLFactory of(GraphCreateFromGDLConfig config) {
         var gdlHandler = new GDLHandler.Builder()
-            .setDefaultVertexLabel("__DEFAULT_NODE_LABEL")
+            .setDefaultVertexLabel(NodeLabel.ALL_NODES.name)
+            .setDefaultEdgeLabel(RelationshipType.ALL_RELATIONSHIPS.name)
             .buildFromString(config.gdlGraph());
 
         var graphDimensions = GraphDimensionsGdlReader.of(gdlHandler);
@@ -118,7 +119,11 @@ public final class GDLFactory extends GraphStoreFactory<GraphCreateFromGDLConfig
                 )
             ));
 
-        gdlHandler.getEdges().forEach(edge -> relTypeImporters.get(edge.getLabel()).add(edge.getSourceVertexId(), edge.getTargetVertexId()));
+        gdlHandler
+            .getEdges()
+            .forEach(edge -> relTypeImporters
+                .get(edge.getLabel())
+                .add(edge.getSourceVertexId(), edge.getTargetVertexId()));
 
         return relTypeImporters.entrySet().stream().collect(Collectors.toMap(
             entry -> RelationshipType.of(entry.getKey()),

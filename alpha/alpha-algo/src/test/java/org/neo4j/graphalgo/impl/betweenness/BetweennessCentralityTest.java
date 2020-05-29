@@ -43,10 +43,10 @@ class BetweennessCentralityTest {
         ", (c:Node)" +
         ", (d:Node)" +
         ", (e:Node)" +
-        ", (a)-[:TYPE]->(b)" +
-        ", (b)-[:TYPE]->(c)" +
-        ", (c)-[:TYPE]->(d)" +
-        ", (d)-[:TYPE]->(e)";
+        ", (a)-->(b)" +
+        ", (b)-->(c)" +
+        ", (c)-->(d)" +
+        ", (d)-->(e)";
 
     private static final double[] EXACT_CENTRALITIES = {0.0, 3.0, 4.0, 3.0, 0.0};
     private static final double[] EMPTY_CENTRALITIES = {0.0, 0.0, 0.0, 0.0, 0.0};
