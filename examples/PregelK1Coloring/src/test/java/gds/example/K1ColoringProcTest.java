@@ -19,11 +19,9 @@
  */
 package gds.example;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.compat.MapUtil;
 
 import java.util.Arrays;
@@ -34,10 +32,10 @@ final class K1ColoringProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
             "CREATE" +
-                    " (a)" +
-                    ",(c)" +
-                    ",(b)" +
-                    ",(d)" +
+                    " (a:Node)" +
+                    ",(c:Node)" +
+                    ",(b:Node)" +
+                    ",(d:Node)" +
                     ",(a)-[:REL]->(b)" +
                     ",(b)-[:REL]->(d)" +
                     ",(a)-[:REL]->(d)" +
@@ -51,14 +49,8 @@ final class K1ColoringProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(K1ColoringProc.class);
         runQuery(DB_CYPHER);
-    }
-
-    @AfterEach
-    void shutdown() {
-        db.shutdown();
     }
 
     @Test
@@ -84,8 +76,8 @@ final class K1ColoringProcTest extends BaseProcTest {
         );
 
         String query = "CALL gds.example.k1coloring.pregel({" +
-                "  nodeProjection: '*'," +
-                "  relationshipProjection: '*'," +
+                "  nodeProjection: 'Node'," +
+                "  relationshipProjection: 'REL'," +
                 "  maxIterations: 5 " +
                 "}) YIELD nodeId, color";
 

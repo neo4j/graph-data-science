@@ -19,18 +19,17 @@
  */
 package gds.example;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AbstractNodeProjection;
+import org.neo4j.graphalgo.AbstractRelationshipProjection;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
@@ -41,10 +40,10 @@ final class K1ColoringTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
         "CREATE" +
-        " (a)" +
-        ",(c)" +
-        ",(b)" +
-        ",(d)" +
+        " (a:Node)" +
+        ",(c:Node)" +
+        ",(b:Node)" +
+        ",(d:Node)" +
         ",(a)-[:REL]->(b)" +
         ",(b)-[:REL]->(d)" +
         ",(a)-[:REL]->(d)" +
@@ -60,20 +59,14 @@ final class K1ColoringTest extends AlgoTestBase {
 
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
         runQuery(DB_CYPHER);
 
         graph = new StoreLoaderBuilder()
             .api(db)
-            .loadAnyLabel()
-            .loadAnyRelationshipType()
+            .addNodeLabel("Node")
+            .addRelationshipType("REL")
             .build()
-            .graph(NativeFactory.class);
-    }
-
-    @AfterEach
-    void shutdown() {
-        db.shutdown();
+            .graph();
     }
 
     @Test

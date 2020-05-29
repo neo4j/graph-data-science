@@ -5,7 +5,15 @@ plugins {
 }
 
 ext {
-    gdsVersion = '1.1.0-alpha01'
+    // Make sure these are the same as your installation of GDS and Neo4j
+    gdsVersion = '1.2.1'
+    neo4jVersion = '4.0.4'
+
+    // Necessary compile-time dependency for code generation
+    jetbrainsAnnotations = '18.0.0'
+
+    // Test dependency versions
+    junit5Version = '5.5.2'
 }
 
 description = 'Graph Data Science :: Pregel Training'
@@ -17,21 +25,21 @@ dependencies {
 
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
-    compileOnly 'org.neo4j:neo4j:3.5.16'
+    compileOnly "org.neo4j:neo4j:$neo4jVersion"
 
     // We need an annotation processor for our K1 configuration
     annotationProcessor "org.neo4j.gds:config-generator:$gdsVersion"
-    compileOnly         'org.jetbrains:annotations:18.0.0'
+    compileOnly         "org.jetbrains:annotations:$jetbrainsAnnotations"
 
     // We need to provide GDS for the test as well, along with some test helpers
     testImplementation "org.neo4j.gds:test-utils:$gdsVersion"
     testImplementation "org.neo4j.gds:proc:$gdsVersion"
 
     // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit5Version"
 
     // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit5Version"
 }
 
 test {
@@ -39,6 +47,7 @@ test {
     useJUnitPlatform()
 }
 
+// If you have no extra dependencies you do not require the standalone JAR
 shadowJar {
     baseName = "neo4j-gds-k1-pregel"
     classifier = "standalone"
