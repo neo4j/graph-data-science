@@ -71,7 +71,7 @@ class ApproximateNearestNeighborsTest extends AlgoTestBase {
 
         Collection<Long> categories = LongStream.range(0, 10).boxed().collect(Collectors.toList());
         List<Map<String, Object>> inputData = new ArrayList<>();
-        for (long i = 0; i < 10; i++) {
+        for (long i = 0; i < categories.size(); i++) {
             Node node = createNode(db, transaction, Label.label("LOAD"));
             inputData.add(genericMap(
                 "item", node.getId(),
