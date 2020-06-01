@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.impl.walking.RandomWalk.NextNodeStrategy.NO_NEXT_NODE;
 
 public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
@@ -117,9 +118,9 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             previousNodeId = currentNodeId;
             currentNodeId = nextNodeId;
 
-            if (currentNodeId == -1 || !running()) {
-                // End walk when there is no way out and return empty result
-                return Arrays.copyOf(nodeIds, 1);
+            if (currentNodeId == NO_NEXT_NODE || !running()) {
+                // End walk when there is no way out and return partial result
+                return Arrays.copyOf(nodeIds, i);
             }
             nodeIds[i] = toOriginalNodeId(currentNodeId);
         }
@@ -128,7 +129,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     }
 
     private long toOriginalNodeId(int currentNodeId) {
-        return currentNodeId == -1 ? -1 : graph.toOriginalNodeId(currentNodeId);
+        return currentNodeId == NO_NEXT_NODE ? NO_NEXT_NODE : graph.toOriginalNodeId(currentNodeId);
     }
 
     private static <T> void put(BlockingQueue<T> queue, T items) {
@@ -138,6 +139,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     }
 
     public abstract static class NextNodeStrategy {
+        public static final long NO_NEXT_NODE = -1L;
+
         protected Graph graph;
         protected Degrees degrees;
 
@@ -159,11 +162,11 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         public long getNextNode(long currentNodeId, long previousNodeId) {
             int degree = degrees.degree(currentNodeId);
             if (degree == 0) {
-                return -1;
+                return NO_NEXT_NODE;
             }
             int randomEdgeIndex = ThreadLocalRandom.current().nextInt(degree);
 
-            MutableLong targetNodeId = new MutableLong(-1L);
+            MutableLong targetNodeId = new MutableLong(NO_NEXT_NODE);
             MutableInt counter = new MutableInt(0);
             graph.concurrentCopy().forEachRelationship(currentNodeId, (s, t) -> {
                 if (counter.getAndIncrement() == randomEdgeIndex) {
@@ -194,7 +197,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
             int degree = degrees.degree(currentNodeId);
             if (degree == 0) {
-                return -1;
+                return NO_NEXT_NODE;
             }
 
             double[] distribution = buildProbabilityDistribution(currentNodeId, previousNodeId, returnParam, inOutParam, degree);
