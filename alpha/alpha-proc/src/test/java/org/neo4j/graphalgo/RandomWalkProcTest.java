@@ -38,6 +38,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 class RandomWalkProcTest extends BaseProcTest {
 
@@ -247,6 +248,26 @@ class RandomWalkProcTest extends BaseProcTest {
             ResourceIterator<List<Long>> results = r.columnAs("nodeIds");
             results.next();
             results.next();
+            assertTrue(!results.hasNext(), "There should be only two results.");
+        });
+    }
+
+    @Test
+    void shouldReturnPartialWalks() {
+        String query = GdsCypher.call()
+            .withNodeLabel(ALL_NODES.name)
+            .withRelationshipType("OF_TYPE")
+            .algo("gds", "alpha", "randomWalk")
+            .streamMode()
+            .addParameter("start", 0)
+            .addParameter("steps", 7)
+            .addParameter("walks", 2)
+            .yields();
+
+        runQueryWithResultConsumer(query, r -> {
+            ResourceIterator<List<Long>> results = r.columnAs("nodeIds");
+            assertTrue(results.next().size() > 1);
+            assertTrue(results.next().size() > 1);
             assertTrue(!results.hasNext(), "There should be only two results.");
         });
     }
