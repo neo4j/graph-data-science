@@ -31,6 +31,16 @@ The Neo4j Graph Data Science library uses the build tool `Gradle`.
 Gradle is shipped with this repository using the Gradle Wrapper.
 This means you can simply run all Gradle commands by running `./gradlew TASK` from the repository root.
 
+[NOTE]
+====
+GDS 1.3 is targeting compatibility with both Neo4j versions 4.0.x and 4.1.x.
+To build, Neo4j 4.1 artifacts need to be available.
+Since Neo4j 4.1.0 is not yet released, you need to build Neo4j yourself from source.
+See the instructions at https://github.com/neo4j/neo4j#building-neo4j.
+
+This is a temporary requirement, until Neo4j 4.1.0 is released.
+====
+
 Running tests::
 To run all tests you can simply run `./gradlew check`
 
