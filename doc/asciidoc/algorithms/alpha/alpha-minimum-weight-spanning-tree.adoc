@@ -180,7 +180,6 @@ CALL gds.alpha.spanningTree.minimum.write({
   relationshipWeightProperty: 'cost',
   writeProperty: 'MINST',
   weightWriteProperty: 'writeCost'
-  }
 })
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 RETURN createMillis, computeMillis, writeMillis, effectiveNodeCount;
@@ -224,12 +223,12 @@ CALL gds.alpha.spanningTree.maximum.write({
     LINK: {
       type: 'LINK',
       properties: 'cost'
-    },
-    startNodeId: id(n),
-    relationshipWeightProperty: 'cost',
-    writeProperty: 'MAXST',
-    weightWriteProperty: 'writeCost'
-  }
+    }
+  },
+  startNodeId: id(n),
+  relationshipWeightProperty: 'cost',
+  writeProperty: 'MAXST',
+  weightWriteProperty: 'writeCost'
 })
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 RETURN createMillis,computeMillis, writeMillis, effectiveNodeCount;
