@@ -20,10 +20,12 @@
 package org.neo4j.graphalgo.gdl;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -32,6 +34,7 @@ import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
+import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -41,12 +44,19 @@ import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
+import org.s1ck.gdl.model.Vertex;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class GDLFactory extends GraphStoreFactory<GraphCreateFromGDLConfig> {
 
+    private static final int NO_SUCH_PROPERTY = -2;
     private final GDLHandler gdlHandler;
 
     public static GDLFactory of(String gdlGraph) {
@@ -100,14 +110,66 @@ public final class GDLFactory extends GraphStoreFactory<GraphCreateFromGDLConfig
             loadingContext.tracker()
         );
 
+        gdlHandler.getVertices().forEach(vertex -> idMapBuilder.addNode(
+            vertex.getId(),
+            vertex.getLabels().stream().map(NodeLabel::of).toArray(NodeLabel[]::new)
+        ));
+
+        var idMap = idMapBuilder.build();
+
+        return IdsAndProperties.of(idMap, loadNodeProperties(idMap));
+    }
+
+    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(IdMapping idMap) {
+        var propertyKeysByLabel = new HashMap<NodeLabel, Set<PropertyMapping>>();
+        var propertyBuilders = new HashMap<PropertyMapping, NodePropertiesBuilder>();
+
         gdlHandler.getVertices().forEach(vertex -> {
-            idMapBuilder.addNode(
-                vertex.getId(),
-                vertex.getLabels().stream().map(NodeLabel::of).toArray(NodeLabel[]::new)
-            );
+            vertex.getProperties().forEach((propertyKey, propertyValue) ->
+                propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) -> {
+                    vertex.getLabels().stream()
+                        .map(NodeLabel::of)
+                        .forEach(nodeLabel -> propertyKeysByLabel
+                            .computeIfAbsent(nodeLabel, (ignore) -> new HashSet<>())
+                            .add(key)
+                        );
+                    return NodePropertiesBuilder.of(
+                        dimensions.nodeCount(),
+                        loadingContext.tracker(),
+                        PropertyMapping.DEFAULT_FALLBACK_VALUE,
+                        NO_SUCH_PROPERTY,
+                        key.propertyKey(),
+                        1
+                    );
+                }).set(idMap.toMappedNodeId(vertex.getId()), gdsValue(vertex, propertyKey, propertyValue)));
         });
 
-        return IdsAndProperties.of(idMapBuilder.build(), Map.of());
+        var nodeProperties = propertyBuilders
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build()));
+
+        return propertyKeysByLabel.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().stream().collect(Collectors.toMap(
+                    propertyKey -> propertyKey,
+                    nodeProperties::get
+                ))
+            ));
+    }
+
+    private double gdsValue(Vertex vertex, String propertyKey, Object gdlValue) {
+        if (gdlValue instanceof Number) {
+            return ((Number) gdlValue).doubleValue();
+        } else {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Node property '%s' of must be of type Number, but was %s for %s.",
+                propertyKey,
+                gdlValue.getClass(),
+                vertex
+            ));
+        }
     }
 
     private Map<RelationshipType, HugeGraph.TopologyCSR> loadRelationships(IdMap nodes) {

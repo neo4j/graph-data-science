@@ -159,6 +159,13 @@ public abstract class PropertyMapping {
         return ((ImmutablePropertyMapping) this).withAggregation(aggregation);
     }
 
+    public static PropertyMapping of(String propertyKey) {
+        return ImmutablePropertyMapping
+            .builder()
+            .propertyKey(propertyKey)
+            .build();
+    }
+
     /**
      * Creates a PropertyMapping. The given property key is also used for internal reference.
      */
