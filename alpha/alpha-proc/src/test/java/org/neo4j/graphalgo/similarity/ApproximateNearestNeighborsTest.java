@@ -19,10 +19,8 @@
  */
 package org.neo4j.graphalgo.similarity;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -40,47 +38,37 @@ import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.createNode;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
-import static org.neo4j.graphalgo.compat.Transactions.close;
-import static org.neo4j.graphalgo.compat.Transactions.commit;
 import static org.neo4j.graphalgo.core.loading.ImportSizing.MIN_PAGE_SIZE;
 
 class ApproximateNearestNeighborsTest extends AlgoTestBase {
-
-
-    @BeforeEach
-    void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-    }
 
     @Test
     void testRunningAnnWithIdGaps() {
         Transaction transaction = db.beginTx();
 
         for (long i = 0; i < MIN_PAGE_SIZE; i++) {
-            createNode(db, transaction, Label.label("IGNORE"));
+            transaction.createNode(Label.label("IGNORE"));
         }
 
         Collection<Long> categories = LongStream.range(0, 10).boxed().collect(Collectors.toList());
-        List<Map<String, Object>> inputData = new ArrayList<>();
+        Collection<Map<String, Object>> inputData = new ArrayList<>();
         for (long i = 0; i < categories.size(); i++) {
-            Node node = createNode(db, transaction, Label.label("LOAD"));
+            Node node = transaction.createNode(Label.label("LOAD"));
             inputData.add(genericMap(
                 "item", node.getId(),
                 "categories", categories
             ));
         }
 
-        commit(transaction);
-        close(transaction);
+        transaction.commit();
+        transaction.close();
 
         JaccardConfig jaccardConfig = ImmutableJaccardConfig.builder().build();
         JaccardAlgorithm jaccardAlgorithm = new JaccardAlgorithm(jaccardConfig, db);
