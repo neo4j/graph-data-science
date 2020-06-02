@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 abstract class VectorComputer {
 
     final Graph graph;
@@ -37,6 +39,8 @@ abstract class VectorComputer {
     }
 
     abstract void forEachRelationship(long node);
+
+    public abstract double[] getWeights();
 
     void reset(int degree) {
         lastTarget = -1;
@@ -80,12 +84,20 @@ abstract class VectorComputer {
         }
 
         @Override
+        public double[] getWeights() {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Method `getWeights` is not supported for %s",
+                this.getClass().getSimpleName()
+            ));
+        }
+
+        @Override
         void forEachRelationship(long node) {
             graph.forEachRelationship(node, this);
         }
     }
 
-    static final class WeightedVectorComputer extends VectorComputer implements RelationshipWithPropertyConsumer  {
+    static final class WeightedVectorComputer extends VectorComputer implements RelationshipWithPropertyConsumer {
 
         DoubleArrayList weights;
 
@@ -100,6 +112,11 @@ abstract class VectorComputer {
                 weights.add(property);
             }
             return true;
+        }
+
+        @Override
+        public double[] getWeights() {
+            return weights.buffer;
         }
 
         @Override

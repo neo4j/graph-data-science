@@ -165,7 +165,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                 progressLogger.logProgress(graph.degree(node));
                 vectorComputer.forEachRelationship(node);
                 if (weighted) {
-                    weights.set(node, ((VectorComputer.WeightedVectorComputer) vectorComputer).weights.buffer);
+                    weights.set(node, vectorComputer.getWeights());
                 }
                 return vectorComputer.targetIds.buffer;
             }
