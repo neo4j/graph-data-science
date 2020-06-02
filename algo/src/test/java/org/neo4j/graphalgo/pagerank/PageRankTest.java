@@ -19,37 +19,76 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.extension.GDLGraph;
+import org.neo4j.graphalgo.extension.GraphStoreExtension;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.gdl.GDLFactory;
 import org.neo4j.graphalgo.result.CentralityResult;
-import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-final class PageRankTest extends AlgoTestBase {
+@GraphStoreExtension
+public final class PageRankTest {
 
-    private static final Label LABEL = Label.label("Label1");
-    private static final String RELATIONSHIP_TYPE = "TYPE1";
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Label)" +
+        ", (b:Label)" +
+        ", (c:Label)" +
+        ", (d:Label)" +
+        ", (e:Label)" +
+        ", (f:Label)" +
+        ", (g:Label)" +
+        ", (h:Label)" +
+        ", (i:Label)" +
+        ", (j:Label)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(b)" +
+        ", (d)-[:TYPE]->(a)" +
+        ", (d)-[:TYPE]->(b)" +
+        ", (e)-[:TYPE]->(b)" +
+        ", (e)-[:TYPE]->(d)" +
+        ", (e)-[:TYPE]->(f)" +
+        ", (f)-[:TYPE]->(b)" +
+        ", (f)-[:TYPE]->(e)";
+
+    @GDLGraph(graphName = "naturalGraph", orientation = Orientation.NATURAL)
+    public static final String OUT_GRAPH = DB_CYPHER;
+
+    @GDLGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
+    public static final String IN_GRAPH = DB_CYPHER;
+
+    @Inject(graphName = "naturalGraph")
+    private GDLFactory factory;
+
+    @Inject(graphName = "reverseGraph")
+    private GDLFactory reverseFactory;
+
+    @Inject(graphName = "naturalGraph")
+    private Graph naturalGraph;
+
+    @Inject(graphName = "reverseGraph")
+    private Graph reverseGraph;
+
     private static final PageRankBaseConfig DEFAULT_CONFIG = defaultConfigBuilder().build();
 
     static ImmutablePageRankStreamConfig.Builder defaultConfigBuilder() {
@@ -57,154 +96,80 @@ final class PageRankTest extends AlgoTestBase {
             .maxIterations(40);
     }
 
-    private static final String DB_CYPHER =
-        "CREATE" +
-        "  (_:Label0 {name: '_'})" +
-        ", (a:Label1 {name: 'a'})" +
-        ", (b:Label1 {name: 'b'})" +
-        ", (c:Label1 {name: 'c'})" +
-        ", (d:Label1 {name: 'd'})" +
-        ", (e:Label1 {name: 'e'})" +
-        ", (f:Label1 {name: 'f'})" +
-        ", (g:Label1 {name: 'g'})" +
-        ", (h:Label1 {name: 'h'})" +
-        ", (i:Label1 {name: 'i'})" +
-        ", (j:Label1 {name: 'j'})" +
-        ", (k:Label2 {name: 'k'})" +
-        ", (l:Label2 {name: 'l'})" +
-        ", (m:Label2 {name: 'm'})" +
-        ", (n:Label2 {name: 'n'})" +
-        ", (o:Label2 {name: 'o'})" +
-        ", (p:Label2 {name: 'p'})" +
-        ", (q:Label2 {name: 'q'})" +
-        ", (r:Label2 {name: 'r'})" +
-        ", (s:Label2 {name: 's'})" +
-        ", (t:Label2 {name: 't'})" +
-        ", (b)-[:TYPE1]->(c)" +
-        ", (c)-[:TYPE1]->(b)" +
-        ", (d)-[:TYPE1]->(a)" +
-        ", (d)-[:TYPE1]->(b)" +
-        ", (e)-[:TYPE1]->(b)" +
-        ", (e)-[:TYPE1]->(d)" +
-        ", (e)-[:TYPE1]->(f)" +
-        ", (f)-[:TYPE1]->(b)" +
-        ", (f)-[:TYPE1]->(e)" +
-        ", (g)-[:TYPE2]->(b)" +
-        ", (g)-[:TYPE2]->(e)" +
-        ", (h)-[:TYPE2]->(b)" +
-        ", (h)-[:TYPE2]->(e)" +
-        ", (i)-[:TYPE2]->(b)" +
-        ", (i)-[:TYPE2]->(e)" +
-        ", (j)-[:TYPE2]->(e)" +
-        ", (k)-[:TYPE2]->(e)";
-
-    @BeforeEach
-    void setupGraphDb() {
-        runQuery(DB_CYPHER);
-    }
-
     @Test
     void testOnOutgoingRelationships() {
-        final Map<Long, Double> expected = new HashMap<>();
+        Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(LABEL, "name", "a").getId(), 0.243007);
-            expected.put(tx.findNode(LABEL, "name", "b").getId(), 1.9183995);
-            expected.put(tx.findNode(LABEL, "name", "c").getId(), 1.7806315);
-            expected.put(tx.findNode(LABEL, "name", "d").getId(), 0.21885);
-            expected.put(tx.findNode(LABEL, "name", "e").getId(), 0.243007);
-            expected.put(tx.findNode(LABEL, "name", "f").getId(), 0.21885);
-            expected.put(tx.findNode(LABEL, "name", "g").getId(), 0.15);
-            expected.put(tx.findNode(LABEL, "name", "h").getId(), 0.15);
-            expected.put(tx.findNode(LABEL, "name", "i").getId(), 0.15);
-            expected.put(tx.findNode(LABEL, "name", "j").getId(), 0.15);
-        });
+        expected.put(factory.nodeId("a"), 0.243007);
+        expected.put(factory.nodeId("b"), 1.9183995);
+        expected.put(factory.nodeId("c"), 1.7806315);
+        expected.put(factory.nodeId("d"), 0.21885);
+        expected.put(factory.nodeId("e"), 0.243007);
+        expected.put(factory.nodeId("f"), 0.21885);
+        expected.put(factory.nodeId("g"), 0.15);
+        expected.put(factory.nodeId("h"), 0.15);
+        expected.put(factory.nodeId("i"), 0.15);
+        expected.put(factory.nodeId("j"), 0.15);
 
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(LABEL.name())
-            .addRelationshipType(RELATIONSHIP_TYPE)
-            .build()
-            .graph();
-
-        final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
-            .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
+        CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
+            .create(naturalGraph, DEFAULT_CONFIG, LongStream.empty(), ProgressLogger.NULL_LOGGER)
             .compute()
             .result();
 
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
+        expected.forEach((originalNodeId, expectedPageRank) -> {
             assertEquals(
-                expected.get(nodeId),
-                rankResult.score(i),
+                expected.get(originalNodeId),
+                rankResult.score(naturalGraph.toMappedNodeId(originalNodeId)),
                 1e-2,
-                "Node#" + nodeId
+                "Node#" + originalNodeId
             );
         });
     }
 
     @Test
     void testOnIncomingRelationships() {
-        final Map<Long, Double> expected = new HashMap<>();
+        Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(LABEL, "name", "a").getId(), 0.15);
-            expected.put(tx.findNode(LABEL, "name", "b").getId(), 0.3386727);
-            expected.put(tx.findNode(LABEL, "name", "c").getId(), 0.2219679);
-            expected.put(tx.findNode(LABEL, "name", "d").getId(), 0.3494679);
-            expected.put(tx.findNode(LABEL, "name", "e").getId(), 2.5463981);
-            expected.put(tx.findNode(LABEL, "name", "f").getId(), 2.3858317);
-            expected.put(tx.findNode(LABEL, "name", "g").getId(), 0.15);
-            expected.put(tx.findNode(LABEL, "name", "h").getId(), 0.15);
-            expected.put(tx.findNode(LABEL, "name", "i").getId(), 0.15);
-            expected.put(tx.findNode(LABEL, "name", "j").getId(), 0.15);
-        });
+        expected.put(reverseFactory.nodeId("a"), 0.15);
+        expected.put(reverseFactory.nodeId("b"), 0.3386727);
+        expected.put(reverseFactory.nodeId("c"), 0.2219679);
+        expected.put(reverseFactory.nodeId("d"), 0.3494679);
+        expected.put(reverseFactory.nodeId("e"), 2.5463981);
+        expected.put(reverseFactory.nodeId("f"), 2.3858317);
+        expected.put(reverseFactory.nodeId("g"), 0.15);
+        expected.put(reverseFactory.nodeId("h"), 0.15);
+        expected.put(reverseFactory.nodeId("i"), 0.15);
+        expected.put(reverseFactory.nodeId("j"), 0.15);
 
         final CentralityResult rankResult;
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(LABEL.name())
-            .addRelationshipType(RELATIONSHIP_TYPE)
-            .globalOrientation(Orientation.REVERSE)
-            .build()
-            .graph();
 
         rankResult = PageRankAlgorithmType.NON_WEIGHTED
-            .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
+            .create(reverseGraph, DEFAULT_CONFIG, LongStream.empty(), ProgressLogger.NULL_LOGGER)
             .compute()
             .result();
 
-
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
+        expected.forEach((originalNodeId, expectedPageRank) -> {
             assertEquals(
-                expected.get(nodeId),
-                rankResult.score(i),
+                expected.get(originalNodeId),
+                rankResult.score(reverseGraph.toMappedNodeId(originalNodeId)),
                 1e-2,
-                "Node#" + nodeId
+                "Node#" + originalNodeId
             );
         });
     }
 
     @Test
     void correctPartitionBoundariesForAllNodes() {
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(LABEL.name())
-            .addRelationshipType(RELATIONSHIP_TYPE)
-            .build()
-            .graph();
-
         // explicitly list all source nodes to prevent the 'we got everything' optimization
         PageRankAlgorithmType.NON_WEIGHTED
             .create(
-                graph,
-                LongStream.range(0L, graph.nodeCount()),
+                naturalGraph,
+                LongStream.range(0L, naturalGraph.nodeCount()),
                 DEFAULT_CONFIG,
                 1,
                 null,
                 1,
-                progressLogger,
+                ProgressLogger.NULL_LOGGER,
                 AllocationTracker.EMPTY
             )
             .compute();
@@ -234,23 +199,16 @@ final class PageRankTest extends AlgoTestBase {
 
     @Test
     void shouldLogProgress() {
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(LABEL.name())
-            .addRelationshipType(RELATIONSHIP_TYPE)
-            .build()
-            .graph();
-
         var config = ImmutablePageRankStreamConfig.builder().build();
 
         var testLogger = new TestProgressLogger(
-            graph.relationshipCount(),
+            naturalGraph.relationshipCount(),
             "PageRank",
             config.concurrency()
         );
 
         var pageRank = PageRankAlgorithmType.NON_WEIGHTED.create(
-            graph,
+            naturalGraph,
             config,
             LongStream.empty(),
             testLogger
@@ -261,7 +219,7 @@ final class PageRankTest extends AlgoTestBase {
         List<AtomicLong> progresses = testLogger.getProgresses();
 
         assertEquals(progresses.size(), pageRank.iterations());
-        progresses.forEach(progress -> assertEquals(graph.relationshipCount(), progress.get()));
+        progresses.forEach(progress -> assertEquals(naturalGraph.relationshipCount(), progress.get()));
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
         LongStream.range(1, pageRank.iterations() + 1).forEach(iteration -> {
