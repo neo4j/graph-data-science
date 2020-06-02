@@ -26,10 +26,12 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> extends AlgorithmFactory<NodeSimilarity, CONFIG> {
@@ -63,7 +65,17 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
                     return MemoryEstimations.builder(HugeObjectArray.class)
                         .perNode("array", nodeCount -> nodeCount * averageVectorSize).build();
                 })
-            );
+            )
+            .add("weights",
+                MemoryEstimations.setup("", (dimensions, nodeCount) -> {
+                int averageDegree = dimensions.nodeCount() == 0
+                    ? 0
+                    : Math.toIntExact(dimensions.maxRelCount() / dimensions.nodeCount());
+                long averageVectorSize = sizeOfDoubleArray(averageDegree);
+                return MemoryEstimations.builder(HugeObjectArray.class)
+                    .rangePerNode("array", ignore -> MemoryRange.of(0, nodeCount * averageVectorSize))
+                    .build();
+            }));
         if (config.computeToGraph() && !config.hasTopK()) {
             builder.add(
                 "similarity graph",

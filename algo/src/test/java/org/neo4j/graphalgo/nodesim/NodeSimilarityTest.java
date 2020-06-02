@@ -734,7 +734,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
 
-        long thisInstance = 56;
+        long thisInstance = 64;
 
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
@@ -744,10 +744,15 @@ final class NodeSimilarityTest extends AlgoTestBase {
         long vectorsRangeMax = 56_000_016L;
         MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
 
+        long weightsRangeMin = 16L;
+        long weightsRangeMax = 16L + 16L + (5_000_000 / 1_000_000) * Long.BYTES;
+        MemoryRange weightsRange = MemoryRange.of(weightsRangeMin, weightsRangeMax);
+
         MemoryEstimations.Builder builder = MemoryEstimations.builder()
             .fixed("this.instance", thisInstance)
             .fixed("node filter", nodeFilterRange)
-            .fixed("vectors", vectorsRange);
+            .fixed("vectors", vectorsRange)
+            .fixed("weights", weightsRange);
 
         long topKMapRangeMin;
         long topKMapRangeMax;
@@ -784,7 +789,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
 
-        long thisInstance = 56;
+        long thisInstance = 64;
 
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
@@ -794,6 +799,10 @@ final class NodeSimilarityTest extends AlgoTestBase {
         long vectorsRangeMax = 56_000_016L;
         MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
 
+        long weightsRangeMin = 16L;
+        long weightsRangeMax = 16L + 16L + (5_000_000 / 1_000_000) * Long.BYTES;
+        MemoryRange weightsRange = MemoryRange.of(weightsRangeMin, weightsRangeMax);
+
         long topNListMin = 2_504L;
         long topNListMax = 2_504L;
         MemoryRange topNListRange = MemoryRange.of(topNListMin, topNListMax);
@@ -802,6 +811,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
             .fixed("this.instance", thisInstance)
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange)
+            .fixed("weights", weightsRange)
             .fixed("topNList", topNListRange);
 
         long topKMapRangeMin;
