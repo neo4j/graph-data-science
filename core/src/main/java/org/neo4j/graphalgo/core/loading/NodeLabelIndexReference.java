@@ -28,13 +28,13 @@ public class NodeLabelIndexReference implements NodeReference {
     private final NodeLabelIndexCursor labelIndexCursor;
     private final Read dataRead;
     private final NodeCursor nodeCursor;
-    private final long[] labels;
+    private final long[] labelIds;
 
-    NodeLabelIndexReference(NodeLabelIndexCursor labelIndexCursor, Read dataRead, NodeCursor nodeCursor, long[] labels) {
+    NodeLabelIndexReference(NodeLabelIndexCursor labelIndexCursor, Read dataRead, NodeCursor nodeCursor, int labelId) {
         this.labelIndexCursor = labelIndexCursor;
         this.dataRead = dataRead;
         this.nodeCursor = nodeCursor;
-        this.labels = labels;
+        this.labelIds = new long[]{labelId};
     }
 
     @Override
@@ -44,7 +44,7 @@ public class NodeLabelIndexReference implements NodeReference {
 
     @Override
     public long[] labels() {
-        return labels;
+        return labelIds;
     }
 
     @Override

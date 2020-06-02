@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
-public final class NodeScannerFactory {
+final class NodeScannerFactory {
 
     private NodeScannerFactory() {}
 

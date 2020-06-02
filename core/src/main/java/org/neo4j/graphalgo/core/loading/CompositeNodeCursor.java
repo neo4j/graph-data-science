@@ -43,7 +43,7 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements Curso
 
     private boolean closed = false;
 
-    public CompositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+    CompositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
         this.cursors = cursors;
         this.cursorQueue = new PriorityQueue<>(
             cursors.size(),
@@ -70,7 +70,7 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements Curso
         }
     }
 
-    long[] currentLabel() {
+    long[] currentLabels() {
         return this.currentLabels.toArray();
     }
 

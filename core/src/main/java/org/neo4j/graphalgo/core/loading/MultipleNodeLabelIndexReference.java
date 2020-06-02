@@ -28,7 +28,6 @@ public class MultipleNodeLabelIndexReference implements NodeReference {
     private final Read dataRead;
     private final NodeCursor nodeCursor;
 
-
     MultipleNodeLabelIndexReference(
         CompositeNodeCursor compositeNodeCursor,
         Read dataRead,
@@ -46,7 +45,7 @@ public class MultipleNodeLabelIndexReference implements NodeReference {
 
     @Override
     public long[] labels() {
-        return compositeNodeCursor.currentLabel();
+        return compositeNodeCursor.currentLabels();
     }
 
     @Override

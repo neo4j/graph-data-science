@@ -58,7 +58,7 @@ final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeRe
             cursor,
             transaction.dataRead(),
             transaction.cursors().allocateNodeCursor(),
-            new long[]{labelId}
+            labelId
         );
     }
 }
