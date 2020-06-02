@@ -40,7 +40,7 @@ See the instructions at https://github.com/neo4j/neo4j#building-neo4j.
 On a UNIX system, the following should get you what you need:
 
 ----
-git clone https://github.com/neo4j/neo4j.git && cd neo4j && mvn install -DskipTests -T2C
+git clone --branch 4.1 https://github.com/neo4j/neo4j.git && cd neo4j && mvn install -DskipTests -T2C
 ----
 
 This is a temporary requirement, until Neo4j 4.1.0 is released.
