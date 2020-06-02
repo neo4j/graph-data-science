@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
 import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.embedding.RandomProjectionStreamProc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphalgo.functions.OneHotEncodingFunc;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
@@ -167,7 +166,6 @@ class AlphaListProcTest extends BaseProcTest {
             PearsonProc.class,
             RandomWalkProc.class,
             OneHotEncodingFunc.class,
-            RandomProjectionStreamProc.class,
             SpanningTreeProc.class,
             SampledBetweennessCentralityProc.class,
             ShortestPathDeltaSteppingProc.class,
