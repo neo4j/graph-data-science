@@ -234,8 +234,6 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.ml.ann.write`
 .1+<.^| Triangle Finding
 | `gds.alpha.triangles`
-.1+<.^|Random Projection
-| `gds.alpha.randomProjection.stream`
 |===
 
 The following table lists all functions in the GDS library:
