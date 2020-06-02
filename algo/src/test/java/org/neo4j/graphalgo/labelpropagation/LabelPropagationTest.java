@@ -23,20 +23,21 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.extension.GDLGraph;
+import org.neo4j.graphalgo.extension.GraphStoreExtension;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.gdl.GDLFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,66 +52,59 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-final class LabelPropagationTest extends AlgoTestBase {
+@GraphStoreExtension
+class LabelPropagationTest {
 
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (nAlice:User   {id: 'Alice',   seedId: 2})" +
-            ", (nBridget:User {id: 'Bridget', seedId: 3})" +
-            ", (nCharles:User {id: 'Charles', seedId: 4})" +
-            ", (nDoug:User    {id: 'Doug',    seedId: 3})" +
-            ", (nMark:User    {id: 'Mark',    seedId: 4})" +
-            ", (nMichael:User {id:'Michael',  seedId: 2})" +
-            ", (nAlice)-[:FOLLOW]->(nBridget)" +
-            ", (nAlice)-[:FOLLOW]->(nCharles)" +
-            ", (nMark)-[:FOLLOW]->(nDoug)" +
-            ", (nBridget)-[:FOLLOW]->(nMichael)" +
-            ", (nDoug)-[:FOLLOW]->(nMark)" +
-            ", (nMichael)-[:FOLLOW]->(nAlice)" +
-            ", (nAlice)-[:FOLLOW]->(nMichael)" +
-            ", (nBridget)-[:FOLLOW]->(nAlice)" +
-            ", (nMichael)-[:FOLLOW]->(nBridget)" +
-            ", (nCharles)-[:FOLLOW]->(nDoug)";
+        "CREATE" +
+        "  (nAlice:User   {seedId: 2})" +
+        ", (nBridget:User {seedId: 3})" +
+        ", (nCharles:User {seedId: 4})" +
+        ", (nDoug:User    {seedId: 3})" +
+        ", (nMark:User    {seedId: 4})" +
+        ", (nMichael:User {seedId: 2})" +
+        ", (nAlice)-[:FOLLOW]->(nBridget)" +
+        ", (nAlice)-[:FOLLOW]->(nCharles)" +
+        ", (nMark)-[:FOLLOW]->(nDoug)" +
+        ", (nBridget)-[:FOLLOW]->(nMichael)" +
+        ", (nDoug)-[:FOLLOW]->(nMark)" +
+        ", (nMichael)-[:FOLLOW]->(nAlice)" +
+        ", (nAlice)-[:FOLLOW]->(nMichael)" +
+        ", (nBridget)-[:FOLLOW]->(nAlice)" +
+        ", (nMichael)-[:FOLLOW]->(nBridget)" +
+        ", (nCharles)-[:FOLLOW]->(nDoug)";
 
-    @BeforeEach
-    void setupGraphDb() {
-        runQuery(DB_CYPHER);
-    }
+    @GDLGraph(gdl = DB_CYPHER)
+    private Graph graph;
 
-    Graph loadGraph() {
-        return new StoreLoaderBuilder()
-             .api(db)
-             .addNodeLabel("User")
-             .addRelationshipType("FOLLOW")
-             .build()
-            .graph();
-    }
+    @Inject
+    private GDLFactory gdlFactory;
 
     @Test
-    void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing() {
-        Graph graph = loadGraph();
+    void shouldUseOriginalNodeIdWhenSeedPropertyIsMissing() {
         LabelPropagation lp = new LabelPropagation(
             graph,
             ImmutableLabelPropagationStreamConfig.builder().maxIterations(1).build(),
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         );
-        lp.compute();
-        HugeLongArray labels = lp.labels();
-        assertArrayEquals(new long[]{1, 1, 3, 4, 4, 1}, labels.toArray(), "Incorrect result assuming initial labels are neo4j id");
+        assertArrayEquals(
+            new long[]{
+                gdlFactory.nodeId("nBridget"),
+                gdlFactory.nodeId("nBridget"),
+                gdlFactory.nodeId("nDoug"),
+                gdlFactory.nodeId("nMark"),
+                gdlFactory.nodeId("nMark"),
+                gdlFactory.nodeId("nBridget")
+            },
+            lp.compute().labels().toArray(),
+            "Incorrect result assuming initial labels are neo4j id"
+        );
     }
 
     @Test
-    void shouldWorkWithSeedOnExplicitlyLoadedGraph() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel("User")
-            .addRelationshipType("FOLLOW")
-            .addNodeProperty(PropertyMapping.of("seedId", 0.0))
-            .build()
-            .graph();
-
+    void shouldUseSeedProperty() {
         LabelPropagation lp = new LabelPropagation(
             graph,
             ImmutableLabelPropagationStreamConfig
@@ -119,24 +113,30 @@ final class LabelPropagationTest extends AlgoTestBase {
                 .maxIterations(1)
                 .build(),
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         );
 
-        HugeLongArray labels = lp.compute().labels();
-
-        assertArrayEquals(new long[]{2, 2, 3, 4, 4, 2}, labels.toArray());
+        assertArrayEquals(
+            new long[]{
+                gdlFactory.nodeId("nCharles"),
+                gdlFactory.nodeId("nCharles"),
+                gdlFactory.nodeId("nDoug"),
+                gdlFactory.nodeId("nMark"),
+                gdlFactory.nodeId("nMark"),
+                gdlFactory.nodeId("nCharles")
+            },
+            lp.compute().labels().toArray()
+        );
     }
 
     @Test
     void testSingleThreadClustering() {
-        Graph graph = loadGraph();
         testClustering(graph, 100);
     }
 
     @Test
     void testMultiThreadClustering() {
-        Graph graph = loadGraph();
         testClustering(graph, 2);
     }
 
@@ -151,7 +151,7 @@ final class LabelPropagationTest extends AlgoTestBase {
             graph,
             defaultConfig(),
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         );
         lp.withBatchSize(batchSize);
@@ -230,15 +230,12 @@ final class LabelPropagationTest extends AlgoTestBase {
     }
 
     @Test
-    void shouldLogProgress(){
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel("User")
-            .addRelationshipType("FOLLOW")
-            .build()
-            .graph();
-
-        var testLogger = new TestProgressLogger(graph.relationshipCount(), "LabelPropagation", defaultConfig().concurrency());
+    void shouldLogProgress() {
+        var testLogger = new TestProgressLogger(
+            graph.relationshipCount(),
+            "LabelPropagation",
+            defaultConfig().concurrency()
+        );
 
         var lp = new LabelPropagation(
             graph,
