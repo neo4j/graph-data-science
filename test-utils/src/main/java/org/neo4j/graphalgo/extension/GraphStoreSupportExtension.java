@@ -19,12 +19,15 @@
  */
 package org.neo4j.graphalgo.extension;
 
+import org.immutables.value.Value;
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.gdl.GDLFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGDLConfig;
 
@@ -37,12 +40,17 @@ import static java.util.Arrays.stream;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
-public class GraphStoreSupportExtension implements BeforeEachCallback {
+public class GraphStoreSupportExtension implements BeforeEachCallback, AfterEachCallback {
 
     @Override
     public void beforeEach(ExtensionContext context) {
         Class<?> requiredTestClass = context.getRequiredTestClass();
         gdlGraphs(requiredTestClass).forEach(setup -> injectGraphStore(setup, context));
+    }
+
+    @Override
+    public void afterEach(ExtensionContext context) {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     private static List<GDLGraphSetup> gdlGraphs(Class<?> testClass) {
@@ -66,25 +74,20 @@ public class GraphStoreSupportExtension implements BeforeEachCallback {
     }
 
     private static GDLGraphSetup gdlGraph(Field field) {
-        if (field.getType() != String.class) {
+        if (field.getType() != Graph.class) {
             throw new IllegalArgumentException(String.format(
                 Locale.ENGLISH,
-                "@GDLGraph annotated fields must be of type String. Field `%s` has type %s.",
+                "@GDLGraph annotated fields must be of type Graph. Field `%s` has type %s.",
                 field, field.getType()));
-        }
-        String gdlGraph;
-        try {
-            gdlGraph = field.get(null).toString();
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
         }
         var annotation = field.getAnnotation(GDLGraph.class);
 
         return ImmutableGDLGraphSetup.of(
-            gdlGraph,
+            annotation.gdl(),
             annotation.graphName(),
             annotation.username(),
-            annotation.orientation()
+            annotation.orientation(),
+            annotation.addToCatalog()
         );
     }
 
@@ -102,10 +105,14 @@ public class GraphStoreSupportExtension implements BeforeEachCallback {
         GraphStore graphStore = gdlFactory.build().graphStore();
         Graph graph = graphStore.getUnion();
 
+        if (gdlGraphSetup.addToCatalog()) {
+            GraphStoreCatalog.set(createConfig, graphStore);
+        }
+
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
-            injectInstance(testInstance, graphName, gdlFactory, GDLFactory.class);
-            injectInstance(testInstance, graphName, graphStore, GraphStore.class);
             injectInstance(testInstance, graphName, graph, Graph.class);
+            injectInstance(testInstance, graphName, graphStore, GraphStore.class);
+            injectInstance(testInstance, graphName, gdlFactory, GDLFactory.class);
         });
     }
 
@@ -113,9 +120,11 @@ public class GraphStoreSupportExtension implements BeforeEachCallback {
         Class<?> testClass = testInstance.getClass();
         do {
             stream(testClass.getDeclaredFields())
-                .filter(field -> isAnnotated(field, Inject.class))
-                .filter(field -> field.getAnnotation(Inject.class).graphName().equals(graphName))
                 .filter(field -> field.getType() == clazz)
+                .filter(field -> isAnnotated(field, Inject.class) || isAnnotated(field, GDLGraph.class))
+                .filter(field -> isAnnotated(field, Inject.class)
+                    ? field.getAnnotation(Inject.class).graphName().equals(graphName)
+                    : field.getAnnotation(GDLGraph.class).graphName().equals(graphName))
                 .forEach(field -> setField(testInstance, field, instance));
             testClass = testClass.getSuperclass();
         }
@@ -131,5 +140,10 @@ public class GraphStoreSupportExtension implements BeforeEachCallback {
         String username();
 
         Orientation orientation();
+
+        @Value.Default
+        default boolean addToCatalog() {
+            return false;
+        }
     }
 }

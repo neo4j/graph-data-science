@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
@@ -34,10 +33,9 @@ import org.neo4j.graphalgo.gdl.GDLFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GraphStoreExtension
-public class BetweennessCentralityTest {
+class BetweennessCentralityTest {
 
-    @GDLGraph(orientation = Orientation.NATURAL)
-    public static final String DB_CYPHER =
+    private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node)" +
         ", (b:Node)" +
@@ -49,11 +47,11 @@ public class BetweennessCentralityTest {
         ", (c)-->(d)" +
         ", (d)-->(e)";
 
-    @Inject
-    private GDLFactory gdlFactory;
+    @GDLGraph(gdl = DB_CYPHER)
+    private Graph graph;
 
     @Inject
-    private Graph graph;
+    private GDLFactory gdlFactory;
 
     private static final double[] EXACT_CENTRALITIES = {0.0, 3.0, 4.0, 3.0, 0.0};
     private static final double[] EMPTY_CENTRALITIES = {0.0, 0.0, 0.0, 0.0, 0.0};

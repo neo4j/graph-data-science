@@ -47,9 +47,9 @@ import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GraphStoreExtension
-public final class PageRankTest {
+final class PageRankTest {
 
-    public static final String DB_CYPHER =
+    private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Label)" +
         ", (b:Label)" +
@@ -71,23 +71,17 @@ public final class PageRankTest {
         ", (f)-[:TYPE]->(b)" +
         ", (f)-[:TYPE]->(e)";
 
-    @GDLGraph(graphName = "naturalGraph", orientation = Orientation.NATURAL)
-    public static final String OUT_GRAPH = DB_CYPHER;
+    @GDLGraph(graphName = "naturalGraph", orientation = Orientation.NATURAL, gdl = DB_CYPHER, addToCatalog = true)
+    private Graph naturalGraph;
 
-    @GDLGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
-    public static final String IN_GRAPH = DB_CYPHER;
+    @GDLGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE, gdl = DB_CYPHER)
+    private Graph reverseGraph;
 
     @Inject(graphName = "naturalGraph")
     private GDLFactory factory;
 
     @Inject(graphName = "reverseGraph")
     private GDLFactory reverseFactory;
-
-    @Inject(graphName = "naturalGraph")
-    private Graph naturalGraph;
-
-    @Inject(graphName = "reverseGraph")
-    private Graph reverseGraph;
 
     private static final PageRankBaseConfig DEFAULT_CONFIG = defaultConfigBuilder().build();
 

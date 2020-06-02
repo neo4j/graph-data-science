@@ -35,4 +35,8 @@ public @interface GDLGraph {
     String graphName() default "graph";
 
     String username() default "";
+
+    String gdl();
+
+    boolean addToCatalog() default false;
 }
