@@ -19,20 +19,14 @@
  */
 package org.neo4j.graphalgo.extension;
 
-import org.neo4j.graphalgo.Orientation;
-
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.TYPE, ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GDLGraph {
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-    Orientation orientation() default Orientation.NATURAL;
-
+@Target(FIELD)
+@Retention(RUNTIME)
+public @interface Inject {
     String graphName() default "graph";
-
-    String username() default "";
 }

@@ -23,14 +23,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.extension.GDLGraph;
 import org.neo4j.graphalgo.extension.GraphStoreExtension;
+import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.gdl.GDLFactory;
-import org.neo4j.test.extension.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -52,9 +51,6 @@ public class BetweennessCentralityTest {
 
     @Inject
     private GDLFactory gdlFactory;
-
-    @Inject
-    private GraphStore graphStore;
 
     @Inject
     private Graph graph;

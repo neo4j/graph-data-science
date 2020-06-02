@@ -27,10 +27,11 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.gdl.GDLFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGDLConfig;
-import org.neo4j.test.extension.Inject;
 
 import java.lang.reflect.Field;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import static java.util.Arrays.stream;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
@@ -39,33 +40,44 @@ import static org.mockito.internal.util.reflection.FieldSetter.setField;
 public class GraphStoreSupportExtension implements BeforeEachCallback {
 
     @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
+    public void beforeEach(ExtensionContext context) {
         Class<?> requiredTestClass = context.getRequiredTestClass();
-
-        GDLGraphSetup gdlGraphSetup = gdlGraph(requiredTestClass);
-
-        injectGraphStore(gdlGraphSetup, context);
+        gdlGraphs(requiredTestClass).forEach(setup -> injectGraphStore(setup, context));
     }
 
-    private static GDLGraphSetup gdlGraph(Class<?> testClass) throws IllegalAccessException {
-        boolean found;
-        Optional<Field> maybeField;
+    private static List<GDLGraphSetup> gdlGraphs(Class<?> testClass) {
+        var gdlGraphs = new ArrayList<GDLGraphSetup>();
 
         do {
-            maybeField = stream(testClass.getDeclaredFields())
+            stream(testClass.getDeclaredFields())
                 .filter(f -> f.isAnnotationPresent(GDLGraph.class))
-                .findFirst();
-            found = maybeField.isPresent();
+                .map(GraphStoreSupportExtension::gdlGraph)
+                .forEach(gdlGraphs::add);
+
             testClass = testClass.getSuperclass();
-        } while (testClass != null && !found);
+        } while (testClass != null);
 
-        var field = maybeField.orElseThrow(() -> new IllegalArgumentException("Missing GDLGraph annotation."));
-
-        if (field.getType() != String.class) {
-            throw new IllegalArgumentException("Field `" + field.getName() + "` must be of type String.");
+        if (gdlGraphs.isEmpty()) {
+            throw new IllegalArgumentException(
+                "@GraphStoreExtension annotated classes require at least one field annotated with @GDLGraph.");
         }
 
-        var gdlGraph = field.get(null).toString();
+        return gdlGraphs;
+    }
+
+    private static GDLGraphSetup gdlGraph(Field field) {
+        if (field.getType() != String.class) {
+            throw new IllegalArgumentException(String.format(
+                Locale.ENGLISH,
+                "@GDLGraph annotated fields must be of type String. Field `%s` has type %s.",
+                field, field.getType()));
+        }
+        String gdlGraph;
+        try {
+            gdlGraph = field.get(null).toString();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
         var annotation = field.getAnnotation(GDLGraph.class);
 
         return ImmutableGDLGraphSetup.of(
@@ -77,9 +89,11 @@ public class GraphStoreSupportExtension implements BeforeEachCallback {
     }
 
     private static void injectGraphStore(GDLGraphSetup gdlGraphSetup, ExtensionContext context) {
+        String graphName = gdlGraphSetup.graphName();
+
         var createConfig = ImmutableGraphCreateFromGDLConfig.builder()
             .username(gdlGraphSetup.username())
-            .graphName(gdlGraphSetup.graphName())
+            .graphName(graphName)
             .gdlGraph(gdlGraphSetup.gdlGraph())
             .orientation(gdlGraphSetup.orientation())
             .build();
@@ -89,17 +103,18 @@ public class GraphStoreSupportExtension implements BeforeEachCallback {
         Graph graph = graphStore.getUnion();
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
-            injectInstance(testInstance, gdlFactory, GDLFactory.class);
-            injectInstance(testInstance, graphStore, GraphStore.class);
-            injectInstance(testInstance, graph, Graph.class);
+            injectInstance(testInstance, graphName, gdlFactory, GDLFactory.class);
+            injectInstance(testInstance, graphName, graphStore, GraphStore.class);
+            injectInstance(testInstance, graphName, graph, Graph.class);
         });
     }
 
-    private static <T> void injectInstance(Object testInstance, T instance, Class<T> clazz) {
+    private static <T> void injectInstance(Object testInstance, String graphName, T instance, Class<T> clazz) {
         Class<?> testClass = testInstance.getClass();
         do {
             stream(testClass.getDeclaredFields())
                 .filter(field -> isAnnotated(field, Inject.class))
+                .filter(field -> field.getAnnotation(Inject.class).graphName().equals(graphName))
                 .filter(field -> field.getType() == clazz)
                 .forEach(field -> setField(testInstance, field, instance));
             testClass = testClass.getSuperclass();
