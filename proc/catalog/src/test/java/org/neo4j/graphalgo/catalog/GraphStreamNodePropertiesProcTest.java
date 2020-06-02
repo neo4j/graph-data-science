@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.IdentityProperties;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -251,23 +252,5 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
         assertThat(rootCause.getMessage(), containsString("Node projection 'A' does not have property key 'newNodeProp3'"));
         assertThat(rootCause.getMessage(), containsString("Available keys: ['newNodeProp1', 'newNodeProp2']"));
-    }
-
-    private static class IdentityProperties implements NodeProperties {
-        private final long expectedPropertyCount;
-
-        IdentityProperties(long expectedPropertyCount) {
-            this.expectedPropertyCount = expectedPropertyCount;
-        }
-
-        @Override
-        public double nodeProperty(long nodeId) {
-            return nodeId;
-        }
-
-        @Override
-        public long size() {
-            return expectedPropertyCount;
-        }
     }
 }

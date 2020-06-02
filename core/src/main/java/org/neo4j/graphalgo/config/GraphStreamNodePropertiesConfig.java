@@ -29,7 +29,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("GraphStreamNodePropertiesConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface GraphStreamNodePropertiesConfig extends  GraphExportNodePropertiesConfig {
+public interface GraphStreamNodePropertiesConfig extends GraphExportNodePropertiesConfig {
 
     static GraphStreamNodePropertiesConfig of(
         String userName,

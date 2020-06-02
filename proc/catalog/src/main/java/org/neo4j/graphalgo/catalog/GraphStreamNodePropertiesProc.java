@@ -75,6 +75,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
 
         var subGraph = graphStore.getGraph(validNodeLabels, graphStore.relationshipTypes(), Optional.empty());
         var nodePropertyKeysAndValues = config.nodeProperties().stream().map(propertyKey -> Pair.of(propertyKey, subGraph.nodeProperties(propertyKey))).collect(Collectors.toList());
+        var usesPropertyNameColumn = callContext.outputFields().anyMatch(field -> field.equals("nodeProperty"));
 
         return LongStream
             .range(0, subGraph.nodeCount())
@@ -96,7 +97,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
 
                     return new Result(
                         originalId,
-                        propertyKeyAndValues.getKey(),
+                        usesPropertyNameColumn ? propertyKeyAndValues.getKey() : null,
                         numberValue
                     );
                 });

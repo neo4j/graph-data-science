@@ -30,7 +30,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("GraphWriteNodePropertiesConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface GraphWriteNodePropertiesConfig extends  GraphExportNodePropertiesConfig {
+public interface GraphWriteNodePropertiesConfig extends GraphExportNodePropertiesConfig {
 
     // This is necessary because of the initialization order in the generated constructors.
     // If we don't set it, it uses into this.concurrency, which is not initialized yet.
