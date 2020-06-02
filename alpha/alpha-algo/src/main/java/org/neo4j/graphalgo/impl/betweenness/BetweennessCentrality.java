@@ -197,12 +197,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
                 });
             }
 
-//            System.out.println("sourceNode = " + startNodeId);
-//            System.out.println("localStack = " + stack);
-//            System.out.println("localPaths = " + paths);
-//            System.out.println("localDelta = " + Arrays.toString(delta));
-//            System.out.println("localSigma = " + Arrays.toString(sigma));
-
             while (!stack.isEmpty()) {
                 int node = stack.pop();
                 paths.forEach(node, v -> {
@@ -213,9 +207,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
                     centrality.add(node, delta[node] / divisor);
                 }
             }
-
-//            System.out.println("centrality = " + centrality);
-//            System.out.println();
 
             return false;
         }
