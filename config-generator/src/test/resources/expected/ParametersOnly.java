@@ -21,13 +21,25 @@ package positive;
 
 import javax.annotation.processing.Generated;
 
+import java.util.ArrayList;
+
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ParametersOnlyConfig implements ParametersOnly {
 
-    private final int onlyAsParameter;
+    private int onlyAsParameter;
 
     public ParametersOnlyConfig(int onlyAsParameter) {
-        this.onlyAsParameter = onlyAsParameter;
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.onlyAsParameter = onlyAsParameter;
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

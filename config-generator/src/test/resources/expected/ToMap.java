@@ -21,23 +21,43 @@ package positive;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.ArrayList;
 import javax.annotation.processing.Generated;
+
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ToMapConfig implements ToMap {
 
-    private final int foo;
+    private int foo;
 
-    private final long bar;
+    private long bar;
 
-    private final double baz;
+    private double baz;
 
     public ToMapConfig(int foo, @NotNull CypherMapWrapper config) {
-        this.foo = foo;
-        this.bar = config.requireLong("bar");
-        this.baz = config.requireDouble("baz");
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.foo = foo;
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.bar = config.requireLong("bar");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.baz = config.requireDouble("baz");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

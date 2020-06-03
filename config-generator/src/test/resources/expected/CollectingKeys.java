@@ -53,7 +53,7 @@ public final class CollectingKeysConfig implements CollectingKeys {
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
-        if(!errors.isEmpty()) {
+        if (!errors.isEmpty()) {
             IllegalArgumentException combinedErrors = new IllegalArgumentException();
             errors.forEach(combinedErrors::addSuppressed);
             throw combinedErrors;

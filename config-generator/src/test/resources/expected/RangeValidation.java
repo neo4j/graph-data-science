@@ -22,17 +22,47 @@ package positive;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.ArrayList;
+
 import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class RangeValidationConfig implements RangeValidation {
 
-    private final int integerWithinRange;
-    private final double doubleWithinRange;
+    private int integerWithinRange;
+    private double doubleWithinRange;
 
     public DefaultValuesConfig(@NotNull CypherMapWrapper config) {
-        this.integerWithinRange = CypherMapWrapper.validateIntegerRange("integerWithinRange", config.requireInt("integerWithinRange"), 21, 42, false, true);
-        this.doubleWithinRange = CypherMapWrapper.validateDoubleRange("doubleWithinRange", config.requireDouble("doubleWithinRange"), 21.0, 42.0, false, true);
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.integerWithinRange = CypherMapWrapper.validateIntegerRange(
+                "integerWithinRange",
+                config.requireInt("integerWithinRange"),
+                21,
+                42,
+                false,
+                true
+            );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.doubleWithinRange = CypherMapWrapper.validateDoubleRange(
+                "doubleWithinRange",
+                config.requireDouble("doubleWithinRange"),
+                21.0,
+                42.0,
+                false,
+                true
+            );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

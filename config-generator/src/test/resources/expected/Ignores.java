@@ -22,15 +22,27 @@ package positive;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.ArrayList;
+
 import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class MyConfig implements Ignores.MyConfig {
 
-    private final long notIgnored;
+    private long notIgnored;
 
     public MyConfig(@NotNull CypherMapWrapper config) {
-        this.notIgnored = config.requireLong("notIgnored");
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.notIgnored = config.requireLong("notIgnored");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

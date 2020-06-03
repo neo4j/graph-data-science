@@ -23,27 +23,47 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.ArrayList;
+
 import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class NullableFieldsConfig implements NullableFields {
 
-    private final @Nullable String nullableRequiredField;
+    private @Nullable String nullableRequiredField;
 
-    private final @Nullable String nullableDefaultField;
+    private @Nullable String nullableDefaultField;
 
-    private final @Nullable String conversionCanReturnNull;
+    private @Nullable String conversionCanReturnNull;
 
     public NullableFieldsConfig(@NotNull CypherMapWrapper config) {
-        this.nullableRequiredField = config.requireString("nullableRequiredField");
-        this.nullableDefaultField = config.getString(
-            "nullableDefaultField",
-            NullableFields.super.nullableDefaultField()
-        );
-        this.conversionCanReturnNull = NullableFields.emptyToNull(config.getString(
-            "conversionCanReturnNull",
-            NullableFields.super.conversionCanReturnNull()
-        ));
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.nullableRequiredField = config.requireString("nullableRequiredField");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.nullableDefaultField = config.getString(
+                "nullableDefaultField",
+                NullableFields.super.nullableDefaultField()
+            );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.conversionCanReturnNull = NullableFields.emptyToNull(config.getString(
+                "conversionCanReturnNull",
+                NullableFields.super.conversionCanReturnNull()
+            ));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

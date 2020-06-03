@@ -23,18 +23,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.ArrayList;
+
 import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class NullableParametersConfig implements NullableParameters {
 
-    private final String referenceTypesDefaultToNotNull;
+    private String referenceTypesDefaultToNotNull;
 
-    private final String referenceTypesCanBeMarkedAsNotNull;
+    private String referenceTypesCanBeMarkedAsNotNull;
 
-    private final String referenceTypesCanBeMarkedAsNullable;
+    private String referenceTypesCanBeMarkedAsNullable;
 
-    private final int extraValue;
+    private int extraValue;
 
     public NullableParametersConfig(
         @NotNull String referenceTypesDefaultToNotNull,
@@ -42,16 +44,38 @@ public final class NullableParametersConfig implements NullableParameters {
         @Nullable String referenceTypesCanBeMarkedAsNullable,
         @NotNull CypherMapWrapper config
     ) {
-        this.referenceTypesDefaultToNotNull = CypherMapWrapper.failOnNull(
-            "referenceTypesDefaultToNotNull",
-            referenceTypesDefaultToNotNull
-        );
-        this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.failOnNull(
-            "referenceTypesCanBeMarkedAsNotNull",
-            referenceTypesCanBeMarkedAsNotNull
-        );
-        this.referenceTypesCanBeMarkedAsNullable = referenceTypesCanBeMarkedAsNullable;
-        this.extraValue = config.requireInt("extraValue");
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.referenceTypesDefaultToNotNull = CypherMapWrapper.failOnNull(
+                "referenceTypesDefaultToNotNull",
+                referenceTypesDefaultToNotNull
+            );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.failOnNull(
+                "referenceTypesCanBeMarkedAsNotNull",
+                referenceTypesCanBeMarkedAsNotNull
+            );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.referenceTypesCanBeMarkedAsNullable = referenceTypesCanBeMarkedAsNullable;
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.extraValue = config.requireInt("extraValue");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

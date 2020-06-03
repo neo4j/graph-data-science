@@ -22,21 +22,41 @@ package positive;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.ArrayList;
+
 import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ParametersConfig implements Parameters {
 
-    private final int keyFromParameter;
+    private int keyFromParameter;
 
-    private final long keyFromMap;
+    private long keyFromMap;
 
-    private final int parametersAreAddedFirst;
+    private int parametersAreAddedFirst;
 
     public ParametersConfig(int keyFromParameter, int parametersAreAddedFirst, @NotNull CypherMapWrapper config) {
-        this.keyFromParameter = keyFromParameter;
-        this.keyFromMap = config.requireLong("keyFromMap");
-        this.parametersAreAddedFirst = parametersAreAddedFirst;
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.keyFromParameter = keyFromParameter;
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.keyFromMap = config.requireLong("keyFromMap");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.parametersAreAddedFirst = parametersAreAddedFirst;
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

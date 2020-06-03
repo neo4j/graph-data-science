@@ -19,21 +19,32 @@
  */
 package positive;
 
+import java.util.ArrayList;
+import javax.annotation.processing.Generated;
+
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-
-import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ConvertingParametersConfig implements ConvertingParameters {
 
-    private final int parametersAreSubjectToConversion;
+    private int parametersAreSubjectToConversion;
 
     public ConvertingParametersConfig(@NotNull String parametersAreSubjectToConversion) {
-        this.parametersAreSubjectToConversion = ConvertingParameters.toInt(CypherMapWrapper.failOnNull(
-            "parametersAreSubjectToConversion",
-            parametersAreSubjectToConversion
-        ));
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.parametersAreSubjectToConversion = ConvertingParameters.toInt(CypherMapWrapper.failOnNull(
+                "parametersAreSubjectToConversion",
+                parametersAreSubjectToConversion
+            ));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

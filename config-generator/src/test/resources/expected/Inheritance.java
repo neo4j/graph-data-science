@@ -22,29 +22,57 @@ package positive;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.ArrayList;
+
 import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class MyConfig implements Inheritance.MyConfig {
 
-    private final String baseValue;
+    private String baseValue;
 
-    private final int overriddenValue;
+    private int overriddenValue;
 
-    private final long overwrittenValue;
+    private long overwrittenValue;
 
-    private final double inheritedValue;
+    private double inheritedValue;
 
-    private final short inheritedDefaultValue;
+    private short inheritedDefaultValue;
 
     public MyConfig(@NotNull CypherMapWrapper config) {
-        this.baseValue = CypherMapWrapper.failOnNull("baseValue", config.requireString("baseValue"));
-        this.overriddenValue = config.getInt("overriddenValue", Inheritance.MyConfig.super.overriddenValue());
-        this.overwrittenValue = config.getLong("overwrittenValue", Inheritance.MyConfig.super.overwrittenValue());
-        this.inheritedValue = config.requireDouble("inheritedValue");
-        this.inheritedDefaultValue = config
-            .getNumber("inheritedDefaultValue", Inheritance.MyConfig.super.inheritedDefaultValue())
-            .shortValue();
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.baseValue = CypherMapWrapper.failOnNull("baseValue", config.requireString("baseValue"));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.overriddenValue = config.getInt("overriddenValue", Inheritance.MyConfig.super.overriddenValue());
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.overwrittenValue = config.getLong("overwrittenValue", Inheritance.MyConfig.super.overwrittenValue());
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.inheritedValue = config.requireDouble("inheritedValue");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.inheritedDefaultValue = config
+                .getNumber("inheritedDefaultValue", Inheritance.MyConfig.super.inheritedDefaultValue())
+                .shortValue();
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

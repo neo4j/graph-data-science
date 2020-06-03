@@ -19,30 +19,53 @@
  */
 package positive;
 
+import java.util.ArrayList;
+import javax.annotation.processing.Generated;
+
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-
-import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ConversionsConfig implements Conversions.MyConversion {
 
-    private final int directMethod;
+    private int directMethod;
 
-    private final int inheritedMethod;
+    private int inheritedMethod;
 
-    private final int qualifiedMethod;
+    private int qualifiedMethod;
 
-    private final String referenceTypeAsResult;
+    private String referenceTypeAsResult;
 
     public ConversionsConfig(@NotNull CypherMapWrapper config) {
-        this.directMethod = Conversions.MyConversion.toInt(config.requireString("directMethod"));
-        this.inheritedMethod = Conversions.BaseConversion.toIntBase(config.requireString("inheritedMethod");
-        this.qualifiedMethod = Conversions.OtherConversion.toIntQual(config.requireString("qualifiedMethod");
-        this.referenceTypeAsResult = CypherMapWrapper.failOnNull(
-            "referenceTypeAsResult",
-            Conversions.MyConversion.add42(config.requireString("referenceTypeAsResult"))
-        );
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.directMethod = Conversions.MyConversion.toInt(config.requireString("directMethod"));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.inheritedMethod = Conversions.BaseConversion.toIntBase(config.requireString("inheritedMethod"));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.qualifiedMethod = Conversions.OtherConversion.toIntQual(config.requireString("qualifiedMethod"));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.referenceTypeAsResult = CypherMapWrapper.failOnNull(
+                "referenceTypeAsResult",
+                Conversions.MyConversion.add42(config.requireString("referenceTypeAsResult"))
+            );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

@@ -22,21 +22,41 @@ package positive;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.ArrayList;
+
 import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class NamingConflictConfig implements NamingConflict {
 
-    private final int config;
+    private int config;
 
-    private final int anotherConfig;
+    private int anotherConfig;
 
-    private final int config_;
+    private int config_;
 
     public NamingConflictConfig(int config_, @NotNull CypherMapWrapper config__) {
-        this.config = config__.requireInt("config");
-        this.anotherConfig = config__.requireInt("config");
-        this.config_ = config_;
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.config = config__.requireInt("config");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.anotherConfig = config__.requireInt("config");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.config_ = config_;
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

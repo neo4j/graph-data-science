@@ -19,24 +19,39 @@
  */
 package positive;
 
+import java.util.ArrayList;
+import javax.annotation.processing.Generated;
+
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-
-import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class DefaultValuesConfig implements DefaultValues {
 
-    private final int defaultInt;
+    private int defaultInt;
 
-    private final String defaultString;
+    private String defaultString;
 
     public DefaultValuesConfig(@NotNull CypherMapWrapper config) {
-        this.defaultInt = config.getInt("defaultInt", DefaultValues.super.defaultInt());
-        this.defaultString = CypherMapWrapper.failOnNull(
-            "defaultString",
-            config.getString("defaultString", DefaultValues.super.defaultString())
-        );
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.defaultInt = config.getInt("defaultInt", DefaultValues.super.defaultInt());
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.defaultString = CypherMapWrapper.failOnNull(
+                "defaultString",
+                config.getString("defaultString", DefaultValues.super.defaultString())
+            );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override

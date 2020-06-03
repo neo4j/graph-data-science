@@ -22,18 +22,34 @@ package positive;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.ArrayList;
+
 import javax.annotation.processing.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class KeyRenamesConfig implements KeyRenames {
 
-    private final int lookupUnderAnotherKey;
+    private int lookupUnderAnotherKey;
 
-    private final int whitespaceWillBeTrimmed;
+    private int whitespaceWillBeTrimmed;
 
     public KeyRenamesConfig(@NotNull CypherMapWrapper config) {
-        this.lookupUnderAnotherKey = config.requireInt("key could also be an invalid identifier");
-        this.whitespaceWillBeTrimmed = config.requireInt("whitespace will be trimmed");
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.lookupUnderAnotherKey = config.requireInt("key could also be an invalid identifier");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.whitespaceWillBeTrimmed = config.requireInt("whitespace will be trimmed");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            IllegalArgumentException combinedErrors = new IllegalArgumentException();
+            errors.forEach(combinedErrors::addSuppressed);
+            throw combinedErrors;
+        }
     }
 
     @Override
