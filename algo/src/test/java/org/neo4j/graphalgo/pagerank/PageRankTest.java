@@ -200,7 +200,7 @@ final class PageRankTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
     }
 
-    static void assertResult(Graph graph, PageRankAlgorithmType algorithmType, Map<Long, Double> expected) {
+    static void assertResult(Graph graph, PageRankAlgorithm algorithmType, Map<Long, Double> expected) {
         var rankResult = algorithmType
             .create(graph, DEFAULT_CONFIG, LongStream.empty(), ProgressLogger.NULL_LOGGER)
             .compute()

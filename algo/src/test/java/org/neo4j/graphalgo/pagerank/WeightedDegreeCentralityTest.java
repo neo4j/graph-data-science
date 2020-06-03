@@ -19,80 +19,53 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Label;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
-final class WeightedDegreeCentralityTest extends AlgoTestBase {
+@GdlExtension
+final class WeightedDegreeCentralityTest {
 
+    @GdlGraph
     private static final String DB_CYPHER =
             "CREATE" +
-            "  (_:Label0 {name: '_'})" +
-            ", (a:Label1 {name: 'a'})" +
-            ", (b:Label1 {name: 'b'})" +
-            ", (c:Label1 {name: 'c'})" +
-            ", (d:Label1 {name: 'd'})" +
-            ", (e:Label1 {name: 'e'})" +
-            ", (f:Label1 {name: 'f'})" +
-            ", (g:Label1 {name: 'g'})" +
-            ", (h:Label1 {name: 'h'})" +
-            ", (i:Label1 {name: 'i'})" +
-            ", (j:Label1 {name: 'j'})" +
-            ", (k:Label2 {name: 'k'})" +
-            ", (l:Label2 {name: 'l'})" +
-            ", (m:Label2 {name: 'm'})" +
-            ", (n:Label2 {name: 'n'})" +
-            ", (o:Label2 {name: 'o'})" +
-            ", (p:Label2 {name: 'p'})" +
-            ", (q:Label2 {name: 'q'})" +
-            ", (r:Label2 {name: 'r'})" +
-            ", (s:Label2 {name: 's'})" +
-            ", (t:Label2 {name: 't'})" +
+            "  (a:Label)" +
+            ", (b:Label)" +
+            ", (c:Label)" +
+            ", (d:Label)" +
+            ", (e:Label)" +
+            ", (f:Label)" +
+            ", (g:Label)" +
+            ", (h:Label)" +
+            ", (i:Label)" +
+            ", (j:Label)" +
 
             ", (b)-[:TYPE1 {weight: 2.0}]->(c)" +
             ", (c)-[:TYPE1 {weight: 2.0}]->(b)" +
-
             ", (d)-[:TYPE1 {weight: 5.0}]->(a)" +
             ", (d)-[:TYPE1 {weight: 2.0}]->(b)" +
-
             ", (e)-[:TYPE1 {weight: 2.0}]->(b)" +
             ", (e)-[:TYPE1 {weight: 7.0}]->(d)" +
             ", (e)-[:TYPE1 {weight: 1.0}]->(f)" +
-
             ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
             ", (f)-[:TYPE1 {weight: 2.0}]->(e)" +
-
-            ", (a)-[:TYPE3 {weight: -2.0}]->(b)" +
-
-            ", (b)-[:TYPE3 {weight: 2.0}]->(c)" +
-            ", (c)-[:TYPE3 {weight: 2.0}]->(b)" +
-
-            ", (d)-[:TYPE3 {weight: 2.0}]->(a)" +
-            ", (d)-[:TYPE3 {weight: 2.0}]->(b)" +
-
-            ", (e)-[:TYPE3 {weight: 2.0}]->(b)" +
-            ", (e)-[:TYPE3 {weight: 2.0}]->(d)" +
-            ", (e)-[:TYPE3 {weight: 2.0}]->(f)" +
-
-            ", (f)-[:TYPE3 {weight: 2.0}]->(b)" +
-            ", (f)-[:TYPE3 {weight: 2.0}]->(e)" +
 
             ", (g)-[:TYPE2]->(b)" +
             ", (g)-[:TYPE2]->(e)" +
@@ -101,69 +74,77 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
             ", (i)-[:TYPE2]->(b)" +
             ", (i)-[:TYPE2]->(e)" +
             ", (j)-[:TYPE2]->(e)" +
-            ", (k)-[:TYPE2]->(e)";
+            ", (k)-[:TYPE2]->(e)" +
 
-    @BeforeEach
-    void setupGraphDb() {
-        runQuery(DB_CYPHER);
-    }
+            ", (a)-[:TYPE3 {weight: -2.0}]->(b)" +
+            ", (b)-[:TYPE3 {weight: 2.0}]->(c)" +
+            ", (c)-[:TYPE3 {weight: 2.0}]->(b)" +
+            ", (d)-[:TYPE3 {weight: 2.0}]->(a)" +
+            ", (d)-[:TYPE3 {weight: 2.0}]->(b)" +
+            ", (e)-[:TYPE3 {weight: 2.0}]->(b)" +
+            ", (e)-[:TYPE3 {weight: 2.0}]->(d)" +
+            ", (e)-[:TYPE3 {weight: 2.0}]->(f)" +
+            ", (f)-[:TYPE3 {weight: 2.0}]->(b)" +
+            ", (f)-[:TYPE3 {weight: 2.0}]->(e)";
+
+    @Inject
+    private GraphStore graphStore;
+
+    @Inject
+    private GdlFactory gdlFactory;
+
+    @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
+    private static final String DB_CYPHER_REVERSE = DB_CYPHER;
+
+    @Inject(graphName = "reverseGraph")
+    private GraphStore reverseGraphStore;
 
     @Test
     void buildWeightsArray() {
-        final Label label = Label.label("Label1");
-        final Map<Long, double[]> expected = new HashMap<>();
+        var expected = Map.of(
+            gdlFactory.nodeId("a"), new double[]{},
+            gdlFactory.nodeId("b"), new double[]{2.0},
+            gdlFactory.nodeId("c"), new double[]{2.0},
+            gdlFactory.nodeId("d"), new double[]{5.0, 2.0},
+            gdlFactory.nodeId("e"), new double[]{2.0, 7.0, 1.0},
+            gdlFactory.nodeId("f"), new double[]{2.0, 2.0},
+            gdlFactory.nodeId("g"), new double[]{},
+            gdlFactory.nodeId("h"), new double[]{},
+            gdlFactory.nodeId("i"), new double[]{},
+            gdlFactory.nodeId("j"), new double[]{}
+        );
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), new double[]{});
-            expected.put(tx.findNode(label, "name", "b").getId(), new double[]{2.0});
-            expected.put(tx.findNode(label, "name", "c").getId(), new double[]{2.0});
-            expected.put(tx.findNode(label, "name", "d").getId(), new double[]{5.0, 2.0});
-            expected.put(tx.findNode(label, "name", "e").getId(), new double[]{2.0, 7.0, 1.0});
-            expected.put(tx.findNode(label, "name", "f").getId(), new double[]{2.0, 2.0});
-            expected.put(tx.findNode(label, "name", "g").getId(), new double[]{});
-            expected.put(tx.findNode(label, "name", "h").getId(), new double[]{});
-            expected.put(tx.findNode(label, "name", "i").getId(), new double[]{});
-            expected.put(tx.findNode(label, "name", "j").getId(), new double[]{});
-        });
+        var graph = graphStore.getGraph(
+            List.of(NodeLabel.of("Label")),
+            List.of(RelationshipType.of("TYPE1")),
+            Optional.of("weight")
+        );
 
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE1")
-            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-            .build()
-            .graph();
-
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
+        var result = new WeightedDegreeCentrality(
             graph,
             1,
             true,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
-        );
-        degreeCentrality.compute();
+        ).compute().weights();
 
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
+        expected.forEach((originalNodeId, expectedPageRank) -> {
             assertArrayEquals(
-                    expected.get(nodeId),
-                    degreeCentrality.weights().get(i).toArray(),
-                    0.01D,
-                    "Node#" + nodeId
-
+                expected.get(originalNodeId),
+                result.get(graph.toMappedNodeId(originalNodeId)).toArray(),
+                1e-2,
+                "Node#" + originalNodeId
             );
         });
     }
 
     @Test
     void shouldThrowIfGraphHasNoRelationshipProperty() {
-
-        Graph graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel("Label1")
-                .addRelationshipType("TYPE1")
-                .build()
-                .graph();
+        var graph = graphStore.getGraph(
+            List.of(NodeLabel.of("Label")),
+            List.of(RelationshipType.of("TYPE1")),
+            Optional.empty()
+        );
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
             new WeightedDegreeCentrality(
@@ -176,142 +157,98 @@ final class WeightedDegreeCentralityTest extends AlgoTestBase {
         });
 
         assertEquals(
-                "WeightedDegreeCentrality requires a weight property to be loaded.",
-                exception.getMessage()
+            "WeightedDegreeCentrality requires a weight property to be loaded.",
+            exception.getMessage()
         );
     }
 
     @Test
     void weightedOutgoingCentrality() {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
+        var expected = Map.of(
+            gdlFactory.nodeId("a"), 0.0,
+            gdlFactory.nodeId("b"), 2.0,
+            gdlFactory.nodeId("c"), 2.0,
+            gdlFactory.nodeId("d"), 7.0,
+            gdlFactory.nodeId("e"), 10.0,
+            gdlFactory.nodeId("f"), 4.0,
+            gdlFactory.nodeId("g"), 0.0,
+            gdlFactory.nodeId("h"), 0.0,
+            gdlFactory.nodeId("i"), 0.0,
+            gdlFactory.nodeId("j"), 0.0
+        );
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "b").getId(), 2.0);
-            expected.put(tx.findNode(label, "name", "c").getId(), 2.0);
-            expected.put(tx.findNode(label, "name", "d").getId(), 7.0);
-            expected.put(tx.findNode(label, "name", "e").getId(), 10.0);
-            expected.put(tx.findNode(label, "name", "f").getId(), 4.0);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.0);
-        });
+        var graph = graphStore.getGraph(
+            List.of(NodeLabel.of("Label")),
+            List.of(RelationshipType.of("TYPE1")),
+            Optional.of("weight")
+        );
 
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE1")
-            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-            .build()
-            .graph();
-
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
-                graph,
-            1,
-            false,
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY);
-        degreeCentrality.compute();
-
-        IntStream.range(0, expected.size()).forEach(i -> {
-            long nodeId = graph.toOriginalNodeId(i);
-            assertEquals(
-                    expected.get(nodeId),
-                    degreeCentrality.degrees().get(i),
-                    1e-2,
-                    "Node#" + nodeId
-            );
-        });
+        assertDegrees(graph, expected, 1);
     }
 
     @Test
     void excludeNegativeWeights() {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
+        var expected = Map.of(
+            gdlFactory.nodeId("a"), 0.0,
+            gdlFactory.nodeId("b"), 2.0,
+            gdlFactory.nodeId("c"), 2.0,
+            gdlFactory.nodeId("d"), 4.0,
+            gdlFactory.nodeId("e"), 6.0,
+            gdlFactory.nodeId("f"), 4.0,
+            gdlFactory.nodeId("g"), 0.0,
+            gdlFactory.nodeId("h"), 0.0,
+            gdlFactory.nodeId("i"), 0.0,
+            gdlFactory.nodeId("j"), 0.0
+        );
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "b").getId(), 2.0);
-            expected.put(tx.findNode(label, "name", "c").getId(), 2.0);
-            expected.put(tx.findNode(label, "name", "d").getId(), 4.0);
-            expected.put(tx.findNode(label, "name", "e").getId(), 6.0);
-            expected.put(tx.findNode(label, "name", "f").getId(), 4.0);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.0);
-        });
+        var graph = graphStore.getGraph(
+            List.of(NodeLabel.of("Label")),
+            List.of(RelationshipType.of("TYPE3")),
+            Optional.of("weight")
+        );
 
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE3")
-            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-            .build()
-            .graph();
-
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
-                graph,
-            1,
-            false,
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY);
-        degreeCentrality.compute();
-
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
-            assertEquals(
-                    expected.get(nodeId),
-                    degreeCentrality.degrees().get(i),
-                    1e-2,
-                    "Node#" + nodeId
-            );
-        });
+        assertDegrees(graph, expected, 1);
     }
 
     @Test
     void weightedIncomingCentrality() {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
+        var expected = Map.of(
+            gdlFactory.nodeId("a"), 5.0,
+            gdlFactory.nodeId("b"), 8.0,
+            gdlFactory.nodeId("c"), 2.0,
+            gdlFactory.nodeId("d"), 7.0,
+            gdlFactory.nodeId("e"), 2.0,
+            gdlFactory.nodeId("f"), 1.0,
+            gdlFactory.nodeId("g"), 0.0,
+            gdlFactory.nodeId("h"), 0.0,
+            gdlFactory.nodeId("i"), 0.0,
+            gdlFactory.nodeId("j"), 0.0
+        );
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 5.0);
-            expected.put(tx.findNode(label, "name", "b").getId(), 8.0);
-            expected.put(tx.findNode(label, "name", "c").getId(), 2.0);
-            expected.put(tx.findNode(label, "name", "d").getId(), 7.0);
-            expected.put(tx.findNode(label, "name", "e").getId(), 2.0);
-            expected.put(tx.findNode(label, "name", "f").getId(), 1.0);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.0);
-        });
+        var graph = reverseGraphStore.getGraph(
+            List.of(NodeLabel.of("Label")),
+            List.of(RelationshipType.of("TYPE1")),
+            Optional.of("weight")
+        );
 
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipProjection(RelationshipProjection.of("TYPE1", Orientation.REVERSE))
-            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-            .build()
-            .graph();
+        assertDegrees(graph, expected, 4);
+    }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
-                graph,
-            4,
+    private void assertDegrees(Graph graph, Map<Long, Double> expected, int concurrency) {
+        var result = new WeightedDegreeCentrality(
+            graph,
+            concurrency,
             false,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY);
-        degreeCentrality.compute();
+            AllocationTracker.EMPTY
+        ).compute().degrees();
 
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
+        expected.forEach((originalNodeId, expectedPageRank) -> {
             assertEquals(
-                    expected.get(nodeId),
-                    degreeCentrality.degrees().get(i),
-                    1e-2,
-                    "Node#" + nodeId
+                expected.get(originalNodeId),
+                result.get(graph.toMappedNodeId(originalNodeId)),
+                1e-2,
+                "Node#" + originalNodeId
             );
         });
     }
