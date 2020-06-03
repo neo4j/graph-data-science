@@ -30,6 +30,6 @@ import java.lang.annotation.Target;
 @Inherited
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(GraphStoreSupportExtension.class)
-public @interface GraphStoreExtension {
+@ExtendWith(GdlSupportExtension.class)
+public @interface GdlExtension {
 }

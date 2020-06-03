@@ -17,26 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.extension;
+package org.neo4j.graphalgo.gdl;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+@ValueClass
+@SuppressWarnings("immutables:subtype")
+public interface GraphCreateFromGdlConfig extends GraphCreateConfig {
 
-@Target({ElementType.TYPE, ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GDLGraph {
+    @Value
+    String gdlGraph();
 
-    Orientation orientation() default Orientation.NATURAL;
+    @Value.Default
+    default Orientation orientation() {
+        return Orientation.NATURAL;
+    }
 
-    String graphName() default "graph";
-
-    String username() default "";
-
-    String gdl();
-
-    boolean addToCatalog() default false;
+    @Override
+    default GraphStoreFactory.Supplier graphStoreFactory() {
+        return loaderContext -> GdlFactory.of(this);
+    }
 }

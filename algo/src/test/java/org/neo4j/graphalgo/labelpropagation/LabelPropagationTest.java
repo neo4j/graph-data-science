@@ -34,10 +34,10 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.extension.GDLGraph;
-import org.neo4j.graphalgo.extension.GraphStoreExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.gdl.GDLFactory;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-@GraphStoreExtension
+@GdlExtension
 class LabelPropagationTest {
 
     private static final String DB_CYPHER =
@@ -74,11 +74,11 @@ class LabelPropagationTest {
         ", (nMichael)-[:FOLLOW]->(nBridget)" +
         ", (nCharles)-[:FOLLOW]->(nDoug)";
 
-    @GDLGraph(gdl = DB_CYPHER)
+    @GdlGraph(gdl = DB_CYPHER)
     private Graph graph;
 
     @Inject
-    private GDLFactory gdlFactory;
+    private GdlFactory gdlFactory;
 
     @Test
     void shouldUseOriginalNodeIdWhenSeedPropertyIsMissing() {

@@ -25,14 +25,14 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.extension.GDLGraph;
-import org.neo4j.graphalgo.extension.GraphStoreExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.gdl.GDLFactory;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@GraphStoreExtension
+@GdlExtension
 class BetweennessCentralityTest {
 
     private static final String DB_CYPHER =
@@ -42,16 +42,16 @@ class BetweennessCentralityTest {
         ", (c:Node)" +
         ", (d:Node)" +
         ", (e:Node)" +
-        ", (a)-->(b)" +
-        ", (b)-->(c)" +
-        ", (c)-->(d)" +
-        ", (d)-->(e)";
+        ", (a)-[:REL]->(b)" +
+        ", (b)-[:REL]->(c)" +
+        ", (c)-[:REL]->(d)" +
+        ", (d)-[:REL]->(e)";
 
-    @GDLGraph(gdl = DB_CYPHER)
+    @GdlGraph(gdl = DB_CYPHER)
     private Graph graph;
 
     @Inject
-    private GDLFactory gdlFactory;
+    private GdlFactory gdlFactory;
 
     private static final double[] EXACT_CENTRALITIES = {0.0, 3.0, 4.0, 3.0, 0.0};
     private static final double[] EMPTY_CENTRALITIES = {0.0, 0.0, 0.0, 0.0, 0.0};

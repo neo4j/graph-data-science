@@ -54,24 +54,24 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class GDLFactory extends GraphStoreFactory<GraphCreateFromGDLConfig> {
+public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig> {
 
     private static final int NO_SUCH_PROPERTY = -2;
     private final GDLHandler gdlHandler;
 
-    public static GDLFactory of(String gdlGraph) {
+    public static GdlFactory of(String gdlGraph) {
         return of(AuthSubject.ANONYMOUS.username(), "graph", gdlGraph);
     }
 
-    public static GDLFactory of(String username, String graphName, String gdlGraph) {
-        return of(ImmutableGraphCreateFromGDLConfig.builder()
+    public static GdlFactory of(String username, String graphName, String gdlGraph) {
+        return of(ImmutableGraphCreateFromGdlConfig.builder()
             .username(username)
             .graphName(graphName)
             .gdlGraph(gdlGraph)
             .build());
     }
 
-    public static GDLFactory of(GraphCreateFromGDLConfig config) {
+    public static GdlFactory of(GraphCreateFromGdlConfig config) {
         var gdlHandler = new GDLHandler.Builder()
             .setDefaultVertexLabel(NodeLabel.ALL_NODES.name)
             .setDefaultEdgeLabel(RelationshipType.ALL_RELATIONSHIPS.name)
@@ -79,12 +79,12 @@ public final class GDLFactory extends GraphStoreFactory<GraphCreateFromGDLConfig
 
         var graphDimensions = GraphDimensionsGdlReader.of(gdlHandler);
 
-        return new GDLFactory(gdlHandler, config, graphDimensions);
+        return new GdlFactory(gdlHandler, config, graphDimensions);
     }
 
-    private GDLFactory(
+    private GdlFactory(
         GDLHandler gdlHandler,
-        GraphCreateFromGDLConfig graphCreateConfig,
+        GraphCreateFromGdlConfig graphCreateConfig,
         GraphDimensions graphDimensions
     ) {
         super(graphCreateConfig, NO_API_CONTEXT, graphDimensions);
@@ -99,7 +99,14 @@ public final class GDLFactory extends GraphStoreFactory<GraphCreateFromGDLConfig
     public ImportResult build() {
         var nodes = loadNodes();
         var relationships = loadRelationships(nodes.idMap());
-        var graphStore = CSRGraphStore.of(nodes.idMap(), nodes.properties(), relationships, Map.of(), 1, loadingContext.tracker());
+        var graphStore = CSRGraphStore.of(
+            nodes.idMap(),
+            nodes.properties(),
+            relationships,
+            Map.of(),
+            1,
+            loadingContext.tracker()
+        );
         return ImportResult.of(dimensions, graphStore);
     }
 
