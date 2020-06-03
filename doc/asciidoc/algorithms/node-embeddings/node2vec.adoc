@@ -34,7 +34,7 @@ CALL gds.alpha.node2vec.stream(
   configuration: Map
 ) YIELD
   nodeId: Integer,
-  vector: List<Float>
+  embedding: List<Float>
 ----
 
 include::../common-configuration/common-parameters-named-graph.adoc[]
@@ -49,7 +49,7 @@ include::specific-configuration.adoc[]
 |===
 | Name   | Type        | Description
 | nodeId | Integer     | The Neo4j node ID.
-| vector | List<Float> | The computed node embedding.
+| embedding | List<Float> | The computed node embedding.
 |===
 
 
@@ -163,7 +163,7 @@ CALL gds.alpha.node2vec.stream('myGraph', {dimensions: 2})
 [opts=header]
 .Results
 |===
-| nodeId | vector
+| nodeId | embedding
 | 0 | [-0.14295829832553864, 0.08884537220001221]
 | 1 | [0.016700705513358116, 0.2253911793231964]
 | 2 | [-0.06589698046445847, 0.042405471205711365]
