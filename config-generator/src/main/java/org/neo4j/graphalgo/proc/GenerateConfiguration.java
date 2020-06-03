@@ -208,6 +208,16 @@ final class GenerateConfiguration {
             }
         }
 
+        for (ConfigParser.Member member : config.members()) {
+            if (member.validates()) {
+                configMapConstructor.beginControlFlow("try")
+                    .addStatement("$N()", member.methodName())
+                    .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
+                    .addStatement("$N.add(e)", errorsVarName)
+                    .endControlFlow();
+            }
+        }
+
         if (!config.members().isEmpty()) {
             String combinedErrorsVarName = names.newName("combinedErrors");
             configMapConstructor.beginControlFlow("if(!$N.isEmpty())", errorsVarName)
@@ -224,12 +234,6 @@ final class GenerateConfiguration {
                 .addStatement("throw $N", combinedErrorsVarName)
                 .endControlFlow()
                 .endControlFlow();
-        }
-        
-        for (ConfigParser.Member member : config.members()) {
-            if (member.validates()) {
-                configMapConstructor.addStatement("$N()", member.methodName());
-            }
         }
 
         if (requiredMapParameter) {

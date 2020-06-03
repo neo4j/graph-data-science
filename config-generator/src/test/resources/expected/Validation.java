@@ -38,6 +38,11 @@ public final class ValidationConfig implements Validation {
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
+        try {
+            validate();
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
         if (!errors.isEmpty()) {
             if(errors.size() == 1) {
                 throw errors.get(0);
@@ -48,7 +53,6 @@ public final class ValidationConfig implements Validation {
                 throw combinedErrors;
             }
         }
-        validate();
     }
 
     public static Validation of(@NotNull CypherMapWrapper config) {
