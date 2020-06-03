@@ -210,34 +210,12 @@ final class GenerateConfiguration {
 
         for (ConfigParser.Member member : config.members()) {
             if (member.validates()) {
-                configMapConstructor.beginControlFlow("try")
-                    .addStatement("$N()", member.methodName())
-                    .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
-                    .addStatement("$N.add(e)", errorsVarName)
-                    .endControlFlow();
+                catchAndPropagatePotentialError(configMapConstructor, errorsVarName, (builder) -> builder.addStatement("$N()", member.methodName()));
             }
         }
 
         if (!config.members().isEmpty()) {
-            String combinedErrorsVarName = names.newName("combinedErrorMsg");
-            configMapConstructor.beginControlFlow("if(!$N.isEmpty())", errorsVarName)
-                .beginControlFlow("if($N.size() == $L)", errorsVarName, 1)
-                .addStatement("throw $N.get($L)", errorsVarName, 0)
-                .nextControlFlow("else")
-                .addStatement(
-                    "$1T $2N = $3N.stream().map($4T::getMessage).reduce($5S, ($6N, $7N) -> $6N + System.lineSeparator() + $8S + $7N)",
-                    String.class,
-                    combinedErrorsVarName,
-                    errorsVarName,
-                    IllegalArgumentException.class,
-                    "Multiple errors in configuration arguments:",
-                    names.newName("combined"),
-                    names.newName("msg"),
-                    "\t\t\t\t"
-                )
-                .addStatement("throw new $T($N)", IllegalArgumentException.class, combinedErrorsVarName)
-                .endControlFlow()
-                .endControlFlow();
+            combineCollectedErrors(names, configMapConstructor, errorsVarName);
         }
 
         if (requiredMapParameter) {
@@ -248,6 +226,45 @@ final class GenerateConfiguration {
         }
 
         return configMapConstructor.build();
+    }
+
+    private void combineCollectedErrors(
+        NameAllocator names,
+        MethodSpec.Builder configMapConstructor,
+        String errorsVarName
+    ) {
+        String combinedErrorsVarName = names.newName("combinedErrorMsg");
+        configMapConstructor.beginControlFlow("if(!$N.isEmpty())", errorsVarName)
+            .beginControlFlow("if($N.size() == $L)", errorsVarName, 1)
+            .addStatement("throw $N.get($L)", errorsVarName, 0)
+            .nextControlFlow("else")
+            .addStatement(
+                "$1T $2N = $3N.stream().map($4T::getMessage).reduce($5S, ($6N, $7N) -> $6N + System.lineSeparator() + $8S + $7N)",
+                String.class,
+                combinedErrorsVarName,
+                errorsVarName,
+                IllegalArgumentException.class,
+                "Multiple errors in configuration arguments:",
+                names.newName("combined"),
+                names.newName("msg"),
+                "\t\t\t\t"
+            )
+            .addStatement("throw new $T($N)", IllegalArgumentException.class, combinedErrorsVarName)
+            .endControlFlow()
+            .endControlFlow();
+    }
+
+    private void catchAndPropagatePotentialError(
+        MethodSpec.Builder builder,
+        String errorVarName,
+        UnaryOperator<MethodSpec.Builder> statementFunc
+    ) {
+        builder.beginControlFlow("try");
+        statementFunc.apply(builder);
+        builder
+            .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
+            .addStatement("$N.add(e)", errorVarName)
+            .endControlFlow();
     }
 
     private Optional<MethodSpec> defineFactory(
@@ -356,11 +373,12 @@ final class GenerateConfiguration {
             );
         }
 
-        constructor.beginControlFlow("try")
-            .addStatement("this.$N = $L", definition.fieldName(), codeBlock)
-            .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
-            .addStatement("$N.add(e)", errorsVarName)
-            .endControlFlow();
+        CodeBlock finalCodeBlock = codeBlock;
+        catchAndPropagatePotentialError(
+            constructor,
+            errorsVarName,
+            (builder) -> builder.addStatement("this.$N = $L", definition.fieldName(), finalCodeBlock)
+        );
     }
 
     private void addParameterToConstructor(
@@ -392,13 +410,14 @@ final class GenerateConfiguration {
         for (UnaryOperator<CodeBlock> converter : definition.converters()) {
             valueProducer = converter.apply(valueProducer);
         }
-        constructor
-            .addParameter(paramType, definition.fieldName())
-            .beginControlFlow("try")
-            .addStatement("this.$N = $L", definition.fieldName(), valueProducer)
-            .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
-            .addStatement("$N.add(e)", errorsVarName)
-            .endControlFlow();
+
+        CodeBlock finalValueProducer = valueProducer;
+        constructor.addParameter(paramType, definition.fieldName());
+        catchAndPropagatePotentialError(
+            constructor,
+            errorsVarName,
+            (builder) -> builder.addStatement("this.$N = $L", definition.fieldName(), finalValueProducer)
+        );
     }
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, ConfigParser.Member member) {
