@@ -34,6 +34,8 @@ import org.neo4j.graphalgo.catalog.GraphDeleteRelationshipProc;
 import org.neo4j.graphalgo.catalog.GraphDropProc;
 import org.neo4j.graphalgo.catalog.GraphExistsProc;
 import org.neo4j.graphalgo.catalog.GraphListProc;
+import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
@@ -103,6 +105,9 @@ class ListProcTest extends BaseProcTest {
         "gds.graph.drop",
         "gds.graph.exists",
         "gds.graph.list",
+        "gds.graph.streamNodeProperties",
+        "gds.graph.streamNodeProperty",
+        "gds.graph.writeNodeProperties",
 
         "gds.labelPropagation.mutate",
         "gds.labelPropagation.mutate.estimate",
@@ -199,6 +204,8 @@ class ListProcTest extends BaseProcTest {
             GraphListProc.class,
             GraphGenerateProc.class,
             GraphDeleteRelationshipProc.class,
+            GraphStreamNodePropertiesProc.class,
+            GraphWriteNodePropertiesProc.class,
             K1ColoringMutateProc.class,
             K1ColoringStatsProc.class,
             K1ColoringWriteProc.class,
