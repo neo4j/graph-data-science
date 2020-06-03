@@ -33,9 +33,7 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.gdl.GdlFactory;
-import org.neo4j.graphalgo.result.CentralityResult;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -96,64 +94,39 @@ final class PageRankTest {
 
     @Test
     void testOnOutgoingRelationships() {
-        Map<Long, Double> expected = new HashMap<>();
+        var expected = Map.of(
+            factory.nodeId("a"), 0.243007,
+            factory.nodeId("b"), 1.9183995,
+            factory.nodeId("c"), 1.7806315,
+            factory.nodeId("d"), 0.21885,
+            factory.nodeId("e"), 0.243007,
+            factory.nodeId("f"), 0.21885,
+            factory.nodeId("g"), 0.15,
+            factory.nodeId("h"), 0.15,
+            factory.nodeId("i"), 0.15,
+            factory.nodeId("j"), 0.15
+        );
 
-        expected.put(factory.nodeId("a"), 0.243007);
-        expected.put(factory.nodeId("b"), 1.9183995);
-        expected.put(factory.nodeId("c"), 1.7806315);
-        expected.put(factory.nodeId("d"), 0.21885);
-        expected.put(factory.nodeId("e"), 0.243007);
-        expected.put(factory.nodeId("f"), 0.21885);
-        expected.put(factory.nodeId("g"), 0.15);
-        expected.put(factory.nodeId("h"), 0.15);
-        expected.put(factory.nodeId("i"), 0.15);
-        expected.put(factory.nodeId("j"), 0.15);
-
-        CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
-            .create(naturalGraph, DEFAULT_CONFIG, LongStream.empty(), ProgressLogger.NULL_LOGGER)
-            .compute()
-            .result();
-
-        expected.forEach((originalNodeId, expectedPageRank) -> {
-            assertEquals(
-                expected.get(originalNodeId),
-                rankResult.score(naturalGraph.toMappedNodeId(originalNodeId)),
-                1e-2,
-                "Node#" + originalNodeId
-            );
-        });
+        assertResult(this.naturalGraph, PageRankAlgorithmType.NON_WEIGHTED, expected);
     }
+
 
     @Test
     void testOnIncomingRelationships() {
-        Map<Long, Double> expected = new HashMap<>();
+        var expected = Map.of(
+            reverseFactory.nodeId("a"), 0.15,
+            reverseFactory.nodeId("b"), 0.3386727,
+            reverseFactory.nodeId("c"), 0.2219679,
+            reverseFactory.nodeId("d"), 0.3494679,
+            reverseFactory.nodeId("e"), 2.5463981,
+            reverseFactory.nodeId("f"), 2.3858317,
+            reverseFactory.nodeId("g"), 0.15,
+            reverseFactory.nodeId("h"), 0.15,
+            reverseFactory.nodeId("i"), 0.15,
+            reverseFactory.nodeId("j"), 0.15
+        );
 
-        expected.put(reverseFactory.nodeId("a"), 0.15);
-        expected.put(reverseFactory.nodeId("b"), 0.3386727);
-        expected.put(reverseFactory.nodeId("c"), 0.2219679);
-        expected.put(reverseFactory.nodeId("d"), 0.3494679);
-        expected.put(reverseFactory.nodeId("e"), 2.5463981);
-        expected.put(reverseFactory.nodeId("f"), 2.3858317);
-        expected.put(reverseFactory.nodeId("g"), 0.15);
-        expected.put(reverseFactory.nodeId("h"), 0.15);
-        expected.put(reverseFactory.nodeId("i"), 0.15);
-        expected.put(reverseFactory.nodeId("j"), 0.15);
-
-        final CentralityResult rankResult;
-
-        rankResult = PageRankAlgorithmType.NON_WEIGHTED
-            .create(reverseGraph, DEFAULT_CONFIG, LongStream.empty(), ProgressLogger.NULL_LOGGER)
-            .compute()
-            .result();
-
-        expected.forEach((originalNodeId, expectedPageRank) -> {
-            assertEquals(
-                expected.get(originalNodeId),
-                rankResult.score(reverseGraph.toMappedNodeId(originalNodeId)),
-                1e-2,
-                "Node#" + originalNodeId
-            );
-        });
+        assertResult(reverseGraph, PageRankAlgorithmType.NON_WEIGHTED, expected);
     }
 
     @Test
@@ -225,6 +198,22 @@ final class PageRankTest {
             assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d :: Start", iteration)));
         });
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
+    }
+
+    static void assertResult(Graph graph, PageRankAlgorithmType algorithmType, Map<Long, Double> expected) {
+        var rankResult = algorithmType
+            .create(graph, DEFAULT_CONFIG, LongStream.empty(), ProgressLogger.NULL_LOGGER)
+            .compute()
+            .result();
+
+        expected.forEach((originalNodeId, expectedPageRank) -> {
+            assertEquals(
+                expected.get(originalNodeId),
+                rankResult.score(graph.toMappedNodeId(originalNodeId)),
+                1e-2,
+                "Node#" + originalNodeId
+            );
+        });
     }
 
     private void assertMemoryEstimation(final long nodeCount, final int concurrency) {

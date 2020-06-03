@@ -19,62 +19,50 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.result.CentralityResult;
-import org.neo4j.graphdb.Label;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
-
-final class WeightedPageRankTest extends AlgoTestBase {
+@GdlExtension
+class WeightedPageRankTest {
 
     private static final PageRankBaseConfig DEFAULT_CONFIG = ImmutablePageRankStreamConfig
         .builder()
         .maxIterations(40)
         .build();
 
+    @GdlGraph
     private static final String DB_CYPHER =
             "CREATE" +
-            "  (_:Label0 {name: '_'})" +
-            ", (a:Label1 {name: 'a'})" +
-            ", (b:Label1 {name: 'b'})" +
-            ", (c:Label1 {name: 'c'})" +
-            ", (d:Label1 {name: 'd'})" +
-            ", (e:Label1 {name: 'e'})" +
-            ", (f:Label1 {name: 'f'})" +
-            ", (g:Label1 {name: 'g'})" +
-            ", (h:Label1 {name: 'h'})" +
-            ", (i:Label1 {name: 'i'})" +
-            ", (j:Label1 {name: 'j'})" +
-            ", (k:Label2 {name: 'k'})" +
-            ", (l:Label2 {name: 'l'})" +
-            ", (m:Label2 {name: 'm'})" +
-            ", (n:Label2 {name: 'n'})" +
-            ", (o:Label2 {name: 'o'})" +
-            ", (p:Label2 {name: 'p'})" +
-            ", (q:Label2 {name: 'q'})" +
-            ", (r:Label2 {name: 'r'})" +
-            ", (s:Label2 {name: 's'})" +
-            ", (t:Label2 {name: 't'})" +
+            "  (a:Label)" +
+            ", (b:Label)" +
+            ", (c:Label)" +
+            ", (d:Label)" +
+            ", (e:Label)" +
+            ", (f:Label)" +
+            ", (g:Label)" +
+            ", (h:Label)" +
+            ", (i:Label)" +
+            ", (j:Label)" +
 
-            ", (b)-[:TYPE1]->(c)" +
-            ", (c)-[:TYPE1]->(b)" +
-            ", (d)-[:TYPE1]->(a)" +
-            ", (d)-[:TYPE1]->(b)" +
-            ", (e)-[:TYPE1]->(b)" +
-            ", (e)-[:TYPE1]->(d)" +
-            ", (e)-[:TYPE1]->(f)" +
-            ", (f)-[:TYPE1]->(b)" +
-            ", (f)-[:TYPE1]->(e)" +
+            ", (b)-[:TYPE1 {weight: 0}]->(c)" +
+            ", (c)-[:TYPE1 {weight: 0}]->(b)" +
+            ", (d)-[:TYPE1 {weight: 0}]->(a)" +
+            ", (d)-[:TYPE1 {weight: 0}]->(b)" +
+            ", (e)-[:TYPE1 {weight: 0}]->(b)" +
+            ", (e)-[:TYPE1 {weight: 0}]->(d)" +
+            ", (e)-[:TYPE1 {weight: 0}]->(f)" +
+            ", (f)-[:TYPE1 {weight: 0}]->(b)" +
+            ", (f)-[:TYPE1 {weight: 0}]->(e)" +
 
             ", (b)-[:TYPE2 {weight: 1}]->(c)" +
             ", (c)-[:TYPE2 {weight: 1}]->(b)" +
@@ -107,219 +95,105 @@ final class WeightedPageRankTest extends AlgoTestBase {
             ", (f)-[:TYPE4 {weight: -0.9}]->(a)" +
             ", (f)-[:TYPE4 {weight: 0.1}]->(e)";
 
-    @BeforeEach
-    void setupGraphDb() {
-        runQuery(DB_CYPHER);
-    }
+    @Inject
+    private GraphStore graphStore;
+
+    @Inject
+    private GdlFactory gdlFactory;
 
     @Test
     void defaultWeightOf0MeansNoDiffusionOfPageRank() {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
+        var expected = Map.of(
+            gdlFactory.nodeId("a"), 0.15,
+            gdlFactory.nodeId("b"), 0.15,
+            gdlFactory.nodeId("c"), 0.15,
+            gdlFactory.nodeId("d"), 0.15,
+            gdlFactory.nodeId("e"), 0.15,
+            gdlFactory.nodeId("f"), 0.15,
+            gdlFactory.nodeId("g"), 0.15,
+            gdlFactory.nodeId("h"), 0.15,
+            gdlFactory.nodeId("i"), 0.15,
+            gdlFactory.nodeId("j"), 0.15
+        );
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "b").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "c").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "d").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "e").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "f").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
-        });
+        var graph = graphStore.getGraph(
+            List.of(NodeLabel.of("Label")),
+            List.of(RelationshipType.of("TYPE1")),
+            Optional.of("weight")
+        );
 
-       var graph = new StoreLoaderBuilder()
-           .api(db)
-           .addNodeLabel(label.name())
-           .addRelationshipType("TYPE1")
-           .addRelationshipProperty(PropertyMapping.of("weight", 0))
-           .build()
-           .graph();
-
-        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
-                .compute()
-                .result();
-
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
-            assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
-            );
-        });
-    }
-
-    @Test
-    void defaultWeightOf1ShouldBeTheSameAsPageRank() {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
-
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.243007);
-            expected.put(tx.findNode(label, "name", "b").getId(), 1.9183995);
-            expected.put(tx.findNode(label, "name", "c").getId(), 1.7806315);
-            expected.put(tx.findNode(label, "name", "d").getId(), 0.21885);
-            expected.put(tx.findNode(label, "name", "e").getId(), 0.243007);
-            expected.put(tx.findNode(label, "name", "f").getId(), 0.21885);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
-        });
-
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE1")
-            .addRelationshipProperty(PropertyMapping.of("weight", 1))
-            .build()
-            .graph();
-
-        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
-                .compute()
-                .result();
-
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
-            assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
-            );
-        });
+        PageRankTest.assertResult(graph, PageRankAlgorithmType.WEIGHTED, expected);
     }
 
     @Test
     void allWeightsTheSameShouldBeTheSameAsPageRank() {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
+        var expected = Map.of(
+            gdlFactory.nodeId("a"), 0.243007,
+            gdlFactory.nodeId("b"), 1.9183995,
+            gdlFactory.nodeId("c"), 1.7806315,
+            gdlFactory.nodeId("d"), 0.21885,
+            gdlFactory.nodeId("e"), 0.243007,
+            gdlFactory.nodeId("f"), 0.21885,
+            gdlFactory.nodeId("g"), 0.15,
+            gdlFactory.nodeId("h"), 0.15,
+            gdlFactory.nodeId("i"), 0.15,
+            gdlFactory.nodeId("j"), 0.15
+        );
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.243007);
-            expected.put(tx.findNode(label, "name", "b").getId(), 1.9183995);
-            expected.put(tx.findNode(label, "name", "c").getId(), 1.7806315);
-            expected.put(tx.findNode(label, "name", "d").getId(), 0.21885);
-            expected.put(tx.findNode(label, "name", "e").getId(), 0.243007);
-            expected.put(tx.findNode(label, "name", "f").getId(), 0.21885);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
-        });
+        var graph = graphStore.getGraph(
+            List.of(NodeLabel.of("Label")),
+            List.of(RelationshipType.of("TYPE2")),
+            Optional.of("weight")
+        );
 
-        var graph = new StoreLoaderBuilder()
-                .api(db)
-                .addNodeLabel(label.name())
-                .addRelationshipType("TYPE2")
-                .addRelationshipProperty(PropertyMapping.of("weight", 0))
-                .build()
-                .graph();
-
-        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
-                .compute()
-                .result();
-
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
-            assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
-            );
-        });
+        PageRankTest.assertResult(graph, PageRankAlgorithmType.WEIGHTED, expected);
     }
 
     @Test
     void higherWeightsLeadToHigherPageRank() {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
+        var expected = Map.of(
+            gdlFactory.nodeId("a"), 0.1900095,
+            gdlFactory.nodeId("b"), 2.2152279,
+            gdlFactory.nodeId("c"), 2.0325884,
+            gdlFactory.nodeId("d"), 0.1569275,
+            gdlFactory.nodeId("e"), 0.1633280,
+            gdlFactory.nodeId("f"), 0.1569275,
+            gdlFactory.nodeId("g"), 0.15,
+            gdlFactory.nodeId("h"), 0.15,
+            gdlFactory.nodeId("i"), 0.15,
+            gdlFactory.nodeId("j"), 0.15
+        );
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.1900095);
-            expected.put(tx.findNode(label, "name", "b").getId(), 2.2152279);
-            expected.put(tx.findNode(label, "name", "c").getId(), 2.0325884);
-            expected.put(tx.findNode(label, "name", "d").getId(), 0.1569275);
-            expected.put(tx.findNode(label, "name", "e").getId(), 0.1633280);
-            expected.put(tx.findNode(label, "name", "f").getId(), 0.1569275);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
-        });
+        var graph = graphStore.getGraph(
+            List.of(NodeLabel.of("Label")),
+            List.of(RelationshipType.of("TYPE3")),
+            Optional.of("weight")
+        );
 
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE3")
-            .addRelationshipProperty(PropertyMapping.of("weight", 0))
-            .build()
-            .graph();
-
-
-        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
-                .compute()
-                .result();
-
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
-            assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
-            );
-        });
+        PageRankTest.assertResult(graph, PageRankAlgorithmType.WEIGHTED, expected);
     }
 
     @Test
     void shouldExcludeNegativeWeights() {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
+        var expected = Map.of(
+            gdlFactory.nodeId("a"), 0.1900095,
+            gdlFactory.nodeId("b"), 2.2152279,
+            gdlFactory.nodeId("c"), 2.0325884,
+            gdlFactory.nodeId("d"), 0.1569275,
+            gdlFactory.nodeId("e"), 0.1633280,
+            gdlFactory.nodeId("f"), 0.1569275,
+            gdlFactory.nodeId("g"), 0.15,
+            gdlFactory.nodeId("h"), 0.15,
+            gdlFactory.nodeId("i"), 0.15,
+            gdlFactory.nodeId("j"), 0.15
+        );
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.1900095);
-            expected.put(tx.findNode(label, "name", "b").getId(), 2.2152279);
-            expected.put(tx.findNode(label, "name", "c").getId(), 2.0325884);
-            expected.put(tx.findNode(label, "name", "d").getId(), 0.1569275);
-            expected.put(tx.findNode(label, "name", "e").getId(), 0.1633280);
-            expected.put(tx.findNode(label, "name", "f").getId(), 0.1569275);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
-        });
+        var graph = graphStore.getGraph(
+            List.of(NodeLabel.of("Label")),
+            List.of(RelationshipType.of("TYPE4")),
+            Optional.of("weight")
+        );
 
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE4")
-            .addRelationshipProperty(PropertyMapping.of("weight", 0))
-            .build()
-            .graph();
-
-        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
-                .create(graph, DEFAULT_CONFIG, LongStream.empty(), progressLogger)
-                .compute()
-                .result();
-
-        IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
-            assertEquals(
-                    expected.get(nodeId),
-                    rankResult.score(i),
-                    1e-2,
-                    "Node#" + nodeId
-            );
-        });
+        PageRankTest.assertResult(graph, PageRankAlgorithmType.WEIGHTED, expected);
     }
 }
