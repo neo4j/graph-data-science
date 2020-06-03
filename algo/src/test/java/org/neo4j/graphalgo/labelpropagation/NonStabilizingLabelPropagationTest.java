@@ -19,28 +19,31 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class NonStabilizingLabelPropagationTest extends AlgoTestBase {
+@GdlExtension
+class NonStabilizingLabelPropagationTest {
 
+    @GdlGraph
     private static final String DB_CYPHER =
             "CREATE" +
-            "  (a {community: 1})" +
-            ", (b {community: 1})" +
-            ", (c {community: 1})" +
-            ", (d {community: 2})" +
-            ", (e {community: 2})" +
-            ", (f {community: 2})" +
-            ", (g {community: 3})" +
-            ", (h {community: 4})" +
+            "  (a)" +
+            ", (b)" +
+            ", (c)" +
+            ", (d)" +
+            ", (e)" +
+            ", (f)" +
+            ", (g)" +
+            ", (h)" +
             ", (g)-[:R]->(a)" +
             ", (a)-[:R]->(d)" +
             ", (d)-[:R]->(b)" +
@@ -49,29 +52,19 @@ class NonStabilizingLabelPropagationTest extends AlgoTestBase {
             ", (c)-[:R]->(f)" +
             ", (f)-[:R]->(h)";
 
-    @BeforeEach
-    void setupGraphDB() {
-        runQuery(DB_CYPHER);
-    }
-
-    Graph loadGraph() {
-        return new StoreLoaderBuilder()
-            .api(db)
-            .build()
-            .graph();
-    }
+    @Inject
+    private Graph graph;
 
     // According to "Near linear time algorithm to detect community structures in large-scale networks"[1], for a graph of this shape
     // LabelPropagation will not converge unless the iteration is random. However, we don't seem to be affected by this.
     // [1]: https://arxiv.org/pdf/0709.2938.pdf, page 5
     @Test
     void testLabelPropagationDoesStabilize() {
-        Graph graph = loadGraph();
         LabelPropagation labelPropagation = new LabelPropagation(
             graph,
             ImmutableLabelPropagationStreamConfig.builder().build(),
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         );
         LabelPropagation compute = labelPropagation.compute();
