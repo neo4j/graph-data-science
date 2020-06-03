@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @GdlExtension
 class BetweennessCentralityTest {
 
+    @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node)" +
@@ -47,7 +48,7 @@ class BetweennessCentralityTest {
         ", (c)-[:REL]->(d)" +
         ", (d)-[:REL]->(e)";
 
-    @GdlGraph(gdl = DB_CYPHER)
+    @Inject
     private Graph graph;
 
     @Inject

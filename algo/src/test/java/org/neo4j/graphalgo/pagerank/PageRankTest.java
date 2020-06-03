@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.result.CentralityResult;
@@ -49,7 +49,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 final class PageRankTest {
 
-    private static final String DB_CYPHER =
+    @GdlGraph(graphName = "naturalGraph", orientation = Orientation.NATURAL, addToCatalog = true)
+    private static final String GRAPH =
         "CREATE" +
         "  (a:Label)" +
         ", (b:Label)" +
@@ -71,10 +72,13 @@ final class PageRankTest {
         ", (f)-[:TYPE]->(b)" +
         ", (f)-[:TYPE]->(e)";
 
-    @GdlGraph(graphName = "naturalGraph", orientation = Orientation.NATURAL, gdl = DB_CYPHER, addToCatalog = true)
+    @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
+    private static String REVERSE_GRAPH = GRAPH;
+
+    @Inject(graphName = "naturalGraph")
     private Graph naturalGraph;
 
-    @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE, gdl = DB_CYPHER)
+    @Inject(graphName = "reverseGraph")
     private Graph reverseGraph;
 
     @Inject(graphName = "naturalGraph")

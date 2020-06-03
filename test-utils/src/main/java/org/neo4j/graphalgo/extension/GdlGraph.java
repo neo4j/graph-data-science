@@ -38,7 +38,5 @@ public @interface GdlGraph {
 
     String username() default "";
 
-    String gdl();
-
     boolean addToCatalog() default false;
 }

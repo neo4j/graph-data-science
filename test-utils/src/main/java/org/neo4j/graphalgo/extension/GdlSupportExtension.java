@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -69,7 +70,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         if (gdlGraphs.isEmpty()) {
             throw new ExtensionConfigurationException(String.format(
                 Locale.ENGLISH,
-                "Required at least one field to be annotated with %s, but found none.",
+                "At least one field must be annotated with %s.",
                 GdlGraph.class.getTypeName()
             ));
         }
@@ -78,20 +79,40 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
     }
 
     private static GdlGraphSetup gdlGraph(Field field) {
-        if (field.getType() != Graph.class) {
+        if (field.getType() != String.class) {
             throw new ExtensionConfigurationException(String.format(
                 Locale.ENGLISH,
-                "Wrong type for field %s.%s. Expected %s, but got %s.",
+                "Field %s.%s must be of type %s.",
                 field.getDeclaringClass().getTypeName(),
                 field.getName(),
-                Graph.class.getTypeName(),
-                field.getType()
+                String.class.getTypeName()
             ));
         }
-        var annotation = field.getAnnotation(GdlGraph.class);
 
+        // read field value
+        if (!Modifier.isStatic(field.getModifiers())) {
+            throw new ExtensionConfigurationException(String.format(
+                Locale.ENGLISH,
+                "Field %s.%s must be static.",
+                field.getDeclaringClass().getTypeName(),
+                field.getName()
+            ));
+        }
+
+        if (Modifier.isPrivate(field.getModifiers())) {
+            field.setAccessible(true);
+        }
+
+        String gdl;
+        try {
+            gdl = field.get(null).toString();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        var annotation = field.getAnnotation(GdlGraph.class);
         return ImmutableGdlGraphSetup.of(
-            annotation.gdl(),
+            gdl,
             annotation.graphName(),
             annotation.username(),
             annotation.orientation(),
@@ -129,10 +150,8 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         do {
             stream(testClass.getDeclaredFields())
                 .filter(field -> field.getType() == clazz)
-                .filter(field -> isAnnotated(field, Inject.class) || isAnnotated(field, GdlGraph.class))
-                .filter(field -> isAnnotated(field, Inject.class)
-                    ? field.getAnnotation(Inject.class).graphName().equals(graphName)
-                    : field.getAnnotation(GdlGraph.class).graphName().equals(graphName))
+                .filter(field -> isAnnotated(field, Inject.class))
+                .filter(field -> field.getAnnotation(Inject.class).graphName().equals(graphName))
                 .forEach(field -> setField(testInstance, field, instance));
             testClass = testClass.getSuperclass();
         }

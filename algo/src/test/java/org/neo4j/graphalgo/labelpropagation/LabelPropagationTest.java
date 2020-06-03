@@ -34,8 +34,8 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
@@ -55,7 +55,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 class LabelPropagationTest {
 
-    private static final String DB_CYPHER =
+    @GdlGraph
+    private static final String GRAPH =
         "CREATE" +
         "  (nAlice:User   {seedId: 2})" +
         ", (nBridget:User {seedId: 3})" +
@@ -74,7 +75,7 @@ class LabelPropagationTest {
         ", (nMichael)-[:FOLLOW]->(nBridget)" +
         ", (nCharles)-[:FOLLOW]->(nDoug)";
 
-    @GdlGraph(gdl = DB_CYPHER)
+    @Inject
     private Graph graph;
 
     @Inject
