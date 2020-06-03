@@ -110,9 +110,14 @@ public final class FieldTypesConfig implements FieldTypes {
             errors.add(e);
         }
         if (!errors.isEmpty()) {
-            IllegalArgumentException combinedErrors = new IllegalArgumentException();
-            errors.forEach(combinedErrors::addSuppressed);
-            throw combinedErrors;
+            if(errors.size() == 1) {
+                throw errors.get(0);
+            } else {
+                IllegalArgumentException combinedErrors = new IllegalArgumentException(
+                    "Multiple errors in configuration arguments");
+                errors.forEach(combinedErrors::addSuppressed);
+                throw combinedErrors;
+            }
         }
     }
 

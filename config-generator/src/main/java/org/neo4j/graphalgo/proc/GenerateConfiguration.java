@@ -211,9 +211,18 @@ final class GenerateConfiguration {
         if (!config.members().isEmpty()) {
             String combinedErrorsVarName = names.newName("combinedErrors");
             configMapConstructor.beginControlFlow("if(!$N.isEmpty())", errorsVarName)
-                .addStatement("$1T $2N = new $1T()", IllegalArgumentException.class, combinedErrorsVarName)
+                .beginControlFlow("if($N.size() == 1)", errorsVarName)
+                .addStatement("throw $N.get(0)", errorsVarName)
+                .nextControlFlow("else")
+                .addStatement(
+                    "$1T $2N = new $1T($3S)",
+                    IllegalArgumentException.class,
+                    combinedErrorsVarName,
+                    "Multiple errors in configuration arguments"
+                )
                 .addStatement("$1N.forEach($2N::addSuppressed)", errorsVarName, combinedErrorsVarName)
                 .addStatement("throw $N", combinedErrorsVarName)
+                .endControlFlow()
                 .endControlFlow();
         }
         
