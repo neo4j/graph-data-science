@@ -134,13 +134,9 @@ public final class HugeGraphUtil {
                 seenOriginalIds.set(originalId);
 
                 for (NodeLabel nodeLabel : nodeLabels) {
-                    labelInformation.compute(nodeLabel, (label, bitSet) -> {
-                        if (bitSet == null) {
-                            bitSet = new BitSet(seenOriginalIds.size());
-                        }
-                        bitSet.set(internalNodeId);
-                        return bitSet;
-                    });
+                    labelInformation
+                        .computeIfAbsent(nodeLabel, (ignore) -> new BitSet(seenOriginalIds.size()))
+                        .set(internalNodeId);
                 }
             }
         }

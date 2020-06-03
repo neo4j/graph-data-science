@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.gdl;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipType;
@@ -44,15 +46,14 @@ import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
-import org.s1ck.gdl.model.Vertex;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig> {
 
@@ -96,14 +97,35 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
     }
 
     @Override
+    public MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.empty();
+    }
+
+    @Override
+    protected ProgressLogger initProgressLogger() {
+        return ProgressLogger.NULL_LOGGER;
+    }
+
+    @Override
     public ImportResult build() {
         var nodes = loadNodes();
         var relationships = loadRelationships(nodes.idMap());
+        var topologies = relationships.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().getTwo().topology()
+            ));
+        var properties = relationships.entrySet().stream()
+            .filter(entry -> entry.getValue().getOne().isPresent())
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> Map.of(entry.getValue().getOne().get(), entry.getValue().getTwo().properties().get())
+            ));
         var graphStore = CSRGraphStore.of(
             nodes.idMap(),
             nodes.properties(),
-            relationships,
-            Map.of(),
+            topologies,
+            properties,
             1,
             loadingContext.tracker()
         );
@@ -166,55 +188,60 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
             ));
     }
 
-    private double gdsValue(Vertex vertex, String propertyKey, Object gdlValue) {
-        if (gdlValue instanceof Number) {
-            return ((Number) gdlValue).doubleValue();
-        } else {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Node property '%s' of must be of type Number, but was %s for %s.",
-                propertyKey,
-                gdlValue.getClass(),
-                vertex
-            ));
-        }
-    }
+    private Map<RelationshipType, Pair<Optional<String>, HugeGraph.Relationships>> loadRelationships(IdMap nodes) {
+        var propertyKeysByRelType = new HashMap<String, Optional<String>>();
 
-    private Map<RelationshipType, HugeGraph.TopologyCSR> loadRelationships(IdMap nodes) {
-        var relTypeImporters = gdlHandler.getEdges().stream()
-            .map(Element::getLabel)
-            .distinct()
+        gdlHandler.getEdges()
+            .forEach(edge -> propertyKeysByRelType
+                .putIfAbsent(edge.getLabel(), edge.getProperties().keySet().stream().findFirst()));
+
+        var relTypeImporters = propertyKeysByRelType.entrySet().stream()
             .collect(Collectors.toMap(
-                relType -> relType,
-                relType -> HugeGraphUtil.createRelImporter(
+                Map.Entry::getKey,
+                relTypeAndProperty -> HugeGraphUtil.createRelImporter(
                     nodes,
                     graphCreateConfig.orientation(),
-                    false,
+                    relTypeAndProperty.getValue().isPresent(),
                     Aggregation.NONE,
                     loadingContext.executor(),
                     loadingContext.tracker()
                 )
             ));
 
-        gdlHandler
-            .getEdges()
-            .forEach(edge -> relTypeImporters
-                .get(edge.getLabel())
-                .add(edge.getSourceVertexId(), edge.getTargetVertexId()));
+        gdlHandler.getEdges()
+            .forEach(edge -> {
+                var relationshipsBuilder = relTypeImporters.get(edge.getLabel());
+                var maybePropertyKey = propertyKeysByRelType.get(edge.getLabel());
+                if (maybePropertyKey.isPresent()) {
+                    relationshipsBuilder.add(
+                        edge.getSourceVertexId(),
+                        edge.getTargetVertexId(),
+                        gdsValue(edge, maybePropertyKey.get(), edge.getProperties().get(maybePropertyKey.get()))
+                    );
+                } else {
+                    relationshipsBuilder.add(edge.getSourceVertexId(), edge.getTargetVertexId());
+                }
+            });
 
         return relTypeImporters.entrySet().stream().collect(Collectors.toMap(
             entry -> RelationshipType.of(entry.getKey()),
-            entry -> entry.getValue().build().topology()
+            entry -> Tuples.pair(propertyKeysByRelType.get(entry.getKey()), entry.getValue().build())
         ));
     }
 
-    @Override
-    public MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.empty();
-    }
-
-    @Override
-    protected ProgressLogger initProgressLogger() {
-        return ProgressLogger.NULL_LOGGER;
+    private double gdsValue(Element element, String propertyKey, Object gdlValue) {
+        if (gdlValue instanceof Number) {
+            return ((Number) gdlValue).doubleValue();
+        } else {
+            throw new IllegalArgumentException(String.format(
+                Locale.ENGLISH,
+                "%s property '%s' must be of type Number, but was %s for %s.",
+                element.getClass().getTypeName(),
+                propertyKey,
+                gdlValue.getClass(),
+                element
+            ));
+        }
     }
 
     private static final GraphLoaderContext NO_API_CONTEXT = new GraphLoaderContext() {
