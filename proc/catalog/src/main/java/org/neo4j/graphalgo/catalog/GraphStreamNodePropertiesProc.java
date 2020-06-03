@@ -82,8 +82,9 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             .boxed()
             .flatMap(nodeId -> {
                 var originalId = subGraph.toOriginalNodeId(nodeId);
+                var label = subGraph.nodeLabels(nodeId).iterator().next();
+
                 return nodePropertyKeysAndValues.stream().map(propertyKeyAndValues -> {
-                    NodeLabel label = subGraph.nodeLabels(nodeId).iterator().next();
                     NumberType valueType = graphStore.nodePropertyType(label, propertyKeyAndValues.getKey());
 
                     double doubleValue = propertyKeyAndValues.getValue().nodeProperty(nodeId);
