@@ -76,6 +76,10 @@ class ThreadLocalRelationshipsBuilder {
         lock.unlock();
     }
 
+    final boolean isLockedByCurrentThread() {
+        return lock.isHeldByCurrentThread();
+    }
+
     int applyVariableDeltaEncoding(
         CompressedLongArray array,
         LongsRef buffer,
