@@ -42,7 +42,9 @@ public final class ValidationConfig implements Validation {
             validate();
         } catch (IllegalArgumentException e) {
             errors.add(e);
+        } catch (NullPointerException e) {
         }
+
         if (!errors.isEmpty()) {
             if (errors.size() == 1) {
                 throw errors.get(0);

@@ -210,7 +210,7 @@ final class GenerateConfiguration {
 
         for (ConfigParser.Member member : config.members()) {
             if (member.validates()) {
-                catchAndPropagatePotentialError(configMapConstructor, errorsVarName, (builder) -> builder.addStatement("$N()", member.methodName()));
+                catchValidationError(configMapConstructor, errorsVarName, (builder) -> builder.addStatement("$N()", member.methodName()));
             }
         }
 
@@ -254,7 +254,7 @@ final class GenerateConfiguration {
             .endControlFlow();
     }
 
-    private void catchAndPropagatePotentialError(
+    private void catchAndPropagateIllegalArgumentError(
         MethodSpec.Builder builder,
         String errorVarName,
         UnaryOperator<MethodSpec.Builder> statementFunc
@@ -264,6 +264,21 @@ final class GenerateConfiguration {
         builder
             .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
             .addStatement("$N.add(e)", errorVarName)
+            .endControlFlow();
+    }
+
+    private void catchValidationError(
+        MethodSpec.Builder builder,
+        String errorVarName,
+        UnaryOperator<MethodSpec.Builder> statementFunc
+    ) {
+        builder.beginControlFlow("try");
+        statementFunc.apply(builder);
+        builder
+            .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
+            .addStatement("$N.add(e)", errorVarName)
+            .nextControlFlow("catch ($T e)", NullPointerException.class)
+            // could suppress the error
             .endControlFlow();
     }
 
@@ -374,7 +389,7 @@ final class GenerateConfiguration {
         }
 
         CodeBlock finalCodeBlock = codeBlock;
-        catchAndPropagatePotentialError(
+        catchAndPropagateIllegalArgumentError(
             constructor,
             errorsVarName,
             (builder) -> builder.addStatement("this.$N = $L", definition.fieldName(), finalCodeBlock)
@@ -413,7 +428,7 @@ final class GenerateConfiguration {
 
         CodeBlock finalValueProducer = valueProducer;
         constructor.addParameter(paramType, definition.fieldName());
-        catchAndPropagatePotentialError(
+        catchAndPropagateIllegalArgumentError(
             constructor,
             errorsVarName,
             (builder) -> builder.addStatement("this.$N = $L", definition.fieldName(), finalValueProducer)
