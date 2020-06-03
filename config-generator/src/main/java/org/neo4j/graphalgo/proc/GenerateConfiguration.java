@@ -219,19 +219,23 @@ final class GenerateConfiguration {
         }
 
         if (!config.members().isEmpty()) {
-            String combinedErrorsVarName = names.newName("combinedErrors");
+            String combinedErrorsVarName = names.newName("combinedErrorMsg");
             configMapConstructor.beginControlFlow("if(!$N.isEmpty())", errorsVarName)
-                .beginControlFlow("if($N.size() == 1)", errorsVarName)
-                .addStatement("throw $N.get(0)", errorsVarName)
+                .beginControlFlow("if($N.size() == $L)", errorsVarName, 1)
+                .addStatement("throw $N.get($L)", errorsVarName, 0)
                 .nextControlFlow("else")
                 .addStatement(
-                    "$1T $2N = new $1T($3S)",
-                    IllegalArgumentException.class,
+                    "$1T $2N = $3N.stream().map($4T::getMessage).reduce($5S, ($6N, $7N) -> $6N + System.lineSeparator() + $8S + $7N)",
+                    String.class,
                     combinedErrorsVarName,
-                    "Multiple errors in configuration arguments"
+                    errorsVarName,
+                    IllegalArgumentException.class,
+                    "Multiple errors in configuration arguments:",
+                    names.newName("combined"),
+                    names.newName("msg"),
+                    "\t\t\t\t"
                 )
-                .addStatement("$1N.forEach($2N::addSuppressed)", errorsVarName, combinedErrorsVarName)
-                .addStatement("throw $N", combinedErrorsVarName)
+                .addStatement("throw new $T($N)", IllegalArgumentException.class, combinedErrorsVarName)
                 .endControlFlow()
                 .endControlFlow();
         }

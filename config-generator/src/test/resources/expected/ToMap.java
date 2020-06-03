@@ -54,13 +54,17 @@ public final class ToMapConfig implements ToMap {
             errors.add(e);
         }
         if (!errors.isEmpty()) {
-            if(errors.size() == 1) {
+            if (errors.size() == 1) {
                 throw errors.get(0);
             } else {
-                IllegalArgumentException combinedErrors = new IllegalArgumentException(
-                    "Multiple errors in configuration arguments");
-                errors.forEach(combinedErrors::addSuppressed);
-                throw combinedErrors;
+                String combinedErrorMsg = errors
+                    .stream()
+                    .map(IllegalArgumentException::getMessage)
+                    .reduce(
+                        "Multiple errors in configuration arguments:",
+                        (combined, msg) -> combined + System.lineSeparator() + "\t\t\t\t" + msg
+                    );
+                throw new IllegalArgumentException(combinedErrorMsg);
             }
         }
     }
