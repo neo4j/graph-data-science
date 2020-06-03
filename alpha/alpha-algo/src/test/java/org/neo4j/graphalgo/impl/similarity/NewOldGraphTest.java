@@ -96,6 +96,6 @@ class NewOldGraphTest {
         for (int i = 0; i < numberOfNodes; i++) {
             idMapBuilder.addNode(i);
         }
-        return idMapBuilder.build().idMap();
+        return idMapBuilder.build();
     }
 }
