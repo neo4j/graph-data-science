@@ -253,4 +253,110 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         assertThat(rootCause.getMessage(), containsString("Node projection 'A' does not have property key 'newNodeProp3'"));
         assertThat(rootCause.getMessage(), containsString("Available keys: ['newNodeProp1', 'newNodeProp2']"));
     }
+
+    @Test
+    void streamLoadedNodePropertyForLabel() {
+        String graphWriteQuery = formatWithLocale(
+            "CALL gds.graph.streamNodeProperty(" +
+            "   '%s', " +
+            "   'newNodeProp1', " +
+            "   ['A']" +
+            ")  YIELD nodeId, propertyValue " +
+            "RETURN gds.util.asNode(nodeId).id AS id, propertyValue",
+            TEST_GRAPH_SAME_PROPERTIES
+        );
+
+        assertCypherResult(graphWriteQuery, asList(
+            map("id", 0L, "propertyValue", 0D),
+            map("id", 1L, "propertyValue", 1D),
+            map("id", 2L, "propertyValue", 2D)
+        ));
+    }
+
+    @Test
+    void streamLoadedNodePropertyForLabelSubset() {
+        String graphWriteQuery = formatWithLocale(
+            "CALL gds.graph.streamNodeProperty(" +
+            "   '%s', " +
+            "   'newNodeProp2'" +
+            ")  YIELD nodeId, propertyValue " +
+            "RETURN gds.util.asNode(nodeId).id AS id, propertyValue",
+            TEST_GRAPH_DIFFERENT_PROPERTIES
+        );
+
+        assertCypherResult(graphWriteQuery, asList(
+            map("id", 0L, "propertyValue", 42D),
+            map("id", 1L, "propertyValue", 43D),
+            map("id", 2L, "propertyValue", 44D)
+        ));
+    }
+
+    @Test
+    void streamMutatedNodeProperty() {
+        long expectedPropertyCount = 6;
+
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
+        NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
+        graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
+        graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
+
+        String graphWriteQuery = formatWithLocale(
+            "CALL gds.graph.streamNodeProperty(" +
+            "   '%s', " +
+            "   'newNodeProp3'" +
+            ")  YIELD nodeId, propertyValue " +
+            "RETURN gds.util.asNode(nodeId).id AS id, propertyValue",
+            TEST_GRAPH_SAME_PROPERTIES
+        );
+
+        assertCypherResult(graphWriteQuery, asList(
+            map("id", 0L, "propertyValue", 0L),
+            map("id", 1L, "propertyValue", 1L),
+            map("id", 2L, "propertyValue", 2L),
+            map("id", 3L, "propertyValue", 3L),
+            map("id", 4L, "propertyValue", 4L),
+            map("id", 5L, "propertyValue", 5L)
+        ));
+    }
+
+    @Test
+    void shouldFailOnNonExistingNodeProperty() {
+        QueryExecutionException ex = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(formatWithLocale(
+                "CALL gds.graph.streamNodeProperty(" +
+                "   '%s', " +
+                "   'newNodeProp3'" +
+                ")",
+                TEST_GRAPH_SAME_PROPERTIES
+            ))
+        );
+
+        Throwable rootCause = rootCause(ex);
+        assertEquals(IllegalArgumentException.class, rootCause.getClass());
+        assertThat(
+            rootCause.getMessage(),
+            containsString("No node projection with property key(s) ['newNodeProp3'] found")
+        );
+    }
+
+    @Test
+    void shouldFailOnNonExistingNodePropertyForSpecificLabel() {
+        QueryExecutionException ex = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(formatWithLocale(
+                "CALL gds.graph.streamNodeProperty(" +
+                "   '%s', " +
+                "   'newNodeProp3', " +
+                "   ['A'] " +
+                ")",
+                TEST_GRAPH_SAME_PROPERTIES
+            ))
+        );
+
+        Throwable rootCause = rootCause(ex);
+        assertEquals(IllegalArgumentException.class, rootCause.getClass());
+        assertThat(rootCause.getMessage(), containsString("Node projection 'A' does not have property key 'newNodeProp3'"));
+        assertThat(rootCause.getMessage(), containsString("Available keys: ['newNodeProp1', 'newNodeProp2']"));
+    }
 }

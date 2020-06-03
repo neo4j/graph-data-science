@@ -84,7 +84,7 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig {
 
             if (!hasValidLabel) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "No node projection with all property keys %s found.",
+                    "No node projection with property key(s) %s found.",
                     join(nodeProperties())
                 ));
             }

@@ -45,7 +45,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.streamNodeProperties", mode = READ)
     @Description("Streams the given node properties.")
-    public Stream<Result> run(
+    public Stream<PropertiesResult> streamProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
@@ -67,10 +67,37 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
         config.validate(graphStore);
 
-       return streamNodeProperties(graphStore, config);
+       return streamNodeProperties(graphStore, config, PropertiesResult::new);
     }
 
-    private Stream<Result> streamNodeProperties(GraphStore graphStore, GraphExportNodePropertiesConfig config) {
+    @Procedure(name = "gds.graph.streamNodeProperty", mode = READ)
+    @Description("Streams the given node property.")
+    public Stream<PropertyResult> streamProperty(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeProperties") String nodeProperty,
+        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        validateGraphName(graphName);
+
+        // input
+        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
+        GraphStreamNodePropertiesConfig config = GraphStreamNodePropertiesConfig.of(
+            getUsername(),
+            graphName,
+            List.of(nodeProperty),
+            nodeLabels,
+            cypherConfig
+        );
+        // validation
+        validateConfig(cypherConfig, config);
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
+        config.validate(graphStore);
+
+        return streamNodeProperties(graphStore, config, (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId,propertyValue));
+    }
+
+    private <R> Stream<R> streamNodeProperties(GraphStore graphStore, GraphExportNodePropertiesConfig config, ResultProducer<R> producer) {
         Collection<NodeLabel> validNodeLabels = config.validNodeLabels(graphStore);
 
         var subGraph = graphStore.getGraph(validNodeLabels, graphStore.relationshipTypes(), Optional.empty());
@@ -96,7 +123,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
                         numberValue = (long) doubleValue;
                     }
 
-                    return new Result(
+                    return producer.produce(
                         originalId,
                         usesPropertyNameColumn ? propertyKeyAndValues.getKey() : null,
                         numberValue
@@ -105,16 +132,29 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             });
     }
 
-    public static class Result {
+    public static class PropertiesResult {
         public final long nodeId;
         public final String nodeProperty;
         public final Number propertyValue;
 
-        Result(long nodeId, String nodeProperty, Number propertyValue) {
+        PropertiesResult(long nodeId, String nodeProperty, Number propertyValue) {
             this.nodeId = nodeId;
             this.nodeProperty = nodeProperty;
             this.propertyValue = propertyValue;
         }
+    }
+
+    public static class PropertyResult {
+        public final long nodeId;
+        public final Number propertyValue;
+
+        PropertyResult(long nodeId, Number propertyValue) {
+            this.nodeId = nodeId;
+            this.propertyValue = propertyValue;
+        }
+    }
+    interface ResultProducer<R> {
+        R produce(long nodeId, String propertyName, Number propertyValue);
     }
 
 }
