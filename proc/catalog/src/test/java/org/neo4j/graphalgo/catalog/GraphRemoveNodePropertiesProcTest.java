@@ -162,7 +162,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
         assertThat(
             rootCause.getMessage(),
-            containsString("No node projection with all property keys ['nodeProp1', 'nodeProp2', 'nodeProp3'] found.")
+            containsString("No node projection with property key(s) ['nodeProp1', 'nodeProp2', 'nodeProp3'] found.")
         );
     }
 }

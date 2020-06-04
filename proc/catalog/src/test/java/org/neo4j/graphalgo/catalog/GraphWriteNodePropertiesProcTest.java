@@ -272,7 +272,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
         assertThat(
             rootCause.getMessage(),
-            containsString("No node projection with all property keys ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'] found")
+            containsString("No node projection with property key(s) ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'] found")
         );
     }
 
