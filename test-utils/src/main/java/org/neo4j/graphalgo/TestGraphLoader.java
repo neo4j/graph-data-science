@@ -159,13 +159,12 @@ public final class TestGraphLoader {
         ));
 
         cypherLoaderBuilder.validateRelationships(false);
-        
+
         return cypherLoaderBuilder.build();
     }
 
     private GraphLoader storeLoader() {
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().api(db);
-
         nodeLabels.forEach(storeLoaderBuilder::addNodeLabel);
 
         if (relTypes.isEmpty()) {

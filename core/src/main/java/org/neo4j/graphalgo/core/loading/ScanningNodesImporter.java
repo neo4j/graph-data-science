@@ -65,7 +65,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         Map<NodeLabel, PropertyMappings> propertyMappingsByNodeLabel
     ) {
         super(
-            USE_KERNEL_CURSORS.get() ? NodeCursorBasedScanner.FACTORY : NodeRecordBasedScanner.FACTORY,
+            scannerFactory(dimensions),
             "Node",
             loadingContext,
             dimensions,
@@ -75,6 +75,20 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         this.progressLogger = progressLogger;
         this.terminationFlag = loadingContext.terminationFlag();
         this.propertyMappingsByNodeLabel = propertyMappingsByNodeLabel;
+    }
+
+    private static StoreScanner.Factory<NodeReference> scannerFactory(
+        GraphDimensions dimensions
+    ) {
+        if (!USE_KERNEL_CURSORS.get()) {
+            return NodeRecordBasedScanner.FACTORY;
+        }
+
+        var tokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
+        assert tokenNodeLabelMapping != null : "Only null in Cypher loader";
+
+        int[] labelIds = tokenNodeLabelMapping.keys().toArray();
+        return NodeScannerFactory.create(labelIds);
     }
 
     @Override

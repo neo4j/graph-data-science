@@ -29,7 +29,10 @@ import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.loading.StoreScanner;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+
+import java.io.PrintWriter;
 
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -49,6 +52,7 @@ class GraphLoaderTest extends BaseTest {
 
     @BeforeEach
     void setup() {
+        StoreScanner.useKernelCursors(true);
         runQuery(DB_CYPHER);
     }
 
@@ -89,6 +93,27 @@ class GraphLoaderTest extends BaseTest {
             .withNodeProperties(multipleProperties)
             .graph(factoryType);
         assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0, prop2: 42.0})-->(b:Node2 {prop1: 42.0, prop2: 2.0})"), graph);
+    }
+
+    @AllGraphStoreFactoryTypesTest
+    void testWithSingleLabelAndProperties(TestSupport.FactoryType factoryType) {
+        PropertyMappings properties = PropertyMappings.of(PropertyMapping.of("prop1", 42.0));
+        PropertyMappings multipleProperties = PropertyMappings.of(
+            PropertyMapping.of("prop1", 42.0),
+            PropertyMapping.of("prop2", 42.0)
+        );
+
+        Graph graph = TestGraphLoader.from(db)
+            .withLabels("Node1")
+            .withNodeProperties(properties)
+            .graph(factoryType);
+        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0})"), graph);
+
+        graph = TestGraphLoader.from(db)
+            .withLabels("Node1")
+            .withNodeProperties(multipleProperties)
+            .graph(factoryType);
+        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0, prop2: 42.0})"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
@@ -143,6 +168,24 @@ class GraphLoaderTest extends BaseTest {
             .withDefaultAggregation(Aggregation.SINGLE)
             .graph(factoryType);
         assertGraphEquals(fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 3.14D}]->(c), (b)-[{w: 3.14D}]->(c)"), graph);
+    }
+
+    @AllGraphStoreFactoryTypesTest
+    void testLoadCorrectLabelCombinations(TestSupport.FactoryType factoryType) {
+        runQuery("CREATE (n:Node1:Node2)");
+        Graph graph = TestGraphLoader.from(db)
+            .withLabels("Node1", "Node2")
+            .graph(factoryType);
+        assertGraphEquals(fromGdl("(a:Node1), (b:Node2), (c:Node1:Node2), (a)-->(b)"), graph);
+    }
+
+    @Test
+    void testLoadNodeWithMultipleLabelsOnPartialLabelMatch() {
+        runQuery("CREATE (n:Node1:Node2)");
+        Graph graph = TestGraphLoader.from(db)
+            .withLabels("Node1")
+            .graph(TestSupport.FactoryType.NATIVE);
+        assertGraphEquals(fromGdl("(a:Node1), (c:Node1)"), graph);
     }
 
     @Test

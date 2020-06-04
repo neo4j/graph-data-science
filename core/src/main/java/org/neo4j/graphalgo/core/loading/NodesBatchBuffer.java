@@ -22,14 +22,12 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
-import org.neo4j.kernel.impl.store.NodeLabelsField;
-import org.neo4j.kernel.impl.store.NodeStore;
-import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
+import static org.neo4j.kernel.impl.store.record.AbstractBaseRecord.NO_ID;
 
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
 
@@ -57,7 +55,8 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
     @Override
     public void offer(final NodeReference record) {
         if (nodeLabelIds.isEmpty()) {
-            add(record.nodeId(), record.propertiesReference(), new long[]{TokenConstants.ANY_LABEL});
+            long propertiesReference = properties == null ? NO_ID : record.propertiesReference();
+            add(record.nodeId(), propertiesReference, new long[]{TokenConstants.ANY_LABEL});
         } else {
             boolean atLeastOneLabelFound = false;
             var labels = record.labels();
@@ -70,7 +69,8 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
                 }
             }
             if (atLeastOneLabelFound) {
-                add(record.nodeId(), record.propertiesReference(), labels);
+                long propertiesReference = properties == null ? NO_ID : record.propertiesReference();
+                add(record.nodeId(), propertiesReference, labels);
             }
         }
     }

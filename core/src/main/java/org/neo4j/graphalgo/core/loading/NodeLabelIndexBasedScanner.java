@@ -21,16 +21,19 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
-import org.neo4j.internal.kernel.api.NodeCursor;
+import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.NodeStore;
 
-final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeCursor, NodeStore, Void> {
+final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeLabelIndexCursor, NodeStore, Integer> {
 
-    NodeCursorBasedScanner(int prefetchSize, SecureTransaction transaction) {
-        super(prefetchSize, transaction, null);
+    private final int labelId;
+
+    NodeLabelIndexBasedScanner(int labelId, int prefetchSize, SecureTransaction transaction) {
+        super(prefetchSize, transaction, labelId);
+        this.labelId = labelId;
     }
 
     @Override
@@ -39,17 +42,24 @@ final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeRefere
     }
 
     @Override
-    NodeCursor entityCursor(KernelTransaction transaction) {
-        return Neo4jProxy.allocateNodeCursor(transaction.cursors(), transaction.pageCursorTracer());
+    NodeLabelIndexCursor entityCursor(KernelTransaction transaction) {
+        return Neo4jProxy.allocateNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer());
     }
 
     @Override
-    Scan<NodeCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
-        return transaction.dataRead().allNodesScan();
+    Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
+        var read = transaction.dataRead();
+        read.prepareForLabelScans();
+        return read.nodeLabelScan(labelId);
     }
 
     @Override
-    NodeReference cursorReference(KernelTransaction transaction, NodeCursor cursor) {
-        return new NodeCursorReference(cursor);
+    NodeReference cursorReference(KernelTransaction transaction, NodeLabelIndexCursor cursor) {
+        return new NodeLabelIndexReference(
+            cursor,
+            transaction.dataRead(),
+            Neo4jProxy.allocateNodeCursor(transaction.cursors(), transaction.pageCursorTracer()),
+            labelId
+        );
     }
 }

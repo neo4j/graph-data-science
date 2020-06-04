@@ -140,7 +140,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     public void accept(KernelTransaction transaction) {
         try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.getCursor(transaction)) {
             List<SingleTypeRelationshipImporter> importers = this.importerBuilders.stream()
-                    .map(imports -> imports.withBuffer(idMap, cursor.bulkSize(), transaction.dataRead(), transaction.cursors()))
+                    .map(imports -> imports.withBuffer(idMap, cursor.bufferSize(), transaction.dataRead(), transaction.cursors()))
                     .collect(Collectors.toList());
 
             RelationshipsBatchBuffer[] buffers = importers
