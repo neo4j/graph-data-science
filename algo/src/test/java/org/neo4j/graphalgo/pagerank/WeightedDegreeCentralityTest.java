@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 final class WeightedDegreeCentralityTest {
 
     @GdlGraph
+    @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
     private static final String DB_CYPHER =
             "CREATE" +
             "  (a:Label)" +
@@ -92,9 +93,6 @@ final class WeightedDegreeCentralityTest {
 
     @Inject
     private GdlFactory gdlFactory;
-
-    @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
-    private static final String DB_CYPHER_REVERSE = DB_CYPHER;
 
     @Inject(graphName = "reverseGraph")
     private GraphStore reverseGraphStore;

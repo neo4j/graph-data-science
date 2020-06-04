@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo.extension;
 
-import org.neo4j.graphalgo.Orientation;
-
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -30,14 +27,6 @@ import static java.lang.annotation.ElementType.FIELD;
 
 @Target(FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(GdlGraphs.class)
-public @interface GdlGraph {
-
-    Orientation orientation() default Orientation.NATURAL;
-
-    String graphName() default "graph";
-
-    String username() default "";
-
-    boolean addToCatalog() default false;
+public @interface GdlGraphs {
+    GdlGraph[] value();
 }

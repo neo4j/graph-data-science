@@ -35,8 +35,12 @@ import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
@@ -60,8 +64,8 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
 
         do {
             stream(testClass.getDeclaredFields())
-                .filter(f -> f.isAnnotationPresent(GdlGraph.class))
-                .map(GdlSupportExtension::gdlGraph)
+                .filter(f -> f.isAnnotationPresent(GdlGraph.class) || f.isAnnotationPresent(GdlGraphs.class))
+                .flatMap(GdlSupportExtension::gdlGraphsForField)
                 .forEach(gdlGraphs::add);
 
             testClass = testClass.getSuperclass();
@@ -78,7 +82,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         return gdlGraphs;
     }
 
-    private static GdlGraphSetup gdlGraph(Field field) {
+    private static Stream<GdlGraphSetup> gdlGraphsForField(Field field) {
         if (field.getType() != String.class) {
             throw new ExtensionConfigurationException(String.format(
                 Locale.ENGLISH,
@@ -110,14 +114,18 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             throw new RuntimeException(e);
         }
 
-        var annotation = field.getAnnotation(GdlGraph.class);
-        return ImmutableGdlGraphSetup.of(
-            gdl,
-            annotation.graphName(),
-            annotation.username(),
-            annotation.orientation(),
-            annotation.addToCatalog()
-        );
+        var annotations = field.isAnnotationPresent(GdlGraph.class)
+            ? Stream.of(field.getAnnotation(GdlGraph.class))
+            : Arrays.stream(field.getAnnotation(GdlGraphs.class).value());
+
+        return annotations
+            .map(annotation -> ImmutableGdlGraphSetup.of(
+                gdl,
+                annotation.graphName(),
+                annotation.username(),
+                annotation.orientation(),
+                annotation.addToCatalog()
+            ));
     }
 
     private static void injectGraphStore(GdlGraphSetup gdlGraphSetup, ExtensionContext context) {

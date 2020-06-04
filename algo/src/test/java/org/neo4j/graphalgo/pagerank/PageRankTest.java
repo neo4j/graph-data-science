@@ -47,7 +47,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 final class PageRankTest {
 
-    @GdlGraph(graphName = "naturalGraph", orientation = Orientation.NATURAL, addToCatalog = true)
+    @GdlGraph
+    @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
     private static final String GRAPH =
         "CREATE" +
         "  (a:Label)" +
@@ -70,17 +71,14 @@ final class PageRankTest {
         ", (f)-[:TYPE]->(b)" +
         ", (f)-[:TYPE]->(e)";
 
-    @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
-    private static String REVERSE_GRAPH = GRAPH;
-
-    @Inject(graphName = "naturalGraph")
+    @Inject
     private Graph naturalGraph;
+
+    @Inject
+    private GdlFactory factory;
 
     @Inject(graphName = "reverseGraph")
     private Graph reverseGraph;
-
-    @Inject(graphName = "naturalGraph")
-    private GdlFactory factory;
 
     @Inject(graphName = "reverseGraph")
     private GdlFactory reverseFactory;
