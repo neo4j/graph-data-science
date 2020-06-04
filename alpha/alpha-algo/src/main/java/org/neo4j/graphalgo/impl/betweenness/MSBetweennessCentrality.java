@@ -212,7 +212,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
         public void run() {
             // pick a consumer from the pool
             var consumer = consumerPool.poll();
-            consumer.init(startNodes, true);
+            consumer.init(startNodes);
             // concurrent forward traversal for all start nodes
             MultiSourceBFS
                 .predecessorProcessing(graph, consumer, consumer, tracker, startNodes)
@@ -238,7 +238,6 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
 
         MSBetweennessCentralityConsumer(int bfsCount, int nodeCount, AtomicDoubleArray centrality, double divisor) {
             this.centrality = centrality;
-
             this.idMapping = new LongIntScatterMap(bfsCount);
             this.paths = new Paths[bfsCount];
             this.stacks = new IntStack[bfsCount];
@@ -256,17 +255,24 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
             }
         }
 
-        void init(long[] startNodes, boolean clear) {
+        void init(long[] startNodes) {
+            // clear the mapping
+            idMapping.clear();
+
             for (int i = 0; i < startNodes.length; i++) {
-                if (clear) {
-                    Arrays.fill(sigmas[i], 0);
-                    Arrays.fill(deltas[i], 0);
-                    idMapping.clear();
-                    paths[i].clear();
-                    stacks[i].clear();
-                }
-                idMapping.put(startNodes[i], i);
+                // fill arrays
+                Arrays.fill(sigmas[i], 0);
+                Arrays.fill(deltas[i], 0);
                 Arrays.fill(distances[i], -1);
+
+                // remove results from prior task
+                paths[i].clear();
+                stacks[i].clear();
+
+                // re-map the new batch of nodes
+                idMapping.put(startNodes[i], i);
+
+                // starting values for each node
                 sigmas[i][(int) startNodes[i]] = 1;
                 distances[i][(int) startNodes[i]] = 0;
             }
