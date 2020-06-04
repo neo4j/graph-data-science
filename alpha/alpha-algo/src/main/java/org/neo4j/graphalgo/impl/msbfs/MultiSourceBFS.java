@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.impl.msbfs;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -106,15 +107,14 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     public static MultiSourceBFS predecessorProcessing(
-        IdMapping nodeIds,
-        RelationshipIterator relationships,
+        Graph graph,
         BfsWithPredecessorConsumer perNeighborAction,
         AllocationTracker tracker,
         long... startNodes
     ) {
         return new MultiSourceBFS(
-            nodeIds,
-            relationships,
+            graph,
+            graph,
             new PredecessorStrategy(perNeighborAction),
             true,
             tracker,
@@ -123,16 +123,15 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     public static MultiSourceBFS predecessorProcessing(
-        IdMapping nodeIds,
-        RelationshipIterator relationships,
+        Graph graph,
         BfsConsumer perNodeAction,
         BfsWithPredecessorConsumer perNeighborAction,
         AllocationTracker tracker,
         long... startNodes
     ) {
         return new MultiSourceBFS(
-            nodeIds,
-            relationships,
+            graph,
+            graph,
             new PredecessorStrategy(perNodeAction, perNeighborAction),
             true,
             tracker,

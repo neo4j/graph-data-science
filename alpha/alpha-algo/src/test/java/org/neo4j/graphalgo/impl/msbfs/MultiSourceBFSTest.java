@@ -79,7 +79,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                 BfsWithPredecessorConsumer mock = mock(BfsWithPredecessorConsumer.class);
                 MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessing(
                     graph,
-                    graph,
                     (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
                     AllocationTracker.EMPTY,
                     0, 1
@@ -135,7 +134,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         withGraph(DB_CYPHER, graph -> {
             BfsWithPredecessorConsumer mock = mock(BfsWithPredecessorConsumer.class);
             MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessing(
-                graph,
                 graph,
                 (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
                 AllocationTracker.EMPTY

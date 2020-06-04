@@ -36,6 +36,8 @@ import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
@@ -72,15 +74,31 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
         this.centrality = new AtomicDoubleArray(nodeCount);
     }
 
+    private Queue<MSBetweennessCentralityConsumer> initPool() {
+        ArrayBlockingQueue<MSBetweennessCentralityConsumer> queue = new ArrayBlockingQueue<>(concurrency);
+
+        for (int i = 0; i < concurrency; i++) {
+            queue.offer(new MSBetweennessCentralityConsumer(
+                bfsCount,
+                nodeCount,
+                centrality,
+                undirected ? 2.0 : 1.0
+            ));
+        }
+
+        return queue;
+    }
+
     @Override
     public AtomicDoubleArray compute() {
         var taskCount = (int) ParallelUtil.threadCount(bfsCount, graph.nodeCount());
+        var consumerPool = initPool();
+
         var taskProvider = new MSBetweennessCentrality.TaskProvider(
             graph,
             taskCount,
             bfsCount,
-            centrality,
-            undirected,
+            consumerPool,
             tracker
         );
 
@@ -124,31 +142,30 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
         private final Graph graph;
         private final int taskCount;
         private final int bfsCount;
-        private final AtomicDoubleArray centrality;
-        private final boolean undirected;
         private final AllocationTracker tracker;
+        private final Queue<MSBetweennessCentralityConsumer> consumerPool;
 
         private long offset = 0L;
-        private int i = 0;
+        private int currentTask = 0;
 
         TaskProvider(
             Graph graph,
             int taskCount,
             int bfsCount,
-            AtomicDoubleArray centrality, boolean undirected, AllocationTracker tracker
+            Queue<MSBetweennessCentralityConsumer> consumerPool,
+            AllocationTracker tracker
         ) {
             this.graph = graph;
             this.taskCount = taskCount;
             this.bfsCount = bfsCount;
-            this.centrality = centrality;
-            this.undirected = undirected;
             this.tracker = tracker;
+            this.consumerPool = consumerPool;
         }
 
         @Override
         public Iterator<MSBetweennessCentralityTask> iterator() {
             offset = 0L;
-            i = 0;
+            currentTask = 0;
             return this;
         }
 
@@ -159,7 +176,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
 
         @Override
         public boolean hasNext() {
-            return i < taskCount;
+            return currentTask < taskCount;
         }
 
         @Override
@@ -167,48 +184,47 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
             var limit = Math.min(offset + bfsCount, graph.nodeCount());
             var startNodes = LongStream.range(offset, limit).toArray();
             offset += startNodes.length;
-            i++;
-            return new MSBetweennessCentralityTask(graph.concurrentCopy(), startNodes, centrality, undirected, tracker);
+            currentTask++;
+            return new MSBetweennessCentralityTask(graph.concurrentCopy(), startNodes, tracker, consumerPool);
         }
     }
 
     static final class MSBetweennessCentralityTask implements Runnable {
 
         private final Graph graph;
-
         private final long[] startNodes;
-
-        private final MSBCBFSConsumer consumer;
-
+        private final Queue<MSBetweennessCentralityConsumer> consumerPool;
         private final AllocationTracker tracker;
 
         MSBetweennessCentralityTask(
             Graph graph,
             long[] startNodes,
-            AtomicDoubleArray centrality,
-            boolean undirected,
-            AllocationTracker tracker
+            AllocationTracker tracker,
+            Queue<MSBetweennessCentralityConsumer> consumerPool
         ) {
             this.graph = graph;
             this.startNodes = startNodes;
-            int nodeCount = Math.toIntExact(graph.nodeCount());
-            this.consumer = new MSBCBFSConsumer(startNodes.length, nodeCount, centrality, undirected ? 2.0 : 1.0);
+            this.consumerPool = consumerPool;
             this.tracker = tracker;
         }
 
         @Override
         public void run() {
-            consumer.init(startNodes, false);
+            // pick a consumer from the pool
+            var consumer = consumerPool.poll();
+            consumer.init(startNodes, true);
             // concurrent forward traversal for all start nodes
             MultiSourceBFS
-                .predecessorProcessing(graph, graph, consumer, consumer, tracker, startNodes)
+                .predecessorProcessing(graph, consumer, consumer, tracker, startNodes)
                 .run();
             // sequential backward traversal for all start nodes
             consumer.updateCentrality();
+            // release the consumer back to the pool
+            consumerPool.offer(consumer);
         }
     }
 
-    static final class MSBCBFSConsumer implements BfsConsumer, BfsWithPredecessorConsumer {
+    static final class MSBetweennessCentralityConsumer implements BfsConsumer, BfsWithPredecessorConsumer {
 
         private final LongIntScatterMap idMapping;
         private final double divisor;
@@ -220,7 +236,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
         private final int[][] sigmas;
         private final int[][] distances;
 
-        MSBCBFSConsumer(int bfsCount, int nodeCount, AtomicDoubleArray centrality, double divisor) {
+        MSBetweennessCentralityConsumer(int bfsCount, int nodeCount, AtomicDoubleArray centrality, double divisor) {
             this.centrality = centrality;
 
             this.idMapping = new LongIntScatterMap(bfsCount);
