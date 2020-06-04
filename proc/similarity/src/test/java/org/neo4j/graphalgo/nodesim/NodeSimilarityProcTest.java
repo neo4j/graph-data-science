@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
@@ -64,7 +65,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
     MemoryEstimateTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
-    HeapControlTest<NodeSimilarity, CONFIG, NodeSimilarityResult> {
+    HeapControlTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
+    RelationshipWeightConfigTest<NodeSimilarity, CONFIG, NodeSimilarityResult> {
 
     static final String DB_CYPHER =
         "CREATE" +

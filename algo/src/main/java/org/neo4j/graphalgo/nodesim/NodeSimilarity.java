@@ -67,7 +67,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         this.progressLogger = progressLogger;
         this.tracker = tracker;
         this.nodeFilter = new BitSet(graph.nodeCount());
-        this.weighted = graph.hasRelationshipProperty();
+        this.weighted = config.relationshipWeightProperty() != null;
     }
 
     @Override
