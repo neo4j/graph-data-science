@@ -27,7 +27,9 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -86,19 +88,32 @@ class TraverseProcTest extends BaseProcTest {
         }
     }
 
+    void assertOrder(Map<String, List<Integer>> expected, List<Long> nodeIds) {
+        assertEquals(expected.size(), nodeIds.size(), "expected " + expected + " | given [" + nodeIds + "]");
+        for (Map.Entry<String, List<Integer>> ex : expected.entrySet()) {
+            long id = id(ex.getKey());
+            List<Integer> expectedPositions = ex.getValue();
+            int actualPosition = nodeIds.indexOf(id);
+            if (!expectedPositions.contains(actualPosition)) {
+                fail(ex.getKey() + "(" + id + ") at " + actualPosition + " expected at " + expectedPositions);
+            }
+        }
+    }
+
     @Test
     void testFindAnyOf() {
-        long id = runQuery("MATCH (n:Node {name: 'a'}) RETURN id(n) AS id", result -> result.<Long>columnAs("id").next());
+        long id = id("a");
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE")
             .algo("gds.alpha.dfs")
             .streamMode()
             .addParameter("startNode", id)
-            .addParameter("targetNodes", Arrays.asList(4,5))
-            .yields("nodeIds");
+            .addParameter("targetNodes", Arrays.asList(id("e"), id("f")))
+            .yields("startNodeId, nodeIds");
 
         runQueryWithRowConsumer(query, row -> {
+            assertEquals(row.getNumber("startNodeId").longValue(), id);
             @SuppressWarnings("unchecked") List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertEquals(4, nodeIds.size());
         });
@@ -106,7 +121,7 @@ class TraverseProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthOut() {
-        long id = runQuery("MATCH (n:Node {name: 'a'}) RETURN id(n) AS id", result -> result.<Long>columnAs("id").next());
+        long id = id("a");
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE")
@@ -114,8 +129,9 @@ class TraverseProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("startNode", id)
             .addParameter("maxDepth", 2)
-            .yields("nodeIds");
+            .yields("startNodeId, nodeIds");
         runQueryWithRowConsumer(query, row -> {
+            assertEquals(row.getNumber("startNodeId").longValue(), id);
             @SuppressWarnings("unchecked") List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"a", "b", "c", "d"}, nodeIds);
         });
@@ -123,7 +139,7 @@ class TraverseProcTest extends BaseProcTest {
 
     @Test
     void testMaxDepthIn() {
-        long id = runQuery("MATCH (n:Node {name: 'g'}) RETURN id(n) AS id", result -> result.<Long>columnAs("id").next());
+        long id = id("g");
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.REVERSE)
@@ -131,10 +147,64 @@ class TraverseProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("startNode", id)
             .addParameter("maxDepth", 2)
-            .yields("nodeIds");
+            .yields("startNodeId, nodeIds");
         runQueryWithRowConsumer(query, row -> {
+            assertEquals(row.getNumber("startNodeId").longValue(), id);
             @SuppressWarnings("unchecked") List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"g", "e", "f", "d"}, nodeIds);
+        });
+    }
+
+    @Test
+    void testDfsPath() {
+        long id = id("g");
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE", Orientation.REVERSE)
+            .algo("gds.alpha.dfs")
+            .streamMode()
+            .addParameter("startNode", id)
+            .yields("startNodeId, nodeIds");
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(row.getNumber("startNodeId").longValue(), id);
+            List<Long> nodeIds = (List<Long>) row.get("nodeIds");
+
+            Map<String, List<Integer>> expectedOrder = new HashMap();
+            expectedOrder.put("g", Arrays.asList(0));
+            expectedOrder.put("f", Arrays.asList(1, 6));
+            expectedOrder.put("d", Arrays.asList(1, 2));
+            expectedOrder.put("c", Arrays.asList(3, 5));
+            expectedOrder.put("a", Arrays.asList(4));
+            expectedOrder.put("b", Arrays.asList(3, 5));
+            expectedOrder.put("e", Arrays.asList(1, 6));
+
+            assertOrder(expectedOrder, nodeIds);
+        });
+    }
+
+    @Test
+    void testBfsPath() {
+        long id = id("g");
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType("TYPE", Orientation.REVERSE)
+            .algo("gds.alpha.bfs")
+            .streamMode()
+            .addParameter("startNode", id)
+            .yields("startNodeId, nodeIds");
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(row.getNumber("startNodeId").longValue(), id);
+            List<Long> nodeIds = (List<Long>) row.get("nodeIds");
+            Map<String, List<Integer>> expectedOrder = new HashMap();
+            expectedOrder.put("g", Arrays.asList(0));
+            expectedOrder.put("f", Arrays.asList(1, 2));
+            expectedOrder.put("e", Arrays.asList(1, 2));
+            expectedOrder.put("d", Arrays.asList(3));
+            expectedOrder.put("c", Arrays.asList(4, 5));
+            expectedOrder.put("b", Arrays.asList(4, 5));
+            expectedOrder.put("a", Arrays.asList(6));
+
+            assertOrder(expectedOrder, nodeIds);
         });
     }
 }
