@@ -105,7 +105,6 @@ final class PageRankTest {
         assertResult(this.graph, PageRankAlgorithmType.NON_WEIGHTED, expected);
     }
 
-
     @Test
     void testOnIncomingRelationships() {
         var expected = Map.of(

@@ -34,9 +34,9 @@ import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.stream.Stream;
 
@@ -57,19 +57,28 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    private static List<GdlGraphSetup> gdlGraphs(Class<?> testClass) {
-        var gdlGraphs = new ArrayList<GdlGraphSetup>();
+    private static Collection<GdlGraphSetup> gdlGraphs(Class<?> testClass) {
+        var setups = new HashSet<GdlGraphSetup>();
 
         do {
             stream(testClass.getDeclaredFields())
                 .filter(f -> f.isAnnotationPresent(GdlGraph.class) || f.isAnnotationPresent(GdlGraphs.class))
                 .flatMap(GdlSupportExtension::gdlGraphsForField)
-                .forEach(gdlGraphs::add);
+                .peek(setup -> {
+                    if (setups.contains(setup)) {
+                        throw new ExtensionConfigurationException(String.format(
+                            Locale.ENGLISH,
+                            "Graph names must be unique. Found duplicate graph name '%s'.",
+                            setup.graphName()
+                        ));
+                    }
+                })
+                .forEach(setups::add);
 
             testClass = testClass.getSuperclass();
         } while (testClass != null);
 
-        if (gdlGraphs.isEmpty()) {
+        if (setups.isEmpty()) {
             throw new ExtensionConfigurationException(String.format(
                 Locale.ENGLISH,
                 "At least one field must be annotated with %s.",
@@ -77,7 +86,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             ));
         }
 
-        return gdlGraphs;
+        return setups;
     }
 
     private static Stream<GdlGraphSetup> gdlGraphsForField(Field field) {
@@ -118,8 +127,8 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
 
         return annotations
             .map(annotation -> ImmutableGdlGraphSetup.of(
-                gdl,
                 annotation.graphName(),
+                gdl,
                 annotation.username(),
                 annotation.orientation(),
                 annotation.addToCatalog()
@@ -167,14 +176,18 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
 
     @ValueClass
     interface GdlGraphSetup {
-        String gdlGraph();
-
         String graphName();
 
+        @Value.Auxiliary
+        String gdlGraph();
+
+        @Value.Auxiliary
         String username();
 
+        @Value.Auxiliary
         Orientation orientation();
 
+        @Value.Auxiliary
         @Value.Default
         default boolean addToCatalog() {
             return false;
