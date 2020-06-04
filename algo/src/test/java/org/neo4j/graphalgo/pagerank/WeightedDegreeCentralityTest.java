@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -92,7 +92,7 @@ final class WeightedDegreeCentralityTest {
     private GraphStore graphStore;
 
     @Inject
-    private GdlFactory gdlFactory;
+    private IdFunction nodeId;
 
     @Inject(graphName = "reverseGraph")
     private GraphStore reverseGraphStore;
@@ -100,16 +100,16 @@ final class WeightedDegreeCentralityTest {
     @Test
     void buildWeightsArray() {
         var expected = Map.of(
-            gdlFactory.nodeId("a"), new double[]{},
-            gdlFactory.nodeId("b"), new double[]{2.0},
-            gdlFactory.nodeId("c"), new double[]{2.0},
-            gdlFactory.nodeId("d"), new double[]{5.0, 2.0},
-            gdlFactory.nodeId("e"), new double[]{2.0, 7.0, 1.0},
-            gdlFactory.nodeId("f"), new double[]{2.0, 2.0},
-            gdlFactory.nodeId("g"), new double[]{},
-            gdlFactory.nodeId("h"), new double[]{},
-            gdlFactory.nodeId("i"), new double[]{},
-            gdlFactory.nodeId("j"), new double[]{}
+            nodeId.of("a"), new double[]{},
+            nodeId.of("b"), new double[]{2.0},
+            nodeId.of("c"), new double[]{2.0},
+            nodeId.of("d"), new double[]{5.0, 2.0},
+            nodeId.of("e"), new double[]{2.0, 7.0, 1.0},
+            nodeId.of("f"), new double[]{2.0, 2.0},
+            nodeId.of("g"), new double[]{},
+            nodeId.of("h"), new double[]{},
+            nodeId.of("i"), new double[]{},
+            nodeId.of("j"), new double[]{}
         );
 
         var graph = graphStore.getGraph(
@@ -163,16 +163,16 @@ final class WeightedDegreeCentralityTest {
     @Test
     void weightedOutgoingCentrality() {
         var expected = Map.of(
-            gdlFactory.nodeId("a"), 0.0,
-            gdlFactory.nodeId("b"), 2.0,
-            gdlFactory.nodeId("c"), 2.0,
-            gdlFactory.nodeId("d"), 7.0,
-            gdlFactory.nodeId("e"), 10.0,
-            gdlFactory.nodeId("f"), 4.0,
-            gdlFactory.nodeId("g"), 0.0,
-            gdlFactory.nodeId("h"), 0.0,
-            gdlFactory.nodeId("i"), 0.0,
-            gdlFactory.nodeId("j"), 0.0
+            nodeId.of("a"), 0.0,
+            nodeId.of("b"), 2.0,
+            nodeId.of("c"), 2.0,
+            nodeId.of("d"), 7.0,
+            nodeId.of("e"), 10.0,
+            nodeId.of("f"), 4.0,
+            nodeId.of("g"), 0.0,
+            nodeId.of("h"), 0.0,
+            nodeId.of("i"), 0.0,
+            nodeId.of("j"), 0.0
         );
 
         var graph = graphStore.getGraph(
@@ -187,16 +187,16 @@ final class WeightedDegreeCentralityTest {
     @Test
     void excludeNegativeWeights() {
         var expected = Map.of(
-            gdlFactory.nodeId("a"), 0.0,
-            gdlFactory.nodeId("b"), 2.0,
-            gdlFactory.nodeId("c"), 2.0,
-            gdlFactory.nodeId("d"), 4.0,
-            gdlFactory.nodeId("e"), 6.0,
-            gdlFactory.nodeId("f"), 4.0,
-            gdlFactory.nodeId("g"), 0.0,
-            gdlFactory.nodeId("h"), 0.0,
-            gdlFactory.nodeId("i"), 0.0,
-            gdlFactory.nodeId("j"), 0.0
+            nodeId.of("a"), 0.0,
+            nodeId.of("b"), 2.0,
+            nodeId.of("c"), 2.0,
+            nodeId.of("d"), 4.0,
+            nodeId.of("e"), 6.0,
+            nodeId.of("f"), 4.0,
+            nodeId.of("g"), 0.0,
+            nodeId.of("h"), 0.0,
+            nodeId.of("i"), 0.0,
+            nodeId.of("j"), 0.0
         );
 
         var graph = graphStore.getGraph(
@@ -211,16 +211,16 @@ final class WeightedDegreeCentralityTest {
     @Test
     void weightedIncomingCentrality() {
         var expected = Map.of(
-            gdlFactory.nodeId("a"), 5.0,
-            gdlFactory.nodeId("b"), 8.0,
-            gdlFactory.nodeId("c"), 2.0,
-            gdlFactory.nodeId("d"), 7.0,
-            gdlFactory.nodeId("e"), 2.0,
-            gdlFactory.nodeId("f"), 1.0,
-            gdlFactory.nodeId("g"), 0.0,
-            gdlFactory.nodeId("h"), 0.0,
-            gdlFactory.nodeId("i"), 0.0,
-            gdlFactory.nodeId("j"), 0.0
+            nodeId.of("a"), 5.0,
+            nodeId.of("b"), 8.0,
+            nodeId.of("c"), 2.0,
+            nodeId.of("d"), 7.0,
+            nodeId.of("e"), 2.0,
+            nodeId.of("f"), 1.0,
+            nodeId.of("g"), 0.0,
+            nodeId.of("h"), 0.0,
+            nodeId.of("i"), 0.0,
+            nodeId.of("j"), 0.0
         );
 
         var graph = reverseGraphStore.getGraph(

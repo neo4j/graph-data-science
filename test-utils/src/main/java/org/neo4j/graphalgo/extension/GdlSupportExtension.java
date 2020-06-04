@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
@@ -141,6 +139,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         GdlFactory gdlFactory = GdlFactory.of(createConfig);
         GraphStore graphStore = gdlFactory.build().graphStore();
         Graph graph = graphStore.getUnion();
+        IdFunction idFunction = gdlFactory::nodeId;
 
         if (gdlGraphSetup.addToCatalog()) {
             GraphStoreCatalog.set(createConfig, graphStore);
@@ -149,7 +148,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
             injectInstance(testInstance, graphName, graph, Graph.class);
             injectInstance(testInstance, graphName, graphStore, GraphStore.class);
-            injectInstance(testInstance, graphName, gdlFactory, GdlFactory.class);
+            injectInstance(testInstance, graphName, idFunction, IdFunction.class);
         });
     }
 

@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -52,7 +52,7 @@ class BetweennessCentralityTest {
     private Graph graph;
 
     @Inject
-    private GdlFactory gdlFactory;
+    private IdFunction nodeId;
 
     private static final double[] EXACT_CENTRALITIES = {0.0, 3.0, 4.0, 3.0, 0.0};
     private static final double[] EMPTY_CENTRALITIES = {0.0, 0.0, 0.0, 0.0, 0.0};
@@ -95,10 +95,10 @@ class BetweennessCentralityTest {
 
     private void assertResult(AtomicDoubleArray result, double[] centralities) {
         assertEquals(5, centralities.length, "Expected 5 centrality values");
-        assertEquals(centralities[0], result.get((int) gdlFactory.nodeId("a")));
-        assertEquals(centralities[1], result.get((int) gdlFactory.nodeId("b")));
-        assertEquals(centralities[2], result.get((int) gdlFactory.nodeId("c")));
-        assertEquals(centralities[3], result.get((int) gdlFactory.nodeId("d")));
-        assertEquals(centralities[4], result.get((int) gdlFactory.nodeId("e")));
+        assertEquals(centralities[0], result.get((int) nodeId.of("a")));
+        assertEquals(centralities[1], result.get((int) nodeId.of("b")));
+        assertEquals(centralities[2], result.get((int) nodeId.of("c")));
+        assertEquals(centralities[3], result.get((int) nodeId.of("d")));
+        assertEquals(centralities[4], result.get((int) nodeId.of("e")));
     }
 }

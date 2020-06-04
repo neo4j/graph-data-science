@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -99,21 +99,21 @@ class WeightedPageRankTest {
     private GraphStore graphStore;
 
     @Inject
-    private GdlFactory gdlFactory;
+    private IdFunction nodeId;
 
     @Test
     void defaultWeightOf0MeansNoDiffusionOfPageRank() {
         var expected = Map.of(
-            gdlFactory.nodeId("a"), 0.15,
-            gdlFactory.nodeId("b"), 0.15,
-            gdlFactory.nodeId("c"), 0.15,
-            gdlFactory.nodeId("d"), 0.15,
-            gdlFactory.nodeId("e"), 0.15,
-            gdlFactory.nodeId("f"), 0.15,
-            gdlFactory.nodeId("g"), 0.15,
-            gdlFactory.nodeId("h"), 0.15,
-            gdlFactory.nodeId("i"), 0.15,
-            gdlFactory.nodeId("j"), 0.15
+            nodeId.of("a"), 0.15,
+            nodeId.of("b"), 0.15,
+            nodeId.of("c"), 0.15,
+            nodeId.of("d"), 0.15,
+            nodeId.of("e"), 0.15,
+            nodeId.of("f"), 0.15,
+            nodeId.of("g"), 0.15,
+            nodeId.of("h"), 0.15,
+            nodeId.of("i"), 0.15,
+            nodeId.of("j"), 0.15
         );
 
         var graph = graphStore.getGraph(
@@ -128,16 +128,16 @@ class WeightedPageRankTest {
     @Test
     void allWeightsTheSameShouldBeTheSameAsPageRank() {
         var expected = Map.of(
-            gdlFactory.nodeId("a"), 0.243007,
-            gdlFactory.nodeId("b"), 1.9183995,
-            gdlFactory.nodeId("c"), 1.7806315,
-            gdlFactory.nodeId("d"), 0.21885,
-            gdlFactory.nodeId("e"), 0.243007,
-            gdlFactory.nodeId("f"), 0.21885,
-            gdlFactory.nodeId("g"), 0.15,
-            gdlFactory.nodeId("h"), 0.15,
-            gdlFactory.nodeId("i"), 0.15,
-            gdlFactory.nodeId("j"), 0.15
+            nodeId.of("a"), 0.243007,
+            nodeId.of("b"), 1.9183995,
+            nodeId.of("c"), 1.7806315,
+            nodeId.of("d"), 0.21885,
+            nodeId.of("e"), 0.243007,
+            nodeId.of("f"), 0.21885,
+            nodeId.of("g"), 0.15,
+            nodeId.of("h"), 0.15,
+            nodeId.of("i"), 0.15,
+            nodeId.of("j"), 0.15
         );
 
         var graph = graphStore.getGraph(
@@ -152,16 +152,16 @@ class WeightedPageRankTest {
     @Test
     void higherWeightsLeadToHigherPageRank() {
         var expected = Map.of(
-            gdlFactory.nodeId("a"), 0.1900095,
-            gdlFactory.nodeId("b"), 2.2152279,
-            gdlFactory.nodeId("c"), 2.0325884,
-            gdlFactory.nodeId("d"), 0.1569275,
-            gdlFactory.nodeId("e"), 0.1633280,
-            gdlFactory.nodeId("f"), 0.1569275,
-            gdlFactory.nodeId("g"), 0.15,
-            gdlFactory.nodeId("h"), 0.15,
-            gdlFactory.nodeId("i"), 0.15,
-            gdlFactory.nodeId("j"), 0.15
+            nodeId.of("a"), 0.1900095,
+            nodeId.of("b"), 2.2152279,
+            nodeId.of("c"), 2.0325884,
+            nodeId.of("d"), 0.1569275,
+            nodeId.of("e"), 0.1633280,
+            nodeId.of("f"), 0.1569275,
+            nodeId.of("g"), 0.15,
+            nodeId.of("h"), 0.15,
+            nodeId.of("i"), 0.15,
+            nodeId.of("j"), 0.15
         );
 
         var graph = graphStore.getGraph(
@@ -176,16 +176,16 @@ class WeightedPageRankTest {
     @Test
     void shouldExcludeNegativeWeights() {
         var expected = Map.of(
-            gdlFactory.nodeId("a"), 0.1900095,
-            gdlFactory.nodeId("b"), 2.2152279,
-            gdlFactory.nodeId("c"), 2.0325884,
-            gdlFactory.nodeId("d"), 0.1569275,
-            gdlFactory.nodeId("e"), 0.1633280,
-            gdlFactory.nodeId("f"), 0.1569275,
-            gdlFactory.nodeId("g"), 0.15,
-            gdlFactory.nodeId("h"), 0.15,
-            gdlFactory.nodeId("i"), 0.15,
-            gdlFactory.nodeId("j"), 0.15
+            nodeId.of("a"), 0.1900095,
+            nodeId.of("b"), 2.2152279,
+            nodeId.of("c"), 2.0325884,
+            nodeId.of("d"), 0.1569275,
+            nodeId.of("e"), 0.1633280,
+            nodeId.of("f"), 0.1569275,
+            nodeId.of("g"), 0.15,
+            nodeId.of("h"), 0.15,
+            nodeId.of("i"), 0.15,
+            nodeId.of("j"), 0.15
         );
 
         var graph = graphStore.getGraph(

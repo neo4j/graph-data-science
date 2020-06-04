@@ -36,8 +36,8 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -79,7 +79,7 @@ class LabelPropagationTest {
     private Graph graph;
 
     @Inject
-    private GdlFactory gdlFactory;
+    private IdFunction nodeId;
 
     @Test
     void shouldUseOriginalNodeIdWhenSeedPropertyIsMissing() {
@@ -92,12 +92,12 @@ class LabelPropagationTest {
         );
         assertArrayEquals(
             new long[]{
-                gdlFactory.nodeId("nBridget"),
-                gdlFactory.nodeId("nBridget"),
-                gdlFactory.nodeId("nDoug"),
-                gdlFactory.nodeId("nMark"),
-                gdlFactory.nodeId("nMark"),
-                gdlFactory.nodeId("nBridget")
+                nodeId.of("nBridget"),
+                nodeId.of("nBridget"),
+                nodeId.of("nDoug"),
+                nodeId.of("nMark"),
+                nodeId.of("nMark"),
+                nodeId.of("nBridget")
             },
             lp.compute().labels().toArray(),
             "Incorrect result assuming initial labels are neo4j id"
@@ -120,12 +120,12 @@ class LabelPropagationTest {
 
         assertArrayEquals(
             new long[]{
-                gdlFactory.nodeId("nCharles"),
-                gdlFactory.nodeId("nCharles"),
-                gdlFactory.nodeId("nDoug"),
-                gdlFactory.nodeId("nMark"),
-                gdlFactory.nodeId("nMark"),
-                gdlFactory.nodeId("nCharles")
+                nodeId.of("nCharles"),
+                nodeId.of("nCharles"),
+                nodeId.of("nDoug"),
+                nodeId.of("nMark"),
+                nodeId.of("nMark"),
+                nodeId.of("nCharles")
             },
             lp.compute().labels().toArray()
         );

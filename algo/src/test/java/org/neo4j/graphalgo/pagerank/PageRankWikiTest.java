@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.HashMap;
 
@@ -69,22 +69,22 @@ class PageRankWikiTest {
     private Graph graph;
 
     @Inject
-    private GdlFactory gdlFactory;
+    private IdFunction nodeId;
 
     @Test
     void test() {
         var expected = new HashMap<Long, Double>();
-        expected.put(gdlFactory.nodeId("a"), 0.3040965);
-        expected.put(gdlFactory.nodeId("b"), 3.5658695);
-        expected.put(gdlFactory.nodeId("c"), 3.180981);
-        expected.put(gdlFactory.nodeId("d"), 0.3625935);
-        expected.put(gdlFactory.nodeId("e"), 0.7503465);
-        expected.put(gdlFactory.nodeId("f"), 0.3625935);
-        expected.put(gdlFactory.nodeId("g"), 0.15);
-        expected.put(gdlFactory.nodeId("h"), 0.15);
-        expected.put(gdlFactory.nodeId("i"), 0.15);
-        expected.put(gdlFactory.nodeId("j"), 0.15);
-        expected.put(gdlFactory.nodeId("k"), 0.15);
+        expected.put(nodeId.of("a"), 0.3040965);
+        expected.put(nodeId.of("b"), 3.5658695);
+        expected.put(nodeId.of("c"), 3.180981);
+        expected.put(nodeId.of("d"), 0.3625935);
+        expected.put(nodeId.of("e"), 0.7503465);
+        expected.put(nodeId.of("f"), 0.3625935);
+        expected.put(nodeId.of("g"), 0.15);
+        expected.put(nodeId.of("h"), 0.15);
+        expected.put(nodeId.of("i"), 0.15);
+        expected.put(nodeId.of("j"), 0.15);
+        expected.put(nodeId.of("k"), 0.15);
 
         assertResult(graph, PageRankAlgorithmType.NON_WEIGHTED, expected);
     }
