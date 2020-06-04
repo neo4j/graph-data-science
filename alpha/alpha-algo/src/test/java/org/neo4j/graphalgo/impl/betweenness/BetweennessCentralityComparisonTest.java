@@ -41,21 +41,36 @@ class BetweennessCentralityComparisonTest extends AlgoTestBase {
     static Stream<Arguments> randomGraphParameters() {
         var rand = new Random();
         return Stream.of(
-            Arguments.of(10, 2, RelationshipDistribution.UNIFORM, rand.nextLong()),
-            Arguments.of(10, 2, RelationshipDistribution.RANDOM, rand.nextLong()),
-            Arguments.of(10, 2, RelationshipDistribution.POWER_LAW, rand.nextLong()),
-            Arguments.of(100, 4, RelationshipDistribution.UNIFORM, rand.nextLong()),
-            Arguments.of(100, 4, RelationshipDistribution.RANDOM, rand.nextLong()),
-            Arguments.of(100, 4, RelationshipDistribution.POWER_LAW, rand.nextLong()),
-            Arguments.of(1_000, 10, RelationshipDistribution.UNIFORM, rand.nextLong()),
-            Arguments.of(1_000, 10, RelationshipDistribution.RANDOM, rand.nextLong()),
-            Arguments.of(1_000, 10, RelationshipDistribution.POWER_LAW, rand.nextLong())
+            Arguments.of(10, 2, RelationshipDistribution.UNIFORM, rand.nextLong(), 1),
+            Arguments.of(10, 2, RelationshipDistribution.RANDOM, rand.nextLong(), 1),
+            Arguments.of(10, 2, RelationshipDistribution.POWER_LAW, rand.nextLong(), 1),
+            Arguments.of(100, 4, RelationshipDistribution.UNIFORM, rand.nextLong(), 1),
+            Arguments.of(100, 4, RelationshipDistribution.RANDOM, rand.nextLong(), 1),
+            Arguments.of(100, 4, RelationshipDistribution.POWER_LAW, rand.nextLong(), 1),
+            Arguments.of(1_000, 10, RelationshipDistribution.UNIFORM, rand.nextLong(), 1),
+            Arguments.of(1_000, 10, RelationshipDistribution.RANDOM, rand.nextLong(), 1),
+            Arguments.of(1_000, 10, RelationshipDistribution.POWER_LAW, rand.nextLong(), 1),
+            Arguments.of(10, 2, RelationshipDistribution.UNIFORM, rand.nextLong(), 4),
+            Arguments.of(10, 2, RelationshipDistribution.RANDOM, rand.nextLong(), 4),
+            Arguments.of(10, 2, RelationshipDistribution.POWER_LAW, rand.nextLong(), 4),
+            Arguments.of(100, 4, RelationshipDistribution.UNIFORM, rand.nextLong(), 4),
+            Arguments.of(100, 4, RelationshipDistribution.RANDOM, rand.nextLong(), 4),
+            Arguments.of(100, 4, RelationshipDistribution.POWER_LAW, rand.nextLong(), 4),
+            Arguments.of(1_000, 10, RelationshipDistribution.UNIFORM, rand.nextLong(), 4),
+            Arguments.of(1_000, 10, RelationshipDistribution.RANDOM, rand.nextLong(), 4),
+            Arguments.of(1_000, 10, RelationshipDistribution.POWER_LAW, rand.nextLong(), 4)
         );
     }
 
     @ParameterizedTest
     @MethodSource("randomGraphParameters")
-    void shouldHaveSameResultOnRandomGraph(long nodeCount, long averageDegree, RelationshipDistribution distribution, long seed) {
+    void shouldHaveSameResultOnRandomGraph(
+        long nodeCount,
+        long averageDegree,
+        RelationshipDistribution distribution,
+        long seed,
+        int concurreny
+    ) {
         var graph = new RandomGraphGenerator(
             nodeCount,
             averageDegree,
@@ -65,7 +80,7 @@ class BetweennessCentralityComparisonTest extends AlgoTestBase {
             AllocationTracker.EMPTY
         ).generate();
 
-        compareResults(graph);
+        compareResults(graph, concurreny);
     }
 
     static Stream<String> specialGraphs() {
@@ -111,14 +126,14 @@ class BetweennessCentralityComparisonTest extends AlgoTestBase {
     void shouldProduceSameResult(String graphQuery) {
         runQuery("MATCH (n) DETACH DELETE n");
         runQuery(graphQuery);
-        compareResults(new StoreLoaderBuilder().api(db).build().graph());
+        compareResults(new StoreLoaderBuilder().api(db).build().graph(), 1);
     }
 
-    private void compareResults(Graph graph) {
-        var msBc = new MSBetweennessCentrality(graph, false, 1, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
+    private void compareResults(Graph graph, int concurrency) {
+        var msBc = new MSBetweennessCentrality(graph, false, 1, Pools.DEFAULT, concurrency, AllocationTracker.EMPTY);
         msBc.compute();
 
-        var bc = new BetweennessCentrality(graph, Pools.DEFAULT, 1, false);
+        var bc = new BetweennessCentrality(graph, Pools.DEFAULT, concurrency, false);
         bc.compute();
 
         for (int i = 0; i < graph.nodeCount(); i++) {

@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.LongIntScatterMap;
 import com.carrotsearch.hppc.procedures.LongIntProcedure;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.container.Paths;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -32,8 +33,11 @@ import org.neo4j.graphalgo.impl.msbfs.BfsSources;
 import org.neo4j.graphalgo.impl.msbfs.BfsWithPredecessorConsumer;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
 
+import java.util.AbstractCollection;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -70,19 +74,24 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
 
     @Override
     public AtomicDoubleArray compute() {
-        var consumer = new MSBCBFSConsumer(bfsCount, nodeCount, centrality, undirected ? 2.0 : 1.0);
+        var taskCount = (int) ParallelUtil.threadCount(bfsCount, graph.nodeCount());
+        var taskProvider = new MSBetweennessCentrality.TaskProvider(
+            graph,
+            taskCount,
+            bfsCount,
+            centrality,
+            undirected,
+            tracker
+        );
 
-        for (long offset = 0; offset < nodeCount; offset += bfsCount) {
-            var limit = Math.min(offset + bfsCount, nodeCount);
-            var startNodes = LongStream.range(offset, limit).toArray();
-            consumer.init(startNodes, offset > 0);
-            // forward traversal for all start nodes
-            MultiSourceBFS
-                .predecessorProcessing(graph, graph, consumer, consumer, tracker, startNodes)
-                .run();
-            // backward traversal for all start nodes
-            consumer.updateCentrality();
-        }
+        ParallelUtil.runWithConcurrency(
+            concurrency,
+            taskProvider,
+            taskCount << 2,
+            100L,
+            TimeUnit.MICROSECONDS,
+            executorService
+        );
 
         return centrality;
     }
@@ -110,7 +119,96 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
                     centrality.get(nodeId)));
     }
 
-    static class MSBCBFSConsumer implements BfsConsumer, BfsWithPredecessorConsumer {
+    static final class TaskProvider extends AbstractCollection<MSBetweennessCentralityTask> implements Iterator<MSBetweennessCentralityTask> {
+
+        private final Graph graph;
+        private final int taskCount;
+        private final int bfsCount;
+        private final AtomicDoubleArray centrality;
+        private final boolean undirected;
+        private final AllocationTracker tracker;
+
+        private long offset = 0L;
+        private int i = 0;
+
+        TaskProvider(
+            Graph graph,
+            int taskCount,
+            int bfsCount,
+            AtomicDoubleArray centrality, boolean undirected, AllocationTracker tracker
+        ) {
+            this.graph = graph;
+            this.taskCount = taskCount;
+            this.bfsCount = bfsCount;
+            this.centrality = centrality;
+            this.undirected = undirected;
+            this.tracker = tracker;
+        }
+
+        @Override
+        public Iterator<MSBetweennessCentralityTask> iterator() {
+            offset = 0L;
+            i = 0;
+            return this;
+        }
+
+        @Override
+        public int size() {
+            return taskCount;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return i < taskCount;
+        }
+
+        @Override
+        public MSBetweennessCentralityTask next() {
+            var limit = Math.min(offset + bfsCount, graph.nodeCount());
+            var startNodes = LongStream.range(offset, limit).toArray();
+            offset += startNodes.length;
+            i++;
+            return new MSBetweennessCentralityTask(graph.concurrentCopy(), startNodes, centrality, undirected, tracker);
+        }
+    }
+
+    static final class MSBetweennessCentralityTask implements Runnable {
+
+        private final Graph graph;
+
+        private final long[] startNodes;
+
+        private final MSBCBFSConsumer consumer;
+
+        private final AllocationTracker tracker;
+
+        MSBetweennessCentralityTask(
+            Graph graph,
+            long[] startNodes,
+            AtomicDoubleArray centrality,
+            boolean undirected,
+            AllocationTracker tracker
+        ) {
+            this.graph = graph;
+            this.startNodes = startNodes;
+            int nodeCount = Math.toIntExact(graph.nodeCount());
+            this.consumer = new MSBCBFSConsumer(startNodes.length, nodeCount, centrality, undirected ? 2.0 : 1.0);
+            this.tracker = tracker;
+        }
+
+        @Override
+        public void run() {
+            consumer.init(startNodes, false);
+            // concurrent forward traversal for all start nodes
+            MultiSourceBFS
+                .predecessorProcessing(graph, graph, consumer, consumer, tracker, startNodes)
+                .run();
+            // sequential backward traversal for all start nodes
+            consumer.updateCentrality();
+        }
+    }
+
+    static final class MSBCBFSConsumer implements BfsConsumer, BfsWithPredecessorConsumer {
 
         private final LongIntScatterMap idMapping;
         private final double divisor;
