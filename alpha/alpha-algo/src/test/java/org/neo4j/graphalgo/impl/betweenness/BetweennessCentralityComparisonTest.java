@@ -23,20 +23,19 @@ import org.junit.Assert;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
 
-class BetweennessCentralityComparisonTest extends AlgoTestBase {
+class BetweennessCentralityComparisonTest {
 
     static Stream<Arguments> randomGraphParameters() {
         var rand = new Random();
@@ -83,7 +82,7 @@ class BetweennessCentralityComparisonTest extends AlgoTestBase {
         compareResults(graph, concurreny);
     }
 
-    static Stream<String> specialGraphs() {
+    static Stream<Graph> specialGraphs() {
         return Stream.of(
             // [0.0, 3.0, 0.0, 2.0, 1.0]
             "CREATE " +
@@ -118,15 +117,13 @@ class BetweennessCentralityComparisonTest extends AlgoTestBase {
             ", (n2)-[:REL]->(n1)" +
             ", (n2)-[:REL]->(n3)" +
             ", (n3)-[:REL]->(n0)"
-        );
+        ).map(cypher -> GdlFactory.of(cypher).build().graphStore().getUnion());
     }
 
     @ParameterizedTest
     @MethodSource("specialGraphs")
-    void shouldProduceSameResult(String graphQuery) {
-        runQuery("MATCH (n) DETACH DELETE n");
-        runQuery(graphQuery);
-        compareResults(new StoreLoaderBuilder().api(db).build().graph(), 1);
+    void shouldProduceSameResult(Graph graph) {
+        compareResults(graph, 1);
     }
 
     private void compareResults(Graph graph, int concurrency) {
