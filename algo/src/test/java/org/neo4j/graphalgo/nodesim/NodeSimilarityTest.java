@@ -263,7 +263,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).build(),
+            configBuilder().relationshipWeightProperty("prop").concurrency(concurrency).build(),
             Pools.DEFAULT,
             progressLogger,
             AllocationTracker.EMPTY
