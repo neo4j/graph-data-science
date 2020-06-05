@@ -76,31 +76,42 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         withGraph(
             DB_CYPHER,
             graph -> {
-                BfsWithPredecessorConsumer mock = mock(BfsWithPredecessorConsumer.class);
+                BfsConsumer bfsConsumerMock = mock(BfsConsumer.class);
+                BfsWithPredecessorConsumer bfsWithPredecessorConsumerMock = mock(BfsWithPredecessorConsumer.class);
                 MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessing(
                     graph,
-                    (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
+                    (i, d, s) -> bfsConsumerMock.accept(i + 1, d, toList(s, x -> x + 1)),
+                    (i, p, d, s) -> bfsWithPredecessorConsumerMock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
                     AllocationTracker.EMPTY,
                     0, 1
                 );
 
                 msbfs.run(AlgoBaseConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
 
-                verify(mock).accept(3, 1, 1, toList(1));
-                verify(mock).accept(3, 2, 1, toList(2));
-                verify(mock).accept(4, 1, 1, toList(1));
-                verify(mock).accept(4, 2, 1, toList(2));
+                verify(bfsConsumerMock).accept(1, 0, toList(1));
+                verify(bfsConsumerMock).accept(2, 0, toList(2));
+                verify(bfsConsumerMock).accept(3, 1, toList(1, 2));
+                verify(bfsConsumerMock).accept(4, 1, toList(1, 2));
+                verify(bfsConsumerMock).accept(1, 2, toList(2));
+                verify(bfsConsumerMock).accept(2, 2, toList(1));
+                verify(bfsConsumerMock).accept(5, 2, toList(1, 2));
+                verify(bfsConsumerMock).accept(6, 2, toList(1, 2));
 
-                verify(mock).accept(5, 3, 2, toList(1, 2));
-                verify(mock).accept(6, 4, 2, toList(1, 2));
+                verify(bfsWithPredecessorConsumerMock).accept(3, 1, 1, toList(1));
+                verify(bfsWithPredecessorConsumerMock).accept(3, 2, 1, toList(2));
+                verify(bfsWithPredecessorConsumerMock).accept(4, 1, 1, toList(1));
+                verify(bfsWithPredecessorConsumerMock).accept(4, 2, 1, toList(2));
 
-                verify(mock).accept(2, 3, 2, toList(1));
-                verify(mock).accept(2, 4, 2, toList(1));
+                verify(bfsWithPredecessorConsumerMock).accept(5, 3, 2, toList(1, 2));
+                verify(bfsWithPredecessorConsumerMock).accept(6, 4, 2, toList(1, 2));
 
-                verify(mock).accept(1, 3, 2, toList(2));
-                verify(mock).accept(1, 4, 2, toList(2));
+                verify(bfsWithPredecessorConsumerMock).accept(2, 3, 2, toList(1));
+                verify(bfsWithPredecessorConsumerMock).accept(2, 4, 2, toList(1));
 
-                verifyNoMoreInteractions(mock);
+                verify(bfsWithPredecessorConsumerMock).accept(1, 3, 2, toList(2));
+                verify(bfsWithPredecessorConsumerMock).accept(1, 4, 2, toList(2));
+
+                verifyNoMoreInteractions(bfsWithPredecessorConsumerMock);
             }
         );
     }
@@ -135,6 +146,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             BfsWithPredecessorConsumer mock = mock(BfsWithPredecessorConsumer.class);
             MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessing(
                 graph,
+                (i, d, s) -> {},
                 (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
                 AllocationTracker.EMPTY
             );

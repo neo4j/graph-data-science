@@ -74,7 +74,7 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
         this.centrality = new AtomicDoubleArray(nodeCount);
     }
 
-    private Queue<MSBetweennessCentralityConsumer> initPool() {
+    private Queue<MSBetweennessCentralityConsumer> initConsumerPool() {
         ArrayBlockingQueue<MSBetweennessCentralityConsumer> queue = new ArrayBlockingQueue<>(concurrency);
 
         for (int i = 0; i < concurrency; i++) {
@@ -92,14 +92,15 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
     @Override
     public AtomicDoubleArray compute() {
         var taskCount = (int) ParallelUtil.threadCount(bfsCount, graph.nodeCount());
-        var consumerPool = initPool();
+        var consumerPool = initConsumerPool();
+        var multiSourceBFS = MultiSourceBFS.predecessorProcessing(graph, tracker);
 
         var taskProvider = new MSBetweennessCentrality.TaskProvider(
-            graph,
+            multiSourceBFS,
+            graph.nodeCount(),
             taskCount,
             bfsCount,
-            consumerPool,
-            tracker
+            consumerPool
         );
 
         ParallelUtil.runWithConcurrency(
@@ -139,26 +140,26 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
 
     static final class TaskProvider extends AbstractCollection<MSBetweennessCentralityTask> implements Iterator<MSBetweennessCentralityTask> {
 
-        private final Graph graph;
+        private final MultiSourceBFS multiSourceBFS;
+        private final long nodeCount;
         private final int taskCount;
         private final int bfsCount;
-        private final AllocationTracker tracker;
         private final Queue<MSBetweennessCentralityConsumer> consumerPool;
 
         private long offset = 0L;
         private int currentTask = 0;
 
         TaskProvider(
-            Graph graph,
+            MultiSourceBFS multiSourceBFS,
+            long nodeCount,
             int taskCount,
             int bfsCount,
-            Queue<MSBetweennessCentralityConsumer> consumerPool,
-            AllocationTracker tracker
+            Queue<MSBetweennessCentralityConsumer> consumerPool
         ) {
-            this.graph = graph;
+            this.multiSourceBFS = multiSourceBFS;
+            this.nodeCount = nodeCount;
             this.taskCount = taskCount;
             this.bfsCount = bfsCount;
-            this.tracker = tracker;
             this.consumerPool = consumerPool;
         }
 
@@ -181,42 +182,38 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
 
         @Override
         public MSBetweennessCentralityTask next() {
-            var limit = Math.min(offset + bfsCount, graph.nodeCount());
+            var limit = Math.min(offset + bfsCount, nodeCount);
             var startNodes = LongStream.range(offset, limit).toArray();
             offset += startNodes.length;
             currentTask++;
-            return new MSBetweennessCentralityTask(graph.concurrentCopy(), startNodes, tracker, consumerPool);
+            return new MSBetweennessCentralityTask(multiSourceBFS, startNodes, consumerPool);
         }
     }
 
     static final class MSBetweennessCentralityTask implements Runnable {
 
-        private final Graph graph;
+        private final MultiSourceBFS multiSourceBFS;
         private final long[] startNodes;
         private final Queue<MSBetweennessCentralityConsumer> consumerPool;
-        private final AllocationTracker tracker;
 
         MSBetweennessCentralityTask(
-            Graph graph,
+            MultiSourceBFS multiSourceBFS,
             long[] startNodes,
-            AllocationTracker tracker,
             Queue<MSBetweennessCentralityConsumer> consumerPool
         ) {
-            this.graph = graph;
+            this.multiSourceBFS = multiSourceBFS;
             this.startNodes = startNodes;
             this.consumerPool = consumerPool;
-            this.tracker = tracker;
         }
 
         @Override
         public void run() {
             // pick a consumer from the pool
             var consumer = consumerPool.poll();
+            //noinspection ConstantConditions
             consumer.init(startNodes);
             // concurrent forward traversal for all start nodes
-            MultiSourceBFS
-                .predecessorProcessing(graph, consumer, consumer, tracker, startNodes)
-                .run();
+            multiSourceBFS.initPredecessorProcessing(consumer, consumer, startNodes).run();
             // sequential backward traversal for all start nodes
             consumer.updateCentrality();
             // release the consumer back to the pool

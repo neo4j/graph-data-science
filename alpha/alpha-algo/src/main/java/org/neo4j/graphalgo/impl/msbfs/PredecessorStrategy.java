@@ -82,7 +82,7 @@ public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
                         // User-defined computation on source.
                         // Happens exactly once for each node.
                         sourceNodes.reset(visit);
-                        perNodeAction.accept(nodeId, depth.get(), sourceNodes);
+                        perNodeAction.accept(nodeId, depth.get() - 1, sourceNodes);
 
                         relationships.forEachRelationship(nodeId, (source, target) -> {
                             // D ← visit[nodeId] & ∼seen[target]
