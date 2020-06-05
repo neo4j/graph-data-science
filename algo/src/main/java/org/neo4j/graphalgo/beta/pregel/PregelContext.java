@@ -23,10 +23,14 @@ public final class PregelContext {
 
     private final Pregel.ComputeStep computeStep;
     private final PregelConfig config;
+    private final SendMessageFunction sendMessageFunction;
 
     PregelContext(Pregel.ComputeStep computeStep, PregelConfig config) {
         this.computeStep = computeStep;
         this.config = config;
+        this.sendMessageFunction = config.relationshipWeightProperty() == null
+            ? computeStep::sendMessages
+            : computeStep::sendWeightedMessages;
     }
 
     public void voteToHalt(long nodeId) {
@@ -50,7 +54,7 @@ public final class PregelContext {
     }
 
     public void sendMessages(long nodeId, double message) {
-        computeStep.sendMessages(nodeId, message);
+        sendMessageFunction.sendMessage(nodeId, message);
     }
 
     public int getDegree(long nodeId) {

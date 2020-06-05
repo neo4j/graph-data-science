@@ -341,6 +341,14 @@ public final class Pregel {
             });
         }
 
+        void sendWeightedMessages(long nodeId, double message) {
+            relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, weight) -> {
+                messageQueues.get(target).add(message * weight);
+                senderBits.set(target);
+                return true;
+            });
+        }
+
         private Queue<Double> receiveMessages(final long nodeId) {
             return receiverBits.get(nodeId) ? messageQueues.get(nodeId) : null;
         }
