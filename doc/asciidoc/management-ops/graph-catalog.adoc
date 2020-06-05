@@ -37,7 +37,7 @@ This chapter explains the available graph catalog operations.
 | <<catalog-graph-remove-node-properties, gds.graph.removeNodeProperties>> | Removes node properties from a named graph.
 | <<catalog-graph-delete-rel-type, gds.graph.deleteRelationships>>         | Deletes relationships of a given relationship type from a named graph.
 | <<catalog-graph-drop, gds.graph.drop>>                                   | Drops a named graph from the catalog.
-| <<catalog-graph-stream-node-property, gds.graph.streamNodeProperty>>     | Streams a single node property stored in a named graph.
+| <<catalog-graph-stream-node-properties, gds.graph.streamNodeProperty>>     | Streams a single node property stored in a named graph.
 | <<catalog-graph-stream-node-properties, gds.graph.streamNodeProperties>> | Streams node properties stored in a named graph.
 | <<catalog-graph-write-node-properties, gds.graph.writeNodeProperties>>   | Writes node properties stored in a named graph to Neo4j.
 | <<catalog-graph-write-relationship, gds.graph.writeRelationship>>        | Writes relationships stored in a named graph to Neo4j.
