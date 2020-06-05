@@ -47,17 +47,14 @@ public class PregelTest extends AlgoTestBase {
         ", (a)-[:REL {prop: 2.0}]->(b)" +
         ", (a)-[:REL]->(c)";
 
-    TestPregelComputation pregelComputation;
-
     @BeforeEach
     void setup() {
         runQuery(TEST_GRAPH);
-        pregelComputation = new TestPregelComputation();
     }
 
     @ParameterizedTest
     @MethodSource("configAndResult")
-    void sendsMessages(PregelConfig config, double[] expected) {
+    void sendsMessages(PregelConfig config, PregelComputation computation, double[] expected) {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .addRelationshipProperty(PropertyMapping.of("prop", 1.0))
@@ -67,7 +64,7 @@ public class PregelTest extends AlgoTestBase {
         Pregel pregelJob = Pregel.withDefaultNodeValues(
             graph,
             config,
-            pregelComputation,
+            computation,
             10,
             AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
@@ -82,11 +79,18 @@ public class PregelTest extends AlgoTestBase {
         return Stream.of(
             Arguments.of(
                 ImmutablePregelConfig.builder().build(),
+                new TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
                 ImmutablePregelConfig.builder().relationshipWeightProperty("prop").build(),
+                new TestPregelComputation(),
                 new double[]{0.0, 2.0, 1.0}
+            ),
+            Arguments.of(
+                ImmutablePregelConfig.builder().relationshipWeightProperty("prop").build(),
+                new TestWeightComputation(),
+                new double[]{0.0, 3.0, 2.0}
             )
         );
     }
@@ -108,6 +112,14 @@ public class PregelTest extends AlgoTestBase {
                 pregel.setNodeValue(nodeId, messageSum);
             }
             pregel.voteToHalt(nodeId);
+        }
+    }
+
+    public static class TestWeightComputation extends TestPregelComputation {
+
+        @Override
+        public double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
+            return nodeValue + relationshipWeight;
         }
     }
 }

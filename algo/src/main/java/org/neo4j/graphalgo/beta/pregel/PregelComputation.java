@@ -25,4 +25,8 @@ import java.util.Queue;
 public interface PregelComputation {
 
     void compute(PregelContext context, long nodeId, Queue<Double> messages);
+
+    default double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
+        return nodeValue * relationshipWeight;
+    }
 }
