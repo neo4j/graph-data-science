@@ -314,9 +314,9 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     private static Stream<Arguments> estimations() {
         return Stream.of(
-            Arguments.of(100, 2, "[27 KiB ... 27 KiB]"),
-            Arguments.of(100, 4, "[29 KiB ... 29 KiB]"),
-            Arguments.of(200, 4, "[57 KiB ... 58 KiB]")
+            Arguments.of(100, 2, "[27 KiB ... 30 KiB]"),
+            Arguments.of(100, 4, "[29 KiB ... 33 KiB]"),
+            Arguments.of(200, 4, "[57 KiB ... 67 KiB]")
         );
     }
 }

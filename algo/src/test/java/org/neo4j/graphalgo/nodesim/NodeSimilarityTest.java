@@ -745,7 +745,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
 
         long weightsRangeMin = 16L;
-        long weightsRangeMax = 16L + 16L + (5_000_000 / 1_000_000) * Long.BYTES;
+        long weightsRangeMax = 56_000_016L;
         MemoryRange weightsRange = MemoryRange.of(weightsRangeMin, weightsRangeMax);
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder()
@@ -800,7 +800,7 @@ final class NodeSimilarityTest extends AlgoTestBase {
         MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
 
         long weightsRangeMin = 16L;
-        long weightsRangeMax = 16L + 16L + (5_000_000 / 1_000_000) * Long.BYTES;
+        long weightsRangeMax = 56_000_016L;
         MemoryRange weightsRange = MemoryRange.of(weightsRangeMin, weightsRangeMax);
 
         long topNListMin = 2_504L;

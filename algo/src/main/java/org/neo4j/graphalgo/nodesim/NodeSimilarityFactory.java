@@ -67,13 +67,13 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
                 })
             )
             .add("weights",
-                MemoryEstimations.setup("", (dimensions, nodeCount) -> {
+                MemoryEstimations.setup("", (dimensions, concurrency) -> {
                 int averageDegree = dimensions.nodeCount() == 0
                     ? 0
                     : Math.toIntExact(dimensions.maxRelCount() / dimensions.nodeCount());
                 long averageVectorSize = sizeOfDoubleArray(averageDegree);
                 return MemoryEstimations.builder(HugeObjectArray.class)
-                    .rangePerNode("array", ignore -> MemoryRange.of(0, nodeCount * averageVectorSize))
+                    .rangePerNode("array", nodeCount -> MemoryRange.of(0, nodeCount * averageVectorSize))
                     .build();
             }));
         if (config.computeToGraph() && !config.hasTopK()) {
