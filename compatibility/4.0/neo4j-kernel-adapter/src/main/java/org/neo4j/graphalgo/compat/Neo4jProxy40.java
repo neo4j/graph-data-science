@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.batchinsert.internal.TransactionLogsInitializer;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.ExternalSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -191,7 +190,8 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
-        return factory.instantiate(
+        return BatchImporterFactoryProxy.instantiateBatchImporter(
+            factory,
             directoryStructure,
             fileSystem,
             externalPageCache,
@@ -203,8 +203,7 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
             recordFormats,
             monitor,
             jobScheduler,
-            badCollector,
-            TransactionLogsInitializer.INSTANCE
+            badCollector
         );
     }
 
