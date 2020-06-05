@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
@@ -64,6 +65,12 @@ public class GraphInfo {
             this.relationshipQuery = cypherConfig.relationshipQuery();
             this.nodeProjection = null;
             this.relationshipProjection = null;
+        } else if (config instanceof RandomGraphGeneratorConfig) {
+            RandomGraphGeneratorConfig randomGraphConfig = (RandomGraphGeneratorConfig) config;
+            this.nodeProjection = randomGraphConfig.nodeProjections().toObject();
+            this.relationshipProjection = randomGraphConfig.relationshipProjections().toObject();
+            this.nodeQuery = null;
+            this.relationshipQuery = null;
         } else {
             GraphCreateFromStoreConfig fromStoreConfig = (GraphCreateFromStoreConfig) config;
             this.nodeProjection = fromStoreConfig.nodeProjections().toObject();

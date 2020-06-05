@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 
@@ -64,6 +65,7 @@ class GraphListProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphCreateProc.class,
+            GraphGenerateProc.class,
             GraphListProc.class
         );
         runQuery(DB_CYPHER);
@@ -115,6 +117,60 @@ class GraphListProcTest extends BaseProcTest {
                     "p95", 1L,
                     "p99", 1L,
                     "p999", 1L
+                ),
+                "creationTime", isA(ZonedDateTime.class),
+                "modificationTime", isA(ZonedDateTime.class),
+                "memoryUsage", instanceOf(String.class),
+                "sizeInBytes", instanceOf(Long.class)
+            )
+        ));
+    }
+
+    @Test
+    void listGeneratedGraph() {
+        var name = "name";
+        var generateQuery = "CALL gds.beta.graph.generate($name, 10, 5)";
+        runQuery(
+            generateQuery,
+            map("name", name)
+        );
+
+        assertCypherResult("CALL gds.graph.list()", singletonList(
+            map(
+                "graphName", name,
+                "nodeProjection", map(
+                    "10_Nodes", map(
+                        "label", "10_Nodes",
+                        "properties", emptyMap()
+                    )
+                ),
+                "relationshipProjection", map(
+                    "UNIFORM", map(
+                        "type", "UNIFORM",
+                        "orientation", "NATURAL",
+                        "aggregation", "NONE",
+                        "properties", emptyMap()
+                    )
+                ),
+                "schema", map(
+                    "nodes", map("__ALL__", map()),
+                    "relationships", map("RELATIONSHIP", map()
+                    )
+                ),
+                "nodeQuery", null,
+                "relationshipQuery", null,
+                "nodeCount", 10L,
+                "relationshipCount", 50L,
+                "degreeDistribution", map(
+                    "min", 5L,
+                    "mean", 5.0D,
+                    "max", 5L,
+                    "p50", 5L,
+                    "p75", 5L,
+                    "p90", 5L,
+                    "p95", 5L,
+                    "p99", 5L,
+                    "p999", 5L
                 ),
                 "creationTime", isA(ZonedDateTime.class),
                 "modificationTime", isA(ZonedDateTime.class),
