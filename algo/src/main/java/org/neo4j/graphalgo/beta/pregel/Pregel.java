@@ -74,7 +74,7 @@ public final class Pregel {
             final AllocationTracker tracker) {
 
         // HugeDoubleArray is faster for set operations compared to HugeNodePropertyMap
-        double defaultNodeValue = config.getInitialNodeValue();
+        double defaultNodeValue = config.initialNodeValue();
         HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),

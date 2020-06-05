@@ -58,6 +58,12 @@ public final class PregelContext {
     }
 
     public double getInitialNodeValue() {
-        return config.getInitialNodeValue();
+        return config.initialNodeValue();
+    }
+
+    @FunctionalInterface
+    interface SendMessageFunction {
+
+        void sendMessage(long nodeId, double message);
     }
 }

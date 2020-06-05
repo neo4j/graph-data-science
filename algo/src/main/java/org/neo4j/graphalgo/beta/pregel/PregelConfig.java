@@ -19,39 +19,22 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-public final class PregelConfig {
-    private final double initialNodeValue;
-    private final boolean isAsynchronous;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
-    private PregelConfig(double initialNodeValue, boolean isAsynchronous) {
-        this.initialNodeValue = initialNodeValue;
-        this.isAsynchronous = isAsynchronous;
+@ValueClass
+@Configuration("PregelConfigImpl")
+public interface PregelConfig extends RelationshipWeightConfig {
+
+    @Value.Default
+    default double initialNodeValue() {
+        return -1;
     }
 
-    double getInitialNodeValue() {
-        return initialNodeValue;
-    }
-
-    boolean isAsynchronous() {
-        return isAsynchronous;
-    }
-
-    public static class Builder {
-        private double initialNodeValue = -1.0;
-        private boolean isAsynchronous = false;
-
-        public Builder withInitialNodeValue(double initialNodeValue) {
-            this.initialNodeValue = initialNodeValue;
-            return this;
-        }
-
-        public Builder isAsynchronous(boolean isAsynchronous) {
-            this.isAsynchronous = isAsynchronous;
-            return this;
-        }
-
-        public PregelConfig build() {
-            return new PregelConfig(initialNodeValue, isAsynchronous);
-        }
+    @Value.Default
+    default boolean isAsynchronous() {
+        return false;
     }
 }
