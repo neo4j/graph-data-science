@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
@@ -57,7 +58,7 @@ class LabelPropagationPregelTest extends AlgoTestBase {
             ", (nAlice)-[:FOLLOW]->(nCharles)" +
             ", (nMark)-[:FOLLOW]->(nDoug)" +
             ", (nBridget)-[:FOLLOW]->(nMichael)" +
-            ", (nDoug)-[:FOLLOW]->(nMark)" +
+            ", (nDoug)-[:FOLLOW {weight: 2.0}]->(nMark)" +
             ", (nMichael)-[:FOLLOW]->(nAlice)" +
             ", (nAlice)-[:FOLLOW]->(nMichael)" +
             ", (nBridget)-[:FOLLOW]->(nAlice)" +
@@ -97,5 +98,37 @@ class LabelPropagationPregelTest extends AlgoTestBase {
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
         assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 0, 0, 0, 4, 3, 0);
+    }
+
+    @Test
+    void runWeightedLP() {
+        int batchSize = 10;
+        int maxIterations = 10;
+
+        Graph weightedGraph = new StoreLoaderBuilder()
+            .api(db)
+            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+            .globalOrientation(Orientation.UNDIRECTED)
+            .globalAggregation(Aggregation.NONE)
+            .build()
+            .graph();
+
+        PregelConfig config = ImmutablePregelConfig.builder()
+            .relationshipWeightProperty("weight")
+            .build();
+
+        Pregel pregelJob = Pregel.withDefaultNodeValues(
+            weightedGraph,
+            config,
+            new LabelPropagationPregel(),
+            batchSize,
+            AlgoBaseConfig.DEFAULT_CONCURRENCY,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+
+        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 0, 0, 0, 0, 0, 0);
     }
 }
