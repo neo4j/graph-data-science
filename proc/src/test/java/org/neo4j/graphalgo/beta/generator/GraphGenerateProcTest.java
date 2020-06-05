@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStatsProc;
+import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,6 +56,7 @@ import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
 import static org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.RELATIONSHIP_SEED_KEY;
 import static org.neo4j.graphalgo.core.CypherMapWrapper.create;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphGenerateProcTest extends BaseProcTest {
@@ -67,6 +69,31 @@ class GraphGenerateProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @Test
+    void shouldThrowOnInvalidGraphName() {
+        var generateQuery = "CALL gds.beta.graph.generate('', 10, 5)";
+        QueryExecutionException ex = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(generateQuery)
+        );
+        Throwable throwable = rootCause(ex);
+        assertEquals(IllegalArgumentException.class, throwable.getClass());
+        assertEquals("`graphName` can not be null or blank, but it was ``", throwable.getMessage());
+    }
+
+    @Test
+    void shouldThrowIfGraphAlreadyExists() {
+        var generateQuery = "CALL gds.beta.graph.generate('foo', 10, 5)";
+        runQuery(generateQuery);
+        QueryExecutionException ex = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(generateQuery)
+        );
+        Throwable throwable = rootCause(ex);
+        assertEquals(IllegalArgumentException.class, throwable.getClass());
+        assertEquals("A graph with name 'foo' already exists.", throwable.getMessage());
     }
 
     @ParameterizedTest
