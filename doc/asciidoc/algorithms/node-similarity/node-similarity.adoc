@@ -29,6 +29,7 @@ This topic includes:
 *** <<algorithms-node-similarity-examples-limits-topk-bottomk, topK and bottomK>>
 *** <<algorithms-node-similarity-examples-limits-topn-bottomn, topN and bottomN>>
 ** <<algorithms-node-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
+** <<algorithms-node-similarity-examples-weighted, Relationship weights>>
 
 [[algorithms-node-similarity-intro]]
 == Introduction
@@ -276,7 +277,7 @@ CREATE (trumpet:Instrument {name: 'Trumpet'})
 
 CREATE (alice)-[:LIKES]->(guitar)
 CREATE (alice)-[:LIKES]->(synth)
-CREATE (alice)-[:LIKES]->(bongos)
+CREATE (alice)-[:LIKES {strength: 0.5}]->(bongos)
 CREATE (bob)-[:LIKES]->(guitar)
 CREATE (bob)-[:LIKES]->(synth)
 CREATE (carol)-[:LIKES]->(bongos)
@@ -303,7 +304,21 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 .The following statement will create the graph and store it in the graph catalog.
 [source, cypher, role=graph-create-query]
 ----
-CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
+CALL gds.graph.create(
+    'myGraph',
+    ['Person', 'Instrument'],
+    {
+        LIKES: {
+            type: 'LIKES',
+            properties: {
+                strength: {
+                    property: 'strength',
+                    defaultValue: 1.0
+                }
+            }
+        }
+    }
+);
 ----
 
 In the following examples we will demonstrate using the Node Similarity algorithm on this graph.
@@ -632,3 +647,44 @@ ORDER BY Person1
 3+|6 rows
 |===
 --
+
+
+[[algorithms-node-similarity-examples-weighted]]
+=== Relationship weights
+
+Relationship properties can be used to modify the similarity induced by certain relationships.
+For example a relationship value of 2 is equal to counting that relationship twice while computing the jaccard similarity.
+
+[NOTE]
+====
+Weighted jaccard similarity is only defined for values greater than 0.
+====
+
+[role=query-example]
+--
+.The following query will respect relationship properties in the similarity computation:
+[source, cypher]
+----
+CALL gds.nodeSimilarity.stream('myGraph', { relationshipWeightProperty: 'strength', similarityCutoff: 0.5 })
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY Person1
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 0.8333333333333334
+| "Alice" | "Bob"   | 0.8
+| "Bob"   | "Alice" | 0.8
+| "Bob"   | "Dave"  | 0.6666666666666666
+| "Dave"  | "Alice" | 0.8333333333333334
+| "Dave"  | "Bob"   | 0.6666666666666666
+3+|6 rows
+|===
+--
+
+It can be seen that the similarity between Alice and Dave decreased compared to the non weighted version of this algorithm.
+This is the case as the strength of the relationship between Alice and Bongos is reduced and both persons now only share 2.5 out of 3 possible instruments.
+Analogous the similarity between Alice and Bob increased as the missing liked instrument has a lower impact on the similarity score.
