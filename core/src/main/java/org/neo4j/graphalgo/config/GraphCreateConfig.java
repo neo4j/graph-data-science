@@ -37,6 +37,7 @@ public interface GraphCreateConfig extends BaseConfig {
     String IMPLICIT_GRAPH_NAME = "";
     String NODECOUNT_KEY = "nodeCount";
     String RELCOUNT_KEY = "relationshipCount";
+    String READ_CONCURRENCY_KEY = "readConcurrency";
 
     @Configuration.Parameter
     String graphName();
