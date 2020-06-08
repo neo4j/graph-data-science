@@ -33,11 +33,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class GetNodeFuncTest extends BaseProcTest {
+class AsNodeFuncTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerFunctions(GetNodeFunc.class);
+        registerFunctions(AsNodeFunc.class);
     }
 
     @Test

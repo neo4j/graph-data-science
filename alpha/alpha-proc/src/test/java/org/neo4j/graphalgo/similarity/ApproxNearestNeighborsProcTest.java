@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 
 import java.util.Map;
 
@@ -73,7 +73,7 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(ApproxNearestNeighborsProc.class);
-        registerFunctions(GetNodeFunc.class);
+        registerFunctions(AsNodeFunc.class);
         runQuery(DB_CYPHER);
     }
 

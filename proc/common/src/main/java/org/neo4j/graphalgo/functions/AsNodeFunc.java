@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
-public class GetNodeFunc {
+public class AsNodeFunc {
     @Context
     public GraphDatabaseService api;
 

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphalgo.functions.NodePropertyFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
@@ -33,7 +33,7 @@ class UtilityDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> functions() {
-        return Arrays.asList(GetNodeFunc.class, VersionFunc.class, IsFiniteFunc.class, NodePropertyFunc.class);
+        return Arrays.asList(AsNodeFunc.class, VersionFunc.class, IsFiniteFunc.class, NodePropertyFunc.class);
     }
 
     @Override

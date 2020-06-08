@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.IdentityProperties;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.values.storable.NumberType;
 
@@ -64,7 +64,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphCreateProc.class, GraphStreamNodePropertiesProc.class);
-        registerFunctions(GetNodeFunc.class);
+        registerFunctions(AsNodeFunc.class);
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher.call()

@@ -37,7 +37,7 @@ import org.neo4j.graphalgo.catalog.GraphListProc;
 import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
@@ -244,7 +244,7 @@ class ListProcTest extends BaseProcTest {
             LocalClusteringCoefficientMutateProc.class
         );
         registerFunctions(
-            GetNodeFunc.class,
+            AsNodeFunc.class,
             VersionFunc.class
         );
     }

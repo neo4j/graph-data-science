@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +39,7 @@ final class K1ColoringDocTest extends BaseProcTest {
     void setupGraph() throws Exception {
         registerProcedures(K1ColoringMutateProc.class, K1ColoringWriteProc.class, K1ColoringStreamProc.class);
         registerProcedures(GraphCreateProc.class);
-        registerFunctions(GetNodeFunc.class);
+        registerFunctions(AsNodeFunc.class);
 
         String dbQuery =
             "CREATE" +

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphdb.Result;
 
@@ -72,7 +72,7 @@ class CosineDocTest extends BaseProcTest {
 
         runQuery(createGraph);
         registerProcedures(CosineProc.class, GraphCreateProc.class);
-        registerFunctions(GetNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
+        registerFunctions(AsNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
     }
 
     @Test

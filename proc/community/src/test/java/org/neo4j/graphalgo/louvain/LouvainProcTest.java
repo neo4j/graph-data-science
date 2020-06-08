@@ -41,11 +41,10 @@ import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -90,7 +89,7 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );
-        registerFunctions(GetNodeFunc.class);
+        registerFunctions(AsNodeFunc.class);
 
         @Language("Cypher") String cypher =
             dbCypher();

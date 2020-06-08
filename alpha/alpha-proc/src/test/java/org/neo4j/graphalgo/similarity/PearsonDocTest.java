@@ -24,7 +24,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,7 +75,7 @@ class PearsonDocTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(PearsonProc.class);
-        registerFunctions(GetNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
+        registerFunctions(AsNodeFunc.class, SimilaritiesFunc.class, IsFiniteFunc.class);
         registerAggregationFunctions(SimilaritiesFunc.class);
         runQuery(DB_CYPHER);
     }

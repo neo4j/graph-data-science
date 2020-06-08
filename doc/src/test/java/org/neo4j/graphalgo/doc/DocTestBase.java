@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.QueryExampleConsumer;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.SetupQueryConsumer;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphdb.Result;
 
 import java.io.File;
@@ -87,7 +87,7 @@ abstract class DocTestBase extends BaseProcTest {
     abstract String adocFile();
 
     List<Class<?>> functions() {
-        return Collections.singletonList(GetNodeFunc.class);
+        return Collections.singletonList(AsNodeFunc.class);
     }
 
     @Test
