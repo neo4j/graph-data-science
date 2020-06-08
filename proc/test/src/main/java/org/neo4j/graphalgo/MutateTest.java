@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
@@ -93,7 +94,7 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
         );
 
         GraphStore graphStore = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore();
-        TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), graphStore.getUnion());
+        TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), graphStore.getUnion());
 
         GraphStoreSchema schema = graphStore.schema();
         boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema().properties());
@@ -197,7 +198,7 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
         );
 
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore().getUnion();
-        TestSupport.assertGraphEquals(TestGraph.Builder.fromGdl(expectedMutatedGraph()), mutatedGraph);
+        TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
     @Test

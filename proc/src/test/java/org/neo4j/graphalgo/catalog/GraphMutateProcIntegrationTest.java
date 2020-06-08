@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.TestGraph;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.wcc.WccMutateProc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphMutateProcIntegrationTest extends BaseProcTest {
@@ -66,7 +67,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         ", (i)-[:TYPE]->(l)" +
         ", (j)-[:TYPE]->(k)";
 
-    private static final Graph EXPECTED_GRAPH = TestGraph.Builder.fromGdl(
+    private static final Graph EXPECTED_GRAPH = fromGdl(
         "(a {nodeId: 0,  labelPropagation: 2,  louvain: 6,  pageRank: 0.150000, wcc: 0})" +
         "(b {nodeId: 1,  labelPropagation: 3,  louvain: 6,  pageRank: 0.277500, wcc: 0})" +
         "(c {nodeId: 2,  labelPropagation: 5,  louvain: 6,  pageRank: 0.385875, wcc: 0})" +

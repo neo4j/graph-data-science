@@ -32,6 +32,8 @@ import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
@@ -45,6 +47,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -98,6 +101,22 @@ public final class TestSupport {
                     leftObjects.addAll(new ArrayList<>(Arrays.asList(rightArgs.get())));
                     return Arguments.of(leftObjects.toArray());
                 }));
+    }
+
+    public static Graph fromGdl(String gdl) {
+        return fromGdl(gdl, NATURAL);
+    }
+
+    public static Graph fromGdl(String gdl, Orientation orientation) {
+        Objects.requireNonNull(gdl);
+
+        var config = ImmutableGraphCreateFromGdlConfig.builder()
+            .gdlGraph(gdl)
+            .graphName("graph")
+            .orientation(orientation)
+            .build();
+
+        return GdlFactory.of(config).build().graphStore().getUnion();
     }
 
     public static void assertGraphEquals(Graph expected, Graph actual) {
