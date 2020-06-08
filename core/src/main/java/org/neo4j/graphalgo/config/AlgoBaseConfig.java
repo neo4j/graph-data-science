@@ -39,6 +39,7 @@ public interface AlgoBaseConfig extends BaseConfig {
     List<String> ALL_NODE_LABELS = Collections.singletonList(ALL_NODES.name());
     List<NodeLabel> ALL_NODE_LABEL_IDENTIFIERS = Collections.singletonList(ALL_NODES);
     List<RelationshipType> ALL_RELATIONSHIP_TYPE_IDENTIFIERS = Collections.singletonList(ALL_RELATIONSHIPS);
+    String CONCURRENCY_KEY = "concurrency";
 
     @Value.Default
     default int concurrency() {

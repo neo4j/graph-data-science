@@ -159,9 +159,11 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
 
     @Test
     default void testImplicitGraphCreateFromCypherConfig() {
+        long concurrency = 2;
         Map<String, Object> tempConfig = MapUtil.map(
             NODE_QUERY_KEY, ALL_NODES_QUERY,
-            RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY
+            RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY,
+            "concurrency", concurrency
         );
         CypherMapWrapper wrapper = createMinimalConfig(CypherMapWrapper.create(tempConfig));
 
@@ -182,6 +184,7 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             assertEquals(ALL_RELATIONSHIPS_QUERY, actualConfig.relationshipQuery());
             assertEquals(IMPLICIT_GRAPH_NAME, actualConfig.graphName());
             assertEquals(TEST_USERNAME, actualConfig.username());
+            assertEquals(concurrency, actualConfig.readConcurrency());
         });
     }
 

@@ -37,6 +37,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 public interface GraphCreateConfig extends BaseConfig {
 
     String IMPLICIT_GRAPH_NAME = "";
+    String READ_CONCURRENCY_KEY = "readConcurrency";
 
     @Configuration.Parameter
     String graphName();
