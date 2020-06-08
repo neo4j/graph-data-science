@@ -190,6 +190,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
                 return new RandomDegreeSelectionStrategy(
                     graph,
                     Pools.DEFAULT,
+                    0.0,
                     configuration.concurrency()
                 );
             case "random":

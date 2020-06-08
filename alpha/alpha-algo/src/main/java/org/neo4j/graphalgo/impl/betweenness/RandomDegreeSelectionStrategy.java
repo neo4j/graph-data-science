@@ -38,7 +38,7 @@ public class RandomDegreeSelectionStrategy implements RABrandesBetweennessCentra
     private final SimpleBitSet bitSet;
     private final int size;
 
-    public RandomDegreeSelectionStrategy(Graph graph, ExecutorService pool, int concurrency) {
+    public RandomDegreeSelectionStrategy(Graph graph, ExecutorService pool, double probabilityOffset, int concurrency) {
         this.degrees = graph;
         bitSet = new SimpleBitSet(Math.toIntExact(graph.nodeCount()));
         SecureRandom random = new SecureRandom();
@@ -52,7 +52,7 @@ public class RandomDegreeSelectionStrategy implements RABrandesBetweennessCentra
         });
         maxDegree = mx.get();
         ParallelUtil.iterateParallel(pool, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
-            if (random.nextDouble() <= degrees.degree(node) / maxDegree) {
+            if (random.nextDouble() - probabilityOffset <= degrees.degree(node) / maxDegree) {
                 bitSet.put(node);
             }
         });
