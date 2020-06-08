@@ -17,45 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.gdl;
 
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
-import org.s1ck.gdl.GDLHandler;
-import org.s1ck.gdl.model.Element;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 
-class TestGraphTest {
+class GdlFactoryTest {
 
-    @Test
-    void testConsecutiveIdSpaceForGDLGraph() {
-        GDLHandler gdlHandler = new GDLHandler.Builder()
-                .buildFromString("(a)-->(b),(b)-->(c),(c)-->(a)," +
-                                 "(),(),()" +
-                                 "()-->(),()-->()");
-
-        assertTrue(haveConsecutiveIdSpace(gdlHandler.getVertices()));
-        assertTrue(haveConsecutiveIdSpace(gdlHandler.getEdges()));
-    }
-
-    private static boolean haveConsecutiveIdSpace(Collection<? extends Element> elements) {
-        long maxVertexId = elements.parallelStream().mapToLong(Element::getId).max().orElse(-1);
-        return (maxVertexId == elements.size() - 1);
+    private Graph fromGdl(String gdl) {
+        return GdlFactory.of(gdl).build().graphStore().getUnion();
     }
 
     @Test
@@ -103,21 +85,4 @@ class TestGraphTest {
         assertEquals(3, relProps.size());
         assertEquals(Sets.newHashSet(1d, 2d, 3d), relProps);
     }
-
-    @Test
-    void invalidNodeProperties() {
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> fromGdl("(a { foo: 42 }), (b { bar: 23 })"));
-        assertThat(ex.getMessage(), containsString("Vertices must have the same set of property keys."));
-    }
-
-    @Test
-    void invalidRelationshipProperties() {
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> fromGdl("(a { foo: 42 }), (b { foo: 23 }), (a)-[{w:1}]->(b), (a)-[{q:1}]->(b)"));
-        assertThat(ex.getMessage(), containsString("Relationships must have the same set of property keys."));
-    }
-
 }
