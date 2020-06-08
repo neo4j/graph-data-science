@@ -367,7 +367,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         for (; offset2 < length2; offset2++) {
             max += weights2[offset2];
         }
-        return min / max;
+        double similarity = min / max;
+        return similarity >= config.similarityCutoff() ? similarity : Double.NaN;
     }
 
     private LongStream nodeStream() {
