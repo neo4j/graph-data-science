@@ -141,7 +141,10 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
 
         gdlHandler.getVertices().forEach(vertex -> idMapBuilder.addNode(
             vertex.getId(),
-            vertex.getLabels().stream().map(NodeLabel::of).toArray(NodeLabel[]::new)
+            vertex.getLabels().stream()
+                .map(NodeLabel::of)
+                .filter(nodeLabel -> !nodeLabel.equals(NodeLabel.ALL_NODES))
+                .toArray(NodeLabel[]::new)
         ));
 
         var idMap = idMapBuilder.build();
@@ -153,25 +156,25 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
         var propertyKeysByLabel = new HashMap<NodeLabel, Set<PropertyMapping>>();
         var propertyBuilders = new HashMap<PropertyMapping, NodePropertiesBuilder>();
 
-        gdlHandler.getVertices().forEach(vertex -> {
-            vertex.getProperties().forEach((propertyKey, propertyValue) ->
-                propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) -> {
-                    vertex.getLabels().stream()
-                        .map(NodeLabel::of)
-                        .forEach(nodeLabel -> propertyKeysByLabel
-                            .computeIfAbsent(nodeLabel, (ignore) -> new HashSet<>())
-                            .add(key)
-                        );
-                    return NodePropertiesBuilder.of(
+        gdlHandler.getVertices().forEach(vertex -> vertex
+            .getProperties()
+            .forEach((propertyKey, propertyValue) -> {
+                vertex.getLabels().stream()
+                    .map(NodeLabel::of)
+                    .forEach(nodeLabel -> propertyKeysByLabel
+                        .computeIfAbsent(nodeLabel, (ignore) -> new HashSet<>())
+                        .add(PropertyMapping.of(propertyKey))
+                    );
+                propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) ->
+                    NodePropertiesBuilder.of(
                         dimensions.nodeCount(),
                         loadingContext.tracker(),
                         PropertyMapping.DEFAULT_FALLBACK_VALUE,
                         NO_SUCH_PROPERTY,
                         key.propertyKey(),
                         1
-                    );
-                }).set(idMap.toMappedNodeId(vertex.getId()), gdsValue(vertex, propertyKey, propertyValue)));
-        });
+                    )).set(idMap.toMappedNodeId(vertex.getId()), gdsValue(vertex, propertyKey, propertyValue));
+            }));
 
         var nodeProperties = propertyBuilders
             .entrySet()
@@ -223,6 +226,20 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
                 }
             });
 
+        // Add fake relationship type since we do not
+        // support GraphStores with zero relationships.
+        if (relTypeImporters.isEmpty()) {
+            relTypeImporters.put(RelationshipType.ALL_RELATIONSHIPS.name, HugeGraphUtil.createRelImporter(
+                nodes,
+                graphCreateConfig.orientation(),
+                false,
+                Aggregation.NONE,
+                loadingContext.executor(),
+                loadingContext.tracker()
+            ));
+            propertyKeysByRelType.put(RelationshipType.ALL_RELATIONSHIPS.name, Optional.empty());
+        }
+
         return relTypeImporters.entrySet().stream().collect(Collectors.toMap(
             entry -> RelationshipType.of(entry.getKey()),
             entry -> Tuples.pair(propertyKeysByRelType.get(entry.getKey()), entry.getValue().build())
@@ -232,6 +249,8 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
     private double gdsValue(Element element, String propertyKey, Object gdlValue) {
         if (gdlValue instanceof Number) {
             return ((Number) gdlValue).doubleValue();
+        } else if (gdlValue instanceof String && gdlValue.equals("NaN")) {
+            return Double.NaN;
         } else {
             throw new IllegalArgumentException(String.format(
                 Locale.ENGLISH,
