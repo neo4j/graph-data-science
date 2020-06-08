@@ -117,10 +117,16 @@ class LabelPropagationPregelTest extends AlgoTestBase {
             .relationshipWeightProperty("weight")
             .build();
 
+        LabelPropagationPregel weightedPregel = new LabelPropagationPregel() {
+            @Override
+            public double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
+                return nodeValue * relationshipWeight;
+            }
+        };
         Pregel pregelJob = Pregel.withDefaultNodeValues(
             weightedGraph,
             config,
-            new LabelPropagationPregel(),
+            weightedPregel,
             batchSize,
             AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,

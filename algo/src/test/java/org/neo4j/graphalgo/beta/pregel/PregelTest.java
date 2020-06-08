@@ -85,12 +85,12 @@ public class PregelTest extends AlgoTestBase {
             Arguments.of(
                 ImmutablePregelConfig.builder().relationshipWeightProperty("prop").build(),
                 new TestPregelComputation(),
-                new double[]{0.0, 2.0, 1.0}
+                new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
                 ImmutablePregelConfig.builder().relationshipWeightProperty("prop").build(),
                 new TestWeightComputation(),
-                new double[]{0.0, 3.0, 2.0}
+                new double[]{0.0, 2.0, 1.0}
             )
         );
     }
@@ -119,7 +119,7 @@ public class PregelTest extends AlgoTestBase {
 
         @Override
         public double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
-            return nodeValue + relationshipWeight;
+            return nodeValue * relationshipWeight;
         }
     }
 }
