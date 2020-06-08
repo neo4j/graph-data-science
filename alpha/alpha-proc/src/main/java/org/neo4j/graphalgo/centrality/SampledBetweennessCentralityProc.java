@@ -23,9 +23,10 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -36,7 +37,6 @@ import org.neo4j.graphalgo.impl.betweenness.RABrandesBetweennessCentrality;
 import org.neo4j.graphalgo.impl.betweenness.RandomDegreeSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.RandomSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.SampledBetweennessCentralityConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -159,7 +159,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
     protected AlgorithmFactory<RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> algorithmFactory(
         SampledBetweennessCentralityConfig config
     ) {
-        return new AlphaAlgorithmFactory<RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig>() {
+        return new AlphaAlgorithmFactory<>() {
             @Override
             public RABrandesBetweennessCentrality buildAlphaAlgo(
                 Graph graph,
@@ -174,8 +174,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
                     strategy(configuration, graph),
                     configuration.undirected()
                 )
-                    .withTerminationFlag(TerminationFlag.wrap(transaction))
-                    .withMaxDepth(configuration.maxDepth());
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
             }
         };
 

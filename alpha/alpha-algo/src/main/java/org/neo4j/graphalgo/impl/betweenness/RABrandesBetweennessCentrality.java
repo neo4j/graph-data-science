@@ -80,8 +80,6 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
     private final double divisor;
     private SelectionStrategy selectionStrategy;
 
-    private int maxDepth = Integer.MAX_VALUE;
-
     public RABrandesBetweennessCentrality(
         Graph graph,
         ExecutorService executorService,
@@ -106,15 +104,6 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
         this.selectionStrategy = selectionStrategy;
         this.expectedNodeCount = selectionStrategy.size();
         this.divisor = undirected ? 2.0 : 1.0;
-    }
-
-    /**
-     * set max depth (maximum number of hops from the start node)
-     * @param maxDepth maximum number of hops from the start node
-     */
-    public RABrandesBetweennessCentrality withMaxDepth(int maxDepth) {
-        this.maxDepth = maxDepth;
-        return this;
     }
 
     /**
@@ -231,9 +220,6 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
                 while (!queue.isEmpty()) {
                     int node = queue.removeFirst();
                     int nodeDepth = queue.removeFirst();
-                    if (nodeDepth - 1 > maxDepth) {
-                        continue;
-                    }
                     pivots.push(node);
                     localRelationshipIterator.forEachRelationship(node, (source, targetId) -> {
                         // This will break for very large graphs
