@@ -37,6 +37,10 @@ final class HugeArrays {
         return 1 + (int) ((index - 1L) & PAGE_MASK);
     }
 
+    static long indexFromPageIndexAndIndexInPage(int pageIndex, int indexInPage) {
+        return PAGE_SIZE * pageIndex + indexInPage;
+    }
+
     static int numberOfPages(long capacity) {
         final long numPages = (capacity + PAGE_MASK) >>> PAGE_SHIFT;
         assert numPages <= Integer.MAX_VALUE : "pageSize=" + (PAGE_SIZE) + " is too small for capacity: " + capacity;

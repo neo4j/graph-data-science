@@ -280,6 +280,32 @@ final class HugeAtomicLongArrayTest {
         }
     }
 
+    @Test
+    void shouldBinarySearchInASinglePageArray() {
+        var array = HugeAtomicLongArray.newSingleArray(
+            10,
+            LongPageFiller.identity(1),
+            AllocationTracker.EMPTY
+        );
+
+        assertEquals(5, array.binarySearch(5));
+        assertEquals(9, array.binarySearch(20));
+        assertEquals(-1, array.binarySearch(-10));
+    }
+
+    @Test
+    void shouldBinarySearchInAPagedArray() {
+        var array = HugeAtomicLongArray.newPagedArray(
+            HugeArrays.PAGE_SIZE * 3,
+            LongPageFiller.identity(1),
+            AllocationTracker.EMPTY
+        );
+
+        assertEquals(20000, array.binarySearch(20000));
+        assertEquals(HugeArrays.PAGE_SIZE * 3 - 1, array.binarySearch(HugeArrays.PAGE_SIZE * 3 + 10));
+        assertEquals(-1, array.binarySearch(-10));
+    }
+
     private static void casTest(int nthreads, int incs, HugeAtomicLongArray a, Executor pool) {
         Phaser phaser = new Phaser(nthreads + 1);
         for (int i = 0; i < nthreads; ++i) {
