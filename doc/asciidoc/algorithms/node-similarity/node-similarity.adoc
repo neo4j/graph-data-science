@@ -29,7 +29,7 @@ This topic includes:
 *** <<algorithms-node-similarity-examples-limits-topk-bottomk, topK and bottomK>>
 *** <<algorithms-node-similarity-examples-limits-topn-bottomn, topN and bottomN>>
 ** <<algorithms-node-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
-** <<algorithms-node-similarity-examples-weighted, Relationship weights>>
+** <<algorithms-node-similarity-examples-weighted, Weighted Jaccard Similarity>>
 
 [[algorithms-node-similarity-intro]]
 == Introduction
@@ -650,14 +650,14 @@ ORDER BY Person1
 
 
 [[algorithms-node-similarity-examples-weighted]]
-=== Relationship weights
+=== Weighted Jaccard Similarity
 
 Relationship properties can be used to modify the similarity induced by certain relationships.
 For example a relationship value of 2 is equal to counting that relationship twice while computing the jaccard similarity.
 
 [NOTE]
 ====
-Weighted jaccard similarity is only defined for values greater than 0.
+Weighted jaccard similarity is only defined for values greater or equal to 0.
 ====
 
 [role=query-example]
@@ -685,6 +685,6 @@ ORDER BY Person1
 |===
 --
 
-It can be seen that the similarity between Alice and Dave decreased compared to the non weighted version of this algorithm.
+It can be seen that the similarity between Alice and Dave decreased compared to the non-weighted version of this algorithm.
 This is the case as the strength of the relationship between Alice and Bongos is reduced and both persons now only share 2.5 out of 3 possible instruments.
 Analogous the similarity between Alice and Bob increased as the missing liked instrument has a lower impact on the similarity score.
