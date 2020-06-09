@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.impl.betweenness;
 
 import com.carrotsearch.hppc.LongArrayList;
-import com.carrotsearch.hppc.LongObjectMap;
-import com.carrotsearch.hppc.LongObjectScatterMap;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
@@ -33,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongDoubleMap;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongStack;
 
 import java.util.ArrayList;
@@ -171,18 +170,14 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
     private class BCTask implements Runnable {
 
         private final RelationshipIterator localRelationshipIterator;
-        // we have to keep all paths during eval (memory intensive)
-        private final LongObjectMap<LongArrayList> paths;
-        /**
-         * contains nodes which have been visited during the first round
-         */
-        private final PagedLongStack backwardNodes;
-        /**
-         * the queue contains 2 elements per node. the node itself
-         * and its depth. Both values are pushed or taken from the
-         * stack during the evaluation as pair.
-         */
+
+        // TODO: replace with AdjacencyList or write own PagedLongObjectScatterMap
+        // Note that this depends on the max-in-degree which is Int.MAX in Neo4j, so maybe no need to change?
+        private final HugeObjectArray<LongArrayList> predecessors;
+
         private final HugeLongArrayQueue forwardNodes;
+        private final PagedLongStack backwardNodes;
+
         private final HugeLongDoubleMap delta;
         private final HugeLongLongMap sigma;
         private final HugeIntArray distance;
@@ -190,9 +185,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
         private BCTask(AllocationTracker tracker) {
             this.localRelationshipIterator = graph.concurrentCopy();
 
-            // TODO: replace with AdjacencyList or write own PagedLongObjectScatterMap
-            // Note that this depends on the max-in-degree which is Int.MAX in Neo4j, so maybe no need to change?
-            this.paths = new LongObjectScatterMap<>((int) expectedNodeCount);
+            this.predecessors = HugeObjectArray.newArray(LongArrayList.class, expectedNodeCount, tracker);
             this.backwardNodes = new PagedLongStack(nodeCount, tracker);
             // TODO: make queue growable
             this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount, tracker);
@@ -220,7 +213,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
 
                 distance.fill(-1);
                 sigma.clear();
-                paths.clear();
+                predecessors.fill(null);
                 delta.clear();
 
                 sigma.addTo(startNodeId, 1);
@@ -252,7 +245,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
 
                 while (!backwardNodes.isEmpty()) {
                     long node = backwardNodes.pop();
-                    LongArrayList predecessors = paths.get(node);
+                    LongArrayList predecessors = this.predecessors.get(node);
 
                     double dependencyNode = delta.getOrDefault(node, 0);
                     double sigmaNode = sigma.getOrDefault(node, 0);
@@ -274,12 +267,12 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
 
         // append node to the path at target
         private void append(long target, long node) {
-            LongArrayList predecessors = paths.get(target);
-            if (null == predecessors) {
-                predecessors = new LongArrayList();
-                paths.put(target, predecessors);
+            LongArrayList targetPredecessors = predecessors.get(target);
+            if (null == targetPredecessors) {
+                targetPredecessors = new LongArrayList();
+                predecessors.set(target, targetPredecessors);
             }
-            predecessors.add(node);
+            targetPredecessors.add(node);
         }
     }
 }
