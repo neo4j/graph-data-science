@@ -134,6 +134,15 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
+    void shouldLoadNamedAllRelationshipsProjection() {
+        String createQuery = "CALL gds.graph.create('test', '*', {test: {type: '*'}})";
+        runQuery(createQuery);
+        String algoQuery = "CALL gds.testProc.test('test', {relationshipTypes: ['test'], writeProperty: 'foo'})";
+        // Test that the query doesn't throw an exception
+        runQuery(algoQuery);
+    }
+
+    @Test
     void failWhenNotFindingGraph() {
         String query1 = "CALL gds.testProc.test('nope', {writeProperty: 'p'})";
         String query2 = "CALL gds.testProc.test.estimate('nope', {writeProperty: 'p'})";

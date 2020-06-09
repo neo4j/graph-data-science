@@ -89,7 +89,9 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 Orientation orientation = relationshipProjection.orientation();
 
                 RelationshipProjectionMapping mapping = relationshipProjection.projectAll()
-                    ? RelationshipProjectionMapping.all(orientation)
+                    ? RelationshipType.ALL_RELATIONSHIPS.equals(relationshipType)
+                        ? RelationshipProjectionMapping.all(orientation)
+                        : RelationshipProjectionMapping.all(relationshipType.name(), orientation)
                     : RelationshipProjectionMapping.of(
                         relationshipType,
                         typeName,

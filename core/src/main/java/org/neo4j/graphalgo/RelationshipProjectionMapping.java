@@ -33,9 +33,13 @@ public interface RelationshipProjectionMapping {
     }
 
     static RelationshipProjectionMapping all(Orientation orientation) {
+        return all("", orientation);
+    }
+
+    static RelationshipProjectionMapping all(String projectedType, Orientation orientation) {
         return ImmutableRelationshipProjectionMapping.builder()
             .typeName("")
-            .relationshipType(RelationshipType.of(""))
+            .relationshipType(RelationshipType.of(projectedType))
             .orientation(orientation)
             .typeId(ANY_RELATIONSHIP_TYPE)
             .exists(true)
