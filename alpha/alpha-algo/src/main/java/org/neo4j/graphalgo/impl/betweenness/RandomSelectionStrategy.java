@@ -20,7 +20,8 @@
 package org.neo4j.graphalgo.impl.betweenness;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedSimpleBitSet;
 
 import java.security.SecureRandom;
 
@@ -29,13 +30,12 @@ import java.security.SecureRandom;
  */
 public class RandomSelectionStrategy implements RABrandesBetweennessCentrality.SelectionStrategy {
 
-    private final SimpleBitSet bitSet;
-    private final int size;
+    private final PagedSimpleBitSet bitSet;
+    private final long size;
 
-    public RandomSelectionStrategy(Graph graph, double probability, long seed) {
-        this.bitSet = new SimpleBitSet(Math.toIntExact(graph.nodeCount()));
+    public RandomSelectionStrategy(Graph graph, double probability, AllocationTracker tracker) {
+        this.bitSet = PagedSimpleBitSet.newBitSet(graph.nodeCount(), tracker);
         final SecureRandom random = new SecureRandom();
-        random.setSeed(seed);
         for (int i = 0; i < graph.nodeCount(); i++) {
             if (random.nextDouble() < probability) {
                 this.bitSet.put(i);
@@ -44,17 +44,13 @@ public class RandomSelectionStrategy implements RABrandesBetweennessCentrality.S
         this.size = this.bitSet.size();
     }
 
-    public RandomSelectionStrategy(Graph graph, double probability) {
-        this(graph, probability, 0);
-    }
-
     @Override
-    public boolean select(int nodeId) {
+    public boolean select(long nodeId) {
         return bitSet.contains(nodeId);
     }
 
     @Override
-    public int size() {
+    public long size() {
         return size;
     }
 

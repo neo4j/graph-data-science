@@ -19,29 +19,28 @@
  */
 package org.neo4j.graphalgo.impl.betweenness;
 
-import com.carrotsearch.hppc.IntArrayDeque;
-import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.IntDoubleMap;
-import com.carrotsearch.hppc.IntDoubleScatterMap;
-import com.carrotsearch.hppc.IntIntMap;
-import com.carrotsearch.hppc.IntIntScatterMap;
-import com.carrotsearch.hppc.IntObjectMap;
-import com.carrotsearch.hppc.IntObjectScatterMap;
-import com.carrotsearch.hppc.IntStack;
-import com.carrotsearch.hppc.cursors.IntCursor;
+import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.LongObjectMap;
+import com.carrotsearch.hppc.LongObjectScatterMap;
+import com.carrotsearch.hppc.cursors.LongCursor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayQueue;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongDoubleMap;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.graphalgo.core.utils.paged.PagedLongStack;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /**
@@ -62,48 +61,55 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
          * node id filter
          * @return true if the nodes is accepted, false otherwise
          */
-        boolean select(int nodeId);
+        boolean select(long nodeId);
 
         /**
          * count of selectable nodes
          */
-        int size();
+        long size();
     }
 
     private Graph graph;
-    private volatile AtomicInteger nodeQueue = new AtomicInteger();
-    private AtomicDoubleArray centrality;
-    private final int nodeCount;
-    private final int expectedNodeCount;
+    private volatile AtomicLong nodeQueue = new AtomicLong();
+    private HugeAtomicDoubleArray centrality;
+    private final long nodeCount;
+    private final long expectedNodeCount;
+    private final double directionFactor;
+    private SelectionStrategy selectionStrategy;
+
     private final ExecutorService executorService;
     private final int concurrency;
-    private final double divisor;
-    private SelectionStrategy selectionStrategy;
+    private final AllocationTracker tracker;
 
     public RABrandesBetweennessCentrality(
         Graph graph,
+        SelectionStrategy selectionStrategy,
         ExecutorService executorService,
         int concurrency,
-        SelectionStrategy selectionStrategy
+        AllocationTracker tracker
     ) {
-        this(graph, executorService, concurrency, selectionStrategy, false);
+        this(graph, selectionStrategy, false, executorService, concurrency, tracker);
     }
 
     public RABrandesBetweennessCentrality(
         Graph graph,
+        SelectionStrategy selectionStrategy,
+        boolean undirected,
         ExecutorService executorService,
         int concurrency,
-        SelectionStrategy selectionStrategy,
-        boolean undirected
+        AllocationTracker tracker
     ) {
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;
-        this.nodeCount = Math.toIntExact(graph.nodeCount());
-        this.centrality = new AtomicDoubleArray(nodeCount);
+        this.nodeCount = graph.nodeCount();
+        this.centrality = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
         this.selectionStrategy = selectionStrategy;
         this.expectedNodeCount = selectionStrategy.size();
-        this.divisor = undirected ? 2.0 : 1.0;
+        this.directionFactor = undirected
+            ? (nodeCount * 2.0) / selectionStrategy.size()
+            : (nodeCount * 1.0) / selectionStrategy.size();
+        this.tracker = tracker;
     }
 
     /**
@@ -116,7 +122,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
         nodeQueue.set(0);
         ArrayList<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
-            futures.add(executorService.submit(new BCTask()));
+            futures.add(executorService.submit(new BCTask(tracker)));
         }
         ParallelUtil.awaitTermination(futures);
         return this;
@@ -127,7 +133,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
      *
      * @return array with centrality
      */
-    public AtomicDoubleArray getCentrality() {
+    public HugeAtomicDoubleArray getCentrality() {
         return centrality;
     }
 
@@ -137,7 +143,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
      * @return stream if Results
      */
     public Stream<BetweennessCentrality.Result> resultStream() {
-        return IntStream
+        return LongStream
             .range(0, nodeCount)
             .mapToObj(nodeId -> new BetweennessCentrality.Result(
                 graph.toOriginalNodeId(nodeId),
@@ -166,38 +172,42 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
 
         private final RelationshipIterator localRelationshipIterator;
         // we have to keep all paths during eval (memory intensive)
-        private final IntObjectMap<IntArrayList> paths;
+        private final LongObjectMap<LongArrayList> paths;
         /**
          * contains nodes which have been visited during the first round
          */
-        private final IntStack pivots;
+        private final PagedLongStack backwardNodes;
         /**
          * the queue contains 2 elements per node. the node itself
          * and its depth. Both values are pushed or taken from the
          * stack during the evaluation as pair.
          */
-        private final IntArrayDeque queue;
-        private final IntDoubleMap delta;
-        private final IntIntMap sigma;
-        private final int[] distance;
+        private final HugeLongArrayQueue forwardNodes;
+        private final HugeLongDoubleMap delta;
+        private final HugeLongLongMap sigma;
+        private final HugeIntArray distance;
 
-        private BCTask() {
+        private BCTask(AllocationTracker tracker) {
             this.localRelationshipIterator = graph.concurrentCopy();
-            this.paths = new IntObjectScatterMap<>(expectedNodeCount);
-            this.pivots = new IntStack();
-            this.queue = new IntArrayDeque();
-            this.sigma = new IntIntScatterMap(expectedNodeCount);
-            this.delta = new IntDoubleScatterMap(expectedNodeCount);
 
-            this.distance = new int[nodeCount];
+            // TODO: replace with AdjacencyList or write own PagedLongObjectScatterMap
+            // Note that this depends on the max-in-degree which is Int.MAX in Neo4j, so maybe no need to change?
+            this.paths = new LongObjectScatterMap<>((int) expectedNodeCount);
+            this.backwardNodes = new PagedLongStack(nodeCount, tracker);
+            // TODO: make queue growable
+            this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount, tracker);
+            // TODO: benchmark maps vs arrays
+            this.sigma = new HugeLongLongMap(expectedNodeCount, tracker);
+            this.delta = new HugeLongDoubleMap(expectedNodeCount, tracker);
+
+            this.distance = HugeIntArray.newArray(nodeCount, tracker);
         }
 
         @Override
         public void run() {
-            double f = (nodeCount * divisor) / selectionStrategy.size();
             for (;;) {
                 // take start node from the queue
-                int startNodeId = nodeQueue.getAndIncrement();
+                long startNodeId = nodeQueue.getAndIncrement();
                 if (startNodeId >= nodeCount || !running()) {
                     return;
                 }
@@ -207,66 +217,69 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
                 }
                 // reset
                 getProgressLogger().logProgress((double) startNodeId / (nodeCount - 1));
-                // default value is -1 (checked during evaluation)
-                Arrays.fill(distance, -1);
+
+                distance.fill(-1);
                 sigma.clear();
                 paths.clear();
                 delta.clear();
-                sigma.put(startNodeId, 1);
-                distance[startNodeId] = 0;
-                queue.addLast(startNodeId);
-                queue.addLast(0);
-                // as long as the inner queue has more nodes
-                while (!queue.isEmpty()) {
-                    int node = queue.removeFirst();
-                    int nodeDepth = queue.removeFirst();
-                    pivots.push(node);
-                    localRelationshipIterator.forEachRelationship(node, (source, targetId) -> {
-                        // This will break for very large graphs
-                        int target = (int) targetId;
 
-                        // check if distance has been set before
-                        if (distance[target] < 0) {
-                            queue.addLast(target);
-                            queue.addLast(nodeDepth + 1);
-                            // distance changes during exec and might trigger next condition
-                            distance[target] = distance[node] + 1;
+                sigma.addTo(startNodeId, 1);
+                distance.set(startNodeId, 0);
+
+                forwardNodes.add(startNodeId);
+
+                // BC forward traversal
+                while (!forwardNodes.isEmpty()) {
+                    long node = forwardNodes.remove();
+                    backwardNodes.push(node);
+                    int distanceNode = distance.get(node);
+
+                    localRelationshipIterator.forEachRelationship(node, (source, target) -> {
+                        if (distance.get(target) < 0) {
+                            forwardNodes.add(target);
+                            distance.set(target, distanceNode + 1);
                         }
-                        // no if-else here since distance could have been changed in the first condition
-                        if (distance[target] == distance[node] + 1) {
-                            sigma.addTo(target, sigma.getOrDefault(node, 0));
+
+                        if (distance.get(target) == distanceNode + 1) {
+                            // TODO: consider moving this out of the lambda (benchmark)
+                            long sigmaNode = sigma.getOrDefault(node, 0);
+                            sigma.addTo(target, sigmaNode);
                             append(target, node);
                         }
                         return true;
                     });
                 }
 
-                while (!pivots.isEmpty()) {
-                    int node = pivots.pop();
-                    IntArrayList intCursors = paths.get(node);
-                    if (null != intCursors) {
-                        intCursors.forEach((Consumer<? super IntCursor>) c -> {
-                            delta.addTo(c.value,
-                                    (double) sigma.getOrDefault(c.value, 0) /
-                                            (double) sigma.getOrDefault(node, 0) *
-                                            (delta.getOrDefault(node, 0) + 1.0));
+                while (!backwardNodes.isEmpty()) {
+                    long node = backwardNodes.pop();
+                    LongArrayList predecessors = paths.get(node);
+
+                    double dependencyNode = delta.getOrDefault(node, 0);
+                    double sigmaNode = sigma.getOrDefault(node, 0);
+
+                    if (null != predecessors) {
+                        predecessors.forEach((Consumer<? super LongCursor>) predecessor -> {
+                            double sigmaPredecessor = sigma.getOrDefault(predecessor.value, 0);
+                            double dependency = sigmaPredecessor / sigmaNode * (dependencyNode + 1.0);
+                            delta.addTo(predecessor.value, dependency);
                         });
                     }
                     if (node != startNodeId) {
-                        centrality.add(node, f * (delta.getOrDefault(node, 0)));
+                        // TODO: replace with + (creates 2! objects per call due to reference to outer scopes)
+                        centrality.update(node, (value) -> value + directionFactor * dependencyNode);
                     }
                 }
             }
         }
 
         // append node to the path at target
-        private void append(int target, int node) {
-            IntArrayList intCursors = paths.get(target);
-            if (null == intCursors) {
-                intCursors = new IntArrayList();
-                paths.put(target, intCursors);
+        private void append(long target, long node) {
+            LongArrayList predecessors = paths.get(target);
+            if (null == predecessors) {
+                predecessors = new LongArrayList();
+                paths.put(target, predecessors);
             }
-            intCursors.add(node);
+            predecessors.add(node);
         }
     }
 }

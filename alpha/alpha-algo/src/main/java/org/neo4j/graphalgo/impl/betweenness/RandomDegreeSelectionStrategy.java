@@ -21,7 +21,8 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedSimpleBitSet;
 
 import java.security.SecureRandom;
 import java.util.concurrent.ExecutorService;
@@ -34,15 +35,21 @@ public class RandomDegreeSelectionStrategy implements RABrandesBetweennessCentra
 
     private final double maxDegree;
     // TODO: benchmark and potentially replace with hppc BitSet
-    private final SimpleBitSet bitSet;
-    private final int size;
+    private final PagedSimpleBitSet bitSet;
+    private final long size;
 
-    public RandomDegreeSelectionStrategy(Graph graph, ExecutorService pool, double probabilityOffset, int concurrency) {
-        this.bitSet = new SimpleBitSet(Math.toIntExact(graph.nodeCount()));
-        this.maxDegree = getMaxDegree(graph, pool, concurrency);
+    public RandomDegreeSelectionStrategy(
+        Graph graph,
+        double probabilityOffset,
+        ExecutorService executorService,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
+        this.bitSet = PagedSimpleBitSet.newBitSet(graph.nodeCount(), tracker);
+        this.maxDegree = getMaxDegree(graph, executorService, concurrency);
 
         SecureRandom random = new SecureRandom();
-        ParallelUtil.iterateParallel(pool, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
+        ParallelUtil.iterateParallel(executorService, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
             if (random.nextDouble() - probabilityOffset <= graph.degree(node) / maxDegree) {
                 bitSet.put(node);
             }
@@ -52,12 +59,12 @@ public class RandomDegreeSelectionStrategy implements RABrandesBetweennessCentra
     }
 
     @Override
-    public boolean select(int nodeId) {
+    public boolean select(long nodeId) {
         return bitSet.contains(nodeId);
     }
 
     @Override
-    public int size() {
+    public long size() {
         return size;
     }
 

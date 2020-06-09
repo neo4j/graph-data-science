@@ -132,13 +132,26 @@ class BetweennessCentralityComparisonTest {
         var bc = new BetweennessCentrality(graph, executorService, concurrency, false);
         bc.compute();
 
-        var msBc = new MSBetweennessCentrality(graph, false, 1, executorService, concurrency, AllocationTracker.EMPTY);
+        AllocationTracker tracker = AllocationTracker.EMPTY;
+        var msBc = new MSBetweennessCentrality(graph, false, 1, executorService, concurrency, tracker);
         msBc.compute();
 
-        var degreeSampledBC = new RABrandesBetweennessCentrality(graph, executorService, concurrency, new RandomDegreeSelectionStrategy(graph, executorService, 1.0, concurrency));
+        var degreeSampledBC = new RABrandesBetweennessCentrality(
+            graph,
+            new RandomDegreeSelectionStrategy(graph, 1.0, executorService, concurrency, tracker),
+            executorService,
+            concurrency,
+            tracker
+        );
         degreeSampledBC.compute();
 
-        var randomSampledBC = new RABrandesBetweennessCentrality(graph, executorService, concurrency, new RandomSelectionStrategy(graph, 1.0));
+        var randomSampledBC = new RABrandesBetweennessCentrality(
+            graph,
+            new RandomSelectionStrategy(graph, 1.0, tracker),
+            executorService,
+            concurrency,
+            tracker
+        );
         randomSampledBC.compute();
 
         for (int i = 0; i < graph.nodeCount(); i++) {

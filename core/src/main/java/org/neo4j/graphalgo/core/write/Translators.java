@@ -21,10 +21,14 @@ package org.neo4j.graphalgo.core.write;
 
 import com.carrotsearch.hppc.IntDoubleMap;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
 public final class Translators {
 
     private Translators() {}
+
+    public static final PropertyTranslator.OfDouble<HugeAtomicDoubleArray> HUGE_ATOMIC_DOUBLE_ARRAY_TRANSLATOR =
+        (data, nodeId) -> data.get((int) nodeId);
 
     public static final PropertyTranslator.OfDouble<AtomicDoubleArray> ATOMIC_DOUBLE_ARRAY_TRANSLATOR =
         (data, nodeId) -> data.get((int) nodeId);
