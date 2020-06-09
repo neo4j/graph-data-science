@@ -27,7 +27,7 @@ public final class HugeLongArrayQueue {
     private long tail;
 
     public static HugeLongArrayQueue newQueue(long capacity, AllocationTracker tracker) {
-        return new HugeLongArrayQueue(HugeLongArray.newArray(capacity, tracker));
+        return new HugeLongArrayQueue(HugeLongArray.newArray(capacity + 1, tracker));
     }
 
     private HugeLongArrayQueue(HugeLongArray array) {
@@ -38,23 +38,32 @@ public final class HugeLongArrayQueue {
     }
 
     public void add(long v) {
-        if (tail == capacity) {
+        long newTail = (tail + 1) % capacity;
+        if (newTail == head) {
             throw new IndexOutOfBoundsException("Queue is full.");
         }
         array.set(tail, v);
-        tail++;
+        tail = newTail;
     }
 
     public long remove() {
-        if (head == tail) {
+        if (isEmpty()) {
             throw new IndexOutOfBoundsException("Queue is empty.");
         }
         long removed = array.get(head);
-        head++;
+        head = (head + 1) % capacity;
         return removed;
     }
 
     public long size() {
-        return tail - head;
+        long diff = tail - head;
+        if (diff < 0) {
+            diff += capacity;
+        }
+        return diff;
+    }
+
+    public boolean isEmpty() {
+        return head == tail;
     }
 }

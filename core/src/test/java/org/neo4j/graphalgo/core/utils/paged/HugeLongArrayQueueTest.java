@@ -22,7 +22,9 @@ package org.neo4j.graphalgo.core.utils.paged;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 class HugeLongArrayQueueTest {
@@ -36,6 +38,31 @@ class HugeLongArrayQueueTest {
     }
 
     @Test
+    void testAddContinuously() {
+        var capacity = 10;
+        var q = HugeLongArrayQueue.newQueue(capacity, AllocationTracker.EMPTY);
+        for (int i = 0; i < capacity * 10; i++) {
+            q.add(i);
+            q.remove();
+        }
+    }
+
+    @Test
+    void testRemoveFromFullQueue() {
+        var capacity = 10;
+        var q = HugeLongArrayQueue.newQueue(capacity, AllocationTracker.EMPTY);
+        // fill up queue
+        for (int i = 0; i < capacity; i++) {
+            q.add(i);
+        }
+        assertEquals(capacity, q.size());
+        q.remove();
+        assertEquals(capacity - 1, q.size());
+        q.add(42);
+        assertEquals(capacity, q.size());
+    }
+
+    @Test
     void testRemove() {
         var q = HugeLongArrayQueue.newQueue(10, AllocationTracker.EMPTY);
         q.add(42);
@@ -43,6 +70,16 @@ class HugeLongArrayQueueTest {
         assertEquals(42, q.remove());
         assertEquals(1337, q.remove());
         assertEquals(0, q.size());
+    }
+
+    @Test
+    void testIsEmpty() {
+        var q = HugeLongArrayQueue.newQueue(10, AllocationTracker.EMPTY);
+        assertTrue(q.isEmpty());
+        q.add(42);
+        assertFalse(q.isEmpty());
+        q.remove();
+        assertTrue(q.isEmpty());
     }
 
     @Test
