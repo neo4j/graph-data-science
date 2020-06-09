@@ -116,9 +116,7 @@ For these reasons, we strongly advise against running GDS in a cluster as this p
 To make use of GDS on graphs hosted by a Neo4j Causal Cluster deployment, these graphs should be detached from the running cluster.
 This can be accomplished in several ways, including:
 
-[[one]]
 1. Dumping a snapshot of the Neo4j store and importing it in a separate standalone Neo4j server.
-[[two]]
 2. Adding a Read Replica to the Neo4j Causal Cluster and then detaching it to safely operate GDS on a snapshot in separation from the Neo4j Causal Cluster.
 3. Adding a Read Replica to the Neo4j Causal Cluster and configuring it for GDS workloads, which requires:
 ** installing GDS on the Read Replica
@@ -126,7 +124,7 @@ This can be accomplished in several ways, including:
 ** avoiding use of GDS write-back features
 ** consuming results from GDS workloads directly via Cypher
 
-After the GDS workload has finished on a detached machine (for cases <<one, 1.>> and <<two, 2.>>) it now contains out-of-sync results written to its copied version of the graph from the Neo4j Causal Cluster.
+After the GDS workload has finished on a detached machine (for cases 1. and 2.) it now contains out-of-sync results written to its copied version of the graph from the Neo4j Causal Cluster.
 To integrate these results back to the cluster, custom programs are necessary.
 
 
