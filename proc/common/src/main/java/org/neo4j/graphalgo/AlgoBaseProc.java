@@ -64,7 +64,10 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.config.AlgoBaseConfig.CONCURRENCY_KEY;
+import static org.neo4j.graphalgo.config.AlgoBaseConfig.DEFAULT_CONCURRENCY;
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class AlgoBaseProc<
@@ -88,8 +91,10 @@ public abstract class AlgoBaseProc<
     public final CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
         Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
         Collection<String> allowedKeys = new HashSet<>();
-        if (!graphName.isPresent()) {
-            // we should do implicit loading
+        // implicit loading
+        if (graphName.isEmpty()) {
+            // inherit concurrency from AlgoBaseConfig
+            config = config.withNumber(READ_CONCURRENCY_KEY, config.getInt(CONCURRENCY_KEY, DEFAULT_CONCURRENCY));
             GraphCreateConfig createConfig = GraphCreateConfig.createImplicit(getUsername(), config);
             maybeImplicitCreate = Optional.of(createConfig);
             allowedKeys.addAll(createConfig.configKeys());
