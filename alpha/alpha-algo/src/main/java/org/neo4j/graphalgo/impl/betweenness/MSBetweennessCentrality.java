@@ -129,11 +129,11 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
         return centrality;
     }
 
-    public Stream<BetweennessCentrality.Result> resultStream() {
+    public Stream<RABrandesBetweennessCentrality.Result> resultStream() {
         return IntStream
             .range(0, nodeCount)
             .mapToObj(nodeId ->
-                new BetweennessCentrality.Result(
+                new RABrandesBetweennessCentrality.Result(
                     graph.toOriginalNodeId(nodeId),
                     centrality.get(nodeId)));
     }

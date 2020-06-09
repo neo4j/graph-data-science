@@ -61,12 +61,6 @@ class BetweennessCentralityTest {
     private static final double[] EMPTY_CENTRALITIES = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     @Test
-    void testBC() {
-        var bc = new BetweennessCentrality(graph, Pools.DEFAULT, 1);
-        assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
-    }
-
-    @Test
     void testMultiSourceBC() {
         var bc = new MSBetweennessCentrality(graph, false, 5, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         assertResult(bc.compute(), EXACT_CENTRALITIES);
@@ -88,12 +82,6 @@ class BetweennessCentralityTest {
     void testRABrandes() {
         var bc = new RABrandesBetweennessCentrality(graph, new RandomSelectionStrategy(graph, 0.3, TRACKER), Pools.DEFAULT, 3, TRACKER
         );
-        assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
-    }
-
-    @Test
-    void testParallelBC() {
-        var bc = new BetweennessCentrality(graph, Pools.DEFAULT, 4);
         assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
     }
 

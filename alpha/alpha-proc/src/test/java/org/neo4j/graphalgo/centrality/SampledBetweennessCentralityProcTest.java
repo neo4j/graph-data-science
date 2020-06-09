@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
-import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
+import org.neo4j.graphalgo.impl.betweenness.RABrandesBetweennessCentrality;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -47,7 +47,7 @@ class SampledBetweennessCentralityProcTest extends BaseProcTest {
     private static long centerNodeId;
 
     @Mock
-    private BetweennessCentrality.ResultConsumer consumer;
+    private RABrandesBetweennessCentrality.ResultConsumer consumer;
 
     @BeforeEach
     void setupGraph() throws Exception {

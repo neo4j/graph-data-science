@@ -32,11 +32,11 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
-import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
 import org.neo4j.graphalgo.impl.betweenness.RABrandesBetweennessCentrality;
 import org.neo4j.graphalgo.impl.betweenness.RandomDegreeSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.RandomSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.SampledBetweennessCentralityConfig;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -60,7 +60,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
 
     @Procedure(name = "gds.alpha.betweenness.sampled.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<BetweennessCentrality.Result> stream(
+    public Stream<RABrandesBetweennessCentrality.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -76,7 +76,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
 
     @Procedure(value = "gds.alpha.betweenness.sampled.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<BetweennessCentralityProc.BetweennessCentralityProcResult> write(
+    public Stream<BetweennessCentralityProcResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -85,8 +85,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
             configuration
         );
 
-        BetweennessCentralityProc.BetweennessCentralityProcResult.Builder builder = BetweennessCentralityProc.BetweennessCentralityProcResult
-            .builder();
+        BetweennessCentralityProcResult.Builder builder = BetweennessCentralityProcResult.builder();
 
         Graph graph = computationResult.graph();
         RABrandesBetweennessCentrality algo = computationResult.algorithm();
@@ -115,10 +114,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
         return Stream.of(builder.build());
     }
 
-    private void computeStats(
-        BetweennessCentralityProc.BetweennessCentralityProcResult.Builder builder,
-        HugeAtomicDoubleArray centrality
-    ) {
+    private void computeStats(BetweennessCentralityProcResult.Builder builder, HugeAtomicDoubleArray centrality) {
         double min = Double.MAX_VALUE;
         double max = Double.MIN_VALUE;
         double sum = 0.0;
@@ -203,6 +199,73 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
                 return new RandomSelectionStrategy(graph, probability, tracker);
             default:
                 throw new IllegalArgumentException("Unknown selection strategy: " + configuration.strategy());
+        }
+    }
+
+    public static final class BetweennessCentralityProcResult {
+
+        public final long createMillis;
+        public final long computeMillis;
+        public final long writeMillis;
+        public final long nodes;
+        public final double minCentrality;
+        public final double maxCentrality;
+        public final double sumCentrality;
+
+        private BetweennessCentralityProcResult(
+            Long createMillis,
+            Long computeMillis,
+            Long writeMillis,
+            Long nodes,
+            Double centralityMin,
+            Double centralityMax,
+            Double centralitySum
+        ) {
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.writeMillis = writeMillis;
+            this.nodes = nodes;
+            this.minCentrality = centralityMin;
+            this.maxCentrality = centralityMax;
+            this.sumCentrality = centralitySum;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder extends AbstractResultBuilder<BetweennessCentralityProcResult> {
+
+            private double centralityMin = -1;
+            private double centralityMax = -1;
+            private double centralitySum = -1;
+
+            public Builder withCentralityMin(double centralityMin) {
+                this.centralityMin = centralityMin;
+                return this;
+            }
+
+            public Builder withCentralityMax(double centralityMax) {
+                this.centralityMax = centralityMax;
+                return this;
+            }
+
+            public Builder withCentralitySum(double centralitySum) {
+                this.centralitySum = centralitySum;
+                return this;
+            }
+
+            public BetweennessCentralityProcResult build() {
+                return new BetweennessCentralityProcResult(
+                    createMillis,
+                    computeMillis,
+                    writeMillis,
+                    nodeCount,
+                    centralityMin,
+                    centralityMax,
+                    centralitySum
+                );
+            }
         }
     }
 }

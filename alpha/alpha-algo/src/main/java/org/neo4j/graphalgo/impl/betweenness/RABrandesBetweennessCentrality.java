@@ -42,16 +42,6 @@ import java.util.function.Consumer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-/**
- * Randomized Approximate Brandes. See https://arxiv.org/pdf/1702.06087.pdf.
- *
- * The implementation follows the same approach as {@link BetweennessCentrality}
- * with an additional node filter to select interesting nodes. the result is multiplied
- * with a factor which is based on the probability of which the filter accepts nodes.
- *
- * There is a significant performance drop if the direction is BOOTH. Its more efficient
- * to load the graph as undirected and do the
- */
 public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality> {
 
     public interface SelectionStrategy {
@@ -141,10 +131,10 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
      *
      * @return stream if Results
      */
-    public Stream<BetweennessCentrality.Result> resultStream() {
+    public Stream<Result> resultStream() {
         return LongStream
             .range(0, nodeCount)
-            .mapToObj(nodeId -> new BetweennessCentrality.Result(
+            .mapToObj(nodeId -> new Result(
                 graph.toOriginalNodeId(nodeId),
                 centrality.get(nodeId)
             ));
@@ -275,4 +265,43 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
             targetPredecessors.add(node);
         }
     }
+
+    /**
+     * Consumer interface
+     */
+    public interface ResultConsumer {
+        /**
+         * consume nodeId and centrality value as long as the consumer returns true
+         *
+         * @param originalNodeId the neo4j node id
+         * @param value          centrality value
+         * @return a bool indicating if the loop should continue(true) or stop(false)
+         */
+        boolean consume(long originalNodeId, double value);
+    }
+
+    /**
+     * Result class used for streaming
+     */
+    public static final class Result {
+
+        // original node id
+        public final long nodeId;
+        // centrality value
+        public final double centrality;
+
+        public Result(long nodeId, double centrality) {
+            this.nodeId = nodeId;
+            this.centrality = centrality;
+        }
+
+        @Override
+        public String toString() {
+            return "Result{" +
+                   "nodeId=" + nodeId +
+                   ", centrality=" + centrality +
+                   '}';
+        }
+    }
+
 }

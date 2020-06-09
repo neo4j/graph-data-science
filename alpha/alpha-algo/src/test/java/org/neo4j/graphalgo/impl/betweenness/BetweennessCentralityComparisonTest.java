@@ -129,9 +129,6 @@ class BetweennessCentralityComparisonTest {
     private void compareResults(Graph graph, int concurrency) {
         var executorService = Pools.DEFAULT;
 
-        var bc = new BetweennessCentrality(graph, executorService, concurrency, false);
-        bc.compute();
-
         AllocationTracker tracker = AllocationTracker.EMPTY;
         var msBc = new MSBetweennessCentrality(graph, false, 1, executorService, concurrency, tracker);
         msBc.compute();
@@ -154,55 +151,18 @@ class BetweennessCentralityComparisonTest {
         );
         randomSampledBC.compute();
 
-        var legacyDegreeSampledBC = new LegacyRABrandesBetweennessCentrality(
-            graph,
-            executorService,
-            concurrency,
-            new RandomDegreeSelectionStrategy(graph, 1.0, executorService, concurrency, tracker)
-        );
-        legacyDegreeSampledBC.compute();
-
-        var legacyRandomSampledBC = new LegacyRABrandesBetweennessCentrality(
-            graph,
-            executorService,
-            concurrency,
-            new RandomSelectionStrategy(graph, 1.0, tracker)
-        );
-        legacyRandomSampledBC.compute();
-
         for (int i = 0; i < graph.nodeCount(); i++) {
             Assert.assertEquals(
-                String.format(Locale.ENGLISH, "BC vs MS-BC: node %d with wrong BC value", i),
-                bc.getCentrality().get(i),
-                msBc.getCentrality().get(i),
-                1E-3
-            );
-
-            Assert.assertEquals(
                 String.format(Locale.ENGLISH, "BC vs Degree-Sampled-BC: node %d with wrong BC value", i),
-                bc.getCentrality().get(i),
+                msBc.getCentrality().get(i),
                 degreeSampledBC.getCentrality().get(i),
                 1E-3
             );
 
             Assert.assertEquals(
                 String.format(Locale.ENGLISH, "BC vs Random-Sampled-BC: node %d with wrong BC value", i),
-                bc.getCentrality().get(i),
+                msBc.getCentrality().get(i),
                 randomSampledBC.getCentrality().get(i),
-                1E-3
-            );
-
-            Assert.assertEquals(
-                String.format(Locale.ENGLISH, "BC vs Legacy-Degree-Sampled-BC: node %d with wrong BC value", i),
-                bc.getCentrality().get(i),
-                legacyDegreeSampledBC.getCentrality().get(i),
-                1E-3
-            );
-
-            Assert.assertEquals(
-                String.format(Locale.ENGLISH, "BC vs Legacy-Random-Sampled-BC: node %d with wrong BC value", i),
-                bc.getCentrality().get(i),
-                legacyRandomSampledBC.getCentrality().get(i),
                 1E-3
             );
         }
