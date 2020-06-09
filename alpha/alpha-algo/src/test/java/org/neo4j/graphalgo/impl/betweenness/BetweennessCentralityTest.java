@@ -61,28 +61,28 @@ class BetweennessCentralityTest {
     private static final double[] EMPTY_CENTRALITIES = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     @Test
-    void testMultiSourceBC() {
-        var bc = new MSBetweennessCentrality(graph, false, 5, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
-        assertResult(bc.compute(), EXACT_CENTRALITIES);
-    }
-
-    @Test
-    void testRABrandesForceCompleteSampling() {
-        var bc = new RABrandesBetweennessCentrality(graph, new RandomSelectionStrategy(graph, 1.0, TRACKER), Pools.DEFAULT, 1, TRACKER);
+    void testForceCompleteSampling() {
+        var bc = new BetweennessCentrality(graph, new RandomSelectionStrategy(graph, 1.0, TRACKER), Pools.DEFAULT, 1, TRACKER);
         assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
     }
 
     @Test
-    void testRABrandesForceEmptySampling() {
-        var bc = new RABrandesBetweennessCentrality(graph, new RandomSelectionStrategy(graph, 0.0, TRACKER), Pools.DEFAULT, 3, TRACKER);
+    void testForceEmptySampling() {
+        var bc = new BetweennessCentrality(graph, new RandomSelectionStrategy(graph, 0.0, TRACKER), Pools.DEFAULT, 3, TRACKER);
         assertResult(bc.compute().getCentrality(), EMPTY_CENTRALITIES);
     }
 
     @Disabled
-    void testRABrandes() {
-        var bc = new RABrandesBetweennessCentrality(graph, new RandomSelectionStrategy(graph, 0.3, TRACKER), Pools.DEFAULT, 3, TRACKER
+    void testSampling() {
+        var bc = new BetweennessCentrality(graph, new RandomSelectionStrategy(graph, 0.3, TRACKER), Pools.DEFAULT, 3, TRACKER
         );
         assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
+    }
+
+    @Test
+    void testMultiSourceBC() {
+        var bc = new MSBetweennessCentrality(graph, false, 5, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
+        assertResult(bc.compute(), EXACT_CENTRALITIES);
     }
 
     private void assertResult(AtomicDoubleArray result, double[] centralities) {

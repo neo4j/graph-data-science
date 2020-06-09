@@ -133,7 +133,7 @@ class BetweennessCentralityComparisonTest {
         var msBc = new MSBetweennessCentrality(graph, false, 1, executorService, concurrency, tracker);
         msBc.compute();
 
-        var degreeSampledBC = new RABrandesBetweennessCentrality(
+        var degreeSampledBC = new BetweennessCentrality(
             graph,
             new RandomDegreeSelectionStrategy(graph, 1.0, executorService, concurrency, tracker),
             executorService,
@@ -142,7 +142,7 @@ class BetweennessCentralityComparisonTest {
         );
         degreeSampledBC.compute();
 
-        var randomSampledBC = new RABrandesBetweennessCentrality(
+        var randomSampledBC = new BetweennessCentrality(
             graph,
             new RandomSelectionStrategy(graph, 1.0, tracker),
             executorService,

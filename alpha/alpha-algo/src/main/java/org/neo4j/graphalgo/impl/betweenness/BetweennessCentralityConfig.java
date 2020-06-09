@@ -28,9 +28,9 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("SampledBetweennessCentralityConfigImpl")
+@Configuration("BetweennessCentralityConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface SampledBetweennessCentralityConfig extends BaseBetweennessCentralityConfig {
+public interface BetweennessCentralityConfig extends BaseBetweennessCentralityConfig {
 
     @Value.Default
     default String strategy() {
@@ -45,12 +45,12 @@ public interface SampledBetweennessCentralityConfig extends BaseBetweennessCentr
         return Double.NaN;
     }
 
-    static SampledBetweennessCentralityConfig of(
+    static BetweennessCentralityConfig of(
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
         String username,
         CypherMapWrapper config
     ) {
-        return new SampledBetweennessCentralityConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new BetweennessCentralityConfigImpl(graphName, implicitCreateConfig, username, config);
     }
 }

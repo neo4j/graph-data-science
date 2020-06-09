@@ -28,7 +28,7 @@ import java.security.SecureRandom;
 /**
  * Filters nodes randomly based on a given probability
  */
-public class RandomSelectionStrategy implements RABrandesBetweennessCentrality.SelectionStrategy {
+public class RandomSelectionStrategy implements BetweennessCentrality.SelectionStrategy {
 
     private final PagedSimpleBitSet bitSet;
     private final long size;

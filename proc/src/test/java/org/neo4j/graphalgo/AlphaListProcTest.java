@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.centrality.ArticleRankProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
 import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
-import org.neo4j.graphalgo.centrality.SampledBetweennessCentralityProc;
+import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
@@ -162,7 +162,7 @@ class AlphaListProcTest extends BaseProcTest {
             RandomWalkProc.class,
             OneHotEncodingFunc.class,
             SpanningTreeProc.class,
-            SampledBetweennessCentralityProc.class,
+            BetweennessCentralityProc.class,
             ShortestPathDeltaSteppingProc.class,
             ShortestPathAStarProc.class,
             ShortestPathsProc.class,

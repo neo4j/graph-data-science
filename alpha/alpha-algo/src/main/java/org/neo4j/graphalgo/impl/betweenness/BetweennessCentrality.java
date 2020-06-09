@@ -42,7 +42,7 @@ import java.util.function.Consumer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality> {
+public class BetweennessCentrality extends Algorithm<BetweennessCentrality, BetweennessCentrality> {
 
     public interface SelectionStrategy {
 
@@ -70,7 +70,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
     private final int concurrency;
     private final AllocationTracker tracker;
 
-    public RABrandesBetweennessCentrality(
+    public BetweennessCentrality(
         Graph graph,
         SelectionStrategy selectionStrategy,
         ExecutorService executorService,
@@ -80,7 +80,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
         this(graph, selectionStrategy, false, executorService, concurrency, tracker);
     }
 
-    public RABrandesBetweennessCentrality(
+    public BetweennessCentrality(
         Graph graph,
         SelectionStrategy selectionStrategy,
         boolean undirected,
@@ -107,7 +107,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
      * @return itself for method chaining
      */
     @Override
-    public RABrandesBetweennessCentrality compute() {
+    public BetweennessCentrality compute() {
         nodeQueue.set(0);
         ArrayList<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
@@ -141,7 +141,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
     }
 
     @Override
-    public RABrandesBetweennessCentrality me() {
+    public BetweennessCentrality me() {
         return this;
     }
 

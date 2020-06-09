@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
-import org.neo4j.graphalgo.impl.betweenness.RABrandesBetweennessCentrality;
+import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -40,18 +40,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class SampledBetweennessCentralityProcTest extends BaseProcTest {
+class BetweennessCentralityProcTest extends BaseProcTest {
 
     private static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
     private static long centerNodeId;
 
     @Mock
-    private RABrandesBetweennessCentrality.ResultConsumer consumer;
+    private BetweennessCentrality.ResultConsumer consumer;
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(SampledBetweennessCentralityProc.class);
+        registerProcedures(BetweennessCentralityProc.class);
 
         DefaultBuilder builder = GraphBuilder.create(db)
             .setLabel("Node")

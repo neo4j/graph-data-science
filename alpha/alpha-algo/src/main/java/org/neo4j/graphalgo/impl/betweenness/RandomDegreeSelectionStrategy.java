@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Note: Experimental
  */
-public class RandomDegreeSelectionStrategy implements RABrandesBetweennessCentrality.SelectionStrategy {
+public class RandomDegreeSelectionStrategy implements BetweennessCentrality.SelectionStrategy {
 
     private final double maxDegree;
     // TODO: benchmark and potentially replace with hppc BitSet

@@ -32,10 +32,10 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
-import org.neo4j.graphalgo.impl.betweenness.RABrandesBetweennessCentrality;
+import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
+import org.neo4j.graphalgo.impl.betweenness.BetweennessCentralityConfig;
 import org.neo4j.graphalgo.impl.betweenness.RandomDegreeSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.RandomSelectionStrategy;
-import org.neo4j.graphalgo.impl.betweenness.SampledBetweennessCentralityConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -49,22 +49,17 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-/**
- * Betweenness Centrality Algorithms
- *
- * all procedures accept {@code in, incoming, <, out, outgoing, >, both, <>} as direction
- */
-public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> {
+public class BetweennessCentralityProc extends AlgoBaseProc<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityConfig> {
 
     private static final String DESCRIPTION = "Sampled Betweenness centrality computes an approximate score for betweenness centrality.";
 
     @Procedure(name = "gds.alpha.betweenness.sampled.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<RABrandesBetweennessCentrality.Result> stream(
+    public Stream<BetweennessCentrality.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> computationResult = compute(
+        ComputationResult<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -80,7 +75,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<RABrandesBetweennessCentrality, RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> computationResult = compute(
+        ComputationResult<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -88,8 +83,8 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
         BetweennessCentralityProcResult.Builder builder = BetweennessCentralityProcResult.builder();
 
         Graph graph = computationResult.graph();
-        RABrandesBetweennessCentrality algo = computationResult.algorithm();
-        SampledBetweennessCentralityConfig config = computationResult.config();
+        BetweennessCentrality algo = computationResult.algorithm();
+        BetweennessCentralityConfig config = computationResult.config();
 
         if (graph.isEmpty()) {
             return Stream.of(builder.build());
@@ -134,36 +129,36 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
     }
 
     @Override
-    protected SampledBetweennessCentralityConfig newConfig(
+    protected BetweennessCentralityConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return SampledBetweennessCentralityConfig.of(graphName, maybeImplicitCreate, username, config);
+        return BetweennessCentralityConfig.of(graphName, maybeImplicitCreate, username, config);
     }
 
     @Override
     protected void validateConfigs(
         GraphCreateConfig graphCreateConfig,
-        SampledBetweennessCentralityConfig config
+        BetweennessCentralityConfig config
     ) {
         config.validate(graphCreateConfig);
     }
 
     @Override
-    protected AlgorithmFactory<RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> algorithmFactory(
-        SampledBetweennessCentralityConfig config
+    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityConfig> algorithmFactory(
+        BetweennessCentralityConfig config
     ) {
         return new AlphaAlgorithmFactory<>() {
             @Override
-            public RABrandesBetweennessCentrality buildAlphaAlgo(
+            public BetweennessCentrality buildAlphaAlgo(
                 Graph graph,
-                SampledBetweennessCentralityConfig configuration,
+                BetweennessCentralityConfig configuration,
                 AllocationTracker tracker,
                 Log log
             ) {
-                return new RABrandesBetweennessCentrality(
+                return new BetweennessCentrality(
                     graph,
                     strategy(configuration, graph, tracker),
                     configuration.undirected(),
@@ -177,8 +172,8 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
 
     }
 
-    private RABrandesBetweennessCentrality.SelectionStrategy strategy(
-        SampledBetweennessCentralityConfig configuration,
+    private BetweennessCentrality.SelectionStrategy strategy(
+        BetweennessCentralityConfig configuration,
         Graph graph,
         AllocationTracker tracker
     ) {

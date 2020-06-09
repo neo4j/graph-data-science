@@ -174,7 +174,7 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<algorithms-articlerank, Article Rank>>
 | `gds.alpha.articleRank.stream`
 | `gds.alpha.articleRank.write`
-.4+<.^|<<algorithms-betweenness-centrality, Betweenness Centrality>>
+.2+<.^|<<algorithms-betweenness-centrality, Betweenness Centrality>>
 | `gds.alpha.betweenness.sampled.stream`
 | `gds.alpha.betweenness.sampled.write`
 |<<algorithms-bfs, Breadth First Search>> | `gds.alpha.bfs.stream`
