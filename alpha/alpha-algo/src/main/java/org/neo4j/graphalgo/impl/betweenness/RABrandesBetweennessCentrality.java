@@ -69,7 +69,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
         long size();
     }
 
-    private Graph graph;
+    private final Graph graph;
     private volatile AtomicLong nodeQueue = new AtomicLong();
     private HugeAtomicDoubleArray centrality;
     private final long nodeCount;
