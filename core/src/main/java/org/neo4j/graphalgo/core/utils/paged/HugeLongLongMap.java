@@ -169,6 +169,13 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         return size() == 0L;
     }
 
+    public void clear() {
+        assigned = 0L;
+
+        keys.fill(0);
+        values.fill(0);
+    }
+
     public void release() {
         long released = 0L;
         released += keys.release();

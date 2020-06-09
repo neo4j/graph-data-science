@@ -34,6 +34,19 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 final class HugeLongLongMapTest {
 
     @Test
+    void canClear() {
+        HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.EMPTY);
+        map.addTo(1, 1);
+        map.clear();
+        assertEquals(0, map.size());
+        map.addTo(1, 23);
+        map.addTo(2, 24);
+        assertEquals(2, map.size());
+        assertEquals(23, map.getOrDefault(1, 42));
+        assertEquals(24, map.getOrDefault(2, 42));
+    }
+
+    @Test
     void canReadFromAddTo() {
         HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.EMPTY);
         map.addTo(1L, 1L);
