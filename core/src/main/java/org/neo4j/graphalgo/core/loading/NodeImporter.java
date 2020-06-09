@@ -27,6 +27,8 @@ import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
+import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
+import org.neo4j.memory.MemoryTracker;
 
 import java.util.Collections;
 import java.util.List;
@@ -59,20 +61,44 @@ public class NodeImporter {
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
     }
 
-    long importNodes(NodesBatchBuffer buffer, Read read, CursorFactory cursors, @Nullable NativeNodePropertyImporter propertyImporter) {
+    long importNodes(
+        NodesBatchBuffer buffer,
+        Read read,
+        CursorFactory cursors,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker,
+        @Nullable NativeNodePropertyImporter propertyImporter
+    ) {
         return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
             if (propertyImporter != null) {
-                return propertyImporter.importProperties(internalId, nodeReference, labelIds, propertiesReference, cursors, read);
+                return propertyImporter.importProperties(
+                    internalId,
+                    nodeReference,
+                    labelIds,
+                    propertiesReference,
+                    cursors,
+                    read,
+                    cursorTracer,
+                    memoryTracker
+                );
             } else {
                 return 0;
             }
         });
     }
 
-    long importCypherNodes(NodesBatchBuffer buffer, List<Map<String, Number>> cypherNodeProperties, CypherNodePropertyImporter propertyImporter) {
+    long importCypherNodes(
+        NodesBatchBuffer buffer,
+        List<Map<String, Number>> cypherNodeProperties,
+        CypherNodePropertyImporter propertyImporter
+    ) {
         return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
             if (propertyImporter != null) {
-                return propertyImporter.importProperties(internalId, labelIds, cypherNodeProperties.get((int) propertiesReference));
+                return propertyImporter.importProperties(
+                    internalId,
+                    labelIds,
+                    cypherNodeProperties.get((int) propertiesReference)
+                );
             } else {
                 return 0;
             }
@@ -127,7 +153,10 @@ public class NodeImporter {
         for (int i = 0; i < cappedBatchLength; i++) {
             long[] labelIdsForNode = labelIds[i];
             for (long labelId : labelIdsForNode) {
-                List<NodeLabel> elementIdentifiers = labelTokenNodeLabelMapping.getOrDefault((int) labelId, Collections.emptyList());
+                List<NodeLabel> elementIdentifiers = labelTokenNodeLabelMapping.getOrDefault(
+                    (int) labelId,
+                    Collections.emptyList()
+                );
                 for (NodeLabel elementIdentifier : elementIdentifiers) {
                     nodeLabelBitSetMapping
                         .computeIfAbsent(elementIdentifier, (ignore) -> new BitSet(batchLength))

@@ -53,6 +53,7 @@ import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
@@ -163,6 +164,11 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     @Override
     public LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue) {
         return numberArrayFactory.newLongArray(size, defaultValue, EmptyMemoryTracker.INSTANCE);
+    }
+
+    @Override
+    public MemoryTracker memoryTracker(KernelTransaction kernelTransaction) {
+        return kernelTransaction.memoryTracker();
     }
 
     @Override

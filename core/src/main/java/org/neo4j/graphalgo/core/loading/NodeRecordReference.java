@@ -28,10 +28,16 @@ public final class NodeRecordReference implements NodeReference {
 
     private final NodeRecord record;
     private final NodeStore nodeStore;
+    private final PageCursorTracer cursorTracer;
 
-    NodeRecordReference(NodeRecord record, NodeStore nodeStore) {
+    NodeRecordReference(
+        NodeRecord record,
+        NodeStore nodeStore,
+        PageCursorTracer cursorTracer
+    ) {
         this.record = record;
         this.nodeStore = nodeStore;
+        this.cursorTracer = cursorTracer;
     }
 
     @Override
@@ -41,7 +47,7 @@ public final class NodeRecordReference implements NodeReference {
 
     @Override
     public long[] labels() {
-        return Neo4jProxy.getNodeLabelFields(record, nodeStore, PageCursorTracer.NULL);
+        return Neo4jProxy.getNodeLabelFields(record, nodeStore, cursorTracer);
     }
 
     @Override

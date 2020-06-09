@@ -47,6 +47,7 @@ import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -116,6 +117,8 @@ public interface Neo4jProxyApi {
     OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base);
 
     LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue);
+
+    MemoryTracker memoryTracker(KernelTransaction kernelTransaction);
 
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,

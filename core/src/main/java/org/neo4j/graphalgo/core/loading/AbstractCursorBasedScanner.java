@@ -110,6 +110,7 @@ abstract class AbstractCursorBasedScanner<
     // global cursor pool to return this one to
     private final ThreadLocal<StoreScanner.ScanCursor<Reference>> cursors;
 
+    private final PageCursorTracer pageCursorTracer;
     private final Scan<EntityCursor> entityCursorScan;
 
     private final Store store;
@@ -123,7 +124,9 @@ abstract class AbstractCursorBasedScanner<
         this.transaction = transaction.fork();
         this.prefetchSize = prefetchSize;
         // get is OK here, since we are forking a new transaction
-        this.entityCursorScan = entityCursorScan(this.transaction.topLevelKernelTransaction().get(), attachment);
+        var kernelTransaction = this.transaction.topLevelKernelTransaction().get();
+        this.pageCursorTracer = kernelTransaction.pageCursorTracer();
+        this.entityCursorScan = entityCursorScan(kernelTransaction, attachment);
         this.cursors = new ThreadLocal<>();
         this.recordSize = recordSize;
         this.recordsPerPage = recordsPerPage;
@@ -151,7 +154,7 @@ abstract class AbstractCursorBasedScanner<
 
     @Override
     public final long storeSize() {
-        long recordsInUse = 1L + Neo4jProxy.getHighestPossibleIdInUse(store, PageCursorTracer.NULL);
+        long recordsInUse = 1L + Neo4jProxy.getHighestPossibleIdInUse(store, pageCursorTracer);
         long idsInPages = ((recordsInUse + (recordsPerPage - 1L)) / recordsPerPage) * recordsPerPage;
         return idsInPages * (long) recordSize;
     }

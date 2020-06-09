@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
+import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
+import org.neo4j.memory.MemoryTracker;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
@@ -112,9 +114,16 @@ final class SingleTypeRelationshipImporter {
                 return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
             }
 
-            SingleTypeRelationshipImporter withBuffer(IdMapping idMap, int bulkSize, Read read, CursorFactory cursors) {
+            SingleTypeRelationshipImporter withBuffer(
+                IdMapping idMap,
+                int bulkSize,
+                Read read,
+                CursorFactory cursors,
+                PageCursorTracer cursorTracer,
+                MemoryTracker memoryTracker
+            ) {
                 RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, typeId, bulkSize, validateRelationships);
-                RelationshipImporter.PropertyReader propertyReader = importer.storeBackedPropertiesReader(cursors, read);
+                RelationshipImporter.PropertyReader propertyReader = importer.storeBackedPropertiesReader(cursors, read, cursorTracer, memoryTracker);
                 return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
             }
         }

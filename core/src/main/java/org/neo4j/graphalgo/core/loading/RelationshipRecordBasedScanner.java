@@ -20,9 +20,8 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.core.SecureTransaction;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.io.layout.DatabaseFile;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RelationshipStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
@@ -50,7 +49,8 @@ final class RelationshipRecordBasedScanner extends AbstractRecordBasedScanner<Re
     @Override
     public RelationshipReference recordReference(
         RelationshipRecord record,
-        RelationshipStore store
+        RelationshipStore store,
+        KernelTransaction transaction
     ) {
         return new RelationshipRecordReference(record);
     }

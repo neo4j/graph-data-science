@@ -47,6 +47,7 @@ import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -164,6 +165,10 @@ public final class Neo4jProxy {
 
     public static LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue) {
         return IMPL.newChunkedLongArray(numberArrayFactory, size, defaultValue);
+    }
+
+    public static MemoryTracker memoryTracker(KernelTransaction kernelTransaction) {
+        return IMPL.memoryTracker(kernelTransaction);
     }
 
     public static BatchImporter instantiateBatchImporter(

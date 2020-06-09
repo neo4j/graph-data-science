@@ -20,9 +20,8 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.core.SecureTransaction;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.io.layout.DatabaseFile;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
@@ -48,8 +47,8 @@ final class NodeRecordBasedScanner extends AbstractRecordBasedScanner<NodeRefere
     }
 
     @Override
-    NodeReference recordReference(NodeRecord record, NodeStore store) {
-        return new NodeRecordReference(record, store);
+    NodeReference recordReference(NodeRecord record, NodeStore store, KernelTransaction kernelTransaction) {
+        return new NodeRecordReference(record, store, kernelTransaction.pageCursorTracer());
     }
 
     @Override

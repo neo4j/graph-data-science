@@ -283,7 +283,7 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
                 throw new UncheckedIOException(e);
             }
             Record record = store.newRecord();
-            Reference reference = recordReference(record, store);
+            Reference reference = recordReference(record, store, transaction);
             cursor = new ScanCursor(pageCursor, record, reference);
             this.cursors.set(cursor);
         }
@@ -314,7 +314,7 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
      */
     abstract RecordFormat<Record> recordFormat(RecordFormats formats);
 
-    abstract Reference recordReference(Record record, Store store);
+    abstract Reference recordReference(Record record, Store store, KernelTransaction kernelTransaction);
 
     /**
      * Return the filename of the store file that the page cache maps
