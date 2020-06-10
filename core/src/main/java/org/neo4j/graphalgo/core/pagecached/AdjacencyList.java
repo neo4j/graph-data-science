@@ -31,6 +31,8 @@ import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
@@ -217,22 +219,40 @@ public final class AdjacencyList {
          * Read the next target id.
          * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
          */
-        long nextLong() {
-            long value = pageCursor.getLong(offset);
-//            long value = AdjacencyDecompressingReader.readLong(currentPage, offset);
-            offset += Long.BYTES;
-            return value;
+        long nextLong() throws IOException {
+            if (pageCursor.getCurrentPageSize() - offset >= Long.BYTES) {
+                long value = pageCursor.getLong(offset);
+                offset += Long.BYTES;
+                return value;
+            }
+
+            byte[] partialLong = new byte[Long.BYTES];
+            int bytesOnThisPage = pageCursor.getCurrentPageSize() - offset;
+            pageCursor.setOffset(offset);
+            pageCursor.getBytes(partialLong, 0, bytesOnThisPage);
+
+            return getLong(partialLong, bytesOnThisPage);
         }
 
         Cursor init(long offset, int pageSize) throws IOException {
             this.offset = (int)(offset % pageSize);
-            pageCursor.next(this.offset / pageSize);
+            pageCursor.next(offset / pageSize);
 //            this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
 //            this.offset = indexInPage(fromIndex, PAGE_MASK);
             this.degree = pageCursor.getInt(this.offset);
             this.offset += Integer.BYTES;
             this.limit = this.offset + degree * Long.BYTES;
             return this;
+        }
+
+        private long getLong(byte[] longBytes, int alreadyRead) throws IOException {
+            if (!pageCursor.next()) {
+                return -1;
+            }
+
+            pageCursor.getBytes(longBytes, alreadyRead, Long.BYTES - alreadyRead);
+            this.offset = pageCursor.getOffset();
+            return ByteBuffer.wrap(longBytes).order(ByteOrder.BIG_ENDIAN).getLong();
         }
     }
 

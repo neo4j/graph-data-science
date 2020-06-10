@@ -92,6 +92,52 @@ class AdjacencyListTest {
     }
 
     @Test
+    void writeBufferIntoAdjacencyList() throws IOException {
+        PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
+        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache, AllocationTracker.EMPTY);
+        AdjacencyListBuilder.Allocator allocator = adjacencyListBuilder.newAllocator();
+
+        ByteBuffer buffer = ByteBuffer.allocate(24);
+        buffer.putLong(2);
+        buffer.putLong(1);
+        buffer.putLong(42);
+
+        allocator.prepare();
+        long offset = allocator.insert(buffer.array(), buffer.arrayOffset() + 4, 20);
+
+        allocator.close();
+        AdjacencyList adjacencyList = adjacencyListBuilder.build();
+        AdjacencyList.Cursor cursor = adjacencyList.cursor(offset);
+        assertEquals(2, cursor.length());
+        assertEquals(1, cursor.nextLong());
+        assertEquals(42, cursor.nextLong());
+    }
+
+    @Test
+    void writeLargeBufferIntoAdjacencyList() throws IOException {
+        PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
+        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache, AllocationTracker.EMPTY);
+        AdjacencyListBuilder.Allocator allocator = adjacencyListBuilder.newAllocator();
+
+        ByteBuffer buffer = ByteBuffer.allocate(1337 * 8 + 4);
+        buffer.putInt(1337);
+        for (int i = 0; i < 1337; i++) {
+            buffer.putLong(i);
+        }
+
+        allocator.prepare();
+        long offset = allocator.insert(buffer.array(), buffer.arrayOffset(), 1337 * 8 + 4);
+
+        allocator.close();
+        AdjacencyList adjacencyList = adjacencyListBuilder.build();
+        AdjacencyList.Cursor cursor = adjacencyList.cursor(offset);
+        assertEquals(1337, cursor.length());
+        for (int i = 0; i < 1337; i++) {
+            assertEquals(i, cursor.nextLong());
+        }
+    }
+
+    @Test
     void test() throws IOException, InterruptedException {
 
         PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
