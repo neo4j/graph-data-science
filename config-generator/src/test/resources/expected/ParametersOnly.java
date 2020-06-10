@@ -20,8 +20,8 @@
 package positive;
 
 import javax.annotation.processing.Generated;
-
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class ParametersOnlyConfig implements ParametersOnly {
@@ -42,11 +42,14 @@ public final class ParametersOnlyConfig implements ParametersOnly {
                 String combinedErrorMsg = errors
                     .stream()
                     .map(IllegalArgumentException::getMessage)
-                    .reduce(
-                        "Multiple errors in configuration arguments:",
-                        (combined, msg) -> combined + System.lineSeparator() + "\t\t\t\t" + msg
-                    );
-                throw new IllegalArgumentException(combinedErrorMsg);
+                    .collect(Collectors.joining(
+                        System.lineSeparator() + "\t\t\t\t",
+                        "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
+                        ""
+                    ));
+                IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
+                errors.forEach(error -> combinedError.addSuppressed(error));
+                throw combinedError;
             }
         }
     }

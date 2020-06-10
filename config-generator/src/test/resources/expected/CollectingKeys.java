@@ -23,9 +23,10 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
-import java.util.Arrays
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class CollectingKeysConfig implements CollectingKeys {
@@ -60,11 +61,14 @@ public final class CollectingKeysConfig implements CollectingKeys {
                 String combinedErrorMsg = errors
                     .stream()
                     .map(IllegalArgumentException::getMessage)
-                    .reduce(
-                        "Multiple errors in configuration arguments:",
-                        (combined, msg) -> combined + System.lineSeparator() + "\t\t\t\t" + msg
-                    );
-                throw new IllegalArgumentException(combinedErrorMsg);
+                    .collect(Collectors.joining(
+                        System.lineSeparator() + "\t\t\t\t",
+                        "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
+                        ""
+                    ));
+                IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
+                errors.forEach(error -> combinedError.addSuppressed(error));
+                throw combinedError;
             }
         }
     }

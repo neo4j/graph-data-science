@@ -233,23 +233,37 @@ final class GenerateConfiguration {
         MethodSpec.Builder configMapConstructor,
         String errorsVarName
     ) {
-        String combinedErrorsVarName = names.newName("combinedErrorMsg");
+        String combinedErrorMsgVarName = names.newName("combinedErrorMsg");
+        String combinedErrorVarName = names.newName("combinedError");
         configMapConstructor.beginControlFlow("if(!$N.isEmpty())", errorsVarName)
             .beginControlFlow("if($N.size() == $L)", errorsVarName, 1)
             .addStatement("throw $N.get($L)", errorsVarName, 0)
             .nextControlFlow("else")
             .addStatement(
-                "$1T $2N = $3N.stream().map($4T::getMessage).reduce($5S, ($6N, $7N) -> $6N + System.lineSeparator() + $8S + $7N)",
+                "$1T $2N = $3N.stream().map($4T::getMessage)" +
+                ".collect($5T.joining(System.lineSeparator() + $6S, $7S + System.lineSeparator() + $6S, $8S))",
                 String.class,
-                combinedErrorsVarName,
+                combinedErrorMsgVarName,
                 errorsVarName,
                 IllegalArgumentException.class,
-                "Multiple errors in configuration arguments:",
-                names.newName("combined"),
-                names.newName("msg"),
-                "\t\t\t\t"
+                Collectors.class,
+                "\t\t\t\t",
+                "Multiple errors in configuration arguments:", //prefix
+                "" // suffix
             )
-            .addStatement("throw new $T($N)", IllegalArgumentException.class, combinedErrorsVarName)
+            .addStatement(
+                "$1T $2N = new $1T($3N)",
+                IllegalArgumentException.class,
+                combinedErrorVarName,
+                combinedErrorMsgVarName
+            )
+            .addStatement(
+                "$1N.forEach($2N -> $3N.addSuppressed($2N))",
+                errorsVarName,
+                names.newName("error"),
+                combinedErrorVarName
+            )
+            .addStatement("throw $N", combinedErrorVarName)
             .endControlFlow()
             .endControlFlow();
     }

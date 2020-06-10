@@ -19,13 +19,15 @@
  */
 package positive;
 
+import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+
+import javax.annotation.processing.Generated;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.processing.Generated;
+import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class FieldTypesConfig implements FieldTypes {
@@ -116,11 +118,14 @@ public final class FieldTypesConfig implements FieldTypes {
                 String combinedErrorMsg = errors
                     .stream()
                     .map(IllegalArgumentException::getMessage)
-                    .reduce(
-                        "Multiple errors in configuration arguments:",
-                        (combined, msg) -> combined + System.lineSeparator() + "\t\t\t\t" + msg
-                    );
-                throw new IllegalArgumentException(combinedErrorMsg);
+                    .collect(Collectors.joining(
+                        System.lineSeparator() + "\t\t\t\t",
+                        "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
+                        ""
+                    ));
+                IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
+                errors.forEach(error -> combinedError.addSuppressed(error));
+                throw combinedError;
             }
         }
     }

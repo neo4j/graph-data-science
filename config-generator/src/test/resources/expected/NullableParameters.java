@@ -23,9 +23,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.ArrayList;
-
 import javax.annotation.processing.Generated;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class NullableParametersConfig implements NullableParameters {
@@ -78,11 +78,14 @@ public final class NullableParametersConfig implements NullableParameters {
                 String combinedErrorMsg = errors
                     .stream()
                     .map(IllegalArgumentException::getMessage)
-                    .reduce(
-                        "Multiple errors in configuration arguments:",
-                        (combined, msg) -> combined + System.lineSeparator() + "\t\t\t\t" + msg
-                    );
-                throw new IllegalArgumentException(combinedErrorMsg);
+                    .collect(Collectors.joining(
+                        System.lineSeparator() + "\t\t\t\t",
+                        "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
+                        ""
+                    ));
+                IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
+                errors.forEach(error -> combinedError.addSuppressed(error));
+                throw combinedError;
             }
         }
     }
