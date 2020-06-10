@@ -291,8 +291,8 @@ final class GenerateConfiguration {
         builder
             .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
             .addStatement("$N.add(e)", errorVarName)
+            // should only throw NPE if previously an error occured on the field it valides on (field is null then)
             .nextControlFlow("catch ($T e)", NullPointerException.class)
-            // could suppress the error
             .endControlFlow();
     }
 
