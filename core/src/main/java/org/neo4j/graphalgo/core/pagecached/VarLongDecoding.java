@@ -19,18 +19,29 @@
  */
 package org.neo4j.graphalgo.core.pagecached;
 
+import org.neo4j.io.pagecache.PageCursor;
+
+import java.io.IOException;
+
 final class VarLongDecoding {
 
     static int decodeDeltaVLongs(
-            long startValue,
-            byte[] adjacencyPage,
-            int offset,
-            int limit,
-            long[] out) {
+        long startValue,
+        PageCursor pageCursor,
+        int offset,
+        int limit,
+        long[] out
+    ) throws IOException {
         long input, value = 0L;
         int into = 0, shift = 0;
         while (into < limit) {
-            input = adjacencyPage[offset++];
+            if (offset >= pageCursor.getCurrentPageSize()) {
+                if (!pageCursor.next()) {
+                    return offset;
+                }
+                offset = 0;
+            }
+            input = pageCursor.getByte(offset++);
             value += (input & 127L) << shift;
             if ((input & 128L) == 128L) {
                 startValue += value;

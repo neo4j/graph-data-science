@@ -44,7 +44,7 @@ public final class AdjacencyList {
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
     public static final long PAGE_MASK = PAGE_SIZE - 1;
 
-//    private final long allocatedMemory;
+    //    private final long allocatedMemory;
     private final PagedFile pagedFile;
 //    private byte[][] pages;
 
@@ -150,7 +150,7 @@ public final class AdjacencyList {
     public final long release() {
         pagedFile.close();
 //        if (pages == null) {
-            return 0L;
+        return 0L;
 //        }
 //        pages = null;
 //        return allocatedMemory;
@@ -167,26 +167,31 @@ public final class AdjacencyList {
         return new Cursor(pageCursor).init(offset, pagedFile.pageSize());
     }
 
-//    /**
-//     * Returns a new, uninitialized delta cursor. Call {@link DecompressingCursor#init(long)}.
-//     */
-//    DecompressingCursor rawDecompressingCursor() {
-//        return new DecompressingCursor(pages);
-//    }
-//
-//    /**
-//     * Get a new cursor initialised on the given offset
-//     */
-//    DecompressingCursor decompressingCursor(long offset) {
-//        return rawDecompressingCursor().init(offset);
-//    }
-//
-//    /**
-//     * Initialise the given cursor with the given offset
-//     */
-//    DecompressingCursor decompressingCursor(DecompressingCursor reuse, long offset) {
-//        return reuse.init(offset);
-//    }
+    /**
+     * Returns a new, uninitialized delta cursor. Call {@link DecompressingCursor#init(long, int)}.
+     */
+    DecompressingCursor rawDecompressingCursor() throws IOException {
+        PageCursor pageCursor = pagedFile.io(
+            0,
+            PagedFile.PF_SHARED_READ_LOCK,
+            PageCursorTracer.NULL
+        );
+        return new DecompressingCursor(pageCursor);
+    }
+
+    /**
+     * Get a new cursor initialised on the given offset
+     */
+    DecompressingCursor decompressingCursor(long offset) throws IOException {
+        return rawDecompressingCursor().init(offset, pagedFile.pageSize());
+    }
+
+    /**
+     * Initialise the given cursor with the given offset
+     */
+    DecompressingCursor decompressingCursor(DecompressingCursor reuse, long offset) throws IOException {
+        return reuse.init(offset, pagedFile.pageSize());
+    }
 
     public static final class Cursor extends MutableIntValue {
 
@@ -195,7 +200,7 @@ public final class AdjacencyList {
         // TODO: free
         private final PageCursor pageCursor;
 
-//        private byte[] currentPage;
+        //        private byte[] currentPage;
         private int degree;
         private int offset;
         private int limit;
@@ -235,7 +240,7 @@ public final class AdjacencyList {
         }
 
         Cursor init(long offset, int pageSize) throws IOException {
-            this.offset = (int)(offset % pageSize);
+            this.offset = (int) (offset % pageSize);
             pageCursor.next(offset / pageSize);
 //            this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
 //            this.offset = indexInPage(fromIndex, PAGE_MASK);
@@ -256,97 +261,97 @@ public final class AdjacencyList {
         }
     }
 
-//    public static final class DecompressingCursor extends MutableIntValue {
-//
-//        public static final long NOT_FOUND = -1;
-//        // TODO: free
-//        private byte[][] pages;
-//        private final AdjacencyDecompressingReader decompress;
-//
-//        private int maxTargets;
-//        private int currentTarget;
-//
-//        private DecompressingCursor(byte[][] pages) {
-//            this.pages = pages;
-//            this.decompress = new AdjacencyDecompressingReader();
-//        }
-//
-//        /**
-//         * Copy iteration state from another cursor without changing {@code other}.
-//         */
-//        void copyFrom(DecompressingCursor other) {
-//            decompress.copyFrom(other.decompress);
-//            currentTarget = other.currentTarget;
-//            maxTargets = other.maxTargets;
-//        }
-//
-//        /**
-//         * Return how many targets can be decoded in total. This is equivalent to the degree.
-//         */
-//        public int cost() {
-//            return maxTargets;
-//        }
-//
-//        /**
-//         * Return how many targets are still left to be decoded.
-//         */
-//        int remaining() {
-//            return maxTargets - currentTarget;
-//        }
-//
-//        /**
-//         * Return true iff there is at least one more target to decode.
-//         */
-//        boolean hasNextVLong() {
-//            return currentTarget < maxTargets;
-//        }
-//
-//        /**
-//         * Read and decode the next target id.
-//         * It is undefined behavior if this is called after {@link #hasNextVLong()} returns {@code false}.
-//         */
-//        long nextVLong() {
-//            int current = currentTarget++;
-//            int remaining = maxTargets - current;
-//            return decompress.next(remaining);
-//        }
-//
-//        /**
-//         * Read and decode target ids until it is strictly larger than (`>`) the provided {@code target}.
-//         * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
-//         * id that is large enough.
-//         * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-//         * will return {@code false}
-//         */
-//        long skipUntil(long target) {
-//            long value = decompress.skipUntil(target, remaining(), this);
-//            this.currentTarget += this.value;
-//            return value;
-//        }
-//
-//        /**
-//         * Read and decode target ids until it is larger than or equal (`>=`) the provided {@code target}.
-//         * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
-//         * id that is large enough.
-//         * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-//         * will return {@code false}
-//         */
-//        long advance(long target) {
-//            int targetsLeftToBeDecoded = remaining();
-//            if(targetsLeftToBeDecoded <= 0) {
-//                return NOT_FOUND;
-//            }
-//            long value = decompress.advance(target, targetsLeftToBeDecoded, this);
-//            this.currentTarget += this.value;
-//            return value;
-//        }
-//
-//        DecompressingCursor init(long fromIndex) {
-//            maxTargets = decompress.reset(
-//                    pages[pageIndex(fromIndex, PAGE_SHIFT)],
-//                    indexInPage(fromIndex, PAGE_MASK));
-//            currentTarget = 0;
-//            return this;
-//        }
-//    }
+    public static final class DecompressingCursor extends MutableIntValue {
+
+        public static final long NOT_FOUND = -1;
+        // TODO: free
+        private byte[][] pages;
+        private final AdjacencyDecompressingReader decompress;
+
+        private int maxTargets;
+        private int currentTarget;
+        private PageCursor pageCursor;
+
+        private DecompressingCursor(PageCursor pageCursor) {
+            this.pageCursor = pageCursor;
+            this.decompress = new AdjacencyDecompressingReader();
+        }
+
+        /**
+         * Copy iteration state from another cursor without changing {@code other}.
+         */
+        void copyFrom(DecompressingCursor other) {
+            decompress.copyFrom(other.decompress);
+            currentTarget = other.currentTarget;
+            maxTargets = other.maxTargets;
+        }
+
+        /**
+         * Return how many targets can be decoded in total. This is equivalent to the degree.
+         */
+        public int length() {
+            return maxTargets;
+        }
+
+        /**
+         * Return how many targets are still left to be decoded.
+         */
+        int remaining() {
+            return maxTargets - currentTarget;
+        }
+
+        /**
+         * Return true iff there is at least one more target to decode.
+         */
+        boolean hasNextVLong() {
+            return currentTarget < maxTargets;
+        }
+
+        /**
+         * Read and decode the next target id.
+         * It is undefined behavior if this is called after {@link #hasNextVLong()} returns {@code false}.
+         */
+        long nextVLong() throws IOException {
+            int current = currentTarget++;
+            int remaining = maxTargets - current;
+            return decompress.next(remaining);
+        }
+
+        /**
+         * Read and decode target ids until it is strictly larger than (`>`) the provided {@code target}.
+         * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
+         * id that is large enough.
+         * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
+         * will return {@code false}
+         */
+        long skipUntil(long target) throws IOException {
+            long value = decompress.skipUntil(target, remaining(), this);
+            this.currentTarget += this.value;
+            return value;
+        }
+
+        /**
+         * Read and decode target ids until it is larger than or equal (`>=`) the provided {@code target}.
+         * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
+         * id that is large enough.
+         * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
+         * will return {@code false}
+         */
+        long advance(long target) throws IOException {
+            int targetsLeftToBeDecoded = remaining();
+            if (targetsLeftToBeDecoded <= 0) {
+                return NOT_FOUND;
+            }
+            long value = decompress.advance(target, targetsLeftToBeDecoded, this);
+            this.currentTarget += this.value;
+            return value;
+        }
+
+        DecompressingCursor init(long fromIndex, int pageSize) throws IOException {
+            pageCursor.next(fromIndex / pageSize);
+            maxTargets = decompress.reset(pageCursor, (int) (fromIndex % pageSize));
+            currentTarget = 0;
+            return this;
+        }
+    }
 }

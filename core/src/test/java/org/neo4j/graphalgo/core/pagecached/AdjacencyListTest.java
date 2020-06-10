@@ -19,15 +19,18 @@
  */
 package org.neo4j.graphalgo.core.pagecached;
 
+import org.apache.lucene.util.LongsRef;
 import org.eclipse.collections.impl.factory.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -42,6 +45,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
@@ -51,9 +56,6 @@ class AdjacencyListTest {
 
     @Inject
     public GraphDatabaseAPI db;
-
-    @Inject
-    FileSystemAbstraction fs;
 
     @Inject
     TestDirectory dir;
@@ -66,7 +68,7 @@ class AdjacencyListTest {
 
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-//        builder.noOpSystemGraphInitializer();
+        builder.noOpSystemGraphInitializer();
         builder.addExtension(new ConcurrencyControllerExtension());
     }
 
@@ -134,6 +136,45 @@ class AdjacencyListTest {
         assertEquals(1337, cursor.length());
         for (int i = 0; i < 1337; i++) {
             assertEquals(i, cursor.nextLong());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {42, 13370})
+    void writeCompressedAdjacencyValues(int numberOfValues) throws IOException {
+        var random = new Random();
+        var uncompressedAdjacencyList = random.longs(0, 1337 * numberOfValues).limit(numberOfValues).toArray();
+
+        var uncompressedValues = new LongsRef(0);
+        uncompressedValues.longs = uncompressedAdjacencyList.clone();
+        uncompressedValues.length = uncompressedAdjacencyList.length;
+
+        var degree = AdjacencyCompression.applyDeltaEncoding(uncompressedValues, Aggregation.NONE);
+        var compressed = new byte[Math.multiplyExact(degree, 10) + 4];
+        AdjacencyCompression.writeBEInt(compressed, 0, degree);
+        var requiredBytes = VarLongEncoding.encodeVLongs(
+            uncompressedValues.longs,
+            uncompressedValues.length,
+            compressed,
+            4
+        );
+
+        PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
+        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache, AllocationTracker.EMPTY);
+        AdjacencyListBuilder.Allocator allocator = adjacencyListBuilder.newAllocator();
+
+        allocator.prepare();
+        long offset = allocator.insert(compressed, 0, requiredBytes);
+        allocator.close();
+
+
+        AdjacencyList adjacencyList = adjacencyListBuilder.build();
+        AdjacencyList.DecompressingCursor cursor = adjacencyList.decompressingCursor(offset);
+        assertEquals(numberOfValues, cursor.length());
+
+        Arrays.sort(uncompressedAdjacencyList);
+        for (int i = 0; i < numberOfValues; i++) {
+            assertEquals(uncompressedAdjacencyList[i], cursor.nextVLong());
         }
     }
 

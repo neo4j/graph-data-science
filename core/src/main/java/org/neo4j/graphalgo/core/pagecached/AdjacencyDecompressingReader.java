@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.core.pagecached;
 
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
+import org.neo4j.io.pagecache.PageCursor;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.pagecached.VarLongDecoding.decodeDeltaVLongs;
@@ -32,7 +34,7 @@ final class AdjacencyDecompressingReader {
 
     private final long[] block;
     private int pos;
-    private byte[] array;
+    private PageCursor cursor;
     private int offset;
 
     AdjacencyDecompressingReader() {
@@ -64,19 +66,25 @@ final class AdjacencyDecompressingReader {
     void copyFrom(AdjacencyDecompressingReader other) {
         System.arraycopy(other.block, 0, block, 0, CHUNK_SIZE);
         pos = other.pos;
-        array = other.array;
+        cursor = other.cursor;
         offset = other.offset;
     }
 
-    int reset(byte[] adjacencyPage, int offset) {
-        this.array = adjacencyPage;
-        int numAdjacencies = readInt(adjacencyPage, offset); // offset should not be 0
-        this.offset = decodeDeltaVLongs(0L, adjacencyPage, Integer.BYTES + offset, Math.min(numAdjacencies, CHUNK_SIZE), block);
+    int reset(PageCursor pageCursor, int offset) throws IOException {
+        this.cursor = pageCursor;
+        int numAdjacencies = pageCursor.getInt(offset); // offset should not be 0
+        this.offset = decodeDeltaVLongs(
+            0L,
+            pageCursor,
+            Integer.BYTES + offset,
+            Math.min(numAdjacencies, CHUNK_SIZE),
+            block
+        );
         pos = 0;
         return numAdjacencies;
     }
 
-    long next(int remaining) {
+    long next(int remaining) throws IOException {
         int pos = this.pos++;
         if (pos < CHUNK_SIZE) {
             return block[pos];
@@ -84,13 +92,13 @@ final class AdjacencyDecompressingReader {
         return readNextBlock(remaining);
     }
 
-    private long readNextBlock(int remaining) {
+    private long readNextBlock(int remaining) throws IOException {
         pos = 1;
-        offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, Math.min(remaining, CHUNK_SIZE), block);
+        offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], cursor, offset, Math.min(remaining, CHUNK_SIZE), block);
         return block[0];
     }
 
-    long skipUntil(long target, int remaining, MutableIntValue consumed) {
+    long skipUntil(long target, int remaining, MutableIntValue consumed) throws IOException {
         int pos = this.pos;
         long[] block = this.block;
         int available = remaining;
@@ -99,13 +107,13 @@ final class AdjacencyDecompressingReader {
         while (available > CHUNK_SIZE - pos && block[CHUNK_SIZE - 1] <= target) {
             int skippedInThisBlock = CHUNK_SIZE - pos;
             int needToDecode = Math.min(CHUNK_SIZE, available - skippedInThisBlock);
-            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, needToDecode, block);
+            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], cursor, offset, needToDecode, block);
             available -= skippedInThisBlock;
             pos = 0;
         }
 
         // last block
-        if(available <= 0) {
+        if (available <= 0) {
             return AdjacencyList.DecompressingCursor.NOT_FOUND;
         }
 
@@ -117,7 +125,7 @@ final class AdjacencyDecompressingReader {
         return block[targetPos];
     }
 
-    long advance(long target, int remaining, MutableIntValue consumed) {
+    long advance(long target, int remaining, MutableIntValue consumed) throws IOException {
         int pos = this.pos;
         long[] block = this.block;
         int available = remaining;
@@ -126,7 +134,7 @@ final class AdjacencyDecompressingReader {
         while (available > CHUNK_SIZE - pos && block[CHUNK_SIZE - 1] < target) {
             int skippedInThisBlock = CHUNK_SIZE - pos;
             int needToDecode = Math.min(CHUNK_SIZE, available - skippedInThisBlock);
-            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, needToDecode, block);
+            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], cursor, offset, needToDecode, block);
             available -= skippedInThisBlock;
             pos = 0;
         }

@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 
 import java.util.Arrays;
 
+import static org.neo4j.graphalgo.core.pagecached.VarLongEncoding.encodeVLongs;
+
 
 final class AdjacencyCompression {
 
@@ -79,20 +81,20 @@ final class AdjacencyCompression {
         return data.length;
     }
 
-//    static int compress(LongsRef data, byte[] out) {
-//        return compress(data.longs, out, data.length);
-//    }
+    static int compress(LongsRef data, byte[] out) {
+        return compress(data.longs, out, data.length);
+    }
 
-//    static int compress(long[] data, byte[] out, int length) {
-//        return encodeVLongs(data, length, out, 0);
-//    }
+    static int compress(long[] data, byte[] out, int length) {
+        return encodeVLongs(data, length, out, 0);
+    }
 
     //@formatter:off
-    static int writeInt(byte[] out, int offset, int value) {
-        out[    offset] = (byte) (value);
-        out[1 + offset] = (byte) (value >>> 8);
-        out[2 + offset] = (byte) (value >>> 16);
-        out[3 + offset] = (byte) (value >>> 24);
+    static int writeBEInt(byte[] out, int offset, int value) {
+        out[    offset] = (byte) (value >>> 24);
+        out[1 + offset] = (byte) (value >>> 16);
+        out[2 + offset] = (byte) (value >>> 8);
+        out[3 + offset] = (byte) (value);
         return 4 + offset;
     }
     //@formatter:on
