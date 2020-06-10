@@ -1083,13 +1083,29 @@ class GraphCreateProcTest extends BaseProcTest {
     // Failure cases
 
     @ParameterizedTest(name = "projections: {0}")
-    @ValueSource(strings = {"'*', {}", "{}, '*'", "'', '*'", "'*', ''", "'', ''"})
+    @ValueSource(strings = {"'*', {}", "{}, '*'", "'', '*'", "'*', ''"})
     void failsOnEmptyProjection(String projection) {
         String query = "CALL gds.graph.create('g', " + projection + ")";
 
         assertErrorRegex(
             query,
             ".*An empty ((node)|(relationship)) projection was given; at least one ((node label)|(relationship type)) must be projected."
+        );
+
+        assertGraphDoesNotExist("g");
+    }
+
+    @Test
+    void failsOnBothEmptyProjection() {
+        String query = "CALL gds.graph.create('g','','')";
+
+        String expectedMsg = "Multiple errors in configuration arguments:\n" +
+                             "\t\t\t\tAn empty node projection was given; at least one node label must be projected.\n" +
+                             "\t\t\t\tAn empty relationship projection was given; at least one relationship type must be projected.";
+
+        assertError(
+            query,
+            expectedMsg
         );
 
         assertGraphDoesNotExist("g");

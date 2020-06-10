@@ -115,6 +115,19 @@ class ConfigKeyValidationTest extends BaseProcTest {
     }
 
     @Test
+    void dontSuggestExistingKeys() {
+        QueryExecutionException exception = Assertions.assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.testProc.test({writeProperty: 'p', writeConccurrency: 12,nodeProjection: '*', relationshipProjection: '*'})")
+        );
+
+        assertThat(
+            exception,
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: writeConccurrency (Did you mean one of [writeConcurrency, readConcurrency]?)")
+        );
+    }
+
+    @Test
     void misspelledRelationshipProjectionKeyWithSuggestion() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
@@ -146,6 +159,22 @@ class ConfigKeyValidationTest extends BaseProcTest {
         assertThat(
             exception,
             rootCause(IllegalArgumentException.class, "Unexpected configuration key: some")
+        );
+    }
+
+    @Test
+    void returnMultipleErrorsInConfigConstructionAtOnce() {
+        QueryExecutionException exception = Assertions.assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.testProc.test({nodeProjection: '*', relationshipProjection: '*', maxIterations: [1]})")
+        );
+
+        String expectedMsg = "Multiple errors in configuration arguments:\n" +
+                             "\t\t\t\tThe value of `maxIterations` must be of type `Integer` but was `ArrayList`.\n" +
+                             "\t\t\t\tNo value specified for the mandatory configuration parameter `writeProperty`";
+        assertThat(
+            exception,
+            rootCause(IllegalArgumentException.class, expectedMsg)
         );
     }
 

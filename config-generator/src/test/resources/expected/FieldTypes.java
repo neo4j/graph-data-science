@@ -23,46 +23,111 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class FieldTypesConfig implements FieldTypes {
 
-    private final boolean aBoolean;
+    private boolean aBoolean;
 
-    private final byte aByte;
+    private byte aByte;
 
-    private final short aShort;
+    private short aShort;
 
-    private final int anInt;
+    private int anInt;
 
-    private final long aLong;
+    private long aLong;
 
-    private final float aFloat;
+    private float aFloat;
 
-    private final double aDouble;
+    private double aDouble;
 
-    private final Number aNumber;
+    private Number aNumber;
 
-    private final String aString;
+    private String aString;
 
-    private final Map<String, Object> aMap;
+    private Map<String, Object> aMap;
 
-    private final List<Object> aList;
+    private List<Object> aList;
 
     public FieldTypesConfig(@NotNull CypherMapWrapper config) {
-        this.aBoolean = config.requireBool("aBoolean");
-        this.aByte = config.requireNumber("aByte").byteValue();
-        this.aShort = config.requireNumber("aShort").shortValue();
-        this.anInt = config.requireInt("anInt");
-        this.aLong = config.requireLong("aLong");
-        this.aFloat = config.requireNumber("aFloat").floatValue();
-        this.aDouble = config.requireDouble("aDouble");
-        this.aNumber = CypherMapWrapper.failOnNull("aNumber", config.requireNumber("aNumber"));
-        this.aString = CypherMapWrapper.failOnNull("aString", config.requireString("aString"));
-        this.aMap = CypherMapWrapper.failOnNull("aMap", config.requireChecked("aMap", Map.class));
-        this.aList = CypherMapWrapper.failOnNull("aList", config.requireChecked("aList", List.class));
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.aBoolean = config.requireBool("aBoolean");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.aByte = config.requireNumber("aByte").byteValue();
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.aShort = config.requireNumber("aShort").shortValue();
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.anInt = config.requireInt("anInt");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.aLong = config.requireLong("aLong");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.aFloat = config.requireNumber("aFloat").floatValue();
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.aDouble = config.requireDouble("aDouble");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.aNumber = CypherMapWrapper.failOnNull("aNumber", config.requireNumber("aNumber"));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.aString = CypherMapWrapper.failOnNull("aString", config.requireString("aString"));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.aMap = CypherMapWrapper.failOnNull("aMap", config.requireChecked("aMap", Map.class));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.aList = CypherMapWrapper.failOnNull("aList", config.requireChecked("aList", List.class));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            if (errors.size() == 1) {
+                throw errors.get(0);
+            } else {
+                String combinedErrorMsg = errors
+                    .stream()
+                    .map(IllegalArgumentException::getMessage)
+                    .collect(Collectors.joining(
+                        System.lineSeparator() + "\t\t\t\t",
+                        "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
+                        ""
+                    ));
+                IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
+                errors.forEach(error -> combinedError.addSuppressed(error));
+                throw combinedError;
+            }
+        }
     }
 
     @Override

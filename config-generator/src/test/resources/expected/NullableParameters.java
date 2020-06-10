@@ -24,17 +24,19 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class NullableParametersConfig implements NullableParameters {
 
-    private final String referenceTypesDefaultToNotNull;
+    private String referenceTypesDefaultToNotNull;
 
-    private final String referenceTypesCanBeMarkedAsNotNull;
+    private String referenceTypesCanBeMarkedAsNotNull;
 
-    private final String referenceTypesCanBeMarkedAsNullable;
+    private String referenceTypesCanBeMarkedAsNullable;
 
-    private final int extraValue;
+    private int extraValue;
 
     public NullableParametersConfig(
         @NotNull String referenceTypesDefaultToNotNull,
@@ -42,16 +44,50 @@ public final class NullableParametersConfig implements NullableParameters {
         @Nullable String referenceTypesCanBeMarkedAsNullable,
         @NotNull CypherMapWrapper config
     ) {
-        this.referenceTypesDefaultToNotNull = CypherMapWrapper.failOnNull(
-            "referenceTypesDefaultToNotNull",
-            referenceTypesDefaultToNotNull
-        );
-        this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.failOnNull(
-            "referenceTypesCanBeMarkedAsNotNull",
-            referenceTypesCanBeMarkedAsNotNull
-        );
-        this.referenceTypesCanBeMarkedAsNullable = referenceTypesCanBeMarkedAsNullable;
-        this.extraValue = config.requireInt("extraValue");
+        ArrayList<IllegalArgumentException> errors = new ArrayList<>();
+        try {
+            this.referenceTypesDefaultToNotNull = CypherMapWrapper.failOnNull(
+                "referenceTypesDefaultToNotNull",
+                referenceTypesDefaultToNotNull
+            );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.failOnNull(
+                "referenceTypesCanBeMarkedAsNotNull",
+                referenceTypesCanBeMarkedAsNotNull
+            );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.referenceTypesCanBeMarkedAsNullable = referenceTypesCanBeMarkedAsNullable;
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.extraValue = config.requireInt("extraValue");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        if (!errors.isEmpty()) {
+            if (errors.size() == 1) {
+                throw errors.get(0);
+            } else {
+                String combinedErrorMsg = errors
+                    .stream()
+                    .map(IllegalArgumentException::getMessage)
+                    .collect(Collectors.joining(
+                        System.lineSeparator() + "\t\t\t\t",
+                        "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
+                        ""
+                    ));
+                IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
+                errors.forEach(error -> combinedError.addSuppressed(error));
+                throw combinedError;
+            }
+        }
     }
 
     @Override

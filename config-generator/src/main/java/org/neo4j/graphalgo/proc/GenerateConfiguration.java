@@ -164,7 +164,7 @@ final class GenerateConfiguration {
             FieldSpec.builder(
                 member.typeSpecWithAnnotation(Nullable.class),
                 names.newName(member.methodName(), member),
-                Modifier.PRIVATE, Modifier.FINAL
+                Modifier.PRIVATE
             ).build()
         ).forEach(builder::addField);
         return builder.build();
@@ -178,6 +178,11 @@ final class GenerateConfiguration {
         String configParameterName = names.newName(CONFIG_VAR, CONFIG_VAR);
         boolean requiredMapParameter = false;
 
+        String errorsVarName = names.newName("errors");
+        if (!config.members().isEmpty()) {
+            configMapConstructor.addStatement("$1T<$2T> $3N = new $1T<>()", ArrayList.class, IllegalArgumentException.class, errorsVarName);
+        }
+
         for (ConfigParser.Member member : config.members()) {
             Optional<MemberDefinition> memberDefinition = memberDefinition(names, member);
             if (memberDefinition.isPresent()) {
@@ -189,13 +194,15 @@ final class GenerateConfiguration {
                     requiredMapParameter = true;
                     addConfigGetterToConstructor(
                         configMapConstructor,
-                        definition
+                        definition,
+                        errorsVarName
                     );
                 } else {
                     addParameterToConstructor(
                         configMapConstructor,
                         definition,
-                        parameter
+                        parameter,
+                        errorsVarName
                     );
                 }
             }
@@ -203,8 +210,12 @@ final class GenerateConfiguration {
 
         for (ConfigParser.Member member : config.members()) {
             if (member.validates()) {
-                configMapConstructor.addStatement("$N()", member.methodName());
+                catchValidationError(configMapConstructor, errorsVarName, (builder) -> builder.addStatement("$N()", member.methodName()));
             }
+        }
+
+        if (!config.members().isEmpty()) {
+            combineCollectedErrors(names, configMapConstructor, errorsVarName);
         }
 
         if (requiredMapParameter) {
@@ -215,6 +226,74 @@ final class GenerateConfiguration {
         }
 
         return configMapConstructor.build();
+    }
+
+    private void combineCollectedErrors(
+        NameAllocator names,
+        MethodSpec.Builder configMapConstructor,
+        String errorsVarName
+    ) {
+        String combinedErrorMsgVarName = names.newName("combinedErrorMsg");
+        String combinedErrorVarName = names.newName("combinedError");
+        configMapConstructor.beginControlFlow("if(!$N.isEmpty())", errorsVarName)
+            .beginControlFlow("if($N.size() == $L)", errorsVarName, 1)
+            .addStatement("throw $N.get($L)", errorsVarName, 0)
+            .nextControlFlow("else")
+            .addStatement(
+                "$1T $2N = $3N.stream().map($4T::getMessage)" +
+                ".collect($5T.joining(System.lineSeparator() + $6S, $7S + System.lineSeparator() + $6S, $8S))",
+                String.class,
+                combinedErrorMsgVarName,
+                errorsVarName,
+                IllegalArgumentException.class,
+                Collectors.class,
+                "\t\t\t\t",
+                "Multiple errors in configuration arguments:", //prefix
+                "" // suffix
+            )
+            .addStatement(
+                "$1T $2N = new $1T($3N)",
+                IllegalArgumentException.class,
+                combinedErrorVarName,
+                combinedErrorMsgVarName
+            )
+            .addStatement(
+                "$1N.forEach($2N -> $3N.addSuppressed($2N))",
+                errorsVarName,
+                names.newName("error"),
+                combinedErrorVarName
+            )
+            .addStatement("throw $N", combinedErrorVarName)
+            .endControlFlow()
+            .endControlFlow();
+    }
+
+    private void catchAndPropagateIllegalArgumentError(
+        MethodSpec.Builder builder,
+        String errorVarName,
+        UnaryOperator<MethodSpec.Builder> statementFunc
+    ) {
+        builder.beginControlFlow("try");
+        statementFunc.apply(builder);
+        builder
+            .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
+            .addStatement("$N.add(e)", errorVarName)
+            .endControlFlow();
+    }
+
+    private void catchValidationError(
+        MethodSpec.Builder builder,
+        String errorVarName,
+        UnaryOperator<MethodSpec.Builder> statementFunc
+    ) {
+        builder.beginControlFlow("try");
+        statementFunc.apply(builder);
+        builder
+            .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
+            .addStatement("$N.add(e)", errorVarName)
+            // should only throw NPE if previously an error occured on the field it valides on (field is null then)
+            .nextControlFlow("catch ($T e)", NullPointerException.class)
+            .endControlFlow();
     }
 
     private Optional<MethodSpec> defineFactory(
@@ -259,7 +338,8 @@ final class GenerateConfiguration {
 
     private void addConfigGetterToConstructor(
         MethodSpec.Builder constructor,
-        MemberDefinition definition
+        MemberDefinition definition,
+        String errorsVarName
     ) {
         CodeBlock.Builder code = CodeBlock.builder().add(
             "$N.$L$L($S",
@@ -322,13 +402,19 @@ final class GenerateConfiguration {
             );
         }
 
-        constructor.addStatement("this.$N = $L", definition.fieldName(), codeBlock);
+        CodeBlock finalCodeBlock = codeBlock;
+        catchAndPropagateIllegalArgumentError(
+            constructor,
+            errorsVarName,
+            (builder) -> builder.addStatement("this.$N = $L", definition.fieldName(), finalCodeBlock)
+        );
     }
 
     private void addParameterToConstructor(
         MethodSpec.Builder constructor,
         MemberDefinition definition,
-        Parameter parameter
+        Parameter parameter,
+        String errorsVarName
     ) {
         TypeName paramType = TypeName.get(definition.parameterType());
 
@@ -353,9 +439,14 @@ final class GenerateConfiguration {
         for (UnaryOperator<CodeBlock> converter : definition.converters()) {
             valueProducer = converter.apply(valueProducer);
         }
-        constructor
-            .addParameter(paramType, definition.fieldName())
-            .addStatement("this.$N = $L", definition.fieldName(), valueProducer);
+
+        CodeBlock finalValueProducer = valueProducer;
+        constructor.addParameter(paramType, definition.fieldName());
+        catchAndPropagateIllegalArgumentError(
+            constructor,
+            errorsVarName,
+            (builder) -> builder.addStatement("this.$N = $L", definition.fieldName(), finalValueProducer)
+        );
     }
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, ConfigParser.Member member) {
