@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -28,29 +27,16 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("BetweennessCentralityConfigImpl")
+@Configuration("BetweennessCentralityStreamConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface BetweennessCentralityConfig extends BaseBetweennessCentralityConfig {
+public interface BetweennessCentralityStreamConfig extends BetweennessCentralityBaseConfig {
 
-    @Value.Default
-    default String strategy() {
-        return "random";
-    }
-
-    @Value.Default
-    default double probability() {
-        // The default is N=nodeCount, log10(N) / e^2
-        // For the purposes of porting this, it is easier to make this calculation at the call site,
-        // where the graph with its node count is already provided.
-        return Double.NaN;
-    }
-
-    static BetweennessCentralityConfig of(
+    static BetweennessCentralityStreamConfig of(
+        String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> implicitCreateConfig,
-        String username,
         CypherMapWrapper config
     ) {
-        return new BetweennessCentralityConfigImpl(graphName, implicitCreateConfig, username, config);
+        return new BetweennessCentralityStreamConfigImpl(graphName, implicitCreateConfig, username, config);
     }
 }

@@ -112,6 +112,8 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.localClusteringCoefficient.write.estimate`
 | `gds.localClusteringCoefficient.mutate`
 | `gds.localClusteringCoefficient.mutate.estimate`
+.8+<.^| <<algorithms-betweenness-centrality-syntax, Betweenness Centrality>>
+| `gds.betweenness.stream`
 |===
 
 [[beta-tier]]
@@ -174,9 +176,6 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<algorithms-articlerank, Article Rank>>
 | `gds.alpha.articleRank.stream`
 | `gds.alpha.articleRank.write`
-.2+<.^|<<algorithms-betweenness-centrality, Betweenness Centrality>>
-| `gds.alpha.betweenness.sampled.stream`
-| `gds.alpha.betweenness.sampled.write`
 |<<algorithms-bfs, Breadth First Search>> | `gds.alpha.bfs.stream`
 .4+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
 | `gds.alpha.closeness.stream`

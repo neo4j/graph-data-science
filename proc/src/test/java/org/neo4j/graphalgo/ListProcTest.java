@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphDeleteRelationshipProc;
 import org.neo4j.graphalgo.catalog.GraphDropProc;
@@ -96,6 +97,8 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.modularityOptimization.stream.estimate",
         "gds.beta.modularityOptimization.write",
         "gds.beta.modularityOptimization.write.estimate",
+
+        "gds.betweenness.stream",
 
         "gds.graph.create",
         "gds.graph.create.cypher",
@@ -198,6 +201,7 @@ class ListProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(
+            BetweennessCentralityStreamProc.class,
             GraphCreateProc.class,
             GraphDropProc.class,
             GraphExistsProc.class,

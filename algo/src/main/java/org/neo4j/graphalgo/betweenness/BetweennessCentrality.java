@@ -39,8 +39,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 public class BetweennessCentrality extends Algorithm<BetweennessCentrality, BetweennessCentrality> {
 
@@ -117,27 +115,8 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
         return this;
     }
 
-    /**
-     * get the centrality array
-     *
-     * @return array with centrality
-     */
     public HugeAtomicDoubleArray getCentrality() {
         return centrality;
-    }
-
-    /**
-     * emit the result stream
-     *
-     * @return stream if Results
-     */
-    public Stream<Result> resultStream() {
-        return LongStream
-            .range(0, nodeCount)
-            .mapToObj(nodeId -> new Result(
-                graph.toOriginalNodeId(nodeId),
-                centrality.get(nodeId)
-            ));
     }
 
     @Override
@@ -145,18 +124,11 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
         return this;
     }
 
-    /**
-     * release inner data structures
-     */
     @Override
     public void release() {
         selectionStrategy = null;
     }
 
-    /**
-     * a BCTask takes one element from the nodeQueue as long as
-     * it is lower then nodeCount and calculates it's centrality
-     */
     private class BCTask implements Runnable {
 
         private final RelationshipIterator localRelationshipIterator;
@@ -265,43 +237,4 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
             targetPredecessors.add(node);
         }
     }
-
-    /**
-     * Consumer interface
-     */
-    public interface ResultConsumer {
-        /**
-         * consume nodeId and centrality value as long as the consumer returns true
-         *
-         * @param originalNodeId the neo4j node id
-         * @param value          centrality value
-         * @return a bool indicating if the loop should continue(true) or stop(false)
-         */
-        boolean consume(long originalNodeId, double value);
-    }
-
-    /**
-     * Result class used for streaming
-     */
-    public static final class Result {
-
-        // original node id
-        public final long nodeId;
-        // centrality value
-        public final double centrality;
-
-        public Result(long nodeId, double centrality) {
-            this.nodeId = nodeId;
-            this.centrality = centrality;
-        }
-
-        @Override
-        public String toString() {
-            return "Result{" +
-                   "nodeId=" + nodeId +
-                   ", centrality=" + centrality +
-                   '}';
-        }
-    }
-
 }

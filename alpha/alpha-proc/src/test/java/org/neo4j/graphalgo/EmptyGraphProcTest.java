@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
-import org.neo4j.graphalgo.centrality.BetweennessCentralityProc;
 import org.neo4j.graphalgo.scc.SccProc;
 import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.graphalgo.shortestpaths.AllShortestPathsProc;
@@ -47,7 +46,6 @@ class EmptyGraphProcTest extends BaseProcTest {
             HarmonicCentralityProc.class,
             KSpanningTreeProc.class,
             SpanningTreeProc.class,
-            BetweennessCentralityProc.class,
             ShortestPathDeltaSteppingProc.class,
             ShortestPathAStarProc.class,
             ShortestPathsProc.class,
@@ -87,29 +85,6 @@ class EmptyGraphProcTest extends BaseProcTest {
             .streamMode()
             .yields();
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
-    }
-
-    @Test
-    void testSampledBetweennessCentralityStream() {
-        String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .algo("gds.alpha.betweenness.sampled")
-            .streamMode()
-            .yields();
-        boolean hasNext = runQuery(query, Result::hasNext);
-        assertFalse(hasNext);
-    }
-
-    @Test
-    void testSampledBetweennessCentrality() {
-        String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .algo("gds.alpha.betweenness.sampled")
-            .writeMode()
-            .yields("nodes");
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("nodes")));
     }
 
     @Test

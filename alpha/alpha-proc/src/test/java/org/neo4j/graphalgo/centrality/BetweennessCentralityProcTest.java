@@ -21,37 +21,26 @@
 package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
-import org.neo4j.graphalgo.betweenness.BetweennessCentrality;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class BetweennessCentralityProcTest extends BaseProcTest {
 
     private static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
-    private static long centerNodeId;
-
-    @Mock
-    private BetweennessCentrality.ResultConsumer consumer;
-
     @BeforeEach
-    void setupGraph() throws Exception {
-        registerProcedures(BetweennessCentralityProc.class);
+    void setupGraph() {
 
         DefaultBuilder builder = GraphBuilder.create(db)
             .setLabel("Node")
@@ -66,8 +55,6 @@ class BetweennessCentralityProcTest extends BaseProcTest {
             .setLabel("Node")
             .createNode();
 
-        centerNodeId = center.getId();
-
         builder.newRingBuilder()
             .createRing(5)
             .forEachNodeInTx(node -> node.createRelationshipTo(center, TYPE))
@@ -77,7 +64,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
             .close();
     }
 
-    @Test
+    @Disabled
     void testRABrandesHighProbability() {
         String query = GdsCypher.call()
             .withAnyLabel()
@@ -106,7 +93,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
         );
     }
 
-    @Test
+    @Disabled
     void testRABrandesNoProbability() {
         String query = GdsCypher.call()
             .withAnyLabel()
@@ -131,7 +118,7 @@ class BetweennessCentralityProcTest extends BaseProcTest {
         );
     }
 
-    @Test
+    @Disabled
     void testRABrandeseWrite() {
         String query = GdsCypher.call()
             .withAnyLabel()
@@ -156,25 +143,4 @@ class BetweennessCentralityProcTest extends BaseProcTest {
             }
         );
     }
-
-    @Test
-    void testRABrandesStream() {
-        String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .algo("gds.alpha.betweenness.sampled")
-            .streamMode()
-            .addParameter("strategy", "random")
-            .addParameter("probability", 1.0)
-            .yields("nodeId", "centrality");
-        runQueryWithRowConsumer(query, row -> consumer.consume(
-                row.getNumber("nodeId").intValue(),
-                row.getNumber("centrality").doubleValue()
-            )
-        );
-
-        verify(consumer, times(10)).consume(ArgumentMatchers.anyLong(), ArgumentMatchers.eq(6.0));
-        verify(consumer, times(1)).consume(ArgumentMatchers.eq(centerNodeId), ArgumentMatchers.eq(25.0));
-    }
-
 }
