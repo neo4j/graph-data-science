@@ -26,8 +26,10 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 
 final class BetweennessCentralityProc {
@@ -94,32 +96,45 @@ final class BetweennessCentralityProc {
 
     static <PROC_RESULT, CONFIG extends BetweennessCentralityBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         BetweennessCentralityResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<BetweennessCentrality, BetweennessCentrality, CONFIG> computeResult
+        AlgoBaseProc.ComputationResult<BetweennessCentrality, BetweennessCentrality, CONFIG> computeResult,
+        ProcedureCallContext callContext
     ) {
         var result = computeResult.result();
-        if (result != null) {
-            var centrality = result.getCentrality();
 
-            double min = Double.MAX_VALUE;
-            double max = Double.MIN_VALUE;
-            double sum = 0.0;
-            for (long i = centrality.size() - 1; i >= 0; i--) {
-                double c = centrality.get(i);
-                if (c < min) {
-                    min = c;
-                }
-                if (c > max) {
-                    max = c;
-                }
-                sum += c;
-            }
+        var computeStatistics = callContext.outputFields().anyMatch(f ->
+            f.equalsIgnoreCase("minCentrality") ||
+            f.equalsIgnoreCase("maxCentrality") ||
+            f.equalsIgnoreCase("sumCentrality")
+        );
 
-            procResultBuilder
-                .minCentrality(min)
-                .maxCentrality(max)
-                .sumCentrality(sum);
+        if (result != null && computeStatistics) {
+            procResultBuilder = computeStatistics(procResultBuilder, result.getCentrality());
         }
+
         return procResultBuilder;
+    }
+
+    private static <PROC_RESULT> BetweennessCentralityResultBuilder<PROC_RESULT> computeStatistics(
+        BetweennessCentralityResultBuilder<PROC_RESULT> procResultBuilder,
+        HugeAtomicDoubleArray result
+    ) {
+        double min = Double.MAX_VALUE;
+        double max = Double.MIN_VALUE;
+        double sum = 0.0;
+        for (long i = 0; i < result.size(); i++) {
+            double c = result.get(i);
+            if (c < min) {
+                min = c;
+            }
+            if (c > max) {
+                max = c;
+            }
+            sum += c;
+        }
+        return procResultBuilder
+            .minCentrality(min)
+            .maxCentrality(max)
+            .sumCentrality(sum);
     }
 
     abstract static class BetweennessCentralityResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {

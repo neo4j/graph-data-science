@@ -71,7 +71,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityWriteConfig> computeResult) {
-        return BetweennessCentralityProc.resultBuilder(new WriteResult.Builder(), computeResult);
+        return BetweennessCentralityProc.resultBuilder(new WriteResult.Builder(), computeResult, callContext);
     }
 
     public static final class WriteResult {
