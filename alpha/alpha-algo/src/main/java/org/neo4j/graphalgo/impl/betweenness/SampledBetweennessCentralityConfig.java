@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.impl.betweenness;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -35,11 +35,6 @@ public interface SampledBetweennessCentralityConfig extends BaseBetweennessCentr
     @Value.Default
     default String strategy() {
         return "random";
-    }
-
-    @Value.Default
-    default int maxDepth() {
-        return Integer.MAX_VALUE;
     }
 
     @Value.Default

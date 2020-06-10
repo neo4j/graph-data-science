@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.BitMixer;
-import com.carrotsearch.hppc.cursors.LongLongCursor;
+import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -28,24 +28,20 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- * map with {@code long=>long} mapping and huge underlying storage, so it can
- * store more than 2B values
- */
-public final class HugeLongLongMap implements Iterable<LongLongCursor> {
+public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
 
     private static final MemoryEstimation MEMORY_REQUIREMENTS = MemoryEstimations
-            .builder(HugeLongLongMap.class)
-            .field("keysCursor", HugeCursor.class)
-            .field("entries", EntryIterator.class)
-            .perNode("keys", HugeLongArray::memoryEstimation)
-            .perNode("values", HugeLongArray::memoryEstimation)
-            .build();
+        .builder(HugeLongDoubleMap.class)
+        .field("keysCursor", HugeCursor.class)
+        .field("entries", EntryIterator.class)
+        .perNode("keys", HugeLongArray::memoryEstimation)
+        .perNode("values", HugeDoubleArray::memoryEstimation)
+        .build();
 
     private final AllocationTracker tracker;
 
     private HugeLongArray keys;
-    private HugeLongArray values;
+    private HugeDoubleArray values;
     private HugeCursor<long[]> keysCursor;
     private EntryIterator entries;
 
@@ -63,14 +59,14 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     /**
      * New instance with sane defaults.
      */
-    public HugeLongLongMap(AllocationTracker tracker) {
+    public HugeLongDoubleMap(AllocationTracker tracker) {
         this(DEFAULT_EXPECTED_ELEMENTS, tracker);
     }
 
     /**
      * New instance with sane defaults.
      */
-    public HugeLongLongMap(long expectedElements, AllocationTracker tracker) {
+    public HugeLongDoubleMap(long expectedElements, AllocationTracker tracker) {
         this.tracker = tracker;
         initialBuffers(expectedElements);
     }
@@ -79,15 +75,15 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         return keys.sizeOf() + values.sizeOf();
     }
 
-    public void addTo(long key, long value) {
+    public void addTo(long key, double value) {
         addTo0(1L + key, value);
     }
 
-    public long getOrDefault(long key, long defaultValue) {
+    public double getOrDefault(long key, double defaultValue) {
         return getOrDefault0(1L + key, defaultValue);
     }
 
-    private void addTo0(long key, long value) {
+    private void addTo0(long key, double value) {
         assert assigned < mask + 1L;
         final long hash = BitMixer.mixPhi(key);
         long slot = findSlot(key, hash & mask);
@@ -108,7 +104,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         assigned++;
     }
 
-    private long getOrDefault0(long key, long defaultValue) {
+    private double getOrDefault0(long key, double defaultValue) {
         final long hash = BitMixer.mixPhi(key);
         long slot = findSlot(key, hash & mask);
         if (slot >= 0L) {
@@ -119,8 +115,9 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     }
 
     private long findSlot(
-            long key,
-            long start) {
+        long key,
+        long start
+    ) {
         HugeLongArray keys = this.keys;
         HugeCursor<long[]> cursor = this.keysCursor;
         long slot = findSlot(key, start, keys.size(), keys, cursor);
@@ -131,11 +128,12 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     }
 
     private long findSlot(
-            long key,
-            long start,
-            long end,
-            HugeLongArray keys,
-            HugeCursor<long[]> cursor) {
+        long key,
+        long start,
+        long end,
+        HugeLongArray keys,
+        HugeCursor<long[]> cursor
+    ) {
 
         long slot = start;
         int blockPos, blockEnd;
@@ -193,7 +191,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     }
 
     @Override
-    public Iterator<LongLongCursor> iterator() {
+    public Iterator<LongDoubleCursor> iterator() {
         return entries.reset();
     }
 
@@ -205,12 +203,12 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         final StringBuilder buffer = new StringBuilder();
         buffer.append('[');
 
-        for (LongLongCursor cursor : this) {
+        for (LongDoubleCursor cursor : this) {
             buffer
-                    .append(cursor.key)
-                    .append("=>")
-                    .append(cursor.value)
-                    .append(", ");
+                .append(cursor.key)
+                .append("=>")
+                .append(cursor.value)
+                .append(", ");
         }
 
         if (buffer.length() > 1) {
@@ -232,10 +230,10 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
 
         // Ensure no change is done if we hit an OOM.
         HugeLongArray prevKeys = this.keys;
-        HugeLongArray prevValues = this.values;
+        HugeDoubleArray prevValues = this.values;
         try {
             this.keys = HugeLongArray.newArray(arraySize, tracker);
-            this.values = HugeLongArray.newArray(arraySize, tracker);
+            this.values = HugeDoubleArray.newArray(arraySize, tracker);
             keysCursor = keys.newCursor();
             entries = new EntryIterator();
         } catch (OutOfMemoryError e) {
@@ -251,19 +249,17 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     /**
      * Rehash from old buffers to new buffers.
      */
-    private void rehash(
-            HugeLongArray fromKeys,
-            HugeLongArray fromValues) {
+    private void rehash(HugeLongArray fromKeys, HugeDoubleArray fromValues) {
         assert fromKeys.size() == fromValues.size() &&
-                BitUtil.isPowerOfTwo(fromValues.size());
+               BitUtil.isPowerOfTwo(fromValues.size());
 
         // Rehash all stored key/value pairs into the new buffers.
         final HugeLongArray newKeys = this.keys;
-        final HugeLongArray newValues = this.values;
+        final HugeDoubleArray newValues = this.values;
         final long mask = this.mask;
 
         try (EntryIterator fromEntries = new EntryIterator(fromKeys, fromValues)) {
-            for (LongLongCursor cursor : fromEntries) {
+            for (LongDoubleCursor cursor : fromEntries) {
                 long key = cursor.key + 1L;
                 long slot = BitMixer.mixPhi(key) & mask;
                 slot = findSlot(key, slot);
@@ -283,12 +279,12 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
      * with rehashing so we assign the pending element to the previous buffer
      * and rehash all keys, substituting new buffers at the end.
      */
-    private void allocateThenInsertThenRehash(long slot, long pendingKey, long pendingValue) {
+    private void allocateThenInsertThenRehash(long slot, long pendingKey, double pendingValue) {
         assert assigned == resizeAt;
 
         // Try to allocate new buffers first. If we OOM, we leave in a consistent state.
         final HugeLongArray prevKeys = this.keys;
-        final HugeLongArray prevValues = this.values;
+        final HugeDoubleArray prevValues = this.values;
         allocateBuffers(nextBufferSize(mask + 1), tracker);
         assert this.keys.size() > prevKeys.size();
 
@@ -312,7 +308,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     private static long minBufferSize(long elements) {
         if (elements < 0L) {
             throw new IllegalArgumentException(
-                    "Number of elements must be >= 0: " + elements);
+                "Number of elements must be >= 0: " + elements);
         }
 
         long length = (long) Math.ceil((double) elements / LOAD_FACTOR);
@@ -333,30 +329,31 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         return Math.min(arraySize, (long) Math.ceil(arraySize * LOAD_FACTOR));
     }
 
-    private final class EntryIterator implements AutoCloseable, Iterable<LongLongCursor>, Iterator<LongLongCursor>  {
+    private final class EntryIterator implements AutoCloseable, Iterable<LongDoubleCursor>, Iterator<LongDoubleCursor> {
         private HugeCursor<long[]> keyCursor;
-        private HugeCursor<long[]> valueCursor;
+        private HugeCursor<double[]> valueCursor;
         private boolean nextFetched = false;
         private boolean hasNext = false;
-        private LongLongCursor cursor;
+        private LongDoubleCursor cursor;
         private int pos = 0, end = 0;
-        private long[] ks, vs;
+        private long[] ks;
+        private double[] vs;
 
         EntryIterator() {
             this(keys, values);
         }
 
-        EntryIterator(HugeLongArray keys, HugeLongArray values) {
+        EntryIterator(HugeLongArray keys, HugeDoubleArray values) {
             keyCursor = keys.initCursor(keys.newCursor());
             valueCursor = values.initCursor(values.newCursor());
-            cursor = new LongLongCursor();
+            cursor = new LongDoubleCursor();
         }
 
         EntryIterator reset() {
             return reset(keys, values);
         }
 
-        EntryIterator reset(HugeLongArray keys, HugeLongArray values) {
+        EntryIterator reset(HugeLongArray keys, HugeDoubleArray values) {
             keyCursor = keys.initCursor(keyCursor);
             valueCursor = values.initCursor(valueCursor);
             pos = 0;
@@ -376,7 +373,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         }
 
         @Override
-        public LongLongCursor next() {
+        public LongDoubleCursor next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
@@ -406,8 +403,9 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         }
 
         private boolean nextPage(
-                final HugeCursor<long[]> keys,
-                final HugeCursor<long[]> values) {
+            final HugeCursor<long[]> keys,
+            final HugeCursor<double[]> values
+        ) {
             boolean valuesHasNext = values.next();
             if (!keys.next()) {
                 assert !valuesHasNext;
@@ -425,7 +423,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         }
 
         @Override
-        public Iterator<LongLongCursor> iterator() {
+        public Iterator<LongDoubleCursor> iterator() {
             return this;
         }
 

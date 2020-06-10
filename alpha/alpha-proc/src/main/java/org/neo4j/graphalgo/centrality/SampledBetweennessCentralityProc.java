@@ -23,12 +23,13 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
@@ -36,7 +37,6 @@ import org.neo4j.graphalgo.impl.betweenness.RABrandesBetweennessCentrality;
 import org.neo4j.graphalgo.impl.betweenness.RandomDegreeSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.RandomSelectionStrategy;
 import org.neo4j.graphalgo.impl.betweenness.SampledBetweennessCentralityConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -104,12 +104,12 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
         graph.release();
 
         try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
-            AtomicDoubleArray centrality = algo.getCentrality();
+            HugeAtomicDoubleArray centrality = algo.getCentrality();
             NodePropertyExporter.builder(api, graph, algo.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build()
-                .write(config.writeProperty(), centrality, Translators.ATOMIC_DOUBLE_ARRAY_TRANSLATOR);
+                .write(config.writeProperty(), centrality, Translators.HUGE_ATOMIC_DOUBLE_ARRAY_TRANSLATOR);
         }
         algo.release();
         return Stream.of(builder.build());
@@ -117,12 +117,12 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
 
     private void computeStats(
         BetweennessCentralityProc.BetweennessCentralityProcResult.Builder builder,
-        AtomicDoubleArray centrality
+        HugeAtomicDoubleArray centrality
     ) {
         double min = Double.MAX_VALUE;
         double max = Double.MIN_VALUE;
         double sum = 0.0;
-        for (int i = centrality.length() - 1; i >= 0; i--) {
+        for (long i = centrality.size() - 1; i >= 0; i--) {
             double c = centrality.get(i);
             if (c < min) {
                 min = c;
@@ -159,7 +159,7 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
     protected AlgorithmFactory<RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig> algorithmFactory(
         SampledBetweennessCentralityConfig config
     ) {
-        return new AlphaAlgorithmFactory<RABrandesBetweennessCentrality, SampledBetweennessCentralityConfig>() {
+        return new AlphaAlgorithmFactory<>() {
             @Override
             public RABrandesBetweennessCentrality buildAlphaAlgo(
                 Graph graph,
@@ -169,13 +169,13 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
             ) {
                 return new RABrandesBetweennessCentrality(
                     graph,
+                    strategy(configuration, graph, tracker),
+                    configuration.undirected(),
                     Pools.DEFAULT,
                     configuration.concurrency(),
-                    strategy(configuration, graph),
-                    configuration.undirected()
+                    tracker
                 )
-                    .withTerminationFlag(TerminationFlag.wrap(transaction))
-                    .withMaxDepth(configuration.maxDepth());
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
             }
         };
 
@@ -183,24 +183,24 @@ public class SampledBetweennessCentralityProc extends AlgoBaseProc<RABrandesBetw
 
     private RABrandesBetweennessCentrality.SelectionStrategy strategy(
         SampledBetweennessCentralityConfig configuration,
-        Graph graph
+        Graph graph,
+        AllocationTracker tracker
     ) {
         switch (configuration.strategy()) {
             case "degree":
                 return new RandomDegreeSelectionStrategy(
                     graph,
+                    0.0,
                     Pools.DEFAULT,
-                    configuration.concurrency()
+                    configuration.concurrency(),
+                    tracker
                 );
             case "random":
                 double probability = configuration.probability();
                 if (Double.isNaN(probability)) {
                     probability = Math.log10(graph.nodeCount()) / Math.exp(2);
                 }
-                return new RandomSelectionStrategy(
-                    graph,
-                    probability
-                );
+                return new RandomSelectionStrategy(graph, probability, tracker);
             default:
                 throw new IllegalArgumentException("Unknown selection strategy: " + configuration.strategy());
         }

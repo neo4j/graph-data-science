@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.impl.betweenness;
 
-import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedSimpleBitSet;
 
 import java.security.SecureRandom;
 import java.util.concurrent.ExecutorService;
@@ -33,40 +33,50 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RandomDegreeSelectionStrategy implements RABrandesBetweennessCentrality.SelectionStrategy {
 
-    private final Degrees degrees;
     private final double maxDegree;
-    private final SimpleBitSet bitSet;
-    private final int size;
+    // TODO: benchmark and potentially replace with hppc BitSet
+    private final PagedSimpleBitSet bitSet;
+    private final long size;
 
-    public RandomDegreeSelectionStrategy(Graph graph, ExecutorService pool, int concurrency) {
-        this.degrees = graph;
-        bitSet = new SimpleBitSet(Math.toIntExact(graph.nodeCount()));
+    public RandomDegreeSelectionStrategy(
+        Graph graph,
+        double probabilityOffset,
+        ExecutorService executorService,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
+        this.bitSet = PagedSimpleBitSet.newBitSet(graph.nodeCount(), tracker);
+        this.maxDegree = getMaxDegree(graph, executorService, concurrency);
+
         SecureRandom random = new SecureRandom();
+        ParallelUtil.iterateParallel(executorService, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
+            if (random.nextDouble() - probabilityOffset <= graph.degree(node) / maxDegree) {
+                bitSet.put(node);
+            }
+        });
+
+        this.size = bitSet.size();
+    }
+
+    @Override
+    public boolean select(long nodeId) {
+        return bitSet.contains(nodeId);
+    }
+
+    @Override
+    public long size() {
+        return size;
+    }
+
+    private long getMaxDegree(Graph graph, ExecutorService pool, int concurrency) {
         AtomicInteger mx = new AtomicInteger(0);
         ParallelUtil.iterateParallel(pool, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
-            int degree = degrees.degree(node);
+            int degree = graph.degree(node);
             int current;
             do {
                 current = mx.get();
             } while (degree > current && !mx.compareAndSet(current, degree));
         });
-        maxDegree = mx.get();
-        ParallelUtil.iterateParallel(pool, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
-            if (random.nextDouble() <= degrees.degree(node) / maxDegree) {
-                bitSet.put(node);
-            }
-        });
-        size = bitSet.size();
+        return mx.get();
     }
-
-    @Override
-    public boolean select(int nodeId) {
-        return bitSet.contains(nodeId);
-    }
-
-    @Override
-    public int size() {
-        return size;
-    }
-
 }
