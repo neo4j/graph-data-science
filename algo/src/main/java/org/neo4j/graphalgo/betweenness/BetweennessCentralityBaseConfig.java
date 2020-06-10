@@ -20,13 +20,15 @@
 package org.neo4j.graphalgo.betweenness;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
 public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig {
 
     @Value.Default
-    default String strategy() {
-        return "random";
+    @Configuration.ConvertWith("org.neo4j.graphalgo.betweenness.SelectionStrategy.Strategy#parse")
+    default SelectionStrategy.Strategy strategy() {
+        return SelectionStrategy.Strategy.RANDOM;
     }
 
     @Value.Default

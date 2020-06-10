@@ -60,26 +60,26 @@ final class BetweennessCentralityProc {
         };
     }
 
-    private static BetweennessCentrality.SelectionStrategy strategy(
+    private static SelectionStrategy strategy(
         BetweennessCentralityBaseConfig configuration,
         Graph graph,
         AllocationTracker tracker
     ) {
+        double probability = configuration.probability();
+        if (Double.isNaN(probability)) {
+            probability = Math.log10(graph.nodeCount()) / Math.exp(2);
+        }
         switch (configuration.strategy()) {
-            case "degree":
-                return new RandomDegreeSelectionStrategy(
+            case RANDOM_DEGREE:
+                return new SelectionStrategy.RandomDegreeSelectionStrategy(
                     graph,
-                    0.0,
+                    probability,
                     Pools.DEFAULT,
                     configuration.concurrency(),
                     tracker
                 );
-            case "random":
-                double probability = configuration.probability();
-                if (Double.isNaN(probability)) {
-                    probability = Math.log10(graph.nodeCount()) / Math.exp(2);
-                }
-                return new RandomSelectionStrategy(graph, probability, tracker);
+            case RANDOM:
+                return new SelectionStrategy.RandomSelectionStrategy(graph, probability, tracker);
             default:
                 throw new IllegalArgumentException("Unknown selection strategy: " + configuration.strategy());
         }

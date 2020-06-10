@@ -42,20 +42,6 @@ import java.util.function.Consumer;
 
 public class BetweennessCentrality extends Algorithm<BetweennessCentrality, BetweennessCentrality> {
 
-    public interface SelectionStrategy {
-
-        /**
-         * node id filter
-         * @return true if the nodes is accepted, false otherwise
-         */
-        boolean select(long nodeId);
-
-        /**
-         * count of selectable nodes
-         */
-        long size();
-    }
-
     private final Graph graph;
     private volatile AtomicLong nodeQueue = new AtomicLong();
     private HugeAtomicDoubleArray centrality;
