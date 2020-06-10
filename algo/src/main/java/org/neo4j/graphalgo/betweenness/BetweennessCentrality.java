@@ -61,7 +61,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
     private HugeAtomicDoubleArray centrality;
     private final long nodeCount;
     private final long expectedNodeCount;
-    private final double directionFactor;
     private SelectionStrategy selectionStrategy;
 
     private final ExecutorService executorService;
@@ -75,17 +74,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
         int concurrency,
         AllocationTracker tracker
     ) {
-        this(graph, selectionStrategy, false, executorService, concurrency, tracker);
-    }
-
-    public BetweennessCentrality(
-        Graph graph,
-        SelectionStrategy selectionStrategy,
-        boolean undirected,
-        ExecutorService executorService,
-        int concurrency,
-        AllocationTracker tracker
-    ) {
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;
@@ -93,9 +81,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
         this.centrality = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
         this.selectionStrategy = selectionStrategy;
         this.expectedNodeCount = selectionStrategy.size();
-        this.directionFactor = undirected
-            ? (nodeCount * 2.0) / selectionStrategy.size()
-            : (nodeCount * 1.0) / selectionStrategy.size();
         this.tracker = tracker;
     }
 
@@ -221,7 +206,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Betw
                     }
                     if (node != startNodeId) {
                         // TODO: replace with + (creates 2! objects per call due to reference to outer scopes)
-                        centrality.update(node, (value) -> value + directionFactor * dependencyNode);
+                        centrality.update(node, (value) -> value + dependencyNode);
                     }
                 }
             }

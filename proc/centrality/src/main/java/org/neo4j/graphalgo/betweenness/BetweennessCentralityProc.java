@@ -43,7 +43,6 @@ final class BetweennessCentralityProc {
                 return new BetweennessCentrality(
                     graph,
                     strategy(configuration, graph, tracker),
-                    false,
                     Pools.DEFAULT,
                     config.concurrency(),
                     tracker
