@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.pagecached;
 
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.core.loading.MutableIntValue;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -29,6 +30,8 @@ import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
+import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 
 public final class AdjacencyList {
 
@@ -148,9 +151,9 @@ public final class AdjacencyList {
 
     // Cursors
 
-//    Cursor cursor(long offset) {
-//        return new Cursor(pages).init(offset);
-//    }
+    Cursor cursor(long offset) {
+        return new Cursor(pages).init(offset);
+    }
 
 //    /**
 //     * Returns a new, uninitialized delta cursor. Call {@link DecompressingCursor#init(long)}.
@@ -173,52 +176,52 @@ public final class AdjacencyList {
 //        return reuse.init(offset);
 //    }
 
-//    public static final class Cursor extends MutableIntValue {
-//
-//        static final Cursor EMPTY = new Cursor(new byte[0][]);
-//
-//        // TODO: free
-//        private final byte[][] pages;
-//
-//        private byte[] currentPage;
-//        private int degree;
-//        private int offset;
-//        private int limit;
-//
-//        private Cursor(byte[][] pages) {
-//            this.pages = pages;
-//        }
-//
-//        public int length() {
-//            return degree;
-//        }
-//
-//        /**
-//         * Return true iff there is at least one more target to decode.
-//         */
-//        boolean hasNextLong() {
-//            return offset < limit;
-//        }
-//
-//        /**
-//         * Read the next target id.
-//         * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
-//         */
-//        long nextLong() {
-//            long value = AdjacencyDecompressingReader.readLong(currentPage, offset);
-//            offset += Long.BYTES;
-//            return value;
-//        }
-//
-//        Cursor init(long fromIndex) {
-//            this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
-//            this.offset = indexInPage(fromIndex, PAGE_MASK);
-//            this.degree = AdjacencyDecompressingReader.readInt(currentPage, offset);
-//            this.offset += Integer.BYTES;
-//            this.limit = offset + degree * Long.BYTES;
-//            return this;
-//        }
-//    }
+    public static final class Cursor extends MutableIntValue {
+
+        static final Cursor EMPTY = new Cursor(new byte[0][]);
+
+        // TODO: free
+        private final byte[][] pages;
+
+        private byte[] currentPage;
+        private int degree;
+        private int offset;
+        private int limit;
+
+        private Cursor(byte[][] pages) {
+            this.pages = pages;
+        }
+
+        public int length() {
+            return degree;
+        }
+
+        /**
+         * Return true iff there is at least one more target to decode.
+         */
+        boolean hasNextLong() {
+            return offset < limit;
+        }
+
+        /**
+         * Read the next target id.
+         * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
+         */
+        long nextLong() {
+            long value = AdjacencyDecompressingReader.readLong(currentPage, offset);
+            offset += Long.BYTES;
+            return value;
+        }
+
+        Cursor init(long fromIndex) {
+            this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
+            this.offset = indexInPage(fromIndex, PAGE_MASK);
+            this.degree = AdjacencyDecompressingReader.readInt(currentPage, offset);
+            this.offset += Integer.BYTES;
+            this.limit = offset + degree * Long.BYTES;
+            return this;
+        }
+    }
 
 //    public static final class DecompressingCursor extends MutableIntValue {
 //

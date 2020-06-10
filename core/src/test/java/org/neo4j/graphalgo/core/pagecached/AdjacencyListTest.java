@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PagedFile;
@@ -42,6 +43,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 @DbmsExtension(configurationCallback = "configuration")
@@ -66,6 +68,24 @@ class AdjacencyListTest {
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
 //        builder.noOpSystemGraphInitializer();
         builder.addExtension(new ConcurrencyControllerExtension());
+    }
+
+    @Test
+    void writeAdjacencyList() {
+        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(AllocationTracker.EMPTY);
+        AdjacencyListBuilder.Allocator allocator = adjacencyListBuilder.newAllocator();
+        allocator.prepare();
+        int length = 20;
+        long offset = allocator.allocate(length);
+        allocator.putInt(2);
+        allocator.putLong(1);
+        allocator.putLong(42);
+
+        AdjacencyList adjacencyList = adjacencyListBuilder.build();
+        AdjacencyList.Cursor cursor = adjacencyList.cursor(offset);
+        assertEquals(2, cursor.length());
+        assertEquals(1, cursor.nextLong());
+        assertEquals(42, cursor.nextLong());
     }
 
     @Test
