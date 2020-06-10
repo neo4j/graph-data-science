@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -26,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 
 final class BetweennessCentralityProc {
@@ -87,6 +89,60 @@ final class BetweennessCentralityProc {
         @Override
         public double toDouble(BetweennessCentrality pageRank, long nodeId) {
             return pageRank.getCentrality().get((int) nodeId);
+        }
+    }
+
+    static <PROC_RESULT, CONFIG extends BetweennessCentralityBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
+        BetweennessCentralityResultBuilder<PROC_RESULT> procResultBuilder,
+        AlgoBaseProc.ComputationResult<BetweennessCentrality, BetweennessCentrality, CONFIG> computeResult
+    ) {
+        var result = computeResult.result();
+        if (result != null) {
+            var centrality = result.getCentrality();
+
+            double min = Double.MAX_VALUE;
+            double max = Double.MIN_VALUE;
+            double sum = 0.0;
+            for (long i = centrality.size() - 1; i >= 0; i--) {
+                double c = centrality.get(i);
+                if (c < min) {
+                    min = c;
+                }
+                if (c > max) {
+                    max = c;
+                }
+                sum += c;
+            }
+
+            procResultBuilder
+                .minCentrality(min)
+                .maxCentrality(max)
+                .sumCentrality(sum);
+        }
+        return procResultBuilder;
+    }
+
+    abstract static class BetweennessCentralityResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
+
+        double minCentrality = -1;
+
+        double maxCentrality = -1;
+
+        double sumCentrality = -1;
+
+        BetweennessCentralityResultBuilder<PROC_RESULT> minCentrality(double minCentrality) {
+            this.minCentrality = minCentrality;
+            return this;
+        }
+
+        BetweennessCentralityResultBuilder<PROC_RESULT> maxCentrality(double maxCentrality) {
+            this.maxCentrality = maxCentrality;
+            return this;
+        }
+
+        BetweennessCentralityResultBuilder<PROC_RESULT> sumCentrality(double sumCentrality) {
+            this.sumCentrality = sumCentrality;
+            return this;
         }
     }
 }

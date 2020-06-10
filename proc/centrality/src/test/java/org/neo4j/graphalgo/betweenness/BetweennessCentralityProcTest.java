@@ -57,7 +57,8 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
             ", (d)-[:REL]->(e)";
 
         registerProcedures(
-            BetweennessCentralityStreamProc.class
+            BetweennessCentralityStreamProc.class,
+            BetweennessCentralityWriteProc.class
         );
 
         runQuery(cypher);
