@@ -518,32 +518,30 @@ final class NodeSimilarityTest extends AlgoTestBase {
             similarityGraphResult.comparedNodes()
         );
         Graph resultGraph = similarityGraphResult.similarityGraph();
-        // Add results in reverse direction because topK
-        // Add results in reverse direction because topK
         assertGraphEquals(
             orientation == REVERSE
                 ? fromGdl("(a), (b), (c), (d), (e)" +
-                                      ", (f)-[{property: 1.000000D}]->(g)" +
-                                      ", (f)-[{property: 0.500000D}]->(h)" +
-                                      ", (g)-[{property: 0.500000D}]->(h)" +
-                                      // Add results in reverse direction because topK
-                                      ", (g)-[{property: 1.000000D}]->(f)" +
-                                      ", (h)-[{property: 0.500000D}]->(f)" +
-                                      ", (h)-[{property: 0.500000D}]->(g)")
+                          ", (f)-[{property: 1.000000D}]->(g)" +
+                          ", (f)-[{property: 0.500000D}]->(h)" +
+                          ", (g)-[{property: 0.500000D}]->(h)" +
+                          // Add results in reverse direction because topK
+                          ", (g)-[{property: 1.000000D}]->(f)" +
+                          ", (h)-[{property: 0.500000D}]->(f)" +
+                          ", (h)-[{property: 0.500000D}]->(g)")
                 : fromGdl("  (a)-[{property: 0.666667D}]->(b)" +
-                                      ", (a)-[{property: 0.333333D}]->(c)" +
-                                      ", (a)-[{property: 1.000000D}]->(d)" +
-                                      ", (b)-[{property: 0.000000D}]->(c)" +
-                                      ", (b)-[{property: 0.666667D}]->(d)" +
-                                      ", (c)-[{property: 0.333333D}]->(d)" +
-                                      // Add results in reverse direction because topK
-                                      "  (b)-[{property: 0.666667D}]->(a)" +
-                                      ", (c)-[{property: 0.333333D}]->(a)" +
-                                      ", (d)-[{property: 1.000000D}]->(a)" +
-                                      ", (c)-[{property: 0.000000D}]->(b)" +
-                                      ", (d)-[{property: 0.666667D}]->(b)" +
-                                      ", (d)-[{property: 0.333333D}]->(c)" +
-                                      ", (e), (f), (g), (h)"),
+                          ", (a)-[{property: 0.333333D}]->(c)" +
+                          ", (a)-[{property: 1.000000D}]->(d)" +
+                          ", (b)-[{property: 0.000000D}]->(c)" +
+                          ", (b)-[{property: 0.666667D}]->(d)" +
+                          ", (c)-[{property: 0.333333D}]->(d)" +
+                          // Add results in reverse direction because topK
+                          "  (b)-[{property: 0.666667D}]->(a)" +
+                          ", (c)-[{property: 0.333333D}]->(a)" +
+                          ", (d)-[{property: 1.000000D}]->(a)" +
+                          ", (c)-[{property: 0.000000D}]->(b)" +
+                          ", (d)-[{property: 0.666667D}]->(b)" +
+                          ", (d)-[{property: 0.333333D}]->(c)" +
+                          ", (e), (f), (g), (h)"),
             resultGraph
         );
         nodeSimilarity.release();
