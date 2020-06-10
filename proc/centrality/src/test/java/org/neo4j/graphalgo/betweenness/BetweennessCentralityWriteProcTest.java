@@ -43,13 +43,20 @@ class BetweennessCentralityWriteProcTest
 
     @Override
     public BetweennessCentralityWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityWriteConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return BetweennessCentralityWriteConfig.of("",
+            Optional.empty(),
+            Optional.empty(),
+            mapWrapper.withNumber("probability", DEFAULT_PROBABILITY)
+        );
     }
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         if (!mapWrapper.containsKey("writeProperty")) {
-            return mapWrapper.withString("writeProperty", WRITE_PROPERTY);
+            mapWrapper = mapWrapper.withString("writeProperty", WRITE_PROPERTY);
+        }
+        if (!mapWrapper.containsKey("probability")) {
+            mapWrapper = mapWrapper.withNumber("probability", DEFAULT_PROBABILITY);
         }
         return mapWrapper;
     }
@@ -63,7 +70,7 @@ class BetweennessCentralityWriteProcTest
             .algo("betweenness")
             .writeMode()
             .addParameter("writeProperty", WRITE_PROPERTY)
-            .addParameter("concurrency", 1)
+            .addParameter("probability", DEFAULT_PROBABILITY)
             .yields(
                 "nodePropertiesWritten",
                 "createMillis",

@@ -35,7 +35,9 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralityBaseConfig>
     extends BaseProcTest implements AlgoBaseProcTest<BetweennessCentrality, CONFIG, BetweennessCentrality> {
 
-    static Map<Long, Double> expected = new HashMap<>();
+    static double DEFAULT_PROBABILITY = 1.0D;
+
+    static Map<Long, Double> EXPECTED = new HashMap<>();
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -65,11 +67,11 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
 
         runInTransaction(db, tx -> {
             final Label label = Label.label("Node");
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "b").getId(), 3.0);
-            expected.put(tx.findNode(label, "name", "c").getId(), 4.0);
-            expected.put(tx.findNode(label, "name", "d").getId(), 3.0);
-            expected.put(tx.findNode(label, "name", "e").getId(), 0.0);
+            EXPECTED.put(tx.findNode(label, "name", "a").getId(), 0.0);
+            EXPECTED.put(tx.findNode(label, "name", "b").getId(), 3.0);
+            EXPECTED.put(tx.findNode(label, "name", "c").getId(), 4.0);
+            EXPECTED.put(tx.findNode(label, "name", "d").getId(), 3.0);
+            EXPECTED.put(tx.findNode(label, "name", "e").getId(), 0.0);
         });
     }
 
@@ -79,6 +81,11 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
         var centrality2 = result2.getCentrality();
 
         assertEquals(centrality1.size(), centrality2.size());
+
+        for (long nodeId = 0; nodeId < centrality1.size(); nodeId++) {
+            System.out.println("centrality1.get(nodeId) = " + centrality1.get(nodeId));
+            System.out.println("centrality2.get(nodeId) = " + centrality2.get(nodeId));
+        }
 
         for (long nodeId = 0; nodeId < centrality1.size(); nodeId++) {
             assertEquals(result1.getCentrality().get(nodeId), result2.getCentrality().get(nodeId));

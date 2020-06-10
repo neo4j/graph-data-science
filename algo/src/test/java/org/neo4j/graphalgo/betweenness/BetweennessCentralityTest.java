@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -59,23 +59,18 @@ class BetweennessCentralityTest {
     private static final double[] EXACT_CENTRALITIES = {0.0, 3.0, 4.0, 3.0, 0.0};
     private static final double[] EMPTY_CENTRALITIES = {0.0, 0.0, 0.0, 0.0, 0.0};
 
-    @Test
-    void testForceCompleteSampling() {
-        var bc = new BetweennessCentrality(graph, new RandomSelectionStrategy(graph, 1.0, TRACKER), Pools.DEFAULT, 1, TRACKER);
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void testForceCompleteSampling(int concurrency) {
+        var bc = new BetweennessCentrality(graph, new RandomSelectionStrategy(graph, 1.0, TRACKER), Pools.DEFAULT, concurrency, TRACKER);
         assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
     }
 
-    @Test
-    void testForceEmptySampling() {
-        var bc = new BetweennessCentrality(graph, new RandomSelectionStrategy(graph, 0.0, TRACKER), Pools.DEFAULT, 3, TRACKER);
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void testForceEmptySampling(int concurrency) {
+        var bc = new BetweennessCentrality(graph, new RandomSelectionStrategy(graph, 0.0, TRACKER), Pools.DEFAULT, concurrency, TRACKER);
         assertResult(bc.compute().getCentrality(), EMPTY_CENTRALITIES);
-    }
-
-    @Disabled
-    void testSampling() {
-        var bc = new BetweennessCentrality(graph, new RandomSelectionStrategy(graph, 0.3, TRACKER), Pools.DEFAULT, 3, TRACKER
-        );
-        assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
     }
 
     private void assertResult(HugeAtomicDoubleArray result, double[] centralities) {

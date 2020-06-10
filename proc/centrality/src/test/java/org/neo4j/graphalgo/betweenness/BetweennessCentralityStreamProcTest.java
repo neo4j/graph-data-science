@@ -36,7 +36,19 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
 
     @Override
     public BetweennessCentralityStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+        return BetweennessCentralityStreamConfig.of("",
+            Optional.empty(),
+            Optional.empty(),
+            mapWrapper.withNumber("probability", DEFAULT_PROBABILITY)
+        );
+    }
+
+    @Override
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        if (!mapWrapper.containsKey("probability")) {
+            mapWrapper = mapWrapper.withNumber("probability", DEFAULT_PROBABILITY);
+        }
+        return mapWrapper;
     }
 
     @Test
@@ -47,7 +59,7 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
             .algo("gds.betweenness")
             .streamMode()
             .addParameter("strategy", "random")
-            .addParameter("probability", 1.0)
+            .addParameter("probability", DEFAULT_PROBABILITY)
             .yields("nodeId", "centrality");
 
         var actual = new HashMap<Long, Double>();
@@ -56,7 +68,7 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
             row -> actual.put(row.getNumber("nodeId").longValue(), row.getNumber("centrality").doubleValue())
         );
 
-        assertMapEqualsWithTolerance(expected, actual, 1E-1);
+        assertMapEqualsWithTolerance(EXPECTED, actual, 1E-1);
     }
 
 }
