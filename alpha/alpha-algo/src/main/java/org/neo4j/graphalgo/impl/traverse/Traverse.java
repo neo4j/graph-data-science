@@ -122,14 +122,14 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
             final double weight = weights.removeFirst();
             switch (exitPredicate.test(source, node, weight)) {
                 case BREAK:
-                    if(!inResult.getAndSet(node)) {
+                    if (!inResult.getAndSet(node)) {
                         result.add(graph.toOriginalNodeId(node));
                     }
                     break loop;
                 case CONTINUE:
                     continue loop;
                 case FOLLOW:
-                    if(!inResult.getAndSet(node)) {
+                    if (!inResult.getAndSet(node)) {
                         result.add(graph.toOriginalNodeId(node));
                     }
                     break;
