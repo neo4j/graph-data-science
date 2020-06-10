@@ -28,4 +28,12 @@ public final class StringFormatting {
     public static String formatWithLocale(String template, Object... inputs) {
         return String.format(Locale.ENGLISH, template, inputs);
     }
+
+    public static String toLowerCaseWithLocale(String string) {
+        return string.toLowerCase(Locale.ENGLISH);
+    }
+
+    public static String toUpperCaseWithLocale(String string) {
+        return string.toUpperCase(Locale.ENGLISH);
+    }
 }
