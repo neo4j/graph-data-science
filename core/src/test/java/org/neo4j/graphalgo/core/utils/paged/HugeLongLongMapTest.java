@@ -60,19 +60,6 @@ final class HugeLongLongMapTest {
     }
 
     @Test
-    void supportsNullKeys() {
-        HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.EMPTY);
-
-        map.addTo(0L, 1L);
-        long actual = map.getOrDefault(0L, 0L);
-        assertEquals(1L, actual);
-
-        map.addTo(0L, 2L);
-        actual = map.getOrDefault(0L, 0L);
-        assertEquals(3L, actual);
-    }
-
-    @Test
     void addToAddsValues() {
         HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.EMPTY);
         map.addTo(1L, 1L);

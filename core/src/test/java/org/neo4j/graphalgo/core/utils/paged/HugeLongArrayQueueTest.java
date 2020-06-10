@@ -43,7 +43,9 @@ class HugeLongArrayQueueTest {
         var q = HugeLongArrayQueue.newQueue(capacity, AllocationTracker.EMPTY);
         for (int i = 0; i < capacity * 10; i++) {
             q.add(i);
+            assertEquals(1, q.size());
             q.remove();
+            assertEquals(0, q.size());
         }
     }
 
