@@ -89,7 +89,7 @@ final class AdjacencyListBuilder {
 //        return intoIndex;
     }
 
-    private long insertDefaultSizedPage(Allocator into, int numPages) throws IOException {
+    private long insertDefaultSizedPages(Allocator into, int numPages) throws IOException {
         int pageIndex = allocatedPages.getAndAdd(numPages);
         into.setNewPages(pageIndex);
 
@@ -223,6 +223,33 @@ final class AdjacencyListBuilder {
             pageCursor.close();
         }
 
+        long insert(byte[] bytes, int arrayOffset, int length) throws IOException {
+            int maxOffset = pageCursor.getCurrentPageSize() - length;
+
+            // data fits in current page
+            if (maxOffset >= pageCursor.getOffset()) {
+                pageCursor.putBytes(bytes, arrayOffset, length);
+                long address = top;
+                top += length;
+                return address;
+            }
+
+            long address = prefetchAllocate(length);
+            while (length > 0) {
+                int availableSpace = Math.min(length, pageCursor.getCurrentPageSize() - pageCursor.getOffset());
+                pageCursor.putBytes(bytes, arrayOffset, availableSpace);
+                length -= availableSpace;
+                arrayOffset += availableSpace;
+
+                if (length > 0) {
+                    pageCursor.next();
+                }
+            }
+
+            return address;
+        }
+
+
         private long localAllocate(int size, long address) throws IOException {
             int maxOffset = pageCursor.getCurrentPageSize() - size;
             if (maxOffset >= pageCursor.getOffset()) {
@@ -262,7 +289,7 @@ final class AdjacencyListBuilder {
 //        }
 
         private long prefetchAllocate(int size) throws IOException {
-            long address = top = builder.insertDefaultSizedPage(this, (int) ceilDiv(size, builder.pagedFile.pageSize()));
+            long address = top = builder.insertDefaultSizedPages(this, (int) ceilDiv(size, builder.pagedFile.pageSize()));
             top += size;
             return address;
         }
