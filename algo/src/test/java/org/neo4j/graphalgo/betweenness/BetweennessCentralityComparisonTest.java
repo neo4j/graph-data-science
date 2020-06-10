@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.betweenness;
+package org.neo4j.graphalgo.betweenness;
 
 import org.junit.Assert;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -130,8 +130,6 @@ class BetweennessCentralityComparisonTest {
         var executorService = Pools.DEFAULT;
 
         AllocationTracker tracker = AllocationTracker.EMPTY;
-        var msBc = new MSBetweennessCentrality(graph, false, 1, executorService, concurrency, tracker);
-        msBc.compute();
 
         var degreeSampledBC = new BetweennessCentrality(
             graph,
@@ -154,14 +152,7 @@ class BetweennessCentralityComparisonTest {
         for (int i = 0; i < graph.nodeCount(); i++) {
             Assert.assertEquals(
                 String.format(Locale.ENGLISH, "BC vs Degree-Sampled-BC: node %d with wrong BC value", i),
-                msBc.getCentrality().get(i),
                 degreeSampledBC.getCentrality().get(i),
-                1E-3
-            );
-
-            Assert.assertEquals(
-                String.format(Locale.ENGLISH, "BC vs Random-Sampled-BC: node %d with wrong BC value", i),
-                msBc.getCentrality().get(i),
                 randomSampledBC.getCentrality().get(i),
                 1E-3
             );

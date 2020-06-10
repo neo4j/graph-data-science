@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.betweenness;
+package org.neo4j.graphalgo.betweenness;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -77,21 +76,6 @@ class BetweennessCentralityTest {
         var bc = new BetweennessCentrality(graph, new RandomSelectionStrategy(graph, 0.3, TRACKER), Pools.DEFAULT, 3, TRACKER
         );
         assertResult(bc.compute().getCentrality(), EXACT_CENTRALITIES);
-    }
-
-    @Test
-    void testMultiSourceBC() {
-        var bc = new MSBetweennessCentrality(graph, false, 5, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
-        assertResult(bc.compute(), EXACT_CENTRALITIES);
-    }
-
-    private void assertResult(AtomicDoubleArray result, double[] centralities) {
-        assertEquals(5, centralities.length, "Expected 5 centrality values");
-        assertEquals(centralities[0], result.get((int) nodeId.of("a")));
-        assertEquals(centralities[1], result.get((int) nodeId.of("b")));
-        assertEquals(centralities[2], result.get((int) nodeId.of("c")));
-        assertEquals(centralities[3], result.get((int) nodeId.of("d")));
-        assertEquals(centralities[4], result.get((int) nodeId.of("e")));
     }
 
     private void assertResult(HugeAtomicDoubleArray result, double[] centralities) {

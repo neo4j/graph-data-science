@@ -129,11 +129,11 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
         return centrality;
     }
 
-    public Stream<BetweennessCentrality.Result> resultStream() {
+    public Stream<Result> resultStream() {
         return IntStream
             .range(0, nodeCount)
             .mapToObj(nodeId ->
-                new BetweennessCentrality.Result(
+                new Result(
                     graph.toOriginalNodeId(nodeId),
                     centrality.get(nodeId)));
     }
@@ -327,4 +327,29 @@ public class MSBetweennessCentrality extends Algorithm<MSBetweennessCentrality, 
             }
         }
     }
+
+    /**
+     * Result class used for streaming
+     */
+    public static final class Result {
+
+        // original node id
+        public final long nodeId;
+        // centrality value
+        public final double centrality;
+
+        public Result(long nodeId, double centrality) {
+            this.nodeId = nodeId;
+            this.centrality = centrality;
+        }
+
+        @Override
+        public String toString() {
+            return "Result{" +
+                   "nodeId=" + nodeId +
+                   ", centrality=" + centrality +
+                   '}';
+        }
+    }
+
 }

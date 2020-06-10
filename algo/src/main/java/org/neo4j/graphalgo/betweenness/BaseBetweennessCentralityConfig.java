@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.betweenness;
+package org.neo4j.graphalgo.betweenness;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.Orientation;
