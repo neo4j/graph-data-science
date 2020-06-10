@@ -19,246 +19,292 @@
  */
 package org.neo4j.graphalgo.core.pagecached;
 
+import org.eclipse.collections.impl.factory.Sets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PageUtil;
+import org.neo4j.io.pagecache.PageCache;
+import org.neo4j.io.pagecache.PageCursor;
+import org.neo4j.io.pagecache.PagedFile;
+import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import java.util.concurrent.locks.ReentrantLock;
 
-import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_MASK;
-import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_SHIFT;
-import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_SIZE;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArrayElements;
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 final class AdjacencyListBuilder {
 
-    private static final long PAGE_SIZE_IN_BYTES = sizeOfByteArray(PAGE_SIZE);
-    private static final AtomicReferenceFieldUpdater<AdjacencyListBuilder, byte[][]> PAGES_UPDATER =
-        AtomicReferenceFieldUpdater.newUpdater(AdjacencyListBuilder.class, byte[][].class, "pages");
-    private static final int NO_SKIP = -1;
+    private static final AtomicInteger GENERATION = new AtomicInteger(0);
 
+//    private static final long PAGE_SIZE_IN_BYTES = sizeOfByteArray(PAGE_SIZE);
+//    private static final AtomicReferenceFieldUpdater<AdjacencyListBuilder, byte[][]> PAGES_UPDATER =
+//        AtomicReferenceFieldUpdater.newUpdater(AdjacencyListBuilder.class, byte[][].class, "pages");
+//    private static final int NO_SKIP = -1;
+
+    private final PageCache pageCache;
     private final AllocationTracker tracker;
-    private final ReentrantLock growLock;
+
     private final AtomicInteger allocatedPages;
 
-    @SuppressWarnings("FieldMayBeFinal")
-    private volatile byte[][] pages;
+    private final PagedFile pagedFile;
 
-    static AdjacencyListBuilder newBuilder(AllocationTracker tracker) {
-        return new AdjacencyListBuilder(tracker);
+    static AdjacencyListBuilder newBuilder(PageCache pageCache, AllocationTracker tracker) {
+        return new AdjacencyListBuilder(pageCache, tracker);
     }
 
-    private AdjacencyListBuilder(AllocationTracker tracker) {
+    private AdjacencyListBuilder(PageCache pageCache, AllocationTracker tracker) {
+        this.pageCache = pageCache;
         this.tracker = tracker;
-        growLock = new ReentrantLock(true);
-        allocatedPages = new AtomicInteger();
-        pages = new byte[0][];
-        tracker.add(sizeOfObjectArray(0));
+        this.allocatedPages = new AtomicInteger(0);
+        try {
+            pagedFile = pageCache.map(
+                fileName(),
+                PageCache.PAGE_SIZE,
+                Sets.immutable.of(StandardOpenOption.CREATE)
+            );
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     Allocator newAllocator() {
         return new Allocator(this);
     }
 
-    public AdjacencyList build() {
-        return new AdjacencyList(pages);
+    public AdjacencyList build() throws IOException {
+        pagedFile.flushAndForce();
+        return new AdjacencyList(pagedFile);
     }
 
-    private long insertDefaultSizedPage(Allocator into) {
+    private long insertDefaultSizedPage(Allocator into) throws IOException {
         int pageIndex = allocatedPages.getAndIncrement();
-        grow(pageIndex + 1, NO_SKIP);
-        long intoIndex = PageUtil.capacityFor(pageIndex, PAGE_SHIFT);
-        into.setNewPages(pages, intoIndex);
-        return intoIndex;
+        into.setNewPages(pageIndex);
+
+//        grow(pageIndex + 1, NO_SKIP);
+        return ((long) pagedFile.pageSize()) * pageIndex;
+//        PageUtil.capacityFor(pageIndex, PAGE_SHIFT);
+//        into.setNewPages(pages, intoIndex);
+//        return intoIndex;
     }
 
-    private long insertOversizedPage(byte[] page, Allocator into) {
-        int pageIndex = allocatedPages.getAndIncrement();
-        grow(pageIndex + 1, pageIndex);
+    private long insertDefaultSizedPage(Allocator into, int numPages) throws IOException {
+        int pageIndex = allocatedPages.getAndAdd(numPages);
+        into.setNewPages(pageIndex);
 
-        // We already increased `pages` for the oversize page in `grow()`.
-        // We need to insert the new page at the right position and
-        // remove the previously tracked memory. This has to happen
-        // within the grow lock to avoid the `pages` reference to be
-        // overwritten by another thread during `grow()`.
-        growLock.lock();
-        try {
-            tracker.add(sizeOfByteArray(page.length));
-            if (PAGES_UPDATER.get(this)[pageIndex] != null) {
-                tracker.remove(PAGE_SIZE_IN_BYTES);
-            }
-            PAGES_UPDATER.get(this)[pageIndex] = page;
-        } finally {
-            growLock.unlock();
-        }
-        into.insertPage(page);
-
-        return PageUtil.capacityFor(pageIndex, PAGE_SHIFT);
+//        grow(pageIndex + 1, NO_SKIP);
+        return ((long) pagedFile.pageSize()) * pageIndex;
+//        PageUtil.capacityFor(pageIndex, PAGE_SHIFT);
+//        into.setNewPages(pages, intoIndex);
+//        return intoIndex;
     }
+//
+//    private long insertOversizedPage(byte[] page, Allocator into) {
+//        int pageIndex = allocatedPages.getAndIncrement();
+//        grow(pageIndex + 1, pageIndex);
+//
+//        // We already increased `pages` for the oversize page in `grow()`.
+//        // We need to insert the new page at the right position and
+//        // remove the previously tracked memory. This has to happen
+//        // within the grow lock to avoid the `pages` reference to be
+//        // overwritten by another thread during `grow()`.
+//        growLock.lock();
+//        try {
+//            tracker.add(sizeOfByteArray(page.length));
+//            if (PAGES_UPDATER.get(this)[pageIndex] != null) {
+//                tracker.remove(PAGE_SIZE_IN_BYTES);
+//            }
+//            PAGES_UPDATER.get(this)[pageIndex] = page;
+//        } finally {
+//            growLock.unlock();
+//        }
+//        into.insertPage(page);
+//
+//        return PageUtil.capacityFor(pageIndex, PAGE_SHIFT);
+//    }
+//
+//    private void grow(int newNumPages, int skipPage) {
+//        if (capacityLeft(newNumPages)) {
+//            return;
+//        }
+//        growLock.lock();
+//        try {
+//            if (capacityLeft(newNumPages)) {
+//                return;
+//            }
+//            setPages(newNumPages, skipPage);
+//        } finally {
+//            growLock.unlock();
+//        }
+//    }
+//
+//    private boolean capacityLeft(long newNumPages) {
+//        return newNumPages <= PAGES_UPDATER.get(this).length;
+//    }
+//
+//    /**
+//     * Grows and re-assigns the {@code pages} representing the Adjacency List.
+//     *
+//     * This method is not thread-safe.
+//     * Callers need to acquire the {@code growLock} before entering the method.
+//     */
+//    private void setPages(int newNumPages, int skipPage) {
+//        byte[][] currentPages = PAGES_UPDATER.get(this);
+//        tracker.add(sizeOfObjectArrayElements(newNumPages - currentPages.length));
+//
+//        byte[][] newPages = Arrays.copyOf(currentPages, newNumPages);
+//
+//        for (int i = currentPages.length; i < newNumPages; i++) {
+//            // Create new page for default sized pages
+//            if (i != skipPage) {
+//                tracker.add(PAGE_SIZE_IN_BYTES);
+//                newPages[i] = new byte[PAGE_SIZE];
+//            }
+//        }
+//        PAGES_UPDATER.set(this, newPages);
+//    }
 
-    private void grow(int newNumPages, int skipPage) {
-        if (capacityLeft(newNumPages)) {
-            return;
-        }
-        growLock.lock();
-        try {
-            if (capacityLeft(newNumPages)) {
-                return;
-            }
-            setPages(newNumPages, skipPage);
-        } finally {
-            growLock.unlock();
-        }
-    }
-
-    private boolean capacityLeft(long newNumPages) {
-        return newNumPages <= PAGES_UPDATER.get(this).length;
-    }
-
-    /**
-     * Grows and re-assigns the {@code pages} representing the Adjacency List.
-     *
-     * This method is not thread-safe.
-     * Callers need to acquire the {@code growLock} before entering the method.
-     */
-    private void setPages(int newNumPages, int skipPage) {
-        byte[][] currentPages = PAGES_UPDATER.get(this);
-        tracker.add(sizeOfObjectArrayElements(newNumPages - currentPages.length));
-
-        byte[][] newPages = Arrays.copyOf(currentPages, newNumPages);
-
-        for (int i = currentPages.length; i < newNumPages; i++) {
-            // Create new page for default sized pages
-            if (i != skipPage) {
-                tracker.add(PAGE_SIZE_IN_BYTES);
-                newPages[i] = new byte[PAGE_SIZE];
-            }
-        }
-        PAGES_UPDATER.set(this, newPages);
+    private static File fileName() {
+        return new File("gds.adjacency." + GENERATION.getAndIncrement());
     }
 
     static final class Allocator {
 
         private final AdjacencyListBuilder builder;
 
+        private final PageCursor pageCursor;
+
         private long top;
 
-        private byte[][] pages;
-        private int prevOffset;
-        private int toPageIndex;
-        private int currentPageIndex;
+//        private byte[][] pages;
+//        private int prevOffset;
+//        private int toPageIndex;
+//        private int currentPageIndex;
 
-        public byte[] page;
-        public int offset;
+//        public byte[] page;
+//        public int offset;
 
         private Allocator(AdjacencyListBuilder builder) {
             this.builder = builder;
-            prevOffset = -1;
+            try {
+                this.pageCursor = builder.pagedFile.io(
+                    0,
+                    PagedFile.PF_SHARED_WRITE_LOCK,
+                    PageCursorTracer.NULL
+                );
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+//            prevOffset = -1;
         }
 
-        void prepare() {
+        void prepare() throws IOException {
             top = builder.insertDefaultSizedPage(this);
             if (top == 0L) {
                 ++top;
-                ++offset;
+                pageCursor.setOffset(pageCursor.getOffset() + 1);
             }
         }
 
-        long allocate(int size) {
+        long allocate(int size) throws IOException {
             return localAllocate(size, top);
         }
 
         void putInt(int value) {
-            offset = AdjacencyCompression.writeInt(page, offset, value);
+            pageCursor.putInt(value);
         }
 
         void putLong(long value) {
-            offset = AdjacencyCompression.writeLong(page, offset, value);
+            pageCursor.putLong(value);
         }
 
-        private long localAllocate(int size, long address) {
-            int maxOffset = PAGE_SIZE - size;
-            if (maxOffset >= offset) {
-                top += size;
-                return address;
-            }
-            return majorAllocate(size, maxOffset, address);
+        void close() {
+            pageCursor.close();
         }
 
-        private long majorAllocate(int size, int maxOffset, long address) {
-            if (maxOffset < 0) {
-                return oversizingAllocate(size);
-            }
-            if (reset() && maxOffset >= offset) {
-                top += size;
-                return address;
-            }
-            int waste = PAGE_SIZE - offset;
-            address = top += waste;
-            if (next()) {
-                // TODO: store and reuse fragments
-                // branch: huge-alloc-fragmentation-recycle
+        private long localAllocate(int size, long address) throws IOException {
+            int maxOffset = pageCursor.getCurrentPageSize() - size;
+            if (maxOffset >= pageCursor.getOffset()) {
                 top += size;
                 return address;
             }
             return prefetchAllocate(size);
         }
 
-        /**
-         * We are faking a valid page by over-allocating a single page to be large enough to hold all data
-         * Since we are storing all degrees into a single page and thus never have to switch pages
-         * and keep the offsets as if this page would be of the correct size, we might just get by.
-         */
-        private long oversizingAllocate(int size) {
-            byte[] largePage = new byte[size];
-            return builder.insertOversizedPage(largePage, this);
-        }
+//        private long majorAllocate(int size, int maxOffset, long address) {
+//            if (maxOffset < 0) {
+//                return oversizingAllocate(size);
+//            }
+//            if (reset() && maxOffset >= offset) {
+//                top += size;
+//                return address;
+//            }
+//            int waste = PAGE_SIZE - offset;
+//            address = top += waste;
+//            if (next()) {
+//                // TODO: store and reuse fragments
+//                // branch: huge-alloc-fragmentation-recycle
+//                top += size;
+//                return address;
+//            }
+//            return prefetchAllocate(size);
+//        }
+//
+//        /**
+//         * We are faking a valid page by over-allocating a single page to be large enough to hold all data
+//         * Since we are storing all degrees into a single page and thus never have to switch pages
+//         * and keep the offsets as if this page would be of the correct size, we might just get by.
+//         */
+//        private long oversizingAllocate(int size) {
+//            byte[] largePage = new byte[size];
+//            return builder.insertOversizedPage(largePage, this);
+//        }
 
-        private long prefetchAllocate(int size) {
-            long address = top = builder.insertDefaultSizedPage(this);
+        private long prefetchAllocate(int size) throws IOException {
+            long address = top = builder.insertDefaultSizedPage(this, (int) ceilDiv(size, builder.pagedFile.pageSize()));
             top += size;
             return address;
         }
 
-        private boolean reset() {
-            if (prevOffset != -1) {
-                page = pages[currentPageIndex];
-                offset = prevOffset;
-                prevOffset = -1;
-                return true;
+//        private boolean reset() {
+//            if (prevOffset != -1) {
+//                page = pages[currentPageIndex];
+//                offset = prevOffset;
+//                prevOffset = -1;
+//                return true;
+//            }
+//            return false;
+//        }
+//
+//        private boolean next() {
+//            if (++currentPageIndex <= toPageIndex) {
+//                page = pages[currentPageIndex];
+//                offset = 0;
+//                return true;
+//            }
+//            page = null;
+//            return false;
+//        }
+
+        private void setNewPages(long pageId) throws IOException {
+            boolean next = pageCursor.next(pageId);
+            if (!next) {
+                throw new IllegalStateException("This should never happen");
             }
-            return false;
+//            assert PageUtil.indexInPage(pageId, PAGE_MASK) == 0;
+//            currentPageIndex = PageUtil.pageIndex(pageId, PAGE_SHIFT);
+//            toPageIndex = currentPageIndex;
+//            page = pages[currentPageIndex];
+//            offset = 0;
         }
 
-        private boolean next() {
-            if (++currentPageIndex <= toPageIndex) {
-                page = pages[currentPageIndex];
-                offset = 0;
-                return true;
-            }
-            page = null;
-            return false;
-        }
-
-        private void setNewPages(byte[][] pages, long fromIndex) {
-            assert PageUtil.indexInPage(fromIndex, PAGE_MASK) == 0;
-            this.pages = pages;
-            currentPageIndex = PageUtil.pageIndex(fromIndex, PAGE_SHIFT);
-            toPageIndex = currentPageIndex;
-            page = pages[currentPageIndex];
-            offset = 0;
-        }
-
-        private void insertPage(byte[] page) {
-            if (prevOffset == -1) {
-                prevOffset = offset;
-            }
-            this.page = page;
-            offset = 0;
-        }
+//        private void insertPage(byte[] page) {
+//            if (prevOffset == -1) {
+//                prevOffset = offset;
+//            }
+//            this.page = page;
+//            offset = 0;
+//        }
     }
 }

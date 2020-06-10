@@ -26,12 +26,15 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
+import org.neo4j.io.pagecache.PageCursor;
+import org.neo4j.io.pagecache.PagedFile;
+import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
+
+import java.io.IOException;
 
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
-import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
-import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 
 public final class AdjacencyList {
 
@@ -39,8 +42,9 @@ public final class AdjacencyList {
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
     public static final long PAGE_MASK = PAGE_SIZE - 1;
 
-    private final long allocatedMemory;
-    private byte[][] pages;
+//    private final long allocatedMemory;
+    private final PagedFile pagedFile;
+//    private byte[][] pages;
 
     public static MemoryEstimation compressedMemoryEstimation(long avgDegree, long nodeCount) {
         // Best case scenario:
@@ -120,20 +124,20 @@ public final class AdjacencyList {
         return (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
     }
 
-    public AdjacencyList(byte[][] pages) {
-        this.pages = pages;
-        this.allocatedMemory = memoryOfPages(pages);
+    public AdjacencyList(PagedFile pagedFile) {
+        this.pagedFile = pagedFile;
+//        this.allocatedMemory = memoryOfPages(pages);
     }
 
-    private static long memoryOfPages(byte[][] pages) {
-        long memory = MemoryUsage.sizeOfObjectArray(pages.length);
-        for (byte[] page : pages) {
-            if (page != null) {
-                memory += MemoryUsage.sizeOfByteArray(page.length);
-            }
-        }
-        return memory;
-    }
+//    private static long memoryOfPages(byte[][] pages) {
+//        long memory = MemoryUsage.sizeOfObjectArray(pages.length);
+//        for (byte[] page : pages) {
+//            if (page != null) {
+//                memory += MemoryUsage.sizeOfByteArray(page.length);
+//            }
+//        }
+//        return memory;
+//    }
 
 //    int getDegree(long index) {
 //        return AdjacencyDecompressingReader.readInt(
@@ -142,17 +146,23 @@ public final class AdjacencyList {
 //    }
 
     public final long release() {
-        if (pages == null) {
+        pagedFile.close();
+//        if (pages == null) {
             return 0L;
-        }
-        pages = null;
-        return allocatedMemory;
+//        }
+//        pages = null;
+//        return allocatedMemory;
     }
 
     // Cursors
 
-    Cursor cursor(long offset) {
-        return new Cursor(pages).init(offset);
+    Cursor cursor(long offset) throws IOException {
+        PageCursor pageCursor = pagedFile.io(
+            0,
+            PagedFile.PF_SHARED_READ_LOCK,
+            PageCursorTracer.NULL
+        );
+        return new Cursor(pageCursor).init(offset, pagedFile.pageSize());
     }
 
 //    /**
@@ -178,18 +188,18 @@ public final class AdjacencyList {
 
     public static final class Cursor extends MutableIntValue {
 
-        static final Cursor EMPTY = new Cursor(new byte[0][]);
+//        static final Cursor EMPTY = new Cursor(new byte[0][]);
 
         // TODO: free
-        private final byte[][] pages;
+        private final PageCursor pageCursor;
 
-        private byte[] currentPage;
+//        private byte[] currentPage;
         private int degree;
         private int offset;
         private int limit;
 
-        private Cursor(byte[][] pages) {
-            this.pages = pages;
+        private Cursor(PageCursor pageCursor) {
+            this.pageCursor = pageCursor;
         }
 
         public int length() {
@@ -208,17 +218,20 @@ public final class AdjacencyList {
          * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
          */
         long nextLong() {
-            long value = AdjacencyDecompressingReader.readLong(currentPage, offset);
+            long value = pageCursor.getLong(offset);
+//            long value = AdjacencyDecompressingReader.readLong(currentPage, offset);
             offset += Long.BYTES;
             return value;
         }
 
-        Cursor init(long fromIndex) {
-            this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
-            this.offset = indexInPage(fromIndex, PAGE_MASK);
-            this.degree = AdjacencyDecompressingReader.readInt(currentPage, offset);
+        Cursor init(long offset, int pageSize) throws IOException {
+            this.offset = (int)(offset % pageSize);
+            pageCursor.next(this.offset / pageSize);
+//            this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
+//            this.offset = indexInPage(fromIndex, PAGE_MASK);
+            this.degree = pageCursor.getInt(this.offset);
             this.offset += Integer.BYTES;
-            this.limit = offset + degree * Long.BYTES;
+            this.limit = this.offset + degree * Long.BYTES;
             return this;
         }
     }

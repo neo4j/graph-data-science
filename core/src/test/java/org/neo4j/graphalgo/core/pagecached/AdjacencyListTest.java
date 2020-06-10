@@ -71,9 +71,11 @@ class AdjacencyListTest {
     }
 
     @Test
-    void writeAdjacencyList() {
-        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(AllocationTracker.EMPTY);
+    void writeAdjacencyList() throws IOException {
+        PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
+        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache, AllocationTracker.EMPTY);
         AdjacencyListBuilder.Allocator allocator = adjacencyListBuilder.newAllocator();
+
         allocator.prepare();
         int length = 20;
         long offset = allocator.allocate(length);
@@ -81,6 +83,7 @@ class AdjacencyListTest {
         allocator.putLong(1);
         allocator.putLong(42);
 
+        allocator.close();
         AdjacencyList adjacencyList = adjacencyListBuilder.build();
         AdjacencyList.Cursor cursor = adjacencyList.cursor(offset);
         assertEquals(2, cursor.length());
