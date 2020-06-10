@@ -40,6 +40,7 @@ public interface SelectionStrategy {
     long size();
 
     enum Strategy {
+        ALL,
         RANDOM,
         RANDOM_DEGREE;
 
@@ -73,12 +74,31 @@ public interface SelectionStrategy {
         }
     }
 
-    class RandomSelectionStrategy implements SelectionStrategy {
+    class All implements SelectionStrategy {
+
+        private final long nodeCount;
+
+        public All(long nodeCount) {
+            this.nodeCount = nodeCount;
+        }
+
+        @Override
+        public boolean select(long nodeId) {
+            return true;
+        }
+
+        @Override
+        public long size() {
+            return nodeCount;
+        }
+    }
+
+    class Random implements SelectionStrategy {
 
         private final PagedSimpleBitSet bitSet;
         private final long size;
 
-        public RandomSelectionStrategy(Graph graph, double probability, AllocationTracker tracker) {
+        public Random(Graph graph, double probability, AllocationTracker tracker) {
             this.bitSet = PagedSimpleBitSet.newBitSet(graph.nodeCount(), tracker);
             final SecureRandom random = new SecureRandom();
             for (int i = 0; i < graph.nodeCount(); i++) {
@@ -101,7 +121,7 @@ public interface SelectionStrategy {
 
     }
 
-    class RandomDegreeSelectionStrategy implements SelectionStrategy {
+    class RandomDegree implements SelectionStrategy {
 
         private final double maxDegree;
         // TODO: benchmark and potentially replace with hppc BitSet
@@ -109,7 +129,7 @@ public interface SelectionStrategy {
         private final long size;
 
 
-        public RandomDegreeSelectionStrategy(
+        public RandomDegree(
             Graph graph,
             double probabilityOffset,
             ExecutorService executorService,

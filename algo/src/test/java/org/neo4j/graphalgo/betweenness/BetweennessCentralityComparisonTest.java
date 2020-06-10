@@ -32,13 +32,12 @@ import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Stream;
 
 class BetweennessCentralityComparisonTest {
 
     static Stream<Arguments> randomGraphParameters() {
-        var rand = new Random();
+        var rand = new java.util.Random();
         return Stream.of(
             Arguments.of(10, 2, RelationshipDistribution.UNIFORM, rand.nextLong(), 1),
             Arguments.of(10, 2, RelationshipDistribution.RANDOM, rand.nextLong(), 1),
@@ -133,7 +132,7 @@ class BetweennessCentralityComparisonTest {
 
         var degreeSampledBC = new BetweennessCentrality(
             graph,
-            new SelectionStrategy.RandomDegreeSelectionStrategy(graph, 1.0, executorService, concurrency, tracker),
+            new SelectionStrategy.RandomDegree(graph, 1.0, executorService, concurrency, tracker),
             executorService,
             concurrency,
             tracker
@@ -142,7 +141,7 @@ class BetweennessCentralityComparisonTest {
 
         var randomSampledBC = new BetweennessCentrality(
             graph,
-            new SelectionStrategy.RandomSelectionStrategy(graph, 1.0, tracker),
+            new SelectionStrategy.Random(graph, 1.0, tracker),
             executorService,
             concurrency,
             tracker
