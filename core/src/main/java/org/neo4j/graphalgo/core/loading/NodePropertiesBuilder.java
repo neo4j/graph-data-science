@@ -97,7 +97,7 @@ public final class NodePropertiesBuilder {
 
         // First try to read without ordering guarantees
         // this value could be an outdated one, but any other value
-        // would be strictly greater that this one, so if our `value`
+        // would be strictly greater than this one, so if our `value`
         // is already smaller, we don't need to write to the maxValue field.
         // Think of this as the initial read in a double-checked locking read.
         // Also, we can't use getPlain here, since that one has no atomicity
