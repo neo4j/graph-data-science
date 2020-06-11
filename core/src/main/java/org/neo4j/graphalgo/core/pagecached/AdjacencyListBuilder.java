@@ -36,7 +36,7 @@ import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 final class AdjacencyListBuilder {
 
-    private static final AtomicInteger GENERATION = new AtomicInteger(0);
+    private static AtomicInteger GENERATION = new AtomicInteger(0);
 
 //    private static final long PAGE_SIZE_IN_BYTES = sizeOfByteArray(PAGE_SIZE);
 //    private static final AtomicReferenceFieldUpdater<AdjacencyListBuilder, byte[][]> PAGES_UPDATER =
@@ -60,7 +60,7 @@ final class AdjacencyListBuilder {
         this.allocatedPages = new AtomicInteger(0);
         try {
             pagedFile = pageCache.map(
-                fileName(),
+                file(),
                 PageCache.PAGE_SIZE,
                 Sets.immutable.of(StandardOpenOption.CREATE)
             );
@@ -165,7 +165,7 @@ final class AdjacencyListBuilder {
 //        PAGES_UPDATER.set(this, newPages);
 //    }
 
-    private static File fileName() {
+    private static File file() {
         return new File("gds.adjacency." + GENERATION.getAndIncrement());
     }
 

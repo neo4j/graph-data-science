@@ -193,6 +193,7 @@ public final class AdjacencyList {
         return reuse.init(offset, pagedFile.pageSize());
     }
 
+    // TODO close cursor
     public static final class Cursor extends MutableIntValue {
 
 //        static final Cursor EMPTY = new Cursor(new byte[0][]);

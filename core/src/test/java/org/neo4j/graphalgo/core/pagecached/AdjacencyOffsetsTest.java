@@ -19,18 +19,57 @@
  */
 package org.neo4j.graphalgo.core.pagecached;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
+import org.neo4j.io.pagecache.PageCache;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.DbmsExtension;
+import org.neo4j.test.extension.ExtensionCallback;
+import org.neo4j.test.extension.Inject;
+import org.neo4j.test.rule.TestDirectory;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
+
+@DbmsExtension(configurationCallback = "configuration")
 class AdjacencyOffsetsTest {
 
+    @Inject
+    public GraphDatabaseAPI db;
+
+    @Inject
+    TestDirectory dir;
+
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        builder.noOpSystemGraphInitializer();
+        builder.addExtension(new ConcurrencyControllerExtension());
+    }
+
+    @BeforeEach
+    void setUp() {
+        runQuery(db, "CREATE (n);");
+    }
+
     @Test
-    void get() {
-
-        var offsets = AdjacencyOffsets.of(new long[]{42});
-        assertEquals(42, offsets.get(0));
-
-
+    void get() throws IOException {
+        PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
+        var offsets = AdjacencyOffsets.of(pageCache, new long[][]{new long[]{0, 1, 2, 3}});
+        long[] values = new long[] {
+            offsets.get(0),
+            offsets.get(1),
+            offsets.get(2),
+            offsets.get(3)
+        };
+        offsets.release();
+        assertEquals(0, values[0]);
+        assertEquals(1, values[1]);
+        assertEquals(2, values[2]);
+        assertEquals(3, values[3]);
     }
 }

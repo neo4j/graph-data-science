@@ -19,150 +19,61 @@
  */
 package org.neo4j.graphalgo.core.pagecached;
 
-import org.neo4j.graphalgo.core.loading.ImportSizing;
-import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.eclipse.collections.impl.factory.Sets;
+import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+import java.nio.file.StandardOpenOption;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AdjacencyOffsets {
 
-    abstract long get(long index);
+    private static AtomicInteger GENERATION = new AtomicInteger(0);
+
+    abstract long get(long index) throws IOException;
 
     abstract long release();
 
-    public static AdjacencyOffsets of(long[][] pages, int pageSize) {
-        if (pages.length == 1) {
-            return new SinglePageOffsets(pages[0]);
-        }
-        return new PagedOffsets(pages, pageSize);
-    }
-
-    public static AdjacencyOffsets of(PagedFile pagedFile) throws IOException {
+    public static AdjacencyOffsets of(PageCache pageCache, long[][] pages) throws IOException {
+        PagedFile pagedFile = pageCache.map(
+            file(),
+            PageCache.PAGE_SIZE,
+            Sets.immutable.of(StandardOpenOption.CREATE)
+        );
         PageCursor pageCursor = pagedFile.io(
             0,
-            PagedFile.PF_SHARED_READ_LOCK,
+            PagedFile.PF_SHARED_WRITE_LOCK,
             PageCursorTracer.NULL
         );
-        return new PageCachedOffsets(pageCursor);
+        return new PageCachedOffsets(pagedFile, pageCursor, pages);
     }
 
-    static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {
-        if (numberOfPages == 1) {
-            return SinglePageOffsets.memoryEstimation(pageSize);
-        } else {
-            return PagedOffsets.memoryEstimation(pageSize, numberOfPages);
-        }
-    }
-
-    public static MemoryEstimation memoryEstimation(int concurrency, long nodeCount) {
-        ImportSizing importSizing = ImportSizing.of(concurrency, nodeCount);
-        return AdjacencyOffsets.memoryEstimation(
-            importSizing.pageSize(),
-            importSizing.numberOfPages());
-    }
-
-    public static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.setup(
-                "adjacency offsets",
-                (dimensions, concurrency) -> memoryEstimation(concurrency, dimensions.nodeCount())
-        );
-    }
-
-    public static AdjacencyOffsets of(long[] page) {
-        return new SinglePageOffsets(page);
-    }
-
-    private static final class PagedOffsets extends AdjacencyOffsets {
-
-        private final int pageShift;
-        private final long pageMask;
-        private long[][] pages;
-
-        static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {
-            return MemoryEstimations.builder(AdjacencyOffsets.PagedOffsets.class)
-                    .fixed("pages wrapper", sizeOfObjectArray(numberOfPages))
-                    .fixed("page[]", sizeOfLongArray(pageSize) * numberOfPages)
-                    .build();
-        }
-
-        private PagedOffsets(long[][] pages, int pageSize) {
-            assert pageSize == 0 || BitUtil.isPowerOfTwo(pageSize);
-            this.pageShift = Integer.numberOfTrailingZeros(pageSize);
-            this.pageMask = pageSize - 1;
-            this.pages = pages;
-        }
-
-        @Override
-        long get(long index) {
-            final int pageIndex = (int) (index >>> pageShift);
-            final int indexInPage = (int) (index & pageMask);
-            return pages[pageIndex][indexInPage];
-        }
-
-        @Override
-        long release() {
-            if (pages != null) {
-                long memoryUsed = sizeOfObjectArray(pages.length);
-                for (long[] page : pages) {
-                    memoryUsed += sizeOfLongArray(page.length);
-                }
-                pages = null;
-                return memoryUsed;
-            }
-            return 0L;
-        }
-    }
-
-    private static final class SinglePageOffsets extends AdjacencyOffsets {
-
-        private long[] page;
-
-        static MemoryEstimation memoryEstimation(int pageSize) {
-            return MemoryEstimations.builder(AdjacencyOffsets.SinglePageOffsets.class)
-                    .fixed("page", sizeOfLongArray(pageSize))
-                    .build();
-        }
-
-        private SinglePageOffsets(long[] page) {
-            this.page = page;
-        }
-
-        @Override
-        long get(long index) {
-            return page[(int) index];
-        }
-
-        @Override
-        long release() {
-            if (page != null) {
-                long memoryUsed = sizeOfLongArray(page.length);
-                page = null;
-                return memoryUsed;
-            }
-            return 0L;
-        }
+    private static File file() {
+        return new File("gds.offsets." + GENERATION.getAndIncrement());
     }
 
     private static final class PageCachedOffsets extends AdjacencyOffsets {
 
-        private PageCursor pageCursor;
+        private final PagedFile pagedFile;
+        private final PageCursor pageCursor;
+        private final long[][] pages;
 
-        private PageCachedOffsets(PageCursor pageCursor) {
+        private PageCachedOffsets(PagedFile pagedFile, PageCursor pageCursor, long[][] pages) throws IOException {
+            this.pagedFile = pagedFile;
             this.pageCursor = pageCursor;
+            this.pages = pages;
+
+            writeOffsetsToPageCache();
         }
 
         @Override
-        long get(long index) {
-            var pageSize = pageCursor.getCurrentPageSize();
+        long get(long index) throws IOException {
+            var pageSize = PageCache.PAGE_SIZE;
             var longsPerPage = pageSize / Long.BYTES;
             var pageIndex = index / longsPerPage;
             var indexInPage = (int)((index % longsPerPage) * Long.BYTES);
@@ -170,7 +81,8 @@ public abstract class AdjacencyOffsets {
                 if (!pageCursor.next(pageIndex)) {
                     throw new ArrayIndexOutOfBoundsException("Array index out of range: " + index);
                 }
-                return pageCursor.getLong(indexInPage);
+                long aLong = pageCursor.getLong(indexInPage);
+                return aLong;
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -179,7 +91,21 @@ public abstract class AdjacencyOffsets {
         @Override
         long release() {
             pageCursor.close();
+            pagedFile.close();
             return 0L;
+        }
+
+        private void writeOffsetsToPageCache() throws IOException {
+            pageCursor.next();
+            for (long[] values : pages) {
+                for (long value : values) {
+                    if (pageCursor.getOffset() >= pageCursor.getCurrentPageSize()) {
+                        pageCursor.next();
+                    }
+                    pageCursor.putLong(value);
+                }
+            }
+            pagedFile.flushAndForce();
         }
     }
 }
