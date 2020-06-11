@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayQueue;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.paged.PagedLongStack;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -97,7 +97,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         private final HugeCursor<LongArrayList[]> predecessorsCursor;
 
         private final HugeLongArrayQueue forwardNodes;
-        private final PagedLongStack backwardNodes;
+        private final HugeLongArrayStack backwardNodes;
 
         private final HugeDoubleArray delta;
         private final HugeLongArray sigma;
@@ -107,8 +107,8 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
             this.localRelationshipIterator = graph.concurrentCopy();
 
             this.predecessors = HugeObjectArray.newArray(LongArrayList.class, expectedNodeCount, tracker);
-            this.backwardNodes = new PagedLongStack(nodeCount, tracker);
             this.predecessorsCursor = predecessors.newCursor();
+            this.backwardNodes = HugeLongArrayStack.newStack(nodeCount, tracker);
             // TODO: make queue growable
             this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount, tracker);
 
