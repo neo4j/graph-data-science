@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.shortestpaths;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
@@ -28,7 +29,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.bitset.SimpleBitSet;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
 
@@ -53,7 +53,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
     private IntPriorityQueue openNodes;
     private IntIntMap path;
     private IntArrayDeque shortestPath;
-    private SimpleBitSet closedNodes;
+    private BitSet closedNodes;
     private final ProgressLogger progressLogger;
 
     public static final double NO_PATH_FOUND = -1.0;
@@ -75,7 +75,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
         this.fCosts = new IntDoubleScatterMap(nodeCount);
         this.openNodes = SharedIntPriorityQueue.min(nodeCount, fCosts, Double.MAX_VALUE);
         this.path = new IntIntScatterMap(nodeCount);
-        this.closedNodes = new SimpleBitSet(nodeCount);
+        this.closedNodes = new BitSet(nodeCount);
         this.shortestPath = new IntArrayDeque();
         this.progressLogger = getProgressLogger();
     }
@@ -113,7 +113,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
             if (currentNodeId == goalNodeId) {
                 return;
             }
-            closedNodes.put(currentNodeId);
+            closedNodes.set(currentNodeId);
             double currentNodeCost = this.gCosts.getOrDefault(currentNodeId, Double.MAX_VALUE);
             graph.forEachRelationship(
                     currentNodeId,
@@ -123,7 +123,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
                         double neighbourLon = getLongitude(target);
                         double heuristic = computeHeuristic(neighbourLat, neighbourLon, goalLat, goalLon);
                         boolean weightChanged = updateCosts(source, target, weight + currentNodeCost, heuristic);
-                        if (!closedNodes.contains(target)) {
+                        if (!closedNodes.get(target)) {
                             if (weightChanged) {
                                 openNodes.update(target);
                             } else {

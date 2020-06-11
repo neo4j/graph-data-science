@@ -19,12 +19,12 @@
  */
 package org.neo4j.graphalgo.impl.scc;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongStack;
-import org.neo4j.graphalgo.core.utils.paged.PagedSimpleBitSet;
 
 /**
  * huge iterative (non recursive) sequential strongly connected components algorithm.
@@ -50,7 +50,7 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
 
     private final long nodeCount;
     private HugeLongArray index;
-    private PagedSimpleBitSet visited;
+    private BitSet visited;
     private HugeLongArray connectedComponents;
     private PagedLongStack stack;
     private PagedLongStack boundaries;
@@ -67,7 +67,7 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
         stack = new PagedLongStack(nodeCount, tracker);
         boundaries = new PagedLongStack(nodeCount, tracker);
         connectedComponents = HugeLongArray.newArray(nodeCount, tracker);
-        visited = PagedSimpleBitSet.newBitSet(nodeCount, tracker);
+        visited = new BitSet(nodeCount);
         todo = new PagedLongStack(nodeCount, tracker);
     }
 
@@ -153,7 +153,7 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
     private void visitEdge(long nodeId) {
         if (index.get(nodeId) == -1) {
             push(Action.VISIT, nodeId);
-        } else if (!visited.contains(nodeId)) {
+        } else if (!visited.get(nodeId)) {
             while (index.get(nodeId) < boundaries.peek()) {
                 boundaries.pop();
             }
@@ -168,7 +168,7 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
             do {
                 element = stack.pop();
                 connectedComponents.set(element, nodeId);
-                visited.put(element);
+                visited.set(element);
                 elementCount++;
             } while (element != nodeId);
             minSetSize = Math.min(minSetSize, elementCount);
