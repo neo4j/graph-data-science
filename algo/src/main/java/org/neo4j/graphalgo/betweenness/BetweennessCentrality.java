@@ -27,10 +27,10 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayQueue;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongDoubleMap;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongStack;
 
@@ -87,7 +87,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         selectionStrategy = null;
     }
 
-    private class BCTask implements Runnable {
+    private final class BCTask implements Runnable {
 
         private final RelationshipIterator localRelationshipIterator;
 
@@ -98,8 +98,8 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         private final HugeLongArrayQueue forwardNodes;
         private final PagedLongStack backwardNodes;
 
-        private final HugeLongDoubleMap delta;
-        private final HugeLongLongMap sigma;
+        private final HugeDoubleArray delta;
+        private final HugeLongArray sigma;
         private final HugeIntArray distance;
 
         private BCTask(AllocationTracker tracker) {
@@ -109,9 +109,9 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
             this.backwardNodes = new PagedLongStack(nodeCount, tracker);
             // TODO: make queue growable
             this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount, tracker);
-            // TODO: benchmark maps vs arrays
-            this.sigma = new HugeLongLongMap(expectedNodeCount, tracker);
-            this.delta = new HugeLongDoubleMap(expectedNodeCount, tracker);
+
+            this.sigma = HugeLongArray.newArray(nodeCount, tracker);;
+            this.delta = HugeDoubleArray.newArray(nodeCount, tracker);
 
             this.distance = HugeIntArray.newArray(nodeCount, tracker);
         }
@@ -132,9 +132,9 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
                 getProgressLogger().logProgress((double) startNodeId / (nodeCount - 1));
 
                 distance.fill(-1);
-                sigma.clear();
+                sigma.fill(0);
                 predecessors.fill(null);
-                delta.clear();
+                delta.fill(0);
 
                 sigma.addTo(startNodeId, 1);
                 distance.set(startNodeId, 0);
@@ -155,8 +155,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
 
                         if (distance.get(target) == distanceNode + 1) {
                             // TODO: consider moving this out of the lambda (benchmark)
-                            long sigmaNode = sigma.getOrDefault(node, 0);
-                            sigma.addTo(target, sigmaNode);
+                            sigma.addTo(target, sigma.get(node));
                             append(target, node);
                         }
                         return true;
@@ -167,12 +166,12 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
                     long node = backwardNodes.pop();
                     LongArrayList predecessors = this.predecessors.get(node);
 
-                    double dependencyNode = delta.getOrDefault(node, 0);
-                    double sigmaNode = sigma.getOrDefault(node, 0);
+                    double dependencyNode = delta.get(node);
+                    double sigmaNode = sigma.get(node);
 
                     if (null != predecessors) {
                         predecessors.forEach((Consumer<? super LongCursor>) predecessor -> {
-                            double sigmaPredecessor = sigma.getOrDefault(predecessor.value, 0);
+                            double sigmaPredecessor = sigma.get(predecessor.value);
                             double dependency = sigmaPredecessor / sigmaNode * (dependencyNode + 1.0);
                             delta.addTo(predecessor.value, dependency);
                         });
