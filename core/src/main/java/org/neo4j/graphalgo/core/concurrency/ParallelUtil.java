@@ -53,7 +53,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 import java.util.stream.BaseStream;
@@ -931,29 +930,6 @@ public final class ParallelUtil {
             throwIfUnchecked(error);
             throw new RuntimeException(error);
         }
-    }
-
-    public static void iterateParallel(
-        final ExecutorService executorService,
-        final int size,
-        final int concurrency,
-        final IntConsumer consumer
-    ) {
-        if (!canRunInParallel(executorService)) {
-            throw new IllegalArgumentException("no executor available to run the tasks in parallel");
-        }
-        final Collection<Future<?>> futures = new ArrayList<>();
-        final int batchSize = threadCount(concurrency, size);
-        for (int i = 0; i < size; i += batchSize) {
-            final int start = i;
-            final int end = Math.min(size, start + batchSize);
-            futures.add(executorService.submit(() -> {
-                for (int j = start; j < end; j++) {
-                    consumer.accept(j);
-                }
-            }));
-        }
-        awaitTermination(futures);
     }
 
     /**

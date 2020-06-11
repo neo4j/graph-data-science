@@ -128,7 +128,6 @@ public interface SelectionStrategy {
         private final PagedSimpleBitSet bitSet;
         private final long size;
 
-
         public RandomDegree(
             Graph graph,
             double probabilityOffset,
@@ -140,9 +139,11 @@ public interface SelectionStrategy {
             this.maxDegree = getMaxDegree(graph, executorService, concurrency);
 
             SecureRandom random = new SecureRandom();
-            ParallelUtil.iterateParallel(executorService, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
-                if (random.nextDouble() - probabilityOffset <= graph.degree(node) / maxDegree) {
-                    bitSet.put(node);
+            ParallelUtil.readParallel(concurrency, graph.nodeCount(), executorService, (from, to) -> {
+                for (long nodeId = from; nodeId < to; nodeId++) {
+                    if (random.nextDouble() - probabilityOffset <= graph.degree(nodeId) / maxDegree) {
+                        bitSet.put(nodeId);
+                    }
                 }
             });
 
@@ -159,14 +160,16 @@ public interface SelectionStrategy {
             return size;
         }
 
-        private long getMaxDegree(Graph graph, ExecutorService pool, int concurrency) {
+        private long getMaxDegree(Graph graph, ExecutorService executorService, int concurrency) {
             AtomicInteger mx = new AtomicInteger(0);
-            ParallelUtil.iterateParallel(pool, Math.toIntExact(graph.nodeCount()), concurrency, node -> {
-                int degree = graph.degree(node);
-                int current;
-                do {
-                    current = mx.get();
-                } while (degree > current && !mx.compareAndSet(current, degree));
+            ParallelUtil.readParallel(concurrency, graph.nodeCount(), executorService, (from, to) -> {
+                for (long nodeId = from; nodeId < to; nodeId++) {
+                    int degree = graph.degree(nodeId);
+                    int current;
+                    do {
+                        current = mx.get();
+                    } while (degree > current && !mx.compareAndSet(current, degree));
+                }
             });
             return mx.get();
         }
