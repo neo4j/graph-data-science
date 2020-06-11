@@ -62,14 +62,14 @@ class BetweennessCentralityTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void testForceCompleteSampling(int concurrency) {
-        var bc = new BetweennessCentrality(graph, new SelectionStrategy.Random(graph, 1.0), Pools.DEFAULT, concurrency, TRACKER);
+        var bc = new BetweennessCentrality(graph, new SelectionStrategy.Random(graph, 1.0, Pools.DEFAULT, concurrency), Pools.DEFAULT, concurrency, TRACKER);
         assertResult(bc.compute(), EXACT_CENTRALITIES);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void testForceEmptySampling(int concurrency) {
-        var bc = new BetweennessCentrality(graph, new SelectionStrategy.Random(graph, 0.0), Pools.DEFAULT, concurrency, TRACKER);
+        var bc = new BetweennessCentrality(graph, new SelectionStrategy.Random(graph, 0.0,Pools.DEFAULT, concurrency), Pools.DEFAULT, concurrency, TRACKER);
         assertResult(bc.compute(), EMPTY_CENTRALITIES);
     }
 

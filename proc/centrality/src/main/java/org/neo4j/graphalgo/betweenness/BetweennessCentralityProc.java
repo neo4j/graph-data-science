@@ -81,7 +81,7 @@ final class BetweennessCentralityProc {
             case ALL:
                 return new SelectionStrategy.All(graph.nodeCount());
             case RANDOM:
-                return new SelectionStrategy.Random(graph, probability);
+                return new SelectionStrategy.Random(graph, probability, Pools.DEFAULT, configuration.concurrency());
             case RANDOM_DEGREE:
                 return new SelectionStrategy.RandomDegree(
                     graph,

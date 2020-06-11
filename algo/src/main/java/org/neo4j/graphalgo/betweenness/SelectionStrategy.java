@@ -98,9 +98,9 @@ public interface SelectionStrategy {
         private final BitSet bitSet;
         private final long size;
 
-        public Random(Graph graph, double probability) {
+        public Random(Graph graph, double probability, ExecutorService executorService, int concurrency) {
             this.bitSet = new BitSet(graph.nodeCount());
-            selectNodes(graph, probability);
+            selectNodes(graph, probability, executorService, concurrency);
             this.size = this.bitSet.cardinality();
         }
 
@@ -114,13 +114,20 @@ public interface SelectionStrategy {
             return size;
         }
 
-        private void selectNodes(Graph graph, double probability) {
-            final SecureRandom random = new SecureRandom();
-            for (int i = 0; i < graph.nodeCount(); i++) {
-                if (random.nextDouble() < probability) {
-                    this.bitSet.set(i);
-                }
-            }
+        private void selectNodes(Graph graph, double probability, ExecutorService executorService, int concurrency) {
+            var random = new SecureRandom();
+
+            var tasks = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE)
+                .stream()
+                .map(partition -> (Runnable) () -> {
+                    for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount; nodeId++) {
+                        if (random.nextDouble() < probability) {
+                            this.bitSet.set(nodeId);
+                        }
+                    }
+                }).collect(Collectors.toList());
+
+            ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
         }
     }
 
@@ -137,7 +144,7 @@ public interface SelectionStrategy {
         ) {
             this.bitSet = new BitSet(graph.nodeCount());
             var maxDegree = maxDegree(graph, executorService, concurrency);
-            selectNodes(graph, executorService, concurrency, probabilityOffset, maxDegree);
+            selectNodes(graph, probabilityOffset, maxDegree, executorService, concurrency);
             this.size = bitSet.cardinality();
         }
 
@@ -171,12 +178,18 @@ public interface SelectionStrategy {
             return mx.get();
         }
 
-        private void selectNodes(Graph graph, ExecutorService executorService, int concurrency, double probabilityOffset, double maxDegree) {
-            SecureRandom random = new SecureRandom();
+        private void selectNodes(
+            Graph graph,
+            double probabilityOffset,
+            double maxDegree,
+            ExecutorService executorService,
+            int concurrency
+        ) {
+            var random = new SecureRandom();
             var tasks = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE)
                 .stream()
                 .map(partition -> (Runnable) () -> {
-                    for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount ; nodeId++) {
+                    for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount; nodeId++) {
                         if (random.nextDouble() - probabilityOffset <= graph.degree(nodeId) / maxDegree) {
                             bitSet.set(nodeId);
                         }
