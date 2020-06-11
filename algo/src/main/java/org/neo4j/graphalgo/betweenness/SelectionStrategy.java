@@ -196,10 +196,14 @@ public abstract class SelectionStrategy {
                 .map(partition -> (Runnable) () -> {
                     for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount; nodeId++) {
                         int degree = graph.degree(nodeId);
-                        int current;
-                        do {
-                            current = mx.get();
-                        } while (degree > current && !mx.compareAndSet(current, degree));
+                        int current = mx.get();
+                        while (degree > current) {
+                            int newCurrent = mx.compareAndExchange(current, degree);
+                            if (newCurrent == current) {
+                                break;
+                            }
+                            current = newCurrent;
+                        }
                     }
                 }).collect(Collectors.toList());
 
