@@ -55,6 +55,6 @@ The maximum concurrency that can be used is limited depending on the license und
 * Neo4j Enterprise Edition
 ** The maximum concurrency in the library is 4.
 
-* Neo4j Graph Data Science Edition
+* Neo4j Graph Data Science Library - Enterprise Edition
 ** The concurrency in the library is unlimited.
    To register for a license, please contact Neo4j at https://neo4j.com/contact-us/?ref=graph-analytics.
