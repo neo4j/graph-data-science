@@ -41,10 +41,11 @@ import java.util.function.Consumer;
 public class BetweennessCentrality extends Algorithm<BetweennessCentrality, HugeAtomicDoubleArray> {
 
     private final Graph graph;
-    private volatile AtomicLong nodeQueue = new AtomicLong();
-    private HugeAtomicDoubleArray centrality;
+    private final AtomicLong nodeQueue = new AtomicLong();
     private final long nodeCount;
     private final long expectedNodeCount;
+
+    private HugeAtomicDoubleArray centrality;
     private SelectionStrategy selectionStrategy;
 
     private final ExecutorService executorService;
@@ -177,8 +178,10 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
                         });
                     }
                     if (node != startNodeId) {
-                        // TODO: replace with + (creates 2! objects per call due to reference to outer scopes)
-                        centrality.update(node, (value) -> value + dependencyNode);
+                        double current;
+                        do {
+                            current = centrality.get(node);
+                        } while (!centrality.compareAndSet(node, current, current + dependencyNode));
                     }
                 }
             }
