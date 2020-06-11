@@ -22,27 +22,52 @@ package org.neo4j.graphalgo.betweenness;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
+import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class BetweennessCentralityWriteProcTest
-    extends BetweennessCentralityProcTest<BetweennessCentralityWriteConfig>
-    implements WritePropertyConfigTest<BetweennessCentrality, BetweennessCentralityWriteConfig, HugeAtomicDoubleArray> {
+public class BetweennessCentralityMutateProcTest
+    extends BetweennessCentralityProcTest<BetweennessCentralityMutateConfig>
+    implements MutateNodePropertyTest<BetweennessCentrality, BetweennessCentralityMutateConfig, HugeAtomicDoubleArray> {
 
     @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig>> getProcedureClazz() {
-        return BetweennessCentralityWriteProc.class;
+    public String mutateProperty() {
+        return DEFAULT_RESULT_PROPERTY;
     }
 
     @Override
-    public BetweennessCentralityWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityWriteConfig.of("",
+    public NumberType mutatePropertyType() {
+        return NumberType.FLOATING_POINT;
+    }
+
+    @Override
+    public String expectedMutatedGraph() {
+        return "CREATE" +
+               "  (a {centrality: 0.0})" +
+               ", (b {centrality: 3.0})" +
+               ", (c {centrality: 4.0})" +
+               ", (d {centrality: 3.0})" +
+               ", (e {centrality: 0.0})" +
+               ", (a)-->(b)" +
+               ", (b)-->(c)" +
+               ", (c)-->(d)" +
+               ", (d)-->(e)";
+    }
+
+    @Override
+    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig>> getProcedureClazz() {
+        return BetweennessCentralityMutateProc.class;
+    }
+
+    @Override
+    public BetweennessCentralityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
+        return BetweennessCentralityMutateConfig.of("",
             Optional.empty(),
             Optional.empty(),
             mapWrapper.withNumber("probability", DEFAULT_PROBABILITY)
@@ -52,7 +77,7 @@ class BetweennessCentralityWriteProcTest
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         if (!mapWrapper.containsKey("writeProperty")) {
-            mapWrapper = mapWrapper.withString("writeProperty", DEFAULT_RESULT_PROPERTY);
+            mapWrapper = mapWrapper.withString("mutateProperty", DEFAULT_RESULT_PROPERTY);
         }
         if (!mapWrapper.containsKey("probability")) {
             mapWrapper = mapWrapper.withNumber("probability", DEFAULT_PROBABILITY);
@@ -61,20 +86,20 @@ class BetweennessCentralityWriteProcTest
     }
 
     @Test
-    void testWrite() {
+    void testMutate() {
         String query = GdsCypher
             .call()
             .withAnyLabel()
             .withAnyRelationshipType()
             .algo("betweenness")
-            .writeMode()
-            .addParameter("writeProperty", DEFAULT_RESULT_PROPERTY)
+            .mutateMode()
+            .addParameter("mutateProperty", DEFAULT_RESULT_PROPERTY)
             .addParameter("probability", DEFAULT_PROBABILITY)
             .yields(
                 "nodePropertiesWritten",
                 "createMillis",
                 "computeMillis",
-                "writeMillis",
+                "mutateMillis",
                 "minCentrality",
                 "maxCentrality",
                 "sumCentrality"
@@ -85,12 +110,11 @@ class BetweennessCentralityWriteProcTest
 
             assertNotEquals(-1L, row.getNumber("createMillis"));
             assertNotEquals(-1L, row.getNumber("computeMillis"));
-            assertNotEquals(-1L, row.getNumber("writeMillis"));
+            assertNotEquals(-1L, row.getNumber("mutateMillis"));
 
             assertEquals(0D, row.getNumber("minCentrality").doubleValue(), 1E-1);
             assertEquals(4D, row.getNumber("maxCentrality").doubleValue(), 1E-1);
             assertEquals(10D, row.getNumber("sumCentrality").doubleValue(), 1E-1);
         });
     }
-
 }

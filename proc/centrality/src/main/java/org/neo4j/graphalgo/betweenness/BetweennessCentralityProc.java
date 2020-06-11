@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
@@ -36,6 +37,10 @@ final class BetweennessCentralityProc {
     static final String BETWEENNESS_DESCRIPTION = "Betweenness centrality measures the relative information flow that goes through a node.";
 
     private BetweennessCentralityProc() {}
+
+    static PropertyTranslator<HugeAtomicDoubleArray> propertyTranslator() {
+        return (PropertyTranslator.OfDouble<HugeAtomicDoubleArray>) HugeAtomicDoubleArray::get;
+    }
 
     static <CONFIG extends BetweennessCentralityBaseConfig> AlgorithmFactory<BetweennessCentrality, CONFIG> algorithmFactory(CONFIG config) {
         return new AlgorithmFactory<>() {

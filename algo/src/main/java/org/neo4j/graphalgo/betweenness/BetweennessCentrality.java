@@ -88,7 +88,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
 
     @Override
     public void release() {
-        centrality.release();
         centrality = null;
         selectionStrategy = null;
     }

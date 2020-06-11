@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,62 +36,62 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
-public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteProc.WriteResult, BetweennessCentralityWriteConfig> {
+public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateProc.MutateResult, BetweennessCentralityMutateConfig> {
 
-    @Procedure(value = "gds.betweenness.write", mode = WRITE)
+    @Procedure(value = "gds.betweenness.mutate", mode = READ)
     @Description(BETWEENNESS_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<MutateResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        return mutate(compute(graphNameOrConfig, configuration));
     }
 
     @Override
-    protected BetweennessCentralityWriteConfig newConfig(
+    protected BetweennessCentralityMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return BetweennessCentralityWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return BetweennessCentralityMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityWriteConfig> algorithmFactory(
-        BetweennessCentralityWriteConfig config
+    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityMutateConfig> algorithmFactory(
+        BetweennessCentralityMutateConfig config
     ) {
         return BetweennessCentralityProc.algorithmFactory(config);
     }
 
     @Override
-    protected PropertyTranslator<HugeAtomicDoubleArray> nodePropertyTranslator(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig> computationResult) {
+    protected PropertyTranslator<HugeAtomicDoubleArray> nodePropertyTranslator(AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computationResult) {
         return BetweennessCentralityProc.propertyTranslator();
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig> computeResult) {
-        return BetweennessCentralityProc.resultBuilder(new WriteResult.Builder(), computeResult, callContext);
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computeResult) {
+        return BetweennessCentralityProc.resultBuilder(new MutateResult.Builder(), computeResult, callContext);
     }
 
-    public static final class WriteResult {
+    public static final class MutateResult {
 
         public final long nodePropertiesWritten;
         public final long createMillis;
         public final long computeMillis;
-        public final long writeMillis;
+        public final long mutateMillis;
 
         public final double minCentrality;
         public final double maxCentrality;
         public final double sumCentrality;
 
-        WriteResult(
+        MutateResult(
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
-            long writeMillis,
+            long mutateMillis,
             double minCentrality,
             double maxCentrality,
             double sumCentrality
@@ -99,22 +99,22 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
+            this.mutateMillis = mutateMillis;
 
             this.minCentrality = minCentrality;
             this.maxCentrality = maxCentrality;
             this.sumCentrality = sumCentrality;
         }
 
-        static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<WriteResult> {
+        static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<MutateResult> {
 
             @Override
-            public WriteResult build() {
-                return new WriteResult(
+            public MutateResult build() {
+                return new MutateResult(
                     nodePropertiesWritten,
                     createMillis,
                     computeMillis,
-                    writeMillis,
+                    mutateMillis,
                     minCentrality,
                     maxCentrality,
                     sumCentrality

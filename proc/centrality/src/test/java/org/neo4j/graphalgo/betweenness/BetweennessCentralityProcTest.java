@@ -23,6 +23,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -35,6 +36,8 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralityBaseConfig>
     extends BaseProcTest implements AlgoBaseProcTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray> {
+
+    static final String DEFAULT_RESULT_PROPERTY = "centrality";
 
     static double DEFAULT_PROBABILITY = 1.0D;
 
@@ -61,13 +64,15 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
 
         registerProcedures(
             BetweennessCentralityStreamProc.class,
-            BetweennessCentralityWriteProc.class
+            BetweennessCentralityWriteProc.class,
+            BetweennessCentralityMutateProc.class,
+            GraphWriteNodePropertiesProc.class
         );
 
         runQuery(cypher);
 
         runInTransaction(db, tx -> {
-            final Label label = Label.label("Node");
+            var label = Label.label("Node");
             EXPECTED.put(tx.findNode(label, "name", "a").getId(), 0.0);
             EXPECTED.put(tx.findNode(label, "name", "b").getId(), 3.0);
             EXPECTED.put(tx.findNode(label, "name", "c").getId(), 4.0);

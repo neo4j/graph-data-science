@@ -59,7 +59,7 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
 
     @Override
     protected PropertyTranslator<HugeAtomicDoubleArray> nodePropertyTranslator(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig> computationResult) {
-        return Translators.HUGE_ATOMIC_DOUBLE_ARRAY_TRANSLATOR;
+        return BetweennessCentralityProc.propertyTranslator();
     }
 
     @Override
