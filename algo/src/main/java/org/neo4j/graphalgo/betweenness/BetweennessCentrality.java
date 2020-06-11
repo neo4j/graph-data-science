@@ -34,9 +34,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongStack;
 
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -73,11 +71,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
     @Override
     public HugeAtomicDoubleArray compute() {
         nodeQueue.set(0);
-        ArrayList<Future<?>> futures = new ArrayList<>();
-        for (int i = 0; i < concurrency; i++) {
-            futures.add(executorService.submit(new BCTask(tracker)));
-        }
-        ParallelUtil.awaitTermination(futures);
+        ParallelUtil.run(ParallelUtil.tasks(concurrency, () -> new BCTask(tracker)), executorService);
         return centrality;
     }
 
