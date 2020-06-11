@@ -64,6 +64,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         this.nodeCount = graph.nodeCount();
         this.centrality = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
         this.selectionStrategy = selectionStrategy;
+        this.selectionStrategy.init(graph, executorService, concurrency);
         this.expectedNodeCount = selectionStrategy.size();
         this.tracker = tracker;
     }

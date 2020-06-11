@@ -22,10 +22,12 @@ package org.neo4j.graphalgo.betweenness;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,16 +35,32 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface SelectionStrategy {
+public abstract class SelectionStrategy {
 
-    boolean select(long nodeId);
+    abstract void init(Graph graph, ExecutorService executorService, int concurrency);
 
-    long size();
+    abstract boolean select(long nodeId);
 
-    enum Strategy {
-        ALL,
-        RANDOM,
-        RANDOM_DEGREE;
+    abstract long size();
+
+    public enum Strategy {
+        ALL {
+            public SelectionStrategy create(double probability) {
+                return new All();
+            }
+        },
+        RANDOM {
+            public SelectionStrategy create(double probability) {
+                return new Random(probability);
+            }
+        },
+        RANDOM_DEGREE {
+            public SelectionStrategy create(double probability) {
+                return new RandomDegree(probability);
+            }
+        };
+
+        public abstract SelectionStrategy create(double probability);
 
         public static Strategy of(String value) {
             try {
@@ -74,49 +92,55 @@ public interface SelectionStrategy {
         }
     }
 
-    class All implements SelectionStrategy {
+    private static class All extends SelectionStrategy {
 
-        private final long nodeCount;
+        private long nodeCount;
 
-        public All(long nodeCount) {
-            this.nodeCount = nodeCount;
+        @Override
+        void init(Graph graph, ExecutorService executorService, int concurrency) {
+            this.nodeCount = graph.nodeCount();
         }
 
         @Override
-        public boolean select(long nodeId) {
+        boolean select(long nodeId) {
             return true;
         }
 
         @Override
-        public long size() {
+        long size() {
             return nodeCount;
         }
     }
 
-    class Random implements SelectionStrategy {
+    private static class Random extends SelectionStrategy {
 
-        private final BitSet bitSet;
-        private final long size;
+        private final double probability;
+        private BitSet bitSet;
+        private long size;
 
-        public Random(Graph graph, double probability, ExecutorService executorService, int concurrency) {
+        Random(double probability) {
+            this.probability = probability;
+        }
+
+        @Override
+        void init(Graph graph, ExecutorService executorService, int concurrency) {
             this.bitSet = new BitSet(graph.nodeCount());
             selectNodes(graph, probability, executorService, concurrency);
             this.size = this.bitSet.cardinality();
         }
 
         @Override
-        public boolean select(long nodeId) {
+        boolean select(long nodeId) {
             return bitSet.get(nodeId);
         }
 
         @Override
-        public long size() {
+        long size() {
             return size;
         }
 
         private void selectNodes(Graph graph, double probability, ExecutorService executorService, int concurrency) {
             var random = new SecureRandom();
-
             var tasks = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE)
                 .stream()
                 .map(partition -> (Runnable) () -> {
@@ -131,40 +155,46 @@ public interface SelectionStrategy {
         }
     }
 
-    class RandomDegree implements SelectionStrategy {
+    private static class RandomDegree extends SelectionStrategy {
 
-        private final BitSet bitSet;
-        private final long size;
+        private final double probability;
+        private BitSet bitSet;
+        private long size;
 
-        public RandomDegree(
-            Graph graph,
-            double probabilityOffset,
-            ExecutorService executorService,
-            int concurrency
-        ) {
+        RandomDegree(double probability) {
+            this.probability = probability;
+        }
+
+        @Override
+        void init(Graph graph, ExecutorService executorService, int concurrency) {
             this.bitSet = new BitSet(graph.nodeCount());
-            var maxDegree = maxDegree(graph, executorService, concurrency);
-            selectNodes(graph, probabilityOffset, maxDegree, executorService, concurrency);
+            var partitions = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE);
+            var maxDegree = maxDegree(graph, partitions, executorService, concurrency);
+            selectNodes(graph, partitions, probability, maxDegree, executorService, concurrency);
             this.size = bitSet.cardinality();
         }
 
         @Override
-        public boolean select(long nodeId) {
+        boolean select(long nodeId) {
             return bitSet.get(nodeId);
         }
 
         @Override
-        public long size() {
+        long size() {
             return size;
         }
 
-        private long maxDegree(Graph graph, ExecutorService executorService, int concurrency) {
+        private long maxDegree(
+            Graph graph,
+            Collection<Partition> partitions,
+            ExecutorService executorService,
+            int concurrency
+        ) {
             AtomicInteger mx = new AtomicInteger(0);
 
-            var tasks = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE)
-                .stream()
+            var tasks = partitions.stream()
                 .map(partition -> (Runnable) () -> {
-                    for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount ; nodeId++) {
+                    for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount; nodeId++) {
                         int degree = graph.degree(nodeId);
                         int current;
                         do {
@@ -180,14 +210,14 @@ public interface SelectionStrategy {
 
         private void selectNodes(
             Graph graph,
+            Collection<Partition> partitions,
             double probabilityOffset,
             double maxDegree,
             ExecutorService executorService,
             int concurrency
         ) {
             var random = new SecureRandom();
-            var tasks = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE)
-                .stream()
+            var tasks = partitions.stream()
                 .map(partition -> (Runnable) () -> {
                     for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount; nodeId++) {
                         if (random.nextDouble() - probabilityOffset <= graph.degree(nodeId) / maxDegree) {

@@ -48,9 +48,13 @@ final class BetweennessCentralityProc {
             public BetweennessCentrality build(
                 Graph graph, CONFIG configuration, AllocationTracker tracker, Log log
             ) {
+                var probability = Double.isNaN(config.probability())
+                    ? Math.log10(graph.nodeCount()) / Math.exp(2)
+                    : config.probability();
+
                 return new BetweennessCentrality(
                     graph,
-                    strategy(configuration, graph),
+                    configuration.strategy().create(probability),
                     Pools.DEFAULT,
                     config.concurrency(),
                     tracker
@@ -62,36 +66,6 @@ final class BetweennessCentralityProc {
                 return MemoryEstimations.empty();
             }
         };
-    }
-
-    private static SelectionStrategy strategy(
-        BetweennessCentralityBaseConfig configuration,
-        Graph graph
-    ) {
-        double probability = configuration.probability();
-
-        if (probability == 1.0) {
-            return new SelectionStrategy.All(graph.nodeCount());
-        }
-
-        if (Double.isNaN(probability)) {
-            probability = Math.log10(graph.nodeCount()) / Math.exp(2);
-        }
-        switch (configuration.strategy()) {
-            case ALL:
-                return new SelectionStrategy.All(graph.nodeCount());
-            case RANDOM:
-                return new SelectionStrategy.Random(graph, probability, Pools.DEFAULT, configuration.concurrency());
-            case RANDOM_DEGREE:
-                return new SelectionStrategy.RandomDegree(
-                    graph,
-                    probability,
-                    Pools.DEFAULT,
-                    configuration.concurrency()
-                );
-            default:
-                throw new IllegalArgumentException("Unknown selection strategy: " + configuration.strategy());
-        }
     }
 
     static <PROC_RESULT, CONFIG extends BetweennessCentralityBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

@@ -34,6 +34,9 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.betweenness.SelectionStrategy.Strategy.RANDOM;
+import static org.neo4j.graphalgo.betweenness.SelectionStrategy.Strategy.RANDOM_DEGREE;
+
 class BetweennessCentralityComparisonTest {
 
     static Stream<Arguments> randomGraphParameters() {
@@ -132,7 +135,7 @@ class BetweennessCentralityComparisonTest {
 
         var degreeSampledBC = new BetweennessCentrality(
             graph,
-            new SelectionStrategy.RandomDegree(graph, 1.0, executorService, concurrency),
+            RANDOM_DEGREE.create(1.0),
             executorService,
             concurrency,
             tracker
@@ -141,7 +144,7 @@ class BetweennessCentralityComparisonTest {
 
         var randomSampledBC = new BetweennessCentrality(
             graph,
-            new SelectionStrategy.Random(graph, 1.0, executorService, concurrency),
+            RANDOM.create(1.0),
             executorService,
             concurrency,
             tracker

@@ -42,13 +42,13 @@ public final class PartitionUtils {
         final long remainder = initialBatchSize % alignTo;
         final long adjustedBatchSize = remainder == 0 ? initialBatchSize : initialBatchSize + (alignTo - remainder);
 
-        List<Partition> tasks = new ArrayList<>(concurrency);
+        List<Partition> partitions = new ArrayList<>(concurrency);
         for (long i = 0; i < nodeCount; i += adjustedBatchSize) {
             long actualBatchSize = i + adjustedBatchSize < nodeCount ? adjustedBatchSize : nodeCount - i;
-            tasks.add(new Partition(i, actualBatchSize));
+            partitions.add(new Partition(i, actualBatchSize));
         }
 
-        return tasks;
+        return partitions;
     }
 
     public static List<Partition> degreePartition(Graph graph, long batchSize) {
