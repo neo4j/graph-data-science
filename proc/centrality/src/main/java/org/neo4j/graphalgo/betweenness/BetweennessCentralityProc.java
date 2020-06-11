@@ -34,7 +34,7 @@ import org.neo4j.logging.Log;
 
 final class BetweennessCentralityProc {
 
-    static final String BETWEENNESS_DESCRIPTION = "Betweenness centrality measures the relative information flow that goes through a node.";
+    static final String BETWEENNESS_DESCRIPTION = "Betweenness centrality measures the relative information flow that passes through a node.";
 
     private BetweennessCentralityProc() {}
 
