@@ -132,7 +132,7 @@ class BetweennessCentralityComparisonTest {
 
         var degreeSampledBC = new BetweennessCentrality(
             graph,
-            new SelectionStrategy.RandomDegree(graph, 1.0, executorService, concurrency, tracker),
+            new SelectionStrategy.RandomDegree(graph, 1.0, executorService, concurrency),
             executorService,
             concurrency,
             tracker
@@ -141,7 +141,7 @@ class BetweennessCentralityComparisonTest {
 
         var randomSampledBC = new BetweennessCentrality(
             graph,
-            new SelectionStrategy.Random(graph, 1.0, tracker),
+            new SelectionStrategy.Random(graph, 1.0),
             executorService,
             concurrency,
             tracker

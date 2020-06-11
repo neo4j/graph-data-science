@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedSimpleBitSet;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -95,23 +95,18 @@ public interface SelectionStrategy {
 
     class Random implements SelectionStrategy {
 
-        private final PagedSimpleBitSet bitSet;
+        private final BitSet bitSet;
         private final long size;
 
-        public Random(Graph graph, double probability, AllocationTracker tracker) {
-            this.bitSet = PagedSimpleBitSet.newBitSet(graph.nodeCount(), tracker);
-            final SecureRandom random = new SecureRandom();
-            for (int i = 0; i < graph.nodeCount(); i++) {
-                if (random.nextDouble() < probability) {
-                    this.bitSet.put(i);
-                }
-            }
-            this.size = this.bitSet.size();
+        public Random(Graph graph, double probability) {
+            this.bitSet = new BitSet(graph.nodeCount());
+            selectNodes(graph, probability);
+            this.size = this.bitSet.cardinality();
         }
 
         @Override
         public boolean select(long nodeId) {
-            return bitSet.contains(nodeId);
+            return bitSet.get(nodeId);
         }
 
         @Override
@@ -119,40 +114,36 @@ public interface SelectionStrategy {
             return size;
         }
 
+        private void selectNodes(Graph graph, double probability) {
+            final SecureRandom random = new SecureRandom();
+            for (int i = 0; i < graph.nodeCount(); i++) {
+                if (random.nextDouble() < probability) {
+                    this.bitSet.set(i);
+                }
+            }
+        }
     }
 
     class RandomDegree implements SelectionStrategy {
 
-        private final double maxDegree;
-        // TODO: benchmark and potentially replace with hppc BitSet
-        private final PagedSimpleBitSet bitSet;
+        private final BitSet bitSet;
         private final long size;
 
         public RandomDegree(
             Graph graph,
             double probabilityOffset,
             ExecutorService executorService,
-            int concurrency,
-            AllocationTracker tracker
+            int concurrency
         ) {
-            this.bitSet = PagedSimpleBitSet.newBitSet(graph.nodeCount(), tracker);
-            this.maxDegree = getMaxDegree(graph, executorService, concurrency);
-
-            SecureRandom random = new SecureRandom();
-            ParallelUtil.readParallel(concurrency, graph.nodeCount(), executorService, (from, to) -> {
-                for (long nodeId = from; nodeId < to; nodeId++) {
-                    if (random.nextDouble() - probabilityOffset <= graph.degree(nodeId) / maxDegree) {
-                        bitSet.put(nodeId);
-                    }
-                }
-            });
-
-            this.size = bitSet.size();
+            this.bitSet = new BitSet(graph.nodeCount());
+            var maxDegree = maxDegree(graph, executorService, concurrency);
+            selectNodes(graph, executorService, concurrency, probabilityOffset, maxDegree);
+            this.size = bitSet.cardinality();
         }
 
         @Override
         public boolean select(long nodeId) {
-            return bitSet.contains(nodeId);
+            return bitSet.get(nodeId);
         }
 
         @Override
@@ -160,18 +151,39 @@ public interface SelectionStrategy {
             return size;
         }
 
-        private long getMaxDegree(Graph graph, ExecutorService executorService, int concurrency) {
+        private long maxDegree(Graph graph, ExecutorService executorService, int concurrency) {
             AtomicInteger mx = new AtomicInteger(0);
-            ParallelUtil.readParallel(concurrency, graph.nodeCount(), executorService, (from, to) -> {
-                for (long nodeId = from; nodeId < to; nodeId++) {
-                    int degree = graph.degree(nodeId);
-                    int current;
-                    do {
-                        current = mx.get();
-                    } while (degree > current && !mx.compareAndSet(current, degree));
-                }
-            });
+
+            var tasks = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE)
+                .stream()
+                .map(partition -> (Runnable) () -> {
+                    for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount ; nodeId++) {
+                        int degree = graph.degree(nodeId);
+                        int current;
+                        do {
+                            current = mx.get();
+                        } while (degree > current && !mx.compareAndSet(current, degree));
+                    }
+                }).collect(Collectors.toList());
+
+            ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+
             return mx.get();
+        }
+
+        private void selectNodes(Graph graph, ExecutorService executorService, int concurrency, double probabilityOffset, double maxDegree) {
+            SecureRandom random = new SecureRandom();
+            var tasks = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE)
+                .stream()
+                .map(partition -> (Runnable) () -> {
+                    for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount ; nodeId++) {
+                        if (random.nextDouble() - probabilityOffset <= graph.degree(nodeId) / maxDegree) {
+                            bitSet.set(nodeId);
+                        }
+                    }
+                }).collect(Collectors.toList());
+
+            ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
         }
     }
 }
