@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -92,9 +93,8 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
 
         private final RelationshipIterator localRelationshipIterator;
 
-        // TODO: replace with AdjacencyList or write own PagedLongObjectScatterMap
-        // Note that this depends on the max-in-degree which is Int.MAX in Neo4j, so maybe no need to change?
         private final HugeObjectArray<LongArrayList> predecessors;
+        private final HugeCursor<LongArrayList[]> predecessorsCursor;
 
         private final HugeLongArrayQueue forwardNodes;
         private final PagedLongStack backwardNodes;
@@ -108,6 +108,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
 
             this.predecessors = HugeObjectArray.newArray(LongArrayList.class, expectedNodeCount, tracker);
             this.backwardNodes = new PagedLongStack(nodeCount, tracker);
+            this.predecessorsCursor = predecessors.newCursor();
             // TODO: make queue growable
             this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount, tracker);
 
@@ -130,12 +131,9 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
                     continue;
                 }
                 // reset
-                getProgressLogger().logProgress((double) startNodeId / (nodeCount - 1));
+                getProgressLogger().logProgress(startNodeId / (nodeCount - 1));
 
-                distance.fill(-1);
-                sigma.fill(0);
-                predecessors.fill(null);
-                delta.fill(0);
+                clear();
 
                 sigma.addTo(startNodeId, 1);
                 distance.set(startNodeId, 0);
@@ -155,9 +153,8 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
                         }
 
                         if (distance.get(target) == distanceNode + 1) {
-                            // TODO: consider moving this out of the lambda (benchmark)
-                            sigma.addTo(target, sigma.get(node));
-                            append(target, node);
+                            sigma.addTo(target, sigma.get(source));
+                            append(target, source);
                         }
                         return true;
                     });
@@ -195,6 +192,22 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
                 predecessors.set(target, targetPredecessors);
             }
             targetPredecessors.add(node);
+        }
+
+        private void clear() {
+            distance.fill(-1);
+            sigma.fill(0);
+            delta.fill(0);
+
+            predecessors.initCursor(predecessorsCursor);
+
+            while (predecessorsCursor.next()) {
+                for (int i = predecessorsCursor.offset; i < predecessorsCursor.limit; i++) {
+                    if (predecessorsCursor.array[i] != null) {
+                        predecessorsCursor.array[i].elementsCount = 0;
+                    }
+                }
+            }
         }
     }
 }
