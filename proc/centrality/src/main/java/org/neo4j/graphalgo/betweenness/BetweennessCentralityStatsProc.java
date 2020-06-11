@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.betweenness;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
@@ -35,85 +35,77 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
-public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteProc.WriteResult, BetweennessCentralityWriteConfig> {
+public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsProc.StatsResult, BetweennessCentralityStatsConfig> {
 
-    @Procedure(value = "gds.betweenness.write", mode = WRITE)
+    @Procedure(value = "gds.betweenness.stats", mode = READ)
     @Description(BETWEENNESS_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        return stats(compute(graphNameOrConfig, configuration));
     }
 
     @Override
-    protected BetweennessCentralityWriteConfig newConfig(
+    protected BetweennessCentralityStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return BetweennessCentralityWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return BetweennessCentralityStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityWriteConfig> algorithmFactory(
-        BetweennessCentralityWriteConfig config
+    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStatsConfig> algorithmFactory(
+        BetweennessCentralityStatsConfig config
     ) {
         return BetweennessCentralityProc.algorithmFactory(config);
     }
 
     @Override
-    protected PropertyTranslator<HugeAtomicDoubleArray> nodePropertyTranslator(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig> computationResult) {
+    protected PropertyTranslator<HugeAtomicDoubleArray> nodePropertyTranslator(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig> computationResult) {
         return BetweennessCentralityProc.propertyTranslator();
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig> computeResult) {
-        return BetweennessCentralityProc.resultBuilder(new WriteResult.Builder(), computeResult, callContext);
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig> computeResult) {
+        return BetweennessCentralityProc.resultBuilder(new StatsResult.Builder(), computeResult, callContext);
     }
 
-    public static final class WriteResult {
+    public static final class StatsResult {
 
-        public final long nodePropertiesWritten;
         public final long createMillis;
         public final long computeMillis;
-        public final long writeMillis;
 
         public final double minCentrality;
         public final double maxCentrality;
         public final double sumCentrality;
 
-        WriteResult(
-            long nodePropertiesWritten,
+        StatsResult(
             long createMillis,
             long computeMillis,
-            long writeMillis,
             double minCentrality,
             double maxCentrality,
             double sumCentrality
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
 
             this.minCentrality = minCentrality;
             this.maxCentrality = maxCentrality;
             this.sumCentrality = sumCentrality;
         }
 
-        static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<WriteResult> {
+        static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<StatsResult> {
 
             @Override
-            public WriteResult build() {
-                return new WriteResult(
-                    nodePropertiesWritten,
+            public StatsResult build() {
+                return new StatsResult(
                     createMillis,
                     computeMillis,
-                    writeMillis,
                     minCentrality,
                     maxCentrality,
                     sumCentrality

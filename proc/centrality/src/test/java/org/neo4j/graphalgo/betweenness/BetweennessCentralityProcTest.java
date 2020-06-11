@@ -66,6 +66,7 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
             BetweennessCentralityStreamProc.class,
             BetweennessCentralityWriteProc.class,
             BetweennessCentralityMutateProc.class,
+            BetweennessCentralityStatsProc.class,
             GraphWriteNodePropertiesProc.class
         );
 
