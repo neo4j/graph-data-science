@@ -19,22 +19,15 @@
  */
 package org.neo4j.graphalgo.core.pagecached;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.io.pagecache.PageCache;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-import org.neo4j.test.extension.DbmsExtension;
-import org.neo4j.test.extension.ExtensionCallback;
-import org.neo4j.test.extension.Inject;
-import org.neo4j.test.rule.TestDirectory;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -44,29 +37,8 @@ import java.util.concurrent.atomic.LongAdder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
-@DbmsExtension(configurationCallback = "configuration")
-
-class AdjacencyBuilderTest {
-
-    @Inject
-    public GraphDatabaseAPI db;
-
-    @Inject
-    TestDirectory dir;
-
-
-    @BeforeEach
-    void setUp() {
-        runQuery(db, "CREATE (n);");
-    }
-
-    @ExtensionCallback
-    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        builder.noOpSystemGraphInitializer();
-        builder.addExtension(new ConcurrencyControllerExtension());
-    }
+class AdjacencyBuilderTest extends BaseTest {
 
     @Test
     void test() throws IOException {
