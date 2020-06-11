@@ -30,7 +30,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
-import java.util.function.Consumer;
 
 import static io.qala.datagen.RandomShortApi.bool;
 import static io.qala.datagen.RandomShortApi.integer;
@@ -66,21 +65,6 @@ final class HugeAtomicDoubleArrayTest {
         testArray(SIZE, aa -> {
             for (int i = 0; i < SIZE; i++) {
                 assertEquals(0, aa.get(i));
-            }
-        });
-    }
-
-    /**
-     * constructor with array is of same size and has all elements
-     */
-    @Test
-    void testConstructor2() {
-        double[] a = {17.0D, 3.0D, -42.0D, 99.0D, -7.0D};
-        PageFiller pageFiller = PageFiller.longToDouble(4, i -> a[(int) i]);
-        testArray(a.length, pageFiller, aa -> {
-            assertEquals(a.length, aa.size());
-            for (int i = 0; i < a.length; i++) {
-                assertEquals(a[i], aa.get(i));
             }
         });
     }
@@ -254,9 +238,9 @@ final class HugeAtomicDoubleArrayTest {
 
     @Test
     void shouldComputeMemoryEstimation() {
-        assertEquals(56, HugeAtomicDoubleArray.memoryEstimation(0L));
-        assertEquals(856, HugeAtomicDoubleArray.memoryEstimation(100L));
-        assertEquals(800_122_070_384L, HugeAtomicDoubleArray.memoryEstimation(100_000_000_000L));
+        assertEquals(40, HugeAtomicDoubleArray.memoryEstimation(0L));
+        assertEquals(840, HugeAtomicDoubleArray.memoryEstimation(100L));
+        assertEquals(800_122_070_368L, HugeAtomicDoubleArray.memoryEstimation(100_000_000_000L));
     }
 
     @Test
@@ -328,30 +312,12 @@ final class HugeAtomicDoubleArrayTest {
         }
     }
 
-    private void testArray(int size, PageFiller pageFiller, Consumer<HugeAtomicDoubleArray> block) {
-        if (bool()) {
-            block.accept(singleArray(size, pageFiller));
-            block.accept(pagedArray(size, pageFiller));
-        } else {
-            block.accept(pagedArray(size, pageFiller));
-            block.accept(singleArray(size, pageFiller));
-        }
-    }
-
     private HugeAtomicDoubleArray singleArray(final int size) {
-        return HugeAtomicDoubleArray.newSingleArray(size, PageFiller.passThrough(), AllocationTracker.EMPTY);
-    }
-
-    private HugeAtomicDoubleArray singleArray(final int size, final PageFiller pageFiller) {
-        return HugeAtomicDoubleArray.newSingleArray(size, pageFiller, AllocationTracker.EMPTY);
+        return HugeAtomicDoubleArray.newSingleArray(size, DoublePageFiller.passThrough(), AllocationTracker.EMPTY);
     }
 
     private HugeAtomicDoubleArray pagedArray(final int size) {
-        return HugeAtomicDoubleArray.newPagedArray(size, PageFiller.passThrough(), AllocationTracker.EMPTY);
-    }
-
-    private HugeAtomicDoubleArray pagedArray(final int size, final PageFiller pageFiller) {
-        return HugeAtomicDoubleArray.newPagedArray(size, pageFiller, AllocationTracker.EMPTY);
+        return HugeAtomicDoubleArray.newPagedArray(size, DoublePageFiller.passThrough(), AllocationTracker.EMPTY);
     }
 
     /**

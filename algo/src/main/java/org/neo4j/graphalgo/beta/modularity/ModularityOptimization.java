@@ -33,11 +33,11 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.DoublePageFiller;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
-import org.neo4j.graphalgo.core.utils.paged.PageFiller;
 import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import java.util.ArrayList;
@@ -270,7 +270,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         // reset communityWeightUpdates
-        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, PageFiller.allZeros(concurrency), tracker);
+        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, DoublePageFiller.allZeros(concurrency), tracker);
     }
 
     private Collection<ModularityOptimizationTask> createModularityOptimizationTasks(long currentColor) {

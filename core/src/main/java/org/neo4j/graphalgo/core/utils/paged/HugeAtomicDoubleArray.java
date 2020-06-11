@@ -19,32 +19,52 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
+
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.LongToDoubleFunction;
-import java.util.function.LongUnaryOperator;
+import java.util.function.IntToLongFunction;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
+import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
+import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
+import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
+import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
+import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
 
-public class HugeAtomicDoubleArray {
+public abstract class HugeAtomicDoubleArray {
 
-    private final HugeAtomicLongArray data;
-
-    public HugeAtomicDoubleArray(HugeAtomicLongArray data) {
-        this.data = data;
-    }
-
-    public double get(long index) {
-        return Double.longBitsToDouble(data.get(index));
-    }
+    /**
+     * @return the long value at the given index
+     * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
+     */
+    public abstract double get(long index);
 
     /**
      * Sets the long value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    public void set(long index, double value) {
-        data.set(index, Double.doubleToLongBits(value));
-    }
+    public abstract void set(long index, double value);
+
+    /**
+     * Atomically sets the element at position {@code index} to the given
+     * updated value if the current value {@code ==} the expected value.ddssdd
+     *
+     * @param index  the index
+     * @param expect the expected value
+     * @param update the new value
+     * @return {@code true} if successful. False return indicates that
+     *     the actual value was not equal to the expected value.
+     */
+    public abstract boolean compareAndSet(long index, double expect, double update);
 
     /**
      * Atomically updates the element at index {@code index} with the results
@@ -55,15 +75,7 @@ public class HugeAtomicDoubleArray {
      * @param index          the index
      * @param updateFunction a side-effect-free function
      */
-    public void update(long index, DoubleUnaryOperator updateFunction) {
-        LongUnaryOperator longUpdateFunction = (oldLongValue) -> {
-            double oldDoubleValue = Double.longBitsToDouble(oldLongValue);
-            double newDoubleValue = updateFunction.applyAsDouble(oldDoubleValue);
-            return Double.doubleToLongBits(newDoubleValue);
-        };
-
-        data.update(index, longUpdateFunction);
-    }
+    public abstract void update(long index, DoubleUnaryOperator updateFunction);
 
     /**
      * Returns the length of this array.
@@ -72,21 +84,13 @@ public class HugeAtomicDoubleArray {
      * <p>
      * The behavior is identical to calling {@code array.length} on primitive arrays.
      */
-    public long size() {
-        return data.size();
-    }
+    public abstract long size();
 
     /**
      * @return the amount of memory used by the instance of this array, in bytes.
      *     This should be the same as returned from {@link #release()} without actually releasing the array.
      */
-    public long sizeOf() {
-        return data.sizeOf();
-    }
-
-    public boolean compareAndSet(long index, double expect, double update) {
-        return data.compareAndSet(index, Double.doubleToLongBits(expect), Double.doubleToLongBits(update));
-    }
+    public abstract long sizeOf();
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
@@ -99,46 +103,234 @@ public class HugeAtomicDoubleArray {
      *
      * @return the amount of memory freed, in bytes.
      */
-    public long release() {
-        return data.release();
-    }
+    public abstract long release();
 
     /**
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static HugeAtomicDoubleArray newArray(long size, AllocationTracker tracker) {
-        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newArray(size, PageFiller.passThrough(), tracker));
+        return newArray(size, DoublePageFiller.passThrough(), tracker);
     }
 
-    public static HugeAtomicDoubleArray newArray(long size, PageFiller pageFiller, AllocationTracker tracker) {
-        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newArray(size, pageFiller, tracker));
-    }
-
-    /* test-only */
-    static HugeAtomicDoubleArray newPagedArray(long size, final PageFiller pageFiller, AllocationTracker tracker) {
-        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newPagedArray(size, pageFiller, tracker));
-    }
-
-    /* test-only */
-    static HugeAtomicDoubleArray newSingleArray(int size, final PageFiller pageFiller, AllocationTracker tracker) {
-        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newSingleArray(size, pageFiller, tracker));
-    }
-
-    private static LongUnaryOperator convertLongDoubleFunctionToLongUnary(LongToDoubleFunction gen) {
-        if (gen == null) {
-            return null;
+    /**
+     * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
+     * The tracker is no longer referenced, as the arrays do not dynamically change their size.
+     * The values are pre-calculated according to the semantics of {@link Arrays#setAll(long[], IntToLongFunction)}
+     */
+    public static HugeAtomicDoubleArray newArray(long size, DoublePageFiller pageFiller, AllocationTracker tracker) {
+        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+            return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, tracker);
         }
-        return (index) -> Double.doubleToLongBits(gen.applyAsDouble(index));
+        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller, tracker);
     }
 
     public static long memoryEstimation(long size) {
         assert size >= 0;
-
-        long hugeLongArraySize = HugeAtomicLongArray.memoryEstimation(size);
-        long instanceSize = sizeOfInstance(HugeAtomicDoubleArray.class);
-
-        return instanceSize + hugeLongArraySize;
+        long instanceSize;
+        long dataSize;
+        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+            instanceSize = sizeOfInstance(HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.class);
+            dataSize = sizeOfLongArray((int) size);
+        } else {
+            instanceSize = sizeOfInstance(HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.class);
+            dataSize = HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.memoryUsageOfData(size);
+        }
+        return instanceSize + dataSize;
     }
 
+    /* test-only */
+    static HugeAtomicDoubleArray newPagedArray(
+        long size,
+        final DoublePageFiller pageFiller,
+        AllocationTracker tracker
+    ) {
+        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller, tracker);
+    }
+
+    /* test-only */
+    static HugeAtomicDoubleArray newSingleArray(
+        int size,
+        final DoublePageFiller pageFiller,
+        AllocationTracker tracker
+    ) {
+        return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, tracker);
+    }
+
+    /**
+     * A {@link PropertyTranslator} for instances of {@link HugeAtomicDoubleArray}s.
+     */
+    public static class Translator implements PropertyTranslator.OfDouble<HugeAtomicDoubleArray> {
+
+        public static final HugeAtomicDoubleArray.Translator INSTANCE = new HugeAtomicDoubleArray.Translator();
+
+        @Override
+        public double toDouble(final HugeAtomicDoubleArray data, final long nodeId) {
+            return data.get(nodeId);
+        }
+    }
+
+    private static final class SingleHugeAtomicDoubleArray extends HugeAtomicDoubleArray {
+
+        private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(double[].class);
+
+        private static HugeAtomicDoubleArray of(long size, DoublePageFiller pageFiller, AllocationTracker tracker) {
+            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
+            final int intSize = (int) size;
+            tracker.add(sizeOfLongArray(intSize));
+            double[] page = new double[intSize];
+            pageFiller.accept(page);
+            return new HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray(intSize, page);
+        }
+
+        private final int size;
+        private double[] page;
+
+        private SingleHugeAtomicDoubleArray(int size, double[] page) {
+            this.size = size;
+            this.page = page;
+        }
+
+        @Override
+        public double get(long index) {
+            return (double) ARRAY_HANDLE.getVolatile(page, (int) index);
+        }
+
+        @Override
+        public void set(long index, double value) {
+            ARRAY_HANDLE.setVolatile(page, (int) index, value);
+        }
+
+        @Override
+        public boolean compareAndSet(long index, double expect, double update) {
+            return ARRAY_HANDLE.compareAndSet(page, (int) index, expect, update);
+        }
+
+        @Override
+        public void update(long index, DoubleUnaryOperator updateFunction) {
+            double prev, next;
+            do {
+                prev = (double) ARRAY_HANDLE.getVolatile(page, (int) index);
+                next = updateFunction.applyAsDouble(prev);
+            } while (!ARRAY_HANDLE.weakCompareAndSet(page, (int) index, prev, next));
+        }
+
+        @Override
+        public long size() {
+            return size;
+        }
+
+        @Override
+        public long sizeOf() {
+            return sizeOfLongArray(size);
+        }
+
+        @Override
+        public long release() {
+            if (page != null) {
+                page = null;
+                return sizeOfLongArray(size);
+            }
+            return 0L;
+        }
+    }
+
+    static final class PagedHugeAtomicDoubleArray extends HugeAtomicDoubleArray {
+
+        private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(double[].class);
+
+        private static HugeAtomicDoubleArray of(long size, DoublePageFiller pageFiller, AllocationTracker tracker) {
+            int numPages = numberOfPages(size);
+            int lastPage = numPages - 1;
+            final int lastPageSize = exclusiveIndexOfPage(size);
+
+            double[][] pages = new double[numPages][];
+            for (int i = 0; i < lastPage; i++) {
+                pages[i] = new double[PAGE_SIZE];
+                long base = ((long) i) << PAGE_SHIFT;
+                pageFiller.accept(pages[i], base);
+            }
+            pages[lastPage] = new double[lastPageSize];
+            long base = ((long) lastPage) << PAGE_SHIFT;
+            pageFiller.accept(pages[lastPage], base);
+
+            long memoryUsed = memoryUsageOfData(size);
+            tracker.add(memoryUsed);
+            return new PagedHugeAtomicDoubleArray(size, pages, memoryUsed);
+        }
+
+        private static long memoryUsageOfData(long size) {
+            int numberOfPages = numberOfPages(size);
+            int numberOfFullPages = numberOfPages - 1;
+            long bytesPerPage = sizeOfDoubleArray(PAGE_SIZE);
+            int sizeOfLastPage = exclusiveIndexOfPage(size);
+            long bytesOfLastPage = sizeOfDoubleArray(sizeOfLastPage);
+            long memoryUsed = sizeOfObjectArray(numberOfPages);
+            memoryUsed += (numberOfFullPages * bytesPerPage);
+            memoryUsed += bytesOfLastPage;
+            return memoryUsed;
+        }
+
+        private final long size;
+        private double[][] pages;
+        private final long memoryUsed;
+
+        private PagedHugeAtomicDoubleArray(long size, double[][] pages, long memoryUsed) {
+            this.size = size;
+            this.pages = pages;
+            this.memoryUsed = memoryUsed;
+        }
+
+        @Override
+        public double get(long index) {
+            int pageIndex = pageIndex(index);
+            int indexInPage = indexInPage(index);
+            return (double) ARRAY_HANDLE.getVolatile(pages[pageIndex], indexInPage);
+        }
+
+        @Override
+        public void set(long index, double value) {
+            int pageIndex = pageIndex(index);
+            int indexInPage = indexInPage(index);
+            ARRAY_HANDLE.setVolatile(pages[pageIndex], indexInPage, value);
+        }
+
+        @Override
+        public boolean compareAndSet(long index, double expect, double update) {
+            int pageIndex = pageIndex(index);
+            int indexInPage = indexInPage(index);
+            return ARRAY_HANDLE.compareAndSet(pages[pageIndex], indexInPage, expect, update);
+        }
+
+        @Override
+        public void update(long index, DoubleUnaryOperator updateFunction) {
+            int pageIndex = pageIndex(index);
+            int indexInPage = indexInPage(index);
+            double[] page = pages[pageIndex];
+            double prev, next;
+            do {
+                prev = (double) ARRAY_HANDLE.getVolatile(page, indexInPage);
+                next = updateFunction.applyAsDouble(prev);
+            } while (!ARRAY_HANDLE.compareAndSet(page, indexInPage, prev, next));
+        }
+
+        @Override
+        public long size() {
+            return size;
+        }
+
+        @Override
+        public long sizeOf() {
+            return memoryUsed;
+        }
+
+        @Override
+        public long release() {
+            if (pages != null) {
+                pages = null;
+                return memoryUsed;
+            }
+            return 0L;
+        }
+    }
 }

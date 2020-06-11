@@ -282,9 +282,9 @@ class ModularityOptimizationTest extends AlgoTestBase {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 5614080, 8413112),
-            arguments(4, 5617368, 14413376),
-            arguments(42, 5659016, 90416720)
+            arguments(1, 5614048, 8413080),
+            arguments(4, 5617336, 14413344),
+            arguments(42, 5658984, 90416688)
         );
     }
 }
