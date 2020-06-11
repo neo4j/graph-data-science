@@ -262,11 +262,10 @@ public final class AdjacencyList {
         }
     }
 
-    public static final class DecompressingCursor extends MutableIntValue {
+    public static final class DecompressingCursor extends MutableIntValue implements AutoCloseable {
 
         public static final long NOT_FOUND = -1;
         // TODO: free
-        private byte[][] pages;
         private final AdjacencyDecompressingReader decompress;
 
         private int maxTargets;
@@ -346,6 +345,11 @@ public final class AdjacencyList {
             long value = decompress.advance(target, targetsLeftToBeDecoded, this);
             this.currentTarget += this.value;
             return value;
+        }
+
+        @Override
+        public void close() {
+            pageCursor.close();
         }
 
         DecompressingCursor init(long fromIndex, int pageSize) throws IOException {

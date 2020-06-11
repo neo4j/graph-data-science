@@ -44,10 +44,10 @@ final class AdjacencyCompression {
         return values;
     }
 
-//    static void copyFrom(LongsRef into, CompressedLongArray array) {
-//        into.longs = growWithDestroy(into.longs, array.length());
-//        into.length = array.uncompress(into.longs);
-//    }
+    static void copyFrom(LongsRef into, CompressedLongArray array) {
+        into.longs = growWithDestroy(into.longs, array.length());
+        into.length = array.uncompress(into.longs);
+    }
 
     static int applyDeltaEncoding(LongsRef data, Aggregation aggregation) {
         Arrays.sort(data.longs, 0, data.length);

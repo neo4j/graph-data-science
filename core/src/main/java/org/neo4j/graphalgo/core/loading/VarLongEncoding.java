@@ -127,7 +127,7 @@ public final class VarLongEncoding {
         }
     }
 
-    static long zigZag(final long value) {
+    public static long zigZag(final long value) {
         return (value >> 63) ^ (value << 1);
     }
 
