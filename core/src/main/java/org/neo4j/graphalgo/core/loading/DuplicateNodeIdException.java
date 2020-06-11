@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 public final class DuplicateNodeIdException extends RuntimeException {
     public final long nodeId;
 
-    DuplicateNodeIdException(long nodeId) {
+    public DuplicateNodeIdException(long nodeId) {
         super("Node(" + nodeId + ") was added multiple times.", null, false, false);
         this.nodeId = nodeId;
     }
