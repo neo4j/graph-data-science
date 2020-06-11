@@ -137,7 +137,7 @@ class BetweennessCentralityComparisonTest {
             concurrency,
             tracker
         );
-        degreeSampledBC.compute();
+        var degreeSampledResult = degreeSampledBC.compute();
 
         var randomSampledBC = new BetweennessCentrality(
             graph,
@@ -146,13 +146,13 @@ class BetweennessCentralityComparisonTest {
             concurrency,
             tracker
         );
-        randomSampledBC.compute();
+        var randomSampledResult = randomSampledBC.compute();
 
         for (int i = 0; i < graph.nodeCount(); i++) {
             Assert.assertEquals(
                 String.format(Locale.ENGLISH, "BC vs Degree-Sampled-BC: node %d with wrong BC value", i),
-                degreeSampledBC.getCentrality().get(i),
-                randomSampledBC.getCentrality().get(i),
+                degreeSampledResult.get(i),
+                randomSampledResult.get(i),
                 1E-3
             );
         }

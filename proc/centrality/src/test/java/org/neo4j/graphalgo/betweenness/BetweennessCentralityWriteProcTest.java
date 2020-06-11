@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.Optional;
 
@@ -32,12 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class BetweennessCentralityWriteProcTest
     extends BetweennessCentralityProcTest<BetweennessCentralityWriteConfig>
-    implements WritePropertyConfigTest<BetweennessCentrality, BetweennessCentralityWriteConfig, BetweennessCentrality> {
+    implements WritePropertyConfigTest<BetweennessCentrality, BetweennessCentralityWriteConfig, HugeAtomicDoubleArray> {
 
     private static final String WRITE_PROPERTY = "centrality";
 
     @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig>> getProcedureClazz() {
         return BetweennessCentralityWriteProc.class;
     }
 

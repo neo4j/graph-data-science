@@ -23,7 +23,9 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityWriteProc.WriteResult, BetweennessCentralityWriteConfig> {
+public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteProc.WriteResult, BetweennessCentralityWriteConfig> {
 
     @Procedure(value = "gds.betweenness.write", mode = WRITE)
     @Description(BETWEENNESS_DESCRIPTION)
@@ -65,12 +67,12 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
     }
 
     @Override
-    protected PropertyTranslator<BetweennessCentrality> nodePropertyTranslator(ComputationResult<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityWriteConfig> computationResult) {
-        return BetweennessCentralityProc.CentralityTranslator.INSTANCE;
+    protected PropertyTranslator<HugeAtomicDoubleArray> nodePropertyTranslator(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig> computationResult) {
+        return Translators.HUGE_ATOMIC_DOUBLE_ARRAY_TRANSLATOR;
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityWriteConfig> computeResult) {
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig> computeResult) {
         return BetweennessCentralityProc.resultBuilder(new WriteResult.Builder(), computeResult, callContext);
     }
 

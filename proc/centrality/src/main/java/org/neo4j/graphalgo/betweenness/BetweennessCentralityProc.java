@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
@@ -92,18 +91,9 @@ final class BetweennessCentralityProc {
         }
     }
 
-    static final class CentralityTranslator implements PropertyTranslator.OfDouble<BetweennessCentrality> {
-        public static final CentralityTranslator INSTANCE = new CentralityTranslator();
-
-        @Override
-        public double toDouble(BetweennessCentrality pageRank, long nodeId) {
-            return pageRank.getCentrality().get((int) nodeId);
-        }
-    }
-
     static <PROC_RESULT, CONFIG extends BetweennessCentralityBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         BetweennessCentralityResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<BetweennessCentrality, BetweennessCentrality, CONFIG> computeResult,
+        AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult,
         ProcedureCallContext callContext
     ) {
         var result = computeResult.result();
@@ -115,7 +105,7 @@ final class BetweennessCentralityProc {
         );
 
         if (result != null && computeStatistics) {
-            procResultBuilder = computeStatistics(procResultBuilder, result.getCentrality());
+            procResultBuilder = computeStatistics(procResultBuilder, result);
         }
 
         return procResultBuilder;

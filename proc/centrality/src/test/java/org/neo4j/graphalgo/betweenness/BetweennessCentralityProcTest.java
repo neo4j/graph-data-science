@@ -23,6 +23,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -33,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralityBaseConfig>
-    extends BaseProcTest implements AlgoBaseProcTest<BetweennessCentrality, CONFIG, BetweennessCentrality> {
+    extends BaseProcTest implements AlgoBaseProcTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray> {
 
     static double DEFAULT_PROBABILITY = 1.0D;
 
@@ -76,19 +77,11 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
     }
 
     @Override
-    public void assertResultEquals(BetweennessCentrality result1, BetweennessCentrality result2) {
-        var centrality1 = result1.getCentrality();
-        var centrality2 = result2.getCentrality();
+    public void assertResultEquals(HugeAtomicDoubleArray result1, HugeAtomicDoubleArray result2) {
+        assertEquals(result1.size(), result2.size());
 
-        assertEquals(centrality1.size(), centrality2.size());
-
-        for (long nodeId = 0; nodeId < centrality1.size(); nodeId++) {
-            System.out.println("centrality1.get(nodeId) = " + centrality1.get(nodeId));
-            System.out.println("centrality2.get(nodeId) = " + centrality2.get(nodeId));
-        }
-
-        for (long nodeId = 0; nodeId < centrality1.size(); nodeId++) {
-            assertEquals(result1.getCentrality().get(nodeId), result2.getCentrality().get(nodeId));
+        for (long nodeId = 0; nodeId < result1.size(); nodeId++) {
+            assertEquals(result1.get(nodeId), result2.get(nodeId));
         }
     }
 }

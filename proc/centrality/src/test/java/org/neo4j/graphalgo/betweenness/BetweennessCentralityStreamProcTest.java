@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -30,7 +31,7 @@ import java.util.Optional;
 class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<BetweennessCentralityStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig>> getProcedureClazz() {
         return BetweennessCentralityStreamProc.class;
     }
 

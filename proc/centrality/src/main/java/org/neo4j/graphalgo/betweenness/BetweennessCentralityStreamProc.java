@@ -23,7 +23,9 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityStreamProc.StreamResult, BetweennessCentralityStreamConfig> {
+public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamProc.StreamResult, BetweennessCentralityStreamConfig> {
 
     @Procedure(value = "gds.betweenness.stream", mode = READ)
     @Description(BETWEENNESS_DESCRIPTION)
@@ -56,8 +58,8 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    protected PropertyTranslator<BetweennessCentrality> nodePropertyTranslator(ComputationResult<BetweennessCentrality, BetweennessCentrality, BetweennessCentralityStreamConfig> computationResult) {
-        return BetweennessCentralityProc.CentralityTranslator.INSTANCE;
+    protected PropertyTranslator<HugeAtomicDoubleArray> nodePropertyTranslator(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig> computationResult) {
+        return Translators.HUGE_ATOMIC_DOUBLE_ARRAY_TRANSLATOR;
     }
 
     @Override
