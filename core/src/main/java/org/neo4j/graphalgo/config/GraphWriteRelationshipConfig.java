@@ -61,7 +61,7 @@ public interface GraphWriteRelationshipConfig extends WriteConfig {
     }
 
     @Configuration.Ignore
-    default void validate(GraphStore graphStore) {
+    default void validate(GraphStore<?> graphStore) {
         if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType()))) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Relationship type `%s` not found. Available types: %s",

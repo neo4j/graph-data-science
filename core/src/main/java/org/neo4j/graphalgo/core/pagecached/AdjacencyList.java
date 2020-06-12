@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
+import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
@@ -141,11 +142,18 @@ public final class AdjacencyList {
 //        return memory;
 //    }
 
-//    int getDegree(long index) {
-//        return AdjacencyDecompressingReader.readInt(
-//                pages[pageIndex(index, PAGE_SHIFT)],
-//                indexInPage(index, PAGE_MASK));
-//    }
+    int getDegree(long index) throws IOException {
+        PageCursor pageCursor = pagedFile.io(
+            0,
+            PagedFile.PF_SHARED_READ_LOCK,
+            PageCursorTracer.NULL
+        );
+        int indexInPage = (int) (index % PageCache.PAGE_SIZE);
+        pageCursor.next(index / PageCache.PAGE_SIZE);
+        int degree = pageCursor.getInt(indexInPage);
+        pageCursor.close();
+        return degree;
+    }
 
     public final long release() {
         pagedFile.close();
@@ -196,7 +204,7 @@ public final class AdjacencyList {
     // TODO close cursor
     public static final class Cursor extends MutableIntValue {
 
-//        static final Cursor EMPTY = new Cursor(new byte[0][]);
+        static final Cursor EMPTY = new Cursor(null);
 
         // TODO: free
         private final PageCursor pageCursor;
