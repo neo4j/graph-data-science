@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import java.util.function.Consumer;
-import java.util.function.DoubleUnaryOperator;
+import java.util.function.LongToDoubleFunction;
 import java.util.function.ObjLongConsumer;
 import java.util.stream.IntStream;
 
@@ -29,9 +29,9 @@ import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamCo
 public class DoublePageFiller implements Consumer<double[]>, ObjLongConsumer<double[]> {
 
     private final int concurrency;
-    private final DoubleUnaryOperator gen;
+    private final LongToDoubleFunction gen;
 
-    DoublePageFiller(int concurrency, DoubleUnaryOperator gen) {
+    DoublePageFiller(int concurrency, LongToDoubleFunction gen) {
         this.concurrency = concurrency;
         this.gen = gen;
     }
@@ -50,7 +50,7 @@ public class DoublePageFiller implements Consumer<double[]>, ObjLongConsumer<dou
         );
     }
 
-    public static DoublePageFiller of(int concurrency, DoubleUnaryOperator gen) {
+    public static DoublePageFiller of(int concurrency, LongToDoubleFunction gen) {
         return new DoublePageFiller(concurrency, gen);
     }
 
@@ -60,7 +60,7 @@ public class DoublePageFiller implements Consumer<double[]>, ObjLongConsumer<dou
 
     private static class PassThroughFiller extends DoublePageFiller {
         PassThroughFiller() {
-            super(0, l -> 0L);
+            super(0, null);
         }
 
         @Override

@@ -64,7 +64,7 @@ public class LongPageFiller implements Consumer<long[]>, ObjLongConsumer<long[]>
 
     private static class PassThroughFillerLong extends LongPageFiller {
         PassThroughFillerLong() {
-            super(0, l -> 0L);
+            super(0, null);
         }
 
         @Override
