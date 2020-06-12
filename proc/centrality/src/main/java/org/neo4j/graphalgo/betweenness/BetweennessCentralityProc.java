@@ -73,19 +73,18 @@ final class BetweennessCentralityProc {
         AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult,
         ProcedureCallContext callContext
     ) {
-        var result = computeResult.result();
-
         var computeStatistics = callContext.outputFields().anyMatch(f ->
             f.equalsIgnoreCase("minCentrality") ||
             f.equalsIgnoreCase("maxCentrality") ||
             f.equalsIgnoreCase("sumCentrality")
         );
 
+        var result = computeResult.result();
         if (result != null && computeStatistics) {
             procResultBuilder = computeStatistics(procResultBuilder, result);
         }
 
-        return procResultBuilder;
+        return procResultBuilder.withConfig(computeResult.config());
     }
 
     private static <PROC_RESULT> BetweennessCentralityResultBuilder<PROC_RESULT> computeStatistics(

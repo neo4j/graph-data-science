@@ -75,16 +75,10 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
         return BetweennessCentralityProc.resultBuilder(new WriteResult.Builder(), computeResult, callContext);
     }
 
-    public static final class WriteResult {
+    public static final class WriteResult extends BetweennessCentralityStatsProc.StatsResult {
 
         public final long nodePropertiesWritten;
-        public final long createMillis;
-        public final long computeMillis;
         public final long writeMillis;
-
-        public final double minCentrality;
-        public final double maxCentrality;
-        public final double sumCentrality;
 
         WriteResult(
             long nodePropertiesWritten,
@@ -93,16 +87,19 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
             long writeMillis,
             double minCentrality,
             double maxCentrality,
-            double sumCentrality
+            double sumCentrality,
+            Map<String, Object> config
         ) {
+            super(
+                createMillis,
+                computeMillis,
+                minCentrality,
+                maxCentrality,
+                sumCentrality,
+                config
+            );
             this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
-
-            this.minCentrality = minCentrality;
-            this.maxCentrality = maxCentrality;
-            this.sumCentrality = sumCentrality;
         }
 
         static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<WriteResult> {
@@ -116,7 +113,8 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
                     writeMillis,
                     minCentrality,
                     maxCentrality,
-                    sumCentrality
+                    sumCentrality,
+                    config.toMap()
                 );
             }
         }

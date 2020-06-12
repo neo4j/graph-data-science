@@ -25,10 +25,12 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
 
 public class BetweennessCentralityStatsProcTest extends BetweennessCentralityProcTest<BetweennessCentralityStatsConfig> {
     @Override
@@ -62,21 +64,15 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .algo("betweenness")
             .statsMode()
             .addParameter("probability", DEFAULT_PROBABILITY)
-            .yields(
-                "createMillis",
-                "computeMillis",
-                "minCentrality",
-                "maxCentrality",
-                "sumCentrality"
-            );
+            .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            assertNotEquals(-1L, row.getNumber("createMillis"));
-            assertNotEquals(-1L, row.getNumber("computeMillis"));
-
-            assertEquals(0D, row.getNumber("minCentrality").doubleValue(), 1E-1);
-            assertEquals(4D, row.getNumber("maxCentrality").doubleValue(), 1E-1);
-            assertEquals(10D, row.getNumber("sumCentrality").doubleValue(), 1E-1);
-        });
+        assertCypherResult(query, List.of(Map.of(
+            "minCentrality", 0.0,
+            "maxCentrality", 4.0,
+            "sumCentrality", 10.0,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "configuration", isA(Map.class)
+        )));
     }
 }

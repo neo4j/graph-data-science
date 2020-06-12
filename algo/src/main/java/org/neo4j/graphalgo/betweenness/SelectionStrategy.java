@@ -37,6 +37,10 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class SelectionStrategy {
 
+    static String nameOf(Strategy s) {
+        return s.name();
+    }
+
     abstract void init(Graph graph, ExecutorService executorService, int concurrency);
 
     abstract boolean select(long nodeId);

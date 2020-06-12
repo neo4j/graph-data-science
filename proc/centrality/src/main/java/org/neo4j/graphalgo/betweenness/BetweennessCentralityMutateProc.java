@@ -76,16 +76,10 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
         return BetweennessCentralityProc.resultBuilder(new MutateResult.Builder(), computeResult, callContext);
     }
 
-    public static final class MutateResult {
+    public static final class MutateResult extends BetweennessCentralityStatsProc.StatsResult {
 
         public final long nodePropertiesWritten;
-        public final long createMillis;
-        public final long computeMillis;
         public final long mutateMillis;
-
-        public final double minCentrality;
-        public final double maxCentrality;
-        public final double sumCentrality;
 
         MutateResult(
             long nodePropertiesWritten,
@@ -94,16 +88,19 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
             long mutateMillis,
             double minCentrality,
             double maxCentrality,
-            double sumCentrality
+            double sumCentrality,
+            Map<String, Object> config
         ) {
+            super(
+                createMillis,
+                computeMillis,
+                minCentrality,
+                maxCentrality,
+                sumCentrality,
+                config
+            );
             this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
             this.mutateMillis = mutateMillis;
-
-            this.minCentrality = minCentrality;
-            this.maxCentrality = maxCentrality;
-            this.sumCentrality = sumCentrality;
         }
 
         static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<MutateResult> {
@@ -117,7 +114,8 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
                     mutateMillis,
                     minCentrality,
                     maxCentrality,
-                    sumCentrality
+                    sumCentrality,
+                    config.toMap()
                 );
             }
         }

@@ -17,23 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.betweenness;
+package org.neo4j.graphalgo.core.utils;
 
-import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import java.util.Collection;
+import java.util.List;
 
-public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig {
+import static java.util.stream.Collectors.toList;
 
-    @Value.Default
-    @Configuration.ConvertWith("org.neo4j.graphalgo.betweenness.SelectionStrategy.Strategy#parse")
-    @Configuration.ToMapValue("org.neo4j.graphalgo.betweenness.SelectionStrategy#nameOf")
-    default SelectionStrategy.Strategy strategy() {
-        return SelectionStrategy.Strategy.ALL;
-    }
+public final class ListUtil {
 
-    @Value.Default
-    default double probability() {
-        return Double.NaN;
+    private ListUtil() {}
+
+    public static <E> List<E> sortedListOf(Collection<E> coll) {
+        return coll.stream().sorted().collect(toList());
     }
 }

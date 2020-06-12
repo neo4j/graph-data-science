@@ -27,10 +27,12 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.values.storable.NumberType;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
 
 public class BetweennessCentralityMutateProcTest
     extends BetweennessCentralityProcTest<BetweennessCentralityMutateConfig>
@@ -76,7 +78,7 @@ public class BetweennessCentralityMutateProcTest
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
+        if (!mapWrapper.containsKey("mutateProperty")) {
             mapWrapper = mapWrapper.withString("mutateProperty", DEFAULT_RESULT_PROPERTY);
         }
         if (!mapWrapper.containsKey("probability")) {
@@ -95,26 +97,17 @@ public class BetweennessCentralityMutateProcTest
             .mutateMode()
             .addParameter("mutateProperty", DEFAULT_RESULT_PROPERTY)
             .addParameter("probability", DEFAULT_PROBABILITY)
-            .yields(
-                "nodePropertiesWritten",
-                "createMillis",
-                "computeMillis",
-                "mutateMillis",
-                "minCentrality",
-                "maxCentrality",
-                "sumCentrality"
-            );
+            .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(5L, row.getNumber("nodePropertiesWritten"));
-
-            assertNotEquals(-1L, row.getNumber("createMillis"));
-            assertNotEquals(-1L, row.getNumber("computeMillis"));
-            assertNotEquals(-1L, row.getNumber("mutateMillis"));
-
-            assertEquals(0D, row.getNumber("minCentrality").doubleValue(), 1E-1);
-            assertEquals(4D, row.getNumber("maxCentrality").doubleValue(), 1E-1);
-            assertEquals(10D, row.getNumber("sumCentrality").doubleValue(), 1E-1);
-        });
+        assertCypherResult(query, List.of(Map.of(
+            "minCentrality", 0.0,
+            "maxCentrality", 4.0,
+            "sumCentrality", 10.0,
+            "nodePropertiesWritten", 5L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
+            "configuration", isA(Map.class)
+        )));
     }
 }
