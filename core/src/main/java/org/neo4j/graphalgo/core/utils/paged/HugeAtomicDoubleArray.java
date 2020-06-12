@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
@@ -26,7 +27,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.IntToLongFunction;
+import java.util.function.IntToDoubleFunction;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
@@ -56,7 +57,7 @@ public abstract class HugeAtomicDoubleArray {
 
     /**
      * Atomically sets the element at position {@code index} to the given
-     * updated value if the current value {@code ==} the expected value.ddssdd
+     * updated value if the current value {@code ==} the expected value.
      *
      * @param index  the index
      * @param expect the expected value
@@ -116,7 +117,7 @@ public abstract class HugeAtomicDoubleArray {
     /**
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
-     * The values are pre-calculated according to the semantics of {@link Arrays#setAll(long[], IntToLongFunction)}
+     * The values are pre-calculated according to the semantics of {@link Arrays#setAll(double[], IntToDoubleFunction)}
      */
     public static HugeAtomicDoubleArray newArray(long size, DoublePageFiller pageFiller, AllocationTracker tracker) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
@@ -139,22 +140,20 @@ public abstract class HugeAtomicDoubleArray {
         return instanceSize + dataSize;
     }
 
-    /* test-only */
+    @TestOnly
     static HugeAtomicDoubleArray newPagedArray(
         long size,
-        final DoublePageFiller pageFiller,
-        AllocationTracker tracker
+        final DoublePageFiller pageFiller
     ) {
-        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller, tracker);
+        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller, AllocationTracker.EMPTY);
     }
 
-    /* test-only */
+    @TestOnly
     static HugeAtomicDoubleArray newSingleArray(
         int size,
-        final DoublePageFiller pageFiller,
-        AllocationTracker tracker
+        final DoublePageFiller pageFiller
     ) {
-        return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, tracker);
+        return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, AllocationTracker.EMPTY);
     }
 
     /**

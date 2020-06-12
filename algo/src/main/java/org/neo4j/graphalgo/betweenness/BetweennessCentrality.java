@@ -204,6 +204,9 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
             while (predecessorsCursor.next()) {
                 for (int i = predecessorsCursor.offset; i < predecessorsCursor.limit; i++) {
                     if (predecessorsCursor.array[i] != null) {
+                        // We avoid using LongArrayList#clear since it would
+                        // fill the inner array with zeros. We don't need that
+                        // so we just reset the index which is cheaper
                         predecessorsCursor.array[i].elementsCount = 0;
                     }
                 }
