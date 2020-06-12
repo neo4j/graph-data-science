@@ -270,7 +270,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         // reset communityWeightUpdates
-        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, DoublePageFiller.allZeros(concurrency), tracker);
+        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
     }
 
     private Collection<ModularityOptimizationTask> createModularityOptimizationTasks(long currentColor) {

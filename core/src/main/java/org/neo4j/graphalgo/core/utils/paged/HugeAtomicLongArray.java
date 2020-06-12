@@ -137,7 +137,7 @@ public abstract class HugeAtomicLongArray {
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static HugeAtomicLongArray newArray(long size, AllocationTracker tracker) {
-        return newArray(size, PageFiller.passThrough(), tracker);
+        return newArray(size, LongPageFiller.passThrough(), tracker);
     }
 
     /**
@@ -145,7 +145,7 @@ public abstract class HugeAtomicLongArray {
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      * The values are pre-calculated according to the semantics of {@link Arrays#setAll(long[], IntToLongFunction)}
      */
-    public static HugeAtomicLongArray newArray(long size, PageFiller pageFiller, AllocationTracker tracker) {
+    public static HugeAtomicLongArray newArray(long size, LongPageFiller pageFiller, AllocationTracker tracker) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
             return SingleHugeAtomicLongArray.of(size, pageFiller, tracker);
         }
@@ -167,12 +167,12 @@ public abstract class HugeAtomicLongArray {
     }
 
     /* test-only */
-    static HugeAtomicLongArray newPagedArray(long size, final PageFiller pageFiller, AllocationTracker tracker) {
+    static HugeAtomicLongArray newPagedArray(long size, final LongPageFiller pageFiller, AllocationTracker tracker) {
         return PagedHugeAtomicLongArray.of(size, pageFiller, tracker);
     }
 
     /* test-only */
-    static HugeAtomicLongArray newSingleArray(int size, final PageFiller pageFiller, AllocationTracker tracker) {
+    static HugeAtomicLongArray newSingleArray(int size, final LongPageFiller pageFiller, AllocationTracker tracker) {
         return SingleHugeAtomicLongArray.of(size, pageFiller, tracker);
     }
 
@@ -193,7 +193,7 @@ public abstract class HugeAtomicLongArray {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
 
-        private static HugeAtomicLongArray of(long size, PageFiller pageFiller, AllocationTracker tracker) {
+        private static HugeAtomicLongArray of(long size, LongPageFiller pageFiller, AllocationTracker tracker) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             tracker.add(sizeOfLongArray(intSize));
@@ -258,7 +258,7 @@ public abstract class HugeAtomicLongArray {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
 
-        private static HugeAtomicLongArray of(long size, PageFiller pageFiller, AllocationTracker tracker) {
+        private static HugeAtomicLongArray of(long size, LongPageFiller pageFiller, AllocationTracker tracker) {
             int numPages = numberOfPages(size);
             int lastPage = numPages - 1;
             final int lastPageSize = exclusiveIndexOfPage(size);

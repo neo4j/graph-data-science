@@ -19,20 +19,19 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.LongToDoubleFunction;
 import java.util.function.LongUnaryOperator;
+import java.util.function.ObjLongConsumer;
 import java.util.stream.IntStream;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 
-public class PageFiller implements Consumer<long[]>, BiConsumer<long[], Long> {
+public class LongPageFiller implements Consumer<long[]>, ObjLongConsumer<long[]> {
 
     private final int concurrency;
     private final LongUnaryOperator gen;
 
-    PageFiller(int concurrency, LongUnaryOperator gen) {
+    LongPageFiller(int concurrency, LongUnaryOperator gen) {
         this.concurrency = concurrency;
         this.gen = gen;
     }
@@ -43,7 +42,7 @@ public class PageFiller implements Consumer<long[]>, BiConsumer<long[], Long> {
     }
 
     @Override
-    public void accept(long[] page, Long offset) {
+    public void accept(long[] page, long offset) {
         parallelStreamConsume(
             IntStream.range(0, page.length),
             concurrency,
@@ -51,37 +50,25 @@ public class PageFiller implements Consumer<long[]>, BiConsumer<long[], Long> {
         );
     }
 
-    public static PageFiller of(int concurrency, LongUnaryOperator gen) {
-        return new PageFiller(concurrency, gen);
+    public static LongPageFiller of(int concurrency, LongUnaryOperator gen) {
+        return new LongPageFiller(concurrency, gen);
     }
 
-    public static PageFiller longToDouble(int concurrency, LongToDoubleFunction gen) {
-        return new PageFiller(concurrency, convertLongDoubleFunctionToLongUnary(gen));
+    public static LongPageFiller identity(int concurrency) {
+        return new LongPageFiller(concurrency, i -> i);
     }
 
-    public static PageFiller allZeros(int concurrency) {
-        return new PageFiller(concurrency, i -> 0L);
+    public static LongPageFiller passThrough() {
+        return new PassThroughFillerLong();
     }
 
-    public static PageFiller identity(int concurrency) {
-        return new PageFiller(concurrency, i -> i);
-    }
-
-    public static PageFiller passThrough() {
-        return new PassThroughFiller();
-    }
-
-    private static LongUnaryOperator convertLongDoubleFunctionToLongUnary(LongToDoubleFunction gen) {
-        return (index) -> Double.doubleToLongBits(gen.applyAsDouble(index));
-    }
-
-    private static class PassThroughFiller extends PageFiller {
-        PassThroughFiller() {
+    private static class PassThroughFillerLong extends LongPageFiller {
+        PassThroughFillerLong() {
             super(0, l -> 0L);
         }
 
         @Override
-        public void accept(long[] page, Long offset) {
+        public void accept(long[] page, long offset) {
             // NOOP
         }
     }

@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
+import java.util.function.ObjLongConsumer;
 import java.util.stream.IntStream;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 
-public class DoublePageFiller implements Consumer<double[]>, BiConsumer<double[], Long> {
+public class DoublePageFiller implements Consumer<double[]>, ObjLongConsumer<double[]> {
 
     private final int concurrency;
     private final DoubleUnaryOperator gen;
@@ -42,7 +42,7 @@ public class DoublePageFiller implements Consumer<double[]>, BiConsumer<double[]
     }
 
     @Override
-    public void accept(double[] page, Long offset) {
+    public void accept(double[] page, long offset) {
         parallelStreamConsume(
             IntStream.range(0, page.length),
             concurrency,
@@ -52,10 +52,6 @@ public class DoublePageFiller implements Consumer<double[]>, BiConsumer<double[]
 
     public static DoublePageFiller of(int concurrency, DoubleUnaryOperator gen) {
         return new DoublePageFiller(concurrency, gen);
-    }
-
-    public static DoublePageFiller allZeros(int concurrency) {
-        return new DoublePageFiller(concurrency, i -> 0L);
     }
 
     public static DoublePageFiller passThrough() {
@@ -68,7 +64,7 @@ public class DoublePageFiller implements Consumer<double[]>, BiConsumer<double[]
         }
 
         @Override
-        public void accept(double[] page, Long offset) {
+        public void accept(double[] page, long offset) {
             // NOOP
         }
     }
