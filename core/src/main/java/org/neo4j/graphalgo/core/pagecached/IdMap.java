@@ -28,12 +28,6 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
@@ -54,22 +48,22 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, AutoCloseable {
 
-    private static final MemoryEstimation ESTIMATION = MemoryEstimations
-        .builder(IdMap.class)
-        .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
-        .rangePerGraphDimension(
-            "Mapping from Neo4j identifiers to internal identifiers",
-            (dimensions, concurrency) -> HugeSparseLongArray.memoryEstimation(
-                dimensions.highestNeoId(),
-                dimensions.nodeCount()
-            )
-        )
-        .perGraphDimension(
-            "Node Label BitSets",
-            (dimensions, concurrency) ->
-                MemoryRange.of(dimensions.nodeLabels().size() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
-        )
-        .build();
+//    private static final MemoryEstimation ESTIMATION = MemoryEstimations
+//        .builder(IdMap.class)
+//        .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
+//        .rangePerGraphDimension(
+//            "Mapping from Neo4j identifiers to internal identifiers",
+//            (dimensions, concurrency) -> HugeSparseLongArray.memoryEstimation(
+//                dimensions.highestNeoId(),
+//                dimensions.nodeCount()
+//            )
+//        )
+//        .perGraphDimension(
+//            "Node Label BitSets",
+//            (dimensions, concurrency) ->
+//                MemoryRange.of(dimensions.nodeLabels().size() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
+//        )
+//        .build();
 
     private static final Set<NodeLabel> ALL_NODES_LABELS = Set.of(NodeLabel.ALL_NODES);
 
@@ -84,9 +78,9 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
     private final PageCursor graphIdsCursor;
 //    private final PageCursor nodeToGraphIdsCursor;
 
-    public static MemoryEstimation memoryEstimation() {
-        return ESTIMATION;
-    }
+//    public static MemoryEstimation memoryEstimation() {
+//        return ESTIMATION;
+//    }
 
     public IdMap(PagedFile graphIds, HugeSparseLongArray nodeToGraphIds, long nodeCount) throws IOException {
         this(graphIds, nodeToGraphIds, Collections.emptyMap(), nodeCount);
@@ -107,7 +101,11 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        return nodeToGraphIds.get(nodeId);
+        try {
+            return nodeToGraphIds.get(nodeId);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
 //        return getFromPage(nodeId, nodeToGraphIdsCursor);
     }
 

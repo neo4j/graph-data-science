@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PagedFile;
@@ -46,18 +45,13 @@ public final class IdMapBuilder {
 
     public static IdMap build(
         HugeLongArrayBuilder idMapBuilder,
+        HugeSparseLongArray.Builder nodeMappingBuilder,
         Map<NodeLabel, BitSet> labelInformation,
-        long highestNodeId,
-        int concurrency,
-        AllocationTracker tracker
+        int concurrency
     ) throws IOException {
         long nodeCount = idMapBuilder.nodeCount();
         PagedFile graphIds = idMapBuilder.build();
 
-        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.Builder.create(
-            highestNodeId == 0 ? 1 : highestNodeId,
-            tracker
-        );
         var partitions = PartitionUtils.numberAlignedPartitioning(
             concurrency,
             nodeCount * Long.BYTES,
@@ -74,6 +68,9 @@ public final class IdMapBuilder {
                     pageCursor.next(pageId);
                     for (int i = 0; i < longsPerPage; i++) {
                         var graphNodeId = pageId * longsPerPage + i;
+                        if (graphNodeId >= nodeCount) {
+                            break;
+                        }
                         var neoNodeId = pageCursor.getLong();
                         nodeMappingBuilder.set(neoNodeId, graphNodeId);
                     }
@@ -109,22 +106,24 @@ public final class IdMapBuilder {
 
     @NotNull
     static HugeSparseLongArray buildSparseNodeMapping(
+        HugeSparseLongArray.Builder nodeMappingBuilder,
         long nodeCount,
-        long highestNodeId,
         int concurrency,
         Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder,
         AllocationTracker tracker
-    ) {
-        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.Builder.create(
-            highestNodeId == 0 ? 1 : highestNodeId,
-            tracker
-        );
+    ) throws IOException {
         ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(nodeMappingBuilder));
         return nodeMappingBuilder.build();
     }
 
     static Function<HugeSparseLongArray.Builder, BiLongConsumer> add(HugeLongArray graphIds) {
-        return builder -> (start, end) -> addNodes(graphIds, builder, start, end);
+        return builder -> (start, end) -> {
+            try {
+                addNodes(graphIds, builder, start, end);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        };
     }
 
 //    private static Function<HugeSparseLongArray.Builder, BiLongConsumer> addChecked(HugeLongArray graphIds) {
@@ -136,7 +135,7 @@ public final class IdMapBuilder {
         HugeSparseLongArray.Builder builder,
         long startNode,
         long endNode
-    ) {
+    ) throws IOException {
         try (HugeCursor<long[]> cursor = graphIds.initCursor(graphIds.newCursor(), startNode, endNode)) {
             while (cursor.next()) {
                 long[] array = cursor.array;

@@ -29,7 +29,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.LongStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class IdMapTest extends BaseTest {
 
@@ -46,12 +47,17 @@ class IdMapTest extends BaseTest {
         nodeAdder.insert(nodeIds, 0, (int) nodeCount);
         nodeAdder.close();
 
+        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.Builder.create(
+            pageCache,
+            nodeCount == 0 ? 1 : nodeCount,
+            AllocationTracker.EMPTY
+        );
+
         var idMap = IdMapBuilder.build(
             longArrayBuilder,
+            nodeMappingBuilder,
             Map.of(),
-            nodeCount,
-            1,
-            AllocationTracker.EMPTY
+            1
         );
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
