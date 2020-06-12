@@ -26,10 +26,12 @@ import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
 
 class BetweennessCentralityWriteProcTest
     extends BetweennessCentralityProcTest<BetweennessCentralityWriteConfig>
@@ -70,27 +72,18 @@ class BetweennessCentralityWriteProcTest
             .writeMode()
             .addParameter("writeProperty", DEFAULT_RESULT_PROPERTY)
             .addParameter("probability", DEFAULT_PROBABILITY)
-            .yields(
-                "nodePropertiesWritten",
-                "createMillis",
-                "computeMillis",
-                "writeMillis",
-                "minCentrality",
-                "maxCentrality",
-                "sumCentrality"
-            );
+            .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(5L, row.getNumber("nodePropertiesWritten"));
-
-            assertNotEquals(-1L, row.getNumber("createMillis"));
-            assertNotEquals(-1L, row.getNumber("computeMillis"));
-            assertNotEquals(-1L, row.getNumber("writeMillis"));
-
-            assertEquals(0D, row.getNumber("minCentrality").doubleValue(), 1E-1);
-            assertEquals(4D, row.getNumber("maxCentrality").doubleValue(), 1E-1);
-            assertEquals(10D, row.getNumber("sumCentrality").doubleValue(), 1E-1);
-        });
+        assertCypherResult(query, List.of(Map.of(
+            "minCentrality", 0.0,
+            "maxCentrality", 4.0,
+            "sumCentrality", 10.0,
+            "nodePropertiesWritten", 5L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "writeMillis", greaterThan(-1L),
+            "configuration", isA(Map.class)
+        )));
     }
 
 }

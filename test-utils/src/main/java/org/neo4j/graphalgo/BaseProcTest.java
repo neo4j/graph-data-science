@@ -58,6 +58,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECT
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
+import static org.neo4j.graphalgo.core.utils.ListUtil.sortedListOf;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class BaseProcTest extends BaseTest {
@@ -179,7 +180,7 @@ public class BaseProcTest extends BaseTest {
                 Map<String, Object> expectedRow = expected.get(i);
                 Map<String, Object> actualRow = actual.get(i);
 
-                assertThat(actualRow.keySet(), equalTo(expectedRow.keySet()));
+                assertThat(sortedListOf(expectedRow.keySet()), equalTo(sortedListOf(expectedRow.keySet())));
                 int rowNumber = i;
                 expectedRow.forEach((key, expectedValue) -> {
                     Matcher<Object> matcher;

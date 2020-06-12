@@ -75,21 +75,24 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         return BetweennessCentralityProc.resultBuilder(new StatsResult.Builder(), computeResult, callContext);
     }
 
-    public static final class StatsResult {
-
-        public final long createMillis;
-        public final long computeMillis;
+    public static class StatsResult {
 
         public final double minCentrality;
         public final double maxCentrality;
         public final double sumCentrality;
+
+        public final long createMillis;
+        public final long computeMillis;
+
+        public final Map<String, Object> configuration;
 
         StatsResult(
             long createMillis,
             long computeMillis,
             double minCentrality,
             double maxCentrality,
-            double sumCentrality
+            double sumCentrality,
+            Map<String, Object> configuration
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
@@ -97,6 +100,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
             this.minCentrality = minCentrality;
             this.maxCentrality = maxCentrality;
             this.sumCentrality = sumCentrality;
+            this.configuration = configuration;
         }
 
         static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<StatsResult> {
@@ -108,7 +112,8 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
                     computeMillis,
                     minCentrality,
                     maxCentrality,
-                    sumCentrality
+                    sumCentrality,
+                    config.toMap()
                 );
             }
         }
