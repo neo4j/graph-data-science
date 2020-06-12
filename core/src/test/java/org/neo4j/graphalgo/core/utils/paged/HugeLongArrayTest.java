@@ -76,6 +76,36 @@ final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongAr
         assertThrows(AssertionError.class, () -> HugeLongArray.memoryEstimation(-1L));
     }
 
+    @Test
+    void shouldBinarySearchInASinglePageArray() {
+        var array = HugeLongArray.newSingleArray(
+            10,
+            AllocationTracker.EMPTY
+        );
+        for (int i = 0; i < 10; i++) {
+            array.set(i, i);
+        }
+
+        assertEquals(5, array.binarySearch(5));
+        assertEquals(9, array.binarySearch(20));
+        assertEquals(-1, array.binarySearch(-10));
+    }
+
+    @Test
+    void shouldBinarySearchInAPagedArray() {
+        var array = HugeLongArray.newPagedArray(
+            HugeArrays.PAGE_SIZE * 3,
+            AllocationTracker.EMPTY
+        );
+        for (int i = 0; i < HugeArrays.PAGE_SIZE * 3; i++) {
+            array.set(i, i);
+        }
+
+        assertEquals(20000, array.binarySearch(20000));
+        assertEquals(HugeArrays.PAGE_SIZE * 3 - 1, array.binarySearch(HugeArrays.PAGE_SIZE * 3 + 10));
+        assertEquals(-1, array.binarySearch(-10));
+    }
+
     @Override
     HugeLongArray singleArray(final int size) {
         return HugeLongArray.newSingleArray(size, AllocationTracker.EMPTY);

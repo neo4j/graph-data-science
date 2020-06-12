@@ -34,7 +34,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexFromPageIndexAndIndexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
@@ -90,7 +89,7 @@ public abstract class HugeAtomicLongArray {
      * @param expect the expected value
      * @param update the new value
      * @return {@code true} if successful. False return indicates that
-     *         the actual value was not equal to the expected value.
+     *     the actual value was not equal to the expected value.
      */
     public abstract boolean compareAndSet(long index, long expect, long update);
 
@@ -116,18 +115,9 @@ public abstract class HugeAtomicLongArray {
 
     /**
      * @return the amount of memory used by the instance of this array, in bytes.
-     *         This should be the same as returned from {@link #release()} without actually releasing the array.
+     *     This should be the same as returned from {@link #release()} without actually releasing the array.
      */
     public abstract long sizeOf();
-
-    /**
-     * Find the index where {@code (values[idx] <= searchValue) && (values[idx + 1] > searchValue)}.
-     * The result differs from that of {@link java.util.Arrays#binarySearch(long[], long)}
-     * in that this method returns a positive index even if the array does not
-     * directly contain the searched value.
-     * It returns -1 iff the value is smaller than the smallest one in the array.
-     */
-    public abstract long binarySearch(long searchValue);
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
@@ -255,11 +245,6 @@ public abstract class HugeAtomicLongArray {
         }
 
         @Override
-        public long binarySearch(long searchValue) {
-            return ArrayUtil.binaryLookup(searchValue, page);
-        }
-
-        @Override
         public long release() {
             if (page != null) {
                 page = null;
@@ -356,21 +341,6 @@ public abstract class HugeAtomicLongArray {
         @Override
         public long sizeOf() {
             return memoryUsed;
-        }
-
-        @Override
-        public long binarySearch(long searchValue) {
-            int value;
-
-            for (int pageIndex = pages.length - 1; pageIndex >= 0; pageIndex--) {
-                long[] page = pages[pageIndex];
-
-                value = ArrayUtil.binaryLookup(searchValue, page);
-                if (value != -1) {
-                    return indexFromPageIndexAndIndexInPage(pageIndex, value);
-                }
-            }
-            return -1;
         }
 
         @Override
