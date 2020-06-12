@@ -1,14 +1,15 @@
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name           | Type    | Default | Optional | Description
-| steps          | Integer | 80      | yes      | The number of steps in a random walk.
-| walksPerNode   | Integer | 10      | yes      | Number of random walks to starting at each node.
-| inOutFactor    | Float   | 1.0     | yes      | The tendency of the random walk to stay close to the start node or fan out in the graph. Higher value means stay local.
-| returnFactor   | Float   | 1.0     | yes      | The tendency of the random walk to return to the last visited node. A value below 1.0 means a higher tendency.
-| walkBufferSize | Integer | 1000    | yes      | Number of random walks to complete before starting training.
-| dimensions     | Integer | 128     | yes      | The number of dimensions of the embedding vector.
-| windowSize     | Integer | 10      | yes      | The size of the context window when training the neural network.
-| learningRate   | Float   | 0.01    | yes      | The learning rate used for training the neural network.
-| iterations     | Integer | 1       | yes      | Number of training iterations.
+| Name                 | Type    | Default | Optional | Description
+| steps                | Integer | 80      | yes      | The number of steps in a random walk.
+| walksPerNode         | Integer | 10      | yes      | Number of random walks to starting at each node.
+| inOutFactor          | Float   | 1.0     | yes      | The tendency of the random walk to stay close to the start node or fan out in the graph. Higher value means stay local.
+| returnFactor         | Float   | 1.0     | yes      | The tendency of the random walk to return to the last visited node. A value below 1.0 means a higher tendency.
+| walkBufferSize       | Integer | 1000    | yes      | Number of random walks to complete before starting training.
+| dimensions           | Integer | 128     | yes      | The number of dimensions of the embedding vector.
+| windowSize           | Integer | 10      | yes      | The size of the context window when training the neural network.
+| learningRate         | Float   | 0.01    | yes      | The learning rate used for training the neural network.
+| negativeSamplingRate | Integer | 5       | yes      | The number of negative samples to produce for each positive sample.
+| iterations           | Integer | 1       | yes      | Number of training iterations.
 |===
