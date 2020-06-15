@@ -38,7 +38,7 @@ final class HugeArrays {
     }
 
     static long indexFromPageIndexAndIndexInPage(int pageIndex, int indexInPage) {
-        return PAGE_SIZE * pageIndex + indexInPage;
+        return (pageIndex << PAGE_SHIFT) | indexInPage;
     }
 
     static int numberOfPages(long capacity) {
