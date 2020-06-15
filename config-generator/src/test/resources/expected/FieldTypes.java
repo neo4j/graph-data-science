@@ -26,6 +26,7 @@ import javax.annotation.processing.Generated;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -53,6 +54,8 @@ public final class FieldTypesConfig implements FieldTypes {
     private Map<String, Object> aMap;
 
     private List<Object> aList;
+
+    private Optional<String> anOptional;
 
     public FieldTypesConfig(@NotNull CypherMapWrapper config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
@@ -108,6 +111,11 @@ public final class FieldTypesConfig implements FieldTypes {
         }
         try {
             this.aList = CypherMapWrapper.failOnNull("aList", config.requireChecked("aList", List.class));
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.anOptional = CypherMapWrapper.failOnNull("anOptional", config.getOptional("anOptional", String.class));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -183,5 +191,10 @@ public final class FieldTypesConfig implements FieldTypes {
     @Override
     public List<Object> aList() {
         return this.aList;
+    }
+
+    @Override
+    public Optional<String> anOptional() {
+        return this.anOptional;
     }
 }

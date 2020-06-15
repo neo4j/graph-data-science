@@ -173,6 +173,14 @@ class ConfigurationProcessorTest {
         );
     }
 
+    @Test
+    void invalidOptionals() {
+        runNegativeTest("Optionals",
+            e("Optional must have a Cypher-supported type as type argument, but found none.", 30, 14),
+            e("Optional fields can not to be declared default (Optional.empty is the default).", 32, 30)
+        );
+    }
+
     private void runNegativeTest(String className, ErrorCheck... expectations) {
         JavaFileObject file = forResource(String.format(Locale.ENGLISH,"negative/%s.java", className));
 

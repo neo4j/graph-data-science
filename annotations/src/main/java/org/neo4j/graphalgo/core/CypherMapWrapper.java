@@ -81,6 +81,14 @@ public final class CypherMapWrapper {
         return getChecked(key, emptyList(), List.class);
     }
 
+    public <E> Optional<E> getOptional(String key, Class<E> clazz) {
+        if (containsKey(key)) {
+            return Optional.of(getChecked(key, null, clazz));
+        } else {
+            return Optional.empty();
+        }
+    }
+
     @Contract("_, !null -> !null")
     public @Nullable String getString(String key, @Nullable String defaultValue) {
         return getChecked(key, defaultValue, String.class);
