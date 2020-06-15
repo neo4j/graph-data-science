@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.pagecached;
 
-import org.eclipse.collections.impl.factory.Sets;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
@@ -61,7 +61,8 @@ public final class HugeSparseLongArray implements  AutoCloseable {
         this.pagedFile = pagedFile;
         this.capacity = capacity;
         try {
-            pageCursor = pagedFile.io(
+            pageCursor = Neo4jProxy.pageFileIO(
+                pagedFile,
                 0,
                 PagedFile.PF_SHARED_READ_LOCK,
                 PageCursorTracer.NULL
@@ -157,10 +158,11 @@ public final class HugeSparseLongArray implements  AutoCloseable {
         )  {
             PagedFile pagedFile;
             try {
-                pagedFile = pageCache.map(
+                pagedFile = Neo4jProxy.pageCacheMap(
+                    pageCache,
                     file(),
                     PageCache.PAGE_SIZE,
-                    Sets.immutable.of(StandardOpenOption.CREATE)
+                    StandardOpenOption.CREATE
                 );
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
@@ -181,7 +183,8 @@ public final class HugeSparseLongArray implements  AutoCloseable {
         ) {
             this.pagedFile = pagedFile;
             try {
-                pageCursor = pagedFile.io(
+                pageCursor = Neo4jProxy.pageFileIO(
+                    pagedFile,
                     0,
                     PagedFile.PF_SHARED_WRITE_LOCK,
                     PageCursorTracer.NULL

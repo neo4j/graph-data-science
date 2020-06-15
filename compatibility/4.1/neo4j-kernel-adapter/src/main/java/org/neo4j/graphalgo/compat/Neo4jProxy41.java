@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.eclipse.collections.api.factory.Sets;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.ExternalSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -71,9 +72,11 @@ import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.OpenOption;
 
 public final class Neo4jProxy41 implements Neo4jProxyApi {
 
@@ -124,6 +127,16 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
         PageCursorTracer pageCursorTracer
     ) throws IOException {
         return pagedFile.io(pageId, pageFileFlags, pageCursorTracer);
+    }
+
+    @Override
+    public PagedFile pageCacheMap(
+        PageCache pageCache,
+        File file,
+        int pageSize,
+        OpenOption... openOptions
+    ) throws IOException {
+        return pageCache.map(file, pageSize, Sets.immutable.of(openOptions));
     }
 
     @Override

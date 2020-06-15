@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.pagecached;
 
 import org.eclipse.collections.impl.factory.Sets;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
@@ -59,10 +60,11 @@ final class AdjacencyListBuilder {
         this.tracker = tracker;
         this.allocatedPages = new AtomicInteger(0);
         try {
-            pagedFile = pageCache.map(
+            pagedFile = Neo4jProxy.pageCacheMap(
+                pageCache,
                 file(),
                 PageCache.PAGE_SIZE,
-                Sets.immutable.of(StandardOpenOption.CREATE)
+                StandardOpenOption.CREATE
             );
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -188,7 +190,8 @@ final class AdjacencyListBuilder {
         private Allocator(AdjacencyListBuilder builder) {
             this.builder = builder;
             try {
-                this.pageCursor = builder.pagedFile.io(
+                this.pageCursor = Neo4jProxy.pageFileIO(
+                    builder.pagedFile,
                     0,
                     PagedFile.PF_SHARED_WRITE_LOCK,
                     PageCursorTracer.NULL

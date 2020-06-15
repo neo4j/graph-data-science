@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.pagecached;
 
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -143,7 +144,8 @@ public final class AdjacencyList {
 //    }
 
     int getDegree(long index) throws IOException {
-        PageCursor pageCursor = pagedFile.io(
+        PageCursor pageCursor = Neo4jProxy.pageFileIO(
+            pagedFile,
             0,
             PagedFile.PF_SHARED_READ_LOCK,
             PageCursorTracer.NULL
@@ -167,7 +169,8 @@ public final class AdjacencyList {
     // Cursors
 
     Cursor cursor(long offset) throws IOException {
-        PageCursor pageCursor = pagedFile.io(
+        PageCursor pageCursor = Neo4jProxy.pageFileIO(
+            pagedFile,
             0,
             PagedFile.PF_SHARED_READ_LOCK,
             PageCursorTracer.NULL
@@ -179,7 +182,8 @@ public final class AdjacencyList {
      * Returns a new, uninitialized delta cursor. Call {@link DecompressingCursor#init(long, int)}.
      */
     DecompressingCursor rawDecompressingCursor() throws IOException {
-        PageCursor pageCursor = pagedFile.io(
+        PageCursor pageCursor = Neo4jProxy.pageFileIO(
+            pagedFile,
             0,
             PagedFile.PF_SHARED_READ_LOCK,
             PageCursorTracer.NULL

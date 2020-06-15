@@ -68,9 +68,11 @@ import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.values.storable.Value;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.OpenOption;
 import java.util.function.ToIntFunction;
 
 public final class Neo4jProxy40 implements Neo4jProxyApi {
@@ -122,6 +124,16 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
         PageCursorTracer pageCursorTracer
     ) throws IOException {
         return pagedFile.io(pageId, pageFileFlags);
+    }
+
+    @Override
+    public PagedFile pageCacheMap(
+        PageCache pageCache,
+        File file,
+        int pageSize,
+        OpenOption... openOptions
+    ) throws IOException {
+        return pageCache.map(file, pageSize, openOptions);
     }
 
     @Override

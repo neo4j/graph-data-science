@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.pagecached;
 import com.carrotsearch.hppc.BitSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BiLongConsumer;
@@ -62,7 +63,7 @@ public final class IdMapBuilder {
             try {
                 var startPage = p.startNode / PageCache.PAGE_SIZE;
                 var endPage = startPage + BitUtil.ceilDiv(p.nodeCount, PageCache.PAGE_SIZE);
-                var pageCursor = graphIds.io(startPage, PagedFile.PF_SHARED_READ_LOCK, PageCursorTracer.NULL);
+                var pageCursor = Neo4jProxy.pageFileIO(graphIds, startPage, PagedFile.PF_SHARED_READ_LOCK, PageCursorTracer.NULL);
                 var longsPerPage = PageCache.PAGE_SIZE / Long.BYTES;
                 for (long pageId = startPage; pageId < endPage; pageId++) {
                     pageCursor.next(pageId);

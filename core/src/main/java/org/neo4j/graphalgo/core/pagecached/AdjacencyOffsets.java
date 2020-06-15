@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.pagecached;
 
-import org.eclipse.collections.impl.factory.Sets;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
@@ -40,12 +40,14 @@ public abstract class AdjacencyOffsets {
     abstract long release();
 
     public static AdjacencyOffsets of(PageCache pageCache, long[][] pages) throws IOException {
-        PagedFile pagedFile = pageCache.map(
+        PagedFile pagedFile = Neo4jProxy.pageCacheMap(
+            pageCache,
             file(),
             PageCache.PAGE_SIZE,
-            Sets.immutable.of(StandardOpenOption.CREATE)
+            StandardOpenOption.CREATE
         );
-        PageCursor pageCursor = pagedFile.io(
+        PageCursor pageCursor = Neo4jProxy.pageFileIO(
+            pagedFile,
             0,
             PagedFile.PF_SHARED_WRITE_LOCK,
             PageCursorTracer.NULL

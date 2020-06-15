@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.config.Setting;
@@ -62,8 +63,10 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.OpenOption;
 import java.util.ServiceLoader;
 
 public final class Neo4jProxy {
@@ -123,6 +126,11 @@ public final class Neo4jProxy {
         PageCursorTracer pageCursorTracer
     ) throws IOException {
         return IMPL.pageFileIO(pagedFile, pageId, pageFileFlags, pageCursorTracer);
+    }
+
+    public static PagedFile pageCacheMap(PageCache pageCache, File file, int pageSize, OpenOption... openOptions)
+    throws IOException {
+        return IMPL.pageCacheMap(pageCache, file, pageSize, openOptions);
     }
 
     public static PropertyCursor allocatePropertyCursor(

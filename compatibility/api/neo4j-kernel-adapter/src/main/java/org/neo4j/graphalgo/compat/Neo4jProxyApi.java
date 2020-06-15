@@ -62,8 +62,10 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.OpenOption;
 
 public interface Neo4jProxyApi {
 
@@ -96,6 +98,13 @@ public interface Neo4jProxyApi {
         long pageId,
         int pageFileFlags,
         PageCursorTracer pageCursorTracer
+    ) throws IOException;
+
+    PagedFile pageCacheMap(
+        PageCache pageCache,
+        File file,
+        int pageSize,
+        OpenOption... openOptions
     ) throws IOException;
 
     PropertyCursor allocatePropertyCursor(

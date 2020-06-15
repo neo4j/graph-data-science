@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
@@ -95,7 +96,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
         this.nodeToGraphIds = nodeToGraphIds;
         this.labelInformation = labelInformation;
         this.nodeCount = nodeCount;
-        this.graphIdsCursor = graphIds.io(0, PagedFile.PF_SHARED_READ_LOCK, PageCursorTracer.NULL);
+        this.graphIdsCursor = Neo4jProxy.pageFileIO(graphIds, 0, PagedFile.PF_SHARED_READ_LOCK, PageCursorTracer.NULL);
 //        this.nodeToGraphIdsCursor = nodeToGraphIds.io(0, PagedFile.PF_SHARED_READ_LOCK, PageCursorTracer.NULL);
     }
 

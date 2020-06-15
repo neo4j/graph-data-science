@@ -191,10 +191,11 @@ class AdjacencyListTest {
 //            channel.writeAll(buf);
 //        }
 
-        PagedFile pagedFile = pageCache.map(
+        PagedFile pagedFile = Neo4jProxy.pageCacheMap(
+            pageCache,
             file,
             PageCache.PAGE_SIZE,
-            Sets.immutable.of(StandardOpenOption.CREATE)
+            StandardOpenOption.CREATE
         );
 
 
