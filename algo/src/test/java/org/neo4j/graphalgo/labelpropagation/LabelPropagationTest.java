@@ -24,6 +24,9 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
@@ -31,7 +34,6 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -41,19 +43,21 @@ import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
+import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class LabelPropagationTest {
+
+    private static final LabelPropagationStreamConfig DEFAULT_CONFIG = ImmutableLabelPropagationStreamConfig.builder().build();
 
     @GdlGraph
     private static final String GRAPH =
@@ -147,7 +151,7 @@ class LabelPropagationTest {
     private void testLPClustering(Graph graph, int batchSize) {
         LabelPropagation lp = new LabelPropagation(
             graph,
-            defaultConfig(),
+            DEFAULT_CONFIG,
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
@@ -191,31 +195,30 @@ class LabelPropagationTest {
         return cluster;
     }
 
-    @Test
-    void shouldComputeMemoryEstimation1Thread() {
-        long nodeCount = 100_000L;
-        int concurrency = 1;
-        assertMemoryEstimation(nodeCount, concurrency);
+    static Stream<Arguments> expectedMemoryEstimation() {
+        return Stream.of(
+            Arguments.of(1, 800_480L, 4_994_656L),
+            Arguments.of(4, 801_560L, 17_578_264L),
+            Arguments.of(42, 815_240L, 176_970_632L)
+        );
     }
 
-    @Test
-    void shouldComputeMemoryEstimation4Threads() {
-        long nodeCount = 100_000L;
-        int concurrency = 4;
-        assertMemoryEstimation(nodeCount, concurrency);
-    }
-
-    @Test
-    void shouldComputeMemoryEstimation42Threads() {
-        long nodeCount = 100_000L;
-        int concurrency = 42;
-        assertMemoryEstimation(nodeCount, concurrency);
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.labelpropagation.LabelPropagationTest#expectedMemoryEstimation")
+    void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
+        assertMemoryEstimation(
+            () -> new LabelPropagationFactory<>(DEFAULT_CONFIG).memoryEstimation(ImmutableLabelPropagationStreamConfig.builder().build()),
+            100_000L,
+            concurrency,
+            expectedMinBytes,
+            expectedMaxBytes
+        );
     }
 
     @Test
     void shouldBoundMemEstimationToMaxSupportedDegree() {
         LabelPropagationFactory<LabelPropagationStreamConfig> labelPropagation = new LabelPropagationFactory<>(
-            defaultConfig());
+            DEFAULT_CONFIG);
         GraphDimensions largeDimensions = ImmutableGraphDimensions.builder()
             .nodeCount((long) Integer.MAX_VALUE + (long) Integer.MAX_VALUE)
             .build();
@@ -232,12 +235,12 @@ class LabelPropagationTest {
         var testLogger = new TestProgressLogger(
             graph.relationshipCount(),
             "LabelPropagation",
-            defaultConfig().concurrency()
+            DEFAULT_CONFIG.concurrency()
         );
 
         var lp = new LabelPropagation(
             graph,
-            defaultConfig(),
+            DEFAULT_CONFIG,
             Pools.DEFAULT,
             testLogger,
             AllocationTracker.EMPTY
@@ -257,35 +260,5 @@ class LabelPropagationTest {
             assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d :: Start", iteration)));
         });
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
-    }
-
-    private void assertMemoryEstimation(long nodeCount, int concurrency) {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-
-        LabelPropagationFactory<LabelPropagationBaseConfig> labelPropagation = new LabelPropagationFactory<>(defaultConfig());
-
-        MemoryRange actual = labelPropagation
-            .memoryEstimation(ImmutableLabelPropagationStreamConfig.builder().build())
-            .estimate(dimensions, concurrency)
-            .memoryUsage();
-
-        Map<Integer, Long> minByConcurrency = genericMap(
-            1, 800480L,
-            4, 801560L,
-            42, 815240L
-        );
-
-        Map<Integer, Long> maxByConcurrency = genericMap(
-            1, 4994656L,
-            4, 17578264L,
-            42, 176970632L
-        );
-
-        assertEquals(minByConcurrency.get(concurrency), actual.min, "min");
-        assertEquals(maxByConcurrency.get(concurrency), actual.max, "max");
-    }
-
-    LabelPropagationStreamConfig defaultConfig() {
-        return ImmutableLabelPropagationStreamConfig.builder().build();
     }
 }
