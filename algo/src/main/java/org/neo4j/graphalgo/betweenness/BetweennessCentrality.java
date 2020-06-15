@@ -112,7 +112,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
 
             this.sigma = HugeLongArray.newArray(nodeCount, tracker);;
             this.delta = HugeDoubleArray.newArray(nodeCount, tracker);
-
             this.distance = HugeIntArray.newArray(nodeCount, tracker);
         }
 

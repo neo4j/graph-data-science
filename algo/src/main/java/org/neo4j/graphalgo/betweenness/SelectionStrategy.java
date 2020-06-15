@@ -36,41 +36,28 @@ import java.util.stream.Collectors;
 
 import static com.carrotsearch.hppc.BitSetIterator.NO_MORE;
 
-public abstract class SelectionStrategy {
+public interface SelectionStrategy {
 
-    abstract void init(Graph graph, ExecutorService executorService, int concurrency);
-
-    abstract boolean select(long nodeId);
-
-    abstract long size();
-
-    public static class All extends SelectionStrategy {
-
-        private long nodeCount;
+    SelectionStrategy ALL = new SelectionStrategy() {
+        @Override
+        public void init(Graph graph, ExecutorService executorService, int concurrency) { }
 
         @Override
-        void init(Graph graph, ExecutorService executorService, int concurrency) {
-            this.nodeCount = graph.nodeCount();
-        }
-
-        @Override
-        boolean select(long nodeId) {
+        public boolean select(long nodeId) {
             return true;
         }
+    };
 
-        @Override
-        long size() {
-            return nodeCount;
-        }
-    }
+    void init(Graph graph, ExecutorService executorService, int concurrency);
 
-    public static class RandomDegree extends SelectionStrategy {
+    boolean select(long nodeId);
+
+    class RandomDegree implements SelectionStrategy {
 
         private final long numSeedNodes;
         private final Optional<Long> maybeRandomSeed;
 
         private BitSet bitSet;
-        private long size;
 
         public RandomDegree(long numSeedNodes) {
             this(numSeedNodes, Optional.empty());
@@ -82,23 +69,17 @@ public abstract class SelectionStrategy {
         }
 
         @Override
-        void init(Graph graph, ExecutorService executorService, int concurrency) {
+        public void init(Graph graph, ExecutorService executorService, int concurrency) {
             assert numSeedNodes <= graph.nodeCount();
             this.bitSet = new BitSet(graph.nodeCount());
             var partitions = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE);
             var maxDegree = maxDegree(graph, partitions, executorService, concurrency);
             selectNodes(graph, partitions, maxDegree, executorService, concurrency);
-            this.size = bitSet.cardinality();
         }
 
         @Override
-        boolean select(long nodeId) {
+        public boolean select(long nodeId) {
             return bitSet.get(nodeId);
-        }
-
-        @Override
-        long size() {
-            return size;
         }
 
         private long maxDegree(

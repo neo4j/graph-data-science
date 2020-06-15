@@ -45,7 +45,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
 
         var strategy = samplingSize.isPresent() && samplingSize.get() < graph.nodeCount()
             ? new SelectionStrategy.RandomDegree(samplingSize.get(), samplingSeed)
-            : new SelectionStrategy.All();
+            : SelectionStrategy.ALL;
 
         return new BetweennessCentrality(
             graph,

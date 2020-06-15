@@ -59,9 +59,9 @@ class SelectionStrategyTest {
 
     @Test
     void selectAllNodes() {
-        SelectionStrategy selectionStrategy = new SelectionStrategy.All();
+        SelectionStrategy selectionStrategy = SelectionStrategy.ALL;
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(graph.nodeCount(), selectionStrategy.size());
+        assertEquals(graph.nodeCount(), samplingSize(graph.nodeCount(), selectionStrategy));
     }
 
     @ParameterizedTest
@@ -69,26 +69,36 @@ class SelectionStrategyTest {
     void selectNumSeedNodes(long numSeedNodes) {
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(numSeedNodes);
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(numSeedNodes, selectionStrategy.size());
+        assertEquals(numSeedNodes, samplingSize(graph.nodeCount(), selectionStrategy));
     }
 
     @Test
     void selectNumSeedNodesWithRandomSeed() {
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(3, Optional.of(42L));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(3, selectionStrategy.size());
+        assertEquals(3, samplingSize(graph.nodeCount(), selectionStrategy));
         assertTrue(selectionStrategy.select(nodeId.of("a")));
-        assertTrue(selectionStrategy.select(nodeId.of("d")));
-        assertTrue(selectionStrategy.select(nodeId.of("e")));
+        assertTrue(selectionStrategy.select(nodeId.of("c")));
+        assertTrue(selectionStrategy.select(nodeId.of("f")));
     }
 
     @Test
     void selectHighDegreeNode() {
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(1);
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(1, selectionStrategy.size());
+        assertEquals(1, samplingSize(graph.nodeCount(), selectionStrategy));
         var isA = selectionStrategy.select(graph.toMappedNodeId(nodeId.of("a")));
         var isB = selectionStrategy.select(graph.toMappedNodeId(nodeId.of("b")));
         assertTrue(isA || isB);
+    }
+
+    private static long samplingSize(long nodeCount, SelectionStrategy selectionStrategy) {
+        long samplingSize = 0;
+        for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
+            if (selectionStrategy.select(nodeId)) {
+                samplingSize++;
+            }
+        }
+        return samplingSize;
     }
 }

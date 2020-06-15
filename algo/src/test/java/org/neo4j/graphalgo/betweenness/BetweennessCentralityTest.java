@@ -72,7 +72,7 @@ class BetweennessCentralityTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void testForceCompleteSampling(int concurrency) {
-        var bc = new BetweennessCentrality(graph, new SelectionStrategy.All(), Pools.DEFAULT, concurrency, TRACKER);
+        var bc = new BetweennessCentrality(graph, SelectionStrategy.ALL, Pools.DEFAULT, concurrency, TRACKER);
         assertResult(bc.compute(), EXACT_CENTRALITIES);
     }
 
