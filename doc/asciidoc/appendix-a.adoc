@@ -112,11 +112,15 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.localClusteringCoefficient.write.estimate`
 | `gds.localClusteringCoefficient.mutate`
 | `gds.localClusteringCoefficient.mutate.estimate`
-.4+<.^| <<algorithms-betweenness-centrality-syntax, Betweenness Centrality>>
+.8+<.^| <<algorithms-betweenness-centrality-syntax, Betweenness Centrality>>
 | `gds.betweenness.stream`
-| `gds.betweenness.write`
-| `gds.betweenness.mutate`
+| `gds.betweenness.stream.estimate`
 | `gds.betweenness.stats`
+| `gds.betweenness.stats.estimate`
+| `gds.betweenness.mutate`
+| `gds.betweenness.mutate.estimate`
+| `gds.betweenness.write`
+| `gds.betweenness.write.estimate`
 |===
 
 [[beta-tier]]

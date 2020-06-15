@@ -29,7 +29,10 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
+import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
+import org.neo4j.graphalgo.betweenness.BetweennessCentralityWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphDeleteRelationshipProc;
 import org.neo4j.graphalgo.catalog.GraphDropProc;
@@ -98,7 +101,14 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.modularityOptimization.write",
         "gds.beta.modularityOptimization.write.estimate",
 
+        "gds.betweenness.mutate",
+        "gds.betweenness.mutate.estimate",
+        "gds.betweenness.stats",
+        "gds.betweenness.stats.estimate",
         "gds.betweenness.stream",
+        "gds.betweenness.stream.estimate",
+        "gds.betweenness.write",
+        "gds.betweenness.write.estimate",
 
         "gds.graph.create",
         "gds.graph.create.cypher",
@@ -202,6 +212,9 @@ class ListProcTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(
             BetweennessCentralityStreamProc.class,
+            BetweennessCentralityWriteProc.class,
+            BetweennessCentralityMutateProc.class,
+            BetweennessCentralityStatsProc.class,
             GraphCreateProc.class,
             GraphDropProc.class,
             GraphExistsProc.class,

@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -64,7 +65,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
                 }))
                 .perNode("forwardNodes", HugeLongArray::memoryEstimation)
                 .perNode("backwardNodes", HugeLongArray::memoryEstimation)
-                .perNode("deltas", HugeLongArray::memoryEstimation)
+                .perNode("deltas", HugeDoubleArray::memoryEstimation)
                 .perNode("sigmas", HugeLongArray::memoryEstimation)
                 .perNode("distances", HugeIntArray::memoryEstimation)
                 .build())

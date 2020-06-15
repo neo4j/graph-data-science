@@ -23,6 +23,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphdb.Label;
@@ -35,7 +36,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralityBaseConfig>
-    extends BaseProcTest implements AlgoBaseProcTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray> {
+    extends BaseProcTest
+    implements
+    AlgoBaseProcTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray>,
+    MemoryEstimateTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray> {
 
     static final String DEFAULT_RESULT_PROPERTY = "centrality";
 
