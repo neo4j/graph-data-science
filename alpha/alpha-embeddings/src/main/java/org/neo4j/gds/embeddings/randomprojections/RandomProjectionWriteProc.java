@@ -67,7 +67,7 @@ public class RandomProjectionWriteProc extends WriteProc<RandomProjection, Rando
 
     @Override
     protected PropertyTranslator<RandomProjection> nodePropertyTranslator(ComputationResult<RandomProjection, RandomProjection, RandomProjectionWriteConfig> computationResult) {
-        return (PropertyTranslator.OfDoubleArray<RandomProjection>) (data, nodeId) -> data.embeddings().get(nodeId);
+        return (PropertyTranslator.OfFloatArray<RandomProjection>) (data, nodeId) -> data.embeddings().get(nodeId);
     }
 
     @Override

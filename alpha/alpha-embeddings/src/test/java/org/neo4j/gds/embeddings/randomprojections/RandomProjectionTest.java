@@ -74,10 +74,10 @@ class RandomProjectionTest extends AlgoTestBase {
         );
 
         randomProjection.initRandomVectors();
-        HugeObjectArray<double[]> randomVectors = HugeObjectArray.newArray(double[].class, 2, AllocationTracker.EMPTY);
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 2, AllocationTracker.EMPTY);
         randomProjection.currentEmbedding(-1).copyTo(randomVectors, 2);
         randomProjection.propagateEmbeddings();
-        HugeObjectArray<double[]> embeddings = randomProjection.embeddings();
+        HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
 
         boolean isEqual = true;
         for (int i = 0; i < 128; i++) {
@@ -104,10 +104,10 @@ class RandomProjectionTest extends AlgoTestBase {
         );
 
         randomProjection.initRandomVectors();
-        HugeObjectArray<double[]> randomVectors = HugeObjectArray.newArray(double[].class, 3, AllocationTracker.EMPTY);
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.EMPTY);
         randomProjection.currentEmbedding(-1).copyTo(randomVectors, 3);
         randomProjection.propagateEmbeddings();
-        HugeObjectArray<double[]> embeddings = randomProjection.embeddings();
+        HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
 
         boolean isEqual = true;
         for (int i = 0; i < 128; i++) {
@@ -140,9 +140,9 @@ class RandomProjectionTest extends AlgoTestBase {
         double p = 1D / 6D;
         int maxNumPositive = (int) ((p + 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D); // 1:30.000.000 chance of failing :P
         int minNumPositive = (int) ((p - 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D);
-        HugeObjectArray<double[]> randomVectors = randomProjection.currentEmbedding(-1);
+        HugeObjectArray<float[]> randomVectors = randomProjection.currentEmbedding(-1);
         for (int i = 0; i < graph.nodeCount(); i++) {
-            double[] embedding = randomVectors.get(i);
+            float[] embedding = randomVectors.get(i);
             int numZeros = 0;
             int numPositive = 0;
             for (int j = 0; j < 512; j++) {
@@ -180,9 +180,9 @@ class RandomProjectionTest extends AlgoTestBase {
         );
 
         RandomProjection computeResult = randomProjection.compute();
-        HugeObjectArray<double[]> embeddings = computeResult.embeddings();
+        HugeObjectArray<float[]> embeddings = computeResult.embeddings();
         for (int i = 0; i < embeddings.size(); i++) {
-            double[] embedding = embeddings.get(i);
+            float[] embedding = embeddings.get(i);
             for (double embeddingValue : embedding) {
                 assertEquals(0.0f, embeddingValue);
             }

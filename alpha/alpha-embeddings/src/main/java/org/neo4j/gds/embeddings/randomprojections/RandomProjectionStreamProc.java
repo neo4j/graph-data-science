@@ -28,10 +28,10 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -92,9 +92,17 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
         public final long nodeId;
         public final List<Double> embedding;
 
-        StreamResult(long nodeId, double[] embedding) {
+        StreamResult(long nodeId, float[] embedding) {
             this.nodeId = nodeId;
-            this.embedding = java.util.Arrays.stream(embedding).boxed().collect(Collectors.toList());
+            this.embedding = floatsToDoubleList(embedding);
+        }
+
+        static List<Double> floatsToDoubleList(float[] values) {
+            var doubles = new ArrayList<Double>(values.length);
+            for (float value : values) {
+                doubles.add((double) value);
+            }
+            return doubles;
         }
     }
 }
