@@ -363,23 +363,7 @@ public final class CSRGraphStore implements GraphStore {
         HugeGraph.Relationships relationships
     ) {
         // TODO: somehow allow the PageCacheGraph.Relationships to be used
-//        updateGraphStore(graphStore -> {
-//            if (!hasRelationshipType(relationshipType)) {
-//                graphStore.relationships.put(relationshipType, relationships.topology());
-//
-//                if (relationshipPropertyKey.isPresent()
-//                    && relationshipPropertyType.isPresent()
-//                    && relationships.properties().isPresent()) {
-//                    addRelationshipProperty(
-//                        relationshipType,
-//                        relationshipPropertyKey.get(),
-//                        relationshipPropertyType.get(),
-//                        relationships.properties().get(),
-//                        graphStore
-//                    );
-//                }
-//            }
-//        });
+        // see Huge GraphStore for what it is doing
     }
 
     @Override
@@ -515,8 +499,8 @@ public final class CSRGraphStore implements GraphStore {
 
         Optional<IdMap> filteredNodes = loadAllNodes || nodes.containsOnlyAllNodesLabel()
             ? Optional.empty()
+            // TODO: filtering not yet implemented, should call into nodes.withFilteredLabels
             : Optional.empty();
-//            : Optional.of(nodes.withFilteredLabels(filteredLabels, concurrency));
 
         List<Graph> filteredGraphs = relationships.entrySet().stream()
             .filter(relTypeAndCSR -> relationshipTypes.contains(relTypeAndCSR.getKey()))

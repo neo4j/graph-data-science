@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.pagecached;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.io.pagecache.PageCache;
 
 import java.io.IOException;
@@ -49,8 +48,7 @@ class IdMapTest extends BaseTest {
 
         HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.Builder.create(
             pageCache,
-            nodeCount == 0 ? 1 : nodeCount,
-            AllocationTracker.EMPTY
+            nodeCount == 0 ? 1 : nodeCount
         );
 
         var idMap = IdMapBuilder.build(

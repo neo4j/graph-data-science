@@ -94,6 +94,7 @@ class ThreadLocalRelationshipsBuilder {
         int localId
     ) throws IOException {
 
+        // TODO: implement property loading
 //        if (array.hasWeights()) {
 //            return applyVariableDeltaEncodingWithWeights(array, buffer, localId);
 //        } else {
@@ -123,70 +124,4 @@ class ThreadLocalRelationshipsBuilder {
         array.release();
         return degree;
     }
-
-//    private int applyVariableDeltaEncodingWithWeights(
-//        CompressedLongArray array,
-//        LongsRef buffer,
-//        int localId
-//    ) {
-//        byte[] storage = array.storage();
-//        long[][] weights = array.weights();
-//        AdjacencyCompression.copyFrom(buffer, array);
-//        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, weights, aggregations, noAggregation);
-//        int requiredBytes = AdjacencyCompression.compress(buffer, storage);
-//
-//        adjacencyOffsets[localId] = copyIds(storage, requiredBytes, degree);
-//        copyProperties(weights, degree, localId, propertyOffsets);
-//
-//        array.release();
-//        return degree;
-//    }
-
-//    private long copyIds(byte[] targets, int requiredBytes, int degree) {
-//        var uncompressedValues = new LongsRef(0);
-//        uncompressedValues.longs = uncompressedAdjacencyList.clone();
-//        uncompressedValues.length = uncompressedAdjacencyList.length;
-//
-//        var degree = AdjacencyCompression.applyDeltaEncoding(uncompressedValues, Aggregation.NONE);
-//        var compressed = new byte[Math.multiplyExact(degree, 10) + 4];
-//        AdjacencyCompression.writeBEInt(compressed, 0, degree);
-//        var requiredBytes = VarLongEncoding.encodeVLongs(
-//            uncompressedValues.longs,
-//            uncompressedValues.length,
-//            compressed,
-//            4
-//        );
-
-
-        // sizeOf(degree) + compression bytes
-//        long address = adjacencyAllocator.allocate(Integer.BYTES + requiredBytes);
-//        int offset = adjacencyAllocator.offset;
-//        offset = writeDegree(adjacencyAllocator.page, offset, degree);
-//        System.arraycopy(targets, 0, adjacencyAllocator.page, offset, requiredBytes);
-//        adjacencyAllocator.offset = (offset + requiredBytes);
-//        return address;
-//    }
-
-//    private void copyProperties(long[][] properties, int degree, int localId, long[][] offsets) {
-//        for (int i = 0; i < properties.length; i++) {
-//            long[] property = properties[i];
-//            AdjacencyListBuilder.Allocator propertiesAllocator = propertiesAllocators[i];
-//            long address = copyProperties(property, degree, propertiesAllocator);
-//            offsets[i][localId] = address;
-//        }
-//    }
-//
-//    private long copyProperties(long[] properties, int degree, AdjacencyListBuilder.Allocator propertiesAllocator) {
-//        int requiredBytes = degree * Long.BYTES;
-//        long address = propertiesAllocator.allocate(Integer.BYTES /* degree */ + requiredBytes);
-//        int offset = propertiesAllocator.offset;
-//        offset = writeDegree(propertiesAllocator.page, offset, degree);
-//        ByteBuffer
-//            .wrap(propertiesAllocator.page, offset, requiredBytes)
-//            .order(ByteOrder.LITTLE_ENDIAN)
-//            .asLongBuffer()
-//            .put(properties, 0, degree);
-//        propertiesAllocator.offset = (offset + requiredBytes);
-//        return address;
-//    }
 }

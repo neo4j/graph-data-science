@@ -46,10 +46,9 @@ public final class AdjacencyList {
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
     public static final long PAGE_MASK = PAGE_SIZE - 1;
 
-    //    private final long allocatedMemory;
     private final PagedFile pagedFile;
-//    private byte[][] pages;
 
+    // TODO: fix estimation for page cache
     public static MemoryEstimation compressedMemoryEstimation(long avgDegree, long nodeCount) {
         // Best case scenario:
         // Difference between node identifiers in each adjacency list is 1.
@@ -130,18 +129,7 @@ public final class AdjacencyList {
 
     public AdjacencyList(PagedFile pagedFile) {
         this.pagedFile = pagedFile;
-//        this.allocatedMemory = memoryOfPages(pages);
     }
-
-//    private static long memoryOfPages(byte[][] pages) {
-//        long memory = MemoryUsage.sizeOfObjectArray(pages.length);
-//        for (byte[] page : pages) {
-//            if (page != null) {
-//                memory += MemoryUsage.sizeOfByteArray(page.length);
-//            }
-//        }
-//        return memory;
-//    }
 
     int getDegree(long index) throws IOException {
         PageCursor pageCursor = Neo4jProxy.pageFileIO(
@@ -157,13 +145,9 @@ public final class AdjacencyList {
         return degree;
     }
 
-    public final long release() {
+    public long release() {
         pagedFile.close();
-//        if (pages == null) {
         return 0L;
-//        }
-//        pages = null;
-//        return allocatedMemory;
     }
 
     // Cursors
@@ -210,10 +194,9 @@ public final class AdjacencyList {
 
         static final Cursor EMPTY = new Cursor(null);
 
-        // TODO: free
+        // TODO: release when closing cursors
         private final PageCursor pageCursor;
 
-        //        private byte[] currentPage;
         private int degree;
         private int offset;
         private int limit;
@@ -255,8 +238,6 @@ public final class AdjacencyList {
         Cursor init(long offset, int pageSize) throws IOException {
             this.offset = (int) (offset % pageSize);
             pageCursor.next(offset / pageSize);
-//            this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
-//            this.offset = indexInPage(fromIndex, PAGE_MASK);
             this.degree = pageCursor.getInt(this.offset);
             this.offset += Integer.BYTES;
             this.limit = this.offset + degree * Long.BYTES;
@@ -282,7 +263,7 @@ public final class AdjacencyList {
 
         private int maxTargets;
         private int currentTarget;
-        private PageCursor pageCursor;
+        private final PageCursor pageCursor;
 
         private DecompressingCursor(PageCursor pageCursor) {
             this.pageCursor = pageCursor;

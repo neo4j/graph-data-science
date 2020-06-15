@@ -20,16 +20,11 @@
 package org.neo4j.graphalgo.core.pagecached;
 
 import com.carrotsearch.hppc.BitSet;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.BiLongConsumer;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PagedFile;
@@ -39,7 +34,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class IdMapBuilder {
@@ -63,7 +57,12 @@ public final class IdMapBuilder {
             try {
                 var startPage = p.startNode / PageCache.PAGE_SIZE;
                 var endPage = startPage + BitUtil.ceilDiv(p.nodeCount, PageCache.PAGE_SIZE);
-                var pageCursor = Neo4jProxy.pageFileIO(graphIds, startPage, PagedFile.PF_SHARED_READ_LOCK, PageCursorTracer.NULL);
+                var pageCursor = Neo4jProxy.pageFileIO(
+                    graphIds,
+                    startPage,
+                    PagedFile.PF_SHARED_READ_LOCK,
+                    PageCursorTracer.NULL
+                );
                 var longsPerPage = PageCache.PAGE_SIZE / Long.BYTES;
                 for (long pageId = startPage; pageId < endPage; pageId++) {
                     pageCursor.next(pageId);
@@ -86,91 +85,6 @@ public final class IdMapBuilder {
         HugeSparseLongArray nodeToGraphIds = nodeMappingBuilder.build();
         return new IdMap(graphIds, nodeToGraphIds, labelInformation, nodeCount);
     }
-
-//    static IdMap buildChecked(
-//        HugeLongArrayBuilder idMapBuilder,
-//        Map<NodeLabel, BitSet> labelInformation,
-//        long highestNodeId,
-//        int concurrency,
-//        AllocationTracker tracker
-//    ) throws DuplicateNodeIdException {
-//        HugeLongArray graphIds = idMapBuilder.build();
-//        HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
-//            idMapBuilder.size(),
-//            highestNodeId,
-//            concurrency,
-//            addChecked(graphIds),
-//            tracker
-//        );
-//        return new IdMap(graphIds, nodeToGraphIds, labelInformation, idMapBuilder.size());
-//    }
-
-    @NotNull
-    static HugeSparseLongArray buildSparseNodeMapping(
-        HugeSparseLongArray.Builder nodeMappingBuilder,
-        long nodeCount,
-        int concurrency,
-        Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder,
-        AllocationTracker tracker
-    ) throws IOException {
-        ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(nodeMappingBuilder));
-        return nodeMappingBuilder.build();
-    }
-
-    static Function<HugeSparseLongArray.Builder, BiLongConsumer> add(HugeLongArray graphIds) {
-        return builder -> (start, end) -> {
-            try {
-                addNodes(graphIds, builder, start, end);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        };
-    }
-
-//    private static Function<HugeSparseLongArray.Builder, BiLongConsumer> addChecked(HugeLongArray graphIds) {
-//        return builder -> (start, end) -> addAndCheckNodes(graphIds, builder, start, end);
-//    }
-
-    private static void addNodes(
-        HugeLongArray graphIds,
-        HugeSparseLongArray.Builder builder,
-        long startNode,
-        long endNode
-    ) throws IOException {
-        try (HugeCursor<long[]> cursor = graphIds.initCursor(graphIds.newCursor(), startNode, endNode)) {
-            while (cursor.next()) {
-                long[] array = cursor.array;
-                int offset = cursor.offset;
-                int limit = cursor.limit;
-                long internalId = cursor.base + offset;
-                for (int i = offset; i < limit; ++i, ++internalId) {
-                    builder.set(array[i], internalId);
-                }
-            }
-        }
-    }
-
-//    private static void addAndCheckNodes(
-//        HugeLongArray graphIds,
-//        HugeSparseLongArray.Builder builder,
-//        long startNode,
-//        long endNode
-//    ) throws DuplicateNodeIdException {
-//        try (HugeCursor<long[]> cursor = graphIds.initCursor(graphIds.newCursor(), startNode, endNode)) {
-//            while (cursor.next()) {
-//                long[] array = cursor.array;
-//                int offset = cursor.offset;
-//                int limit = cursor.limit;
-//                long internalId = cursor.base + offset;
-//                for (int i = offset; i < limit; ++i, ++internalId) {
-//                    boolean addedAsNewId = builder.setIfAbsent(array[i], internalId);
-//                    if (!addedAsNewId) {
-//                        throw new DuplicateNodeIdException(array[i]);
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     private IdMapBuilder() {
     }

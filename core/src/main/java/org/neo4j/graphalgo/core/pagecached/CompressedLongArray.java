@@ -24,9 +24,9 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
 
-import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
-import static org.neo4j.graphalgo.core.loading.VarLongEncoding.zigZag;
 import static org.neo4j.graphalgo.core.pagecached.VarLongEncoding.encodeVLongs;
+import static org.neo4j.graphalgo.core.pagecached.VarLongEncoding.encodedVLongSize;
+import static org.neo4j.graphalgo.core.pagecached.VarLongEncoding.zigZag;
 import static org.neo4j.graphalgo.core.pagecached.ZigZagLongDecoding.zigZagUncompress;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
@@ -79,10 +79,10 @@ final class CompressedLongArray {
     }
 
     /**
-     * @param values        values to write
-     * @param allWeights    weights to write
-     * @param start         start index in values and weights
-     * @param end           end index in values and weights
+     * @param values     values to write
+     * @param allWeights weights to write
+     * @param start      start index in values and weights
+     * @param end        end index in values and weights
      * @implNote For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
      */
     void add(long[] values, long[][] allWeights, int start, int end) {

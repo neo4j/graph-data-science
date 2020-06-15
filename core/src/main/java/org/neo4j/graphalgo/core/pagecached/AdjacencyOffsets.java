@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AdjacencyOffsets {
 
-    private static AtomicInteger GENERATION = new AtomicInteger(0);
+    private static final AtomicInteger GENERATION = new AtomicInteger(0);
 
     abstract long get(long index) throws IOException;
 
@@ -74,7 +74,7 @@ public abstract class AdjacencyOffsets {
         }
 
         @Override
-        long get(long index) throws IOException {
+        long get(long index) {
             var pageSize = PageCache.PAGE_SIZE;
             var longsPerPage = pageSize / Long.BYTES;
             var pageIndex = index / longsPerPage;
@@ -83,8 +83,7 @@ public abstract class AdjacencyOffsets {
                 if (!pageCursor.next(pageIndex)) {
                     throw new ArrayIndexOutOfBoundsException("Array index out of range: " + index);
                 }
-                long aLong = pageCursor.getLong(indexInPage);
-                return aLong;
+                return pageCursor.getLong(indexInPage);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

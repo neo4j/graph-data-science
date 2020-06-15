@@ -45,8 +45,7 @@ class AdjacencyBuilderTest extends BaseTest {
         PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
         RelationshipsBuilder globalBuilder = new RelationshipsBuilder(
             pageCache,
-            RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
-            AllocationTracker.EMPTY
+            RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE)
         );
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
             pageCache,

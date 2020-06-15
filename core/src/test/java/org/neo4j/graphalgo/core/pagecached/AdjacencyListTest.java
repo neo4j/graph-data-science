@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.pagecached;
 
 import org.apache.lucene.util.LongsRef;
-import org.eclipse.collections.impl.factory.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,7 +29,6 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -75,7 +73,7 @@ class AdjacencyListTest {
     @Test
     void writeAdjacencyList() throws IOException {
         PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
-        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache, AllocationTracker.EMPTY);
+        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache);
         AdjacencyListBuilder.Allocator allocator = adjacencyListBuilder.newAllocator();
 
         allocator.prepare();
@@ -96,7 +94,7 @@ class AdjacencyListTest {
     @Test
     void writeBufferIntoAdjacencyList() throws IOException {
         PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
-        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache, AllocationTracker.EMPTY);
+        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache);
         AdjacencyListBuilder.Allocator allocator = adjacencyListBuilder.newAllocator();
 
         ByteBuffer buffer = ByteBuffer.allocate(24);
@@ -118,7 +116,7 @@ class AdjacencyListTest {
     @Test
     void writeLargeBufferIntoAdjacencyList() throws IOException {
         PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
-        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache, AllocationTracker.EMPTY);
+        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache);
         AdjacencyListBuilder.Allocator allocator = adjacencyListBuilder.newAllocator();
 
         ByteBuffer buffer = ByteBuffer.allocate(1337 * 8 + 4);
@@ -160,7 +158,7 @@ class AdjacencyListTest {
         );
 
         PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
-        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache, AllocationTracker.EMPTY);
+        AdjacencyListBuilder adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache);
         AdjacencyListBuilder.Allocator allocator = adjacencyListBuilder.newAllocator();
 
         allocator.prepare();

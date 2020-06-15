@@ -41,18 +41,17 @@ public class RelationshipsBuilder {
 
     public RelationshipsBuilder(
         PageCache pageCache,
-        RelationshipProjection projection,
-        AllocationTracker tracker
+        RelationshipProjection projection
     ) {
         this.projection = projection;
 
-        adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache, tracker);
+        adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache);
 
         if (projection.properties().isEmpty()) {
             propertyBuilders = EMPTY_PROPERTY_BUILDERS;
         } else {
             propertyBuilders = new AdjacencyListBuilder[projection.properties().numberOfMappings()];
-            Arrays.setAll(propertyBuilders, i -> AdjacencyListBuilder.newBuilder(pageCache, tracker));
+            Arrays.setAll(propertyBuilders, i -> AdjacencyListBuilder.newBuilder(pageCache));
         }
     }
 

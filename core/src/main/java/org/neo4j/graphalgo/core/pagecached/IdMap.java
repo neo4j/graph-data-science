@@ -49,23 +49,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, AutoCloseable {
 
-//    private static final MemoryEstimation ESTIMATION = MemoryEstimations
-//        .builder(IdMap.class)
-//        .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
-//        .rangePerGraphDimension(
-//            "Mapping from Neo4j identifiers to internal identifiers",
-//            (dimensions, concurrency) -> HugeSparseLongArray.memoryEstimation(
-//                dimensions.highestNeoId(),
-//                dimensions.nodeCount()
-//            )
-//        )
-//        .perGraphDimension(
-//            "Node Label BitSets",
-//            (dimensions, concurrency) ->
-//                MemoryRange.of(dimensions.nodeLabels().size() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
-//        )
-//        .build();
-
     private static final Set<NodeLabel> ALL_NODES_LABELS = Set.of(NodeLabel.ALL_NODES);
 
     private final long nodeCount;
@@ -74,14 +57,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
 
     private final PagedFile graphIds;
     private final HugeSparseLongArray nodeToGraphIds;
-//    private final PagedFile nodeToGraphIds;
-
     private final PageCursor graphIdsCursor;
-//    private final PageCursor nodeToGraphIdsCursor;
-
-//    public static MemoryEstimation memoryEstimation() {
-//        return ESTIMATION;
-//    }
 
     public IdMap(PagedFile graphIds, HugeSparseLongArray nodeToGraphIds, long nodeCount) throws IOException {
         this(graphIds, nodeToGraphIds, Collections.emptyMap(), nodeCount);
@@ -97,7 +73,6 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
         this.labelInformation = labelInformation;
         this.nodeCount = nodeCount;
         this.graphIdsCursor = Neo4jProxy.pageFileIO(graphIds, 0, PagedFile.PF_SHARED_READ_LOCK, PageCursorTracer.NULL);
-//        this.nodeToGraphIdsCursor = nodeToGraphIds.io(0, PagedFile.PF_SHARED_READ_LOCK, PageCursorTracer.NULL);
     }
 
     @Override
@@ -107,7 +82,6 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-//        return getFromPage(nodeId, nodeToGraphIdsCursor);
     }
 
     @Override
@@ -190,51 +164,11 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         this.graphIdsCursor.close();
         this.graphIds.close();
-//        this.nodeToGraphIdsCursor.close();
-//        this.nodeToGraphIds.close();
+        this.nodeToGraphIds.close();
     }
-
-//    IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
-//        validateNodeLabelFilter(nodeLabels, labelInformation);
-//
-//        if (labelInformation.isEmpty()) {
-//            return this;
-//        }
-//
-//        BitSet unionBitSet = new BitSet(nodeCount());
-//        nodeLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
-//
-//        if (unionBitSet.cardinality() == nodeCount()) {
-//            return this;
-//        }
-//
-//        long nodeId = -1L;
-//        long cursor = 0L;
-//        long newNodeCount = unionBitSet.cardinality();
-//        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, AllocationTracker.EMPTY);
-//
-//        while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
-//            newGraphIds.set(cursor, nodeId);
-//            cursor++;
-//        }
-//
-//        HugeSparseLongArray newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
-//            newNodeCount,
-//            nodeToGraphIds.getCapacity(),
-//            concurrency,
-//            IdMapBuilder.add(newGraphIds),
-//            AllocationTracker.EMPTY
-//        );
-//
-//        Map<NodeLabel, BitSet> newLabelInformation = nodeLabels
-//            .stream()
-//            .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get));
-//
-//        return new FilteredIdMap(newGraphIds, newNodeToGraphIds, newLabelInformation, newNodeCount);
-//    }
 
     private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, Map<NodeLabel, BitSet> labelInformation) {
         List<ElementIdentifier> invalidLabels = nodeLabels
@@ -290,26 +224,4 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
             return current++;
         }
     }
-
-//    private static class FilteredIdMap extends IdMap {
-//
-//        FilteredIdMap(
-//            HugeLongArray graphIds,
-//            HugeSparseLongArray nodeToGraphIds,
-//            Map<NodeLabel, BitSet> filteredLabelMap,
-//            long nodeCount
-//        ) {
-//            super(graphIds, nodeToGraphIds, filteredLabelMap, nodeCount);
-//        }
-//
-//        @Override
-//        public Set<NodeLabel> nodeLabels(long nodeId) {
-//            return super.nodeLabels(toOriginalNodeId(nodeId));
-//        }
-//
-//        @Override
-//        public boolean hasLabel(long nodeId, NodeLabel label) {
-//            return super.hasLabel(toOriginalNodeId(nodeId), label);
-//        }
-//    }
 }

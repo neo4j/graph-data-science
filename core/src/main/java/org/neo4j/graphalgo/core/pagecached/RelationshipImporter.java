@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.pagecached;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.loading.ReadHelper;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
