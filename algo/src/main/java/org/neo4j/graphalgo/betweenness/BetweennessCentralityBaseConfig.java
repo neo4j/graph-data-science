@@ -20,20 +20,34 @@
 package org.neo4j.graphalgo.betweenness;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+
+import java.util.Locale;
+import java.util.Optional;
 
 public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig {
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.graphalgo.betweenness.SelectionStrategy.Strategy#parse")
-    @Configuration.ToMapValue("org.neo4j.graphalgo.betweenness.SelectionStrategy#nameOf")
-    default SelectionStrategy.Strategy strategy() {
-        return SelectionStrategy.Strategy.ALL;
+    default @Nullable Long samplingSize() {
+        return null;
     }
 
     @Value.Default
-    default double probability() {
-        return Double.NaN;
+    default @Nullable Long samplingSeed() {
+        return null;
+    }
+
+    @Value.Check
+    default void validate() {
+        Optional.ofNullable(samplingSize()).ifPresent(samplingSize -> {
+            if (samplingSize < 0) {
+                throw new IllegalArgumentException(String.format(
+                    Locale.ENGLISH,
+                    "Configuration parameter 'samplingSize' must be a positive number, got %d.",
+                    samplingSize
+                ));
+            }
+        });
     }
 }

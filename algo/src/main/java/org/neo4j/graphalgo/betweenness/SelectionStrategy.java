@@ -20,26 +20,23 @@
 package org.neo4j.graphalgo.betweenness;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.BitSetIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
-import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Locale;
+import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static com.carrotsearch.hppc.BitSetIterator.NO_MORE;
 
 public abstract class SelectionStrategy {
-
-    static String nameOf(Strategy s) {
-        return s.name();
-    }
 
     abstract void init(Graph graph, ExecutorService executorService, int concurrency);
 
@@ -47,56 +44,7 @@ public abstract class SelectionStrategy {
 
     abstract long size();
 
-    public enum Strategy {
-        ALL {
-            public SelectionStrategy create(double probability) {
-                return new All();
-            }
-        },
-        RANDOM {
-            public SelectionStrategy create(double probability) {
-                return new Random(probability);
-            }
-        },
-        RANDOM_DEGREE {
-            public SelectionStrategy create(double probability) {
-                return new RandomDegree(probability);
-            }
-        };
-
-        public abstract SelectionStrategy create(double probability);
-
-        public static Strategy of(String value) {
-            try {
-                return Strategy.valueOf(value.toUpperCase(Locale.ENGLISH));
-            } catch (IllegalArgumentException e) {
-                String availableProjections = Arrays
-                    .stream(Strategy.values())
-                    .map(Strategy::name)
-                    .collect(Collectors.joining(", "));
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Selection strategy `%s` is not supported. Must be one of: %s.",
-                    value,
-                    availableProjections
-                ));
-            }
-        }
-
-        public static Strategy parse(Object object) {
-            if (object == null) {
-                return null;
-            }
-            if (object instanceof String) {
-                return of(((String) object).toUpperCase(Locale.ENGLISH));
-            }
-            if (object instanceof Strategy) {
-                return (Strategy) object;
-            }
-            return null;
-        }
-    }
-
-    private static class All extends SelectionStrategy {
+    public static class All extends SelectionStrategy {
 
         private long nodeCount;
 
@@ -116,65 +64,30 @@ public abstract class SelectionStrategy {
         }
     }
 
-    private static class Random extends SelectionStrategy {
+    public static class RandomDegree extends SelectionStrategy {
 
-        private final double probability;
+        private final long numSeedNodes;
+        private final Optional<Long> maybeRandomSeed;
+
         private BitSet bitSet;
         private long size;
 
-        Random(double probability) {
-            this.probability = probability;
+        public RandomDegree(long numSeedNodes) {
+            this(numSeedNodes, Optional.empty());
+        }
+
+        public RandomDegree(long numSeedNodes, Optional<Long> maybeRandomSeed) {
+            this.numSeedNodes = numSeedNodes;
+            this.maybeRandomSeed = maybeRandomSeed;
         }
 
         @Override
         void init(Graph graph, ExecutorService executorService, int concurrency) {
-            this.bitSet = new BitSet(graph.nodeCount());
-            selectNodes(graph, probability, executorService, concurrency);
-            this.size = this.bitSet.cardinality();
-        }
-
-        @Override
-        boolean select(long nodeId) {
-            return bitSet.get(nodeId);
-        }
-
-        @Override
-        long size() {
-            return size;
-        }
-
-        private void selectNodes(Graph graph, double probability, ExecutorService executorService, int concurrency) {
-            var random = new SecureRandom();
-            var tasks = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE)
-                .stream()
-                .map(partition -> (Runnable) () -> {
-                    for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount; nodeId++) {
-                        if (random.nextDouble() < probability) {
-                            this.bitSet.set(nodeId);
-                        }
-                    }
-                }).collect(Collectors.toList());
-
-            ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
-        }
-    }
-
-    private static class RandomDegree extends SelectionStrategy {
-
-        private final double probability;
-        private BitSet bitSet;
-        private long size;
-
-        RandomDegree(double probability) {
-            this.probability = probability;
-        }
-
-        @Override
-        void init(Graph graph, ExecutorService executorService, int concurrency) {
+            assert numSeedNodes <= graph.nodeCount();
             this.bitSet = new BitSet(graph.nodeCount());
             var partitions = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE);
             var maxDegree = maxDegree(graph, partitions, executorService, concurrency);
-            selectNodes(graph, partitions, probability, maxDegree, executorService, concurrency);
+            selectNodes(graph, partitions, maxDegree, executorService, concurrency);
             this.size = bitSet.cardinality();
         }
 
@@ -194,15 +107,18 @@ public abstract class SelectionStrategy {
             ExecutorService executorService,
             int concurrency
         ) {
-            AtomicInteger mx = new AtomicInteger(0);
+            AtomicInteger maxDegree = new AtomicInteger(0);
 
             var tasks = partitions.stream()
                 .map(partition -> (Runnable) () -> {
-                    for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount; nodeId++) {
+                    var fromNode = partition.startNode;
+                    var toNode = partition.startNode + partition.nodeCount;
+
+                    for (long nodeId = fromNode; nodeId < toNode; nodeId++) {
                         int degree = graph.degree(nodeId);
-                        int current = mx.get();
+                        int current = maxDegree.get();
                         while (degree > current) {
-                            int newCurrent = mx.compareAndExchange(current, degree);
+                            int newCurrent = maxDegree.compareAndExchange(current, degree);
                             if (newCurrent == current) {
                                 break;
                             }
@@ -213,28 +129,57 @@ public abstract class SelectionStrategy {
 
             ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
 
-            return mx.get();
+            return maxDegree.get();
         }
 
         private void selectNodes(
             Graph graph,
             Collection<Partition> partitions,
-            double probabilityOffset,
             double maxDegree,
             ExecutorService executorService,
             int concurrency
         ) {
-            var random = new SecureRandom();
+            var random = maybeRandomSeed.map(Random::new).orElseGet(Random::new);
+            var numSelectNodes = new AtomicLong(0);
             var tasks = partitions.stream()
                 .map(partition -> (Runnable) () -> {
-                    for (long nodeId = partition.startNode; nodeId < partition.startNode + partition.nodeCount; nodeId++) {
-                        if (random.nextDouble() - probabilityOffset <= graph.degree(nodeId) / maxDegree) {
-                            bitSet.set(nodeId);
+                    var fromNode = partition.startNode;
+                    var toNode = partition.startNode + partition.nodeCount;
+
+                    for (long nodeId = fromNode; nodeId < toNode && numSelectNodes.get() < numSeedNodes; nodeId++) {
+                        if (random.nextDouble() <= graph.degree(nodeId) / maxDegree) {
+                            bitSet.set(nodeId); // (0, 100]
+                            numSelectNodes.getAndIncrement();
                         }
                     }
                 }).collect(Collectors.toList());
 
             ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+
+            long actualSelectedNodes = numSelectNodes.get();
+
+            if (actualSelectedNodes < numSeedNodes) {
+                // Flip bitset to be able to iterate unset bits
+                bitSet.flip(0, bitSet.size());
+                // BitSet#size() returns a multiple of 64.
+                // We need to make sure to stay within bounds.
+                bitSet.clear(graph.nodeCount(), bitSet.size());
+                // Potentially iterate the bitset multiple times
+                // until we have exactly numSeedNodes nodes.
+                BitSetIterator iterator;
+                while (actualSelectedNodes < numSeedNodes) {
+                    iterator = bitSet.iterator();
+                    var unselectedNode = iterator.nextSetBit();
+                    while (unselectedNode != NO_MORE && actualSelectedNodes < numSeedNodes) {
+                        if (random.nextDouble() >= 0.5) {
+                            bitSet.flip(unselectedNode);
+                            actualSelectedNodes++;
+                        }
+                        unselectedNode = iterator.nextSetBit();
+                    }
+                }
+                bitSet.flip(0, bitSet.size());
+            }
         }
     }
 }

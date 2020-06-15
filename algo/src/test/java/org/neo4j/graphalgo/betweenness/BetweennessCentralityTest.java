@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
-import static org.neo4j.graphalgo.betweenness.SelectionStrategy.Strategy.RANDOM;
 
 @GdlExtension
 class BetweennessCentralityTest {
@@ -73,14 +72,14 @@ class BetweennessCentralityTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void testForceCompleteSampling(int concurrency) {
-        var bc = new BetweennessCentrality(graph, RANDOM.create(1.0), Pools.DEFAULT, concurrency, TRACKER);
+        var bc = new BetweennessCentrality(graph, new SelectionStrategy.All(), Pools.DEFAULT, concurrency, TRACKER);
         assertResult(bc.compute(), EXACT_CENTRALITIES);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void testForceEmptySampling(int concurrency) {
-        var bc = new BetweennessCentrality(graph, RANDOM.create(0.0), Pools.DEFAULT, concurrency, TRACKER);
+        var bc = new BetweennessCentrality(graph, new SelectionStrategy.RandomDegree(0), Pools.DEFAULT, concurrency, TRACKER);
         assertResult(bc.compute(), EMPTY_CENTRALITIES);
     }
 

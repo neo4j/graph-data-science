@@ -40,16 +40,8 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
         return BetweennessCentralityStreamConfig.of("",
             Optional.empty(),
             Optional.empty(),
-            mapWrapper.withNumber("probability", DEFAULT_PROBABILITY)
+            mapWrapper
         );
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("probability")) {
-            mapWrapper = mapWrapper.withNumber("probability", DEFAULT_PROBABILITY);
-        }
-        return mapWrapper;
     }
 
     @Test
@@ -59,8 +51,6 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
             .withAnyRelationshipType()
             .algo("gds.betweenness")
             .streamMode()
-            .addParameter("strategy", "random")
-            .addParameter("probability", DEFAULT_PROBABILITY)
             .yields("nodeId", "centrality");
 
         var actual = new HashMap<Long, Double>();
@@ -70,6 +60,19 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
         );
 
         assertMapEqualsWithTolerance(EXPECTED, actual, 1E-1);
+    }
+
+    @Test
+    void shouldValidateSampleSize() {
+        var query = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("gds.betweenness")
+            .streamMode()
+            .addParameter("samplingSize", -42)
+            .yields("nodeId", "centrality");
+
+        assertError(query, "Configuration parameter 'samplingSize' must be a positive number, got -42.");
     }
 
 }

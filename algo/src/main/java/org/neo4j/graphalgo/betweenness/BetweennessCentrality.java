@@ -44,7 +44,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
     private final Graph graph;
     private final AtomicLong nodeQueue = new AtomicLong();
     private final long nodeCount;
-    private final long expectedNodeCount;
 
     private HugeAtomicDoubleArray centrality;
     private SelectionStrategy selectionStrategy;
@@ -67,7 +66,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         this.centrality = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);
-        this.expectedNodeCount = selectionStrategy.size();
         this.tracker = tracker;
     }
 
@@ -106,7 +104,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         private BCTask(AllocationTracker tracker) {
             this.localRelationshipIterator = graph.concurrentCopy();
 
-            this.predecessors = HugeObjectArray.newArray(LongArrayList.class, expectedNodeCount, tracker);
+            this.predecessors = HugeObjectArray.newArray(LongArrayList.class, nodeCount, tracker);
             this.predecessorsCursor = predecessors.newCursor();
             this.backwardNodes = HugeLongArrayStack.newStack(nodeCount, tracker);
             // TODO: make queue growable

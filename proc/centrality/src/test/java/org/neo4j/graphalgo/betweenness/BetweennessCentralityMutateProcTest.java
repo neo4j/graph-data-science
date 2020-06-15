@@ -72,7 +72,7 @@ public class BetweennessCentralityMutateProcTest
         return BetweennessCentralityMutateConfig.of("",
             Optional.empty(),
             Optional.empty(),
-            mapWrapper.withNumber("probability", DEFAULT_PROBABILITY)
+            mapWrapper
         );
     }
 
@@ -80,9 +80,6 @@ public class BetweennessCentralityMutateProcTest
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         if (!mapWrapper.containsKey("mutateProperty")) {
             mapWrapper = mapWrapper.withString("mutateProperty", DEFAULT_RESULT_PROPERTY);
-        }
-        if (!mapWrapper.containsKey("probability")) {
-            mapWrapper = mapWrapper.withNumber("probability", DEFAULT_PROBABILITY);
         }
         return mapWrapper;
     }
@@ -96,7 +93,6 @@ public class BetweennessCentralityMutateProcTest
             .algo("betweenness")
             .mutateMode()
             .addParameter("mutateProperty", DEFAULT_RESULT_PROPERTY)
-            .addParameter("probability", DEFAULT_PROBABILITY)
             .yields();
 
         assertCypherResult(query, List.of(Map.of(

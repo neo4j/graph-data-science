@@ -47,7 +47,7 @@ class BetweennessCentralityWriteProcTest
         return BetweennessCentralityWriteConfig.of("",
             Optional.empty(),
             Optional.empty(),
-            mapWrapper.withNumber("probability", DEFAULT_PROBABILITY)
+            mapWrapper
         );
     }
 
@@ -55,9 +55,6 @@ class BetweennessCentralityWriteProcTest
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         if (!mapWrapper.containsKey("writeProperty")) {
             mapWrapper = mapWrapper.withString("writeProperty", DEFAULT_RESULT_PROPERTY);
-        }
-        if (!mapWrapper.containsKey("probability")) {
-            mapWrapper = mapWrapper.withNumber("probability", DEFAULT_PROBABILITY);
         }
         return mapWrapper;
     }
@@ -71,7 +68,6 @@ class BetweennessCentralityWriteProcTest
             .algo("betweenness")
             .writeMode()
             .addParameter("writeProperty", DEFAULT_RESULT_PROPERTY)
-            .addParameter("probability", DEFAULT_PROBABILITY)
             .yields();
 
         assertCypherResult(query, List.of(Map.of(

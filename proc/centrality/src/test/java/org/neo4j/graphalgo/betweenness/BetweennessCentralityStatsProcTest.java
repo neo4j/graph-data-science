@@ -43,16 +43,8 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
         return BetweennessCentralityStatsConfig.of("",
             Optional.empty(),
             Optional.empty(),
-            mapWrapper.withNumber("probability", DEFAULT_PROBABILITY)
+            mapWrapper
         );
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("probability")) {
-            mapWrapper = mapWrapper.withNumber("probability", DEFAULT_PROBABILITY);
-        }
-        return mapWrapper;
     }
 
     @Test
@@ -63,7 +55,6 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .withAnyRelationshipType()
             .algo("betweenness")
             .statsMode()
-            .addParameter("probability", DEFAULT_PROBABILITY)
             .yields();
 
         assertCypherResult(query, List.of(Map.of(

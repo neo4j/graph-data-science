@@ -43,8 +43,6 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
 
     static final String DEFAULT_RESULT_PROPERTY = "centrality";
 
-    static double DEFAULT_PROBABILITY = 1.0D;
-
     static Map<Long, Double> EXPECTED = new HashMap<>();
 
     @Override
