@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -160,7 +161,23 @@ public final class TestSupport {
         long expectedMinBytes,
         long expectedMaxBytes
     ) {
-        var dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
+        assertMemoryEstimation(
+            actualMemoryEstimation,
+            ImmutableGraphDimensions.builder().nodeCount(nodeCount).build(),
+            concurrency,
+            expectedMinBytes,
+            expectedMaxBytes
+        );
+
+    }
+
+    public static void assertMemoryEstimation(
+        Supplier<MemoryEstimation> actualMemoryEstimation,
+        GraphDimensions dimensions,
+        int concurrency,
+        long expectedMinBytes,
+        long expectedMaxBytes
+    ) {
         var actual = actualMemoryEstimation.get().estimate(dimensions, concurrency).memoryUsage();
 
         assertEquals(expectedMinBytes, actual.min);
