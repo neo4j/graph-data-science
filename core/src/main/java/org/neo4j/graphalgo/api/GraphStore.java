@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.api;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.values.storable.NumberType;
 
@@ -36,7 +37,7 @@ import java.util.Set;
 
 import static java.util.Collections.singletonList;
 
-public interface GraphStore<RELATIONSHIPS> {
+public interface GraphStore {
 
     enum PropertyState {
         PERSISTENT, TRANSIENT
@@ -128,7 +129,7 @@ public interface GraphStore<RELATIONSHIPS> {
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
-        RELATIONSHIPS relationships
+        HugeGraph.Relationships relationships
     );
 
     DeletionResult deleteRelationships(RelationshipType relationshipType);

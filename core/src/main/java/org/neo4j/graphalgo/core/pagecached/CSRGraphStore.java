@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
@@ -61,7 +62,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationships> {
+public final class CSRGraphStore implements GraphStore {
 
     private final int concurrency;
 
@@ -79,7 +80,7 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
 
     private ZonedDateTime modificationTime;
 
-    public static GraphStore<PageCacheGraph.Relationships> of(
+    public static GraphStore of(
         IdMap nodes,
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
         Map<RelationshipType, PageCacheGraph.TopologyCSR> relationships,
@@ -102,7 +103,12 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
             RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
             propertyMap.forEach((propertyKey, propertyValues) -> builder.putRelationshipProperty(
                 propertyKey,
-                RelationshipProperty.of(propertyKey, NumberType.FLOATING_POINT, PropertyState.PERSISTENT, propertyValues)
+                RelationshipProperty.of(
+                    propertyKey,
+                    NumberType.FLOATING_POINT,
+                    PropertyState.PERSISTENT,
+                    propertyValues
+                )
             ));
             relationshipPropertyStores.put(relationshipType, builder.build());
         });
@@ -117,7 +123,7 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
         );
     }
 
-    public static GraphStore<PageCacheGraph.Relationships> of(
+    public static GraphStore of(
         PageCacheGraph graph,
         String relationshipType,
         Optional<String> relationshipProperty,
@@ -126,7 +132,10 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
     ) {
         PageCacheGraph.Relationships relationships = graph.relationships();
 
-        Map<RelationshipType, PageCacheGraph.TopologyCSR> topology = singletonMap(RelationshipType.of(relationshipType), relationships.topology());
+        Map<RelationshipType, PageCacheGraph.TopologyCSR> topology = singletonMap(
+            RelationshipType.of(relationshipType),
+            relationships.topology()
+        );
 
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties = new HashMap<>();
         nodeProperties.put(
@@ -221,7 +230,9 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
         if (!nodeLabels().contains(nodeLabel)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Adding '%s.%s' to the graph store failed. Node label '%s' does not exist in the store. Available node labels: %s",
-                nodeLabel.name, propertyKey, nodeLabel.name,
+                nodeLabel.name,
+                propertyKey,
+                nodeLabel.name,
                 StringJoining.join(nodeLabels().stream().map(NodeLabel::name))
             ));
         }
@@ -231,7 +242,10 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
                 storeBuilder.from(nodePropertyStore);
             }
             return storeBuilder
-                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyValues))
+                .putIfAbsent(
+                    propertyKey,
+                    NodeProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyValues)
+                )
                 .build();
         }));
     }
@@ -300,7 +314,9 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
     public boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey) {
         return relTypes
             .stream()
-            .allMatch(relType -> relationshipProperties.containsKey(relType) && relationshipProperties.get(relType).containsKey(propertyKey));
+            .allMatch(relType -> relationshipProperties.containsKey(relType) && relationshipProperties
+                .get(relType)
+                .containsKey(propertyKey));
     }
 
     @Override
@@ -344,25 +360,26 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
-        PageCacheGraph.Relationships relationships
+        HugeGraph.Relationships relationships
     ) {
-        updateGraphStore(graphStore -> {
-            if (!hasRelationshipType(relationshipType)) {
-                graphStore.relationships.put(relationshipType, relationships.topology());
-
-                if (relationshipPropertyKey.isPresent()
-                    && relationshipPropertyType.isPresent()
-                    && relationships.properties().isPresent()) {
-                    addRelationshipProperty(
-                        relationshipType,
-                        relationshipPropertyKey.get(),
-                        relationshipPropertyType.get(),
-                        relationships.properties().get(),
-                        graphStore
-                    );
-                }
-            }
-        });
+        // TODO: somehow allow the PageCacheGraph.Relationships to be used
+//        updateGraphStore(graphStore -> {
+//            if (!hasRelationshipType(relationshipType)) {
+//                graphStore.relationships.put(relationshipType, relationships.topology());
+//
+//                if (relationshipPropertyKey.isPresent()
+//                    && relationshipPropertyType.isPresent()
+//                    && relationships.properties().isPresent()) {
+//                    addRelationshipProperty(
+//                        relationshipType,
+//                        relationshipPropertyKey.get(),
+//                        relationshipPropertyType.get(),
+//                        relationships.properties().get(),
+//                        graphStore
+//                    );
+//                }
+//            }
+//        });
     }
 
     @Override
@@ -540,7 +557,9 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
             return Collections.emptyMap();
         }
         if (labels.size() == 1 || nodes.containsOnlyAllNodesLabel()) {
-            return this.nodeProperties.getOrDefault(labels.iterator().next(), NodePropertyStore.empty()).nodePropertyValues();
+            return this.nodeProperties
+                .getOrDefault(labels.iterator().next(), NodePropertyStore.empty())
+                .nodePropertyValues();
         }
 
         Map<String, Map<NodeLabel, NodeProperties>> invertedNodeProperties = new HashMap<>();
@@ -566,7 +585,10 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
             ));
     }
 
-    private void validateInput(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    private void validateInput(
+        Collection<RelationshipType> relationshipTypes,
+        Optional<String> maybeRelationshipProperty
+    ) {
         if (relationshipTypes.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The parameter '%s' should not be empty. Use '*' to load all relationship types.",
@@ -751,7 +773,12 @@ public final class CSRGraphStore implements GraphStore<PageCacheGraph.Relationsh
 
         PageCacheGraph.PropertyCSR values();
 
-        static RelationshipProperty of(String key, NumberType type, PropertyState state, PageCacheGraph.PropertyCSR values) {
+        static RelationshipProperty of(
+            String key,
+            NumberType type,
+            PropertyState state,
+            PageCacheGraph.PropertyCSR values
+        ) {
             return ImmutableRelationshipProperty.of(key, type, state, values);
         }
     }

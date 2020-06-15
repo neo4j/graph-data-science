@@ -232,7 +232,7 @@ public class GraphStoreExport {
             return labels;
         }
 
-        static NodeStore of(GraphStore<?> graphStore) {
+        static NodeStore of(GraphStore graphStore) {
             HugeIntArray labelCounts = null;
             Map<String, Map<String, NodeProperties>> nodeProperties;
 
@@ -315,7 +315,7 @@ public class GraphStoreExport {
             );
         }
 
-        static RelationshipStore of(GraphStore<?> graphStore, String defaultRelationshipType) {
+        static RelationshipStore of(GraphStore graphStore, String defaultRelationshipType) {
             var graphs = graphStore
                 .relationshipTypes()
                 .stream()

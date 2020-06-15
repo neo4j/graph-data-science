@@ -61,7 +61,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class CSRGraphStore implements GraphStore<HugeGraph.Relationships> {
+public final class CSRGraphStore implements GraphStore {
 
     private final int concurrency;
 
@@ -79,7 +79,7 @@ public final class CSRGraphStore implements GraphStore<HugeGraph.Relationships> 
 
     private ZonedDateTime modificationTime;
 
-    public static GraphStore<HugeGraph.Relationships> of(
+    public static GraphStore of(
         IdMap nodes,
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
         Map<RelationshipType, HugeGraph.TopologyCSR> relationships,
@@ -117,7 +117,7 @@ public final class CSRGraphStore implements GraphStore<HugeGraph.Relationships> 
         );
     }
 
-    public static GraphStore<HugeGraph.Relationships> of(
+    public static GraphStore of(
         HugeGraph graph,
         String relationshipType,
         Optional<String> relationshipProperty,
