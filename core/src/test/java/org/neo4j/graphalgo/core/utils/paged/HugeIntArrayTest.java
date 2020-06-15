@@ -63,6 +63,13 @@ final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntAr
         });
     }
 
+    @Test
+    void shouldComputeMemoryEstimation() {
+        assertEquals(40, HugeIntArray.memoryEstimation(0L));
+        assertEquals(440, HugeIntArray.memoryEstimation(100L));
+        assertEquals(400_122_070_368L, HugeIntArray.memoryEstimation(100_000_000_000L));
+    }
+
     @Override
     HugeIntArray singleArray(final int size) {
         return HugeIntArray.newSingleArray(size, AllocationTracker.EMPTY);
