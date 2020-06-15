@@ -76,6 +76,11 @@ public interface GraphDimensions {
     IntObjectMap<List<RelationshipType>> tokenRelationshipTypeMapping();
 
     @Value.Derived
+    default int averageDegree() {
+        return nodeCount() == 0 ? 0 : Math.toIntExact(maxRelCount() / nodeCount());
+    }
+
+    @Value.Derived
     @Nullable
     default ObjectIntMap<RelationshipType> relationshipTypeTokenMapping() {
         if (tokenRelationshipTypeMapping() == null) {

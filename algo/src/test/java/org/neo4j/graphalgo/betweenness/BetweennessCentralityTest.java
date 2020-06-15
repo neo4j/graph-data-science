@@ -20,7 +20,10 @@
 package org.neo4j.graphalgo.betweenness;
 
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
@@ -29,13 +32,24 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.betweenness.SelectionStrategy.Strategy.RANDOM;
 
 @GdlExtension
 class BetweennessCentralityTest {
 
     private static final AllocationTracker TRACKER = AllocationTracker.EMPTY;
+
+    private static final BetweennessCentralityStreamConfig DEFAULT_CONFIG = BetweennessCentralityStreamConfig.of(
+        "",
+        Optional.empty(),
+        Optional.empty(),
+        CypherMapWrapper.empty()
+    );
 
     @GdlGraph
     private static final String DB_CYPHER =
@@ -68,6 +82,26 @@ class BetweennessCentralityTest {
     void testForceEmptySampling(int concurrency) {
         var bc = new BetweennessCentrality(graph, RANDOM.create(0.0), Pools.DEFAULT, concurrency, TRACKER);
         assertResult(bc.compute(), EMPTY_CENTRALITIES);
+    }
+
+    static Stream<Arguments> expectedMemoryEstimation() {
+        return Stream.of(
+            Arguments.of(1, 6_000_368L, 6_000_368L),
+            Arguments.of(4, 21_601_160L, 21_601_160L),
+            Arguments.of(42, 219_211_192L, 219_211_192L)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.betweenness.BetweennessCentralityTest#expectedMemoryEstimation")
+    void testMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
+        assertMemoryEstimation(
+            () -> new BetweennessCentralityFactory<>().memoryEstimation(DEFAULT_CONFIG),
+            100_000L,
+            concurrency,
+            expectedMinBytes,
+            expectedMaxBytes
+        );
     }
 
     private void assertResult(HugeAtomicDoubleArray result, double[] centralities) {
