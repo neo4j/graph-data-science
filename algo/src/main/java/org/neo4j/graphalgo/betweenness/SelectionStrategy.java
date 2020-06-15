@@ -54,23 +54,23 @@ public interface SelectionStrategy {
 
     class RandomDegree implements SelectionStrategy {
 
-        private final long numSeedNodes;
+        private final long samplingSize;
         private final Optional<Long> maybeRandomSeed;
 
         private BitSet bitSet;
 
-        public RandomDegree(long numSeedNodes) {
-            this(numSeedNodes, Optional.empty());
+        public RandomDegree(long samplingSize) {
+            this(samplingSize, Optional.empty());
         }
 
-        public RandomDegree(long numSeedNodes, Optional<Long> maybeRandomSeed) {
-            this.numSeedNodes = numSeedNodes;
+        public RandomDegree(long samplingSize, Optional<Long> maybeRandomSeed) {
+            this.samplingSize = samplingSize;
             this.maybeRandomSeed = maybeRandomSeed;
         }
 
         @Override
         public void init(Graph graph, ExecutorService executorService, int concurrency) {
-            assert numSeedNodes <= graph.nodeCount();
+            assert samplingSize <= graph.nodeCount();
             this.bitSet = new BitSet(graph.nodeCount());
             var partitions = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE);
             var maxDegree = maxDegree(graph, partitions, executorService, concurrency);
@@ -121,25 +121,33 @@ public interface SelectionStrategy {
             int concurrency
         ) {
             var random = maybeRandomSeed.map(Random::new).orElseGet(Random::new);
-            var numSelectNodes = new AtomicLong(0);
+            var selectionSize = new AtomicLong(0);
             var tasks = partitions.stream()
                 .map(partition -> (Runnable) () -> {
                     var fromNode = partition.startNode;
                     var toNode = partition.startNode + partition.nodeCount;
 
-                    for (long nodeId = fromNode; nodeId < toNode && numSelectNodes.get() < numSeedNodes; nodeId++) {
+                    for (long nodeId = fromNode; nodeId < toNode; nodeId++) {
+                        var currentSelectionSize = selectionSize.get();
+                        if (currentSelectionSize >= samplingSize) {
+                            break;
+                        }
                         if (random.nextDouble() <= graph.degree(nodeId) / maxDegree) {
-                            bitSet.set(nodeId); // (0, 100]
-                            numSelectNodes.getAndIncrement();
+                            if (currentSelectionSize == selectionSize.compareAndExchange(
+                                currentSelectionSize,
+                                currentSelectionSize + 1
+                            )) {
+                                bitSet.set(nodeId);
+                            }
                         }
                     }
                 }).collect(Collectors.toList());
 
             ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
 
-            long actualSelectedNodes = numSelectNodes.get();
+            long actualSelectedNodes = selectionSize.get();
 
-            if (actualSelectedNodes < numSeedNodes) {
+            if (actualSelectedNodes < samplingSize) {
                 // Flip bitset to be able to iterate unset bits
                 bitSet.flip(0, bitSet.size());
                 // BitSet#size() returns a multiple of 64.
@@ -148,10 +156,10 @@ public interface SelectionStrategy {
                 // Potentially iterate the bitset multiple times
                 // until we have exactly numSeedNodes nodes.
                 BitSetIterator iterator;
-                while (actualSelectedNodes < numSeedNodes) {
+                while (actualSelectedNodes < samplingSize) {
                     iterator = bitSet.iterator();
                     var unselectedNode = iterator.nextSetBit();
-                    while (unselectedNode != NO_MORE && actualSelectedNodes < numSeedNodes) {
+                    while (unselectedNode != NO_MORE && actualSelectedNodes < samplingSize) {
                         if (random.nextDouble() >= 0.5) {
                             bitSet.flip(unselectedNode);
                             actualSelectedNodes++;

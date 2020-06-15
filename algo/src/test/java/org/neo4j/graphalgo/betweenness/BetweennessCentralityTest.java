@@ -66,28 +66,39 @@ class BetweennessCentralityTest {
     @Inject
     private TestGraph graph;
 
-    private static final double[] EXACT_CENTRALITIES = {0.0, 3.0, 4.0, 3.0, 0.0};
-    private static final double[] EMPTY_CENTRALITIES = {0.0, 0.0, 0.0, 0.0, 0.0};
-
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
-    void testForceCompleteSampling(int concurrency) {
+    void noSampling(int concurrency) {
         var bc = new BetweennessCentrality(graph, SelectionStrategy.ALL, Pools.DEFAULT, concurrency, TRACKER);
-        assertResult(bc.compute(), EXACT_CENTRALITIES);
+        assertResult(bc.compute(), new double[]{0.0, 3.0, 4.0, 3.0, 0.0});
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
-    void testForceEmptySampling(int concurrency) {
+    void completeSampling(int concurrency) {
+        var bc = new BetweennessCentrality(graph, new SelectionStrategy.RandomDegree(graph.nodeCount()), Pools.DEFAULT, concurrency, TRACKER);
+        assertResult(bc.compute(), new double[]{0.0, 3.0, 4.0, 3.0, 0.0});
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void sampling(int concurrency) {
+        var bc = new BetweennessCentrality(graph, new SelectionStrategy.RandomDegree(2, Optional.of(42L)), Pools.DEFAULT, concurrency, TRACKER);
+        assertResult(bc.compute(), new double[]{0.0, 3.0, 4.0, 2.0, 0.0});
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void emptySampling(int concurrency) {
         var bc = new BetweennessCentrality(graph, new SelectionStrategy.RandomDegree(0), Pools.DEFAULT, concurrency, TRACKER);
-        assertResult(bc.compute(), EMPTY_CENTRALITIES);
+        assertResult(bc.compute(), new double[]{0.0, 0.0, 0.0, 0.0, 0.0});
     }
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1, 6_000_368L, 6_000_368L),
-            Arguments.of(4, 21_601_160L, 21_601_160L),
-            Arguments.of(42, 219_211_192L, 219_211_192L)
+            Arguments.of(1, 6_000_360L, 6_000_360L),
+            Arguments.of(4, 21_601_152L, 21_601_152L),
+            Arguments.of(42, 219_211_184L, 219_211_184L)
         );
     }
 

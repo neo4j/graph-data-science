@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -58,7 +60,7 @@ class SelectionStrategyTest {
     private IdFunction nodeId;
 
     @Test
-    void selectAllNodes() {
+    void selectAll() {
         SelectionStrategy selectionStrategy = SelectionStrategy.ALL;
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(graph.nodeCount(), samplingSize(graph.nodeCount(), selectionStrategy));
@@ -66,14 +68,23 @@ class SelectionStrategyTest {
 
     @ParameterizedTest
     @ValueSource(longs = {0, 1, 2, 10, 11})
-    void selectNumSeedNodes(long numSeedNodes) {
-        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(numSeedNodes);
+    void selectSamplingSize(long samplingSize) {
+        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(samplingSize);
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(numSeedNodes, samplingSize(graph.nodeCount(), selectionStrategy));
+        assertEquals(samplingSize, samplingSize(graph.nodeCount(), selectionStrategy));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 4, 42, 1337, 99_999, 100_000})
+    void selectSamplingSizeMultiThreaded(long samplingSize) {
+        var graph = RandomGraphGenerator.generate(100_000, 10, RelationshipDistribution.RANDOM);
+        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(samplingSize, Optional.of(42L));
+        selectionStrategy.init(graph, Pools.DEFAULT, 4);
+        assertEquals(samplingSize, samplingSize(graph.nodeCount(), selectionStrategy));
     }
 
     @Test
-    void selectNumSeedNodesWithRandomSeed() {
+    void selectSamplingSizeWithSeed() {
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(3, Optional.of(42L));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(3, samplingSize(graph.nodeCount(), selectionStrategy));
