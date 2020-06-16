@@ -148,11 +148,11 @@ public interface SelectionStrategy {
             long actualSelectedNodes = selectionSize.get();
 
             if (actualSelectedNodes < samplingSize) {
-                // Flip bitset to be able to iterate unset bits
-                bitSet.flip(0, bitSet.size());
+                // Flip bitset to be able to iterate unset bits.
+                // The upper range is Graph#nodeCount() since
                 // BitSet#size() returns a multiple of 64.
                 // We need to make sure to stay within bounds.
-                bitSet.clear(graph.nodeCount(), bitSet.size());
+                bitSet.flip(0, graph.nodeCount());
                 // Potentially iterate the bitset multiple times
                 // until we have exactly numSeedNodes nodes.
                 BitSetIterator iterator;
@@ -167,7 +167,7 @@ public interface SelectionStrategy {
                         unselectedNode = iterator.nextSetBit();
                     }
                 }
-                bitSet.flip(0, bitSet.size());
+                bitSet.flip(0, graph.nodeCount());
             }
         }
     }
