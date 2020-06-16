@@ -59,4 +59,9 @@ public class TopKGraph extends FilterGraph {
             topKList.forEach((node2, similarity) -> consumer.accept(node1, node2, similarity));
         }
    }
+
+    @Override
+    public Graph concurrentCopy() {
+        return this;
+    }
 }

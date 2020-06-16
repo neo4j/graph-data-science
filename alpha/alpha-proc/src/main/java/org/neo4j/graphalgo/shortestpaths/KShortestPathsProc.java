@@ -290,6 +290,11 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
         public void release() {
         }
 
+        @Override
+        public Graph concurrentCopy() {
+            return this;
+        }
+
         void actuallyRelease() {
             super.release();
         }

@@ -67,4 +67,9 @@ public class SpanningGraph extends FilterGraph {
         int target = Math.toIntExact(targetNodeId);
         return spanningTree.parent[source] != -1 || spanningTree.parent[target] != -1;
     }
+
+    @Override
+    public Graph concurrentCopy() {
+        return this;
+    }
 }

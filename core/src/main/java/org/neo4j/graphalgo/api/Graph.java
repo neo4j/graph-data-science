@@ -77,7 +77,5 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
     RelationshipIntersect intersection(long maxDegree);
 
     @Override
-    default Graph concurrentCopy() {
-        return this;
-    }
+    Graph concurrentCopy();
 }

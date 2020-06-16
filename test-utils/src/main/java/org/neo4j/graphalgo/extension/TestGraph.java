@@ -34,4 +34,9 @@ public class TestGraph extends FilterGraph {
     public long toOriginalNodeId(String variable) {
         return idFunction.of(variable);
     }
+
+    @Override
+    public Graph concurrentCopy() {
+        return new TestGraph(graph.concurrentCopy(), idFunction);
+    }
 }

@@ -129,7 +129,7 @@ public class NodeFilteredGraph extends FilterGraph {
 
     @Override
     public Graph concurrentCopy() {
-        return new NodeFilteredGraph((HugeGraph) graph.concurrentCopy(), filteredIdMap);
+        return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap);
     }
 
     @Override

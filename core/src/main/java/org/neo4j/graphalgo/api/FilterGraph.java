@@ -36,6 +36,11 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
+    public boolean isEmpty() {
+        return graph.isEmpty();
+    }
+
+    @Override
     public long relationshipCount() {
         return graph.relationshipCount();
     }
@@ -116,6 +121,16 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
+    public boolean hasLabel(long nodeId, NodeLabel label) {
+        return graph.hasLabel(nodeId, label);
+    }
+
+    @Override
+    public boolean containsOnlyAllNodesLabel() {
+        return graph.containsOnlyAllNodesLabel();
+    }
+
+    @Override
     public NodeProperties nodeProperties(String propertyKey) {
         return graph.nodeProperties(propertyKey);
     }
@@ -153,5 +168,25 @@ public abstract class FilterGraph implements Graph {
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
         return graph.relationshipProperty(sourceNodeId, targetNodeId);
+    }
+
+    @Override
+    public RelationshipIntersect intersection() {
+        return graph.intersection();
+    }
+
+    @Override
+    public void release() {
+        graph.release();
+    }
+
+    @Override
+    public void releaseTopology() {
+        graph.releaseTopology();
+    }
+
+    @Override
+    public void releaseProperties() {
+        graph.releaseProperties();
     }
 }

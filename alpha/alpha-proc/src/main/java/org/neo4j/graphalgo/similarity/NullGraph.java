@@ -77,6 +77,12 @@ public class NullGraph implements Graph {
     }
 
     @Override
+    public Graph concurrentCopy() {
+        throw new UnsupportedOperationException(
+            "org.neo4j.graphalgo.similarity.NullGraph.concurrentCopy is not implemented.");
+    }
+
+    @Override
     public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
         throw new UnsupportedOperationException(
             "org.neo4j.graphalgo.similarity.NullGraph.batchIterables is not implemented.");
