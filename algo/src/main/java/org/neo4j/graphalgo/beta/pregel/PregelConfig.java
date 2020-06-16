@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 @ValueClass
 @Configuration("PregelConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface PregelConfig extends RelationshipWeightConfig {
 
     @Value.Default
