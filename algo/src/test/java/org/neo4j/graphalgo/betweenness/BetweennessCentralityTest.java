@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
 import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
@@ -62,20 +63,64 @@ class BetweennessCentralityTest {
         ", (b)-[:REL]->(c)" +
         ", (c)-[:REL]->(a)";
 
+    private static final String CLIQUE_5 =
+        "CREATE" +
+        "  (a)-[:REL]->(b)" +
+        "  (a)-[:REL]->(c)" +
+        "  (a)-[:REL]->(d)" +
+        "  (a)-[:REL]->(e)" +
+        ", (b)-[:REL]->(c)" +
+        ", (b)-[:REL]->(d)" +
+        ", (b)-[:REL]->(e)" +
+        ", (c)-[:REL]->(d)" +
+        ", (c)-[:REL]->(e)" +
+        ", (d)-[:REL]->(e)";
+
+    private static final String DISCONNECTED_CYCLES =
+        "CREATE" +
+        // Cycle 1
+        "  (a)-[:REL]->(b)" +
+        ", (b)-[:REL]->(c)" +
+        ", (c)-[:REL]->(a)" +
+        // Cycle 2
+        ", (d)-[:REL]->(e)" +
+        ", (e)-[:REL]->(f)" +
+        ", (f)-[:REL]->(d)";
+
+    private static final String CONNECTED_CYCLES =
+        "CREATE" +
+        // Cycle 1
+        "  (a)-[:REL]->(b)" +
+        ", (b)-[:REL]->(c)" +
+        ", (c)-[:REL]->(a)" +
+        // Cycle 2
+        ", (d)-[:REL]->(e)" +
+        ", (e)-[:REL]->(f)" +
+        ", (f)-[:REL]->(d)" +
+        // Connection
+        ", (a)-[:REL]->(d)" +
+        ", (d)-[:REL]->(a)";
+
     static Stream<Arguments> testArguments() {
         return crossArguments(() -> Stream.of(1, 4).map(Arguments::of), BetweennessCentralityTest::expectedResults);
     }
 
     static Stream<Arguments> expectedResults() {
         return Stream.of(
-            Arguments.of(fromGdl(LINE), 5, Map.of("a", 0.0, "b", 3.0, "c", 4.0, "d", 3.0, "e", 0.0)),
-            Arguments.of(fromGdl(LINE), 2, Map.of("a", 0.0, "b", 3.0, "c", 4.0, "d", 2.0, "e", 0.0)),
-            Arguments.of(fromGdl(LINE), 0, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
-            Arguments.of(fromGdl(CYCLE), 3, Map.of("a", 1.0, "b", 1.0, "c", 1.0))
+            Arguments.of(fromGdl(LINE, "line"), 5, Map.of("a", 0.0, "b", 3.0, "c", 4.0, "d", 3.0, "e", 0.0)),
+            Arguments.of(fromGdl(LINE, "line"), 2, Map.of("a", 0.0, "b", 3.0, "c", 4.0, "d", 2.0, "e", 0.0)),
+            Arguments.of(fromGdl(LINE, "line"), 0, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
+            Arguments.of(fromGdl(CYCLE, "cycle"), 3, Map.of("a", 1.0, "b", 1.0, "c", 1.0)),
+            Arguments.of(fromGdl(CLIQUE_5, "clique_5"), 5, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
+            Arguments.of(fromGdl(CLIQUE_5, UNDIRECTED, "clique_5"), 5, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
+            Arguments.of(fromGdl(CLIQUE_5, UNDIRECTED,"clique_5"), 3, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
+            Arguments.of(fromGdl(DISCONNECTED_CYCLES, "disconnected_cycles"), 6, Map.of("a", 1.0, "b", 1.0, "c", 1.0, "d", 1.0, "e", 1.0, "f", 1.0)),
+            Arguments.of(fromGdl(CONNECTED_CYCLES, "connected_cycles"), 6, Map.of("a", 13.0, "b", 4.0, "c", 4.0, "d", 13.0, "e", 4.0, "f", 4.0)),
+            Arguments.of(fromGdl(CONNECTED_CYCLES, "connected_cycles"), 2, Map.of("a", 3.0, "b", 1.0, "c", 4.0, "d", 4.0, "e", 2.0, "f", 0.0))
         );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "graph={1}, concurrency={0}, samplingSize={2}")
     @MethodSource("org.neo4j.graphalgo.betweenness.BetweennessCentralityTest#testArguments")
     void sampling(int concurrency, TestGraph graph, int samplingSize, Map<String, Double> expectedResult) {
         HugeAtomicDoubleArray actualResult = new BetweennessCentrality(
@@ -88,7 +133,7 @@ class BetweennessCentralityTest {
 
         assertEquals(expectedResult.size(), actualResult.size());
         expectedResult.forEach((variable, expectedCentrality) ->
-            assertEquals(expectedCentrality, actualResult.get(graph.toMappedNodeId(variable)))
+            assertEquals(expectedCentrality, actualResult.get(graph.toMappedNodeId(variable)), variable)
         );
     }
 
