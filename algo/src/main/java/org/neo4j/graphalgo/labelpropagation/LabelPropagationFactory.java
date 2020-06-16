@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -37,12 +36,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> extends AlgorithmFactory<LabelPropagation, CONFIG> {
-
-    private final LabelPropagationBaseConfig config;
-
-    public LabelPropagationFactory(LabelPropagationBaseConfig config) {
-        this.config = config;
-    }
 
     @Override
     public LabelPropagation build(
@@ -60,7 +53,7 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
 
         return new LabelPropagation(
             graph,
-            config,
+            configuration,
             Pools.DEFAULT,
             progressLogger,
             tracker

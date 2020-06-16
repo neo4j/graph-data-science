@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -163,12 +162,11 @@ public final class TestSupport {
     ) {
         assertMemoryEstimation(
             actualMemoryEstimation,
-            ImmutableGraphDimensions.builder().nodeCount(nodeCount).build(),
+            GraphDimensions.of(nodeCount),
             concurrency,
             expectedMinBytes,
             expectedMaxBytes
         );
-
     }
 
     public static void assertMemoryEstimation(

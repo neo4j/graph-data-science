@@ -87,7 +87,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     protected AlgorithmFactory<LabelPropagation, LabelPropagationWriteConfig> algorithmFactory(
         LabelPropagationWriteConfig config
     ) {
-        return new LabelPropagationFactory<>(config);
+        return new LabelPropagationFactory<>();
     }
 
     public static class WriteResult {
