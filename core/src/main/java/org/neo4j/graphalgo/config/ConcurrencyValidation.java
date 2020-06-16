@@ -54,7 +54,7 @@ public interface ConcurrencyValidation {
                     "The configured concurrency value is too high. " +
                     "The maximum allowed concurrency value is %d but %d was configured. " +
                     "Please see the documentation (System Requirements section) for an explanation of concurrency limitations for different editions of Neo4j Graph Data Science. " +
-                    "Higher than concurrency %d is only available under the Neo4j Graph Data Science Edition license.",
+                    "Higher than concurrency %d is only available, when you have licensed the Enterprise Edition of the Neo4j Graph Data Science Library.",
                     CONCURRENCY_LIMITATION,
                     requestedConcurrency,
                     CONCURRENCY_LIMITATION
