@@ -36,8 +36,8 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.Arrays;
 import java.util.List;
@@ -76,10 +76,7 @@ class LabelPropagationTest {
         ", (nCharles)-[:FOLLOW]->(nDoug)";
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction nodeId;
+    private TestGraph graph;
 
     @Test
     void shouldUseOriginalNodeIdWhenSeedPropertyIsMissing() {
@@ -92,12 +89,12 @@ class LabelPropagationTest {
         );
         assertArrayEquals(
             new long[]{
-                nodeId.of("nBridget"),
-                nodeId.of("nBridget"),
-                nodeId.of("nDoug"),
-                nodeId.of("nMark"),
-                nodeId.of("nMark"),
-                nodeId.of("nBridget")
+                graph.toOriginalNodeId("nBridget"),
+                graph.toOriginalNodeId("nBridget"),
+                graph.toOriginalNodeId("nDoug"),
+                graph.toOriginalNodeId("nMark"),
+                graph.toOriginalNodeId("nMark"),
+                graph.toOriginalNodeId("nBridget")
             },
             lp.compute().labels().toArray(),
             "Incorrect result assuming initial labels are neo4j id"
@@ -120,12 +117,12 @@ class LabelPropagationTest {
 
         assertArrayEquals(
             new long[]{
-                nodeId.of("nCharles"),
-                nodeId.of("nCharles"),
-                nodeId.of("nDoug"),
-                nodeId.of("nMark"),
-                nodeId.of("nMark"),
-                nodeId.of("nCharles")
+                graph.toOriginalNodeId("nCharles"),
+                graph.toOriginalNodeId("nCharles"),
+                graph.toOriginalNodeId("nDoug"),
+                graph.toOriginalNodeId("nMark"),
+                graph.toOriginalNodeId("nMark"),
+                graph.toOriginalNodeId("nCharles")
             },
             lp.compute().labels().toArray()
         );

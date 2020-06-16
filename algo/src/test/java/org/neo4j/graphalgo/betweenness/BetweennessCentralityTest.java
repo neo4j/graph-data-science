@@ -21,14 +21,13 @@ package org.neo4j.graphalgo.betweenness;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.betweenness.SelectionStrategy.Strategy.RANDOM;
@@ -52,10 +51,7 @@ class BetweennessCentralityTest {
         ", (d)-[:REL]->(e)";
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction nodeId;
+    private TestGraph graph;
 
     private static final double[] EXACT_CENTRALITIES = {0.0, 3.0, 4.0, 3.0, 0.0};
     private static final double[] EMPTY_CENTRALITIES = {0.0, 0.0, 0.0, 0.0, 0.0};
@@ -76,10 +72,10 @@ class BetweennessCentralityTest {
 
     private void assertResult(HugeAtomicDoubleArray result, double[] centralities) {
         assertEquals(5, centralities.length, "Expected 5 centrality values");
-        assertEquals(centralities[0], result.get((int) nodeId.of("a")));
-        assertEquals(centralities[1], result.get((int) nodeId.of("b")));
-        assertEquals(centralities[2], result.get((int) nodeId.of("c")));
-        assertEquals(centralities[3], result.get((int) nodeId.of("d")));
-        assertEquals(centralities[4], result.get((int) nodeId.of("e")));
+        assertEquals(centralities[0], result.get((int) graph.toOriginalNodeId("a")));
+        assertEquals(centralities[1], result.get((int) graph.toOriginalNodeId("b")));
+        assertEquals(centralities[2], result.get((int) graph.toOriginalNodeId("c")));
+        assertEquals(centralities[3], result.get((int) graph.toOriginalNodeId("d")));
+        assertEquals(centralities[4], result.get((int) graph.toOriginalNodeId("e")));
     }
 }

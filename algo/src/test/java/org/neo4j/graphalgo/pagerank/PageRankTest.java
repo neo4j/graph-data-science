@@ -31,8 +31,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
 import java.util.Map;
@@ -72,13 +72,10 @@ final class PageRankTest {
         ", (f)-[:TYPE]->(e)";
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction nodeId;
+    private TestGraph graph;
 
     @Inject(graphName = "reverseGraph")
-    private Graph reverseGraph;
+    private TestGraph reverseGraph;
 
     private static final PageRankBaseConfig DEFAULT_CONFIG = defaultConfigBuilder().build();
 
@@ -90,16 +87,16 @@ final class PageRankTest {
     @Test
     void testOnOutgoingRelationships() {
         var expected = Map.of(
-            nodeId.of("a"), 0.243007,
-            nodeId.of("b"), 1.9183995,
-            nodeId.of("c"), 1.7806315,
-            nodeId.of("d"), 0.21885,
-            nodeId.of("e"), 0.243007,
-            nodeId.of("f"), 0.21885,
-            nodeId.of("g"), 0.15,
-            nodeId.of("h"), 0.15,
-            nodeId.of("i"), 0.15,
-            nodeId.of("j"), 0.15
+            graph.toOriginalNodeId("a"), 0.243007,
+            graph.toOriginalNodeId("b"), 1.9183995,
+            graph.toOriginalNodeId("c"), 1.7806315,
+            graph.toOriginalNodeId("d"), 0.21885,
+            graph.toOriginalNodeId("e"), 0.243007,
+            graph.toOriginalNodeId("f"), 0.21885,
+            graph.toOriginalNodeId("g"), 0.15,
+            graph.toOriginalNodeId("h"), 0.15,
+            graph.toOriginalNodeId("i"), 0.15,
+            graph.toOriginalNodeId("j"), 0.15
         );
 
         assertResult(this.graph, PageRankAlgorithmType.NON_WEIGHTED, expected);
@@ -108,16 +105,16 @@ final class PageRankTest {
     @Test
     void testOnIncomingRelationships() {
         var expected = Map.of(
-            nodeId.of("a"), 0.15,
-            nodeId.of("b"), 0.3386727,
-            nodeId.of("c"), 0.2219679,
-            nodeId.of("d"), 0.3494679,
-            nodeId.of("e"), 2.5463981,
-            nodeId.of("f"), 2.3858317,
-            nodeId.of("g"), 0.15,
-            nodeId.of("h"), 0.15,
-            nodeId.of("i"), 0.15,
-            nodeId.of("j"), 0.15
+            reverseGraph.toOriginalNodeId("a"), 0.15,
+            reverseGraph.toOriginalNodeId("b"), 0.3386727,
+            reverseGraph.toOriginalNodeId("c"), 0.2219679,
+            reverseGraph.toOriginalNodeId("d"), 0.3494679,
+            reverseGraph.toOriginalNodeId("e"), 2.5463981,
+            reverseGraph.toOriginalNodeId("f"), 2.3858317,
+            reverseGraph.toOriginalNodeId("g"), 0.15,
+            reverseGraph.toOriginalNodeId("h"), 0.15,
+            reverseGraph.toOriginalNodeId("i"), 0.15,
+            reverseGraph.toOriginalNodeId("j"), 0.15
         );
 
         assertResult(reverseGraph, PageRankAlgorithmType.NON_WEIGHTED, expected);
