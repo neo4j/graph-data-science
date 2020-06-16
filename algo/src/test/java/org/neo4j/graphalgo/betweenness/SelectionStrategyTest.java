@@ -89,7 +89,7 @@ class SelectionStrategyTest {
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(3, samplingSize(graph.nodeCount(), selectionStrategy));
         assertTrue(selectionStrategy.select(nodeId.of("a")));
-        assertTrue(selectionStrategy.select(nodeId.of("c")));
+        assertTrue(selectionStrategy.select(nodeId.of("b")));
         assertTrue(selectionStrategy.select(nodeId.of("f")));
     }
 

@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -116,14 +116,15 @@ public interface SelectionStrategy {
         private void selectNodes(
             Graph graph,
             Collection<Partition> partitions,
-            double maxDegree,
+            long maxDegree,
             ExecutorService executorService,
             int concurrency
         ) {
-            var random = maybeRandomSeed.map(Random::new).orElseGet(Random::new);
+            var random = maybeRandomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
             var selectionSize = new AtomicLong(0);
             var tasks = partitions.stream()
                 .map(partition -> (Runnable) () -> {
+                    var threadLocalRandom = random.split();
                     var fromNode = partition.startNode;
                     var toNode = partition.startNode + partition.nodeCount;
 
@@ -132,12 +133,20 @@ public interface SelectionStrategy {
                         if (currentSelectionSize >= samplingSize) {
                             break;
                         }
-                        if (random.nextDouble() <= graph.degree(nodeId) / maxDegree) {
-                            if (currentSelectionSize == selectionSize.compareAndExchange(
-                                currentSelectionSize,
-                                currentSelectionSize + 1
-                            )) {
-                                bitSet.set(nodeId);
+                        if (threadLocalRandom.nextLong(maxDegree) <= graph.degree(nodeId)) {
+                            while (true) {
+                                long actualCurrentSelectionSize = selectionSize.compareAndExchange(
+                                    currentSelectionSize,
+                                    currentSelectionSize + 1
+                                );
+                                if (currentSelectionSize == actualCurrentSelectionSize) {
+                                    bitSet.set(nodeId);
+                                    break;
+                                }
+                                if (actualCurrentSelectionSize >= samplingSize) {
+                                    break;
+                                }
+                                currentSelectionSize = actualCurrentSelectionSize;
                             }
                         }
                     }
