@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
@@ -107,10 +108,18 @@ public final class TestSupport {
     }
 
     public static TestGraph fromGdl(String gdl) {
-        return fromGdl(gdl, NATURAL);
+        return fromGdl(gdl, NATURAL, GdlGraph.DEFAULT_GRAPH_NAME);
+    }
+
+    public static TestGraph fromGdl(String gdl, String name) {
+        return fromGdl(gdl, NATURAL, name);
     }
 
     public static TestGraph fromGdl(String gdl, Orientation orientation) {
+        return fromGdl(gdl, orientation, GdlGraph.DEFAULT_GRAPH_NAME);
+    }
+
+    public static TestGraph fromGdl(String gdl, Orientation orientation, String name) {
         Objects.requireNonNull(gdl);
 
         var config = ImmutableGraphCreateFromGdlConfig.builder()
@@ -121,7 +130,7 @@ public final class TestSupport {
 
         var gdlFactory = GdlFactory.of(config);
 
-        return new TestGraph(gdlFactory.build().graphStore().getUnion(), gdlFactory::nodeId);
+        return new TestGraph(gdlFactory.build().graphStore().getUnion(), gdlFactory::nodeId, name);
     }
 
     public static void assertGraphEquals(Graph expected, Graph actual) {

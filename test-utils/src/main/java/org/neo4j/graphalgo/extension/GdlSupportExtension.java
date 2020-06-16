@@ -149,7 +149,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         GraphStore graphStore = gdlFactory.build().graphStore();
         Graph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;
-        TestGraph testGraph = new TestGraph(graph, idFunction);
+        TestGraph testGraph = new TestGraph(graph, idFunction, graphName);
 
         if (gdlGraphSetup.addToCatalog()) {
             GraphStoreCatalog.set(createConfig, graphStore);

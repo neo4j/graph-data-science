@@ -29,5 +29,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({FIELD, TYPE})
 @Retention(RUNTIME)
 public @interface Inject {
-    String graphName() default "graph";
+    String graphName() default GdlGraph.DEFAULT_GRAPH_NAME;
 }
