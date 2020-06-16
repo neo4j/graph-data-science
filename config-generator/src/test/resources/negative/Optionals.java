@@ -17,38 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package positive;
+package negative;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-@Configuration("FieldTypesConfig")
-public interface FieldTypes {
+@Configuration("OptionalsConfig")
+public interface Optionals {
 
-    boolean aBoolean();
+    Optional myOpt();
 
-    byte aByte();
-
-    short aShort();
-
-    int anInt();
-
-    long aLong();
-
-    float aFloat();
-
-    double aDouble();
-
-    Number aNumber();
-
-    String aString();
-
-    Map<String, Object> aMap();
-
-    List<Object> aList();
-
-    Optional<String> anOptional();
+    default Optional<String> invalidDefault() {
+        return Optional.empty();
+    }
 }

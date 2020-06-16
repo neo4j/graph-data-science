@@ -45,6 +45,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -662,6 +663,24 @@ final class GenerateConfiguration {
                     builder.methodName("String");
                 } else if (isTypeOf(Number.class, targetType)) {
                     builder.methodName("Number");
+                } else if (isTypeOf(Optional.class, targetType)) {
+                    if (member.method().isDefault()) {
+                        return error(
+                            "Optional fields can not to be declared default (Optional.empty is the default).",
+                            member.method()
+                        );
+                    }
+                    List<? extends TypeMirror> typeArguments = ((DeclaredType) targetType).getTypeArguments();
+                    if (typeArguments.isEmpty()) {
+                        return error(
+                            "Optional must have a Cypher-supported type as type argument, but found none.",
+                            member.method()
+                        );
+                    }
+                    builder
+                        .methodPrefix("get")
+                        .methodName("Optional")
+                        .expectedType(CodeBlock.of("$T.class", ClassName.get(asTypeElement(typeArguments.get(0)))));
                 } else {
                     builder
                         .methodName("Checked")

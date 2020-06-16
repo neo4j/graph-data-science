@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -39,6 +40,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class CypherMapWrapperTest {
+
+    @Test
+    void shouldConvertOptional() {
+        Map<String, Object> map = Map.of("foo", 1L, "bar", "actualBar");
+        CypherMapWrapper wrapper = CypherMapWrapper.create(map);
+
+        assertEquals(Optional.of(1L), wrapper.getOptional("foo", Long.class));
+        assertEquals(Optional.of("actualBar"), wrapper.getOptional("bar", String.class));
+        assertEquals(Optional.<String>empty(), wrapper.getOptional("baz", String.class));
+    }
 
     @Test
     void testCastingFromNumberToDouble() {
