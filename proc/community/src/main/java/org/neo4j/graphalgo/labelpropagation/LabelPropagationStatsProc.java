@@ -79,7 +79,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     protected AlgorithmFactory<LabelPropagation, LabelPropagationStatsConfig> algorithmFactory(
         LabelPropagationStatsConfig config
     ) {
-        return new LabelPropagationFactory<>(config);
+        return new LabelPropagationFactory<>();
     }
 
     public static class StatsResult {

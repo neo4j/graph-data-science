@@ -73,7 +73,7 @@ public class LabelPropagationMutateProc extends MutateProc<LabelPropagation, Lab
     protected AlgorithmFactory<LabelPropagation, LabelPropagationMutateConfig> algorithmFactory(
         LabelPropagationMutateConfig config
     ) {
-        return new LabelPropagationFactory<>(config);
+        return new LabelPropagationFactory<>();
     }
 
     @Override

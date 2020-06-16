@@ -30,8 +30,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
@@ -149,6 +151,35 @@ public final class TestSupport {
         );
 
         assertTrue(equals, message);
+    }
+
+    public static void assertMemoryEstimation(
+        Supplier<MemoryEstimation> actualMemoryEstimation,
+        long nodeCount,
+        int concurrency,
+        long expectedMinBytes,
+        long expectedMaxBytes
+    ) {
+        assertMemoryEstimation(
+            actualMemoryEstimation,
+            GraphDimensions.of(nodeCount),
+            concurrency,
+            expectedMinBytes,
+            expectedMaxBytes
+        );
+    }
+
+    public static void assertMemoryEstimation(
+        Supplier<MemoryEstimation> actualMemoryEstimation,
+        GraphDimensions dimensions,
+        int concurrency,
+        long expectedMinBytes,
+        long expectedMaxBytes
+    ) {
+        var actual = actualMemoryEstimation.get().estimate(dimensions, concurrency).memoryUsage();
+
+        assertEquals(expectedMinBytes, actual.min);
+        assertEquals(expectedMaxBytes, actual.max);
     }
 
     public static <K, V> Matcher<Map<K, ? extends V>> mapEquals(Map<K, V> expected) {

@@ -53,6 +53,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
@@ -267,7 +268,7 @@ class LouvainTest extends AlgoTestBase {
 
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
-    void testMemoryEstimation(int concurrency, int levels, long min, long max) {
+    void testMemoryEstimation(int concurrency, int levels, long expectedMinBytes, long expectedMaxBytes) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000L)
             .maxRelCount(500_000L)
@@ -281,9 +282,13 @@ class LouvainTest extends AlgoTestBase {
             .concurrency(1)
             .build();
 
-        MemoryTree memoryTree = new LouvainFactory<>().memoryEstimation(config).estimate(dimensions, concurrency);
-        assertEquals(min, memoryTree.memoryUsage().min);
-        assertEquals(max, memoryTree.memoryUsage().max);
+        assertMemoryEstimation(
+            () -> new LouvainFactory<>().memoryEstimation(config),
+            dimensions,
+            concurrency,
+            expectedMinBytes,
+            expectedMaxBytes
+        );
     }
 
     @Test

@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,6 +36,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteProc.WriteResult, BetweennessCentralityWriteConfig> {
@@ -46,6 +48,15 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return write(compute(graphNameOrConfig, configuration));
+    }
+
+    @Procedure(value = "gds.betweenness.write.estimate", mode = READ)
+    @Description(BETWEENNESS_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
@@ -62,7 +73,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
     protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityWriteConfig> algorithmFactory(
         BetweennessCentralityWriteConfig config
     ) {
-        return BetweennessCentralityProc.algorithmFactory(config);
+        return BetweennessCentralityProc.algorithmFactory();
     }
 
     @Override

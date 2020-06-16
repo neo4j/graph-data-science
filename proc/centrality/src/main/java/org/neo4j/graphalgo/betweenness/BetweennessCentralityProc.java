@@ -21,16 +21,10 @@ package org.neo4j.graphalgo.betweenness;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.logging.Log;
 
 final class BetweennessCentralityProc {
 
@@ -42,30 +36,8 @@ final class BetweennessCentralityProc {
         return (PropertyTranslator.OfDouble<HugeAtomicDoubleArray>) HugeAtomicDoubleArray::get;
     }
 
-    static <CONFIG extends BetweennessCentralityBaseConfig> AlgorithmFactory<BetweennessCentrality, CONFIG> algorithmFactory(CONFIG config) {
-        return new AlgorithmFactory<>() {
-            @Override
-            public BetweennessCentrality build(
-                Graph graph, CONFIG configuration, AllocationTracker tracker, Log log
-            ) {
-                var probability = Double.isNaN(config.probability())
-                    ? Math.log10(graph.nodeCount()) / Math.exp(2)
-                    : config.probability();
-
-                return new BetweennessCentrality(
-                    graph,
-                    configuration.strategy().create(probability),
-                    Pools.DEFAULT,
-                    config.concurrency(),
-                    tracker
-                );
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(CONFIG configuration) {
-                return MemoryEstimations.empty();
-            }
-        };
+    static <CONFIG extends BetweennessCentralityBaseConfig> AlgorithmFactory<BetweennessCentrality, CONFIG> algorithmFactory() {
+        return new BetweennessCentralityFactory<>();
     }
 
     static <PROC_RESULT, CONFIG extends BetweennessCentralityBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -48,6 +49,15 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         return stats(compute(graphNameOrConfig, configuration));
     }
 
+    @Procedure(value = "gds.betweenness.stats.estimate", mode = READ)
+    @Description(BETWEENNESS_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
+    }
+
     @Override
     protected BetweennessCentralityStatsConfig newConfig(
         String username,
@@ -62,7 +72,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStatsConfig> algorithmFactory(
         BetweennessCentralityStatsConfig config
     ) {
-        return BetweennessCentralityProc.algorithmFactory(config);
+        return BetweennessCentralityProc.algorithmFactory();
     }
 
     @Override

@@ -76,6 +76,11 @@ public interface GraphDimensions {
     IntObjectMap<List<RelationshipType>> tokenRelationshipTypeMapping();
 
     @Value.Derived
+    default long averageDegree() {
+        return nodeCount() == 0 ? 0 : maxRelCount() / nodeCount();
+    }
+
+    @Value.Derived
     @Nullable
     default ObjectIntMap<RelationshipType> relationshipTypeTokenMapping() {
         if (tokenRelationshipTypeMapping() == null) {
@@ -110,5 +115,9 @@ public interface GraphDimensions {
             }
         }
         return nodeLabels;
+    }
+
+    static GraphDimensions of(long nodeCount) {
+        return ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
     }
 }

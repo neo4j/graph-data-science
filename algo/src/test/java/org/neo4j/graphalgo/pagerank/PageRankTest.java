@@ -20,14 +20,14 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -38,10 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
+import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -138,25 +139,24 @@ final class PageRankTest {
         // should not throw
     }
 
-    @Test
-    void shouldComputeMemoryEstimation1Thread() {
-        long nodeCount = 100_000L;
-        int concurrency = 1;
-        assertMemoryEstimation(nodeCount, concurrency);
+    static Stream<Arguments> expectedMemoryEstimation() {
+        return Stream.of(
+            Arguments.of(1, 2000416L, 2000416L),
+            Arguments.of(4, 3201304L, 3201304L),
+            Arguments.of(42, 18451288L, 18451288L)
+        );
     }
 
-    @Test
-    void shouldComputeMemoryEstimation4Threads() {
-        long nodeCount = 100_000L;
-        int concurrency = 4;
-        assertMemoryEstimation(nodeCount, concurrency);
-    }
-
-    @Test
-    void shouldComputeMemoryEstimation42Threads() {
-        long nodeCount = 100_000L;
-        int concurrency = 42;
-        assertMemoryEstimation(nodeCount, concurrency);
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankTest#expectedMemoryEstimation")
+    void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
+        assertMemoryEstimation(
+            () -> new PageRankFactory<>(PageRankAlgorithmType.NON_WEIGHTED).memoryEstimation(defaultConfigBuilder().build()),
+            100_000L,
+            concurrency,
+            expectedMinBytes,
+            expectedMaxBytes
+        );
     }
 
     @Test
@@ -205,31 +205,5 @@ final class PageRankTest {
                 "Node#" + originalNodeId
             );
         });
-    }
-
-    private void assertMemoryEstimation(final long nodeCount, final int concurrency) {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-
-        final PageRankFactory<PageRankStreamConfig> pageRank = new PageRankFactory<>(PageRankAlgorithmType.NON_WEIGHTED);
-
-        final MemoryRange actual = pageRank
-            .memoryEstimation(defaultConfigBuilder().build())
-            .estimate(dimensions, concurrency)
-            .memoryUsage();
-
-        Map<Integer, Long> minByConcurrency = genericMap(
-            1, 2000416L,
-            4, 3201304L,
-            42, 18451288L
-        );
-
-        Map<Integer, Long> maxByConcurrency = genericMap(
-            1, 2000416L,
-            4, 3201304L,
-            42, 18451288L
-        );
-
-        assertEquals(minByConcurrency.get(concurrency), actual.min);
-        assertEquals(maxByConcurrency.get(concurrency), actual.max);
     }
 }

@@ -89,7 +89,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         selectionStrategy = null;
     }
 
-    private final class BCTask implements Runnable {
+    final class BCTask implements Runnable {
 
         private final RelationshipIterator localRelationshipIterator;
 
