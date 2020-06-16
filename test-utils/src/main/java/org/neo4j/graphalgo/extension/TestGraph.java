@@ -35,6 +35,10 @@ public class TestGraph extends FilterGraph {
         return idFunction.of(variable);
     }
 
+    public long toMappedNodeId(String variable) {
+        return graph.toMappedNodeId(idFunction.of(variable));
+    }
+
     @Override
     public Graph concurrentCopy() {
         return new TestGraph(graph.concurrentCopy(), idFunction);

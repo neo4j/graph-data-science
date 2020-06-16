@@ -32,11 +32,14 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 @GdlExtension
 class BetweennessCentralityTest {
@@ -74,24 +77,14 @@ class BetweennessCentralityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 4})
-    void completeSampling(int concurrency) {
-        var bc = new BetweennessCentrality(graph, new SelectionStrategy.RandomDegree(graph.nodeCount()), Pools.DEFAULT, concurrency, TRACKER);
-        assertResult(bc.compute(), new double[]{0.0, 3.0, 4.0, 3.0, 0.0});
-    }
+    @MethodSource("testArguments")
+    void sampling(int concurrency, TestGraph graph, int samplingSize, Map<String, Double> expectedResult) {
+        HugeAtomicDoubleArray actualResult = create(graph, samplingSize, concurrency).compute();
 
-    @ParameterizedTest
-    @ValueSource(ints = {1, 4})
-    void sampling(int concurrency) {
-        var bc = new BetweennessCentrality(graph, new SelectionStrategy.RandomDegree(2, Optional.of(42L)), Pools.DEFAULT, concurrency, TRACKER);
-        assertResult(bc.compute(), new double[]{0.0, 3.0, 4.0, 2.0, 0.0});
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {1, 4})
-    void emptySampling(int concurrency) {
-        var bc = new BetweennessCentrality(graph, new SelectionStrategy.RandomDegree(0), Pools.DEFAULT, concurrency, TRACKER);
-        assertResult(bc.compute(), new double[]{0.0, 0.0, 0.0, 0.0, 0.0});
+        assertEquals(expectedResult.size(), actualResult.size());
+        expectedResult.forEach((variable, expectedCentrality) ->
+            assertEquals(expectedCentrality, actualResult.get(graph.toMappedNodeId(variable)))
+        );
     }
 
     static Stream<Arguments> expectedMemoryEstimation() {
@@ -121,5 +114,27 @@ class BetweennessCentralityTest {
         assertEquals(centralities[2], result.get((int) graph.toOriginalNodeId("c")));
         assertEquals(centralities[3], result.get((int) graph.toOriginalNodeId("d")));
         assertEquals(centralities[4], result.get((int) graph.toOriginalNodeId("e")));
+    }
+
+    static Stream<Arguments> testArguments() {
+        return crossArguments(() -> Stream.of(1, 4).map(Arguments::of), BetweennessCentralityTest::expectedResults);
+    }
+
+    static Stream<Arguments> expectedResults() {
+        return Stream.of(
+            Arguments.of(fromGdl(DB_CYPHER), 5, Map.of("a", 0.0, "b", 3.0, "c", 4.0, "d", 3.0, "e", 0.0)),
+            Arguments.of(fromGdl(DB_CYPHER), 2, Map.of("a", 0.0, "b", 3.0, "c", 4.0, "d", 2.0, "e", 0.0)),
+            Arguments.of(fromGdl(DB_CYPHER), 0, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0))
+        );
+    }
+
+    private BetweennessCentrality create(TestGraph graph, long samplingSize, int concurrency) {
+        return new BetweennessCentrality(
+            graph,
+            new SelectionStrategy.RandomDegree(samplingSize, Optional.of(42L)),
+            Pools.DEFAULT,
+            concurrency,
+            TRACKER
+        );
     }
 }
