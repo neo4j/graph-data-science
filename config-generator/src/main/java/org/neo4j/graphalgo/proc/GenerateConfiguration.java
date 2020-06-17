@@ -46,7 +46,6 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -73,6 +72,7 @@ import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isTypeOf;
+import static javax.lang.model.type.TypeKind.DECLARED;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 final class GenerateConfiguration {
@@ -356,7 +356,7 @@ final class GenerateConfiguration {
             codeBlock = converter.apply(codeBlock);
         }
         TypeMirror fieldType = definition.fieldType();
-        if (fieldType.getKind() == TypeKind.DECLARED) {
+        if (fieldType.getKind() == DECLARED) {
             boolean isNullable = !definition.member().annotations(Nullable.class).isEmpty();
 
             if (!isNullable) {
@@ -420,7 +420,7 @@ final class GenerateConfiguration {
         TypeName paramType = TypeName.get(definition.parameterType());
 
         CodeBlock valueProducer;
-        if (definition.parameterType().getKind() == TypeKind.DECLARED) {
+        if (definition.parameterType().getKind() == DECLARED) {
             if (parameter.acceptNull()) {
                 paramType = paramType.annotated(NULLABLE);
                 valueProducer = CodeBlock.of("$N", definition.fieldName());
@@ -728,11 +728,23 @@ final class GenerateConfiguration {
                 break;
             default:
                 builder.addStatement("$T<$T, Object> map = new $T<>()", Map.class, String.class, LinkedHashMap.class);
-                configMembers.forEach(configMember -> builder.addStatement(
-                    "map.put($S, $L)",
-                    configMember.lookupKey(),
-                    getMapValueCode(configMember)
-                ));
+                configMembers.forEach(configMember -> {
+                    if (isTypeOf(Optional.class, configMember.method().getReturnType())) {
+                        builder.addStatement(
+                            "$L.ifPresent($L -> map.put($S, $L))",
+                            getMapValueCode(configMember),
+                            configMember.lookupKey(),
+                            configMember.lookupKey(),
+                            configMember.lookupKey()
+                        );
+                    } else {
+                        builder.addStatement(
+                            "map.put($S, $L)",
+                            configMember.lookupKey(),
+                            getMapValueCode(configMember)
+                        );
+                    }
+                });
                 builder.addStatement("return map");
                 break;
         }

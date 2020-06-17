@@ -107,7 +107,7 @@ public final class ToMapConfig implements ToMap {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("bar", bar());
         map.put("baz", positive.ToMap.add42(baz()));
-        map.put("maybeBar", maybeBar());
+        maybeBar().ifPresent(maybeBar -> map.put("maybeBar", maybeBar));
         return map;
     }
 }
