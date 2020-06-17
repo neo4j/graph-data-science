@@ -73,12 +73,12 @@ RETURN gds.alpha.similarity.overlap([1,2,3], [1,2,4,5]) AS similarity
 These two lists of numbers have an overlap similarity of 0.66.
 We can see how this result is derived by breaking down the formula:
 
-```
+----
 O(A,B) = (∣A ∩ B∣) / (min(∣A|,|B|))
 O(A,B) = 2 / min(3,4)
        = 2 / 3
        = 0.66
-```
+----
 // end::function-explanation[]
 
 [[algorithms-similarity-overlap-procedure-sample]]

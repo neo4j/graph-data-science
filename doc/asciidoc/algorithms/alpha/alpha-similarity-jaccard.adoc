@@ -71,12 +71,12 @@ RETURN gds.alpha.similarity.jaccard([1,2,3], [1,2,4,5]) AS similarity
 These two lists of numbers have a Jaccard Similarity of 0.4.
 We can see how this result is derived by breaking down the formula:
 
-```
+----
 J(A,B) = ∣A ∩ B∣ / ∣A∣ + ∣B∣ - ∣A ∩ B|
 J(A,B) = 2 / 3 + 4 - 2
        = 2 / 5
        = 0.4
-```
+----
 
 We can also use it to compute the similarity of nodes based on lists computed by a Cypher query.
 
