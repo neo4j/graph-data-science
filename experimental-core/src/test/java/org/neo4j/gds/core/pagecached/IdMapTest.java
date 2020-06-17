@@ -44,7 +44,7 @@ class IdMapTest extends BaseTest {
         nodeAdder.insert(nodeIds, 0, (int) nodeCount);
         nodeAdder.close();
 
-        ReverseIdMappingBuilder.Builder nodeMappingBuilder = ReverseIdMappingBuilder.Builder.create(
+        ReverseIdMapping.Builder nodeMappingBuilder = ReverseIdMapping.Builder.create(
             pageCache,
             nodeCount == 0 ? 1 : nodeCount
         );

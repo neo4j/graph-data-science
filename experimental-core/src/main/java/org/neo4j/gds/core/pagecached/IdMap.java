@@ -50,7 +50,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
     private final Map<NodeLabel, BitSet> labelInformation;
 
     private final PagedFile graphIds;
-    private final ReverseIdMappingBuilder nodeToGraphIds;
+    private final ReverseIdMapping nodeToGraphIds;
     private final PageCursor graphIdsCursor;
 
     /**
@@ -58,7 +58,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
      */
     IdMap(
         PagedFile graphIds,
-        ReverseIdMappingBuilder nodeToGraphIds,
+        ReverseIdMapping nodeToGraphIds,
         Map<NodeLabel, BitSet> labelInformation,
         long nodeCount
     ) throws IOException {

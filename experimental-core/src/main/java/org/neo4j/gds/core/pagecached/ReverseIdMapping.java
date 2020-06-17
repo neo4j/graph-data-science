@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.pagecached;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
@@ -36,23 +35,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public final class ReverseIdMappingBuilder implements  AutoCloseable {
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
+
+public final class ReverseIdMapping implements AutoCloseable {
 
     private static final AtomicInteger GENERATION = new AtomicInteger(0);
 
     private static final long NOT_FOUND = -1L;
 
-    private static final int PAGE_SHIFT = 12;
-    private static final int PAGE_SIZE = 1 << PAGE_SHIFT;
-    private static final int PAGE_MASK = PAGE_SIZE - 1;
-
     private final PagedFile pagedFile;
-    private final long capacity;
     private final PageCursor pageCursor;
 
-    private ReverseIdMappingBuilder(PagedFile pagedFile, long capacity) {
+    private ReverseIdMapping(PagedFile pagedFile) {
         this.pagedFile = pagedFile;
-        this.capacity = capacity;
         try {
             pageCursor = Neo4jProxy.pageFileIO(
                 pagedFile,
@@ -65,20 +60,18 @@ public final class ReverseIdMappingBuilder implements  AutoCloseable {
         }
     }
 
-    public long getCapacity() {
-        return capacity;
-    }
-
     public long get(long index) throws IOException {
-        int pageIndex = (int)(index / PageCache.PAGE_SIZE);
-        int indexInPage = (int)(index % PageCache.PAGE_SIZE);
+        long longBaseIndex = index * Long.BYTES;
+        int pageIndex = (int)(longBaseIndex / PageCache.PAGE_SIZE);
+        int indexInPage = (int)(longBaseIndex % PageCache.PAGE_SIZE);
         pageCursor.next(pageIndex);
-        return pageCursor.getLong(indexInPage * Long.BYTES);
+        return pageCursor.getLong(indexInPage);
     }
 
     public boolean contains(long index) throws IOException {
-        int pageIndex = (int)(index / PageCache.PAGE_SIZE);
-        int indexInPage = (int)(index % PageCache.PAGE_SIZE);
+        long longBaseIndex = index * Long.BYTES;
+        int pageIndex = (int)(longBaseIndex / PageCache.PAGE_SIZE);
+        int indexInPage = (int)(longBaseIndex % PageCache.PAGE_SIZE);
         pageCursor.next(pageIndex);
         return pageCursor.getLong(indexInPage) != NOT_FOUND;
     }
@@ -124,8 +117,8 @@ public final class ReverseIdMappingBuilder implements  AutoCloseable {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-            int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
-            long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
+            long numPages = ceilDiv(size * Long.BYTES, PageCache.PAGE_SIZE);
+            long capacity = numPages * PageCache.PAGE_SIZE;
             return new Builder(pagedFile, capacity, defaultValue);
         }
 
@@ -155,27 +148,37 @@ public final class ReverseIdMappingBuilder implements  AutoCloseable {
         }
 
         public void set(long index, long value) throws IOException {
-            assert index < capacity;
-            final int pageIndex = (int)(index / PageCache.PAGE_SIZE);
+            long longBasedIndex = index * Long.BYTES;
+            assert longBasedIndex < capacity;
+            final int pageIndex = (int)(longBasedIndex / PageCache.PAGE_SIZE);
             if (initializedPages.add(pageIndex)) {
                 initializePage(pageIndex);
             } else {
                 pageCursor.next(pageIndex);
             }
-            final int indexInPage = (int)(index % PageCache.PAGE_SIZE);
-            pageCursor.putLong(indexInPage * Long.BYTES, value);
+            final int indexInPage = (int)(longBasedIndex % PageCache.PAGE_SIZE);
+            pageCursor.putLong(indexInPage, value);
         }
 
         synchronized void initializePage(int pageIndex) throws IOException {
             pageCursor.next(pageIndex);
             pageCursor.putBytes(emptyPage);
-            initializedPages.add(pageIndex);
         }
 
-        public ReverseIdMappingBuilder build() throws IOException {
+        public ReverseIdMapping build() throws IOException {
+            initializeUntouchedPages();
             pageCursor.close();
             pagedFile.flushAndForce();
-            return new ReverseIdMappingBuilder(pagedFile, capacity);
+            return new ReverseIdMapping(pagedFile);
+        }
+
+        private void initializeUntouchedPages() throws IOException {
+            long numPages = (capacity * Long.BYTES) / PageCache.PAGE_SIZE;
+            for (int i = 0; i < numPages; i++) {
+                if (!initializedPages.contains(i)) {
+                    initializePage(i);
+                }
+            }
         }
     }
 }

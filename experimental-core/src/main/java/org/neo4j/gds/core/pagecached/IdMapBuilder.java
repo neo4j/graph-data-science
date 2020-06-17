@@ -40,7 +40,7 @@ public final class IdMapBuilder {
 
     public static IdMap build(
         InternalToNeoIdMappingBuilder idMapBuilder,
-        ReverseIdMappingBuilder.Builder nodeMappingBuilder,
+        ReverseIdMapping.Builder nodeMappingBuilder,
         Map<NodeLabel, BitSet> labelInformation,
         int concurrency
     ) throws IOException {
@@ -84,7 +84,7 @@ public final class IdMapBuilder {
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        ReverseIdMappingBuilder nodeToGraphIds = nodeMappingBuilder.build();
+        ReverseIdMapping nodeToGraphIds = nodeMappingBuilder.build();
         return new IdMap(graphIds, nodeToGraphIds, labelInformation, nodeCount);
     }
 
