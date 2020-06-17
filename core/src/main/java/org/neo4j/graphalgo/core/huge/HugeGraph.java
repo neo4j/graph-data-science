@@ -23,9 +23,11 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.ModifiableRelationshipCursor;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
@@ -37,6 +39,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.function.LongPredicate;
 
 /**
@@ -247,6 +251,84 @@ public class HugeGraph implements Graph {
     @Override
     public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         runForEach(nodeId, fallbackValue, consumer);
+    }
+
+    @Override
+    public Spliterator<RelationshipCursor> streamRelationships(
+        long nodeId, double fallbackValue
+    ) {
+        if (!hasRelationshipProperty()) {
+            return new Spliterator<>() {
+                final AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(nodeId);
+                final ModifiableRelationshipCursor modifiableRelationshipCursor = ModifiableRelationshipCursor.create();
+
+                @Override
+                public boolean tryAdvance(Consumer<? super RelationshipCursor> action) {
+                    if (adjacencyCursor.hasNextVLong()) {
+                        RelationshipCursor relationshipCursor = modifiableRelationshipCursor
+                            .setSourceId(nodeId)
+                            .setTargetId(adjacencyCursor.nextVLong())
+                            .setProperty(fallbackValue);
+
+                        action.accept(relationshipCursor);
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public Spliterator<RelationshipCursor> trySplit() {
+                    return null;
+                }
+
+                @Override
+                public long estimateSize() {
+                    return adjacencyCursor.remaining();
+                }
+
+                @Override
+                public int characteristics() {
+                    return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SIZED;
+                }
+            };
+        } else {
+            return new Spliterator<>() {
+                final AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(nodeId);
+                final AdjacencyList.Cursor propertyCursor = propertyCursorForIteration(nodeId);
+                final ModifiableRelationshipCursor modifiableRelationshipCursor = ModifiableRelationshipCursor.create();
+
+                @Override
+                public boolean tryAdvance(Consumer<? super RelationshipCursor> action) {
+                    if (adjacencyCursor.hasNextVLong()) {
+                        long propertyBits = propertyCursor.nextLong();
+                        double property = Double.longBitsToDouble(propertyBits);
+                        RelationshipCursor relationshipCursor = modifiableRelationshipCursor
+                            .setSourceId(nodeId)
+                            .setTargetId(adjacencyCursor.nextVLong())
+                            .setProperty(property);
+
+                        action.accept(relationshipCursor);
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public Spliterator<RelationshipCursor> trySplit() {
+                    return null;
+                }
+
+                @Override
+                public long estimateSize() {
+                    return adjacencyCursor.remaining();
+                }
+
+                @Override
+                public int characteristics() {
+                    return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SIZED;
+                }
+            };
+        }
     }
 
     @Override

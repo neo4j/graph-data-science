@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -31,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.LongPredicate;
 
 public class NullGraph implements Graph {
@@ -172,6 +174,14 @@ public class NullGraph implements Graph {
     public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         throw new UnsupportedOperationException(
             "org.neo4j.graphalgo.similarity.NullGraph.forEachRelationship is not implemented.");
+    }
+
+    @Override
+    public Spliterator<RelationshipCursor> streamRelationships(
+        long nodeId, double fallbackValue
+    ) {
+        throw new UnsupportedOperationException(
+            "org.neo4j.graphalgo.similarity.NullGraph.streamRelationships is not implemented.");
     }
 
     @Override

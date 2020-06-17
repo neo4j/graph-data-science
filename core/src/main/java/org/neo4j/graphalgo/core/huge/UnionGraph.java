@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -30,8 +31,11 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public final class UnionGraph implements Graph {
 
@@ -130,6 +134,18 @@ public final class UnionGraph implements Graph {
         for (Graph graph : graphs) {
             graph.forEachRelationship(nodeId, fallbackValue, consumer);
         }
+    }
+
+    @Override
+    public Spliterator<RelationshipCursor> streamRelationships(
+        long nodeId, double fallbackValue
+    ) {
+        return graphs
+            .stream()
+            .map(graph -> StreamSupport.stream(graph.streamRelationships(nodeId, fallbackValue), false))
+            .reduce(Stream::concat)
+            .orElseGet(Stream::empty)
+            .spliterator();
     }
 
     @Override
