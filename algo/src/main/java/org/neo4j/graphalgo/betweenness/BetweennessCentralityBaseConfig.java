@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.betweenness;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
 import java.util.Locale;
@@ -28,19 +27,13 @@ import java.util.Optional;
 
 public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig {
 
-    @Value.Default
-    default @Nullable Long samplingSize() {
-        return null;
-    }
+    Optional<Long> samplingSize();
 
-    @Value.Default
-    default @Nullable Long samplingSeed() {
-        return null;
-    }
+    Optional<Long> samplingSeed();
 
     @Value.Check
     default void validate() {
-        Optional.ofNullable(samplingSize()).ifPresent(samplingSize -> {
+        samplingSize().ifPresent(samplingSize -> {
             if (samplingSize < 0) {
                 throw new IllegalArgumentException(String.format(
                     Locale.ENGLISH,

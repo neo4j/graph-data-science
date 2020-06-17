@@ -32,16 +32,14 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
-import java.util.Optional;
-
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> extends AlgorithmFactory<BetweennessCentrality, CONFIG> {
 
     @Override
     public BetweennessCentrality build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
-        var samplingSize = Optional.ofNullable(configuration.samplingSize());
-        var samplingSeed = Optional.ofNullable(configuration.samplingSeed());
+        var samplingSize = configuration.samplingSize();
+        var samplingSeed = configuration.samplingSeed();
 
         var strategy = samplingSize.isPresent() && samplingSize.get() < graph.nodeCount()
             ? new SelectionStrategy.RandomDegree(samplingSize.get(), samplingSeed)
