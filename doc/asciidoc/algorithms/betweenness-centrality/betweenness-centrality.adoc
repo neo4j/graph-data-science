@@ -1,0 +1,387 @@
+[[algorithms-betweenness-centrality]]
+= Betweenness Centrality
+:entity: node
+:result: centrality
+:algorithm: Betweenness Centrality
+
+[abstract]
+--
+This section describes the Betweenness Centrality algorithm in the Neo4j Graph Data Science library.
+--
+
+This topic includes:
+
+* <<algorithms-betweenness-centrality-intro, Introduction>>
+* <<algorithms-betweenness-centrality-considerations, Considerations>>
+* <<algorithms-betweenness-centrality-syntax, Syntax>>
+** <<algorithms-betweenness-centrality-syntax-stream, Stream>>
+** <<algorithms-betweenness-centrality-syntax-stats, Stats>>
+** <<algorithms-betweenness-centrality-syntax-mutate, Mutate>>
+** <<algorithms-betweenness-centrality-syntax-write, Write>>
+* <<algorithms-betweenness-centrality-examples, Examples>>
+** <<algorithms-betweenness-centrality-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-betweenness-centrality-examples-stream, Stream>>
+** <<algorithms-betweenness-centrality-examples-stats, Stats>>
+** <<algorithms-betweenness-centrality-examples-mutate, Mutate>>
+** <<algorithms-betweenness-centrality-examples-write, Write>>
+
+
+[[algorithms-betweenness-centrality-intro]]
+== Introduction
+
+
+[NOTE]
+====
+Running this algorithm requires sufficient memory availability.
+Before running this algorithm, we recommend that you read <<memory-estimation>>.
+====
+
+
+[[algorithms-betweenness-centrality-considerations]]
+== Considerations
+
+
+[[algorithms-betweenness-centrality-syntax]]
+== Syntax
+
+include::../shared/syntax-intro-named-graph.adoc[]
+
+[[algorithms-betweenness-centrality-syntax-stream]]
+=== Stream
+
+.Run Betweenness Centrality in stream mode on a named graph.
+[source, cypher]
+----
+CALL gds.betweenness.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  centrality: Float
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header"]
+|===
+| Name          | Type    | Description
+| nodeId        | Integer | Node ID
+| centrality    | Float   | PageRank centrality
+|===
+
+
+[[algorithms-betweenness-centrality-syntax-stats]]
+=== Stats
+
+.Run Betweenness Centrality in stats mode on a named graph.
+[source, cypher]
+----
+CALL gds.betweenness.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-betweenness-centrality-syntax-mutate]]
+=== Mutate
+
+.Run Betweenness Centrality in mutate mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.betweenness.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-betweenness-centrality-syntax-write]]
+=== Write
+
+.Run Betweenness Centrality in write mode on a named graph.
+[source, cypher]
+----
+CALL gds.betweenness.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
+| writeMillis            | Integer   | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+[[algorithms-betweenness-centrality-syntax-anonymous]]
+=== Anonymous graphs
+
+include::../shared/syntax-anonymous-graphs.adoc[]
+
+.Run Betweenness Centrality in write mode on an anonymous graph:
+[source, cypher]
+----
+CALL gds.betweenness.write(
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, <<algorithms-betweenness-centrality-syntax-write, specified above>>.
+
+
+[[algorithms-betweenness-centrality-examples]]
+== Examples
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=setup-query]
+----
+CREATE
+  (home:Page {name:'Home'}),
+  (about:Page {name:'About'}),
+  (product:Page {name:'Product'}),
+  (links:Page {name:'Links'}),
+  (a:Page {name:'Site A'}),
+  (b:Page {name:'Site B'}),
+  (c:Page {name:'Site C'}),
+  (d:Page {name:'Site D'}),
+
+  (home)-[:LINKS {weight: 0.2}]->(about),
+  (home)-[:LINKS {weight: 0.2}]->(links),
+  (home)-[:LINKS {weight: 0.6}]->(product),
+  (about)-[:LINKS {weight: 1.0}]->(home),
+  (product)-[:LINKS {weight: 1.0}]->(home),
+  (a)-[:LINKS {weight: 1.0}]->(home),
+  (b)-[:LINKS {weight: 1.0}]->(home),
+  (c)-[:LINKS {weight: 1.0}]->(home),
+  (d)-[:LINKS {weight: 1.0}]->(home),
+  (links)-[:LINKS {weight: 0.8}]->(home),
+  (links)-[:LINKS {weight: 0.05}]->(a),
+  (links)-[:LINKS {weight: 0.05}]->(b),
+  (links)-[:LINKS {weight: 0.05}]->(c),
+  (links)-[:LINKS {weight: 0.05}]->(d);
+----
+
+This graph represents eight pages, linking to one another.
+Each relationship has a property called `weight`, which describes the importance of the relationship.
+
+include::../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=graph-create-query]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'Page',
+  'LINKS',
+  {
+    relationshipProperties: 'weight'
+  }
+)
+----
+
+
+[[algorithms-betweenness-centrality-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.betweenness.write.estimate('myGraph', { writeProperty: 'centrality' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 8         | 14                | 1560     | 1560     | "1560 Bytes"
+|===
+--
+
+
+[[algorithms-betweenness-centrality-examples-stream]]
+=== Stream
+
+:stream-details: For example, we can order the results to find the nodes with the highest PageRank centrality.
+include::../shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher]
+----
+CALL gds.betweenness.stream('myGraph')
+YIELD nodeId, centrality
+RETURN gds.util.asNode(nodeId).name AS name, centrality
+ORDER BY centrality DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | centrality
+| "Home"    | 3.2362017153762284
+| "About"   | 1.0611098567023873
+| "Links"   | 1.0611098567023873
+| "Product" | 1.0611098567023873
+| "Site A"  | 0.3292259009438567
+| "Site B"  | 0.3292259009438567
+| "Site C"  | 0.3292259009438567
+| "Site D"  | 0.3292259009438567
+|===
+--
+
+[[algorithms-betweenness-centrality-examples-stats]]
+=== Stats
+
+:stats-details: For example Betweenness Centrality stats returns minimum, maximum and the sum of all centrality values.
+:stats-syntax: algorithms-betweenness-centrality-syntax-stats
+include::../shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+CALL gds.betweenness.stats('myGraph')
+YIELD minCentrality, maxCentrality, sumCentrality
+RETURN minCentrality, maxCentrality, sumCentrality
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| max
+| 3.236204147338867
+|===
+--
+
+[[algorithms-betweenness-centrality-examples-mutate]]
+=== Mutate
+
+include::../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher]
+----
+CALL gds.betweenness.mutate('myGraph', { mutateProperty: 'centrality' })
+YIELD nodePropertiesWritten
+----
+
+.Results
+[opts="header",cols="1m"]
+|===
+| nodePropertiesWritten
+| 8
+|===
+--
+
+
+[[algorithms-betweenness-centrality-examples-write]]
+=== Write
+
+include::../shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher]
+----
+CALL gds.betweenness.write('myGraph', { writeProperty: 'centrality' })
+YIELD nodePropertiesWritten
+----
+
+.Results
+[opts="header",cols="1m"]
+|===
+| nodePropertiesWritten
+| 8
+|===
+--

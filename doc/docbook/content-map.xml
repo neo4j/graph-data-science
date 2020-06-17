@@ -55,6 +55,9 @@
                 <d:tocentry linkend="algorithms-betweenness-centrality">
                     <?dbhtml filename="algorithms/betweenness-centrality/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-betweenness-centrality-alpha">
+                    <?dbhtml filename="algorithms/betweenness-centrality-alpha/index.html"?>
+                </d:tocentry>
                 <d:tocentry linkend="algorithms-closeness-centrality">
                     <?dbhtml filename="algorithms/closeness-centrality/index.html"?>
                 </d:tocentry>
