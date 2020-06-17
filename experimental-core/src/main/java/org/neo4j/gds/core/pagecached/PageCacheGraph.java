@@ -338,6 +338,7 @@ public class PageCacheGraph implements Graph {
             propertyOffsets = null;
         }
         emptyCursor = null;
+        cursorCache.close();
         cursorCache = null;
     }
 
@@ -381,9 +382,11 @@ public class PageCacheGraph implements Graph {
         AdjacencyList.DecompressingCursor adjacencyCursor,
         RelationshipConsumer consumer
     ) throws IOException {
-        while (adjacencyCursor.hasNextVLong()) {
-            if (!consumer.accept(sourceId, adjacencyCursor.nextVLong())) {
-                break;
+        try (adjacencyCursor) {
+            while (adjacencyCursor.hasNextVLong()) {
+                if (!consumer.accept(sourceId, adjacencyCursor.nextVLong())) {
+                    break;
+                }
             }
         }
     }
@@ -394,15 +397,16 @@ public class PageCacheGraph implements Graph {
         AdjacencyList.Cursor propertyCursor,
         RelationshipWithPropertyConsumer consumer
     ) throws IOException {
+        try (adjacencyCursor) {
+            while (adjacencyCursor.hasNextVLong()) {
+                long targetId = adjacencyCursor.nextVLong();
 
-        while (adjacencyCursor.hasNextVLong()) {
-            long targetId = adjacencyCursor.nextVLong();
+                long propertyBits = propertyCursor.nextLong();
+                double property = Double.longBitsToDouble(propertyBits);
 
-            long propertyBits = propertyCursor.nextLong();
-            double property = Double.longBitsToDouble(propertyBits);
-
-            if (!consumer.accept(sourceId, targetId, property)) {
-                break;
+                if (!consumer.accept(sourceId, targetId, property)) {
+                    break;
+                }
             }
         }
     }

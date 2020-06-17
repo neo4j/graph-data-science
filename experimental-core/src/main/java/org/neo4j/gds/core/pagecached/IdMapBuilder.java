@@ -63,16 +63,18 @@ public final class IdMapBuilder {
                     PagedFile.PF_SHARED_READ_LOCK,
                     PageCursorTracer.NULL
                 );
-                var longsPerPage = PageCache.PAGE_SIZE / Long.BYTES;
-                for (long pageId = startPage; pageId < endPage; pageId++) {
-                    pageCursor.next(pageId);
-                    for (int i = 0; i < longsPerPage; i++) {
-                        var graphNodeId = pageId * longsPerPage + i;
-                        if (graphNodeId >= nodeCount) {
-                            break;
+                try (pageCursor) {
+                    var longsPerPage = PageCache.PAGE_SIZE / Long.BYTES;
+                    for (long pageId = startPage; pageId < endPage; pageId++) {
+                        pageCursor.next(pageId);
+                        for (int i = 0; i < longsPerPage; i++) {
+                            var graphNodeId = pageId * longsPerPage + i;
+                            if (graphNodeId >= nodeCount) {
+                                break;
+                            }
+                            var neoNodeId = pageCursor.getLong();
+                            nodeMappingBuilder.set(neoNodeId, graphNodeId);
                         }
-                        var neoNodeId = pageCursor.getLong();
-                        nodeMappingBuilder.set(neoNodeId, graphNodeId);
                     }
                 }
             } catch (IOException e) {

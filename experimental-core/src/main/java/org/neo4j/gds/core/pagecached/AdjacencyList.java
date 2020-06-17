@@ -96,12 +96,10 @@ public final class AdjacencyList {
         return reuse.init(offset, pagedFile.pageSize());
     }
 
-    // TODO close cursor
-    public static final class Cursor extends MutableIntValue {
+    public static final class Cursor extends MutableIntValue implements AutoCloseable {
 
         static final Cursor EMPTY = new Cursor(null);
 
-        // TODO: release when closing cursors
         private final PageCursor pageCursor;
 
         private int degree;
@@ -149,6 +147,11 @@ public final class AdjacencyList {
             this.offset += Integer.BYTES;
             this.limit = this.offset + degree * Long.BYTES;
             return this;
+        }
+
+        @Override
+        public void close() {
+            pageCursor.close();
         }
 
         private long getLong(byte[] longBytes, int alreadyRead) throws IOException {
