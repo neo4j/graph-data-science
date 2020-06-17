@@ -53,10 +53,11 @@ public final class CompressedLongArray {
     }
 
     /**
+     * For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
+     *
      * @param values values to write
      * @param start  start index in values
      * @param end    end index in values
-     * @implNote For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
      */
     public void add(long[] values, int start, int end) {
         // not inlined to avoid field access
@@ -79,11 +80,12 @@ public final class CompressedLongArray {
     }
 
     /**
+     * For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
+     *
      * @param values        values to write
      * @param allWeights    weights to write
      * @param start         start index in values and weights
      * @param end           end index in values and weights
-     * @implNote For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
      */
     public void add(long[] values, long[][] allWeights, int start, int end) {
         // write weights
