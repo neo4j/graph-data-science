@@ -115,7 +115,7 @@ class AdjacencyListTest extends BaseTest {
 
         var degree = AdjacencyCompression.applyDeltaEncoding(uncompressedValues, Aggregation.NONE);
         var compressed = new byte[Math.multiplyExact(degree, 10) + 4];
-        AdjacencyCompression.writeBEInt(compressed, 0, degree);
+        AdjacencyCompression.writeBigEndianInt(compressed, 0, degree);
         var requiredBytes = VarLongEncoding.encodeVLongs(
             uncompressedValues.longs,
             uncompressedValues.length,

@@ -30,7 +30,6 @@ public class RelationshipsBuilder {
 
     private static final AdjacencyListBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyListBuilder[0];
 
-    private final RelationshipProjection projection;
     final AdjacencyListBuilder adjacencyListBuilder;
     final AdjacencyListBuilder[] propertyBuilders;
 
@@ -41,8 +40,6 @@ public class RelationshipsBuilder {
         PageCache pageCache,
         RelationshipProjection projection
     ) {
-        this.projection = projection;
-
         adjacencyListBuilder = AdjacencyListBuilder.newBuilder(pageCache);
 
         if (projection.properties().isEmpty()) {
@@ -54,18 +51,11 @@ public class RelationshipsBuilder {
     }
 
     final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder(
-            long[] adjacencyOffsets,
-            long[][] propertyOffsets,
-            Aggregation[] aggregations
+            long[] adjacencyOffsets
     ) {
         return new ThreadLocalRelationshipsBuilder(
             adjacencyListBuilder.newAllocator(),
-            Arrays.stream(propertyBuilders)
-                .map(AdjacencyListBuilder::newAllocator)
-                .toArray(AdjacencyListBuilder.Allocator[]::new),
-            adjacencyOffsets,
-            propertyOffsets,
-            aggregations
+            adjacencyOffsets
         );
     }
 
@@ -83,27 +73,5 @@ public class RelationshipsBuilder {
 
     public AdjacencyOffsets globalAdjacencyOffsets(PageCache pageCache) throws IOException {
         return AdjacencyOffsets.of(pageCache, globalAdjacencyOffsets);
-    }
-
-    // TODO: This returns only the first of possibly multiple properties
-    public AdjacencyList properties() throws IOException {
-        return propertyBuilders.length > 0 ? propertyBuilders[0].build() : null;
-    }
-
-    public AdjacencyList properties(int propertyIndex) throws IOException {
-        return propertyBuilders.length > 0 ? propertyBuilders[propertyIndex].build() : null;
-    }
-
-    public RelationshipProjection projection() {
-        return this.projection;
-    }
-
-    // TODO: This returns only the first of possibly multiple properties
-    public AdjacencyOffsets globalPropertyOffsets() {
-        return globalPropertyOffsets[0];
-    }
-
-    public AdjacencyOffsets globalPropertyOffsets(int propertyIndex) {
-        return globalPropertyOffsets[propertyIndex];
     }
 }

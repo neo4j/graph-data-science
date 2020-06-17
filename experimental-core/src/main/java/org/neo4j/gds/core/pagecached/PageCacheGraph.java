@@ -44,9 +44,6 @@ import java.util.function.LongPredicate;
  */
 public class PageCacheGraph implements Graph {
 
-    public static final double NO_PROPERTY_VALUE = Double.NaN;
-    private static final int NO_SUCH_NODE = 0;
-
     private final IdMap idMapping;
     private final AllocationTracker tracker;
 
@@ -161,46 +158,7 @@ public class PageCacheGraph implements Graph {
 
     @Override
     public double relationshipProperty(long sourceId, long targetId, double fallbackValue) {
-        if (!hasRelationshipProperty) {
-            return fallbackValue;
-        }
-
-        double maybeValue = Double.NaN;
-
-        if (properties != null) {
-            try {
-                maybeValue = findPropertyValue(sourceId, targetId);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (!Double.isNaN(maybeValue)) {
-                return maybeValue;
-            }
-        }
-
-        return defaultPropertyValue;
-    }
-
-    private double findPropertyValue(long fromId, long toId) throws IOException {
-        long relOffset = adjacencyOffsets.get(fromId);
-        if (relOffset == NO_SUCH_NODE) {
-            return NO_PROPERTY_VALUE;
-        }
-        long propertyOffset = propertyOffsets.get(fromId);
-
-        AdjacencyList.DecompressingCursor relDecompressingCursor = adjacencyList.decompressingCursor(relOffset);
-        AdjacencyList.Cursor propertyCursor = properties.cursor(propertyOffset);
-
-        while (relDecompressingCursor.hasNextVLong() && propertyCursor.hasNextLong() && relDecompressingCursor.nextVLong() != toId) {
-            propertyCursor.nextLong();
-        }
-
-        if (!propertyCursor.hasNextLong()) {
-            return NO_PROPERTY_VALUE;
-        }
-
-        long doubleBits = propertyCursor.nextLong();
-        return Double.longBitsToDouble(doubleBits);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -395,10 +353,6 @@ public class PageCacheGraph implements Graph {
     @Override
     public boolean isUndirected() {
         return orientation == Orientation.UNDIRECTED;
-    }
-
-    public Orientation orientation() {
-        return orientation;
     }
 
     public Relationships relationships() {

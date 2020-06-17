@@ -156,52 +156,6 @@ class RelationshipImporter {
         );
     }
 
-    Collection<Runnable> flushTasks() {
-        return adjacencyBuilder.flushTasks();
-    }
-
-    PropertyReader storeBackedPropertiesReader(CursorFactory cursors, Read read) {
-        return (batch, batchLength, relationshipProperties, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
-            long[][] properties = new long[relationshipProperties.length][batchLength / BATCH_ENTRY_SIZE];
-            if (atLeastOnePropertyToLoad) {
-                try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(cursors, PageCursorTracer.NULL, EmptyMemoryTracker.INSTANCE)) {
-                    double[] relProps = new double[relationshipProperties.length];
-                    for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
-                        long relationshipReference = batch[RELATIONSHIP_REFERENCE_OFFSET + i];
-                        long propertiesReference = batch[PROPERTIES_REFERENCE_OFFSET + i];
-                        read.relationshipProperties(relationshipReference, propertiesReference, pc);
-                        ReadHelper.readProperties(pc, relationshipProperties, defaultPropertyValues, aggregations, relProps);
-                        int propertyPos = i / BATCH_ENTRY_SIZE;
-                        for (int j = 0; j < relProps.length; j++) {
-                            properties[j][propertyPos] = Double.doubleToLongBits(relProps[j]);
-                        }
-                    }
-                }
-            } else {
-                for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
-                    int propertyPos = i / BATCH_ENTRY_SIZE;
-                    for (int j = 0; j < defaultPropertyValues.length; j++) {
-                        double value = aggregations[j].normalizePropertyValue(defaultPropertyValues[j]);
-                        properties[j][propertyPos] = Double.doubleToLongBits(value);
-                    }
-                }
-            }
-            return properties;
-        };
-    }
-
-
-    public static PropertyReader preLoadedPropertyReader() {
-        return (batch, batchLength, weightProperty, defaultWeight, aggregations, atLeastOnePropertyToLoad) -> {
-            long[] properties = new long[batchLength / BATCH_ENTRY_SIZE];
-            for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
-                long property = batch[PROPERTIES_REFERENCE_OFFSET + i];
-                properties[i / BATCH_ENTRY_SIZE] = property;
-            }
-            return new long[][]{properties};
-        };
-    }
-
     private static int importRelationships(
         RelationshipsBatchBuffer buffer,
         long[] batch,

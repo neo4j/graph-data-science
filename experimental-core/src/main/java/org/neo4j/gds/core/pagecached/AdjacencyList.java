@@ -19,15 +19,8 @@
  */
 package org.neo4j.gds.core.pagecached;
 
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
-import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
@@ -39,90 +32,7 @@ import java.nio.ByteOrder;
 
 public final class AdjacencyList {
 
-    public static final int PAGE_SHIFT = 18;
-    public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
-    public static final long PAGE_MASK = PAGE_SIZE - 1;
-
     private final PagedFile pagedFile;
-
-    // TODO: fix estimation for page cache
-    public static MemoryEstimation compressedMemoryEstimation(long avgDegree, long nodeCount) {
-        // Best case scenario:
-        // Difference between node identifiers in each adjacency list is 1.
-        // This leads to ideal compression through delta encoding.
-        int deltaBestCase = 1;
-        long bestCaseAdjacencySize = computeAdjacencyByteSize(avgDegree, nodeCount, deltaBestCase);
-
-        // Worst case scenario:
-        // Relationships are equally distributed across nodes, i.e. each node has the same number of rels.
-        // Within each adjacency list, all identifiers have the highest possible difference between each other.
-        // Highest possible difference is the number of nodes divided by the average degree.
-        long deltaWorstCase = (avgDegree > 0) ? BitUtil.ceilDiv(nodeCount, avgDegree) : 0L;
-        long worstCaseAdjacencySize = computeAdjacencyByteSize(avgDegree, nodeCount, deltaWorstCase);
-
-        int minPages = PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-        int maxPages = PageUtil.numPagesFor(worstCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-
-        long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
-        long minMemoryReqs = minPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(minPages);
-        long maxMemoryReqs = maxPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(maxPages);
-
-        MemoryRange pagesMemoryRange = MemoryRange.of(minMemoryReqs, maxMemoryReqs);
-
-        return MemoryEstimations
-            .builder(AdjacencyList.class)
-            .fixed("pages", pagesMemoryRange)
-            .build();
-    }
-
-    public static MemoryEstimation compressedMemoryEstimation(boolean undirected) {
-        return compressedMemoryEstimation(RelationshipType.ALL_RELATIONSHIPS, undirected);
-    }
-
-    public static MemoryEstimation compressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
-        return MemoryEstimations.setup("", dimensions -> {
-            long nodeCount = dimensions.nodeCount();
-            long relCountForType = dimensions
-                .relationshipCounts()
-                .getOrDefault(relationshipType, dimensions.maxRelCount());
-            long relCount = undirected ? relCountForType * 2 : relCountForType;
-            long avgDegree = (nodeCount > 0) ? BitUtil.ceilDiv(relCount, nodeCount) : 0L;
-            return AdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
-        });
-    }
-
-    public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {
-        return uncompressedMemoryEstimation(RelationshipType.ALL_RELATIONSHIPS, undirected);
-    }
-
-    public static MemoryEstimation uncompressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
-
-        return MemoryEstimations
-            .builder(AdjacencyList.class)
-            .perGraphDimension("pages", (dimensions, concurrency) -> {
-                long nodeCount = dimensions.nodeCount();
-                long relCountForType = dimensions
-                    .relationshipCounts()
-                    .getOrDefault(relationshipType, dimensions.maxRelCount());
-                long relCount = undirected ? relCountForType * 2 : relCountForType;
-
-                long uncompressedAdjacencySize = relCount * Long.BYTES + nodeCount * Integer.BYTES;
-                int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-                long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
-
-                return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
-            })
-            .build();
-    }
-
-    /* test private */
-    static long computeAdjacencyByteSize(long avgDegree, long nodeCount, long delta) {
-        long firstAdjacencyIdAvgByteSize = (avgDegree > 0) ? BitUtil.ceilDiv(VarLongEncoding.encodedVLongSize(nodeCount), 2) : 0L;
-        int relationshipByteSize = VarLongEncoding.encodedVLongSize(delta);
-        int degreeByteSize = Integer.BYTES;
-        long compressedAdjacencyByteSize = relationshipByteSize * Math.max(0, (avgDegree - 1));
-        return (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
-    }
 
     public AdjacencyList(PagedFile pagedFile) {
         this.pagedFile = pagedFile;
@@ -254,7 +164,6 @@ public final class AdjacencyList {
 
     public static final class DecompressingCursor extends MutableIntValue implements AutoCloseable {
 
-        public static final long NOT_FOUND = -1;
         // TODO: free
         private final AdjacencyDecompressingReader decompress;
 
@@ -268,26 +177,10 @@ public final class AdjacencyList {
         }
 
         /**
-         * Copy iteration state from another cursor without changing {@code other}.
-         */
-        void copyFrom(DecompressingCursor other) {
-            decompress.copyFrom(other.decompress);
-            currentTarget = other.currentTarget;
-            maxTargets = other.maxTargets;
-        }
-
-        /**
          * Return how many targets can be decoded in total. This is equivalent to the degree.
          */
         public int length() {
             return maxTargets;
-        }
-
-        /**
-         * Return how many targets are still left to be decoded.
-         */
-        int remaining() {
-            return maxTargets - currentTarget;
         }
 
         /**
@@ -305,36 +198,6 @@ public final class AdjacencyList {
             int current = currentTarget++;
             int remaining = maxTargets - current;
             return decompress.next(remaining);
-        }
-
-        /**
-         * Read and decode target ids until it is strictly larger than (`>`) the provided {@code target}.
-         * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
-         * id that is large enough.
-         * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-         * will return {@code false}
-         */
-        long skipUntil(long target) throws IOException {
-            long value = decompress.skipUntil(target, remaining(), this);
-            this.currentTarget += this.value;
-            return value;
-        }
-
-        /**
-         * Read and decode target ids until it is larger than or equal (`>=`) the provided {@code target}.
-         * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
-         * id that is large enough.
-         * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-         * will return {@code false}
-         */
-        long advance(long target) throws IOException {
-            int targetsLeftToBeDecoded = remaining();
-            if (targetsLeftToBeDecoded <= 0) {
-                return NOT_FOUND;
-            }
-            long value = decompress.advance(target, targetsLeftToBeDecoded, this);
-            this.currentTarget += this.value;
-            return value;
         }
 
         @Override

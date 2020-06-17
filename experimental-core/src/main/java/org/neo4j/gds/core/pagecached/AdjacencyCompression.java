@@ -50,35 +50,8 @@ final class AdjacencyCompression {
         return data.length = applyDelta(data.longs, data.length, aggregation);
     }
 
-    // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
-    static int applyDeltaEncoding(LongsRef data, long[][] weights, Aggregation[] aggregations, boolean noAggregation) {
-        int[] order = IndirectSort.mergesort(0, data.length, new AscendingLongComparator(data.longs));
-
-        long[] sortedValues = new long[data.length];
-        long[][] sortedWeights = new long[weights.length][data.length];
-
-        data.length = applyDelta(
-                order,
-                data.longs,
-                sortedValues,
-                weights,
-                sortedWeights,
-                data.length,
-                aggregations,
-                noAggregation
-        );
-
-        System.arraycopy(sortedValues, 0, data.longs, 0, data.length);
-        for (int i = 0; i < sortedWeights.length; i++) {
-            long[] sortedWeight = sortedWeights[i];
-            System.arraycopy(sortedWeight, 0, weights[i], 0, data.length);
-        }
-
-        return data.length;
-    }
-
     //@formatter:off
-    static int writeBEInt(byte[] out, int offset, int value) {
+    static int writeBigEndianInt(byte[] out, int offset, int value) {
         out[    offset] = (byte) (value >>> 24);
         out[1 + offset] = (byte) (value >>> 16);
         out[2 + offset] = (byte) (value >>> 8);
@@ -95,64 +68,6 @@ final class AdjacencyCompression {
             value = values[in];
             if (delta > 0L || aggregation == Aggregation.NONE) {
                 values[out++] = delta;
-            }
-        }
-        return out;
-    }
-
-    /**
-     * Applies delta encoding to the given {@code values}.
-     * Weights are not encoded.
-     *
-     * @param order Ordered indices into {@code values} and {@code weights} for consuming these in ascending value order.
-     * @param values Relationships represented by target node ID.
-     * @param outValues Sorted, delta-encoded and optionally aggregated relationships.
-     * @param weights Relationship properties by key, ordered by {@code order}.
-     * @param outWeights Sorted and optionally aggregated relationship properties.
-     * @param length Number of relationships (degree of source node) to process.
-     * @param aggregations Aggregations to apply to parallel edges. One per relationship property key in {@code weights}.
-     * @param noAggregation Is true iff all aggregations are NONE.
-     */
-    private static int applyDelta(
-            int[] order,
-            long[] values,
-            long[] outValues,
-            long[][] weights,
-            long[][] outWeights,
-            int length,
-            Aggregation[] aggregations,
-            boolean noAggregation
-    ) {
-        int firstSortIdx = order[0];
-        long value = values[firstSortIdx];
-        long delta;
-
-        outValues[0] = values[firstSortIdx];
-        for (int i = 0; i < weights.length; i++) {
-            outWeights[i][0] = weights[i][firstSortIdx];
-        }
-
-        int in = 1, out = 1;
-        for (; in < length; ++in) {
-            final int sortIdx = order[in];
-            delta = values[sortIdx] - value;
-            value = values[sortIdx];
-
-            if (delta > 0L || noAggregation) {
-                for (int i = 0; i < weights.length; i++) {
-                    outWeights[i][out] = weights[i][sortIdx];
-                }
-                outValues[out++] = delta;
-            } else {
-                for (int i = 0; i < weights.length; i++) {
-                    Aggregation aggregation = aggregations[i];
-                    int existingIdx = out - 1;
-                    long[] outWeight = outWeights[i];
-                    double existingWeight = Double.longBitsToDouble(outWeight[existingIdx]);
-                    double newWeight = Double.longBitsToDouble(weights[i][sortIdx]);
-                    newWeight = aggregation.merge(existingWeight, newWeight);
-                    outWeight[existingIdx] = Double.doubleToLongBits(newWeight);
-                }
             }
         }
         return out;

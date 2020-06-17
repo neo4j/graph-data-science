@@ -63,8 +63,6 @@ import static java.util.stream.Collectors.toMap;
 
 public final class CSRGraphStore implements GraphStore {
 
-    private final int concurrency;
-
     private final IdMap nodes;
 
     private final Map<NodeLabel, NodePropertyStore> nodeProperties;
@@ -84,7 +82,6 @@ public final class CSRGraphStore implements GraphStore {
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
         Map<RelationshipType, PageCacheGraph.TopologyCSR> relationships,
         Map<RelationshipType, Map<String, PageCacheGraph.PropertyCSR>> relationshipProperties,
-        int concurrency,
         AllocationTracker tracker
     ) {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
@@ -117,7 +114,6 @@ public final class CSRGraphStore implements GraphStore {
             nodePropertyStores,
             relationships,
             relationshipPropertyStores,
-            concurrency,
             tracker
         );
     }
@@ -153,7 +149,7 @@ public final class CSRGraphStore implements GraphStore {
             );
         }
 
-        return CSRGraphStore.of(graph.idMap(), nodeProperties, topology, relationshipProperties, concurrency, tracker);
+        return CSRGraphStore.of(graph.idMap(), nodeProperties, topology, relationshipProperties, tracker);
     }
 
     private CSRGraphStore(
@@ -161,14 +157,12 @@ public final class CSRGraphStore implements GraphStore {
         Map<NodeLabel, NodePropertyStore> nodeProperties,
         Map<RelationshipType, PageCacheGraph.TopologyCSR> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
-        int concurrency,
         AllocationTracker tracker
     ) {
         this.nodes = nodes;
         this.nodeProperties = nodeProperties;
         this.relationships = relationships;
         this.relationshipProperties = relationshipProperties;
-        this.concurrency = concurrency;
         this.createdGraphs = new HashSet<>();
         this.modificationTime = TimeUtil.now();
         this.tracker = tracker;
@@ -362,7 +356,8 @@ public final class CSRGraphStore implements GraphStore {
         HugeGraph.Relationships relationships
     ) {
         // TODO: somehow allow the PageCacheGraph.Relationships to be used
-        // see Huge GraphStore for what it is doing
+        // see org.neo4j.graphalgo.core.loading.CSRGraphStore#addRelationshipType for what it is doing
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -462,25 +457,6 @@ public final class CSRGraphStore implements GraphStore {
         }
     }
 
-    private void addRelationshipProperty(
-        RelationshipType relationshipType,
-        String propertyKey,
-        NumberType propertyType,
-        PageCacheGraph.PropertyCSR propertyCSR,
-        CSRGraphStore graphStore
-    ) {
-        graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
-            RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
-            if (propertyStore != null) {
-                builder.from(propertyStore);
-            }
-            return builder.putIfAbsent(
-                propertyKey,
-                ImmutableRelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyCSR)
-            ).build();
-        });
-    }
-
     private Graph createGraph(
         Collection<NodeLabel> nodeLabels,
         RelationshipType relationshipType,
@@ -522,7 +498,6 @@ public final class CSRGraphStore implements GraphStore {
                 }
 
                 if (filteredNodes.isPresent()) {
-//                    return new NodeFilteredGraph(initialGraph, filteredNodes.get());
                     throw new UnsupportedOperationException();
                 } else {
                     return initialGraph;

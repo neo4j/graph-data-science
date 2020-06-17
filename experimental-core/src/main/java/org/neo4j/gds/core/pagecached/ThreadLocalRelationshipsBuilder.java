@@ -31,46 +31,19 @@ class ThreadLocalRelationshipsBuilder {
 
     private final ReentrantLock lock;
     private final AdjacencyListBuilder.Allocator adjacencyAllocator;
-    private final AdjacencyListBuilder.Allocator[] propertiesAllocators;
     private final long[] adjacencyOffsets;
-    private final long[][] propertyOffsets;
-    private final boolean noAggregation;
-    private final Aggregation[] aggregations;
 
     ThreadLocalRelationshipsBuilder(
         AdjacencyListBuilder.Allocator adjacencyAllocator,
         long[] adjacencyOffsets
     ) {
-        this(adjacencyAllocator, null, adjacencyOffsets, null, null);
-    }
-
-    ThreadLocalRelationshipsBuilder(
-        AdjacencyListBuilder.Allocator adjacencyAllocator,
-        AdjacencyListBuilder.Allocator[] propertiesAllocators,
-        long[] adjacencyOffsets,
-        long[][] propertyOffsets,
-        Aggregation[] aggregations
-    ) {
-
-        this.aggregations = aggregations;
-
-        this.noAggregation = Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE);
-
         this.adjacencyAllocator = adjacencyAllocator;
-        this.propertiesAllocators = propertiesAllocators;
         this.adjacencyOffsets = adjacencyOffsets;
-        this.propertyOffsets = propertyOffsets;
         this.lock = new ReentrantLock();
     }
 
     final void prepare() throws IOException {
         adjacencyAllocator.prepare();
-
-        for (AdjacencyListBuilder.Allocator weightsAllocator : propertiesAllocators) {
-            if (weightsAllocator != null) {
-                weightsAllocator.prepare();
-            }
-        }
     }
 
     final void lock() {
@@ -94,13 +67,7 @@ class ThreadLocalRelationshipsBuilder {
         LongsRef buffer,
         int localId
     ) throws IOException {
-
-        // TODO: implement property loading
-//        if (array.hasWeights()) {
-//            return applyVariableDeltaEncodingWithWeights(array, buffer, localId);
-//        } else {
-            return applyVariableDeltaEncodingWithoutWeights(array, buffer, localId);
-//        }
+        return applyVariableDeltaEncodingWithoutWeights(array, buffer, localId);
     }
 
     private int applyVariableDeltaEncodingWithoutWeights(
@@ -112,7 +79,7 @@ class ThreadLocalRelationshipsBuilder {
         AdjacencyCompression.copyFrom(buffer, array);
 
         var degree = AdjacencyCompression.applyDeltaEncoding(buffer, Aggregation.NONE);
-        AdjacencyCompression.writeBEInt(storage, 0, degree);
+        AdjacencyCompression.writeBigEndianInt(storage, 0, degree);
         var requiredBytes = VarLongEncoding.encodeVLongs(
             buffer.longs,
             buffer.length,

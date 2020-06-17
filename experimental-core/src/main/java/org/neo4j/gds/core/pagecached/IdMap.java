@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.pagecached;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.NodeIterator;
@@ -29,7 +28,6 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.utils.StringFormatting;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
@@ -38,13 +36,10 @@ import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.stream.Collectors;
 
 public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, AutoCloseable {
 
@@ -57,10 +52,6 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
     private final PagedFile graphIds;
     private final HugeSparseLongArray nodeToGraphIds;
     private final PageCursor graphIdsCursor;
-
-    public IdMap(PagedFile graphIds, HugeSparseLongArray nodeToGraphIds, long nodeCount) throws IOException {
-        this(graphIds, nodeToGraphIds, Collections.emptyMap(), nodeCount);
-    }
 
     /**
      * initialize the map with pre-built sub arrays
@@ -167,20 +158,6 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
         this.graphIdsCursor.close();
         this.graphIds.close();
         this.nodeToGraphIds.close();
-    }
-
-    private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, Map<NodeLabel, BitSet> labelInformation) {
-        List<ElementIdentifier> invalidLabels = nodeLabels
-            .stream()
-            .filter(label -> !new HashSet<>(labelInformation.keySet()).contains(label))
-            .collect(Collectors.toList());
-        if (!invalidLabels.isEmpty()) {
-            throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-                "Specified labels %s do not correspond to any of the node projections %s.",
-                invalidLabels,
-                labelInformation.keySet()
-            ));
-        }
     }
 
     public static final class IdIterable implements PrimitiveLongIterable {

@@ -166,15 +166,8 @@ public abstract class AdjacencyBuilder {
             buffers[pageIndex] = new LongsRef();
             long[] localAdjacencyOffsets = globalAdjacencyOffsets[pageIndex] = new long[pageSize];
 
-            long[][] localWeightOffsets = new long[globalWeightOffsets.length][];
-            for (int i = 0; i < globalWeightOffsets.length; i++) {
-                localWeightOffsets[i] = globalWeightOffsets[i][pageIndex] = new long[pageSize];
-            }
-
             localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder(
-                localAdjacencyOffsets,
-                localWeightOffsets,
-                aggregations
+                localAdjacencyOffsets
             );
             localBuilders[pageIndex].prepare();
         }
@@ -307,7 +300,7 @@ public abstract class AdjacencyBuilder {
 
     private static final class NoAdjacency extends AdjacencyBuilder {
 
-        private static final AdjacencyBuilder INSTANCE = new AdjacencyBuilder.NoAdjacency();
+        private static final AdjacencyBuilder INSTANCE = new NoAdjacency();
 
         @Override
         void addAll(
