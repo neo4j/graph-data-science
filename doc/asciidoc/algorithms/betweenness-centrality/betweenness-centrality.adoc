@@ -29,6 +29,20 @@ This topic includes:
 [[algorithms-betweenness-centrality-intro]]
 == Introduction
 
+Betweenness centrality is a way of detecting the amount of influence a node has over the flow of information in a graph.
+It is often used to find nodes that serve as a bridge from one part of a graph to another.
+
+The algorithm calculates the shortest path between every pair of nodes in an unweighted graph.
+Each node receives a score, based on the number of these shortest paths that pass through the node.
+Nodes that most frequently lie on these shortest paths will have a higher betweenness centrality score.
+
+The GDS implementation is based on https://www.eecs.wsu.edu/~assefaw/CptS580-06/papers/brandes01centrality.pdf[Brandes' algorithm^] for unweighted graphs.
+The implementation requires _O(n + m)_ space and runs in _O(n * m)_ time, where _n_ is the number of nodes and _m_ the number of relationships in the graph.
+
+For more information on this algorithm, see:
+
+* https://www.eecs.wsu.edu/~assefaw/CptS580-06/papers/brandes01centrality.pdf[A Faster Algorithm for Betweenness Centrality^]
+* http://moreno.ss.uci.edu/23.pdf[A Set of Measures of Centrality Based on Betweenness^]
 
 [NOTE]
 ====
@@ -39,6 +53,17 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 
 [[algorithms-betweenness-centrality-considerations]]
 == Considerations
+
+The algorithm computes Single Source Shortest paths (SSSP) for a set of start nodes.
+By default, all nodes in the graph are considered as start nodes, which leads to exact results.
+In the worst case, a single SSSP requires the whole graph to be duplicated in memory.
+
+There are two things to consider when executing the algorithm on large graphs:
+
+* A higher parallelism leads to higher memory consumption as each thread executes SSSPs for a subset of start nodes sequentially.
+* A higher number of start nodes leads to better results, but also to a potentially much longer execution time.
+
+Changing the value of parameters `concurrency` and `samplingSize` can help with these considerations.
 
 
 [[algorithms-betweenness-centrality-syntax]]
