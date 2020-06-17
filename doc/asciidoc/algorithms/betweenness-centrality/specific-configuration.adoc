@@ -2,6 +2,6 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name          | Type    | Default    | Optional | Description
-| samplingSize  | Integer | node count | yes      | The number of start (pivot) nodes to consider for computing centrality values.
+| samplingSize  | Integer | node count | yes      | The number of start nodes to consider for computing centrality scores.
 | samplingSeed  | Integer | null       | yes      | The seed value for the random generator that selects start nodes.
 |===

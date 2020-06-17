@@ -32,7 +32,7 @@ This topic includes:
 Betweenness centrality is a way of detecting the amount of influence a node has over the flow of information in a graph.
 It is often used to find nodes that serve as a bridge from one part of a graph to another.
 
-The algorithm calculates the shortest path between every pair of nodes in an unweighted graph.
+The algorithm calculates the shortest path between all pairs of nodes in an unweighted graph.
 Each node receives a score, based on the number of these shortest paths that pass through the node.
 Nodes that most frequently lie on these shortest paths will have a higher betweenness centrality score.
 
@@ -96,8 +96,8 @@ include::specific-configuration.adoc[]
 [opts="header"]
 |===
 | Name          | Type    | Description
-| nodeId        | Integer | Node ID
-| centrality    | Float   | PageRank centrality
+| nodeId        | Integer | The Neo4j node ID.
+| centrality    | Float   | The denormalized Betweenness Centrality score.
 |===
 
 
@@ -114,6 +114,9 @@ CALL gds.betweenness.stats(
 YIELD
   createMillis: Integer,
   computeMillis: Integer,
+  minCentrality: Float,
+  maxCentrality: Float,
+  sumCentrality: Float,
   configuration: Map
 ----
 
@@ -126,10 +129,13 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                   | Type      | Description
-| createMillis           | Integer   | Milliseconds for creating the graph.
-| computeMillis          | Integer   | Milliseconds for running the algorithm.
-| configuration          | Map       | The configuration used for running the algorithm.
+| Name          | Type      | Description
+| createMillis  | Integer   | Milliseconds for creating the graph.
+| computeMillis | Integer   | Milliseconds for running the algorithm.
+| minCentrality | Float     | The lowest centrality score.
+| maxCentrality | Float     | The highest centrality score.
+| sumCentrality | Float     | The sum of all centrality scores.
+| configuration | Map       | The configuration used for running the algorithm.
 |===
 
 
@@ -148,6 +154,9 @@ YIELD
   createMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
+  minCentrality: Float,
+  maxCentrality: Float,
+  sumCentrality: Float,
   configuration: Map
 ----
 
@@ -165,6 +174,9 @@ include::specific-configuration.adoc[]
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
 | nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
+| minCentrality          | Float     | The lowest centrality score.
+| maxCentrality          | Float     | The highest centrality score.
+| sumCentrality          | Float     | The sum of all centrality scores.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 
@@ -184,6 +196,9 @@ YIELD
   createMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
+  minCentrality: Float,
+  maxCentrality: Float,
+  sumCentrality: Float,
   configuration: Map
 ----
 
@@ -197,41 +212,15 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type      | Description
-| ranIterations          | Integer   | The number of iterations run.
-| didConverge            | Boolean   | Indicates if the algorithm converged.
 | createMillis           | Integer   | Milliseconds for creating the graph.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
-| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
 | writeMillis            | Integer   | Milliseconds for writing result data back.
 | nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
-| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| minCentrality          | Float     | The lowest centrality score.
+| maxCentrality          | Float     | The highest centrality score.
+| sumCentrality          | Float     | The sum of all centrality scores.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
-
-[[algorithms-betweenness-centrality-syntax-anonymous]]
-=== Anonymous graphs
-
-include::../shared/syntax-anonymous-graphs.adoc[]
-
-.Run Betweenness Centrality in write mode on an anonymous graph:
-[source, cypher]
-----
-CALL gds.betweenness.write(
-  configuration: Map
-)
-YIELD
-  nodePropertiesWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  configuration: Map
-----
-
-include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-include::specific-configuration.adoc[]
-
-The results are the same as for running write mode with a named graph, <<algorithms-betweenness-centrality-syntax-write, specified above>>.
 
 
 [[algorithms-betweenness-centrality-examples]]
