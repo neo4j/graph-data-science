@@ -42,6 +42,9 @@ public interface ToMap {
 
     Optional<Long> maybeBar();
 
+    @Configuration.ToMapValue("positive.ToMap.add42")
+    Optional<Double> maybeBaz();
+
     @Configuration.ToMap
     Map<String, Object> toMap();
 }

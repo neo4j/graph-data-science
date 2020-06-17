@@ -730,13 +730,7 @@ final class GenerateConfiguration {
                 builder.addStatement("$T<$T, Object> map = new $T<>()", Map.class, String.class, LinkedHashMap.class);
                 configMembers.forEach(configMember -> {
                     if (isTypeOf(Optional.class, configMember.method().getReturnType())) {
-                        builder.addStatement(
-                            "$L.ifPresent($L -> map.put($S, $L))",
-                            getMapValueCode(configMember),
-                            configMember.lookupKey(),
-                            configMember.lookupKey(),
-                            configMember.lookupKey()
-                        );
+                        builder.addStatement(getMapPutOptionalCode(configMember));
                     } else {
                         builder.addStatement(
                             "map.put($S, $L)",
@@ -754,11 +748,29 @@ final class GenerateConfiguration {
     private CodeBlock getMapValueCode(ConfigParser.Member configMember) {
         String getter = configMember.methodName();
         Configuration.ToMapValue toMapValue = configMember.method().getAnnotation(Configuration.ToMapValue.class);
-        return (toMapValue == null) ? CodeBlock.of("$N()", getter) : CodeBlock.of(
-            "$L($N())",
-            toMapValue.value().replaceAll("#", "."),
-            getter
+        return (toMapValue == null)
+            ? CodeBlock.of("$N()", getter)
+            : CodeBlock.of("$L($N())", getReference(toMapValue), getter);
+    }
+
+    @NotNull
+    private CodeBlock getMapPutOptionalCode(ConfigParser.Member configMember) {
+        Configuration.ToMapValue toMapValue = configMember.method().getAnnotation(Configuration.ToMapValue.class);
+
+        CodeBlock mapValue = (toMapValue == null)
+            ? CodeBlock.of("$L", configMember.lookupKey())
+            : CodeBlock.of("$L($L)", getReference(toMapValue), configMember.lookupKey());
+
+        return CodeBlock.of("$L.ifPresent($L -> map.put($S, $L))",
+            CodeBlock.of("$N()", configMember.methodName()),
+            configMember.lookupKey(),
+            configMember.lookupKey(),
+            mapValue
         );
+    }
+
+    private String getReference(Configuration.ToMapValue toMapValue) {
+        return toMapValue.value().replaceAll("#", ".");
     }
 
     private CodeBlock collectKeysCode(ConfigParser.Spec config) {
