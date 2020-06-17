@@ -53,7 +53,6 @@ YIELD nodes, iterations, dampingFactor, writeProperty, createMillis, computeMill
 | concurrency                   | int        | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency               | int        | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency              | int        | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| relationshipWeightProperty    | string     | null                   | yes      | The name of the relationship property that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | normalization                 | string     | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
 | maxIterations                 | int        | 20                     | yes      | The maximum number of iterations of EigenvectorCentrality to run.
 | sourceNodes                   | list<node> | empty list             | yes      | A list of nodes to start the computation from.
@@ -85,7 +84,6 @@ YIELD node, score
 | Name                          | Type       | Default                | Optional | Description
 | concurrency                   | int        | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
 | readConcurrency               | int        | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| relationshipWeightProperty    | string     | null                   | yes      | The name of the relationship property that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | normalization                 | string     | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
 | maxIterations                 | int        | 20                     | yes      | The maximum number of iterations of EigenvectorCentrality to run.
 | sourceNodes                   | list<node> | empty list             | yes      | A list f nodes to start the computation from.
