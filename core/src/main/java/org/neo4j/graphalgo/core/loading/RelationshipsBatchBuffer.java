@@ -101,21 +101,21 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
         this.length = 4 + position;
     }
 
-    long[] sortBySource() {
+    public long[] sortBySource() {
         RadixSort.radixSort(buffer, sortCopy, histogram, length);
         return buffer;
     }
 
-    long[] sortByTarget() {
+    public long[] sortByTarget() {
         RadixSort.radixSort2(buffer, sortCopy, histogram, length);
         return buffer;
     }
 
-    long[] spareLongs() {
+    public long[] spareLongs() {
         return sortCopy;
     }
 
-    int[] spareInts() {
+    public int[] spareInts() {
         return histogram;
     }
 }

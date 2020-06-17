@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.loading.VarLongEncoding;
 import org.neo4j.io.pagecache.PageCache;
 
 import java.io.IOException;

@@ -21,10 +21,11 @@ package org.neo4j.gds.core.pagecached;
 
 import org.apache.lucene.util.LongsRef;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.loading.CompressedLongArray;
+import org.neo4j.graphalgo.core.loading.VarLongEncoding;
 
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Stream;
 
 class ThreadLocalRelationshipsBuilder {
 

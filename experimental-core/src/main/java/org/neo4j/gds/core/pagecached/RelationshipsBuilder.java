@@ -21,7 +21,6 @@ package org.neo4j.gds.core.pagecached;
 
 
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.io.pagecache.PageCache;
 
 import java.io.IOException;

@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 public final class VarLongEncoding {
 
-    static int encodeVLongs(long[] values, int limit, byte[] out, int into) {
+    public static int encodeVLongs(long[] values, int limit, byte[] out, int into) {
         return encodeVLongs(values, 0, limit, out, into);
     }
 

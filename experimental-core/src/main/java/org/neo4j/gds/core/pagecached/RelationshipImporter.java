@@ -20,24 +20,12 @@
 package org.neo4j.gds.core.pagecached;
 
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.ReadHelper;
+import org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.utils.StringFormatting;
-import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.PropertyCursor;
-import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.StatementConstants;
-import org.neo4j.memory.EmptyMemoryTracker;
-
-import java.util.Collection;
-
-import static org.neo4j.gds.core.pagecached.RelationshipsBatchBuffer.BATCH_ENTRY_SIZE;
-import static org.neo4j.gds.core.pagecached.RelationshipsBatchBuffer.PROPERTIES_REFERENCE_OFFSET;
-import static org.neo4j.gds.core.pagecached.RelationshipsBatchBuffer.RELATIONSHIP_REFERENCE_OFFSET;
 
 class RelationshipImporter {
 
@@ -80,7 +68,7 @@ class RelationshipImporter {
     }
 
     private long importUndirectedWithProperties(RelationshipsBatchBuffer buffer, PropertyReader reader) {
-        int batchLength = buffer.length;
+        int batchLength = buffer.length();
         long[] batch = buffer.sortBySource();
         long[][] outProperties = reader.readProperty(
             batch,
@@ -111,7 +99,7 @@ class RelationshipImporter {
     }
 
     private long importNaturalWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
-        int batchLength = buffer.length;
+        int batchLength = buffer.length();
         long[] batch = buffer.sortBySource();
         long[][] outProperties = propertyReader.readProperty(
             batch,
@@ -131,7 +119,7 @@ class RelationshipImporter {
     }
 
     private long importReverseWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
-        int batchLength = buffer.length;
+        int batchLength = buffer.length();
         long[] batch = buffer.sortByTarget();
         long[][] inProperties = propertyReader.readProperty(
             batch,
@@ -221,7 +209,7 @@ class RelationshipImporter {
         AdjacencyBuilder adjacency,
         AllocationTracker tracker
     ) {
-        int batchLength = buffer.length;
+        int batchLength = buffer.length();
 
         int[] offsets = buffer.spareInts();
         long[] targets = buffer.spareLongs();

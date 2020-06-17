@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.core.pagecached;
 
-import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
+import org.neo4j.graphalgo.core.loading.CompressedLongArray;
 
 import java.util.Arrays;
 

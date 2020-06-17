@@ -37,7 +37,7 @@ abstract class RecordsBatchBuffer<Reference> implements RecordConsumer<Reference
         return cursor.bulkNext(this);
     }
 
-    int length() {
+    public int length() {
         return length;
     }
 

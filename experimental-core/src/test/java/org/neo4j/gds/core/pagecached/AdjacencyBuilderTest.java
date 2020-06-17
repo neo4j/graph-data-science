@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
+import org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.io.pagecache.PageCache;
 

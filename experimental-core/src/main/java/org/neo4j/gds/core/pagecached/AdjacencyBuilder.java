@@ -21,6 +21,7 @@ package org.neo4j.gds.core.pagecached;
 
 import org.apache.lucene.util.LongsRef;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.loading.CompressedLongArray;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.kernel.api.StatementConstants;
