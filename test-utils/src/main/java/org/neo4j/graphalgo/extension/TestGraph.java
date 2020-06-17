@@ -25,9 +25,11 @@ import org.neo4j.graphalgo.api.Graph;
 public class TestGraph extends FilterGraph {
 
     private final IdFunction idFunction;
+    private final String name;
 
-    public TestGraph(Graph graph, IdFunction idFunction) {
+    public TestGraph(Graph graph, IdFunction idFunction, String name) {
         super(graph);
+        this.name = name;
         this.idFunction = idFunction;
     }
 
@@ -35,8 +37,17 @@ public class TestGraph extends FilterGraph {
         return idFunction.of(variable);
     }
 
+    public long toMappedNodeId(String variable) {
+        return graph.toMappedNodeId(idFunction.of(variable));
+    }
+
     @Override
     public Graph concurrentCopy() {
-        return new TestGraph(graph.concurrentCopy(), idFunction);
+        return new TestGraph(graph.concurrentCopy(), idFunction, name);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

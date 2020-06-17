@@ -33,9 +33,11 @@ import static java.lang.annotation.ElementType.FIELD;
 @Repeatable(GdlGraphs.class)
 public @interface GdlGraph {
 
+    String DEFAULT_GRAPH_NAME = "graph";
+
     Orientation orientation() default Orientation.NATURAL;
 
-    String graphName() default "graph";
+    String graphName() default DEFAULT_GRAPH_NAME;
 
     String username() default "";
 
