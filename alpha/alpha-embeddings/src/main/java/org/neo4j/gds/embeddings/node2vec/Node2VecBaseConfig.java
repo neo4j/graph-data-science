@@ -70,7 +70,7 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig {
     @Value.Default
     @Configuration.FloatRange(min = 0.0, minInclusive = false)
     default float minLearningRate() {
-        return learningRate();
+        return 0.0001F;
     }
 
     @Value.Default
