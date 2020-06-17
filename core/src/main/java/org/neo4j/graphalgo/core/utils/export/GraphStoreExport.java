@@ -115,10 +115,9 @@ public class GraphStoreExport {
                 config.batchSize()
             ));
 
-            var metaDataFile = databaseLayout.metadataStore();
-            var metaDataPath = metaDataFile.toPath();
-            var somethingExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
-            if (somethingExists) {
+            var metaDataPath = databaseLayout.metadataStore().toPath();
+            var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
+            if (dbExists) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "The database [%s] already exists. The graph export procedure can only create new databases.",
                     config.dbName()
