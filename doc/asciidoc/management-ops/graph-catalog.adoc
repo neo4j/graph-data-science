@@ -361,6 +361,13 @@ The procedure yields information about the number of nodes, relationships and pr
 
 The new database can be started using link:https://neo4j.com/docs/cypher-manual/current/administration/databases/#administration-databases-start-database[`databases management commands`].
 
+
+[NOTE]
+====
+The database must not exist when using the export procedure, it needs to be created manually using the following commands.
+====
+
+
 .After running the procedure, we can start a new database and query the exported graph:
 [source,cypher]
 ----

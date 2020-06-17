@@ -53,6 +53,7 @@ import org.neo4j.logging.internal.StoreLogService;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -60,6 +61,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
 
@@ -112,6 +114,15 @@ public class GraphStoreExport {
                 RelationshipStore.of(graphStore, config.defaultRelationshipType()),
                 config.batchSize()
             ));
+
+            var metaDataPath = databaseLayout.metadataStore().toPath();
+            var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
+            if (dbExists) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The database [%s] already exists. The graph export procedure can only create new databases.",
+                    config.dbName()
+                ));
+            }
 
             var importer = Neo4jProxy.instantiateBatchImporter(
                 BatchImporterFactory.withHighestPriority(),
