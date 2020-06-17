@@ -34,11 +34,10 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -131,9 +130,12 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
         public long nodeId;
         public List<Double> embedding;
 
-        StreamResult(long nodeId, double[] embedding) {
+        StreamResult(long nodeId, float[] embedding) {
             this.nodeId = nodeId;
-            this.embedding = Arrays.stream(embedding).boxed().collect(Collectors.toList());
+            this.embedding = new ArrayList<>(embedding.length);
+            for (var f : embedding) {
+                this.embedding.add((double) f);
+            }
         }
     }
 }

@@ -20,17 +20,17 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 public class Vector {
-    private final double[] data;
+    private final float[] data;
 
     Vector(int size) {
-        this(new double[size]);
+        this(new float[size]);
     }
 
-    Vector(double[] data) {
+    Vector(float[] data) {
         this.data = data;
     }
 
-    public double[] data() {
+    public float[] data() {
         return data;
     }
 
@@ -40,14 +40,14 @@ public class Vector {
         }
     }
 
-    void scalarMultiply(Vector other, double scalar) {
+    void scalarMultiply(Vector other, float scalar) {
         for (int pos = 0; pos < data.length; pos++) {
             data[pos] = other.data[pos] * scalar;
         }
     }
 
-    double innerProduct(Vector other) {
-        double result = 0;
+    float innerProduct(Vector other) {
+        float result = 0;
         for (int i = 0; i < data.length; i++) {
             result += data[i] * other.data[i];
         }

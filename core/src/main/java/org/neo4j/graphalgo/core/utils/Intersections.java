@@ -321,4 +321,22 @@ public class Intersections {
         }
         return dotProduct;
     }
+
+    public static float cosine(float[] vector1, float[] vector2, int len) {
+        float dotProduct = 0F;
+        float xLength = 0F;
+        float yLength = 0F;
+        for (int i = 0; i < len; i++) {
+            float weight1 = vector1[i];
+            // if (weight1 == 0d) continue;
+            float weight2 = vector2[i];
+            // if (weight2 == 0d) continue;
+
+            dotProduct += weight1 * weight2;
+            xLength += weight1 * weight1;
+            yLength += weight2 * weight2;
+        }
+
+        return (float) (dotProduct / Math.sqrt(xLength * yLength));
+    }
 }

@@ -150,6 +150,29 @@ public interface PropertyTranslator<T> {
         }
     }
 
+    interface OfFloatArray<T> extends PropertyTranslator<T> {
+        float[] toFloatArray(final T data, final long nodeId);
+
+        @Override
+        default NumberType numberType() {
+            return NumberType.NO_NUMBER;
+        }
+
+        @Override
+        default double toDouble(final T data, final long nodeId) {
+            throw new UnsupportedOperationException("Can not translate list property to single double value.");
+        }
+
+        @Override
+        default Value toProperty(
+            int propertyId,
+            T data,
+            long nodeId) {
+            final float[] value = toFloatArray(data, nodeId);
+            return Values.floatArray(value);
+        }
+    }
+
     @FunctionalInterface
     interface DataAccessFunction<T> {
 

@@ -88,9 +88,9 @@ public class Node2VecModel {
     private HugeObjectArray<Vector> initializeEmbeddings(long nodeCount, int embeddingDimensions) {
         HugeObjectArray<Vector> embeddings = HugeObjectArray.newArray(Vector.class, nodeCount, AllocationTracker.EMPTY);
         for (var i = 0L; i < nodeCount; i++) {
-            double[] data = new Random()
+            var data = new Random()
                 .doubles(embeddingDimensions, -1, 1)
-                .toArray();
+                .collect(() -> new FloatConsumer(embeddingDimensions), FloatConsumer::add, FloatConsumer::addAll).values;
             embeddings.set(i, new Vector(data));
         }
         return embeddings;
@@ -100,11 +100,11 @@ public class Node2VecModel {
         private final PositiveSampleProducer positiveSamples;
         private final Vector centerGradientBuffer;
         private final Vector contextGradientBuffer;
-        private final double learningRate;
-        private final double learningRateModifier;
+        private final float learningRate;
+        private final float learningRateModifier;
         private final long startIndex;
 
-        private double currentLearningRate;
+        private float currentLearningRate;
 
         TrainingTask(long startIndex, long endIndex) {
             this.startIndex = startIndex;
@@ -143,19 +143,38 @@ public class Node2VecModel {
             var centerEmbedding = centerEmbeddings.get(center);
             var contextEmbedding = contextEmbeddings.get(context);
 
-            double affinity = positive
+            float affinity = positive
                 ? centerEmbedding.innerProduct(contextEmbedding)
                 : -centerEmbedding.innerProduct(contextEmbedding);
 
-            double scalar = positive
-                ? 1 / (Math.exp(affinity) + 1)
-                : -1 / (Math.exp(affinity) + 1);
+
+            float scalar = (float) (positive
+                            ? 1 / (Math.exp(affinity) + 1)
+                            : -1 / (Math.exp(affinity) + 1));
 
             centerGradientBuffer.scalarMultiply(contextEmbedding, scalar * currentLearningRate);
             contextGradientBuffer.scalarMultiply(centerEmbedding, scalar * currentLearningRate);
 
             centerEmbedding.addMutable(centerGradientBuffer);
             contextEmbedding.addMutable(contextGradientBuffer);
+        }
+    }
+
+    static class FloatConsumer {
+        float[] values;
+        int index;
+
+        FloatConsumer(int length) {
+            this.values = new float[length];
+        }
+
+        void add(double value) {
+            values[index++] = (float) value;
+        }
+
+        void addAll(FloatConsumer other) {
+            System.arraycopy(other.values, 0, values, index, other.index);
+            index += other.index;
         }
     }
 }

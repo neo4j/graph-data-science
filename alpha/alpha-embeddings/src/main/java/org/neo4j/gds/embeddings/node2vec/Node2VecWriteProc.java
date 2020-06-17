@@ -111,7 +111,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
 
     @Override
     protected PropertyTranslator<HugeObjectArray<Vector>> nodePropertyTranslator(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computationResult) {
-        return (PropertyTranslator.OfDoubleArray<HugeObjectArray<Vector>>) (data, nodeId) -> data.get(nodeId).data();
+        return (PropertyTranslator.OfFloatArray<HugeObjectArray<Vector>>) (data, nodeId) -> data.get(nodeId).data();
     }
 
     @Override
