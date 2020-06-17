@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 @Configuration("ToMapConfig")
 public interface ToMap {
@@ -38,6 +39,8 @@ public interface ToMap {
 
     @Configuration.ToMapValue("positive.ToMap.add42")
     double baz();
+
+    Optional<Long> maybeBar();
 
     @Configuration.ToMap
     Map<String, Object> toMap();

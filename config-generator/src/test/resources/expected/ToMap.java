@@ -26,6 +26,7 @@ import javax.annotation.processing.Generated;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -37,6 +38,8 @@ public final class ToMapConfig implements ToMap {
     private long bar;
 
     private double baz;
+
+    private Optional<Long> maybeBar;
 
     public ToMapConfig(int foo, @NotNull CypherMapWrapper config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
@@ -52,6 +55,11 @@ public final class ToMapConfig implements ToMap {
         }
         try {
             this.baz = config.requireDouble("baz");
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.maybeBar = CypherMapWrapper.failOnNull("maybeBar", config.getOptional("maybeBar", Long.class));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -90,10 +98,16 @@ public final class ToMapConfig implements ToMap {
     }
 
     @Override
+    public Optional<Long> maybeBar() {
+        return this.maybeBar;
+    }
+
+    @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("bar", bar());
         map.put("baz", positive.ToMap.add42(baz()));
+        map.put("maybeBar", maybeBar());
         return map;
     }
 }
