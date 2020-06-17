@@ -19,14 +19,9 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.LongStream;
 
 public class NegativeSampleProducer {
 

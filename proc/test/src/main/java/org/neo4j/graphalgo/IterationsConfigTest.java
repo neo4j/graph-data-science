@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;

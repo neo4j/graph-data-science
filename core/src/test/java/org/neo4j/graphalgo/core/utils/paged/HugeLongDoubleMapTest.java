@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.LongDoubleHashMap;
-import com.carrotsearch.hppc.LongLongHashMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;

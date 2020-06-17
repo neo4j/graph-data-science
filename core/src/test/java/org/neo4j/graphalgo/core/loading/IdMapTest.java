@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
-import com.carrotsearch.hppc.LongObjectHashMap;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.GraphDimensions;
