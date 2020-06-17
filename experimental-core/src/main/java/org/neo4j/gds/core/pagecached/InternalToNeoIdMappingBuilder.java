@@ -33,7 +33,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class HugeLongArrayBuilder implements AutoCloseable {
+public final class InternalToNeoIdMappingBuilder implements AutoCloseable {
 
     private static final AtomicInteger GENERATION = new AtomicInteger(0);
 
@@ -43,11 +43,11 @@ public final class HugeLongArrayBuilder implements AutoCloseable {
     private final CloseableThreadLocal<BulkAdder> adders;
     private final PagedFile pagedFile;
 
-    public static HugeLongArrayBuilder of(long length, PageCache pageCache) {
-        return new HugeLongArrayBuilder(pageCache, length);
+    public static InternalToNeoIdMappingBuilder of(long length, PageCache pageCache) {
+        return new InternalToNeoIdMappingBuilder(pageCache, length);
     }
 
-    private HugeLongArrayBuilder(PageCache pageCache, final long nodeCount) {
+    private InternalToNeoIdMappingBuilder(PageCache pageCache, final long nodeCount) {
         this.nodeCount = nodeCount;
         this.lengthInBytes = Long.BYTES * nodeCount;
         this.allocationIndex = new AtomicLong();

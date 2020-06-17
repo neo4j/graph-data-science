@@ -36,7 +36,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public final class HugeSparseLongArray implements  AutoCloseable {
+public final class ReverseIdMappingBuilder implements  AutoCloseable {
 
     private static final AtomicInteger GENERATION = new AtomicInteger(0);
 
@@ -50,7 +50,7 @@ public final class HugeSparseLongArray implements  AutoCloseable {
     private final long capacity;
     private final PageCursor pageCursor;
 
-    private HugeSparseLongArray(PagedFile pagedFile, long capacity) {
+    private ReverseIdMappingBuilder(PagedFile pagedFile, long capacity) {
         this.pagedFile = pagedFile;
         this.capacity = capacity;
         try {
@@ -172,10 +172,10 @@ public final class HugeSparseLongArray implements  AutoCloseable {
             initializedPages.add(pageIndex);
         }
 
-        public HugeSparseLongArray build() throws IOException {
+        public ReverseIdMappingBuilder build() throws IOException {
             pageCursor.close();
             pagedFile.flushAndForce();
-            return new HugeSparseLongArray(pagedFile, capacity);
+            return new ReverseIdMappingBuilder(pagedFile, capacity);
         }
     }
 }

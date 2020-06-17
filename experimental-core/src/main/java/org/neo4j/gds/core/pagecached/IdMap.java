@@ -50,14 +50,18 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable, Auto
     private final Map<NodeLabel, BitSet> labelInformation;
 
     private final PagedFile graphIds;
-    private final HugeSparseLongArray nodeToGraphIds;
+    private final ReverseIdMappingBuilder nodeToGraphIds;
     private final PageCursor graphIdsCursor;
 
     /**
      * initialize the map with pre-built sub arrays
      */
-    public IdMap(PagedFile graphIds, HugeSparseLongArray nodeToGraphIds, Map<NodeLabel, BitSet> labelInformation, long nodeCount)
-    throws IOException {
+    IdMap(
+        PagedFile graphIds,
+        ReverseIdMappingBuilder nodeToGraphIds,
+        Map<NodeLabel, BitSet> labelInformation,
+        long nodeCount
+    ) throws IOException {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
         this.labelInformation = labelInformation;

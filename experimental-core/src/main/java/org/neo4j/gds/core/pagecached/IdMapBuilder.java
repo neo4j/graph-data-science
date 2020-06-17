@@ -39,8 +39,8 @@ import java.util.stream.Collectors;
 public final class IdMapBuilder {
 
     public static IdMap build(
-        HugeLongArrayBuilder idMapBuilder,
-        HugeSparseLongArray.Builder nodeMappingBuilder,
+        InternalToNeoIdMappingBuilder idMapBuilder,
+        ReverseIdMappingBuilder.Builder nodeMappingBuilder,
         Map<NodeLabel, BitSet> labelInformation,
         int concurrency
     ) throws IOException {
@@ -84,7 +84,7 @@ public final class IdMapBuilder {
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        HugeSparseLongArray nodeToGraphIds = nodeMappingBuilder.build();
+        ReverseIdMappingBuilder nodeToGraphIds = nodeMappingBuilder.build();
         return new IdMap(graphIds, nodeToGraphIds, labelInformation, nodeCount);
     }
 

@@ -36,7 +36,7 @@ class IdMapTest extends BaseTest {
         PageCache pageCache = GraphDatabaseApiProxy.resolveDependency(db, PageCache.class);
 
         long nodeCount = 6;
-        var longArrayBuilder = HugeLongArrayBuilder.of(nodeCount, pageCache);
+        var longArrayBuilder = InternalToNeoIdMappingBuilder.of(nodeCount, pageCache);
         var nodeAdder = longArrayBuilder.allocate(nodeCount);
         assertNotNull(nodeAdder);
 
@@ -44,7 +44,7 @@ class IdMapTest extends BaseTest {
         nodeAdder.insert(nodeIds, 0, (int) nodeCount);
         nodeAdder.close();
 
-        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.Builder.create(
+        ReverseIdMappingBuilder.Builder nodeMappingBuilder = ReverseIdMappingBuilder.Builder.create(
             pageCache,
             nodeCount == 0 ? 1 : nodeCount
         );
