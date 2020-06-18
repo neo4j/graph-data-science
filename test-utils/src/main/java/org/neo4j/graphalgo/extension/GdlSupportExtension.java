@@ -68,8 +68,8 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
                     if (setups.contains(setup)) {
                         throw new ExtensionConfigurationException(String.format(
                             Locale.ENGLISH,
-                            "Graph names must be unique. Found duplicate graph name '%s'.",
-                            setup.graphName()
+                            "Graph names prefixes must be unique. Found duplicate graph name prefixes '%s'.",
+                            setup.graphNamePrefix()
                         ));
                     }
                 })
@@ -136,7 +136,8 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
     }
 
     private static void injectGraphStore(GdlGraphSetup gdlGraphSetup, ExtensionContext context) {
-        String graphName = gdlGraphSetup.graphName();
+        String graphNamePrefix = gdlGraphSetup.graphNamePrefix();
+        String graphName = graphNamePrefix.isBlank() ? "graph" : graphNamePrefix + "Graph";
 
         var createConfig = ImmutableGraphCreateFromGdlConfig.builder()
             .username(gdlGraphSetup.username())
@@ -156,10 +157,10 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         }
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
-            injectInstance(testInstance, graphName, graph, Graph.class, "Graph");
-            injectInstance(testInstance, graphName, testGraph, TestGraph.class, "Graph");
-            injectInstance(testInstance, graphName, graphStore, GraphStore.class, "GraphStore");
-            injectInstance(testInstance, graphName, idFunction, IdFunction.class, "IdFunction");
+            injectInstance(testInstance, graphNamePrefix, graph, Graph.class, "Graph");
+            injectInstance(testInstance, graphNamePrefix, testGraph, TestGraph.class, "Graph");
+            injectInstance(testInstance, graphNamePrefix, graphStore, GraphStore.class, "GraphStore");
+            injectInstance(testInstance, graphNamePrefix, idFunction, IdFunction.class, "IdFunction");
         });
     }
 
@@ -178,7 +179,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
 
     @ValueClass
     interface GdlGraphSetup {
-        String graphName();
+        String graphNamePrefix();
 
         @Value.Auxiliary
         String gdlGraph();

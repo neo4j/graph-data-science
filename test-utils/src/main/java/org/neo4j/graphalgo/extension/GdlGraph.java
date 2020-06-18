@@ -39,5 +39,10 @@ public @interface GdlGraph {
 
     String username() default "";
 
+    /**
+     * If set, the graph store is added to the GraphStore catalog.
+     * The name is the {@code graphNamePrefix() + 'Graph'} or just
+     * {@code 'graph'} if no prefix is set.
+     */
     boolean addToCatalog() default false;
 }
