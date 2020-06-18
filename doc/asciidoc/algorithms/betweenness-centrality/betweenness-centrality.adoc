@@ -18,6 +18,7 @@ This topic includes:
 ** <<algorithms-betweenness-centrality-syntax-stats, Stats>>
 ** <<algorithms-betweenness-centrality-syntax-mutate, Mutate>>
 ** <<algorithms-betweenness-centrality-syntax-write, Write>>
+** <<algorithms-betweenness-centrality-syntax-anonymous, Anonymous graphs>>
 * <<algorithms-betweenness-centrality-examples, Examples>>
 ** <<algorithms-betweenness-centrality-examples-memory-estimation, Memory Estimation>>
 ** <<algorithms-betweenness-centrality-examples-stream, Stream>>
@@ -96,7 +97,7 @@ CALL gds.betweenness.stream(
 )
 YIELD
   nodeId: Integer,
-  centrality: Float
+  score: Float
 ----
 
 include::../common-configuration/common-parameters-named-graph.adoc[]
@@ -108,9 +109,9 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header"]
 |===
-| Name          | Type    | Description
-| nodeId        | Integer | The Neo4j node ID.
-| centrality    | Float   | The denormalized Betweenness Centrality score.
+| Name   | Type    | Description
+| nodeId | Integer | Node ID.
+| score  | Float   | Betweenness Centrality score.
 |===
 
 
@@ -125,11 +126,11 @@ CALL gds.betweenness.stats(
   configuration: Map
 )
 YIELD
-  createMillis: Integer,
-  computeMillis: Integer,
   minCentrality: Float,
   maxCentrality: Float,
   sumCentrality: Float,
+  createMillis: Integer,
+  computeMillis: Integer,
   configuration: Map
 ----
 
@@ -142,13 +143,13 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type      | Description
-| createMillis  | Integer   | Milliseconds for creating the graph.
-| computeMillis | Integer   | Milliseconds for running the algorithm.
-| minCentrality | Float     | The lowest centrality score.
-| maxCentrality | Float     | The highest centrality score.
-| sumCentrality | Float     | The sum of all centrality scores.
-| configuration | Map       | The configuration used for running the algorithm.
+| Name          | Type    | Description
+| minCentrality | Float   | Lowest centrality score.
+| maxCentrality | Float   | Greatest centrality score.
+| sumCentrality | Float   | Sum of all centrality scores.
+| createMillis  | Integer | Milliseconds for creating the graph.
+| computeMillis | Integer | Milliseconds for running the algorithm.
+| configuration | Map     | Configuration used for running the algorithm.
 |===
 
 
@@ -163,13 +164,13 @@ CALL gds.betweenness.mutate(
   configuration: Map
 )
 YIELD
-  nodePropertiesWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  mutateMillis: Integer,
   minCentrality: Float,
   maxCentrality: Float,
   sumCentrality: Float,
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
   configuration: Map
 ----
 
@@ -182,15 +183,15 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                   | Type      | Description
-| createMillis           | Integer   | Milliseconds for creating the graph.
-| computeMillis          | Integer   | Milliseconds for running the algorithm.
-| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
-| nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
-| minCentrality          | Float     | The lowest centrality score.
-| maxCentrality          | Float     | The highest centrality score.
-| sumCentrality          | Float     | The sum of all centrality scores.
-| configuration          | Map       | The configuration used for running the algorithm.
+| Name                  | Type    | Description
+| minCentrality         | Float   | Lowest centrality score.
+| maxCentrality         | Float   | Greatest centrality score.
+| sumCentrality         | Float   | Sum of all centrality scores.
+| createMillis          | Integer | Milliseconds for creating the graph.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten | Integer | Number of properties added to the in-memory graph.
+| configuration         | Map     | Configuration used for running the algorithm.
 |===
 
 
@@ -205,13 +206,13 @@ CALL gds.betweenness.write(
   configuration: Map
 )
 YIELD
-  nodePropertiesWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
   minCentrality: Float,
   maxCentrality: Float,
   sumCentrality: Float,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
   configuration: Map
 ----
 
@@ -224,16 +225,45 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                   | Type      | Description
-| createMillis           | Integer   | Milliseconds for creating the graph.
-| computeMillis          | Integer   | Milliseconds for running the algorithm.
-| writeMillis            | Integer   | Milliseconds for writing result data back.
-| nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
-| minCentrality          | Float     | The lowest centrality score.
-| maxCentrality          | Float     | The highest centrality score.
-| sumCentrality          | Float     | The sum of all centrality scores.
-| configuration          | Map       | The configuration used for running the algorithm.
+| Name                   | Type    | Description
+| minCentrality          | Float   | Lowest centrality score.
+| maxCentrality          | Float   | Highest centrality score.
+| sumCentrality          | Float   | Sum of all centrality scores.
+| createMillis           | Integer | Milliseconds for creating the graph.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| writeMillis            | Integer | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer | Number of properties written to Neo4j.
+| configuration          | Map     | The configuration used for running the algorithm.
 |===
+
+
+[[algorithms-betweenness-centrality-syntax-anonymous]]
+=== Anonymous graphs
+
+include::../shared/syntax-anonymous-graphs.adoc[]
+
+.Run Betweenness Centrality in write mode on an anonymous graph:
+[source, cypher]
+----
+CALL gds.betweenness.write(
+  configuration: Map
+)
+YIELD
+  minCentrality: Float,
+  maxCentrality: Float,
+  sumCentrality: Float,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, <<algorithms-betweenness-centrality-syntax-write, specified above>>.
 
 
 [[algorithms-betweenness-centrality-examples]]
