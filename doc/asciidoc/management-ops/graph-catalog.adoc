@@ -37,11 +37,11 @@ This chapter explains the available graph catalog operations.
 | <<catalog-graph-remove-node-properties, gds.graph.removeNodeProperties>> | Removes node properties from a named graph.
 | <<catalog-graph-delete-rel-type, gds.graph.deleteRelationships>>         | Deletes relationships of a given relationship type from a named graph.
 | <<catalog-graph-drop, gds.graph.drop>>                                   | Drops a named graph from the catalog.
-| <<catalog-graph-stream-node-properties, gds.graph.streamNodeProperty>>     | Streams a single node property stored in a named graph.
+| <<catalog-graph-stream-node-properties, gds.graph.streamNodeProperty>>   | Streams a single node property stored in a named graph.
 | <<catalog-graph-stream-node-properties, gds.graph.streamNodeProperties>> | Streams node properties stored in a named graph.
 | <<catalog-graph-write-node-properties, gds.graph.writeNodeProperties>>   | Writes node properties stored in a named graph to Neo4j.
 | <<catalog-graph-write-relationship, gds.graph.writeRelationship>>        | Writes relationships stored in a named graph to Neo4j.
-| <<catalog-graph-export, gds.beta.graph.export>>                          | Exports a named graph into a new offline Neo4j database.
+| <<catalog-graph-export, gds.graph.export>>                               | Exports a named graph into a new offline Neo4j database.
 |===
 
 [NOTE]
@@ -322,11 +322,7 @@ CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO', 'similarityScore')
 
 
 [[catalog-graph-export]]
-[.beta]
 == Create Neo4j databases from named graphs
-
-[.tier-note]
-This procedure is in the beta tier. For more information on this tier of algorithm, see <<algorithms, here>>.
 
 We can create new Neo4j databases from named in-memory graphs stored in the graph catalog.
 All nodes, relationships and properties present in an in-memory graph are written to a new Neo4j database.
@@ -343,7 +339,7 @@ The feature is useful in the following, exemplary scenarios:
 .Export a named graph to a new database in the Neo4j databases directory:
 [source,cypher]
 ----
-CALL gds.beta.graph.export('my-graph', { dbName: 'mydatabase' })
+CALL gds.graph.export('my-graph', { dbName: 'mydatabase' })
 ----
 
 The procedure yields information about the number of nodes, relationships and properties written.
