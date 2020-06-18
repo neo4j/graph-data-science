@@ -82,6 +82,11 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, BetweennessCentralityStreamConfig config) {
+        validateNoMixingWithUndirected(graphCreateConfig, config);
+    }
+
+    @Override
     protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStreamConfig> algorithmFactory(
         BetweennessCentralityStreamConfig config
     ) {

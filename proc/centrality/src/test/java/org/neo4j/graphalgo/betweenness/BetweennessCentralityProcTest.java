@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
+import org.neo4j.graphalgo.NeverCombineUndirectedOrientationTest;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphdb.Label;
@@ -39,7 +41,8 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
     extends BaseProcTest
     implements
     AlgoBaseProcTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray>,
-    MemoryEstimateTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray> {
+    MemoryEstimateTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray>,
+    NeverCombineUndirectedOrientationTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray> {
 
     static final String DEFAULT_RESULT_PROPERTY = "centrality";
 
@@ -69,7 +72,8 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
             BetweennessCentralityWriteProc.class,
             BetweennessCentralityMutateProc.class,
             BetweennessCentralityStatsProc.class,
-            GraphWriteNodePropertiesProc.class
+            GraphWriteNodePropertiesProc.class,
+            GraphCreateProc.class
         );
 
         runQuery(cypher);

@@ -69,6 +69,11 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     }
 
     @Override
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, BetweennessCentralityStatsConfig config) {
+        validateNoMixingWithUndirected(graphCreateConfig, config);
+    }
+
+    @Override
     protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStatsConfig> algorithmFactory(
         BetweennessCentralityStatsConfig config
     ) {

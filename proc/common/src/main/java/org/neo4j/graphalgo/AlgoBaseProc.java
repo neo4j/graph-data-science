@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.DEFAULT_CONCURRENCY;
@@ -347,6 +348,38 @@ public abstract class AlgoBaseProc<
                         entry.getValue().orientation()
                     ));
                 });
+        }
+    }
+
+    protected void validateNoMixingWithUndirected(GraphCreateConfig graphCreateConfig, CONFIG config) {
+        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
+            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
+            var filteredProjections = storeConfig
+                .relationshipProjections()
+                .projections()
+                .entrySet()
+                .stream()
+                .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
+                                 config.relationshipTypes().contains(entry.getKey().name()))
+                .collect(toList());
+
+            boolean allUndirected = filteredProjections
+                .stream()
+                .allMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
+
+            boolean anyUndirected = filteredProjections
+                .stream()
+                .anyMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
+
+            if (anyUndirected && !allUndirected) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported. Found projections: %s.",
+                    StringJoining.join(filteredProjections
+                        .stream()
+                        .map(entry -> formatWithLocale("%s (%s)", entry.getKey().name, entry.getValue().orientation()))
+                        .sorted())
+                ));
+            }
         }
     }
 

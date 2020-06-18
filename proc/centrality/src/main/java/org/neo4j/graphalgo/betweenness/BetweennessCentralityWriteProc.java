@@ -70,6 +70,11 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
     }
 
     @Override
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, BetweennessCentralityWriteConfig config) {
+        validateNoMixingWithUndirected(graphCreateConfig, config);
+    }
+
+    @Override
     protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityWriteConfig> algorithmFactory(
         BetweennessCentralityWriteConfig config
     ) {
