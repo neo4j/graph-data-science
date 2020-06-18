@@ -27,11 +27,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Result;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,9 +44,32 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class ParticleFilteringProcTest extends BaseProcTest {
-    public static final String TYPE = "TYPE";
+    private static final String DB_CYPHER =
+            "CREATE" +
+                    "  (paper0:Paper {name:'Paper 0'})" +
+                    ", (paper1:Paper {name:'Paper 1'})" +
+                    ", (paper2:Paper {name:'Paper 2'})" +
+                    ", (paper3:Paper {name:'Paper 3'})" +
+                    ", (paper4:Paper {name:'Paper 4'})" +
+                    ", (paper5:Paper {name:'Paper 5'})" +
+                    ", (paper6:Paper {name:'Paper 6'})" +
+                    ", (paper1)-[:CITES]->(paper0)" +
+                    ", (paper2)-[:CITES]->(paper0)" +
+                    ", (paper2)-[:CITES]->(paper1)" +
+                    ", (paper3)-[:CITES]->(paper0)" +
+                    ", (paper3)-[:CITES]->(paper1)" +
+                    ", (paper3)-[:CITES]->(paper2)" +
+                    ", (paper3)-[:CITES]->(paper6)" +
+                    ", (paper4)-[:CITES]->(paper0)" +
+                    ", (paper4)-[:CITES]->(paper1)" +
+                    ", (paper4)-[:CITES]->(paper2)" +
+                    ", (paper4)-[:CITES]->(paper3)" +
+                    ", (paper5)-[:CITES]->(paper1)" +
+                    ", (paper5)-[:CITES]->(paper4)" +
+                    ", (paper6)-[:CITES]->(paper1)" +
+                    ", (paper6)-[:CITES]->(paper4)";
 
-    private static long centerNodeId;
+    private static final String NL = System.lineSeparator();
 
     interface TestConsumer {
         void accept(long nodeId, double centrality);
@@ -53,51 +80,36 @@ public class ParticleFilteringProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        DefaultBuilder builder = GraphBuilder.create(db)
-                .setLabel("Node")
-                .setRelationship(TYPE);
-
-        RelationshipType type = RelationshipType.withName(TYPE);
-
-        /*
-         * create two rings of nodes where each node of ring A
-         * is connected to center while center is connected to
-         * each node of ring B.
-         */
-        Node center = builder.newDefaultBuilder()
-                .setLabel("Node")
-                .createNode();
-
-        centerNodeId = center.getId();
-
-        builder.newRingBuilder()
-                .createRing(5)
-                .forEachNodeInTx(node -> node.createRelationshipTo(center, type))
-                .newRingBuilder()
-                .createRing(5)
-                .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
-                .close();
-
         registerProcedures(ParticleFilteringProc.class);
+        registerFunctions(AsNodeFunc.class);
+        runQuery(DB_CYPHER);
     }
 
     @Test
     void testParticleFilteringStream() {
-        String query = "MATCH (n) WHERE id(n) = $nodeId WITH collect(n) AS nodes CALL gds.alpha.particleFiltering.stream({sourceNodes:nodes, shuffleNeighbors: false}) YIELD nodeId, score RETURN nodeId, score ORDER BY score DESC";
+        String query = "MATCH (n:Paper) " +
+                "WHERE n.name IN ['Paper 1', 'Paper 2', 'Paper 3']  " +
+                "WITH collect(n) AS nodes " +
+                "CALL gds.alpha.particleFiltering.stream({sourceNodes:nodes, shuffleNeighbors: false, numberParticles: 10, minThreshold: 0.0}) " +
+                "YIELD nodeId, score " +
+                "RETURN gds.util.asNode(nodeId).name as node, score " +
+                "ORDER BY score DESC";
 
-        db.executeTransactionally(query, org.neo4j.graphalgo.compat.MapUtil.map("nodeId", centerNodeId), result -> {
-            System.out.println(result.resultAsString());
-            return null;
-        });
+        String expected =
+                "+---------------------------------+" + NL +
+                "| node      | score               |" + NL +
+                "+---------------------------------+" + NL +
+                "| \"Paper 0\" | 6.031727701822916   |" + NL +
+                "| \"Paper 1\" | 5.558772786458333   |" + NL +
+                "| \"Paper 2\" | 3.632161458333333   |" + NL +
+                "| \"Paper 3\" | 3.433333333333333   |" + NL +
+                "| \"Paper 6\" | 0.7083333333333333  |" + NL +
+                "| \"Paper 4\" | 0.30104166666666665 |" + NL +
+                "+---------------------------------+" + NL +
+                "6 rows" + NL;
 
-        runQueryWithRowConsumer(query, org.neo4j.graphalgo.compat.MapUtil.map("nodeId", centerNodeId), row -> {
-            consumer.accept(
-                    row.getNumber("nodeId").longValue(),
-                    row.getNumber("score").doubleValue()
-            );
-        });
-
-        verifyMock();
+        String actual = runQuery(query, Result::resultAsString);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -131,7 +143,7 @@ public class ParticleFilteringProcTest extends BaseProcTest {
     }
 
     private void verifyMock() {
-        verify(consumer, times(1)).accept(eq(centerNodeId), AdditionalMatchers.eq(10.0, 0.01));
+        verify(consumer, times(1)).accept(eq(0), AdditionalMatchers.eq(10.0, 0.01));
         verify(consumer, times(10)).accept(anyLong(), AdditionalMatchers.eq(0.588, 0.01));
     }
 }
