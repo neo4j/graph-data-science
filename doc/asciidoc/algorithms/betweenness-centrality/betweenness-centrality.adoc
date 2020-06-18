@@ -269,52 +269,46 @@ The results are the same as for running write mode with a named graph, <<algorit
 [[algorithms-betweenness-centrality-examples]]
 == Examples
 
+In this section we will show examples of executing the Betweenness Centrality algorithm on a concrete graph.
+The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
+We will do this on a small social network graph of a handful nodes connected in a particular pattern.
+The example graph looks like this:
+
+[[algorithms-betweenness-centrality-examples-graph]]
+image::betweenness_centrality.png[]
+
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
 ----
 CREATE
-  (home:Page {name:'Home'}),
-  (about:Page {name:'About'}),
-  (product:Page {name:'Product'}),
-  (links:Page {name:'Links'}),
-  (a:Page {name:'Site A'}),
-  (b:Page {name:'Site B'}),
-  (c:Page {name:'Site C'}),
-  (d:Page {name:'Site D'}),
-
-  (home)-[:LINKS {weight: 0.2}]->(about),
-  (home)-[:LINKS {weight: 0.2}]->(links),
-  (home)-[:LINKS {weight: 0.6}]->(product),
-  (about)-[:LINKS {weight: 1.0}]->(home),
-  (product)-[:LINKS {weight: 1.0}]->(home),
-  (a)-[:LINKS {weight: 1.0}]->(home),
-  (b)-[:LINKS {weight: 1.0}]->(home),
-  (c)-[:LINKS {weight: 1.0}]->(home),
-  (d)-[:LINKS {weight: 1.0}]->(home),
-  (links)-[:LINKS {weight: 0.8}]->(home),
-  (links)-[:LINKS {weight: 0.05}]->(a),
-  (links)-[:LINKS {weight: 0.05}]->(b),
-  (links)-[:LINKS {weight: 0.05}]->(c),
-  (links)-[:LINKS {weight: 0.05}]->(d);
+  (alice:User {name: 'Alice'}),
+  (bob:User {name: 'Bob'}),
+  (carol:User {name: 'Carol'}),
+  (dan:User {name: 'Dan'}),
+  (eve:User {name: 'Eve'}),
+  (frank:User {name: 'Frank'}),
+  (gale:User {name: 'Gale'}),
+  (alice)-[:FOLLOWS]->(carol),
+  (bob)-[:FOLLOWS]->(carol),
+  (carol)-[:FOLLOWS]->(dan),
+  (carol)-[:FOLLOWS]->(eve),
+  (dan)-[:FOLLOWS]->(frank),
+  (eve)-[:FOLLOWS]->(frank),
+  (frank)-[:FOLLOWS]->(gale);
 ----
 
-This graph represents eight pages, linking to one another.
-Each relationship has a property called `weight`, which describes the importance of the relationship.
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `User` nodes and the `FOLLOWS` relationships.
 
 include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=graph-create-query]
 ----
-CALL gds.graph.create(
-  'myGraph',
-  'Page',
-  'LINKS',
-  {
-    relationshipProperties: 'weight'
-  }
-)
+CALL gds.graph.create('myGraph', 'User', 'FOLLOWS')
 ----
+
+In the following examples we will demonstrate using the Betweenness Centrality algorithm on this graph.
 
 
 [[algorithms-betweenness-centrality-examples-memory-estimation]]
@@ -328,23 +322,45 @@ include::../shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]
 ----
-CALL gds.betweenness.write.estimate('myGraph', { writeProperty: 'centrality' })
+CALL gds.betweenness.write.estimate('myGraph', { writeProperty: 'betweenness' })
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 
 .Results
-[opts="header",cols="1,1,1,1,1"]
+[opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 8         | 14                | 1560     | 1560     | "1560 Bytes"
+| 7         | 7                 | 2904     | 2904     | "2904 Bytes"
 |===
 --
+
+As is discussed in <<algorithms-betweenness-centrality-considerations>> we can configure the memory requirements using the `concurrency` configuration parameter.
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.betweenness.write.estimate('myGraph', { writeProperty: 'betweenness', concurrency: 1 })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 7         | 7                 | 840      | 840      | "840 Bytes"
+|===
+--
+
+Here we can note that the estimated memory requirements were lower than when running with the default concurrency setting.
+Similarly, using a higher value will increase the estimated memory requirements.
 
 
 [[algorithms-betweenness-centrality-examples-stream]]
 === Stream
 
-:stream-details: For example, we can order the results to find the nodes with the highest PageRank centrality.
+:stream-details: For example, we can order the results to find the nodes with the highest betweenness centrality.
 include::../shared/examples-stream-intro.adoc[]
 
 [role=query-example]
@@ -353,25 +369,34 @@ include::../shared/examples-stream-intro.adoc[]
 [source, cypher]
 ----
 CALL gds.betweenness.stream('myGraph')
-YIELD nodeId, centrality
-RETURN gds.util.asNode(nodeId).name AS name, centrality
-ORDER BY centrality DESC, name ASC
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
 ----
 
 .Results
-[opts="header",cols="1,1"]
+[opts="header"]
 |===
-| name      | centrality
-| "Home"    | 3.2362017153762284
-| "About"   | 1.0611098567023873
-| "Links"   | 1.0611098567023873
-| "Product" | 1.0611098567023873
-| "Site A"  | 0.3292259009438567
-| "Site B"  | 0.3292259009438567
-| "Site C"  | 0.3292259009438567
-| "Site D"  | 0.3292259009438567
+| name    | score
+| "Alice" | 0.0
+| "Bob"   | 0.0
+| "Carol" | 8.0
+| "Dan"   | 3.0
+| "Eve"   | 3.0
+| "Frank" | 5.0
+| "Gale"  | 0.0
 |===
 --
+
+We note that the 'Carol' node has the highest score, followed by the 'Frank' node.
+Studying the <<algorithms-betweenness-centrality-examples-graph, example graph>> we can see that these nodes are in bottleneck positions in the graph.
+The 'Carol' node connects the 'Alice' and 'Bob' nodes to all other nodes, which increases its score.
+In particular, the shortest path from 'Alice' or 'Bob' to any other reachable node passes through 'Carol'.
+Similarly, all shortest paths that lead to the 'Gale' node passes through the 'Frank' node.
+Since 'Gale' is reachable from each other node, this causes the score for 'Frank' to be high.
+
+Conversely, there are no shortest paths that pass through either of the nodes 'Alice', 'Bob' or 'Gale' which causes their betweenness centrality score to be zero.
+
 
 [[algorithms-betweenness-centrality-examples-stats]]
 === Stats
@@ -387,14 +412,13 @@ include::../shared/examples-stats-intro.adoc[]
 ----
 CALL gds.betweenness.stats('myGraph')
 YIELD minCentrality, maxCentrality, sumCentrality
-RETURN minCentrality, maxCentrality, sumCentrality
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header"]
 |===
-| max
-| 3.236204147338867
+| minCentrality | maxCentrality | sumCentrality
+| 0.0           | 8.0           | 19.0
 |===
 --
 
@@ -408,15 +432,15 @@ include::../shared/examples-mutate-intro.adoc[]
 .The following will run the algorithm in `mutate` mode:
 [source, cypher]
 ----
-CALL gds.betweenness.mutate('myGraph', { mutateProperty: 'centrality' })
-YIELD nodePropertiesWritten
+CALL gds.betweenness.mutate('myGraph', { mutateProperty: 'betweenness' })
+YIELD minCentrality, maxCentrality, sumCentrality, nodePropertiesWritten
 ----
 
 .Results
-[opts="header",cols="1m"]
+[opts="header"]
 |===
-| nodePropertiesWritten
-| 8
+| minCentrality | maxCentrality | sumCentrality | nodePropertiesWritten
+| 0.0           | 8.0           | 19.0          | 7
 |===
 --
 
@@ -431,14 +455,14 @@ include::../shared/examples-write-intro.adoc[]
 .The following will run the algorithm in `write` mode:
 [source, cypher]
 ----
-CALL gds.betweenness.write('myGraph', { writeProperty: 'centrality' })
-YIELD nodePropertiesWritten
+CALL gds.betweenness.write('myGraph', { writeProperty: 'betweenness' })
+YIELD minCentrality, maxCentrality, sumCentrality, nodePropertiesWritten
 ----
 
 .Results
-[opts="header",cols="1m"]
+[opts="header"]
 |===
-| nodePropertiesWritten
-| 8
+| minCentrality | maxCentrality | sumCentrality | nodePropertiesWritten
+| 0.0           | 8.0           | 19.0          | 7
 |===
 --
