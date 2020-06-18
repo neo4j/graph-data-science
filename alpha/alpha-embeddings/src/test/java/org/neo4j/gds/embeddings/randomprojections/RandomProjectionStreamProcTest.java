@@ -45,7 +45,7 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionsProcTest#weights")
+    @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionProcTest#weights")
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
         int embeddingDimension = 128;
         int maxIterations = 4;
