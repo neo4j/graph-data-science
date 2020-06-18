@@ -40,7 +40,7 @@ class WeightedPageRankTest {
         .maxIterations(40)
         .build();
 
-    @GdlGraph
+    @GdlGraph(graphName = "graph")
     private static final String DB_CYPHER =
             "CREATE" +
             "  (a:Label)" +
@@ -95,10 +95,10 @@ class WeightedPageRankTest {
             ", (f)-[:TYPE4 {weight: -0.9}]->(a)" +
             ", (f)-[:TYPE4 {weight: 0.1}]->(e)";
 
-    @Inject
+    @Inject(graphName = "graph")
     private GraphStore graphStore;
 
-    @Inject
+    @Inject(graphName = "graph")
     private IdFunction nodeId;
 
     @Test

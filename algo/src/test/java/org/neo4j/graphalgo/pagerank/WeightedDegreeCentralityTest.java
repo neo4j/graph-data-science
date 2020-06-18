@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @GdlExtension
 final class WeightedDegreeCentralityTest {
 
-    @GdlGraph
+    @GdlGraph(graphName = "naturalGraph", orientation = Orientation.NATURAL)
     @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
     private static final String DB_CYPHER =
             "CREATE" +
@@ -88,10 +88,10 @@ final class WeightedDegreeCentralityTest {
             ", (f)-[:TYPE3 {weight: 2.0}]->(b)" +
             ", (f)-[:TYPE3 {weight: 2.0}]->(e)";
 
-    @Inject
+    @Inject(graphName = "naturalGraph")
     private GraphStore graphStore;
 
-    @Inject
+    @Inject(graphName = "naturalGraph")
     private IdFunction nodeId;
 
     @Inject(graphName = "reverseGraph")

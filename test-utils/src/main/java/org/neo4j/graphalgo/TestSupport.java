@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
@@ -108,7 +107,7 @@ public final class TestSupport {
     }
 
     public static TestGraph fromGdl(String gdl) {
-        return fromGdl(gdl, NATURAL, GdlGraph.DEFAULT_GRAPH_NAME);
+        return fromGdl(gdl, NATURAL, "graph");
     }
 
     public static TestGraph fromGdl(String gdl, String name) {
@@ -116,7 +115,7 @@ public final class TestSupport {
     }
 
     public static TestGraph fromGdl(String gdl, Orientation orientation) {
-        return fromGdl(gdl, orientation, GdlGraph.DEFAULT_GRAPH_NAME);
+        return fromGdl(gdl, orientation, "graph");
     }
 
     public static TestGraph fromGdl(String gdl, Orientation orientation, String name) {

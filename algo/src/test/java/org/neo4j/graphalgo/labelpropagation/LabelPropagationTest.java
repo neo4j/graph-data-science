@@ -66,7 +66,7 @@ class LabelPropagationTest {
         CypherMapWrapper.empty()
     );
 
-    @GdlGraph
+    @GdlGraph(graphName = "graph")
     private static final String GRAPH =
         "CREATE" +
         "  (nAlice:User   {seedId: 2})" +
@@ -100,12 +100,12 @@ class LabelPropagationTest {
         );
         assertArrayEquals(
             new long[]{
-                graph.toOriginalNodeId("nBridget"),
-                graph.toOriginalNodeId("nBridget"),
-                graph.toOriginalNodeId("nDoug"),
-                graph.toOriginalNodeId("nMark"),
-                graph.toOriginalNodeId("nMark"),
-                graph.toOriginalNodeId("nBridget")
+                graph.toMappedNodeId("nBridget"),
+                graph.toMappedNodeId("nBridget"),
+                graph.toMappedNodeId("nDoug"),
+                graph.toMappedNodeId("nMark"),
+                graph.toMappedNodeId("nMark"),
+                graph.toMappedNodeId("nBridget")
             },
             lp.compute().labels().toArray(),
             "Incorrect result assuming initial labels are neo4j id"
@@ -128,12 +128,12 @@ class LabelPropagationTest {
 
         assertArrayEquals(
             new long[]{
-                graph.toOriginalNodeId("nCharles"),
-                graph.toOriginalNodeId("nCharles"),
-                graph.toOriginalNodeId("nDoug"),
-                graph.toOriginalNodeId("nMark"),
-                graph.toOriginalNodeId("nMark"),
-                graph.toOriginalNodeId("nCharles")
+                graph.toMappedNodeId("nCharles"),
+                graph.toMappedNodeId("nCharles"),
+                graph.toMappedNodeId("nDoug"),
+                graph.toMappedNodeId("nMark"),
+                graph.toMappedNodeId("nMark"),
+                graph.toMappedNodeId("nCharles")
             },
             lp.compute().labels().toArray()
         );

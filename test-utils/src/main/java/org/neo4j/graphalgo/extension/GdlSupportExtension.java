@@ -169,7 +169,15 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             stream(testClass.getDeclaredFields())
                 .filter(field -> field.getType() == clazz)
                 .filter(field -> isAnnotated(field, Inject.class))
-                .filter(field -> field.getAnnotation(Inject.class).graphName().equals(graphName))
+                .filter(field -> {
+                    var annotationGraphName = field.getAnnotation(Inject.class).graphName();
+                    var isGraph = clazz == TestGraph.class || clazz == Graph.class;
+
+                    if (isGraph && annotationGraphName.equals(Inject.NO_GRAPH_NAME)) {
+                        return field.getName().equals(graphName);
+                    }
+                    return annotationGraphName.equals(graphName);
+                })
                 .forEach(field -> setField(testInstance, field, instance));
             testClass = testClass.getSuperclass();
         }

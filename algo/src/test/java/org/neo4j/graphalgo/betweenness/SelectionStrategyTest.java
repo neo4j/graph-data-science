@@ -22,14 +22,13 @@ package org.neo4j.graphalgo.betweenness;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.Optional;
 
@@ -39,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @GdlExtension
 class SelectionStrategyTest {
 
-    @GdlGraph
+    @GdlGraph(graphName = "graph")
     private static final String DB_GDL =
         "(a)-->(b)" +
         "(a)-->(c)" +
@@ -54,10 +53,7 @@ class SelectionStrategyTest {
         "(b)-->(k)";
 
     @Inject
-    private Graph graph;
-
-    @Inject
-    private IdFunction nodeId;
+    private TestGraph graph;
 
     @Test
     void selectAll() {
@@ -88,9 +84,9 @@ class SelectionStrategyTest {
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(3, Optional.of(42L));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(3, samplingSize(graph.nodeCount(), selectionStrategy));
-        assertTrue(selectionStrategy.select(nodeId.of("a")));
-        assertTrue(selectionStrategy.select(nodeId.of("b")));
-        assertTrue(selectionStrategy.select(nodeId.of("f")));
+        assertTrue(selectionStrategy.select(graph.toMappedNodeId("a")));
+        assertTrue(selectionStrategy.select(graph.toMappedNodeId("b")));
+        assertTrue(selectionStrategy.select(graph.toMappedNodeId("f")));
     }
 
     @Test
@@ -98,8 +94,8 @@ class SelectionStrategyTest {
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(1);
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(1, samplingSize(graph.nodeCount(), selectionStrategy));
-        var isA = selectionStrategy.select(graph.toMappedNodeId(nodeId.of("a")));
-        var isB = selectionStrategy.select(graph.toMappedNodeId(nodeId.of("b")));
+        var isA = selectionStrategy.select(graph.toMappedNodeId("a"));
+        var isB = selectionStrategy.select(graph.toMappedNodeId("b"));
         assertTrue(isA || isB);
     }
 

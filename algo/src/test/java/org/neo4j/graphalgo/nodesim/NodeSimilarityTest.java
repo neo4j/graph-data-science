@@ -94,13 +94,13 @@ final class NodeSimilarityTest {
         ", (d)-[:LIKES {prop: 1.0}]->(i2)" +
         ", (d)-[:LIKES {prop: 1.0}]->(i3)";
 
-    @Inject(graphName = "naturalGraph")
+    @Inject
     private TestGraph naturalGraph;
 
-    @Inject(graphName = "reverseGraph")
+    @Inject
     private TestGraph reverseGraph;
 
-    @Inject(graphName = "undirectedGraph")
+    @Inject
     private TestGraph undirectedGraph;
 
     private static final Collection<String> EXPECTED_OUTGOING = new HashSet<>();

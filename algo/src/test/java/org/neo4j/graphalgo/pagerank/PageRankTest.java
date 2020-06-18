@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 final class PageRankTest {
 
-    @GdlGraph
+    @GdlGraph(graphName = "naturalGraph", orientation = Orientation.NATURAL)
     @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
     private static final String GRAPH =
         "CREATE" +
@@ -73,9 +73,9 @@ final class PageRankTest {
         ", (f)-[:TYPE]->(e)";
 
     @Inject
-    private TestGraph graph;
+    private TestGraph naturalGraph;
 
-    @Inject(graphName = "reverseGraph")
+    @Inject
     private TestGraph reverseGraph;
 
     private static final PageRankBaseConfig DEFAULT_CONFIG = defaultConfigBuilder().build();
@@ -88,34 +88,34 @@ final class PageRankTest {
     @Test
     void testOnOutgoingRelationships() {
         var expected = Map.of(
-            graph.toOriginalNodeId("a"), 0.243007,
-            graph.toOriginalNodeId("b"), 1.9183995,
-            graph.toOriginalNodeId("c"), 1.7806315,
-            graph.toOriginalNodeId("d"), 0.21885,
-            graph.toOriginalNodeId("e"), 0.243007,
-            graph.toOriginalNodeId("f"), 0.21885,
-            graph.toOriginalNodeId("g"), 0.15,
-            graph.toOriginalNodeId("h"), 0.15,
-            graph.toOriginalNodeId("i"), 0.15,
-            graph.toOriginalNodeId("j"), 0.15
+            naturalGraph.toMappedNodeId("a"), 0.243007,
+            naturalGraph.toMappedNodeId("b"), 1.9183995,
+            naturalGraph.toMappedNodeId("c"), 1.7806315,
+            naturalGraph.toMappedNodeId("d"), 0.21885,
+            naturalGraph.toMappedNodeId("e"), 0.243007,
+            naturalGraph.toMappedNodeId("f"), 0.21885,
+            naturalGraph.toMappedNodeId("g"), 0.15,
+            naturalGraph.toMappedNodeId("h"), 0.15,
+            naturalGraph.toMappedNodeId("i"), 0.15,
+            naturalGraph.toMappedNodeId("j"), 0.15
         );
 
-        assertResult(this.graph, PageRankAlgorithmType.NON_WEIGHTED, expected);
+        assertResult(this.naturalGraph, PageRankAlgorithmType.NON_WEIGHTED, expected);
     }
 
     @Test
     void testOnIncomingRelationships() {
         var expected = Map.of(
-            reverseGraph.toOriginalNodeId("a"), 0.15,
-            reverseGraph.toOriginalNodeId("b"), 0.3386727,
-            reverseGraph.toOriginalNodeId("c"), 0.2219679,
-            reverseGraph.toOriginalNodeId("d"), 0.3494679,
-            reverseGraph.toOriginalNodeId("e"), 2.5463981,
-            reverseGraph.toOriginalNodeId("f"), 2.3858317,
-            reverseGraph.toOriginalNodeId("g"), 0.15,
-            reverseGraph.toOriginalNodeId("h"), 0.15,
-            reverseGraph.toOriginalNodeId("i"), 0.15,
-            reverseGraph.toOriginalNodeId("j"), 0.15
+            reverseGraph.toMappedNodeId("a"), 0.15,
+            reverseGraph.toMappedNodeId("b"), 0.3386727,
+            reverseGraph.toMappedNodeId("c"), 0.2219679,
+            reverseGraph.toMappedNodeId("d"), 0.3494679,
+            reverseGraph.toMappedNodeId("e"), 2.5463981,
+            reverseGraph.toMappedNodeId("f"), 2.3858317,
+            reverseGraph.toMappedNodeId("g"), 0.15,
+            reverseGraph.toMappedNodeId("h"), 0.15,
+            reverseGraph.toMappedNodeId("i"), 0.15,
+            reverseGraph.toMappedNodeId("j"), 0.15
         );
 
         assertResult(reverseGraph, PageRankAlgorithmType.NON_WEIGHTED, expected);
@@ -126,8 +126,8 @@ final class PageRankTest {
         // explicitly list all source nodes to prevent the 'we got everything' optimization
         PageRankAlgorithmType.NON_WEIGHTED
             .create(
-                graph,
-                LongStream.range(0L, graph.nodeCount()),
+                naturalGraph,
+                LongStream.range(0L, naturalGraph.nodeCount()),
                 DEFAULT_CONFIG,
                 1,
                 null,
@@ -164,13 +164,13 @@ final class PageRankTest {
         var config = ImmutablePageRankStreamConfig.builder().build();
 
         var testLogger = new TestProgressLogger(
-            graph.relationshipCount(),
+            naturalGraph.relationshipCount(),
             "PageRank",
             config.concurrency()
         );
 
         var pageRank = PageRankAlgorithmType.NON_WEIGHTED.create(
-            graph,
+            naturalGraph,
             config,
             LongStream.empty(),
             testLogger
@@ -181,7 +181,7 @@ final class PageRankTest {
         List<AtomicLong> progresses = testLogger.getProgresses();
 
         assertEquals(progresses.size(), pageRank.iterations());
-        progresses.forEach(progress -> assertEquals(graph.relationshipCount(), progress.get()));
+        progresses.forEach(progress -> assertEquals(naturalGraph.relationshipCount(), progress.get()));
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
         LongStream.range(1, pageRank.iterations() + 1).forEach(iteration -> {

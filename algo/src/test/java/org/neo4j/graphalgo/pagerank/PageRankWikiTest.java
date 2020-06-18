@@ -32,7 +32,7 @@ import static org.neo4j.graphalgo.pagerank.PageRankTest.assertResult;
 @GdlExtension
 class PageRankWikiTest {
 
-    @GdlGraph
+    @GdlGraph(graphName = "graph")
     private static final String DB_CYPHER =
             "CREATE" +
             "  (a:Node)" +
@@ -70,17 +70,17 @@ class PageRankWikiTest {
     @Test
     void test() {
         var expected = new HashMap<Long, Double>();
-        expected.put(graph.toOriginalNodeId("a"), 0.3040965);
-        expected.put(graph.toOriginalNodeId("b"), 3.5658695);
-        expected.put(graph.toOriginalNodeId("c"), 3.180981);
-        expected.put(graph.toOriginalNodeId("d"), 0.3625935);
-        expected.put(graph.toOriginalNodeId("e"), 0.7503465);
-        expected.put(graph.toOriginalNodeId("f"), 0.3625935);
-        expected.put(graph.toOriginalNodeId("g"), 0.15);
-        expected.put(graph.toOriginalNodeId("h"), 0.15);
-        expected.put(graph.toOriginalNodeId("i"), 0.15);
-        expected.put(graph.toOriginalNodeId("j"), 0.15);
-        expected.put(graph.toOriginalNodeId("k"), 0.15);
+        expected.put(graph.toMappedNodeId("a"), 0.3040965);
+        expected.put(graph.toMappedNodeId("b"), 3.5658695);
+        expected.put(graph.toMappedNodeId("c"), 3.180981);
+        expected.put(graph.toMappedNodeId("d"), 0.3625935);
+        expected.put(graph.toMappedNodeId("e"), 0.7503465);
+        expected.put(graph.toMappedNodeId("f"), 0.3625935);
+        expected.put(graph.toMappedNodeId("g"), 0.15);
+        expected.put(graph.toMappedNodeId("h"), 0.15);
+        expected.put(graph.toMappedNodeId("i"), 0.15);
+        expected.put(graph.toMappedNodeId("j"), 0.15);
+        expected.put(graph.toMappedNodeId("k"), 0.15);
 
         assertResult(graph, PageRankAlgorithmType.NON_WEIGHTED, expected);
     }
