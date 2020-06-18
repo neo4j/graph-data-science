@@ -38,15 +38,15 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig {
     }
 
     @Value.Default
-    @Configuration.FloatRange(min = 0.0)
-    default float returnFactor() {
-        return 1.0F;
+    @Configuration.DoubleRange(min = 0.0)
+    default double returnFactor() {
+        return 1.0;
     }
 
     @Value.Default
-    @Configuration.FloatRange(min = 0.0)
-    default float inOutFactor() {
-        return 1.0F;
+    @Configuration.DoubleRange(min = 0.0)
+    default double inOutFactor() {
+        return 1.0;
     }
 
     @Value.Default
@@ -62,15 +62,15 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig {
     }
 
     @Value.Default
-    @Configuration.FloatRange(min = 0.0, minInclusive = false)
-    default float learningRate() {
-        return 0.025F;
+    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
+    default double learningRate() {
+        return 0.025;
     }
 
     @Value.Default
-    @Configuration.FloatRange(min = 0.0, minInclusive = false)
-    default float minLearningRate() {
-        return 0.0001F;
+    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
+    default double minLearningRate() {
+        return 0.0001;
     }
 
     @Value.Default
@@ -80,15 +80,15 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig {
     }
 
     @Value.Default
-    @Configuration.FloatRange(min = 0.00001, minInclusive = false, max=1.0)
-    default float centerSamplingFactor() {
-        return 0.001F;
+    @Configuration.DoubleRange(min = 0.00001, minInclusive = false, max=1.0)
+    default double centerSamplingFactor() {
+        return 0.001;
     }
 
     @Value.Default
-    @Configuration.FloatRange(min = 0.00001, minInclusive = false, max=1.0)
-    default float contextSamplingFactor() {
-        return 0.75F;
+    @Configuration.DoubleRange(min = 0.00001, minInclusive = false, max=1.0)
+    default double contextSamplingFactor() {
+        return 0.75;
     }
 
     @Value.Default

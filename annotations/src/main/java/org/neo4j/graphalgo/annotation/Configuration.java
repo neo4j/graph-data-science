@@ -100,14 +100,4 @@ public @interface Configuration {
         boolean minInclusive() default true;
         boolean maxInclusive() default true;
     }
-
-    @Documented
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.CLASS)
-    @interface FloatRange {
-        double min() default Float.MIN_VALUE;
-        double max() default Float.MAX_VALUE;
-        boolean minInclusive() default true;
-        boolean maxInclusive() default true;
-    }
 }

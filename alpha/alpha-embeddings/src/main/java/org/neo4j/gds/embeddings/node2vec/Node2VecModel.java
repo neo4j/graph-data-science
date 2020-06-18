@@ -119,8 +119,8 @@ public class Node2VecModel {
             this.centerGradientBuffer = new Vector(config.dimensions());
             this.contextGradientBuffer = new Vector(config.dimensions());
 
-            this.learningRate = config.learningRate();
-            this.learningRateModifier = (learningRate - config.minLearningRate()) / (endIndex - startIndex);
+            this.learningRate = (float) config.learningRate();
+            this.learningRateModifier = (float) ((learningRate - config.minLearningRate()) / (endIndex - startIndex));
             this.currentLearningRate = learningRate;
         }
 
