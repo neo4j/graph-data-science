@@ -56,6 +56,7 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.query.ExecutingQuery;
+import org.neo4j.kernel.impl.newapi.OpenCursorFactory41;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -139,24 +140,71 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
         return pageCache.map(file, pageSize, Sets.immutable.of(openOptions));
     }
 
-    @Override
-    public PropertyCursor allocatePropertyCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer, MemoryTracker memoryTracker) {
-        return cursorFactory.allocatePropertyCursor(cursorTracer, memoryTracker);
-    }
 
     @Override
-    public NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
+    public NodeCursor allocateNodeCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
         return cursorFactory.allocateNodeCursor(cursorTracer);
     }
 
     @Override
-    public RelationshipScanCursor allocateRelationshipScanCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
+    public NodeCursor allocateFullAccessNodeCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
+        return cursorFactory.allocateFullAccessNodeCursor(cursorTracer);
+    }
+
+    @Override
+    public RelationshipScanCursor allocateRelationshipScanCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
         return cursorFactory.allocateRelationshipScanCursor(cursorTracer);
     }
 
     @Override
-    public NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
+    public RelationshipScanCursor allocateFullAccessRelationshipScanCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
+        return cursorFactory.allocateFullAccessRelationshipScanCursor(cursorTracer);
+    }
+
+    @Override
+    public PropertyCursor allocatePropertyCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    ) {
+        return cursorFactory.allocatePropertyCursor(cursorTracer, memoryTracker);
+    }
+
+    @Override
+    public PropertyCursor allocateFullAccessPropertyCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    ) {
+        return cursorFactory.allocateFullAccessPropertyCursor(cursorTracer, memoryTracker);
+    }
+
+    @Override
+    public NodeLabelIndexCursor allocateNodeLabelIndexCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
         return cursorFactory.allocateNodeLabelIndexCursor(cursorTracer);
+    }
+
+    @Override
+    public NodeLabelIndexCursor allocateFullAccessNodeLabelIndexCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
+        return OpenCursorFactory41.allocateFullAccessNodeLabelIndexCursor(cursorFactory, cursorTracer);
     }
 
     @Override

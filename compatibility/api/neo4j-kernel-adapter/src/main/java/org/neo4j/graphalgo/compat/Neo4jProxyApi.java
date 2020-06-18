@@ -107,17 +107,47 @@ public interface Neo4jProxyApi {
         OpenOption... openOptions
     ) throws IOException;
 
+    NodeCursor allocateNodeCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    );
+
+    NodeCursor allocateFullAccessNodeCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    );
+
+    RelationshipScanCursor allocateRelationshipScanCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    );
+
+    RelationshipScanCursor allocateFullAccessRelationshipScanCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    );
+
     PropertyCursor allocatePropertyCursor(
         CursorFactory cursorFactory,
         PageCursorTracer cursorTracer,
         MemoryTracker memoryTracker
     );
 
-    NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer);
+    PropertyCursor allocateFullAccessPropertyCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    );
 
-    RelationshipScanCursor allocateRelationshipScanCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer);
+    NodeLabelIndexCursor allocateNodeLabelIndexCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    );
 
-    NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer);
+    NodeLabelIndexCursor allocateFullAccessNodeLabelIndexCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    );
 
     long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer);
 

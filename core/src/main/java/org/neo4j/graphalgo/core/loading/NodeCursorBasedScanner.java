@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -40,7 +41,11 @@ final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeRefere
 
     @Override
     NodeCursor entityCursor(KernelTransaction transaction) {
-        return Neo4jProxy.allocateNodeCursor(transaction.cursors(), transaction.pageCursorTracer());
+        if (GdsEdition.instance().isOnEnterpriseEdition()) {
+            return Neo4jProxy.allocateNodeCursor(transaction.cursors(), transaction.pageCursorTracer());
+        } else {
+            return Neo4jProxy.allocateFullAccessNodeCursor(transaction.cursors(), transaction.pageCursorTracer());
+        }
     }
 
     @Override

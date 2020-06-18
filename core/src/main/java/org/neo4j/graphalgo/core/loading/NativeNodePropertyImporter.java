@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -78,13 +79,25 @@ public final class NativeNodePropertyImporter {
         PageCursorTracer cursorTracer,
         MemoryTracker memoryTracker
     ) {
-        try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(cursors, cursorTracer, memoryTracker)) {
+        try (PropertyCursor pc = allocatePropertyCursor(cursors, cursorTracer, memoryTracker)) {
             read.nodeProperties(neoNodeId, propertiesReference, pc);
             int nodePropertiesRead = 0;
             while (pc.next()) {
                 nodePropertiesRead += importProperty(nodeId, labelIds, pc);
             }
             return nodePropertiesRead;
+        }
+    }
+
+    private PropertyCursor allocatePropertyCursor(
+        CursorFactory cursors,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    ) {
+        if (GdsEdition.instance().isOnEnterpriseEdition()) {
+            return Neo4jProxy.allocatePropertyCursor(cursors, cursorTracer, memoryTracker);
+        } else {
+            return Neo4jProxy.allocateFullAccessPropertyCursor(cursors, cursorTracer, memoryTracker);
         }
     }
 

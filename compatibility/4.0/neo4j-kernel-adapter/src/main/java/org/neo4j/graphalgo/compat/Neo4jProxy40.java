@@ -53,6 +53,7 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.query.ExecutingQuery;
+import org.neo4j.kernel.impl.newapi.OpenCursorFactory40;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -137,17 +138,19 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
-    public PropertyCursor allocatePropertyCursor(
+    public NodeCursor allocateNodeCursor(
         CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker
+        PageCursorTracer cursorTracer
     ) {
-        return cursorFactory.allocatePropertyCursor();
+        return cursorFactory.allocateNodeCursor();
     }
 
     @Override
-    public NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer) {
-        return cursorFactory.allocateNodeCursor();
+    public NodeCursor allocateFullAccessNodeCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
+        return cursorFactory.allocateFullAccessNodeCursor();
     }
 
     @Override
@@ -159,11 +162,45 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
+    public RelationshipScanCursor allocateFullAccessRelationshipScanCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
+        return cursorFactory.allocateFullAccessRelationshipScanCursor();
+    }
+
+    @Override
+    public PropertyCursor allocatePropertyCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    ) {
+        return cursorFactory.allocatePropertyCursor();
+    }
+
+    @Override
+    public PropertyCursor allocateFullAccessPropertyCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    ) {
+        return cursorFactory.allocateFullAccessPropertyCursor();
+    }
+
+    @Override
     public NodeLabelIndexCursor allocateNodeLabelIndexCursor(
         CursorFactory cursorFactory,
         PageCursorTracer cursorTracer
     ) {
         return cursorFactory.allocateNodeLabelIndexCursor();
+    }
+
+    @Override
+    public NodeLabelIndexCursor allocateFullAccessNodeLabelIndexCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer
+    ) {
+        return OpenCursorFactory40.allocateFullAccessNodeLabelIndexCursor(cursorFactory);
     }
 
     @Override
