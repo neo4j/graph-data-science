@@ -51,12 +51,12 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
             .withAnyRelationshipType()
             .algo("gds.betweenness")
             .streamMode()
-            .yields("nodeId", "centrality");
+            .yields();
 
         var actual = new HashMap<Long, Double>();
         runQueryWithRowConsumer(
             query,
-            row -> actual.put(row.getNumber("nodeId").longValue(), row.getNumber("centrality").doubleValue())
+            row -> actual.put(row.getNumber("nodeId").longValue(), row.getNumber("score").doubleValue())
         );
 
         assertMapEqualsWithTolerance(EXPECTED, actual, 1E-1);
@@ -70,7 +70,7 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
             .algo("gds.betweenness")
             .streamMode()
             .addParameter("samplingSize", -42)
-            .yields("nodeId", "centrality");
+            .yields();
 
         assertError(query, "Configuration parameter 'samplingSize' must be a positive number, got -42.");
     }

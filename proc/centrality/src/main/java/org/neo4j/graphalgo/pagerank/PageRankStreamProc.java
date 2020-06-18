@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.common.StreamResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
@@ -36,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class PageRankStreamProc extends StreamProc<PageRank, PageRank, PageRankStreamProc.StreamResult, PageRankStreamConfig> {
+public class PageRankStreamProc extends StreamProc<PageRank, PageRank, StreamResult, PageRankStreamConfig> {
 
     @Procedure(value = "gds.pageRank.stream", mode = READ)
     @Description(PAGE_RANK_DESCRIPTION)
@@ -83,15 +84,5 @@ public class PageRankStreamProc extends StreamProc<PageRank, PageRank, PageRankS
     @Override
     protected PropertyTranslator<PageRank> nodePropertyTranslator(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {
         return PageRankProc.ScoresTranslator.INSTANCE;
-    }
-
-    public static final class StreamResult {
-        public final long nodeId;
-        public final double score;
-
-        StreamResult(long nodeId, double score) {
-            this.nodeId = nodeId;
-            this.score = score;
-        }
     }
 }
