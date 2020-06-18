@@ -21,7 +21,7 @@ package org.neo4j.graphalgo;
 
 
 import org.intellij.lang.annotations.Language;
-import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
+import org.neo4j.graphalgo.core.EnterpriseLicensingExtension;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -49,7 +49,7 @@ public abstract class BaseTest {
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         builder.impermanent();
         builder.noOpSystemGraphInitializer();
-        builder.addExtension(new ConcurrencyControllerExtension());
+        builder.addExtension(new EnterpriseLicensingExtension());
     }
 
     protected long clearDb() {

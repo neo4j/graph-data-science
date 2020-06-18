@@ -17,41 +17,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.concurrency;
+package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ConcurrencyControllerExtensionTest {
+class EnterpriseLicensingExtensionTest {
 
     @Test
     void shouldSetMonitorFalse() {
         new TestDatabaseManagementServiceBuilder()
-            .addExtension(new ConcurrencyControllerExtension())
+            .addExtension(new EnterpriseLicensingExtension())
             .impermanent()
             .build()
             .database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);
 
-        assertFalse(ConcurrencyMonitor.instance().isUnlimited());
-        assertTrue(ConcurrencyMonitor.instance().isLimited());
+        assertFalse(GdsEdition.instance().isOnEnterpriseEdition());
+        assertTrue(GdsEdition.instance().isOnCommunityEdition());
     }
 
     @Test
     void shouldSetMonitorTrue() {
         new TestDatabaseManagementServiceBuilder()
-            .addExtension(new ConcurrencyControllerExtension())
-            .setConfig(Settings.unlimitedCores(), true)
+            .addExtension(new EnterpriseLicensingExtension())
+            .setConfig(Settings.enterpriseLicensed(), true)
             .impermanent()
             .build()
             .database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);
 
-        assertTrue(ConcurrencyMonitor.instance().isUnlimited());
-        assertFalse(ConcurrencyMonitor.instance().isLimited());
+        assertTrue(GdsEdition.instance().isOnEnterpriseEdition());
+        assertFalse(GdsEdition.instance().isOnCommunityEdition());
     }
 
 }

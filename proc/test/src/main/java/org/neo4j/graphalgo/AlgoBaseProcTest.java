@@ -37,7 +37,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
-import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -346,7 +346,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     @Test
     default void shouldThrowWhenTooManyCoresOnLimited() {
-        ConcurrencyMonitor.instance().setLimited();
+        GdsEdition.instance().setToCommunityEdition();
         applyOnProcedure((proc) ->
             getWriteAndStreamProcedures(proc).forEach(method -> {
                 Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map(
@@ -366,7 +366,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     @Test
     default void shouldAllowManyCoresOnUnlimited() {
-        ConcurrencyMonitor.instance().setUnlimited();
+        GdsEdition.instance().setToEnterpriseEdition();
         applyOnProcedure((proc) ->
             getWriteAndStreamProcedures(proc).forEach(method -> {
                 Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 78))).toMap();

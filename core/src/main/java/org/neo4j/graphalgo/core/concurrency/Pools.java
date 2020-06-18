@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.internal.helpers.NamedThreadFactory;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -47,7 +48,7 @@ public final class Pools {
 
     static ExecutorService createDefaultPool() {
         int corePoolSize, maxPoolSize;
-        if (ConcurrencyMonitor.instance().isUnlimited()) {
+        if (GdsEdition.instance().isOnEnterpriseEdition()) {
             corePoolSize = Runtime.getRuntime().availableProcessors();
             maxPoolSize = corePoolSize * 2;
         } else {

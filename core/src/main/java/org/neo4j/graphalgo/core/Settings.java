@@ -24,7 +24,7 @@ import org.neo4j.configuration.SettingValueParsers;
 import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
-import org.neo4j.graphalgo.compat.ConcurrencyControllerSettings;
+import org.neo4j.graphalgo.compat.EnterpriseLicensingSettings;
 import org.neo4j.graphdb.config.Setting;
 
 import java.nio.file.Path;
@@ -33,8 +33,8 @@ import static org.neo4j.configuration.SettingImpl.newBuilder;
 
 public final class Settings {
 
-    public static Setting<Boolean> unlimitedCores() {
-        return ConcurrencyControllerSettings.unlimitedCores;
+    public static Setting<Boolean> enterpriseLicensed() {
+        return EnterpriseLicensingSettings.enterpriseLicensed;
     }
 
     public static Setting<Boolean> boltEnabled() {

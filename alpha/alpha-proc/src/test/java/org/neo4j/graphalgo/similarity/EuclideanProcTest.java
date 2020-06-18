@@ -111,7 +111,7 @@ class EuclideanProcTest extends BaseProcTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(Settings.unlimitedCores(), true);
+        builder.setConfig(Settings.enterpriseLicensed(), true);
     }
 
     private void buildRandomDB(int size) {

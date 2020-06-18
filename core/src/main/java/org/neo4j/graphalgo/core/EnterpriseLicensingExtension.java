@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.concurrency;
+package org.neo4j.graphalgo.core;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
@@ -29,27 +28,25 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
 @ServiceProvider
-public final class ConcurrencyControllerExtension extends ExtensionFactory<ConcurrencyControllerExtension.Dependencies> {
+public final class EnterpriseLicensingExtension extends ExtensionFactory<EnterpriseLicensingExtension.Dependencies> {
 
-    public ConcurrencyControllerExtension() {
-        super(ExtensionType.DATABASE, "gds.concurrency-limitation");
+    public EnterpriseLicensingExtension() {
+        super(ExtensionType.DATABASE, "gds.enterprise");
     }
 
     @Override
-    public Lifecycle newInstance(
-        ExtensionContext context, Dependencies dependencies
-    ) {
+    public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
         return new LifecycleAdapter() {
             @Override
             public void init() {
-                boolean unlimitedCores = dependencies
+                boolean enterpriseLicensed = dependencies
                     .config()
-                    .get(Settings.unlimitedCores());
-                ConcurrencyMonitor concurrencyMonitor = ConcurrencyMonitor.instance();
-                if (unlimitedCores) {
-                    concurrencyMonitor.setUnlimited();
+                    .get(Settings.enterpriseLicensed());
+                GdsEdition gdsEdition = GdsEdition.instance();
+                if (enterpriseLicensed) {
+                    gdsEdition.setToEnterpriseEdition();
                 } else {
-                    concurrencyMonitor.setLimited();
+                    gdsEdition.setToCommunityEdition();
                 }
             }
 

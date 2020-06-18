@@ -17,45 +17,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.concurrency;
+package org.neo4j.graphalgo.core;
 
-public final class ConcurrencyMonitor {
+public final class GdsEdition {
 
-    private static ConcurrencyMonitor INSTANCE;
+    private static final GdsEdition INSTANCE = new GdsEdition();
 
-    public static ConcurrencyMonitor instance() {
-        if (INSTANCE == null) {
-            INSTANCE = new ConcurrencyMonitor();
-        }
+    public static GdsEdition instance() {
         return INSTANCE;
     }
 
     private enum State {
-        UNLIMITED,
-        LIMITED
+        ENTERPRISE,
+        COMMUNITY
     }
 
     private State currentState;
 
-    private ConcurrencyMonitor() {
-        this.currentState = State.LIMITED;
+    private GdsEdition() {
+        this.currentState = State.COMMUNITY;
     }
 
-    public boolean isUnlimited() {
-        return get() == State.UNLIMITED;
+    public boolean isOnEnterpriseEdition() {
+        return get() == State.ENTERPRISE;
     }
 
-    public boolean isLimited() {
-        return !isUnlimited();
+    public boolean isOnCommunityEdition() {
+        return !isOnEnterpriseEdition();
     }
 
-    public void setUnlimited() {
-        set(State.UNLIMITED);
+    public void setToEnterpriseEdition() {
+        set(State.ENTERPRISE);
     }
 
-    // TODO move it all to concurrency package
-    public void setLimited() {
-        set(State.LIMITED);
+    public void setToCommunityEdition() {
+        set(State.COMMUNITY);
     }
 
     private void set(State state) {

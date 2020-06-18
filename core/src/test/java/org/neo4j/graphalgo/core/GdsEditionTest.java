@@ -17,25 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.concurrency;
+package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ConcurrencyMonitorTest {
+class GdsEditionTest {
 
     @Test
     void isLimited() {
-        ConcurrencyMonitor.instance().setLimited();
-        assertTrue(ConcurrencyMonitor.instance().isLimited());
-        assertFalse(ConcurrencyMonitor.instance().isUnlimited());
+        GdsEdition.instance().setToCommunityEdition();
+        assertTrue(GdsEdition.instance().isOnCommunityEdition());
+        assertFalse(GdsEdition.instance().isOnEnterpriseEdition());
     }
 
     @Test
     void isUnlimited() {
-        ConcurrencyMonitor.instance().setUnlimited();
-        assertFalse(ConcurrencyMonitor.instance().isLimited());
-        assertTrue(ConcurrencyMonitor.instance().isUnlimited());
+        GdsEdition.instance().setToEnterpriseEdition();
+        assertFalse(GdsEdition.instance().isOnCommunityEdition());
+        assertTrue(GdsEdition.instance().isOnEnterpriseEdition());
     }
 }

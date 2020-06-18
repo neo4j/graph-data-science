@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.core.concurrency.ConcurrencyMonitor;
+import org.neo4j.graphalgo.core.GdsEdition;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -30,7 +30,7 @@ public interface ConcurrencyValidation {
 
     @Value.Check
     default void validateConcurrency() {
-        if (ConcurrencyMonitor.instance().isUnlimited()) {
+        if (GdsEdition.instance().isOnEnterpriseEdition()) {
             // do nothing
             return;
         }

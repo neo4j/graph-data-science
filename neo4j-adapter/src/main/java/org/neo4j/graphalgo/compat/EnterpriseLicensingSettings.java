@@ -28,13 +28,13 @@ import org.neo4j.graphdb.config.Setting;
 import static org.neo4j.configuration.SettingImpl.newBuilder;
 
 @ServiceProvider
-public class ConcurrencyControllerSettings implements SettingsDeclaration {
+public class EnterpriseLicensingSettings implements SettingsDeclaration {
 
-    private static final String CORE_LIMITATION = "gds.enterprise.licensed";
+    private static final String ENTERPRISE_LICENSED = "gds.enterprise.licensed";
 
-    @Description("Controls the allowed concurrency configuration.")
-    public static Setting<Boolean> unlimitedCores = newBuilder(
-        CORE_LIMITATION,
+    @Description("Defines if GDS Enterprise features can be used.")
+    public static Setting<Boolean> enterpriseLicensed = newBuilder(
+        ENTERPRISE_LICENSED,
         SettingValueParsers.BOOL,
         false
     ).build();
