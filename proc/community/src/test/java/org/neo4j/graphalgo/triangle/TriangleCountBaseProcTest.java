@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.OnlyUndirectedTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -44,7 +45,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 
 abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig> extends BaseProcTest
     implements AlgoBaseProcTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
-    UndirectedValidationTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
+    OnlyUndirectedTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
     MemoryEstimateTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
     HeapControlTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult> {
 

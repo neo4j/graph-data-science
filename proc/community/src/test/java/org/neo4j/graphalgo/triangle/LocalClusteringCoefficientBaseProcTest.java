@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.ConfigurableSeedConfigTest;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.OnlyUndirectedTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -41,7 +42,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 
 abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalClusteringCoefficientBaseConfig> extends BaseProcTest
     implements AlgoBaseProcTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
-    UndirectedValidationTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
+    OnlyUndirectedTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     ConfigurableSeedConfigTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     MemoryEstimateTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     HeapControlTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result> {
