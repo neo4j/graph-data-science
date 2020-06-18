@@ -50,6 +50,16 @@ class BetweennessCentralityTest {
         CypherMapWrapper.empty()
     );
 
+    private static final String DIAMOND =
+        "CREATE " +
+        "  (a1)-[:REL]->(b)" +
+        ", (a2)-[:REL]->(b)" +
+        ", (b)-[:REL]->(c)" +
+        ", (b)-[:REL]->(d)" +
+        ", (c)-[:REL]->(e)" +
+        ", (d)-[:REL]->(e)" +
+        ", (e)-[:REL]->(f)";
+
     private static final String LINE =
         "CREATE" +
         "  (a)-[:REL]->(b)" +
@@ -112,11 +122,13 @@ class BetweennessCentralityTest {
             Arguments.of(fromGdl(LINE, "line"), 0, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
             Arguments.of(fromGdl(CYCLE, "cycle"), 3, Map.of("a", 1.0, "b", 1.0, "c", 1.0)),
             Arguments.of(fromGdl(CLIQUE_5, "clique_5"), 5, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
-            Arguments.of(fromGdl(CLIQUE_5, UNDIRECTED, "clique_5"), 5, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
-            Arguments.of(fromGdl(CLIQUE_5, UNDIRECTED,"clique_5"), 3, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
+            Arguments.of(fromGdl(CLIQUE_5, UNDIRECTED, "undirected_clique_5"), 5, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
+            Arguments.of(fromGdl(CLIQUE_5, UNDIRECTED,"undirected_clique_5"), 3, Map.of("a", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e", 0.0)),
             Arguments.of(fromGdl(DISCONNECTED_CYCLES, "disconnected_cycles"), 6, Map.of("a", 1.0, "b", 1.0, "c", 1.0, "d", 1.0, "e", 1.0, "f", 1.0)),
             Arguments.of(fromGdl(CONNECTED_CYCLES, "connected_cycles"), 6, Map.of("a", 13.0, "b", 4.0, "c", 4.0, "d", 13.0, "e", 4.0, "f", 4.0)),
-            Arguments.of(fromGdl(CONNECTED_CYCLES, "connected_cycles"), 2, Map.of("a", 3.0, "b", 1.0, "c", 4.0, "d", 4.0, "e", 2.0, "f", 0.0))
+            Arguments.of(fromGdl(CONNECTED_CYCLES, "connected_cycles"), 2, Map.of("a", 3.0, "b", 1.0, "c", 4.0, "d", 4.0, "e", 2.0, "f", 0.0)),
+            Arguments.of(fromGdl(DIAMOND, "diamond"), 7, Map.of("a1", 0.0, "a2", 0.0, "b", 8.0, "c", 3.0, "d", 3.0, "e", 5.0, "f", 0.0)),
+            Arguments.of(fromGdl(DIAMOND, UNDIRECTED, "undirected_diamond"), 7, Map.of("a1", 0.0, "a2", 0.0, "b", 9.5, "c", 3.0, "d", 3.0, "e", 5.5, "f", 0.0))
         );
     }
 
@@ -152,9 +164,9 @@ class BetweennessCentralityTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1, 6_000_360L, 6_000_360L),
-            Arguments.of(4, 21_601_152L, 21_601_152L),
-            Arguments.of(42, 219_211_184L, 219_211_184L)
+            Arguments.of(1, 6_000_368L, 6_000_368L),
+            Arguments.of(4, 21_601_160L, 21_601_160L),
+            Arguments.of(42, 219_211_192L, 219_211_192L)
         );
     }
 

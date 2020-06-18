@@ -44,6 +44,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
     private final Graph graph;
     private final AtomicLong nodeQueue = new AtomicLong();
     private final long nodeCount;
+    private final double divisor;
 
     private HugeAtomicDoubleArray centrality;
     private SelectionStrategy selectionStrategy;
@@ -67,6 +68,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);
         this.tracker = tracker;
+        this.divisor = graph.isUndirected() ? 2.0 : 1.0;
     }
 
     @Override
@@ -175,7 +177,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
                         double current;
                         do {
                             current = centrality.get(node);
-                        } while (!centrality.compareAndSet(node, current, current + dependencyNode));
+                        } while (!centrality.compareAndSet(node, current, current + dependencyNode / divisor));
                     }
                 }
             }
