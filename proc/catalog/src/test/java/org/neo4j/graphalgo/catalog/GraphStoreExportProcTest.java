@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.catalog;
+package org.neo4j.graphalgo.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -67,7 +66,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
             .yields());
 
         var exportQuery = formatWithLocale(
-            "CALL gds.beta.graph.export('test-graph', {" +
+            "CALL gds.graph.export('test-graph', {" +
             "  dbName: 'test-db'" +
             "})"
         );
