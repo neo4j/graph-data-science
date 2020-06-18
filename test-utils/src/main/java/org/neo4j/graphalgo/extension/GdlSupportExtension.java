@@ -127,7 +127,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
 
         return annotations
             .map(annotation -> ImmutableGdlGraphSetup.of(
-                annotation.graphName(),
+                annotation.graphNamePrefix(),
                 gdl,
                 annotation.username(),
                 annotation.orientation(),
@@ -156,28 +156,20 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         }
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
-            injectInstance(testInstance, graphName, graph, Graph.class);
-            injectInstance(testInstance, graphName, testGraph, TestGraph.class);
-            injectInstance(testInstance, graphName, graphStore, GraphStore.class);
-            injectInstance(testInstance, graphName, idFunction, IdFunction.class);
+            injectInstance(testInstance, graphName, graph, Graph.class, "Graph");
+            injectInstance(testInstance, graphName, testGraph, TestGraph.class, "Graph");
+            injectInstance(testInstance, graphName, graphStore, GraphStore.class, "GraphStore");
+            injectInstance(testInstance, graphName, idFunction, IdFunction.class, "IdFunction");
         });
     }
 
-    private static <T> void injectInstance(Object testInstance, String graphName, T instance, Class<T> clazz) {
+    private static <T> void injectInstance(Object testInstance, String graphNamePrefix, T instance, Class<T> clazz, String suffix) {
         Class<?> testClass = testInstance.getClass();
         do {
             stream(testClass.getDeclaredFields())
                 .filter(field -> field.getType() == clazz)
                 .filter(field -> isAnnotated(field, Inject.class))
-                .filter(field -> {
-                    var annotationGraphName = field.getAnnotation(Inject.class).graphName();
-                    var isGraph = clazz == TestGraph.class || clazz == Graph.class;
-
-                    if (isGraph && annotationGraphName.equals(Inject.NO_GRAPH_NAME)) {
-                        return field.getName().equals(graphName);
-                    }
-                    return annotationGraphName.equals(graphName);
-                })
+                .filter(field -> field.getName().equalsIgnoreCase(graphNamePrefix + suffix))
                 .forEach(field -> setField(testInstance, field, instance));
             testClass = testClass.getSuperclass();
         }

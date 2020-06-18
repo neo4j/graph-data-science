@@ -71,9 +71,9 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 final class NodeSimilarityTest {
 
-    @GdlGraph(graphName = "naturalGraph", orientation = NATURAL)
-    @GdlGraph(graphName = "reverseGraph", orientation = REVERSE)
-    @GdlGraph(graphName = "undirectedGraph", orientation = UNDIRECTED)
+    @GdlGraph(graphNamePrefix = "natural", orientation = NATURAL)
+    @GdlGraph(graphNamePrefix = "reverse", orientation = REVERSE)
+    @GdlGraph(graphNamePrefix = "undirected", orientation = UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Person)" +

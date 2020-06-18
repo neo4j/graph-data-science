@@ -32,7 +32,7 @@ import static org.neo4j.graphalgo.pagerank.PageRankTest.assertResult;
 @GdlExtension
 class PageRankWikiTest {
 
-    @GdlGraph(graphName = "graph")
+    @GdlGraph
     private static final String DB_CYPHER =
             "CREATE" +
             "  (a:Node)" +

@@ -40,7 +40,7 @@ class WeightedPageRankTest {
         .maxIterations(40)
         .build();
 
-    @GdlGraph(graphName = "graph")
+    @GdlGraph
     private static final String DB_CYPHER =
             "CREATE" +
             "  (a:Label)" +
@@ -95,25 +95,25 @@ class WeightedPageRankTest {
             ", (f)-[:TYPE4 {weight: -0.9}]->(a)" +
             ", (f)-[:TYPE4 {weight: 0.1}]->(e)";
 
-    @Inject(graphName = "graph")
+    @Inject
     private GraphStore graphStore;
 
-    @Inject(graphName = "graph")
-    private IdFunction nodeId;
+    @Inject
+    private IdFunction idFunction;
 
     @Test
     void defaultWeightOf0MeansNoDiffusionOfPageRank() {
         var expected = Map.of(
-            nodeId.of("a"), 0.15,
-            nodeId.of("b"), 0.15,
-            nodeId.of("c"), 0.15,
-            nodeId.of("d"), 0.15,
-            nodeId.of("e"), 0.15,
-            nodeId.of("f"), 0.15,
-            nodeId.of("g"), 0.15,
-            nodeId.of("h"), 0.15,
-            nodeId.of("i"), 0.15,
-            nodeId.of("j"), 0.15
+            idFunction.of("a"), 0.15,
+            idFunction.of("b"), 0.15,
+            idFunction.of("c"), 0.15,
+            idFunction.of("d"), 0.15,
+            idFunction.of("e"), 0.15,
+            idFunction.of("f"), 0.15,
+            idFunction.of("g"), 0.15,
+            idFunction.of("h"), 0.15,
+            idFunction.of("i"), 0.15,
+            idFunction.of("j"), 0.15
         );
 
         var graph = graphStore.getGraph(
@@ -128,16 +128,16 @@ class WeightedPageRankTest {
     @Test
     void allWeightsTheSameShouldBeTheSameAsPageRank() {
         var expected = Map.of(
-            nodeId.of("a"), 0.243007,
-            nodeId.of("b"), 1.9183995,
-            nodeId.of("c"), 1.7806315,
-            nodeId.of("d"), 0.21885,
-            nodeId.of("e"), 0.243007,
-            nodeId.of("f"), 0.21885,
-            nodeId.of("g"), 0.15,
-            nodeId.of("h"), 0.15,
-            nodeId.of("i"), 0.15,
-            nodeId.of("j"), 0.15
+            idFunction.of("a"), 0.243007,
+            idFunction.of("b"), 1.9183995,
+            idFunction.of("c"), 1.7806315,
+            idFunction.of("d"), 0.21885,
+            idFunction.of("e"), 0.243007,
+            idFunction.of("f"), 0.21885,
+            idFunction.of("g"), 0.15,
+            idFunction.of("h"), 0.15,
+            idFunction.of("i"), 0.15,
+            idFunction.of("j"), 0.15
         );
 
         var graph = graphStore.getGraph(
@@ -152,16 +152,16 @@ class WeightedPageRankTest {
     @Test
     void higherWeightsLeadToHigherPageRank() {
         var expected = Map.of(
-            nodeId.of("a"), 0.1900095,
-            nodeId.of("b"), 2.2152279,
-            nodeId.of("c"), 2.0325884,
-            nodeId.of("d"), 0.1569275,
-            nodeId.of("e"), 0.1633280,
-            nodeId.of("f"), 0.1569275,
-            nodeId.of("g"), 0.15,
-            nodeId.of("h"), 0.15,
-            nodeId.of("i"), 0.15,
-            nodeId.of("j"), 0.15
+            idFunction.of("a"), 0.1900095,
+            idFunction.of("b"), 2.2152279,
+            idFunction.of("c"), 2.0325884,
+            idFunction.of("d"), 0.1569275,
+            idFunction.of("e"), 0.1633280,
+            idFunction.of("f"), 0.1569275,
+            idFunction.of("g"), 0.15,
+            idFunction.of("h"), 0.15,
+            idFunction.of("i"), 0.15,
+            idFunction.of("j"), 0.15
         );
 
         var graph = graphStore.getGraph(
@@ -176,16 +176,16 @@ class WeightedPageRankTest {
     @Test
     void shouldExcludeNegativeWeights() {
         var expected = Map.of(
-            nodeId.of("a"), 0.1900095,
-            nodeId.of("b"), 2.2152279,
-            nodeId.of("c"), 2.0325884,
-            nodeId.of("d"), 0.1569275,
-            nodeId.of("e"), 0.1633280,
-            nodeId.of("f"), 0.1569275,
-            nodeId.of("g"), 0.15,
-            nodeId.of("h"), 0.15,
-            nodeId.of("i"), 0.15,
-            nodeId.of("j"), 0.15
+            idFunction.of("a"), 0.1900095,
+            idFunction.of("b"), 2.2152279,
+            idFunction.of("c"), 2.0325884,
+            idFunction.of("d"), 0.1569275,
+            idFunction.of("e"), 0.1633280,
+            idFunction.of("f"), 0.1569275,
+            idFunction.of("g"), 0.15,
+            idFunction.of("h"), 0.15,
+            idFunction.of("i"), 0.15,
+            idFunction.of("j"), 0.15
         );
 
         var graph = graphStore.getGraph(

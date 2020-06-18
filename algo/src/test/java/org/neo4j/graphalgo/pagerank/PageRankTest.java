@@ -48,8 +48,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 final class PageRankTest {
 
-    @GdlGraph(graphName = "naturalGraph", orientation = Orientation.NATURAL)
-    @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
+    @GdlGraph(graphNamePrefix = "natural", orientation = Orientation.NATURAL)
+    @GdlGraph(graphNamePrefix = "reverse", orientation = Orientation.REVERSE)
     private static final String GRAPH =
         "CREATE" +
         "  (a:Label)" +

@@ -33,7 +33,7 @@ import static java.lang.annotation.ElementType.FIELD;
 @Repeatable(GdlGraphs.class)
 public @interface GdlGraph {
 
-    String graphName();
+    String graphNamePrefix() default "";
 
     Orientation orientation() default Orientation.NATURAL;
 

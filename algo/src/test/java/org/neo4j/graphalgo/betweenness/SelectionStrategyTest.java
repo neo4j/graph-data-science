@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @GdlExtension
 class SelectionStrategyTest {
 
-    @GdlGraph(graphName = "graph")
+    @GdlGraph
     private static final String DB_GDL =
         "(a)-->(b)" +
         "(a)-->(c)" +

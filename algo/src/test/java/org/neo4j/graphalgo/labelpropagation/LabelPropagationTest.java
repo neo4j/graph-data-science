@@ -66,7 +66,7 @@ class LabelPropagationTest {
         CypherMapWrapper.empty()
     );
 
-    @GdlGraph(graphName = "graph")
+    @GdlGraph
     private static final String GRAPH =
         "CREATE" +
         "  (nAlice:User   {seedId: 2})" +

@@ -43,8 +43,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @GdlExtension
 final class WeightedDegreeCentralityTest {
 
-    @GdlGraph(graphName = "naturalGraph", orientation = Orientation.NATURAL)
-    @GdlGraph(graphName = "reverseGraph", orientation = Orientation.REVERSE)
+    @GdlGraph(graphNamePrefix = "natural", orientation = Orientation.NATURAL)
+    @GdlGraph(graphNamePrefix = "reverse", orientation = Orientation.REVERSE)
     private static final String DB_CYPHER =
             "CREATE" +
             "  (a:Label)" +
@@ -88,31 +88,31 @@ final class WeightedDegreeCentralityTest {
             ", (f)-[:TYPE3 {weight: 2.0}]->(b)" +
             ", (f)-[:TYPE3 {weight: 2.0}]->(e)";
 
-    @Inject(graphName = "naturalGraph")
-    private GraphStore graphStore;
+    @Inject
+    private GraphStore naturalGraphStore;
 
-    @Inject(graphName = "naturalGraph")
-    private IdFunction nodeId;
+    @Inject
+    private IdFunction naturalIdFunction;
 
-    @Inject(graphName = "reverseGraph")
+    @Inject
     private GraphStore reverseGraphStore;
 
     @Test
     void buildWeightsArray() {
         var expected = Map.of(
-            nodeId.of("a"), new double[]{},
-            nodeId.of("b"), new double[]{2.0},
-            nodeId.of("c"), new double[]{2.0},
-            nodeId.of("d"), new double[]{5.0, 2.0},
-            nodeId.of("e"), new double[]{2.0, 7.0, 1.0},
-            nodeId.of("f"), new double[]{2.0, 2.0},
-            nodeId.of("g"), new double[]{},
-            nodeId.of("h"), new double[]{},
-            nodeId.of("i"), new double[]{},
-            nodeId.of("j"), new double[]{}
+            naturalIdFunction.of("a"), new double[]{},
+            naturalIdFunction.of("b"), new double[]{2.0},
+            naturalIdFunction.of("c"), new double[]{2.0},
+            naturalIdFunction.of("d"), new double[]{5.0, 2.0},
+            naturalIdFunction.of("e"), new double[]{2.0, 7.0, 1.0},
+            naturalIdFunction.of("f"), new double[]{2.0, 2.0},
+            naturalIdFunction.of("g"), new double[]{},
+            naturalIdFunction.of("h"), new double[]{},
+            naturalIdFunction.of("i"), new double[]{},
+            naturalIdFunction.of("j"), new double[]{}
         );
 
-        var graph = graphStore.getGraph(
+        var graph = naturalGraphStore.getGraph(
             List.of(NodeLabel.of("Label")),
             List.of(RelationshipType.of("TYPE1")),
             Optional.of("weight")
@@ -138,7 +138,7 @@ final class WeightedDegreeCentralityTest {
 
     @Test
     void shouldThrowIfGraphHasNoRelationshipProperty() {
-        var graph = graphStore.getGraph(
+        var graph = naturalGraphStore.getGraph(
             List.of(NodeLabel.of("Label")),
             List.of(RelationshipType.of("TYPE1")),
             Optional.empty()
@@ -163,19 +163,19 @@ final class WeightedDegreeCentralityTest {
     @Test
     void weightedOutgoingCentrality() {
         var expected = Map.of(
-            nodeId.of("a"), 0.0,
-            nodeId.of("b"), 2.0,
-            nodeId.of("c"), 2.0,
-            nodeId.of("d"), 7.0,
-            nodeId.of("e"), 10.0,
-            nodeId.of("f"), 4.0,
-            nodeId.of("g"), 0.0,
-            nodeId.of("h"), 0.0,
-            nodeId.of("i"), 0.0,
-            nodeId.of("j"), 0.0
+            naturalIdFunction.of("a"), 0.0,
+            naturalIdFunction.of("b"), 2.0,
+            naturalIdFunction.of("c"), 2.0,
+            naturalIdFunction.of("d"), 7.0,
+            naturalIdFunction.of("e"), 10.0,
+            naturalIdFunction.of("f"), 4.0,
+            naturalIdFunction.of("g"), 0.0,
+            naturalIdFunction.of("h"), 0.0,
+            naturalIdFunction.of("i"), 0.0,
+            naturalIdFunction.of("j"), 0.0
         );
 
-        var graph = graphStore.getGraph(
+        var graph = naturalGraphStore.getGraph(
             List.of(NodeLabel.of("Label")),
             List.of(RelationshipType.of("TYPE1")),
             Optional.of("weight")
@@ -187,19 +187,19 @@ final class WeightedDegreeCentralityTest {
     @Test
     void excludeNegativeWeights() {
         var expected = Map.of(
-            nodeId.of("a"), 0.0,
-            nodeId.of("b"), 2.0,
-            nodeId.of("c"), 2.0,
-            nodeId.of("d"), 4.0,
-            nodeId.of("e"), 6.0,
-            nodeId.of("f"), 4.0,
-            nodeId.of("g"), 0.0,
-            nodeId.of("h"), 0.0,
-            nodeId.of("i"), 0.0,
-            nodeId.of("j"), 0.0
+            naturalIdFunction.of("a"), 0.0,
+            naturalIdFunction.of("b"), 2.0,
+            naturalIdFunction.of("c"), 2.0,
+            naturalIdFunction.of("d"), 4.0,
+            naturalIdFunction.of("e"), 6.0,
+            naturalIdFunction.of("f"), 4.0,
+            naturalIdFunction.of("g"), 0.0,
+            naturalIdFunction.of("h"), 0.0,
+            naturalIdFunction.of("i"), 0.0,
+            naturalIdFunction.of("j"), 0.0
         );
 
-        var graph = graphStore.getGraph(
+        var graph = naturalGraphStore.getGraph(
             List.of(NodeLabel.of("Label")),
             List.of(RelationshipType.of("TYPE3")),
             Optional.of("weight")
@@ -211,16 +211,16 @@ final class WeightedDegreeCentralityTest {
     @Test
     void weightedIncomingCentrality() {
         var expected = Map.of(
-            nodeId.of("a"), 5.0,
-            nodeId.of("b"), 8.0,
-            nodeId.of("c"), 2.0,
-            nodeId.of("d"), 7.0,
-            nodeId.of("e"), 2.0,
-            nodeId.of("f"), 1.0,
-            nodeId.of("g"), 0.0,
-            nodeId.of("h"), 0.0,
-            nodeId.of("i"), 0.0,
-            nodeId.of("j"), 0.0
+            naturalIdFunction.of("a"), 5.0,
+            naturalIdFunction.of("b"), 8.0,
+            naturalIdFunction.of("c"), 2.0,
+            naturalIdFunction.of("d"), 7.0,
+            naturalIdFunction.of("e"), 2.0,
+            naturalIdFunction.of("f"), 1.0,
+            naturalIdFunction.of("g"), 0.0,
+            naturalIdFunction.of("h"), 0.0,
+            naturalIdFunction.of("i"), 0.0,
+            naturalIdFunction.of("j"), 0.0
         );
 
         var graph = reverseGraphStore.getGraph(

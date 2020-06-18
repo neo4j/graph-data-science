@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @GdlExtension
 class NonStabilizingLabelPropagationTest {
 
-    @GdlGraph(graphName = "graph")
+    @GdlGraph
     private static final String DB_CYPHER =
             "CREATE" +
             "  (a)" +
