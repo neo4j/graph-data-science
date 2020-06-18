@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class RandomProjectionsWriteProc extends WriteProc<RandomProjection, RandomProjection, RandomProjectionsWriteProc.WriteResult, RandomProjectionWriteConfig> {
+public class RandomProjectionWriteProc extends WriteProc<RandomProjection, RandomProjection, RandomProjectionWriteProc.WriteResult, RandomProjectionWriteConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.write", mode = WRITE)
     @Description("foo")

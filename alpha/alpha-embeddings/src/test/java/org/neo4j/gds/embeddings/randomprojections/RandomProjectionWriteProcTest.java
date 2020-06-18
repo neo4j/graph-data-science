@@ -34,12 +34,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class RandomProjectionWriteProcTest extends RandomProjectionsProcTest<RandomProjectionWriteConfig>
+class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProjectionWriteConfig>
     implements WritePropertyConfigTest<RandomProjection, RandomProjectionWriteConfig, RandomProjection> {
 
     @Override
     public Class<? extends AlgoBaseProc<RandomProjection, RandomProjection, RandomProjectionWriteConfig>> getProcedureClazz() {
-        return RandomProjectionsWriteProc.class;
+        return RandomProjectionWriteProc.class;
     }
 
     @Override

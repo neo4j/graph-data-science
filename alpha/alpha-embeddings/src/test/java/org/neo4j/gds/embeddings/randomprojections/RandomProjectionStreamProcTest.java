@@ -32,7 +32,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class RandomProjectionStreamProcTest extends RandomProjectionsProcTest<RandomProjectionStreamConfig> {
+class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProjectionStreamConfig> {
 
     @Override
     public Class<? extends AlgoBaseProc<RandomProjection, RandomProjection, RandomProjectionStreamConfig>> getProcedureClazz() {
