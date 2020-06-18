@@ -195,6 +195,6 @@ public final class UnionGraph implements Graph {
 
     @Override
     public boolean isUndirected() {
-        return first.isUndirected();
+        return graphs.stream().allMatch(Graph::isUndirected);
     }
 }
