@@ -12,7 +12,7 @@ This section describes the Betweenness Centrality algorithm in the Neo4j Graph D
 This topic includes:
 
 * <<algorithms-betweenness-centrality-intro, Introduction>>
-* <<algorithms-betweenness-centrality-considerations, Considerations>>
+* <<algorithms-betweenness-centrality-considerations, Considerations and sampling>>
 * <<algorithms-betweenness-centrality-syntax, Syntax>>
 ** <<algorithms-betweenness-centrality-syntax-stream, Stream>>
 ** <<algorithms-betweenness-centrality-syntax-stats, Stats>>
@@ -32,16 +32,17 @@ This topic includes:
 Betweenness centrality is a way of detecting the amount of influence a node has over the flow of information in a graph.
 It is often used to find nodes that serve as a bridge from one part of a graph to another.
 
-The algorithm calculates the shortest path between all pairs of nodes in an unweighted graph.
-Each node receives a score, based on the number of these shortest paths that pass through the node.
-Nodes that most frequently lie on these shortest paths will have a higher betweenness centrality score.
+The algorithm calculates the shortest paths between all pairs of nodes in an unweighted graph.
+Each node receives a score, based on the number of shortest paths that pass through the node.
+Nodes that more frequently lie on shortest paths between other nodes will have higher betweenness centrality scores.
 
-The GDS implementation is based on https://www.eecs.wsu.edu/~assefaw/CptS580-06/papers/brandes01centrality.pdf[Brandes' algorithm^] for unweighted graphs.
+The GDS implementation is based on https://www.uni-konstanz.de/mmsp/pubsys/publishedFiles/BrPi07.pdf[Brandes' approximate algorithm^] for unweighted graphs.
 The implementation requires _O(n + m)_ space and runs in _O(n * m)_ time, where _n_ is the number of nodes and _m_ the number of relationships in the graph.
 
 For more information on this algorithm, see:
 
 * https://www.eecs.wsu.edu/~assefaw/CptS580-06/papers/brandes01centrality.pdf[A Faster Algorithm for Betweenness Centrality^]
+* https://www.uni-konstanz.de/mmsp/pubsys/publishedFiles/BrPi07.pdf[Centrality Estimation in Large Networks^]
 * http://moreno.ss.uci.edu/23.pdf[A Set of Measures of Centrality Based on Betweenness^]
 
 [NOTE]
@@ -52,18 +53,30 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 
 
 [[algorithms-betweenness-centrality-considerations]]
-== Considerations
+== Considerations and sampling
 
-The algorithm computes Single Source Shortest paths (SSSP) for a set of start nodes.
-By default, all nodes in the graph are considered as start nodes, which leads to exact results.
-In the worst case, a single SSSP requires the whole graph to be duplicated in memory.
+The Betweenness Centrality algorithm can be very resource-intensive to compute.
+https://www.uni-konstanz.de/mmsp/pubsys/publishedFiles/BrPi07.pdf[Brandes' approximate algorithm^] computes single-source shortest paths (SSSP) for a set of source nodes.
+When all nodes are selected as source nodes, the algorithm produces an exact result.
+However, for large graphs this can potentially lead to very long runtimes.
+Thus, approximating the results by computing the SSSPs for only a subset of nodes can be useful.
+In GDS we refer to this technique as _sampling_, where the size of the source node set is the _sampling size_.
 
 There are two things to consider when executing the algorithm on large graphs:
 
-* A higher parallelism leads to higher memory consumption as each thread executes SSSPs for a subset of start nodes sequentially.
-* A higher number of start nodes leads to better results, but also to a potentially much longer execution time.
+* A higher parallelism leads to higher memory consumption as each thread executes SSSPs for a subset of source nodes sequentially.
+** In the worst case, a single SSSP requires the whole graph to be duplicated in memory.
+* A higher sampling size leads to more accurate results, but also to a potentially much longer execution time.
 
-Changing the value of parameters `concurrency` and `samplingSize` can help with these considerations.
+Changing the values of the configuration parameters `concurrency` and `samplingSize`, respectively, can help to manage these considerations.
+
+
+[[algorithms-betweenness-centrality-sampling-strategies]]
+=== Sampling strategies
+
+Brandes defines several strategies for selecting source nodes.
+The GDS implementation is based on the random degree selection strategy, which selects nodes with a probability proportional to their degree.
+The idea behind this strategy is that such nodes are likely to lie on many shortest paths in the graph and thus have a higher contribution to the betweenness centrality score.
 
 
 [[algorithms-betweenness-centrality-syntax]]
