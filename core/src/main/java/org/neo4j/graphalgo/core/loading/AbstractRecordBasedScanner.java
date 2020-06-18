@@ -189,7 +189,6 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
             };
         }
 
-        @SuppressWarnings("ConstantConditions")
         @Override
         public void close() {
             if (pageCursor != null) {

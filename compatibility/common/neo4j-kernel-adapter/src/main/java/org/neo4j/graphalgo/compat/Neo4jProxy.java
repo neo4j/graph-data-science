@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.config.Setting;

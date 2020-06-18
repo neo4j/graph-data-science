@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class SimilaritiesFuncTest extends BaseProcTest {
 

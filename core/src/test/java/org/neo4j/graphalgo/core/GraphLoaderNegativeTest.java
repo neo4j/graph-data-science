@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

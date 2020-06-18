@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.canonization;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

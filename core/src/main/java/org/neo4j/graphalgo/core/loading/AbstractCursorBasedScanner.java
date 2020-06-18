@@ -82,7 +82,6 @@ abstract class AbstractCursorBasedScanner<
             return true;
         }
 
-        @SuppressWarnings("ConstantConditions")
         @Override
         public void close() {
             if (cursor != null) {
