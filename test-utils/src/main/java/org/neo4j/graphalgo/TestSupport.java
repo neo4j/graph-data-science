@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -131,6 +132,38 @@ public final class TestSupport {
 
         return new TestGraph(gdlFactory.build().graphStore().getUnion(), gdlFactory::nodeId, name);
     }
+
+    public static void assertLongValues(TestGraph graph, Function<Long, Long> actualValues, Map<String, Long> expectedValues) {
+        expectedValues.forEach((variable, expectedValue) -> {
+            Long actualValue = actualValues.apply(graph.toMappedNodeId(variable));
+            assertEquals(
+                expectedValue,
+                actualValue,
+                formatWithLocale(
+                    "Values do not match for variable %s. Expected %s, got %s.",
+                    variable,
+                    expectedValue.toString(),
+                    actualValue.toString()
+                ));
+        });
+    }
+
+    public static void assertDoubleValues(TestGraph graph, Function<Long, Double> actualValues, Map<String, Double> expectedValues, double delta) {
+        expectedValues.forEach((variable, expectedValue) -> {
+            Double actualValue = actualValues.apply(graph.toMappedNodeId(variable));
+            assertEquals(
+                expectedValue,
+                actualValue,
+                delta,
+                formatWithLocale(
+                    "Values do not match for variable %s. Expected %s, got %s.",
+                    variable,
+                    expectedValue.toString(),
+                    actualValue.toString()
+                ));
+        });
+    }
+
 
     public static void assertGraphEquals(Graph expected, Graph actual) {
         Assertions.assertEquals(expected.nodeCount(), actual.nodeCount(), "Node counts do not match.");
