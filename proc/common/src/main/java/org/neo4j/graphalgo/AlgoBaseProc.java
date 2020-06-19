@@ -351,7 +351,12 @@ public abstract class AlgoBaseProc<
         }
     }
 
-    protected void validateNoMixingWithUndirected(GraphCreateConfig graphCreateConfig, CONFIG config) {
+    /**
+     * Validates that {@link Orientation#UNDIRECTED} is not mixed with {@link Orientation#NATURAL}
+     * and {@link Orientation#REVERSE}. If a relationship type filter is present in the algorithm
+     * config, only those relationship projections are considered in the validation.
+     */
+    protected void validateOrientationCombinations(GraphCreateConfig graphCreateConfig, CONFIG algorithmConfig) {
         if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
             GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
             var filteredProjections = storeConfig
@@ -359,8 +364,8 @@ public abstract class AlgoBaseProc<
                 .projections()
                 .entrySet()
                 .stream()
-                .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
-                                 config.relationshipTypes().contains(entry.getKey().name()))
+                .filter(entry -> algorithmConfig.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
+                                 algorithmConfig.relationshipTypes().contains(entry.getKey().name()))
                 .collect(toList());
 
             boolean allUndirected = filteredProjections

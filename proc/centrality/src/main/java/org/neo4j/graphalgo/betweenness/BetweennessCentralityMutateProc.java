@@ -71,7 +71,7 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
 
     @Override
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, BetweennessCentralityMutateConfig config) {
-        validateNoMixingWithUndirected(graphCreateConfig, config);
+        validateOrientationCombinations(graphCreateConfig, config);
     }
 
     @Override
