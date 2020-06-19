@@ -36,16 +36,89 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
-public interface NeverCombineUndirectedOrientationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
+public interface OrientationCombinationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
-    @MethodSource("badCombinations")
-    @ParameterizedTest(name = "Orientation(s): {1}")
-    default void badCombinations(List<String> filter, String ignoredModeName) {
+    private void setupDb() {
         runQuery(graphDb(), "CALL gds.graph.create('directedMultiRels', '*', {" +
                             "  R: { type: '*', orientation: 'REVERSE' }, " +
                             "  U: { type: '*', orientation: 'UNDIRECTED' }, " +
                             "  N: { type: '*', orientation: 'NATURAL' } " +
                             "})");
+    }
+
+    static Stream<Arguments> goodCombinations() {
+        return Stream.of(
+            Arguments.of(
+                List.of("N", "R"),
+                "Natural and Reverse"
+            ),
+            Arguments.of(
+                List.of("U"),
+                "Undirected"
+            ),
+            Arguments.of(
+                List.of("N"),
+                "Natural"
+            ),
+            Arguments.of(
+                List.of("R"),
+                "Reverse"
+            )
+        );
+    }
+
+    @MethodSource("goodCombinations")
+    @ParameterizedTest(name = "Orientation(s): {1}")
+    default void goodCombinations(List<String> filter, String ignoredModeName) {
+        setupDb();
+
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper
+            .empty()
+            .withEntry("relationshipTypes", filter));
+
+        applyOnProcedure(proc -> {
+            getProcedureMethods(proc)
+                .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
+                .forEach(noneEstimateMethod -> {
+                    try {
+                        // it should work
+                        noneEstimateMethod.invoke(
+                            proc,
+                            "directedMultiRels",
+                            config.toMap()
+                        );
+                    } catch (Exception e) {
+                        fail(e);
+                    }
+                });
+        });
+    }
+
+    static Stream<Arguments> badCombinations() {
+        return Stream.of(
+            Arguments.of(
+                List.of("N", "U", "R"),
+                "Natural, Undirected and Reverse"
+            ),
+            Arguments.of(
+                List.of("U", "R"),
+                "Undirected and Reverse"
+            ),
+            Arguments.of(
+                List.of("U", "N"),
+                "Undirected and Natural"
+            ),
+            Arguments.of(
+                List.of("*"),
+                "All"
+            )
+        );
+    }
+
+    @MethodSource("badCombinations")
+    @ParameterizedTest(name = "Orientation(s): {1}")
+    default void badCombinations(List<String> filter, String ignoredModeName) {
+        setupDb();
 
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper
             .empty()
@@ -73,81 +146,8 @@ public interface NeverCombineUndirectedOrientationTest<ALGORITHM extends Algorit
         });
     }
 
-    @MethodSource("goodCombinations")
-    @ParameterizedTest(name = "Orientation(s): {1}")
-    default void goodCombinations(List<String> filter, String ignoredModeName) {
-        runQuery(graphDb(), "CALL gds.graph.create('directedMultiRels', '*', {" +
-                            "  R: { type: '*', orientation: 'REVERSE' }, " +
-                            "  U: { type: '*', orientation: 'UNDIRECTED' }, " +
-                            "  N: { type: '*', orientation: 'NATURAL' } " +
-                            "})");
-
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper
-            .empty()
-            .withEntry("relationshipTypes", filter));
-
-        applyOnProcedure(proc -> {
-            getProcedureMethods(proc)
-                .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
-                .forEach(noneEstimateMethod -> {
-                    try {
-                        // it should work
-                        noneEstimateMethod.invoke(
-                            proc,
-                            "directedMultiRels",
-                            config.toMap()
-                        );
-                    } catch (Exception e) {
-                        fail(e);
-                    }
-                });
-        });
-    }
-
     default String expectedValidationMessage() {
         return "Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported.";
-    }
-
-    static Stream<Arguments> badCombinations() {
-        return Stream.of(
-            Arguments.of(
-                List.of("N", "U", "R"),
-                "Natural, Undirected and Reverse"
-            ),
-            Arguments.of(
-                List.of("U", "R"),
-                "Undirected and Reverse"
-            ),
-            Arguments.of(
-                List.of("U", "N"),
-                "Undirected and Natural"
-            ),
-            Arguments.of(
-                List.of("*"),
-                "All"
-            )
-        );
-    }
-
-    static Stream<Arguments> goodCombinations() {
-        return Stream.of(
-            Arguments.of(
-                List.of("N", "R"),
-                "Natural and Reverse"
-            ),
-            Arguments.of(
-                List.of("U"),
-                "Undirected"
-            ),
-            Arguments.of(
-                List.of("N"),
-                "Natural"
-            ),
-            Arguments.of(
-                List.of("R"),
-                "Reverse"
-            )
-        );
     }
 
 }
