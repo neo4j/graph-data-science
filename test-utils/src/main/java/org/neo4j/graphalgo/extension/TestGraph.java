@@ -33,6 +33,10 @@ public class TestGraph extends FilterGraph {
         this.idFunction = idFunction;
     }
 
+    public Graph innerGraph() {
+        return graph;
+    }
+
     public long toOriginalNodeId(String variable) {
         return idFunction.of(variable);
     }

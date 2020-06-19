@@ -19,16 +19,16 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.stream.Stream;
 
@@ -36,41 +36,46 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-class SimilarityGraphBuilderTest extends AlgoTestBase {
+@GdlExtension
+class SimilarityGraphBuilderTest {
 
-    private static final String DB_CYPHER =
+    @GdlGraph
+    private static final String DB =
         "CREATE" +
-        "  (a:Person {name: 'Alice'})" +
-        ", (b:Person {name: 'Bob'})" +
-        ", (i1:Item {name: 'p1'})" +
-        ", (i2:Item {name: 'p2'})" +
-        ", (a)-[:LIKES]->(i1)" +
-        ", (a)-[:LIKES]->(i2)" +
-        ", (b)-[:LIKES]->(i1)" +
+        "  (a:Person)-[:LIKES]->(i1:Item)" +
+        ", (a)-[:LIKES]->(i2:Item)" +
+        ", (b:Person)-[:LIKES]->(i1)" +
         ", (b)-[:LOVES]->(i2)";
 
-    @BeforeEach
-    void setup() {
-        runQuery(DB_CYPHER);
-    }
+    @GdlGraph(graphNamePrefix = "unlabelled")
+    private static final String DB_UNLABELLED =
+        "CREATE" +
+        "  (a)-[:REL]->(i1)" +
+        ", (a)-[:REL]->(i2)" +
+        ", (b)-[:REL]->(i1)" +
+        ", (b)-[:REL]->(i2)";
+
+    @Inject
+    private TestGraph graph;
+
+    @Inject
+    private TestGraph unlabelledGraph;
 
     @Test
     void testConstructionFromHugeGraph() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .globalOrientation(Orientation.NATURAL)
-            .build()
-            .graph();
-
-        assertEquals(HugeGraph.class, graph.getClass());
+        assertEquals(HugeGraph.class, unlabelledGraph.innerGraph().getClass());
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
-            graph,
+            unlabelledGraph,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(0, 1, 0.42)));
+        Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(
+            graph.toMappedNodeId("a"),
+            graph.toMappedNodeId("b"),
+            0.42
+        )));
 
         assertEquals(graph.nodeCount(), simGraph.nodeCount());
         assertEquals(1, simGraph.relationshipCount());
@@ -80,17 +85,7 @@ class SimilarityGraphBuilderTest extends AlgoTestBase {
 
     @Test
     void testConstructionFromUnionGraph() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel("Person")
-            .addNodeLabel("Item")
-            .addRelationshipType("LIKES")
-            .addRelationshipType("LOVES")
-            .globalOrientation(Orientation.NATURAL)
-            .build()
-            .graph();
-
-        assertEquals(UnionGraph.class, graph.getClass());
+        assertEquals(UnionGraph.class, graph.innerGraph().getClass());
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             graph,
@@ -98,7 +93,11 @@ class SimilarityGraphBuilderTest extends AlgoTestBase {
             AllocationTracker.EMPTY
         );
 
-        Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(0, 1, 0.42)));
+        Graph simGraph = similarityGraphBuilder.build(Stream.of(new SimilarityResult(
+            graph.toMappedNodeId("a"),
+            graph.toMappedNodeId("b"),
+            0.42
+        )));
 
         assertEquals(graph.nodeCount(), simGraph.nodeCount());
         assertEquals(1, simGraph.relationshipCount());
