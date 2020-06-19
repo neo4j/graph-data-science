@@ -23,26 +23,27 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -57,7 +58,8 @@ import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
-class LouvainTest extends AlgoTestBase {
+@GdlExtension
+class LouvainTest {
 
     static ImmutableLouvainStreamConfig.Builder defaultConfigBuilder() {
         return ImmutableLouvainStreamConfig.builder()
@@ -68,6 +70,7 @@ class LouvainTest extends AlgoTestBase {
             .concurrency(1);
     }
 
+    @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {seed: 1})" +        // 0
@@ -89,41 +92,81 @@ class LouvainTest extends AlgoTestBase {
         ", (v:Other)" +
         ", (w:Label)" +
 
-        ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-        ", (a)-[:TYPE {weight: 1.0}]->(d)" +
-        ", (a)-[:TYPE {weight: 1.0}]->(f)" +
-        ", (b)-[:TYPE {weight: 1.0}]->(d)" +
-        ", (b)-[:TYPE {weight: 1.0}]->(x)" +
-        ", (b)-[:TYPE {weight: 1.0}]->(g)" +
-        ", (b)-[:TYPE {weight: 1.0}]->(e)" +
-        ", (c)-[:TYPE {weight: 1.0}]->(x)" +
-        ", (c)-[:TYPE {weight: 1.0}]->(f)" +
-        ", (d)-[:TYPE {weight: 1.0}]->(k)" +
-        ", (e)-[:TYPE {weight: 1.0}]->(x)" +
-        ", (e)-[:TYPE {weight: 0.01}]->(f)" +
-        ", (e)-[:TYPE {weight: 1.0}]->(h)" +
-        ", (f)-[:TYPE {weight: 1.0}]->(g)" +
-        ", (g)-[:TYPE {weight: 1.0}]->(h)" +
-        ", (h)-[:TYPE {weight: 1.0}]->(i)" +
-        ", (h)-[:TYPE {weight: 1.0}]->(j)" +
-        ", (i)-[:TYPE {weight: 1.0}]->(k)" +
-        ", (j)-[:TYPE {weight: 1.0}]->(k)" +
-        ", (j)-[:TYPE {weight: 1.0}]->(m)" +
-        ", (j)-[:TYPE {weight: 1.0}]->(n)" +
-        ", (k)-[:TYPE {weight: 1.0}]->(m)" +
-        ", (k)-[:TYPE {weight: 1.0}]->(l)" +
-        ", (l)-[:TYPE {weight: 1.0}]->(n)" +
-        ", (m)-[:TYPE {weight: 1.0}]->(n)";
+        ", (a)-[:TYPE_OUT {weight: 1.0}]->(b)" +
+        ", (a)-[:TYPE_OUT {weight: 1.0}]->(d)" +
+        ", (a)-[:TYPE_OUT {weight: 1.0}]->(f)" +
+        ", (b)-[:TYPE_OUT {weight: 1.0}]->(d)" +
+        ", (b)-[:TYPE_OUT {weight: 1.0}]->(x)" +
+        ", (b)-[:TYPE_OUT {weight: 1.0}]->(g)" +
+        ", (b)-[:TYPE_OUT {weight: 1.0}]->(e)" +
+        ", (c)-[:TYPE_OUT {weight: 1.0}]->(x)" +
+        ", (c)-[:TYPE_OUT {weight: 1.0}]->(f)" +
+        ", (d)-[:TYPE_OUT {weight: 1.0}]->(k)" +
+        ", (e)-[:TYPE_OUT {weight: 1.0}]->(x)" +
+        ", (e)-[:TYPE_OUT {weight: 0.01}]->(f)" +
+        ", (e)-[:TYPE_OUT {weight: 1.0}]->(h)" +
+        ", (f)-[:TYPE_OUT {weight: 1.0}]->(g)" +
+        ", (g)-[:TYPE_OUT {weight: 1.0}]->(h)" +
+        ", (h)-[:TYPE_OUT {weight: 1.0}]->(i)" +
+        ", (h)-[:TYPE_OUT {weight: 1.0}]->(j)" +
+        ", (i)-[:TYPE_OUT {weight: 1.0}]->(k)" +
+        ", (j)-[:TYPE_OUT {weight: 1.0}]->(k)" +
+        ", (j)-[:TYPE_OUT {weight: 1.0}]->(m)" +
+        ", (j)-[:TYPE_OUT {weight: 1.0}]->(n)" +
+        ", (k)-[:TYPE_OUT {weight: 1.0}]->(m)" +
+        ", (k)-[:TYPE_OUT {weight: 1.0}]->(l)" +
+        ", (l)-[:TYPE_OUT {weight: 1.0}]->(n)" +
+        ", (m)-[:TYPE_OUT {weight: 1.0}]->(n)" +
+
+        ", (a)<-[:TYPE_IN {weight: 1.0}]-(b)" +
+        ", (a)<-[:TYPE_IN {weight: 1.0}]-(d)" +
+        ", (a)<-[:TYPE_IN {weight: 1.0}]-(f)" +
+        ", (b)<-[:TYPE_IN {weight: 1.0}]-(d)" +
+        ", (b)<-[:TYPE_IN {weight: 1.0}]-(x)" +
+        ", (b)<-[:TYPE_IN {weight: 1.0}]-(g)" +
+        ", (b)<-[:TYPE_IN {weight: 1.0}]-(e)" +
+        ", (c)<-[:TYPE_IN {weight: 1.0}]-(x)" +
+        ", (c)<-[:TYPE_IN {weight: 1.0}]-(f)" +
+        ", (d)<-[:TYPE_IN {weight: 1.0}]-(k)" +
+        ", (e)<-[:TYPE_IN {weight: 1.0}]-(x)" +
+        ", (e)<-[:TYPE_IN {weight: 0.01}]-(f)" +
+        ", (e)<-[:TYPE_IN {weight: 1.0}]-(h)" +
+        ", (f)<-[:TYPE_IN {weight: 1.0}]-(g)" +
+        ", (g)<-[:TYPE_IN {weight: 1.0}]-(h)" +
+        ", (h)<-[:TYPE_IN {weight: 1.0}]-(i)" +
+        ", (h)<-[:TYPE_IN {weight: 1.0}]-(j)" +
+        ", (i)<-[:TYPE_IN {weight: 1.0}]-(k)" +
+        ", (j)<-[:TYPE_IN {weight: 1.0}]-(k)" +
+        ", (j)<-[:TYPE_IN {weight: 1.0}]-(m)" +
+        ", (j)<-[:TYPE_IN {weight: 1.0}]-(n)" +
+        ", (k)<-[:TYPE_IN {weight: 1.0}]-(m)" +
+        ", (k)<-[:TYPE_IN {weight: 1.0}]-(l)" +
+        ", (l)<-[:TYPE_IN {weight: 1.0}]-(n)" +
+        ", (m)<-[:TYPE_IN {weight: 1.0}]-(n)";
+
+    @Inject
+    private GraphStore graphStore;
+
+    @Inject
+    private IdFunction idFunction;
+
+    private long[] ids(String... variables) {
+        return Arrays.stream(variables).mapToLong(idFunction::of).toArray();
+    }
 
     @Test
-    void unweightedLouvain() {
-        Graph graph = loadGraph(DB_CYPHER, false);
+    void testUnweighted() {
+        var graph = graphStore.getGraph(
+            NodeLabel.listOf("Node"),
+            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            Optional.empty()
+        );
 
         Louvain algorithm = new Louvain(
             graph,
             defaultConfigBuilder().build(),
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -134,17 +177,17 @@ class LouvainTest extends AlgoTestBase {
 
         assertCommunities(
             dendrogram[0],
-            new long[]{0, 1, 3},
-            new long[]{2, 4, 5, 14},
-            new long[]{6, 7, 8},
-            new long[]{9, 10, 11, 12, 13}
+            ids("a", "b", "d"),
+            ids("c", "e", "f", "x"),
+            ids("g", "h", "i"),
+            ids("j", "k", "l", "m", "n")
         );
 
         assertCommunities(
             dendrogram[1],
-            new long[]{0, 1, 2, 3, 4, 5, 14},
-            new long[]{6, 7, 8},
-            new long[]{9, 10, 11, 12, 13}
+            ids("a", "b", "c", "d", "e", "f", "x"),
+            ids("g", "h", "i"),
+            ids("j", "k", "l", "m", "n")
         );
 
         assertEquals(2, algorithm.levels());
@@ -152,14 +195,18 @@ class LouvainTest extends AlgoTestBase {
     }
 
     @Test
-    void weightedLouvain() {
-        Graph graph = loadGraph(DB_CYPHER, true);
+    void testWeighted() {
+        var graph = graphStore.getGraph(
+            NodeLabel.listOf("Node"),
+            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            Optional.of("weight")
+        );
 
         Louvain algorithm = new Louvain(
             graph,
             defaultConfigBuilder().build(),
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -170,17 +217,17 @@ class LouvainTest extends AlgoTestBase {
 
         assertCommunities(
             dendrogram[0],
-            new long[]{0, 1, 3},
-            new long[]{2, 4, 14},
-            new long[]{5, 6},
-            new long[]{7, 8},
-            new long[]{9, 10, 11, 12, 13}
+            ids("a", "b", "d"),
+            ids("c", "e", "x"),
+            ids("f", "g"),
+            ids("h", "i"),
+            ids("j", "k", "l", "m", "n")
         );
 
         assertCommunities(
             dendrogram[1],
-            new long[]{0, 1, 2, 3, 4, 5, 6, 14},
-            new long[]{7, 8, 9, 10, 11, 12, 13}
+            ids("a", "b", "c", "d", "e", "f", "g", "x"),
+            ids("h", "i", "j", "k", "l", "m", "n")
         );
 
         assertEquals(2, algorithm.levels());
@@ -188,14 +235,18 @@ class LouvainTest extends AlgoTestBase {
     }
 
     @Test
-    void seededLouvain() {
-        Graph graph = loadGraph(DB_CYPHER, true, "seed");
+    void testSeeded() {
+        var graph = graphStore.getGraph(
+            NodeLabel.listOf("Node"),
+            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            Optional.of("weight")
+        );
 
         Louvain algorithm = new Louvain(
             graph,
             defaultConfigBuilder().seedProperty("seed").build(),
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -204,16 +255,15 @@ class LouvainTest extends AlgoTestBase {
         final HugeLongArray[] dendrogram = algorithm.dendrograms();
         final double[] modularities = algorithm.modularities();
 
-        Map<Long, Long[]> expectedCommunitiesWithlabels = MapUtil.genericMap(
-            new HashMap<>(),
-            1L, new Long[]{0L, 1L, 2L, 3L, 4L, 5L, 14L},
-            2L, new Long[]{6L, 7L, 8L},
-            42L, new Long[]{9L, 10L, 11L, 12L, 13L}
+        var expectedCommunitiesWithLabels = Map.of(
+            1L, ids("a", "b", "c", "d", "e", "f", "x"),
+            2L, ids("g", "h", "i"),
+            42L, ids("j", "k", "l", "m", "n")
         );
 
         assertCommunitiesWithLabels(
             dendrogram[0],
-            expectedCommunitiesWithlabels
+            expectedCommunitiesWithLabels
         );
 
         assertEquals(1, algorithm.levels());
@@ -222,7 +272,11 @@ class LouvainTest extends AlgoTestBase {
 
     @Test
     void testTolerance() {
-        Graph graph = loadGraph(DB_CYPHER);
+        var graph = graphStore.getGraph(
+            NodeLabel.listOf("Node"),
+            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            Optional.empty()
+        );
 
         Louvain algorithm = new Louvain(
             graph,
@@ -234,7 +288,7 @@ class LouvainTest extends AlgoTestBase {
                 .concurrency(1)
                 .build(),
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -245,7 +299,11 @@ class LouvainTest extends AlgoTestBase {
 
     @Test
     void testMaxLevels() {
-        Graph graph = loadGraph(DB_CYPHER);
+        var graph = graphStore.getGraph(
+            NodeLabel.listOf("Node"),
+            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            Optional.empty()
+        );
 
         Louvain algorithm = new Louvain(
             graph,
@@ -257,13 +315,24 @@ class LouvainTest extends AlgoTestBase {
                 .concurrency(1)
                 .build(),
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
         assertEquals(1, algorithm.levels());
+    }
+
+    static Stream<Arguments> memoryEstimationTuples() {
+        return Stream.of(
+            arguments(1, 1, 6414145, 23941592),
+            arguments(1, 10, 6414145, 31141952),
+            arguments(4, 1, 6417433, 29745968),
+            arguments(4, 10, 6417433, 36946328),
+            arguments(42, 1, 6459081, 105719456),
+            arguments(42, 10, 6459081, 112919816)
+        );
     }
 
     @ParameterizedTest
@@ -314,16 +383,22 @@ class LouvainTest extends AlgoTestBase {
             .concurrency(1)
             .build();
 
-        MemoryTree memoryTree = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithoutProperties, 1);
-        MemoryTree memoryTreeOneProperty = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithOneProperty, 1);
-        MemoryTree memoryTreeTwoProperties = new LouvainFactory<>().memoryEstimation(config).estimate(dimensionsWithTwoProperties, 1);
+        MemoryTree memoryTree = new LouvainFactory<>()
+            .memoryEstimation(config)
+            .estimate(dimensionsWithoutProperties, 1);
+        MemoryTree memoryTreeOneProperty = new LouvainFactory<>()
+            .memoryEstimation(config)
+            .estimate(dimensionsWithOneProperty, 1);
+        MemoryTree memoryTreeTwoProperties = new LouvainFactory<>()
+            .memoryEstimation(config)
+            .estimate(dimensionsWithTwoProperties, 1);
 
         assertEquals(memoryTree.memoryUsage(), memoryTreeOneProperty.memoryUsage());
         assertEquals(memoryTreeOneProperty.memoryUsage(), memoryTreeTwoProperties.memoryUsage());
     }
 
     @Test
-    void testCanBeInterruptedByTxCancelation() {
+    void testCanBeInterruptedByTxCancellation() {
         Graph graph = new RandomGraphGenerator(
             100_000,
             10,
@@ -337,17 +412,21 @@ class LouvainTest extends AlgoTestBase {
                 graph,
                 defaultConfigBuilder().concurrency(2).build(),
                 Pools.DEFAULT,
-                progressLogger,
+                ProgressLogger.NULL_LOGGER,
                 AllocationTracker.EMPTY
             )
-            .withTerminationFlag(terminationFlag)
-            .compute(), 500, 1000
+                .withTerminationFlag(terminationFlag)
+                .compute(), 500, 1000
         );
     }
 
     @Test
     void testLogging() {
-        var graph = loadGraph(DB_CYPHER);
+        var graph = graphStore.getGraph(
+            NodeLabel.listOf("Node"),
+            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            Optional.empty()
+        );
 
         var config = defaultConfigBuilder().build();
 
@@ -366,54 +445,5 @@ class LouvainTest extends AlgoTestBase {
         assertTrue(testLogger.containsMessage(INFO, ":: Start"));
         assertTrue(testLogger.containsMessage(INFO, "Level 1 :: Finished"));
         assertTrue(testLogger.containsMessage(INFO, ":: Finished"));
-    }
-
-    static Stream<Arguments> memoryEstimationTuples() {
-        return Stream.of(
-            arguments(1, 1, 6414145, 23941592),
-            arguments(1, 10, 6414145, 31141952),
-            arguments(4, 1, 6417433, 29745968),
-            arguments(4, 10, 6417433, 36946328),
-            arguments(42, 1, 6459081, 105719456),
-            arguments(42, 10, 6459081, 112919816)
-        );
-    }
-
-    private Graph loadGraph(String cypher, String... nodeProperties) {
-        return loadGraph(cypher, false, nodeProperties);
-    }
-
-    private Graph loadGraph(
-        String cypher,
-        boolean loadRelationshipProperty,
-        String... nodeProperties
-    ) {
-        runQuery(cypher);
-
-        PropertyMapping[] nodePropertyMappings = Arrays.stream(nodeProperties)
-            .map(p -> PropertyMapping.of(p, -1))
-            .toArray(PropertyMapping[]::new);
-
-        PropertyMapping relationshipPropertyMapping = PropertyMapping.of("weight", 1.0);
-
-        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel("Node")
-            .putRelationshipProjectionsWithIdentifier(
-                "TYPE_OUT",
-                RelationshipProjection.of("TYPE", Orientation.NATURAL)
-            )
-            .putRelationshipProjectionsWithIdentifier(
-                "TYPE_IN",
-                RelationshipProjection.of("TYPE", Orientation.REVERSE)
-            )
-            .addNodeProperties(nodePropertyMappings);
-        if (loadRelationshipProperty) {
-            storeLoaderBuilder.addRelationshipProperty(relationshipPropertyMapping);
-        }
-        return storeLoaderBuilder
-            .build()
-            .graph();
-
     }
 }

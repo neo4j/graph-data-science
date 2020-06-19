@@ -107,21 +107,21 @@ public final class CommunityHelper {
         }
     }
 
-    public static void assertCommunitiesWithLabels(HugeLongArray communityData, Map<Long, Long[]> expectedCommunities) {
+    public static void assertCommunitiesWithLabels(HugeLongArray communityData, Map<Long, long[]> expectedCommunities) {
         assertCommunitiesWithLabels(communityData.toArray(), expectedCommunities);
     }
 
-    public static void assertCommunitiesWithLabels(long[] communityData, Map<Long, Long[]> expectedCommunities) {
+    public static void assertCommunitiesWithLabels(long[] communityData, Map<Long, long[]> expectedCommunities) {
         List<Long> communityDataList = Arrays.stream(communityData).boxed().collect(toList());
         List<List<Long>> expectedCommunitiesList = expectedCommunities
             .values()
             .stream()
-            .map(l -> Arrays.stream(l).collect(toList()))
+            .map(l -> Arrays.stream(l).boxed().collect(toList()))
             .collect(toList());
 
         assertCommunities(communityDataList, expectedCommunitiesList);
         for (Long label : expectedCommunities.keySet()) {
-            Long[] community = expectedCommunities.get(label);
+            long[] community = expectedCommunities.get(label);
             for (Long nodeId : community) {
                 assertEquals(label, communityData[nodeId.intValue()],
                     formatWithLocale(

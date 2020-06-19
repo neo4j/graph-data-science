@@ -21,6 +21,10 @@ package org.neo4j.graphalgo;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 public class RelationshipType extends ElementIdentifier {
 
     public static final RelationshipType ALL_RELATIONSHIPS = RelationshipType.of("__ALL__");
@@ -36,5 +40,9 @@ public class RelationshipType extends ElementIdentifier {
 
     public static RelationshipType of(@NotNull String name) {
         return new RelationshipType(name);
+    }
+
+    public static Collection<RelationshipType> listOf(@NotNull String... relationshipTypes) {
+        return Arrays.stream(relationshipTypes).map(RelationshipType::of).collect(Collectors.toList());
     }
 }
