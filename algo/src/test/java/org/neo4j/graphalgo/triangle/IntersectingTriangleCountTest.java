@@ -68,7 +68,7 @@ class IntersectingTriangleCountTest {
             gdl.append(formatWithLocale("(a%d)-[:T]->()-[:T]->()-[:T]->(a%d) ", i, i));
         }
 
-        TriangleCountResult result = compute(fromGdl(gdl.toString().toString(), UNDIRECTED));
+        TriangleCountResult result = compute(fromGdl(gdl.toString(), UNDIRECTED));
 
         assertEquals(nbrOfTriangles, result.globalTriangles());
         assertEquals(3 * nbrOfTriangles, result.localTriangles().size());
