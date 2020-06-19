@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.extension.IdFunction;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class CommunityHelper {
+
+    private CommunityHelper() {}
 
     public static void assertCommunities(HugeLongArray communityData, long[]... communities) {
         assertCommunities(communityData.toArray(), communities);

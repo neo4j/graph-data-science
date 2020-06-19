@@ -19,83 +19,69 @@
  */
 package org.neo4j.graphalgo.wcc;
 
-import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CommunityHelper;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
-class WccThresholdTest extends AlgoTestBase {
+@GdlExtension
+class WccThresholdTest {
 
-    @BeforeEach
-    void setup() {
-        @Language("Cypher") String cypher =
-            "CREATE" +
-            " (nA:Label {nodeId: 0, seedId: 42})" +
-            ",(nB:Label {nodeId: 1, seedId: 42})" +
-            ",(nC:Label {nodeId: 2, seedId: 42})" +
-            ",(nD:Label {nodeId: 3, seedId: 42})" +
-            ",(nE {nodeId: 4})" +
-            ",(nF {nodeId: 5})" +
-            ",(nG {nodeId: 6})" +
-            ",(nH {nodeId: 7})" +
-            ",(nI {nodeId: 8})" +
-            ",(nJ {nodeId: 9})" +
-            // {A, B, C, D}
-            ",(nA)-[:TYPE]->(nB)" +
-            ",(nB)-[:TYPE]->(nC)" +
-            ",(nC)-[:TYPE]->(nD)" +
-            ",(nD)-[:TYPE {cost:4.2}]->(nE)" + // threshold UF should split here
-            // {E, F, G}
-            ",(nE)-[:TYPE]->(nF)" +
-            ",(nF)-[:TYPE]->(nG)" +
-            // {H, I}
-            ",(nH)-[:TYPE]->(nI)";
-        runQuery(cypher);
+    @GdlGraph
+    private static final String DB =
+        "CREATE" +
+        "  (a:Label {nodeId: 0, seedId: 42})" +
+        ", (b:Label {nodeId: 1, seedId: 42})" +
+        ", (c:Label {nodeId: 2, seedId: 42})" +
+        ", (d:Label {nodeId: 3, seedId: 42})" +
+        ", (e {nodeId: 4})" +
+        ", (f {nodeId: 5})" +
+        ", (g {nodeId: 6})" +
+        ", (h {nodeId: 7})" +
+        ", (i {nodeId: 8})" +
+        ", (j {nodeId: 9})" +
+        // {A, B, C, D}
+        ", (a)-[:TYPE {cost: 10.0}]->(b)" +
+        ", (b)-[:TYPE {cost: 10.0}]->(c)" +
+        ", (c)-[:TYPE {cost: 10.0}]->(d)" +
+        ", (d)-[:TYPE {cost:  4.2}]->(e)" + // threshold UF should split here
+        // {E, F, G}
+        ", (e)-[:TYPE {cost: 10.0}]->(f)" +
+        ", (f)-[:TYPE {cost: 10.0}]->(g)" +
+        // {H, I}
+        ", (h)-[:TYPE {cost: 10.0}]->(i)";
+
+    @Inject
+    private TestGraph graph;
+
+    private long[][] ids(String[][] variables) {
+        return Arrays
+            .stream(variables)
+            .map(component -> Arrays.stream(component).mapToLong(graph::toMappedNodeId).toArray())
+            .toArray(long[][]::new);
     }
 
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.wcc.WccThresholdTest#thresholdParams")
-    void testThreshold(double threshold, long[][] expectedComponents) {
-
-        GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
-            .graphName("myGraph")
-            .nodeProjections(emptyList())
-            .relationshipProjections(singletonList(RelationshipProjection.builder()
-                .type("TYPE")
-                .properties(
-                    PropertyMappings.of(
-                        PropertyMapping.of("cost", 10.0)
-                    )
-                ).build()))
-            .build();
-
-        Graph graph = graphLoader.graph();
-
+    void testThreshold(double threshold, String[][] expectedComponents) {
         WccStreamConfig wccConfig = ImmutableWccStreamConfig
             .builder()
             .threshold(threshold)
             .relationshipWeightProperty("cost")
-            .implicitCreateConfig(graphLoader.createConfig())
             .build();
 
         DisjointSetStruct dss = new Wcc(
@@ -103,7 +89,7 @@ class WccThresholdTest extends AlgoTestBase {
             Pools.DEFAULT,
             DEFAULT_BATCH_SIZE,
             wccConfig,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         ).compute();
 
@@ -113,13 +99,28 @@ class WccThresholdTest extends AlgoTestBase {
             return true;
         });
 
-        CommunityHelper.assertCommunities(communityData, expectedComponents);
+        CommunityHelper.assertCommunities(communityData, ids(expectedComponents));
     }
 
     static Stream<Arguments> thresholdParams() {
         return Stream.of(
-            arguments(5.0, new long[][]{new long[]{0L, 1L, 2L, 3L}, new long[]{4, 5, 6}, new long[]{7, 8}, new long[]{9}}),
-            arguments(3.14, new long[][]{new long[]{0L, 1L, 2L, 3L, 4, 5, 6}, new long[]{7, 8}, new long[]{9}})
+            arguments(
+                5.0,
+                new String[][]{
+                    new String[]{"a", "b", "c", "d"},
+                    new String[]{"e", "f", "g"},
+                    new String[]{"h", "i"},
+                    new String[]{"j"}
+                }
+            ),
+            arguments(
+                3.14,
+                new String[][]{
+                    new String[]{"a", "b", "c", "d", "e", "f", "g"},
+                    new String[]{"h", "i"},
+                    new String[]{"j"}
+                }
+            )
         );
     }
 }
