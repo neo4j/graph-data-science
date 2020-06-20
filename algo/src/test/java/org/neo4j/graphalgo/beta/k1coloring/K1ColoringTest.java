@@ -21,9 +21,7 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
@@ -35,6 +33,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -51,10 +50,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class K1ColoringTest extends AlgoTestBase {
+class K1ColoringTest {
 
     @Test
     void testK1Coloring() {
@@ -67,12 +67,7 @@ class K1ColoringTest extends AlgoTestBase {
             ",(a)-[:REL]->(b)" +
             ",(a)-[:REL]->(c)";
 
-        runQuery(DB_CYPHER);
-
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .build()
-            .graph();
+        var graph = fromGdl(DB_CYPHER);
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,
@@ -80,7 +75,7 @@ class K1ColoringTest extends AlgoTestBase {
             DEFAULT_BATCH_SIZE,
             1,
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         );
 
@@ -125,7 +120,7 @@ class K1ColoringTest extends AlgoTestBase {
             DEFAULT_BATCH_SIZE,
             8,
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         );
 
@@ -190,7 +185,7 @@ class K1ColoringTest extends AlgoTestBase {
             DEFAULT_BATCH_SIZE,
             8,
             Pools.DEFAULT,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         );
 

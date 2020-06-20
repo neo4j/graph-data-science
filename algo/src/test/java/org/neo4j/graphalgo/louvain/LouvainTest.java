@@ -43,7 +43,6 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -55,6 +54,7 @@ import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
+import static org.neo4j.graphalgo.TestSupport.ids;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
@@ -150,10 +150,6 @@ class LouvainTest {
     @Inject
     private IdFunction idFunction;
 
-    private long[] ids(String... variables) {
-        return Arrays.stream(variables).mapToLong(idFunction::of).toArray();
-    }
-
     @Test
     void testUnweighted() {
         var graph = graphStore.getGraph(
@@ -177,17 +173,17 @@ class LouvainTest {
 
         assertCommunities(
             dendrogram[0],
-            ids("a", "b", "d"),
-            ids("c", "e", "f", "x"),
-            ids("g", "h", "i"),
-            ids("j", "k", "l", "m", "n")
+            ids(idFunction, "a", "b", "d"),
+            ids(idFunction, "c", "e", "f", "x"),
+            ids(idFunction, "g", "h", "i"),
+            ids(idFunction, "j", "k", "l", "m", "n")
         );
 
         assertCommunities(
             dendrogram[1],
-            ids("a", "b", "c", "d", "e", "f", "x"),
-            ids("g", "h", "i"),
-            ids("j", "k", "l", "m", "n")
+            ids(idFunction, "a", "b", "c", "d", "e", "f", "x"),
+            ids(idFunction, "g", "h", "i"),
+            ids(idFunction, "j", "k", "l", "m", "n")
         );
 
         assertEquals(2, algorithm.levels());
@@ -217,17 +213,17 @@ class LouvainTest {
 
         assertCommunities(
             dendrogram[0],
-            ids("a", "b", "d"),
-            ids("c", "e", "x"),
-            ids("f", "g"),
-            ids("h", "i"),
-            ids("j", "k", "l", "m", "n")
+            ids(idFunction, "a", "b", "d"),
+            ids(idFunction, "c", "e", "x"),
+            ids(idFunction, "f", "g"),
+            ids(idFunction, "h", "i"),
+            ids(idFunction, "j", "k", "l", "m", "n")
         );
 
         assertCommunities(
             dendrogram[1],
-            ids("a", "b", "c", "d", "e", "f", "g", "x"),
-            ids("h", "i", "j", "k", "l", "m", "n")
+            ids(idFunction, "a", "b", "c", "d", "e", "f", "g", "x"),
+            ids(idFunction, "h", "i", "j", "k", "l", "m", "n")
         );
 
         assertEquals(2, algorithm.levels());
@@ -256,9 +252,9 @@ class LouvainTest {
         final double[] modularities = algorithm.modularities();
 
         var expectedCommunitiesWithLabels = Map.of(
-            1L, ids("a", "b", "c", "d", "e", "f", "x"),
-            2L, ids("g", "h", "i"),
-            42L, ids("j", "k", "l", "m", "n")
+            1L, ids(idFunction, "a", "b", "c", "d", "e", "f", "x"),
+            2L, ids(idFunction, "g", "h", "i"),
+            42L, ids(idFunction, "j", "k", "l", "m", "n")
         );
 
         assertCommunitiesWithLabels(

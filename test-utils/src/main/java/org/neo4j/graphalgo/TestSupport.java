@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
@@ -131,6 +132,14 @@ public final class TestSupport {
         var gdlFactory = GdlFactory.of(config);
 
         return new TestGraph(gdlFactory.build().graphStore().getUnion(), gdlFactory::nodeId, name);
+    }
+
+    public static long[][] ids(IdFunction idFunction, String[][] variables) {
+        return Arrays.stream(variables).map(vs -> ids(idFunction, vs)).toArray(long[][]::new);
+    }
+
+    public static long[] ids(IdFunction idFunction, String... variables) {
+        return Arrays.stream(variables).mapToLong(idFunction::of).toArray();
     }
 
     public static void assertLongValues(TestGraph graph, Function<Long, Long> actualValues, Map<String, Long> expectedValues) {

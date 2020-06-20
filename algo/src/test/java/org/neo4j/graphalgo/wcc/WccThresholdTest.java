@@ -32,10 +32,10 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.TestSupport.ids;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 @GdlExtension
@@ -68,13 +68,6 @@ class WccThresholdTest {
     @Inject
     private TestGraph graph;
 
-    private long[][] ids(String[][] variables) {
-        return Arrays
-            .stream(variables)
-            .map(component -> Arrays.stream(component).mapToLong(graph::toMappedNodeId).toArray())
-            .toArray(long[][]::new);
-    }
-
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.wcc.WccThresholdTest#thresholdParams")
     void testThreshold(double threshold, String[][] expectedComponents) {
@@ -99,7 +92,7 @@ class WccThresholdTest {
             return true;
         });
 
-        CommunityHelper.assertCommunities(communityData, ids(expectedComponents));
+        CommunityHelper.assertCommunities(communityData, ids(graph::toMappedNodeId, expectedComponents));
     }
 
     static Stream<Arguments> thresholdParams() {
