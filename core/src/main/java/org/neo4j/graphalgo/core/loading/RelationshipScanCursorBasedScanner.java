@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -43,11 +42,7 @@ final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanne
 
     @Override
     RelationshipScanCursor entityCursor(KernelTransaction transaction) {
-        if (GdsEdition.instance().isOnEnterpriseEdition()) {
-            return Neo4jProxy.allocateRelationshipScanCursor(transaction.cursors(), transaction.pageCursorTracer());
-        } else {
-            return Neo4jProxy.allocateFullAccessRelationshipScanCursor(transaction.cursors(), transaction.pageCursorTracer());
-        }
+        return Neo4jProxy.allocateRelationshipScanCursor(transaction.cursors(), transaction.pageCursorTracer());
     }
 
     @Override

@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -44,11 +43,7 @@ final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeRe
 
     @Override
     NodeLabelIndexCursor entityCursor(KernelTransaction transaction) {
-        if (GdsEdition.instance().isOnEnterpriseEdition()) {
-            return Neo4jProxy.allocateNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer());
-        } else {
-            return Neo4jProxy.allocateFullAccessNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer());
-        }
+        return Neo4jProxy.allocateNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer());
     }
 
     @Override

@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -181,7 +180,7 @@ class RelationshipImporter {
         return (batch, batchLength, relationshipProperties, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
             long[][] properties = new long[relationshipProperties.length][batchLength / BATCH_ENTRY_SIZE];
             if (atLeastOnePropertyToLoad) {
-                try (PropertyCursor pc = allocatePropertyCursor(cursors, cursorTracer, memoryTracker)) {
+                try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(cursors, cursorTracer, memoryTracker)) {
                     double[] relProps = new double[relationshipProperties.length];
                     for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
                         long relationshipReference = batch[RELATIONSHIP_REFERENCE_OFFSET + i];
@@ -205,18 +204,6 @@ class RelationshipImporter {
             }
             return properties;
         };
-    }
-
-    private PropertyCursor allocatePropertyCursor(
-        CursorFactory cursors,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker
-    ) {
-        if (GdsEdition.instance().isOnEnterpriseEdition()) {
-            return Neo4jProxy.allocatePropertyCursor(cursors, cursorTracer, memoryTracker);
-        } else {
-            return Neo4jProxy.allocateFullAccessPropertyCursor(cursors, cursorTracer, memoryTracker);
-        }
     }
 
 

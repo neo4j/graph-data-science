@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.walking.RandomWalk;
@@ -129,10 +128,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
             String label = start.toString();
             int labelId = transaction.tokenRead().nodeLabel(label);
             int countWithLabel = Math.toIntExact(transaction.dataRead().countsForNodeWithoutTxState(labelId));
-            NodeLabelIndexCursor cursor =
-                GdsEdition.instance().isOnEnterpriseEdition()
-                    ? Neo4jProxy.allocateNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer())
-                    : Neo4jProxy.allocateFullAccessNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer());
+            NodeLabelIndexCursor cursor = Neo4jProxy.allocateNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer());
 
             Neo4jProxy.nodeLabelScan(transaction.dataRead(), labelId, cursor);
             cursor.next();

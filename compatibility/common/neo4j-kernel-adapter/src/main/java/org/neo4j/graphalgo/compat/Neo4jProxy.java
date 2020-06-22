@@ -132,18 +132,16 @@ public final class Neo4jProxy {
         return IMPL.pageCacheMap(pageCache, file, pageSize, openOptions);
     }
 
-    public static NodeCursor allocateNodeCursor(
+    public static PropertyCursor allocatePropertyCursor(
         CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
     ) {
-        return IMPL.allocateNodeCursor(cursorFactory, cursorTracer);
+        return IMPL.allocatePropertyCursor(cursorFactory, cursorTracer, memoryTracker);
     }
 
-    public static NodeCursor allocateFullAccessNodeCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer
-    ) {
-        return IMPL.allocateFullAccessNodeCursor(cursorFactory, cursorTracer);
+    public static NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer) {
+        return IMPL.allocateNodeCursor(cursorFactory, cursorTracer);
     }
 
     public static RelationshipScanCursor allocateRelationshipScanCursor(
@@ -153,41 +151,11 @@ public final class Neo4jProxy {
         return IMPL.allocateRelationshipScanCursor(cursorFactory, cursorTracer);
     }
 
-    public static RelationshipScanCursor allocateFullAccessRelationshipScanCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer
-    ) {
-        return IMPL.allocateFullAccessRelationshipScanCursor(cursorFactory, cursorTracer);
-    }
-
-    public static PropertyCursor allocatePropertyCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker
-    ) {
-        return IMPL.allocatePropertyCursor(cursorFactory, cursorTracer, memoryTracker);
-    }
-
-    public static PropertyCursor allocateFullAccessPropertyCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker
-    ) {
-        return IMPL.allocateFullAccessPropertyCursor(cursorFactory, cursorTracer, memoryTracker);
-    }
-
     public static NodeLabelIndexCursor allocateNodeLabelIndexCursor(
         CursorFactory cursorFactory,
         PageCursorTracer cursorTracer
     ) {
         return IMPL.allocateNodeLabelIndexCursor(cursorFactory, cursorTracer);
-    }
-
-    public static NodeLabelIndexCursor allocateFullAccessNodeLabelIndexCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer
-    ) {
-        return IMPL.allocateFullAccessNodeLabelIndexCursor(cursorFactory, cursorTracer);
     }
 
     public static long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
