@@ -106,7 +106,7 @@ public final class SecureTransaction implements AutoCloseable {
     ) {
         this.db = db;
         this.topTx = top;
-        this.securityContext = securityContext;
+        this.securityContext = GdsEdition.instance().isOnEnterpriseEdition() ? securityContext : SecurityContext.AUTH_DISABLED;
     }
 
     /**
