@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.FilterAccessMode;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.StoreScanner;
@@ -35,11 +36,10 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-class SecureTransactionTest extends BaseTest {
+abstract class SecureTransactionTestBase extends BaseTest {
 
     @BeforeEach
     void setUp() {
@@ -54,18 +54,13 @@ class SecureTransactionTest extends BaseTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-
     @Test
     void defaultIsFullAccess() {
         var graph = storeLoaderBuilder().securityContext(SecurityContext.AUTH_DISABLED).build().graph();
-        assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0})-[{prop3: 23.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
-            graph
-        );
+        assertFullGraph(graph);
     }
 
-    @Test
-    void noNodeAccessAllowed() {
+    Graph noNodeAccessAllowedGraph() {
         AccessMode noNodesAllowed = new FilterAccessMode() {
             @Override
             public boolean allowsTraverseAllLabels() {
@@ -78,16 +73,13 @@ class SecureTransactionTest extends BaseTest {
             }
         }.toNeoAccessMode();
 
-        var graph = storeLoaderBuilder()
+        return storeLoaderBuilder()
             .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, noNodesAllowed))
             .build()
             .graph();
-
-        assertTrue(graph.isEmpty());
     }
 
-    @Test
-    void noRelationshipAccessAllowed() {
+    Graph noRelationshipAccessAllowedGraph() {
         AccessMode noRelsAllowed = new FilterAccessMode() {
             @Override
             public boolean allowsTraverseRelType(int relType) {
@@ -95,19 +87,13 @@ class SecureTransactionTest extends BaseTest {
             }
         }.toNeoAccessMode();
 
-        var graph = storeLoaderBuilder()
+        return storeLoaderBuilder()
             .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, noRelsAllowed))
             .build()
             .graph();
-
-        assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0}), (b:Node2 {prop1: 1.0, prop2: 1337.0})"),
-            graph
-        );
     }
 
-    @Test
-    void noTargetNodeAccessAllowed() throws Exception {
+    Graph noTargetNodeAccessAllowedGraph() throws Exception {
         int labelTokenNode2 = SecureTransaction.of(db).apply((tx, ktx) ->
             ktx.tokenWrite().labelGetOrCreateForName("Node2"));
 
@@ -123,19 +109,13 @@ class SecureTransactionTest extends BaseTest {
             }
         }.toNeoAccessMode();
 
-        var graph = storeLoaderBuilder()
+        return storeLoaderBuilder()
             .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, noNode2Allowed))
             .build()
             .graph();
-
-        assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0})"),
-            graph
-        );
     }
 
-    @Test
-    void noNodeProp1Allowed() throws Exception {
+    Graph noNodeProp1AllowedGraph() throws Exception {
         int propertyKeyProp1 = SecureTransaction.of(db).apply((tx, ktx) ->
             ktx.tokenWrite().propertyKeyGetOrCreateForName("prop1"));
 
@@ -147,19 +127,13 @@ class SecureTransactionTest extends BaseTest {
             }
         }.toNeoAccessMode();
 
-        var graph = storeLoaderBuilder()
+        return storeLoaderBuilder()
             .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, prop1NotAllowed))
             .build()
             .graph();
-
-        assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 1.0, prop2: 2.0})-[{prop3: 23.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
-            graph
-        );
     }
 
-    @Test
-    void noRelProp3Allowed() throws Exception {
+    Graph noRelProp3AllowedGraph() throws Exception {
         int propertyKeyProp3 = SecureTransaction.of(db).apply((tx, ktx) ->
             ktx.tokenWrite().propertyKeyGetOrCreateForName("prop3"));
 
@@ -170,19 +144,13 @@ class SecureTransactionTest extends BaseTest {
             }
         }.toNeoAccessMode();
 
-        var graph = storeLoaderBuilder()
+        return storeLoaderBuilder()
             .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, prop3NotAllowed))
             .build()
             .graph();
-
-        assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0})-[{prop3: 3.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
-            graph
-        );
     }
 
-    @NotNull
-    private StoreLoaderBuilder storeLoaderBuilder() {
+    private @NotNull StoreLoaderBuilder storeLoaderBuilder() {
         return new StoreLoaderBuilder()
             .api(db)
             .concurrency(1)
@@ -191,5 +159,12 @@ class SecureTransactionTest extends BaseTest {
             .addNodeProperty(PropertyMapping.of("prop2", 2))
             .addRelationshipType("REL")
             .addRelationshipProperty(PropertyMapping.of("prop3", 3));
+    }
+
+    void assertFullGraph(Graph graph) {
+        var expected = fromGdl(
+            "(a:Node1 {prop1: 42.0, prop2: 2.0})-[{prop3: 23.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"
+        );
+        assertGraphEquals(expected, graph);
     }
 }
