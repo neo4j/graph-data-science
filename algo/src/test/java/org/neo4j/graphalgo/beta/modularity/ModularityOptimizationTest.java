@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.modularity;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -26,7 +27,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -94,24 +97,9 @@ class ModularityOptimizationTest {
 
     @Test
     void testUnweighted() {
-        var graph = graphStore.getGraph(
-            NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
-            Optional.empty()
-        );
-        ModularityOptimization pmo = new ModularityOptimization(
-            graph,
-            3,
-            TOLERANCE_DEFAULT,
-            null,
-            1,
-            10_000,
-            Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
-        );
+        var graph = unweightedGraph();
 
-        pmo.compute();
+        ModularityOptimization pmo = compute(graph, 3, null, 1, 10_000, ProgressLogger.NULL_LOGGER);
 
         assertEquals(0.12244, pmo.getModularity(), 0.001);
         assertCommunities(
@@ -124,19 +112,7 @@ class ModularityOptimizationTest {
 
     @Test
     void testWeighted() {
-        ModularityOptimization pmo = new ModularityOptimization(
-            graph,
-            3,
-            TOLERANCE_DEFAULT,
-            null,
-            3,
-            2,
-            Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
-        );
-
-        pmo.compute();
+        ModularityOptimization pmo = compute(graph, 3, null, 3, 2, ProgressLogger.NULL_LOGGER);
 
         assertEquals(0.4985, pmo.getModularity(), 0.001);
         assertCommunities(
@@ -149,25 +125,15 @@ class ModularityOptimizationTest {
 
     @Test
     void testSeedingWithBiggerSeedValues() {
-        var graph = graphStore.getGraph(
-            NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
-            Optional.empty()
-        );
+        var graph = unweightedGraph();
 
-        ModularityOptimization pmo = new ModularityOptimization(
+        ModularityOptimization pmo = compute(
             graph,
-            10,
-            TOLERANCE_DEFAULT,
-            graph.nodeProperties("seed2"),
+            10, graph.nodeProperties("seed2"),
             1,
             100,
-            Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            ProgressLogger.NULL_LOGGER
         );
-
-        pmo.compute();
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.getModularity(), 0.001);
@@ -178,25 +144,15 @@ class ModularityOptimizationTest {
 
     @Test
     void testSeeding() {
-        var graph = graphStore.getGraph(
-            NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
-            Optional.empty()
-        );
+        var graph = unweightedGraph();
 
-        ModularityOptimization pmo = new ModularityOptimization(
+        ModularityOptimization pmo = compute(
             graph,
-            10,
-            TOLERANCE_DEFAULT,
-            graph.nodeProperties("seed1"),
+            10, graph.nodeProperties("seed1"),
             1,
             100,
-            Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            ProgressLogger.NULL_LOGGER
         );
-
-        pmo.compute();
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.getModularity(), 0.001);
@@ -221,19 +177,7 @@ class ModularityOptimizationTest {
             3
         );
 
-        var modularityOptimization = new ModularityOptimization(
-            graph,
-            3,
-            TOLERANCE_DEFAULT,
-            null,
-            3,
-            2,
-            Pools.DEFAULT,
-            testLogger,
-            AllocationTracker.EMPTY
-        );
-
-        modularityOptimization.compute();
+        compute(graph, 3, null, 3, 2, testLogger);
 
         assertTrue(testLogger.containsMessage(INFO, ":: Start"));
         assertTrue(testLogger.containsMessage(INFO, "Initialization :: Start"));
@@ -247,17 +191,7 @@ class ModularityOptimizationTest {
     void requireAtLeastOneIteration() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new ModularityOptimization(
-                graph,
-                0,
-                TOLERANCE_DEFAULT,
-                null,
-                3,
-                2,
-                Pools.DEFAULT,
-                ProgressLogger.NULL_LOGGER,
-                AllocationTracker.EMPTY
-            )
+            () -> compute(graph, 0, null, 3, 2, ProgressLogger.NULL_LOGGER)
         );
 
         assertTrue(exception.getMessage().contains("at least one iteration"));
@@ -284,6 +218,36 @@ class ModularityOptimizationTest {
             arguments(1, 5614048, 8413080),
             arguments(4, 5617336, 14413344),
             arguments(42, 5658984, 90416688)
+        );
+    }
+
+    @NotNull
+    private ModularityOptimization compute(
+        Graph graph,
+        int maxIterations,
+        NodeProperties properties,
+        int concurrency,
+        int minBatchSize,
+        ProgressLogger testLogger
+    ) {
+        return new ModularityOptimization(
+            graph,
+            maxIterations,
+            TOLERANCE_DEFAULT,
+            properties,
+            concurrency,
+            minBatchSize,
+            Pools.DEFAULT,
+            testLogger,
+            AllocationTracker.EMPTY
+        ).compute();
+    }
+
+    private Graph unweightedGraph() {
+        return graphStore.getGraph(
+            NodeLabel.listOf("Node"),
+            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            Optional.empty()
         );
     }
 }
