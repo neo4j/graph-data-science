@@ -98,32 +98,11 @@ public interface GraphStreamRelationshipPropertiesConfig extends BaseConfig {
     }
 
     /**
-     * Returns the node labels that are to be considered for writing properties.
-     *
-     * If nodeLabels contains '*`, this returns all node labels in the graph store
-     * that have the specified nodeProperties.
-     *
-     * Otherwise, it just returns all the labels in the graph store since validation
-     * made sure that all node labels have the specified properties.
+     * Returns the relationship types that are to be considered for streaming properties.
      */
     @Configuration.Ignore
     default Collection<RelationshipType> validRelationshipTypes(GraphStore graphStore) {
-        Collection<RelationshipType> filteredRelationshipTypes;
-
-        if (relationshipTypes().contains(PROJECT_ALL)) {
-            // Filter node labels that have all the properties.
-            // Validation guarantees that there is at least one.
-            filteredRelationshipTypes = relationshipTypeIdentifiers(graphStore)
-                .stream()
-                .filter(relationshipType -> graphStore.relationshipPropertyKeys(relationshipType).containsAll(relationshipProperties()))
-                .collect(Collectors.toList());
-        } else {
-            // Write for all the labels that are specified.
-            // Validation guarantees that each label has all properties.
-            filteredRelationshipTypes = relationshipTypeIdentifiers(graphStore);
-        }
-
-        return filteredRelationshipTypes;
+        return relationshipTypeIdentifiers(graphStore);
     }
 
     static GraphStreamRelationshipPropertiesConfig of(
