@@ -19,11 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel.examples;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
@@ -31,30 +27,33 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphdb.Label;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
-import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertDoubleValues;
+import java.util.HashMap;
 
-class PageRankPregelTest extends AlgoTestBase {
+import static org.neo4j.graphalgo.TestSupport.assertDoubleValues;
 
-    private static final String ID_PROPERTY = "id";
-
-    private static final Label NODE_LABEL = Label.label("Node");
+@GdlExtension
+class PageRankPregelTest {
 
     // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
+    @GdlGraph
     private static final String TEST_GRAPH =
             "CREATE" +
-            "  (a:Node { id: 0, name: 'a' })" +
-            ", (b:Node { id: 1, name: 'b' })" +
-            ", (c:Node { id: 2, name: 'c' })" +
-            ", (d:Node { id: 3, name: 'd' })" +
-            ", (e:Node { id: 4, name: 'e' })" +
-            ", (f:Node { id: 5, name: 'f' })" +
-            ", (g:Node { id: 6, name: 'g' })" +
-            ", (h:Node { id: 7, name: 'h' })" +
-            ", (i:Node { id: 8, name: 'i' })" +
-            ", (j:Node { id: 9, name: 'j' })" +
-            ", (k:Node { id: 10, name: 'k' })" +
+            "  (a:Node)" +
+            ", (b:Node)" +
+            ", (c:Node)" +
+            ", (d:Node)" +
+            ", (e:Node)" +
+            ", (f:Node)" +
+            ", (g:Node)" +
+            ", (h:Node)" +
+            ", (i:Node)" +
+            ", (j:Node)" +
+            ", (k:Node)" +
             ", (b)-[:REL]->(c)" +
             ", (c)-[:REL]->(b)" +
             ", (d)-[:REL]->(a)" +
@@ -73,16 +72,8 @@ class PageRankPregelTest extends AlgoTestBase {
             ", (j)-[:REL]->(e)" +
             ", (k)-[:REL]->(e)";
 
-    private Graph graph;
-
-    @BeforeEach
-    void setup() {
-        runQuery(TEST_GRAPH);
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .build()
-            .graph();
-    }
+    @Inject
+    private TestGraph graph;
 
     @Test
     void runPR() {
@@ -105,20 +96,21 @@ class PageRankPregelTest extends AlgoTestBase {
             AllocationTracker.EMPTY
         );
 
-        final HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertDoubleValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 1e-3,
-                0.0276, // a
-                0.3483, // b
-                0.2650, // c
-                0.0330, // d
-                0.0682, // e
-                0.0330, // f
-                0.0136, // g
-                0.0136, // h
-                0.0136, // i
-                0.0136, // j
-                0.0136 // k
-        );
+        var expected = new HashMap<String, Double>();
+        expected.put("a", 0.0276D);
+        expected.put("b", 0.3483D);
+        expected.put("c", 0.2650D);
+        expected.put("d", 0.0330D);
+        expected.put("e", 0.0682D);
+        expected.put("f", 0.0330D);
+        expected.put("g", 0.0136D);
+        expected.put("h", 0.0136D);
+        expected.put("i", 0.0136D);
+        expected.put("j", 0.0136D);
+        expected.put("k", 0.0136D);
+
+        assertDoubleValues(graph, nodeValues::get, expected, 1E-3);
     }
 }

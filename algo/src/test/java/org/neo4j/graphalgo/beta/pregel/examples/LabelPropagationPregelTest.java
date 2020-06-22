@@ -19,64 +19,51 @@
  */
 package org.neo4j.graphalgo.beta.pregel.examples;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphdb.Label;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
-import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertLongValues;
+import java.util.Map;
 
-class LabelPropagationPregelTest extends AlgoTestBase {
+import static org.neo4j.graphalgo.TestSupport.assertLongValues;
 
-    private static final String ID_PROPERTY = "id";
-
-    private static final Label NODE_LABEL = Label.label("User");
+@GdlExtension
+class LabelPropagationPregelTest {
 
     // https://neo4j.com/blog/graph-algorithms-neo4j-label-propagation/
     //
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String TEST_GRAPH =
             "CREATE" +
-            "  (nAlice:User   { id: 0 })" +
-            ", (nBridget:User { id: 1 })" +
-            ", (nCharles:User { id: 2 })" +
-            ", (nDoug:User    { id: 3 })" +
-            ", (nMark:User    { id: 4 })" +
-            ", (nMichael:User { id: 5 })" +
-            ", (nAlice)-[:FOLLOW]->(nBridget)" +
-            ", (nAlice)-[:FOLLOW]->(nCharles)" +
-            ", (nMark)-[:FOLLOW]->(nDoug)" +
-            ", (nBridget)-[:FOLLOW]->(nMichael)" +
-            ", (nDoug)-[:FOLLOW {weight: 2.0}]->(nMark)" +
-            ", (nMichael)-[:FOLLOW]->(nAlice)" +
-            ", (nAlice)-[:FOLLOW]->(nMichael)" +
-            ", (nBridget)-[:FOLLOW]->(nAlice)" +
-            ", (nMichael)-[:FOLLOW]->(nBridget)" +
-            ", (nCharles)-[:FOLLOW]->(nDoug)";
+            "  (nAlice:User)" +
+            ", (nBridget:User)" +
+            ", (nCharles:User)" +
+            ", (nDoug:User)" +
+            ", (nMark:User)" +
+            ", (nMichael:User)" +
+            ", (nAlice)-[:FOLLOW   {weight: 1.0}]->(nBridget)" +
+            ", (nAlice)-[:FOLLOW   {weight: 1.0}]->(nCharles)" +
+            ", (nMark)-[:FOLLOW    {weight: 1.0}]->(nDoug)" +
+            ", (nBridget)-[:FOLLOW {weight: 1.0}]->(nMichael)" +
+            ", (nDoug)-[:FOLLOW    {weight: 2.0}]->(nMark)" +
+            ", (nMichael)-[:FOLLOW {weight: 1.0}]->(nAlice)" +
+            ", (nAlice)-[:FOLLOW   {weight: 1.0}]->(nMichael)" +
+            ", (nBridget)-[:FOLLOW {weight: 1.0}]->(nAlice)" +
+            ", (nMichael)-[:FOLLOW {weight: 1.0}]->(nBridget)" +
+            ", (nCharles)-[:FOLLOW {weight: 1.0}]->(nDoug)";
 
-    private Graph graph;
-
-    @BeforeEach
-    void setup() {
-        runQuery(TEST_GRAPH);
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .globalAggregation(Aggregation.NONE)
-            .build()
-            .graph();
-    }
+    @Inject
+    private TestGraph graph;
 
     @Test
     void runLP() {
@@ -97,7 +84,14 @@ class LabelPropagationPregelTest extends AlgoTestBase {
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 0, 0, 0, 4, 3, 0);
+        assertLongValues(graph, (nodeId) -> (long) nodeValues.get(nodeId), Map.of(
+            "nAlice", 0L,
+            "nBridget", 0L,
+            "nCharles", 0L,
+            "nDoug", 4L,
+            "nMark", 3L,
+            "nMichael", 0L
+        ));
     }
 
     @Test
@@ -105,28 +99,21 @@ class LabelPropagationPregelTest extends AlgoTestBase {
         int batchSize = 10;
         int maxIterations = 10;
 
-        Graph weightedGraph = new StoreLoaderBuilder()
-            .api(db)
-            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-            .globalOrientation(Orientation.UNDIRECTED)
-            .globalAggregation(Aggregation.NONE)
-            .build()
-            .graph();
-
         PregelConfig config = ImmutablePregelConfig.builder()
             .relationshipWeightProperty("weight")
             .build();
 
-        LabelPropagationPregel weightedPregel = new LabelPropagationPregel() {
+        var weightedLabelPropagation = new LabelPropagationPregel() {
             @Override
             public double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
                 return nodeValue * relationshipWeight;
             }
         };
+
         Pregel pregelJob = Pregel.withDefaultNodeValues(
-            weightedGraph,
+            graph,
             config,
-            weightedPregel,
+            weightedLabelPropagation,
             batchSize,
             AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
@@ -135,6 +122,13 @@ class LabelPropagationPregelTest extends AlgoTestBase {
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 0, 0, 0, 0, 0, 0);
+        assertLongValues(graph, (nodeId) -> (long) nodeValues.get(nodeId), Map.of(
+            "nAlice", 0L,
+            "nBridget", 0L,
+            "nCharles", 0L,
+            "nDoug", 0L,
+            "nMark", 0L,
+            "nMichael", 0L
+        ));
     }
 }

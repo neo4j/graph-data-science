@@ -19,11 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel.examples;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
@@ -31,50 +27,45 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphdb.Label;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
-import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertLongValues;
+import java.util.Map;
 
-class SingleSourceShortestPathPregelTest extends AlgoTestBase {
+import static org.neo4j.graphalgo.TestSupport.assertLongValues;
 
-    private static final String ID_PROPERTY = "id";
+@GdlExtension
+class SingleSourceShortestPathPregelTest {
 
-    private static final Label NODE_LABEL = Label.label("Node");
-
+    @GdlGraph
     private static final String TEST_GRAPH =
             "CREATE" +
-            "  (nA:Node { id: 0 })" +
-            ", (nB:Node { id: 1 })" +
-            ", (nC:Node { id: 2 })" +
-            ", (nD:Node { id: 3 })" +
-            ", (nE:Node { id: 4 })" +
-            ", (nF:Node { id: 5 })" +
-            ", (nG:Node { id: 6 })" +
-            ", (nH:Node { id: 7 })" +
-            ", (nI:Node { id: 8 })" +
+            "  (a:Node)" +
+            ", (b:Node)" +
+            ", (c:Node)" +
+            ", (d:Node)" +
+            ", (e:Node)" +
+            ", (f:Node)" +
+            ", (g:Node)" +
+            ", (h:Node)" +
+            ", (i:Node)" +
             // {J}
-            ", (nJ:Node { id: 9 })" +
+            ", (j:Node)" +
             // {A, B, C, D}
-            ", (nA)-[:TYPE]->(nB)" +
-            ", (nB)-[:TYPE]->(nC)" +
-            ", (nC)-[:TYPE]->(nD)" +
-            ", (nA)-[:TYPE]->(nC)" +
+            ", (a)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(d)" +
+            ", (a)-[:TYPE]->(c)" +
             // {E, F, G}
-            ", (nE)-[:TYPE]->(nF)" +
-            ", (nF)-[:TYPE]->(nG)" +
+            ", (e)-[:TYPE]->(f)" +
+            ", (f)-[:TYPE]->(g)" +
             // {H, I}
-            ", (nI)-[:TYPE]->(nH)";
+            ", (i)-[:TYPE]->(h)";
 
-    private Graph graph;
-
-    @BeforeEach
-    void setup() {
-        runQuery(TEST_GRAPH);
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .build()
-            .graph();
-    }
+    @Inject
+    private TestGraph graph;
 
     @Test
     void runSSSP() {
@@ -97,16 +88,17 @@ class SingleSourceShortestPathPregelTest extends AlgoTestBase {
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues,
-                0,
-                1,
-                1,
-                2,
-                Long.MAX_VALUE,
-                Long.MAX_VALUE,
-                Long.MAX_VALUE,
-                Long.MAX_VALUE,
-                Long.MAX_VALUE,
-                Long.MAX_VALUE);
+        assertLongValues(graph, nodeId -> (long) nodeValues.get(nodeId), Map.of(
+                "a", 0L,
+                "b", 1L,
+                "c", 1L,
+                "d", 2L,
+                "e", Long.MAX_VALUE,
+                "f", Long.MAX_VALUE,
+                "g", Long.MAX_VALUE,
+                "h", Long.MAX_VALUE,
+                "i", Long.MAX_VALUE,
+                "j", Long.MAX_VALUE
+        ));
     }
 }

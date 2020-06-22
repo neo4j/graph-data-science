@@ -19,12 +19,10 @@
  */
 package org.neo4j.graphalgo.beta.pregel.examples;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
@@ -32,50 +30,45 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphdb.Label;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
-import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertLongValues;
+import java.util.HashMap;
 
-class WeaklyConnectedComponentsPregelTest extends AlgoTestBase {
+@GdlExtension
+class WeaklyConnectedComponentsPregelTest {
 
-    private static final String ID_PROPERTY = "id";
-
-    private static final Label NODE_LABEL = Label.label("Node");
-
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String TEST_GRAPH =
-            "CREATE" +
-            "  (nA:Node { id: 0 })" +
-            ", (nB:Node { id: 1 })" +
-            ", (nC:Node { id: 2 })" +
-            ", (nD:Node { id: 3 })" +
-            ", (nE:Node { id: 4 })" +
-            ", (nF:Node { id: 5 })" +
-            ", (nG:Node { id: 6 })" +
-            ", (nH:Node { id: 7 })" +
-            ", (nI:Node { id: 8 })" +
-            // {J}
-            ", (nJ:Node { id: 9 })" +
-            // {A, B, C, D}
-            ", (nA)-[:TYPE]->(nB)" +
-            ", (nB)-[:TYPE]->(nC)" +
-            ", (nC)-[:TYPE]->(nD)" +
-            // {E, F, G}
-            ", (nE)-[:TYPE]->(nF)" +
-            ", (nF)-[:TYPE]->(nG)" +
-            // {H, I}
-            ", (nI)-[:TYPE]->(nH)";
+        "CREATE" +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        ", (g:Node)" +
+        ", (h:Node)" +
+        ", (i:Node)" +
+        // {J}
+        ", (j:Node { id: 9 })" +
+        // {A, B, C, D}
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(d)" +
+        ", (d)-[:TYPE]->(a)" +
+        // {E, F, G}
+        ", (e)-[:TYPE]->(f)" +
+        ", (f)-[:TYPE]->(g)" +
+        ", (g)-[:TYPE]->(e)" +
+        // {H, I}
+        ", (i)-[:TYPE]->(h)" +
+        ", (h)-[:TYPE]->(i)";
 
-    private Graph graph;
-
-    @BeforeEach
-    void setup() {
-        runQuery(TEST_GRAPH);
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .build()
-            .graph();
-    }
+    @Inject
+    private TestGraph graph;
 
     @Test
     void runWCC() {
@@ -98,6 +91,18 @@ class WeaklyConnectedComponentsPregelTest extends AlgoTestBase {
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 0, 0, 0, 0, 4, 4, 4, 7, 7, 9);
+        var expected = new HashMap<String, Long>();
+        expected.put("a", 0L);
+        expected.put("b", 0L);
+        expected.put("c", 0L);
+        expected.put("d", 0L);
+        expected.put("e", 4L);
+        expected.put("f", 4L);
+        expected.put("g", 4L);
+        expected.put("h", 7L);
+        expected.put("i", 7L);
+        expected.put("j", 9L);
+
+        TestSupport.assertLongValues(graph, (nodeId) -> (long) nodeValues.get(nodeId), expected);
     }
 }

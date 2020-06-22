@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -144,6 +145,22 @@ public interface GraphStore {
 
     default Graph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         return getGraph(nodeLabels(), relationshipTypes, maybeRelationshipProperty);
+    }
+
+    default Graph getGraph(
+        String nodeLabel,
+        String relationshipType,
+        Optional<String> maybeRelationshipProperty
+    ) {
+        return getGraph(NodeLabel.of(nodeLabel), RelationshipType.of(relationshipType), maybeRelationshipProperty);
+    }
+
+    default Graph getGraph(
+        NodeLabel nodeLabel,
+        RelationshipType relationshipType,
+        Optional<String> maybeRelationshipProperty
+    ) {
+        return getGraph(List.of(nodeLabel), List.of(relationshipType), maybeRelationshipProperty);
     }
 
     Graph getGraph(

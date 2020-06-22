@@ -24,9 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -35,25 +32,26 @@ import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResul
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.triangle.IntersectingTriangleCount.EXCLUDED_NODE_TRIANGLE_COUNT;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class IntersectingTriangleCountTest extends AlgoTestBase {
+class IntersectingTriangleCountTest {
 
     private static Stream<Arguments> noTriangleQueries() {
         return Stream.of(
-            Arguments.of("CREATE ()-[:T]->()-[:T]->()", "line"),
-            Arguments.of("CREATE (), (), ()", "no rels"),
-            Arguments.of("CREATE ()-[:T]->(), ()", "one rel"),
-            Arguments.of("CREATE (a1)-[:T]->()-[:T]->(a1), ()", "back and forth")
+            Arguments.of(fromGdl("CREATE ()-[:T]->()-[:T]->()", UNDIRECTED), "line"),
+            Arguments.of(fromGdl("CREATE (), (), ()", UNDIRECTED), "no rels"),
+            Arguments.of(fromGdl("CREATE ()-[:T]->(), ()", UNDIRECTED), "one rel"),
+            Arguments.of(fromGdl("CREATE (a1)-[:T]->()-[:T]->(a1), ()", UNDIRECTED), "back and forth")
         );
     }
 
     @MethodSource("noTriangleQueries")
     @ParameterizedTest(name = "{1}")
-    void noTriangles(String query, String ignoredName) {
-        runQuery(query);
-
-        TriangleCountResult result =  projectAndCompute();
+    void noTriangles(Graph graph, String ignoredName) {
+        TriangleCountResult result = compute(graph);
 
         assertEquals(0L, result.globalTriangles());
         assertEquals(3, result.localTriangles().size());
@@ -65,11 +63,12 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
     @ValueSource(ints = {1, 2, 4, 8, 100})
     @ParameterizedTest
     void independentTriangles(int nbrOfTriangles) {
+        StringBuilder gdl = new StringBuilder("CREATE ");
         for (int i = 0; i < nbrOfTriangles; ++i) {
-            runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)");
+            gdl.append(formatWithLocale("(a%d)-[:T]->()-[:T]->()-[:T]->(a%d) ", i, i));
         }
 
-        TriangleCountResult result =  projectAndCompute();
+        TriangleCountResult result = compute(fromGdl(gdl.toString(), UNDIRECTED));
 
         assertEquals(nbrOfTriangles, result.globalTriangles());
         assertEquals(3 * nbrOfTriangles, result.localTriangles().size());
@@ -80,20 +79,22 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
 
     @Test
     void clique5() {
-        runQuery("CREATE (a1), (a2), (a3), (a4), (a5) " +
-                 "CREATE " +
-                 " (a1)-[:T]->(a2), " +
-                 " (a1)-[:T]->(a3), " +
-                 " (a1)-[:T]->(a4), " +
-                 " (a1)-[:T]->(a5), " +
-                 " (a2)-[:T]->(a3), " +
-                 " (a2)-[:T]->(a4), " +
-                 " (a2)-[:T]->(a5), " +
-                 " (a3)-[:T]->(a4), " +
-                 " (a3)-[:T]->(a5), " +
-                 " (a4)-[:T]->(a5)");
+        var graph = fromGdl(
+            "CREATE " +
+            " (a1)-[:T]->(a2), " +
+            " (a1)-[:T]->(a3), " +
+            " (a1)-[:T]->(a4), " +
+            " (a1)-[:T]->(a5), " +
+            " (a2)-[:T]->(a3), " +
+            " (a2)-[:T]->(a4), " +
+            " (a2)-[:T]->(a5), " +
+            " (a3)-[:T]->(a4), " +
+            " (a3)-[:T]->(a5), " +
+            " (a4)-[:T]->(a5)",
+            UNDIRECTED
+        );
 
-        TriangleCountResult result =  projectAndCompute();
+        TriangleCountResult result = compute(graph);
 
         assertEquals(10, result.globalTriangles());
         assertEquals(5, result.localTriangles().size());
@@ -104,10 +105,14 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
 
     @Test
     void twoAdjacentTriangles() {
-        runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
-                 "CREATE (a)-[:T]->(r)-[:T]->(t)-[:T]->(a)");
+        var graph = fromGdl(
+            "CREATE " +
+            "  (a)-[:T]->()-[:T]->()-[:T]->(a) " +
+            ", (a)-[:T]->()-[:T]->()-[:T]->(a)",
+            UNDIRECTED
+        );
 
-        TriangleCountResult result =  projectAndCompute();
+        TriangleCountResult result = compute(graph);
 
         assertEquals(2, result.globalTriangles());
         assertEquals(5, result.localTriangles().size());
@@ -115,11 +120,15 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
 
     @Test
     void twoTrianglesWithLine() {
-        runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
-                 "CREATE (q)-[:T]->(r)-[:T]->(t)-[:T]->(q) " +
-                 "CREATE (a)-[:T]->(q)");
+        var graph = fromGdl(
+            "CREATE " +
+            "  (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
+            ", (q)-[:T]->(r)-[:T]->(t)-[:T]->(q) " +
+            ", (a)-[:T]->(q)",
+            UNDIRECTED
+        );
 
-        TriangleCountResult result =  projectAndCompute();
+        TriangleCountResult result = compute(graph);
 
         assertEquals(2, result.globalTriangles());
         assertEquals(6, result.localTriangles().size());
@@ -131,9 +140,9 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
 
     @Test
     void selfLoop() {
-        runQuery("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)");
+        var graph = fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
 
-        TriangleCountResult result = projectAndCompute();
+        TriangleCountResult result = compute(graph);
 
         assertEquals(0, result.globalTriangles());
         assertEquals(1, result.localTriangles().size());
@@ -143,9 +152,9 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
     @Test
     void selfLoop2() {
         // a self loop adds two to the degree
-        runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)");
+        var graph = fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
 
-        TriangleCountResult result = projectAndCompute();
+        TriangleCountResult result = compute(graph);
 
         assertEquals(1, result.globalTriangles());
         assertEquals(3, result.localTriangles().size());
@@ -156,16 +165,19 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
 
     @Test
     void manyTrianglesAndOtherThings() {
-        runQuery("CREATE" +
-                 " (a)-[:T]->(b)-[:T]->(b)-[:T]->(c)-[:T]->(a), " +
-                 " (c)-[:T]->(d)-[:T]->(e)-[:T]->(f)-[:T]->(d), " +
-                 " (f)-[:T]->(g)-[:T]->(h)-[:T]->(f), " +
-                 " (h)-[:T]->(i)-[:T]->(j)-[:T]->(k)-[:T]->(e), " +
-                 " (k)-[:T]->(l), " +
-                 " (k)-[:T]->(m)-[:T]->(n)-[:T]->(j), " +
-                 " (o)");
+        var graph = fromGdl(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ", (c)-[:T]->(d)-[:T]->(e)-[:T]->(f)-[:T]->(d)" +
+            ", (f)-[:T]->(g)-[:T]->(h)-[:T]->(f)" +
+            ", (h)-[:T]->(i)-[:T]->(j)-[:T]->(k)-[:T]->(e)" +
+            ", (k)-[:T]->(l)" +
+            ", (k)-[:T]->(m)-[:T]->(n)-[:T]->(j)" +
+            ", (o)",
+            UNDIRECTED
+        );
 
-        TriangleCountResult result = projectAndCompute();
+        TriangleCountResult result = compute(graph);
 
         assertEquals(3, result.globalTriangles());
         assertEquals(15, result.localTriangles().size());
@@ -188,7 +200,7 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
 
     @Test
     void testTriangleCountingWithMaxDegree() {
-        runQuery(
+        var graph = fromGdl(
             "CREATE" +
             "  (a)-[:T]->(b)"+
             " ,(a)-[:T]->(c)"+
@@ -198,7 +210,8 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
 
             " ,(e)-[:T]->(f)"+
             " ,(f)-[:T]->(g)"+
-            " ,(g)-[:T]->(e)"
+            " ,(g)-[:T]->(e)",
+            UNDIRECTED
         );
 
         TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
@@ -206,7 +219,7 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
             .maxDegree(2)
             .build();
 
-        TriangleCountResult result = projectAndCompute(config);
+        TriangleCountResult result = compute(graph, config);
 
         assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(0)); // a (deg = 3)
         assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(1)); // b (deg = 3)
@@ -219,18 +232,12 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
         assertEquals(1, result.globalTriangles());
     }
 
-    private TriangleCountResult projectAndCompute() {
+    private TriangleCountResult compute(Graph graph) {
         TriangleCountStatsConfig config = ImmutableTriangleCountStatsConfig.builder().build();
-        return projectAndCompute(config);
+        return compute(graph, config);
     }
 
-    private TriangleCountResult projectAndCompute(TriangleCountBaseConfig config) {
-        Graph graph =  new StoreLoaderBuilder()
-            .api(db)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .build()
-            .graph();
-
+    private TriangleCountResult compute(Graph graph, TriangleCountBaseConfig config) {
         return new IntersectingTriangleCount(
             graph,
             config,

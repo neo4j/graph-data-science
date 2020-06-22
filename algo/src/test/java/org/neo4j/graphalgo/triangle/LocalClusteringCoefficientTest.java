@@ -24,9 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -39,25 +36,26 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 // TODO: Add tests for seeded property
-class LocalClusteringCoefficientTest extends AlgoTestBase {
+class LocalClusteringCoefficientTest {
 
     private static Stream<Arguments> noTriangleQueries() {
         return Stream.of(
-            Arguments.of("CREATE ()-[:T]->()-[:T]->()", "line"),
-            Arguments.of("CREATE (), (), ()", "no rels"),
-            Arguments.of("CREATE ()-[:T]->(), ()", "one rel"),
-            Arguments.of("CREATE (a1)-[:T]->()-[:T]->(a1), ()", "back and forth")
+            Arguments.of(fromGdl("CREATE ()-[:T]->()-[:T]->()", UNDIRECTED), "line"),
+            Arguments.of(fromGdl("CREATE (), (), ()", UNDIRECTED), "no rels"),
+            Arguments.of(fromGdl("CREATE ()-[:T]->(), ()", UNDIRECTED), "one rel"),
+            Arguments.of(fromGdl("CREATE (a1)-[:T]->()-[:T]->(a1), ()", UNDIRECTED), "back and forth")
         );
     }
 
     @MethodSource("noTriangleQueries")
     @ParameterizedTest(name = "{1}")
-    void noTriangles(String query, String ignoredName) {
-        runQuery(query);
-
-        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+    void noTriangles(Graph graph, String ignoredName) {
+        LocalClusteringCoefficient.Result result = compute(graph);
 
         assertEquals(0, result.averageClusteringCoefficient());
         assertEquals(3, result.localClusteringCoefficients().size());
@@ -69,11 +67,12 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
     @ValueSource(ints = {1, 2, 4, 8, 100})
     @ParameterizedTest
     void independentTriangles(int nbrOfTriangles) {
+        StringBuilder gdl = new StringBuilder("CREATE ");
         for (int i = 0; i < nbrOfTriangles; ++i) {
-            runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)");
+            gdl.append(formatWithLocale("(a%d)-[:T]->()-[:T]->()-[:T]->(a%d) ", i, i));
         }
 
-        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+        LocalClusteringCoefficient.Result result = compute(fromGdl(gdl.toString(), UNDIRECTED));
 
         assertEquals(1, result.averageClusteringCoefficient());
         assertEquals(3 * nbrOfTriangles, result.localClusteringCoefficients().size());
@@ -84,20 +83,22 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
 
     @Test
     void clique5() {
-        runQuery("CREATE (a1), (a2), (a3), (a4), (a5) " +
-                 "CREATE " +
-                 " (a1)-[:T]->(a2), " +
-                 " (a1)-[:T]->(a3), " +
-                 " (a1)-[:T]->(a4), " +
-                 " (a1)-[:T]->(a5), " +
-                 " (a2)-[:T]->(a3), " +
-                 " (a2)-[:T]->(a4), " +
-                 " (a2)-[:T]->(a5), " +
-                 " (a3)-[:T]->(a4), " +
-                 " (a3)-[:T]->(a5), " +
-                 " (a4)-[:T]->(a5)");
+        var graph = fromGdl(
+            "CREATE " +
+            " (a1)-[:T]->(a2), " +
+            " (a1)-[:T]->(a3), " +
+            " (a1)-[:T]->(a4), " +
+            " (a1)-[:T]->(a5), " +
+            " (a2)-[:T]->(a3), " +
+            " (a2)-[:T]->(a4), " +
+            " (a2)-[:T]->(a5), " +
+            " (a3)-[:T]->(a4), " +
+            " (a3)-[:T]->(a5), " +
+            " (a4)-[:T]->(a5)",
+            UNDIRECTED
+        );
 
-        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+        LocalClusteringCoefficient.Result result = compute(graph);
 
         assertEquals(1, result.averageClusteringCoefficient());
         assertEquals(5, result.localClusteringCoefficients().size());
@@ -108,10 +109,14 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
 
     @Test
     void twoAdjacentTriangles() {
-        runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
-                 "CREATE (a)-[:T]->(r)-[:T]->(t)-[:T]->(a)");
+        var graph = fromGdl(
+            "CREATE " +
+            "  (a)-[:T]->()-[:T]->()-[:T]->(a) " +
+            ", (a)-[:T]->()-[:T]->()-[:T]->(a)",
+            UNDIRECTED
+        );
 
-        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+        LocalClusteringCoefficient.Result result = compute(graph);
 
         assertEquals(13.0 / 15.0, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(5, result.localClusteringCoefficients().size());
@@ -131,11 +136,15 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
 
     @Test
     void twoTrianglesWithLine() {
-        runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
-                 "CREATE (q)-[:T]->(r)-[:T]->(t)-[:T]->(q) " +
-                 "CREATE (a)-[:T]->(q)");
+        var graph = fromGdl(
+            "CREATE " +
+            "  (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
+            ", (q)-[:T]->(r)-[:T]->(t)-[:T]->(q) " +
+            ", (a)-[:T]->(q)",
+            UNDIRECTED
+        );
 
-        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+        LocalClusteringCoefficient.Result result = compute(graph);
 
         assertEquals(7.0 / 9.0, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(6, result.localClusteringCoefficients().size());
@@ -154,9 +163,9 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
 
     @Test
     void selfLoop() {
-        runQuery("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)");
+        var graph = fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)", UNDIRECTED);;
 
-        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+        LocalClusteringCoefficient.Result result = compute(graph);
 
         assertEquals(0, result.averageClusteringCoefficient());
         assertEquals(1, result.localClusteringCoefficients().size());
@@ -166,9 +175,9 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
     @Test
     void selfLoop2() {
         // a self loop adds two to the degree
-        runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)");
+        var graph = fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
 
-        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+        LocalClusteringCoefficient.Result result = compute(graph);
 
         assertEquals(13.0 / 18, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(3, result.localClusteringCoefficients().size());
@@ -179,16 +188,19 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
 
     @Test
     void manyTrianglesAndOtherThings() {
-        runQuery("CREATE" +
-                 " (a)-[:T]->(b)-[:T]->(b)-[:T]->(c)-[:T]->(a), " +
-                 " (c)-[:T]->(d)-[:T]->(e)-[:T]->(f)-[:T]->(d), " +
-                 " (f)-[:T]->(g)-[:T]->(h)-[:T]->(f), " +
-                 " (h)-[:T]->(i)-[:T]->(j)-[:T]->(k)-[:T]->(e), " +
-                 " (k)-[:T]->(l), " +
-                 " (k)-[:T]->(m)-[:T]->(n)-[:T]->(j), " +
-                 " (o)");
+        var graph = fromGdl(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ", (c)-[:T]->(d)-[:T]->(e)-[:T]->(f)-[:T]->(d)" +
+            ", (f)-[:T]->(g)-[:T]->(h)-[:T]->(f)" +
+            ", (h)-[:T]->(i)-[:T]->(j)-[:T]->(k)-[:T]->(e)" +
+            ", (k)-[:T]->(l)" +
+            ", (k)-[:T]->(m)-[:T]->(n)-[:T]->(j)" +
+            ", (o)",
+            UNDIRECTED
+        );
 
-        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+        LocalClusteringCoefficient.Result result = compute(graph);
 
         assertEquals(23.0 / 90, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(15, result.localClusteringCoefficients().size());
@@ -209,13 +221,7 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
         assertEquals(0, result.localClusteringCoefficients().get(14)); // o
     }
 
-    private LocalClusteringCoefficient.Result projectWithoutSeedAndCompute() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .build()
-            .graph();
-
+    private LocalClusteringCoefficient.Result compute(Graph graph) {
         return new LocalClusteringCoefficient(
             graph,
             createConfig().build(),

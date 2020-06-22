@@ -19,48 +19,41 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.Queue;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class PregelTest extends AlgoTestBase {
+@GdlExtension
+class PregelTest {
 
+    @GdlGraph
     private static final String TEST_GRAPH =
         "CREATE" +
         "  (a:Node)" +
         ", (b:Node)" +
         ", (c:Node)" +
         ", (a)-[:REL {prop: 2.0}]->(b)" +
-        ", (a)-[:REL]->(c)";
+        ", (a)-[:REL {prop: 1.0}]->(c)";
 
-    @BeforeEach
-    void setup() {
-        runQuery(TEST_GRAPH);
-    }
+    @Inject
+    private Graph graph;
 
     @ParameterizedTest
     @MethodSource("configAndResult")
     void sendsMessages(PregelConfig config, PregelComputation computation, double[] expected) {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .addRelationshipProperty(PropertyMapping.of("prop", 1.0))
-            .build()
-            .graph();
-
         Pregel pregelJob = Pregel.withDefaultNodeValues(
             graph,
             config,

@@ -20,38 +20,33 @@
 package org.neo4j.graphalgo.wcc;
 
 import com.carrotsearch.hppc.BitSet;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-class WccTest extends AlgoTestBase {
+class WccTest {
 
-    static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
     private static final int SETS_COUNT = 16;
     private static final int SET_SIZE = 10;
 
@@ -68,26 +63,14 @@ class WccTest extends AlgoTestBase {
         return sets.cardinality();
     }
 
-    @BeforeEach
-    void setupGraphDb() {
-        int[] setSizes = new int[SETS_COUNT];
-        Arrays.fill(setSizes, SET_SIZE);
-        createTestGraph(setSizes);
-    }
-
     int communitySize() {
         return SET_SIZE;
     }
 
-    @ParameterizedTest(name = "orientation = {1}")
+    @ParameterizedTest(name = "orientation = {0}")
     @EnumSource(Orientation.class)
     void shouldComputeComponents(Orientation orientation) {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .addRelationshipType(RELATIONSHIP_TYPE.name())
-            .globalOrientation(orientation)
-            .build()
-            .graph();
+        var graph = createTestGraph(orientation);
 
         DisjointSetStruct result = run(graph);
 
@@ -121,12 +104,7 @@ class WccTest extends AlgoTestBase {
 
     @Test
     void shouldLogProgress() {
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addRelationshipType(RELATIONSHIP_TYPE.name())
-            .globalOrientation(Orientation.NATURAL)
-            .build()
-            .graph();
+        var graph = createTestGraph(Orientation.NATURAL);
 
         var testLogger = new TestProgressLogger(graph.relationshipCount(), "Wcc", 2);
 
@@ -229,21 +207,23 @@ class WccTest extends AlgoTestBase {
         );
     }
 
-    private void createTestGraph(int... setSizes) {
-        runInTransaction(db, tx -> {
-            for (int setSize : setSizes) {
-                createLine(db, tx, setSize);
-            }
-        });
+    private static Graph createTestGraph(Orientation orientation) {
+        int[] setSizes = new int[SETS_COUNT];
+        Arrays.fill(setSizes, SET_SIZE);
+
+        StringBuilder gdl = new StringBuilder();
+
+        for (int setSize : setSizes) {
+            gdl.append(createLine(setSize));
+        }
+
+        return fromGdl(gdl.toString(), orientation);
     }
 
-    private static void createLine(GraphDatabaseService db, Transaction tx, int setSize) {
-        Node temp = tx.createNode();
-        for (int i = 1; i < setSize; i++) {
-            Node t = tx.createNode();
-            temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
-            temp = t;
-        }
+    static String createLine(int setSize) {
+        return IntStream.range(0, setSize)
+            .mapToObj(i -> "()")
+            .collect(Collectors.joining("-[:REL]->"));
     }
 
     DisjointSetStruct run(Graph graph) {
@@ -260,7 +240,7 @@ class WccTest extends AlgoTestBase {
             Pools.DEFAULT,
             communitySize() / concurrency,
             config,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         ).compute();
     }

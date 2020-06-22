@@ -21,6 +21,10 @@ package org.neo4j.graphalgo;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 public class NodeLabel extends ElementIdentifier {
 
     public static final NodeLabel ALL_NODES = NodeLabel.of("__ALL__");
@@ -36,5 +40,9 @@ public class NodeLabel extends ElementIdentifier {
 
     public static NodeLabel of(@NotNull String name) {
         return new NodeLabel(name);
+    }
+
+    public static Collection<NodeLabel> listOf(@NotNull String... nodeLabels) {
+        return Arrays.stream(nodeLabels).map(NodeLabel::of).collect(Collectors.toList());
     }
 }

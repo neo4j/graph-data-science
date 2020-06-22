@@ -19,25 +19,31 @@
  */
 package org.neo4j.graphalgo.beta.modularity;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,148 +52,111 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.TestSupport.ids;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
-class ModularityOptimizationTest extends AlgoTestBase {
+@GdlExtension
+class ModularityOptimizationTest {
 
-    public static final long[][] EXPECTED_SEED_COMMUNITIES = {new long[]{0, 1}, new long[]{2, 4}, new long[]{3, 5}};
+    private static final String[][] EXPECTED_SEED_COMMUNITIES = {new String[]{"a", "b"}, new String[]{"c", "e"}, new String[]{"d", "f"}};
 
-    static final String DB_CYPHER =
+    @GdlGraph
+    private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {name:'a', seed1: 1, seed2: 21})" +
-        ", (b:Node {name:'b'})" +
-        ", (c:Node {name:'c', seed1: 2, seed2: 42})" +
-        ", (d:Node {name:'d', seed1: 3, seed2: 33})" +
-        ", (e:Node {name:'e', seed1: 2, seed2: 42})" +
-        ", (f:Node {name:'f', seed1: 3, seed2: 33})" +
-        ", (a)-[:TYPE {weight: 0.01}]->(b)" +
-        ", (a)-[:TYPE {weight: 5.0}]->(e)" +
-        ", (a)-[:TYPE {weight: 5.0}]->(f)" +
-        ", (b)-[:TYPE {weight: 5.0}]->(c)" +
-        ", (b)-[:TYPE {weight: 5.0}]->(d)" +
-        ", (c)-[:TYPE {weight: 0.01}]->(e)" +
-        ", (f)-[:TYPE {weight: 0.01}]->(d)";
+        "  (a:Node {seed1:  1,  seed2: 21})" +
+        ", (b:Node {seed1: -1,  seed2: -1})" +
+        ", (c:Node {seed1:  2,  seed2: 42})" +
+        ", (d:Node {seed1:  3,  seed2: 33})" +
+        ", (e:Node {seed1:  2,  seed2: 42})" +
+        ", (f:Node {seed1:  3,  seed2: 33})" +
 
-    @BeforeEach
-    void setupGraphDb() {
-        runQuery(DB_CYPHER);
-    }
+        ", (a)-[:TYPE_OUT {weight: 0.01}]->(b)" +
+        ", (a)-[:TYPE_OUT {weight: 5.0}]->(e)" +
+        ", (a)-[:TYPE_OUT {weight: 5.0}]->(f)" +
+        ", (b)-[:TYPE_OUT {weight: 5.0}]->(c)" +
+        ", (b)-[:TYPE_OUT {weight: 5.0}]->(d)" +
+        ", (c)-[:TYPE_OUT {weight: 0.01}]->(e)" +
+        ", (f)-[:TYPE_OUT {weight: 0.01}]->(d)" +
+
+        ", (a)<-[:TYPE_IN {weight: 0.01}]-(b)" +
+        ", (a)<-[:TYPE_IN {weight: 5.0}]-(e)" +
+        ", (a)<-[:TYPE_IN {weight: 5.0}]-(f)" +
+        ", (b)<-[:TYPE_IN {weight: 5.0}]-(c)" +
+        ", (b)<-[:TYPE_IN {weight: 5.0}]-(d)" +
+        ", (c)<-[:TYPE_IN {weight: 0.01}]-(e)" +
+        ", (f)<-[:TYPE_IN {weight: 0.01}]-(d)";
+
+    @Inject
+    private TestGraph graph;
+
+    @Inject
+    private GraphStore graphStore;
+
+    @Inject
+    private IdFunction idFunction;
 
     @Test
     void testUnweighted() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
-            .build()
-            .graph();
+        var graph = unweightedGraph();
 
-        ModularityOptimization pmo = new ModularityOptimization(
-            graph,
-            3,
-            TOLERANCE_DEFAULT,
-            null,
-            1,
-            10_000,
-            Pools.DEFAULT,
-            progressLogger,
-            AllocationTracker.EMPTY
-        );
-
-        pmo.compute();
+        ModularityOptimization pmo = compute(graph, 3, null, 1, 10_000, ProgressLogger.NULL_LOGGER);
 
         assertEquals(0.12244, pmo.getModularity(), 0.001);
-        assertCommunities(getCommunityIds(graph.nodeCount(), pmo), new long[]{0, 1, 2, 4}, new long[]{3, 5});
+        assertCommunities(
+            getCommunityIds(graph.nodeCount(), pmo),
+            ids(idFunction, "a", "b", "c", "e"),
+            ids(idFunction, "d", "f")
+        );
         assertTrue(pmo.getIterations() <= 3);
     }
 
     @Test
     void testWeighted() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
-            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
-            .build()
-            .graph();
-
-        ModularityOptimization pmo = new ModularityOptimization(
-            graph,
-            3,
-            TOLERANCE_DEFAULT,
-            null,
-            3,
-            2,
-            Pools.DEFAULT,
-            progressLogger,
-            AllocationTracker.EMPTY
-        );
-
-        pmo.compute();
+        ModularityOptimization pmo = compute(graph, 3, null, 3, 2, ProgressLogger.NULL_LOGGER);
 
         assertEquals(0.4985, pmo.getModularity(), 0.001);
-        assertCommunities(getCommunityIds(graph.nodeCount(), pmo), new long[]{0, 4, 5}, new long[]{1, 2, 3});
+        assertCommunities(
+            getCommunityIds(graph.nodeCount(), pmo),
+            ids(idFunction, "a", "e", "f"),
+            ids(idFunction, "b", "c", "d")
+        );
         assertTrue(pmo.getIterations() <= 3);
     }
 
     @Test
     void testSeedingWithBiggerSeedValues() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
-            .addNodeProperty(PropertyMapping.of("seed2", -1))
-            .build()
-            .graph();
+        var graph = unweightedGraph();
 
-        ModularityOptimization pmo = new ModularityOptimization(
+        ModularityOptimization pmo = compute(
             graph,
-            10,
-            TOLERANCE_DEFAULT,
-            graph.nodeProperties("seed2"),
+            10, graph.nodeProperties("seed2"),
             1,
             100,
-            Pools.DEFAULT,
-            progressLogger,
-            AllocationTracker.EMPTY
+            ProgressLogger.NULL_LOGGER
         );
-
-        pmo.compute();
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.getModularity(), 0.001);
-        assertCommunities(actualCommunities, EXPECTED_SEED_COMMUNITIES);
+        assertCommunities(actualCommunities, ids(idFunction, EXPECTED_SEED_COMMUNITIES));
         assertTrue(actualCommunities[0] == 43 && actualCommunities[2] == 42 && actualCommunities[3] == 33);
         assertTrue(pmo.getIterations() <= 3);
     }
 
     @Test
     void testSeeding() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
-            .addNodeProperty(PropertyMapping.of("seed1", -1))
-            .build()
-            .graph();
+        var graph = unweightedGraph();
 
-        ModularityOptimization pmo = new ModularityOptimization(
+        ModularityOptimization pmo = compute(
             graph,
-            10,
-            TOLERANCE_DEFAULT,
-            graph.nodeProperties("seed1"),
+            10, graph.nodeProperties("seed1"),
             1,
             100,
-            Pools.DEFAULT,
-            progressLogger,
-            AllocationTracker.EMPTY
+            ProgressLogger.NULL_LOGGER
         );
-
-        pmo.compute();
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.getModularity(), 0.001);
-        assertCommunities(actualCommunities, EXPECTED_SEED_COMMUNITIES);
+        assertCommunities(actualCommunities, ids(idFunction, EXPECTED_SEED_COMMUNITIES));
         assertTrue(actualCommunities[0] == 4 && actualCommunities[2] == 2 || actualCommunities[3] == 3);
         assertTrue(pmo.getIterations() <= 3);
     }
@@ -202,32 +171,13 @@ class ModularityOptimizationTest extends AlgoTestBase {
 
     @Test
     void testLogging() {
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
-            .build()
-            .graph();
-
         var testLogger = new TestProgressLogger(
             graph.relationshipCount(),
             "ModularityOptimization",
             3
         );
 
-        var modularityOptimization = new ModularityOptimization(
-            graph,
-            3,
-            TOLERANCE_DEFAULT,
-            null,
-            3,
-            2,
-            Pools.DEFAULT,
-            testLogger,
-            AllocationTracker.EMPTY
-        );
-
-        modularityOptimization.compute();
+        compute(graph, 3, null, 3, 2, testLogger);
 
         assertTrue(testLogger.containsMessage(INFO, ":: Start"));
         assertTrue(testLogger.containsMessage(INFO, "Initialization :: Start"));
@@ -239,26 +189,9 @@ class ModularityOptimizationTest extends AlgoTestBase {
 
     @Test
     void requireAtLeastOneIteration() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .putRelationshipProjectionsWithIdentifier("TYPE_OUT", RelationshipProjection.of("TYPE", Orientation.NATURAL))
-            .putRelationshipProjectionsWithIdentifier("TYPE_IN", RelationshipProjection.of("TYPE", Orientation.REVERSE))
-            .build()
-            .graph();
-
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new ModularityOptimization(
-                graph,
-                0,
-                TOLERANCE_DEFAULT,
-                null,
-                3,
-                2,
-                Pools.DEFAULT,
-                progressLogger,
-                AllocationTracker.EMPTY
-            )
+            () -> compute(graph, 0, null, 3, 2, ProgressLogger.NULL_LOGGER)
         );
 
         assertTrue(exception.getMessage().contains("at least one iteration"));
@@ -285,6 +218,36 @@ class ModularityOptimizationTest extends AlgoTestBase {
             arguments(1, 5614048, 8413080),
             arguments(4, 5617336, 14413344),
             arguments(42, 5658984, 90416688)
+        );
+    }
+
+    @NotNull
+    private ModularityOptimization compute(
+        Graph graph,
+        int maxIterations,
+        NodeProperties properties,
+        int concurrency,
+        int minBatchSize,
+        ProgressLogger testLogger
+    ) {
+        return new ModularityOptimization(
+            graph,
+            maxIterations,
+            TOLERANCE_DEFAULT,
+            properties,
+            concurrency,
+            minBatchSize,
+            Pools.DEFAULT,
+            testLogger,
+            AllocationTracker.EMPTY
+        ).compute();
+    }
+
+    private Graph unweightedGraph() {
+        return graphStore.getGraph(
+            NodeLabel.listOf("Node"),
+            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            Optional.empty()
         );
     }
 }

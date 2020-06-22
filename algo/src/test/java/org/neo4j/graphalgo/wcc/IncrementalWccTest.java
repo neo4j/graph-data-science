@@ -20,30 +20,25 @@
 package org.neo4j.graphalgo.wcc;
 
 import com.carrotsearch.hppc.BitSet;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class IncrementalWccTest extends AlgoTestBase {
+class IncrementalWccTest {
 
-    private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
     private static final String SEED_PROPERTY = "community";
 
     private static final int COMMUNITY_COUNT = 16;
@@ -52,36 +47,32 @@ class IncrementalWccTest extends AlgoTestBase {
     /**
      * Create multiple communities and connect them pairwise.
      */
-    @BeforeEach
-    void setupGraphDb() {
-        runInTransaction(db, tx -> {
-            for (int i = 0; i < COMMUNITY_COUNT; i = i + 2) {
-                long community1 = createLineGraph(tx);
-                long community2 = createLineGraph(tx);
-                createConnection(tx, community1, community2);
-            }
-        });
+    static Graph createGraph() {
+        StringBuilder gdl = new StringBuilder();
+
+        for (int i = 0; i < COMMUNITY_COUNT; i = i + 2) {
+            gdl.append(createCommunity(i));
+            gdl.append(createCommunity(i + 1));
+            gdl.append(formatWithLocale(
+                "(n_%d_%d)-[:REL]->(n_%d_%d)",
+                COMMUNITY_SIZE - 1, i,
+                COMMUNITY_SIZE - 1, i + 1
+            ));
+        }
+        return fromGdl(gdl.toString());
     }
 
-    private static void createConnection(
-        Transaction tx,
-        long sourceId,
-        long targetId
-    ) {
-        final Node source = tx.getNodeById(sourceId);
-        final Node target = tx.getNodeById(targetId);
-
-        source.createRelationshipTo(target, RELATIONSHIP_TYPE);
+    static String createCommunity(int communityId) {
+        return IntStream.range(0, COMMUNITY_SIZE)
+            .mapToObj(nodeId -> formatWithLocale(
+                "(n_%d_%d {%s: %d})",
+                nodeId, communityId, SEED_PROPERTY, communityId))
+            .collect(Collectors.joining("-[:REL]->"));
     }
 
     @Test
     void shouldComputeComponentsFromSeedProperty() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .addRelationshipType(RELATIONSHIP_TYPE.name())
-            .addNodeProperty(PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L))
-            .build()
-            .graph();
+        Graph graph = createGraph();
 
         WccStreamConfig config = ImmutableWccStreamConfig.builder()
             .concurrency(AlgoBaseConfig.DEFAULT_CONCURRENCY)
@@ -89,7 +80,7 @@ class IncrementalWccTest extends AlgoTestBase {
             .threshold(0D)
             .build();
 
-        // We expect that UF connects pairs of communites
+        // We expect that UF connects pairs of communities
         DisjointSetStruct result = run(graph, config);
         assertEquals(COMMUNITY_COUNT / 2, getSetCount(result));
 
@@ -132,32 +123,13 @@ class IncrementalWccTest extends AlgoTestBase {
             .forEach(node -> assertEquals(42, result.setIdOf(node)));
     }
 
-    /**
-     * Creates a line graph of the given length (i.e. numer of relationships).
-     *
-     * @return the last node id inserted into the graph
-     */
-    private long createLineGraph(Transaction tx) {
-        Node temp = tx.createNode();
-        long communityId = temp.getId() / COMMUNITY_SIZE;
-
-        for (int i = 1; i < COMMUNITY_SIZE; i++) {
-            temp.setProperty(SEED_PROPERTY, communityId);
-            Node target = tx.createNode();
-            temp.createRelationshipTo(target, RELATIONSHIP_TYPE);
-            temp = target;
-        }
-        temp.setProperty(SEED_PROPERTY, communityId);
-        return temp.getId();
-    }
-
     private DisjointSetStruct run(Graph graph, WccBaseConfig config) {
         return new Wcc(
             graph,
             Pools.DEFAULT,
             COMMUNITY_SIZE / AlgoBaseConfig.DEFAULT_CONCURRENCY,
             config,
-            progressLogger,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY
         ).compute();
     }
