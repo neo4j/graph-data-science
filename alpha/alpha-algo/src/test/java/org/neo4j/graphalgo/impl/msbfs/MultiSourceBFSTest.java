@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -42,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.LongUnaryOperator;
 
@@ -349,6 +351,13 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             @Override
             public boolean exists(final long sourceNodeId, final long targetNodeId) {
                 return false;
+            }
+
+            @Override
+            public Spliterator<RelationshipCursor> streamRelationships(
+                long nodeId, double fallbackValue
+            ) {
+                throw new UnsupportedOperationException();
             }
         };
 
