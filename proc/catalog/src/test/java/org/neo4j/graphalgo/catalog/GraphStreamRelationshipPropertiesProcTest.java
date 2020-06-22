@@ -26,13 +26,24 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
+import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.values.storable.NumberType;
 
-import static java.util.Arrays.asList;
+import java.util.List;
+import java.util.Optional;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -114,7 +125,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     void streamLoadedRelationshipProperties(String graphWriteQueryTemplate) {
         String graphWriteQuery = formatWithLocale(graphWriteQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
 
-        assertCypherResult(graphWriteQuery, asList(
+        assertCypherResult(graphWriteQuery, List.of(
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
             map("source", 0L, "target", 0L, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 2D),
@@ -139,7 +150,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             TEST_GRAPH_SAME_PROPERTIES
         );
 
-        assertCypherResult(graphWriteQuery, asList(
+        assertCypherResult(graphWriteQuery, List.of(
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
             map("source", 1L, "target", 1L, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
@@ -158,7 +169,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             TEST_GRAPH_DIFFERENT_PROPERTIES
         );
 
-        assertCypherResult(graphWriteQuery, asList(
+        assertCypherResult(graphWriteQuery, List.of(
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 0D),
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 42D),
             map("source", 0L, "target", 0L, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 2D),
@@ -166,6 +177,37 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             map("source", 1L, "target", 1L, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 1D),
             map("source", 1L, "target", 1L, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 43D),
             map("source", 1L, "target", 1L, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 3D)
+        ));
+    }
+
+    @Test
+    void streamMutatedRelationshipProperties() {
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
+
+        HugeGraphUtil.RelationshipsBuilder relImporter = HugeGraphUtil.createRelImporter(
+            (IdMap) graphStore.nodes(),
+            Orientation.NATURAL,
+            true,
+            Aggregation.NONE,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        relImporter.addFromInternal(0, 1, 23D);
+
+        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), relImporter.build());
+
+        String graphWriteQuery = formatWithLocale(
+            "CALL gds.graph.streamRelationshipProperties(" +
+            "   '%s', " +
+            "   ['newRelProp3']" +
+            ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue " +
+            "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, relationshipProperty, propertyValue",
+            TEST_GRAPH_SAME_PROPERTIES
+        );
+
+        assertCypherResult(graphWriteQuery, List.of(
+            map("source", 0L, "target", 1L, "relationshipType", "NEW_REL", "relationshipProperty", "newRelProp3", "propertyValue", 23D)
         ));
     }
 
@@ -222,7 +264,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             TEST_GRAPH_SAME_PROPERTIES
         );
 
-        assertCypherResult(graphWriteQuery, asList(
+        assertCypherResult(graphWriteQuery, List.of(
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "propertyValue", 0D),
             map("source", 1L, "target", 1L, "relationshipType", "REL1", "propertyValue", 1D)
         ));
@@ -239,9 +281,40 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             TEST_GRAPH_DIFFERENT_PROPERTIES
         );
 
-        assertCypherResult(graphWriteQuery, asList(
+        assertCypherResult(graphWriteQuery, List.of(
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "propertyValue", 42D),
             map("source", 1L, "target", 1L, "relationshipType", "REL1", "propertyValue", 43D)
+        ));
+    }
+
+    @Test
+    void streamMutatedNodeProperty() {
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
+
+        HugeGraphUtil.RelationshipsBuilder relImporter = HugeGraphUtil.createRelImporter(
+            (IdMap) graphStore.nodes(),
+            Orientation.NATURAL,
+            true,
+            Aggregation.NONE,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        relImporter.addFromInternal(0, 1, 23D);
+
+        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), relImporter.build());
+
+        String graphWriteQuery = formatWithLocale(
+            "CALL gds.graph.streamRelationshipProperty(" +
+            "   '%s', " +
+            "   'newRelProp3'" +
+            ") YIELD sourceNodeId, targetNodeId, relationshipType, propertyValue " +
+            "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, propertyValue",
+            TEST_GRAPH_SAME_PROPERTIES
+        );
+
+        assertCypherResult(graphWriteQuery, List.of(
+            map("source", 0L, "target", 1L, "relationshipType", "NEW_REL", "propertyValue", 23D)
         ));
     }
 
