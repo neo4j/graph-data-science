@@ -44,16 +44,16 @@ class WccThresholdTest {
     @GdlGraph
     private static final String DB =
         "CREATE" +
-        "  (a:Label {nodeId: 0, seedId: 42})" +
-        ", (b:Label {nodeId: 1, seedId: 42})" +
-        ", (c:Label {nodeId: 2, seedId: 42})" +
-        ", (d:Label {nodeId: 3, seedId: 42})" +
-        ", (e {nodeId: 4})" +
-        ", (f {nodeId: 5})" +
-        ", (g {nodeId: 6})" +
-        ", (h {nodeId: 7})" +
-        ", (i {nodeId: 8})" +
-        ", (j {nodeId: 9})" +
+        "  (a:Label {seedId: 42})" +
+        ", (b:Label {seedId: 42})" +
+        ", (c:Label {seedId: 42})" +
+        ", (d:Label {seedId: 42})" +
+        ", (e)" +
+        ", (f)" +
+        ", (g)" +
+        ", (h)" +
+        ", (i)" +
+        ", (j)" +
         // {A, B, C, D}
         ", (a)-[:TYPE {cost: 10.0}]->(b)" +
         ", (b)-[:TYPE {cost: 10.0}]->(c)" +
