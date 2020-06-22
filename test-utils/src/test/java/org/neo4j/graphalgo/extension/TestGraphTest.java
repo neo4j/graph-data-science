@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.List;
@@ -30,9 +32,26 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 class TestGraphTest {
+
+    @Test
+    void exposeInner() {
+        assertTrue(fromGdl("()").innerGraph() instanceof HugeGraph);
+
+        TestGraph g = new TestGraph(
+            GdlFactory
+                .of("(:A)-[:T1]->(:B)-[:T2]->(:A)")
+                .build()
+                .graphStore()
+                .getGraph(NodeLabel.listOf("A", "B"), RelationshipType.listOf("T1", "T2"), Optional.empty()),
+            (a) -> 0,
+            "foo"
+        );
+        assertTrue(g.innerGraph() instanceof UnionGraph);
+    }
 
     @Test
     void shouldCopyForConcurrentAccess() {
