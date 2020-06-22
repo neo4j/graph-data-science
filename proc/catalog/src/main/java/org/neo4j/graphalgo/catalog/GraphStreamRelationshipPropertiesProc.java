@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -96,24 +96,36 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
         config.validate(graphStore);
 
-        return streamRelationshipProperties(graphStore, config, (sourceId, targetId, propertyName, propertyValue) -> new PropertyResult(sourceId, targetId, propertyValue));
+        return streamRelationshipProperties(
+            graphStore,
+            config,
+            (sourceId, targetId, relationshipType, propertyName, propertyValue) -> new PropertyResult(
+                sourceId,
+                targetId,
+                relationshipType,
+                propertyValue
+            )
+        );
     }
 
     private <R> Stream<R> streamRelationshipProperties(GraphStore graphStore, GraphStreamRelationshipPropertiesConfig config, ResultProducer<R> producer) {
         Collection<RelationshipType> validRelationshipTypes = config.validRelationshipTypes(graphStore);
 
-        var relationshipPropertyKeysAndValues = config
-            .relationshipProperties()
+        var relationshipPropertyKeysAndValues = validRelationshipTypes
             .stream()
-            .map(propertyKey -> Pair.of(propertyKey, graphStore.getGraph(validRelationshipTypes, Optional.of(propertyKey))))
+            .flatMap(relType -> config.relationshipProperties()
+                .stream()
+                .filter(propertyKey -> graphStore.hasRelationshipProperty(List.of(relType), propertyKey))
+                .map(propertyKey -> Triple.of(relType, propertyKey, graphStore.getGraph(relType, Optional.of(propertyKey))))
+            )
             .collect(Collectors.toList());
         var usesPropertyNameColumn = callContext.outputFields().anyMatch(field -> field.equals("relationshipProperty"));
 
         return LongStream
             .range(0, graphStore.nodeCount())
-            .mapToObj(nodeId -> relationshipPropertyKeysAndValues.stream().flatMap(propertyKeyAndValues -> {
-                NumberType valueType = graphStore.relationshipPropertyType(propertyKeyAndValues.getKey());
-                Graph graph = propertyKeyAndValues.getRight();
+            .mapToObj(nodeId -> relationshipPropertyKeysAndValues.stream().flatMap(relTypeAndPropertyKeyAndValues -> {
+                NumberType valueType = graphStore.relationshipPropertyType(relTypeAndPropertyKeyAndValues.getMiddle());
+                Graph graph = relTypeAndPropertyKeyAndValues.getRight();
 
                 var originalSourceId = graph.toOriginalNodeId(nodeId);
                 return StreamSupport.stream(graph.streamRelationships(nodeId, Double.NaN), false)
@@ -130,7 +142,8 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
                         return producer.produce(
                             originalSourceId,
                             originalTargetId,
-                            usesPropertyNameColumn ? propertyKeyAndValues.getKey() : null,
+                            relTypeAndPropertyKeyAndValues.getLeft().name(),
+                            usesPropertyNameColumn ? relTypeAndPropertyKeyAndValues.getMiddle() : null,
                             numberValue
                         );
                     });
@@ -140,12 +153,20 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
     public static class PropertiesResult {
         public final long sourceNodeId;
         public final long targetNodeId;
+        public final String relationshipType;
         public final String relationshipProperty;
         public final Number propertyValue;
 
-        PropertiesResult(long sourceNodeId, long targetNodeId, String relationshipProperty, Number propertyValue) {
+        PropertiesResult(
+            long sourceNodeId,
+            long targetNodeId,
+            String relationshipType,
+            String relationshipProperty,
+            Number propertyValue
+        ) {
             this.sourceNodeId = sourceNodeId;
             this.targetNodeId = targetNodeId;
+            this.relationshipType = relationshipType;
             this.relationshipProperty = relationshipProperty;
             this.propertyValue = propertyValue;
         }
@@ -154,16 +175,18 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
     public static class PropertyResult {
         public final long sourceNodeId;
         public final long targetNodeId;
+        public final String relationshipType;
         public final Number propertyValue;
 
-        PropertyResult(long sourceNodeId, long targetNodeId, Number propertyValue) {
+        PropertyResult(long sourceNodeId, long targetNodeId, String relationshipType, Number propertyValue) {
             this.sourceNodeId = sourceNodeId;
             this.targetNodeId = targetNodeId;
+            this.relationshipType = relationshipType;
             this.propertyValue = propertyValue;
         }
     }
     interface ResultProducer<R> {
-        R produce(long sourceId, long targetId, String propertyName, Number propertyValue);
+        R produce(long sourceId, long targetId, String relationshipType, String propertyName, Number propertyValue);
     }
 
 }
