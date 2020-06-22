@@ -71,7 +71,7 @@ class WeaklyConnectedComponentsPregelTest {
     private TestGraph graph;
 
     @Test
-    void runSCC() {
+    void runWCC() {
         int batchSize = 10;
         int maxIterations = 10;
 
