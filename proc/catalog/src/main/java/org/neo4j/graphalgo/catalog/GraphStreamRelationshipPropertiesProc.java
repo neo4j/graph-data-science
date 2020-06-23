@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.catalog;
 
 import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -35,6 +36,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.DoubleFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -124,27 +126,26 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
             .range(0, graphStore.nodeCount())
             .mapToObj(nodeId -> relationshipPropertyKeysAndValues.stream().flatMap(relTypeAndPropertyKeyAndValues -> {
                 NumberType valueType = graphStore.relationshipPropertyType(relTypeAndPropertyKeyAndValues.getMiddle());
-                Graph graph = relTypeAndPropertyKeyAndValues.getRight();
+                DoubleFunction<Number> convertProperty = valueType == NumberType.FLOATING_POINT
+                    ? property -> property
+                    : property -> (long) property;
 
+                var relationshipType = relTypeAndPropertyKeyAndValues.getLeft().name();
+                var propertyName = usesPropertyNameColumn ? relTypeAndPropertyKeyAndValues.getMiddle() : null;
+
+                Graph graph = relTypeAndPropertyKeyAndValues.getRight();
                 var originalSourceId = graph.toOriginalNodeId(nodeId);
                 return graph
                     .streamRelationships(nodeId, Double.NaN)
                     .map(relationshipCursor -> {
                         var originalTargetId = graph.toOriginalNodeId(relationshipCursor.targetId());
-                        Number numberValue;
-                        if (valueType == NumberType.FLOATING_POINT) {
-                            numberValue = relationshipCursor.property();
-                        }
-                        else {
-                            numberValue = (long) relationshipCursor.property();
-                        }
-
+                        Number propertyValue = convertProperty.apply(relationshipCursor.property());
                         return producer.produce(
                             originalSourceId,
                             originalTargetId,
-                            relTypeAndPropertyKeyAndValues.getLeft().name(),
-                            usesPropertyNameColumn ? relTypeAndPropertyKeyAndValues.getMiddle() : null,
-                            numberValue
+                            relationshipType,
+                            propertyName,
+                            propertyValue
                         );
                     });
             })).flatMap(Function.identity());
@@ -186,7 +187,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         }
     }
     interface ResultProducer<R> {
-        R produce(long sourceId, long targetId, String relationshipType, String propertyName, Number propertyValue);
+        R produce(long sourceId, long targetId, String relationshipType, @Nullable String propertyName, Number propertyValue);
     }
 
 }
