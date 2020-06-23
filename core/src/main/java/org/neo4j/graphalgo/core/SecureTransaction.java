@@ -68,7 +68,7 @@ public final class SecureTransaction implements AutoCloseable {
      * The {@code Transaction} can be null, in which case this method behaves the same as {@link #of(GraphDatabaseService)}.
      */
     public static SecureTransaction of(GraphDatabaseService db, @Nullable Transaction top) {
-        return new SecureTransaction(
+        return ofEdition(
             db,
             (InternalTransaction) top,
             Optional
@@ -92,7 +92,16 @@ public final class SecureTransaction implements AutoCloseable {
      * The {@code Transaction} can be null, in which case this method behaves the same as {@link #of(GraphDatabaseService, SecurityContext)}.
      */
     public static SecureTransaction of(GraphDatabaseService db, @Nullable Transaction transaction, SecurityContext securityContext) {
-        return new SecureTransaction(db, (InternalTransaction) transaction, securityContext);
+        return ofEdition(db, (InternalTransaction) transaction, securityContext);
+    }
+
+    private static SecureTransaction ofEdition(
+        GraphDatabaseService db,
+        @Nullable InternalTransaction top,
+        SecurityContext securityContext
+    ) {
+        securityContext = GdsEdition.instance().isOnEnterpriseEdition() ? securityContext : SecurityContext.AUTH_DISABLED;
+        return new SecureTransaction(db, top, securityContext);
     }
 
     private final GraphDatabaseService db;
