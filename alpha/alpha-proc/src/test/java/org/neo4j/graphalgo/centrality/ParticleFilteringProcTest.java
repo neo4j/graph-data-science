@@ -22,25 +22,13 @@ package org.neo4j.graphalgo.centrality;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
-import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
-import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class ParticleFilteringProcTest extends BaseProcTest {
@@ -110,40 +98,5 @@ public class ParticleFilteringProcTest extends BaseProcTest {
 
         String actual = runQuery(query, Result::resultAsString);
         assertEquals(expected, actual);
-    }
-
-    @Test
-    void testClosenessWrite() {
-        String query = gdsCypher()
-                .writeMode()
-                .yields("nodes", "createMillis", "computeMillis", "writeMillis");
-
-        runQueryWithRowConsumer(query, row -> {
-            assertNotEquals(-1L, row.getNumber("writeMillis"));
-            assertNotEquals(-1L, row.getNumber("createMillis"));
-            assertNotEquals(-1L, row.getNumber("computeMillis"));
-            assertNotEquals(-1L, row.getNumber("nodes"));
-        });
-
-        runQueryWithRowConsumer("MATCH (n) WHERE exists(n.centrality) RETURN id(n) AS id, n.centrality AS centrality", row -> {
-            consumer.accept(
-                    row.getNumber("id").longValue(),
-                    row.getNumber("centrality").doubleValue()
-            );
-        });
-
-        verifyMock();
-    }
-
-    private GdsCypher.ModeBuildStage gdsCypher() {
-        return GdsCypher.call()
-                .withAnyLabel()
-                .withAnyRelationshipType()
-                .algo("gds.alpha.particleFiltering");
-    }
-
-    private void verifyMock() {
-        verify(consumer, times(1)).accept(eq(0), AdditionalMatchers.eq(10.0, 0.01));
-        verify(consumer, times(10)).accept(anyLong(), AdditionalMatchers.eq(0.588, 0.01));
     }
 }

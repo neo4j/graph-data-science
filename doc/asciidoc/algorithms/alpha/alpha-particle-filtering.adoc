@@ -1,0 +1,51 @@
+[[algorithms-particle-filtering-centrality]]
+[.alpha]
+= Particle Filtering
+
+[abstract]
+--
+This section describes the Particle Filtering algorithm in the Neo4j Graph Data Science library.
+--
+
+Particle filtering measures the proximity between source nodes and other nodes in the graph.
+It is an alternative to the <<algorithms-page-rank-examples-personalised, Personalized Page Rank>> algorithm that runs directly against Neo4j rather than a projected graph.
+
+include::alpha-note.adoc[]
+
+* <<algorithms-particle-filtering-context, History and explanation>>
+* <<algorithms-particle-filtering-usecase, Use-cases - when to use the Particle Filtering algorithm>>
+* <<algorithms-particle-filtering-syntax, Syntax>>
+
+[[algorithms-particle-filtering-context]]
+== History and explanation
+
+Particle Filtering was proposed by Denis Gallo, Matteo Lissandrini, and Yannis Velegrakis in their 2020 paper https://people.cs.aau.dk/~matteo/pdf/EDBT20-particle-filtering.pdf[Personalized Page Rank on Knowledge Graphs: Particle Filtering is all you need!^].
+
+[[algorithms-particle-filtering-usecase]]
+== Use-cases - when to use the Particle Filtering algorithm
+
+* Particle filtering has been used to build the movie recommendation engine used by https://mindreader.tech/[MindReader^], a novel dataset providing explicit user ratings over a knowledge graph within the movie domain.
+Read more in https://towardsdatascience.com/movie-recommendations-powered-by-knowledge-graphs-and-neo4j-33603a212ad0[Movie Recommendations powered by Knowledge Graphs and Neo4j^].
+
+[[algorithms-particle-filtering-syntax]]
+== Syntax
+
+.The following will run the algorithm and stream back results:
+[source, cypher]
+----
+CALL gds.alpha.particleFiltering.stream(configuration: Map)
+YIELD nodeId, score
+----
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                          | Type    | Default                | Optional | Description
+| sourceNodes                | List    | []        | yes      | A set of nodes to use for computing Particle Filtering.
+| numberParticles                   | int     | 10                      | yes      | The number of particles
+| minThreshold               | float     | 0.5 | yes      | The minimum threshold for scores. Values below this will not be returned.
+| dampingFactor                 | float   | 0.85                   | yes      | The damping factor of the Particle Filtering calculation.
+| relationshipType                 | String   | null                   | yes      | The relationship type to use.
+| direction                 | String   | OUTGOING                   | yes      | The direction of the relationship type.
+| shuffleNeighbors                 | Boolean   | true                   | yes      | Whether to shuffle neighboring nodes before iterating over them.
+|===
