@@ -234,6 +234,15 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.ml.ann.write`
 .1+<.^| Triangle Finding
 | `gds.alpha.triangles`
+.2+<.^|<<algorithms-embeddings-node2vec, Node2Vec>>
+| `gds.alpha.node2vec.stream`
+| `gds.alpha.node2vec.write`
+.2+<.^|<<algorithms-embeddings-graph-sage, GraphSAGE>>
+| `gds.alpha.graphSage.stream`
+| `gds.alpha.graphSage.write`
+.2+<.^| RandomProjections
+| `gds.alpha.randomProjection.stream`
+| `gds.alpha.randomProjection.write`
 |===
 
 The following table lists all functions in the GDS library:

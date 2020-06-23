@@ -53,8 +53,20 @@ class AppendixAProcedureListingTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() {
-        Reflections reflections = new Reflections("org.neo4j.graphalgo",
+        Reflections graphAlgoReflections = new Reflections("org.neo4j.graphalgo",
             new MethodAnnotationsScanner());
+
+        registerProcedures(graphAlgoReflections);
+        registerFunctions(graphAlgoReflections);
+
+        Reflections embeddingsReflections = new Reflections("org.neo4j.gds.embeddings",
+            new MethodAnnotationsScanner());
+
+        registerProcedures(embeddingsReflections);
+        registerFunctions(embeddingsReflections);
+    }
+
+    private void registerProcedures(Reflections reflections) {
         reflections
             .getMethodsAnnotatedWith(Procedure.class)
             .stream()
@@ -67,7 +79,9 @@ class AppendixAProcedureListingTest extends BaseProcTest {
                     e.printStackTrace();
                 }
             });
+    }
 
+    private void registerFunctions(Reflections reflections) {
         reflections
             .getMethodsAnnotatedWith(UserFunction.class)
             .stream()
