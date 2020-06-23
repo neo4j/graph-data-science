@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
-public abstract class RandomProjectionsProcTest<CONFIG extends RandomProjectionBaseConfig> extends BaseProcTest implements AlgoBaseProcTest<RandomProjection, CONFIG, RandomProjection> {
+public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBaseConfig> extends BaseProcTest implements AlgoBaseProcTest<RandomProjection, CONFIG, RandomProjection> {
 
     private static final String DB_CYPHER = "CREATE" +
                                             "  (a:Node)" +

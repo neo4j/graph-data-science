@@ -32,7 +32,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class RandomProjectionStreamProcTest extends RandomProjectionsProcTest<RandomProjectionStreamConfig> {
+class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProjectionStreamConfig> {
 
     @Override
     public Class<? extends AlgoBaseProc<RandomProjection, RandomProjection, RandomProjectionStreamConfig>> getProcedureClazz() {
@@ -45,7 +45,7 @@ class RandomProjectionStreamProcTest extends RandomProjectionsProcTest<RandomPro
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionsProcTest#weights")
+    @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionProcTest#weights")
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
         int embeddingDimension = 128;
         int maxIterations = 4;
