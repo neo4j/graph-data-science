@@ -40,7 +40,13 @@ abstract class ScanningRecordsImporter<Record, T> {
 
     private static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
 
-    static final AtomicBoolean USE_KERNEL_CURSORS = new AtomicBoolean(FeatureToggles.flag(ScanningRecordsImporter.class, "useKernelCursors", false));
+    private static final boolean USE_KERNEL_CURSORS_DEFAULT_SETTING = true;
+    private static final boolean USE_KERNEL_CURSORS_FLAG = FeatureToggles.flag(
+        ScanningRecordsImporter.class,
+        "useKernelCursors",
+        USE_KERNEL_CURSORS_DEFAULT_SETTING
+    );
+    static final AtomicBoolean USE_KERNEL_CURSORS = new AtomicBoolean(USE_KERNEL_CURSORS_FLAG);
 
     private final StoreScanner.Factory<Record> factory;
     private final String label;
