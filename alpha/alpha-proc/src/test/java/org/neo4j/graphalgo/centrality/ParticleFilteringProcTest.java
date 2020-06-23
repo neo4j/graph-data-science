@@ -78,7 +78,7 @@ public class ParticleFilteringProcTest extends BaseProcTest {
         String query = "MATCH (n:Paper) " +
                 "WHERE n.name IN ['Paper 1', 'Paper 2', 'Paper 3']  " +
                 "WITH collect(n) AS nodes " +
-                "CALL gds.alpha.particleFiltering.stream({sourceNodes:nodes, shuffleNeighbors: false, numberParticles: 10, minThreshold: 0.0}) " +
+                "CALL gds.alpha.particleFiltering.stream({sourceNodes:nodes, shuffleNeighbors: false, numberParticles: 10, minimumThreshold: 0.0}) " +
                 "YIELD nodeId, score " +
                 "RETURN gds.util.asNode(nodeId).name as node, score " +
                 "ORDER BY score DESC";

@@ -571,7 +571,6 @@ Also, note that the nodes 'About', 'Link' and 'Product' now have the same score,
 [[algorithms-page-rank-examples-personalised]]
 === Personalised PageRank
 
-
 Personalized PageRank is a variation of PageRank which is biased towards a set of `sourceNodes`.
 This variant of PageRank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
 
@@ -590,7 +589,7 @@ CALL gds.pageRank.stream('myGraph', {
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
-ORDER BY score DESC, name ASC
+ORDER BY score DESC, name ASC;
 ----
 
 .Results

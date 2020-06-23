@@ -57,7 +57,7 @@ public class ParticleFilteringProc {
 
     private Stream<Map.Entry<Long, Double>> stream(CypherMapWrapper algoConfig) {
         double numberParticles = algoConfig.getDouble("numberParticles", 10);
-        double minThreshold = algoConfig.getDouble("minThreshold", 0.5);
+        double minThreshold = algoConfig.getDouble("minimumThreshold", 0.5);
         double dampingFactor = algoConfig.getDouble("dampingFactor", 0.85);
         boolean shuffleNeighbors = algoConfig.getBool("shuffleNeighbors", true);
         List<Node> sourceNodes = CypherMapWrapper.failOnNull("sourceNodes", algoConfig.getChecked("sourceNodes", Collections.emptyList(), List.class));
