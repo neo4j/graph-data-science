@@ -180,6 +180,8 @@
             <d:tocentry linkend="node-embeddings"><?dbhtml filename="algorithms/node-embeddings/index.html"?>
                 <d:tocentry linkend="algorithms-embeddings-node2vec"><?dbhtml filename="algorithms/node-embeddings/node2vec/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-embeddings-graph-sage"><?dbhtml filename="algorithms/alpha/graph-sage/index.html"?>
+                </d:tocentry>
             </d:tocentry>
 
             <d:tocentry linkend="algorithms-auxiliary">

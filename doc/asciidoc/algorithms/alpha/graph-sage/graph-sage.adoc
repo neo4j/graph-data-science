@@ -1,0 +1,225 @@
+[[algorithms-embeddings-graph-sage]]
+[.alpha]
+= GraphSAGE
+
+[abstract]
+--
+This section describes the GraphSAGE node embedding algorithm in the Neo4j Graph Data Science library.
+--
+
+GraphSAGE is an _inductive_ framework making use of node feature information to generate node embeddings.
+
+
+[[algorithms-embeddings-graph-sage-syntax]]
+== Syntax
+
+[[algorithms-embeddings-graph-sage-syntax-stream]]
+=== Stream mode
+
+.Run GraphSAGE in stream mode on a named graph.
+[source, cypher]
+----
+CALL gds.alpha.graphSage.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer,
+  embedding: List<Double>
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name      | Type         | Description
+| nodeId    | Integer      | The Neo4j node ID.
+| embedding | List<Double> | The computed node embedding.
+|===
+
+
+[[algorithms-embeddings-graph-sage-syntax-write]]
+=== Write mode
+
+.Run GraphSAGE in write mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.alpha.graphSage.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  nodeCount: Integer,
+  propertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name               | Type                 | Description
+| startLoss          | Double               | The Loss value before the first epoch.
+| epochLosses        | Map<String, Double>  | A map containing the loss for each of the ran epochs, may be less than the configured epochs.
+| nodesCount         | Integer              | The number of nodes processed.
+| propertiesWritten  | Integer              | The number of node properties written.
+| createMillis       | Integer              | Milliseconds for loading data.
+| computeMillis      | Integer              | Milliseconds for running the algorithm.
+| writeMillis        | Integer              | Milliseconds for writing result data back to Neo4j.
+| configuration      | Map                  | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-embeddings-graph-sage-syntax-anonymous]]
+=== Anonymous graphs
+
+include::../../shared/syntax-anonymous-graphs.adoc[]
+
+.Run GraphSAGE in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.alpha.graphSage.write(
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  nodeCount: Integer,
+  propertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-configuration-anonymous-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, <<algorithms-embeddings-graph-sage-syntax-write, specified above>>.
+
+[[algorithms-embeddings-node2vec-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher, role=setup-query]
+----
+CREATE
+  (Dan:Person{ name: 'Dan', age: 20, height: 185, weight: 75 }),
+  (Annie:Person{ name: 'Annie', age: 12, height: 124, weight: 42 }),
+  (Matt:Person{ name: 'Matt', age: 67, height: 170, weight: 80 }),
+  (Jeff:Person{ name: 'Jeff', age: 45, height: 192, weight: 85 }),
+  (Brie:Person{ name: 'Brie', age: 27, height: 176, weight: 57 }),
+  (Elsa:Person{ name: 'Elsa', age: 32, height: 158, weight: 55 }),
+  (John:Person{ name: 'John', age: 35, height: 172, weight: 76.4 }),
+
+  (Dan)-[:REL]->(Annie),
+  (Dan)-[:REL]->(Matt),
+  (Annie)-[:REL]->(Matt),
+  (Annie)-[:REL]->(Jeff),
+  (Annie)-[:REL]->(Brie),
+  (Matt)-[:REL]->(Brie),
+  (Brie)-[:REL]->(Elsa),
+  (Brie)-[:REL]->(Jeff),
+  (John)-[:REL]->(Jeff);
+----
+
+[source, cypher, role=graph-create-query]
+----
+CALL gds.graph.create(
+  'persons',
+  {
+    Person: {
+      label: 'Person',
+      properties: {
+        age: {
+          property: 'age',
+          defaultValue: 1.0
+        },
+        height: {
+         property: 'height',
+         defaultValue: 1.0
+        },
+        weight: {
+         property: 'weight',
+         defaultValue: 1.0
+       }
+     }
+    }
+  }, {
+    R: {
+      type: 'REL',
+      orientation: 'UNDIRECTED'
+    }
+})
+----
+
+=== Stream
+
+[source, cypher, role=query-example, no-result, group=graphSage]
+----
+CALL gds.alpha.graphSage.stream(
+  'persons',
+  {
+    nodePropertyNames: ['age', 'height', 'weight'],
+    aggregator: 'mean',
+    activationFunction: 'sigmoid',
+    embeddingSize: 3,
+    sampleSizes: [25, 10],
+    degreeAsProperty: true
+  }
+)
+----
+
+[opts=header]
+.Results
+|===
+| nodeId | embedding
+| 0      | [0.5773502692664537,0.5773502691669364,0.5773502691354871]
+| 1      | [0.5773502692979483,0.5773502691576353,0.5773502691132936]
+| 2      | [0.5773502692500592,0.5773502691717781,0.5773502691470399]
+| 3      | [0.5773502692751916,0.577350269164356,0.5773502691293296]
+| 4      | [0.5773502693595794,0.577350269139434,0.5773502690698639]
+| 5      | [0.5773502693858079,0.5773502691316881,0.5773502690513813]
+| 6      | [0.577350269340378,0.5773502691451048,0.5773502690833946]
+|===
+
+NOTE: Due to the random initialisation of the weight variables the results may vary slightly between the runs.
+
+=== Write
+
+[source, cypher, role=query-example, no-result, group=graphSageWrite]
+----
+CALL gds.alpha.graphSage.write(
+  'persons',
+  {
+    writeProperty: 'embedding',
+    nodePropertyNames: ['age', 'height', 'weight'],
+    aggregator: 'mean',
+    activationFunction: 'sigmoid',
+    embeddingSize: 3,
+    sampleSizes: [25, 10],
+    degreeAsProperty: true
+  }
+) YIELD startLoss, epochLosses
+----
+
+[opts=header]
+.Results
+|===
+| startLoss         | epochLosses                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+| 186.0245759990926 | { Epoch: 0 -> 186.04946806517876 }
+|===
+
+NOTE: Due to the random initialisation of the weight variables the results may vary slightly between the runs.
