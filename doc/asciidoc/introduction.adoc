@@ -44,6 +44,6 @@ The Neo4j Graph Data Science library is available in two editions.
 * The open source Community Edition includes all algorithms and features, but is limited to four CPU cores.
 * The Neo4j Graph Data Science library Enterprise Edition:
 ** Can run on an unlimited amount of CPU cores.
-** Supports the role-based access control system (RBAC) from Neo4j Enterprise Edition
+** Supports the role-based access control system (RBAC) from Neo4j Enterprise Edition.
 
 For more information see <<system-requirements-cpu, System Requirements - CPU>>.
