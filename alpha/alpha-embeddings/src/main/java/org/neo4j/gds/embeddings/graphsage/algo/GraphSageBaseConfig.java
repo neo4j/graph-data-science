@@ -25,15 +25,20 @@ import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.config.ToleranceConfig;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig {
+public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, ToleranceConfig {
 
     int embeddingSize();
+
+    @Configuration.ConvertWith("toIntList")
+    List<Integer> sampleSizes();
 
     @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#toString")
@@ -49,9 +54,6 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig {
         return ActivationFunction.SIGMOID;
     }
 
-    @Configuration.ConvertWith("toIntList")
-    List<Integer> sampleSizes();
-
     // TODO: add validation that at least one of `nodePropertyNames` or `degreeAsProperty` is specified
     @Value.Default
     default List<String> nodePropertyNames() {
@@ -64,6 +66,7 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig {
     }
 
     @Value.Default
+    @Override
     default double tolerance() {
         return 1e-4;
     }
@@ -79,7 +82,8 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig {
     }
 
     @Value.Default
-    default int maxOptimizationIterations() {
+    @Override
+    default int maxIterations() {
         return 100;
     }
 

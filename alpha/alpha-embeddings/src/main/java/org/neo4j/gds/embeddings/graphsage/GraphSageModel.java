@@ -123,7 +123,7 @@ public class GraphSageModel {
             config.tolerance(),
             config.learningRate(),
             config.epochs(),
-            config.maxOptimizationIterations(),
+            config.maxIterations(),
             config.searchDepth(),
             config.negativeSamples(),
             config.layerConfigs().stream()
