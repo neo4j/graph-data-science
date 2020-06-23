@@ -21,18 +21,12 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Relu;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
-import java.util.Locale;
 import java.util.Random;
-import java.util.function.Function;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
-import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public final class LayerInitialisationFactory {
     private LayerInitialisationFactory() {}
@@ -106,53 +100,4 @@ public final class LayerInitialisationFactory {
         ));
     }
 
-    public enum ActivationFunction {
-        SIGMOID {
-            @Override
-            public Function<Variable, Variable> activationFunction() {
-                return Sigmoid::new;
-            }
-
-            @Override
-            public double weightInitBound(int rows, int cols) {
-                return Math.sqrt(2d / (rows + cols));
-            }
-        },
-        RELU {
-            @Override
-            public Function<Variable, Variable> activationFunction() {
-                return Relu::new;
-            }
-
-            @Override
-            public double weightInitBound(int rows, int cols) {
-                return Math.sqrt(2d / cols);
-            }
-        };
-
-        public abstract Function<Variable, Variable> activationFunction();
-
-        public abstract double weightInitBound(int rows, int cols);
-
-        public static ActivationFunction of(String activationFunction) {
-            return valueOf(toUpperCaseWithLocale(activationFunction));
-        }
-
-        public static ActivationFunction parse(Object object) {
-            if (object == null) {
-                return null;
-            }
-            if (object instanceof String) {
-                return of(((String) object).toUpperCase(Locale.ENGLISH));
-            }
-            if (object instanceof ActivationFunction) {
-                return (ActivationFunction) object;
-            }
-            return null;
-        }
-
-        public static String toString(ActivationFunction af) {
-            return af.toString();
-        }
-    }
 }

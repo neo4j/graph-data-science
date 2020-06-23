@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
-import org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction;
+import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
@@ -36,8 +36,8 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig {
 
     String aggregator();
 
-    @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction#toString")
+    @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.ActivationFunction#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.ActivationFunction#toString")
     @Value.Default
     default ActivationFunction activationFunction() {
         return ActivationFunction.SIGMOID;

@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
@@ -44,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction.SIGMOID;
+import static org.neo4j.gds.embeddings.graphsage.ActivationFunction.SIGMOID;
 
 @GdlExtension
 class GraphSageModelTest implements FiniteDifferenceTest {
