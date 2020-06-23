@@ -31,11 +31,9 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.Spliterator;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public final class UnionGraph implements Graph {
 
@@ -137,15 +135,10 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public Spliterator<RelationshipCursor> streamRelationships(
-        long nodeId, double fallbackValue
-    ) {
+    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return graphs
             .stream()
-            .map(graph -> StreamSupport.stream(graph.streamRelationships(nodeId, fallbackValue), false))
-            .reduce(Stream::concat)
-            .orElseGet(Stream::empty)
-            .spliterator();
+            .flatMap(graph -> graph.streamRelationships(nodeId, fallbackValue));
     }
 
     @Override

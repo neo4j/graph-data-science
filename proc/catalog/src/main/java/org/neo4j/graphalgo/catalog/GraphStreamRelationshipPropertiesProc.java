@@ -39,7 +39,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static org.neo4j.procedure.Mode.READ;
 
@@ -128,7 +127,8 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
                 Graph graph = relTypeAndPropertyKeyAndValues.getRight();
 
                 var originalSourceId = graph.toOriginalNodeId(nodeId);
-                return StreamSupport.stream(graph.streamRelationships(nodeId, Double.NaN), false)
+                return graph
+                    .streamRelationships(nodeId, Double.NaN)
                     .map(relationshipCursor -> {
                         var originalTargetId = graph.toOriginalNodeId(relationshipCursor.targetId());
                         Number numberValue;

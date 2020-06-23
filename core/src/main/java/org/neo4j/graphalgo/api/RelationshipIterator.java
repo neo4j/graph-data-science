@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
-import java.util.Spliterator;
+import java.util.stream.Stream;
 
 public interface RelationshipIterator extends RelationshipPredicate {
 
@@ -43,7 +43,7 @@ public interface RelationshipIterator extends RelationshipPredicate {
      */
     void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer);
 
-    Spliterator<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue);
+    Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue);
 
     /**
      * @return a copy of this iterator that reuses new cursors internally,

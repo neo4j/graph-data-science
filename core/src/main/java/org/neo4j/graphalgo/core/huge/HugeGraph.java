@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.ModifiableRelationshipCursor;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -39,9 +38,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Spliterator;
-import java.util.function.Consumer;
 import java.util.function.LongPredicate;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Huge Graph contains two array like data structures.
@@ -254,81 +253,13 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public Spliterator<RelationshipCursor> streamRelationships(
-        long nodeId, double fallbackValue
-    ) {
-        if (!hasRelationshipProperty()) {
-            return new Spliterator<>() {
-                final AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(nodeId);
-                final ModifiableRelationshipCursor modifiableRelationshipCursor = ModifiableRelationshipCursor.create();
+    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
+        var adjacencyCursor = adjacencyCursorForIteration(nodeId);
+        var spliterator = !hasRelationshipProperty()
+            ? AdjacencySpliterator.of(adjacencyCursor, nodeId, fallbackValue)
+            : AdjacencySpliterator.of(adjacencyCursor, propertyCursorForIteration(nodeId), nodeId);
 
-                @Override
-                public boolean tryAdvance(Consumer<? super RelationshipCursor> action) {
-                    if (adjacencyCursor.hasNextVLong()) {
-                        RelationshipCursor relationshipCursor = modifiableRelationshipCursor
-                            .setSourceId(nodeId)
-                            .setTargetId(adjacencyCursor.nextVLong())
-                            .setProperty(fallbackValue);
-
-                        action.accept(relationshipCursor);
-                        return true;
-                    }
-                    return false;
-                }
-
-                @Override
-                public Spliterator<RelationshipCursor> trySplit() {
-                    return null;
-                }
-
-                @Override
-                public long estimateSize() {
-                    return adjacencyCursor.remaining();
-                }
-
-                @Override
-                public int characteristics() {
-                    return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SIZED;
-                }
-            };
-        } else {
-            return new Spliterator<>() {
-                final AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(nodeId);
-                final AdjacencyList.Cursor propertyCursor = propertyCursorForIteration(nodeId);
-                final ModifiableRelationshipCursor modifiableRelationshipCursor = ModifiableRelationshipCursor.create();
-
-                @Override
-                public boolean tryAdvance(Consumer<? super RelationshipCursor> action) {
-                    if (adjacencyCursor.hasNextVLong()) {
-                        long propertyBits = propertyCursor.nextLong();
-                        double property = Double.longBitsToDouble(propertyBits);
-                        RelationshipCursor relationshipCursor = modifiableRelationshipCursor
-                            .setSourceId(nodeId)
-                            .setTargetId(adjacencyCursor.nextVLong())
-                            .setProperty(property);
-
-                        action.accept(relationshipCursor);
-                        return true;
-                    }
-                    return false;
-                }
-
-                @Override
-                public Spliterator<RelationshipCursor> trySplit() {
-                    return null;
-                }
-
-                @Override
-                public long estimateSize() {
-                    return adjacencyCursor.remaining();
-                }
-
-                @Override
-                public int characteristics() {
-                    return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SIZED;
-                }
-            };
-        }
+        return StreamSupport.stream(spliterator, false);
     }
 
     @Override

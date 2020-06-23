@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.Spliterator;
 import java.util.function.LongPredicate;
+import java.util.stream.Stream;
 
 public class NullGraph implements Graph {
 
@@ -177,9 +177,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public Spliterator<RelationshipCursor> streamRelationships(
-        long nodeId, double fallbackValue
-    ) {
+    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         throw new UnsupportedOperationException(
             "org.neo4j.graphalgo.similarity.NullGraph.streamRelationships is not implemented.");
     }

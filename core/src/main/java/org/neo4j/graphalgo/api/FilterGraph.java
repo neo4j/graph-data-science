@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.Spliterator;
 import java.util.function.LongPredicate;
+import java.util.stream.Stream;
 
 public abstract class FilterGraph implements Graph {
 
@@ -157,7 +157,7 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public Spliterator<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
+    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return graph.streamRelationships(nodeId, fallbackValue);
     }
 

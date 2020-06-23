@@ -43,9 +43,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -354,10 +354,8 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             }
 
             @Override
-            public Spliterator<RelationshipCursor> streamRelationships(
-                long nodeId, double fallbackValue
-            ) {
-                throw new UnsupportedOperationException();
+            public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
+                throw new UnsupportedOperationException(".streamRelationships is not implemented.");
             }
         };
 
