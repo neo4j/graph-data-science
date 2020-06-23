@@ -89,7 +89,7 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
     @Value.Default
     @Override
     default int maxIterations() {
-        return 100;
+        return 10;
     }
 
     @Value.Default
