@@ -1,0 +1,86 @@
+/*
+ * Copyright (c) 2017-2020 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.embeddings.graphsage;
+
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.AdamOptimizer;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ConstantScale;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2Norm;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class AdamOptimizerTest {
+
+    @Test
+    void shouldConverge() {
+        Weights weights = new Weights(Tensor.matrix(
+            new double[]{
+                0.1, 0.1, 0.1,
+                0.4, 0.3, 0.9,
+                0.01, 0.6, 0.5
+            },
+            3,
+            3
+        ));
+
+        Variable expectedOptimum = new Weights(Tensor.matrix(
+            new double[]{
+                0.11, 0.13, 0.231,
+                0.4, 0.3, 0.9,
+                0.01, 0.6, 0.15
+            },
+            3,
+            3
+        ));
+
+        ComputationContext ctx = ComputationContext.instance();
+        // need to populate context with data from weights
+        ctx.forward(weights);
+        AdamOptimizer adam = new AdamOptimizer(List.of(weights));
+
+        double oldLoss = Double.MAX_VALUE;
+        while(true) {
+            Variable difference = new TensorAdd(
+                List.of(weights, new ConstantScale(expectedOptimum, -1)),
+                expectedOptimum.dimensions()
+            );
+            L2Norm lossFunction = new L2Norm(difference);
+
+            double newLoss = ctx.forward(lossFunction).data[0];
+            double d = oldLoss - newLoss;
+            if (Math.abs(d) < 1e-8) break;
+
+            oldLoss = newLoss;
+            ctx.backward(lossFunction);
+
+            adam.update(ctx);
+        }
+
+        assertTrue(oldLoss < 1e-4, "oldLoss was : " + oldLoss);
+    }
+
+}

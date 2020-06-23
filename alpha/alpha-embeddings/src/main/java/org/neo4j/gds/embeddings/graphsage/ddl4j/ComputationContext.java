@@ -1,0 +1,160 @@
+/*
+ * Copyright (c) 2017-2020 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.embeddings.graphsage.ddl4j;
+
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.DummyVariable;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.util.Arrays.stream;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
+public class ComputationContext {
+    private final Map<Variable, Tensor> data;
+    private final Map<Variable, Tensor> gradients;
+
+
+    ComputationContext(
+        Map<Variable, Tensor> data,
+        Map<Variable, Tensor> gradients
+    ) {
+        this.data = data;
+        this.gradients = gradients;
+    }
+
+    public static ComputationContext instance() {
+        return new ComputationContext(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+    }
+
+    public Tensor forward(Variable variable) {
+        for (Variable parent : variable.parents) {
+            if (!data.containsKey(parent)) {
+                Tensor parentData = forward(parent);
+                data.put(parent, parentData);
+            }
+        }
+        return data.computeIfAbsent(variable, ignore -> variable.apply(this));
+    }
+
+    public Tensor data(Variable variable) {
+        return data.get(variable);
+    }
+
+    public Tensor gradient(Variable variable) {
+        return gradients.get(variable);
+    }
+
+    public void setData(Variable variable, Tensor tensor) {
+        data.put(variable, tensor);
+    }
+
+    public void backward(Variable function) {
+        if (function.dimensions().length != 1 || data(function).totalSize() != 1) {
+            throw new IllegalArgumentException("Backward requires a variable with rank 1 and single dimension of size 1.");
+        }
+        gradients.clear();
+        Queue<BackPropTask> executionQueue = new LinkedBlockingQueue<>();
+        DummyVariable dummy = new DummyVariable(function);
+        executionQueue.add(new BackPropTask(function, dummy));
+        Map<Variable, AtomicInteger> upstreamCounters = initUpstream(dummy);
+        backward(executionQueue, upstreamCounters);
+    }
+
+    private void backward(Queue<BackPropTask> executionQueue, Map<Variable, AtomicInteger> upstreamCounters) {
+        while (!executionQueue.isEmpty()) {
+            BackPropTask task = executionQueue.poll();
+            var variable = task.variable;
+            var child = task.child;
+            Tensor gradient = child.gradient(variable, this);
+            updateGradient(variable, gradient);
+
+//            logGradientUpdate(variable, child, gradient);
+
+            upstreamCounters.get(variable).decrementAndGet();
+            if (upstreamCounters.get(variable).get() == 0) {
+                for (Variable parent : variable.parents) {
+                    if (parent.requireGradient) {
+                        executionQueue.offer(new BackPropTask(parent, variable));
+                    }
+                }
+            }
+        }
+    }
+
+    private Map<Variable, AtomicInteger> initUpstream(Variable function) {
+        Map<Variable, AtomicInteger> upstreamCounters = new HashMap<>();
+        initUpstream(function, upstreamCounters);
+        return upstreamCounters;
+    }
+
+    private void initUpstream(
+        Variable function,
+        Map<Variable, AtomicInteger> upstreamCounters
+    ) {
+        for (Variable parent : function.parents) {
+            if (parent.requireGradient) {
+                boolean firstToSeeParent = !upstreamCounters.containsKey(parent);
+                if (firstToSeeParent) {
+                    initUpstream(parent, upstreamCounters);
+                    upstreamCounters.put(parent, new AtomicInteger(0));
+                }
+                upstreamCounters.get(parent).incrementAndGet();
+            }
+        }
+    }
+
+    private void updateGradient(Variable variable, Tensor gradient) {
+        gradients.putIfAbsent(variable, Tensor.constant(0D, variable.dimensions()));
+        gradients.get(variable).addInPlace(gradient);
+    }
+
+    private static double l2(Tensor tensor) {
+        return Math.sqrt(
+            Arrays.stream(tensor.data)
+                .map(value -> value * value)
+                .sum());
+    }
+
+    private static void logGradientUpdate(Variable variable, Variable child, Tensor gradient) {
+        System.out.println(formatWithLocale(
+            "%s got gradient from %s with L2 %s",
+            variable.getClass().getSimpleName(),
+            child.getClass().getSimpleName(),
+            l2(gradient)
+        ));
+    }
+
+    static class BackPropTask {
+        Variable variable;
+        Variable child;
+
+        BackPropTask(Variable variable, Variable child) {
+            this.variable = variable;
+            this.child = child;
+        }
+    }
+
+}
