@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage.proc;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
@@ -115,8 +116,8 @@ class GraphSageBaseProcTest extends BaseProcTest {
                 Arguments.of("pool")
             ),
             () -> Stream.of(
-                Arguments.of("sigmoid"),
-                Arguments.of("relu")
+                Arguments.of(ActivationFunction.SIGMOID),
+                Arguments.of(ActivationFunction.RELU)
             )
         );
     }

@@ -21,14 +21,14 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunctions.SIGMOID;
+import static org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction.SIGMOID;
 
 @GdlExtension
 class GraphSageModelTest implements FiniteDifferenceTest {

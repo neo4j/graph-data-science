@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.proc;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction;
 import org.neo4j.graphalgo.GdsCypher;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
 
     @ParameterizedTest
     @MethodSource("configVariations")
-    void testWriting(int embeddingSize, String aggregator, String activationFunction) {
+    void testWriting(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
 
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
             .algo("gds.alpha.graphSage")

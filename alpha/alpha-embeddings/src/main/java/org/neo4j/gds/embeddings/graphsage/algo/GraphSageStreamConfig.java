@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -47,7 +48,7 @@ public interface GraphSageStreamConfig extends GraphSageBaseConfig {
     }
 
     static GraphSageStreamConfig of(
-        String activationFunction,
+        ActivationFunction activationFunction,
         String aggregator,
         int batchSize,
         int embeddingDimension,

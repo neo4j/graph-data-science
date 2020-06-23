@@ -24,10 +24,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModel;
-import org.neo4j.gds.embeddings.graphsage.Layer;
-import org.neo4j.gds.embeddings.graphsage.LayerConfig;
-import org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory;
+import org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.randomprojections.ImmutableRandomProjectionBaseConfig;
 import org.neo4j.gds.embeddings.randomprojections.RandomProjection;
 import org.neo4j.gds.embeddings.randomprojections.RandomProjectionBaseConfig;
@@ -42,8 +41,6 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -119,7 +116,7 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
         graph = randomGraphGenerator.generate();
     }
 
-    private void setupLayers(String activationFunction, String aggregatorType) {
+    private void setupLayers(ActivationFunction activationFunction, String aggregatorType) {
         LayerConfig layer1Config = LayerConfig.builder()
             .aggregatorType(aggregatorType)
             .rows(GS_DIM)
@@ -143,7 +140,7 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
 
     @ParameterizedTest
     @MethodSource("configVariations")
-    void smokeTestTraining(int concurrency, String aggregator, String activationFunction) {
+    void smokeTestTraining(int concurrency, String aggregator, ActivationFunction activationFunction) {
         setupLayers(activationFunction, aggregator);
         GraphSageModel model = new GraphSageModel(
             concurrency,
@@ -156,7 +153,7 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
 
     @ParameterizedTest
     @MethodSource("configVariations")
-    void smokeTestTrainingSingleBatch(int concurrency, String aggregator, String activationFunction) {
+    void smokeTestTrainingSingleBatch(int concurrency, String aggregator, ActivationFunction activationFunction) {
         setupLayers(activationFunction, aggregator);
         GraphSageModel model = new GraphSageModel(concurrency, (int) graph.nodeCount(), List.of(layer1, layer2), log);
         runSmokeTest(model);
@@ -190,8 +187,8 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
                 Arguments.of("pool")
             ),
             () -> Stream.of(
-                Arguments.of("sigmoid"),
-                Arguments.of("relu")
+                Arguments.of(ActivationFunction.SIGMOID),
+                Arguments.of(ActivationFunction.RELU)
             )
         );
     }

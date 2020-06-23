@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.immutables.value.Value;
+import org.neo4j.gds.embeddings.graphsage.LayerInitialisationFactory.ActivationFunction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Optional;
@@ -34,10 +34,7 @@ public interface LayerConfig {
 
     String aggregatorType();
 
-    @Value.Default
-    default String activationFunction() {
-        return "sigmoid";
-    }
+    ActivationFunction activationFunction();
 
     static ImmutableLayerConfig.Builder builder() {
         return ImmutableLayerConfig.builder();

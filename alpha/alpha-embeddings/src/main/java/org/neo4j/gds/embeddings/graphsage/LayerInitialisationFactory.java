@@ -23,9 +23,10 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Relu;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
+import java.util.Locale;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -43,7 +44,7 @@ public final class LayerInitialisationFactory {
             int rows = layerConfig.rows();
             int cols = layerConfig.cols();
 
-            ActivationFunction activationFunction = ActivationFunctions.activationFunction(layerConfig.activationFunction());
+            ActivationFunction activationFunction = layerConfig.activationFunction();
 
             Weights weights = generateWeights(
                 rows,
@@ -57,7 +58,7 @@ public final class LayerInitialisationFactory {
             int rows = layerConfig.rows();
             int cols = layerConfig.cols();
 
-            ActivationFunction activationFunction = ActivationFunctions.activationFunction(layerConfig.activationFunction());
+            ActivationFunction activationFunction = layerConfig.activationFunction();
 
             Weights poolWeights = generateWeights(
                 rows,
@@ -105,16 +106,7 @@ public final class LayerInitialisationFactory {
         ));
     }
 
-    interface ActivationFunction {
-
-        Function<Variable, Variable> activationFunction();
-
-        double weightInitBound(int rows, int cols);
-
-    }
-
-    public enum ActivationFunctions implements ActivationFunction {
-
+    public enum ActivationFunction {
         SIGMOID {
             @Override
             public Function<Variable, Variable> activationFunction() {
@@ -138,9 +130,29 @@ public final class LayerInitialisationFactory {
             }
         };
 
-        public static ActivationFunction activationFunction(String activationFunction) {
+        public abstract Function<Variable, Variable> activationFunction();
+
+        public abstract double weightInitBound(int rows, int cols);
+
+        public static ActivationFunction of(String activationFunction) {
             return valueOf(toUpperCaseWithLocale(activationFunction));
         }
 
+        public static ActivationFunction parse(Object object) {
+            if (object == null) {
+                return null;
+            }
+            if (object instanceof String) {
+                return of(((String) object).toUpperCase(Locale.ENGLISH));
+            }
+            if (object instanceof ActivationFunction) {
+                return (ActivationFunction) object;
+            }
+            return null;
+        }
+
+        public static String toString(ActivationFunction af) {
+            return af.toString();
+        }
     }
 }
