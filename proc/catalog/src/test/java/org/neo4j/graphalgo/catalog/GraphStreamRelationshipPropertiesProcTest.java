@@ -122,10 +122,10 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue " +
         "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, relationshipProperty, propertyValue"
     })
-    void streamLoadedRelationshipProperties(String graphWriteQueryTemplate) {
-        String graphWriteQuery = formatWithLocale(graphWriteQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
+    void streamLoadedRelationshipProperties(String graphStreamQueryTemplate) {
+        String graphStreamQuery = formatWithLocale(graphStreamQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
 
-        assertCypherResult(graphWriteQuery, List.of(
+        assertCypherResult(graphStreamQuery, List.of(
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
             map("source", 0L, "target", 0L, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 2D),
@@ -140,7 +140,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamLoadedRelationshipPropertiesForType() {
-        String graphWriteQuery = formatWithLocale(
+        String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.streamRelationshipProperties(" +
             "   '%s', " +
             "   ['relProp1', 'relProp2'], " +
@@ -150,7 +150,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             TEST_GRAPH_SAME_PROPERTIES
         );
 
-        assertCypherResult(graphWriteQuery, List.of(
+        assertCypherResult(graphStreamQuery, List.of(
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
             map("source", 1L, "target", 1L, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
@@ -160,7 +160,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamLoadedRelationshipPropertiesForTypeSubset() {
-        String graphWriteQuery = formatWithLocale(
+        String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.streamRelationshipProperties(" +
             "   '%s', " +
             "   ['newRelProp1', 'newRelProp2']" +
@@ -169,7 +169,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             TEST_GRAPH_DIFFERENT_PROPERTIES
         );
 
-        assertCypherResult(graphWriteQuery, List.of(
+        assertCypherResult(graphStreamQuery, List.of(
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 0D),
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 42D),
             map("source", 0L, "target", 0L, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 2D),
@@ -197,7 +197,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
         graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), relImporter.build());
 
-        String graphWriteQuery = formatWithLocale(
+        String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.streamRelationshipProperties(" +
             "   '%s', " +
             "   ['newRelProp3']" +
@@ -206,7 +206,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             TEST_GRAPH_SAME_PROPERTIES
         );
 
-        assertCypherResult(graphWriteQuery, List.of(
+        assertCypherResult(graphStreamQuery, List.of(
             map("source", 0L, "target", 1L, "relationshipType", "NEW_REL", "relationshipProperty", "newRelProp3", "propertyValue", 23D)
         ));
     }
@@ -254,7 +254,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamLoadedRelationshipPropertyForType() {
-        String graphWriteQuery = formatWithLocale(
+        String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.streamRelationshipProperty(" +
             "   '%s', " +
             "   'relProp1', " +
@@ -264,7 +264,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             TEST_GRAPH_SAME_PROPERTIES
         );
 
-        assertCypherResult(graphWriteQuery, List.of(
+        assertCypherResult(graphStreamQuery, List.of(
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "propertyValue", 0D),
             map("source", 1L, "target", 1L, "relationshipType", "REL1", "propertyValue", 1D)
         ));
@@ -272,7 +272,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamLoadedRelationshipPropertyForTypeSubset() {
-        String graphWriteQuery = formatWithLocale(
+        String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.streamRelationshipProperty(" +
             "   '%s', " +
             "   'newRelProp2'" +
@@ -281,7 +281,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             TEST_GRAPH_DIFFERENT_PROPERTIES
         );
 
-        assertCypherResult(graphWriteQuery, List.of(
+        assertCypherResult(graphStreamQuery, List.of(
             map("source", 0L, "target", 0L, "relationshipType", "REL1", "propertyValue", 42D),
             map("source", 1L, "target", 1L, "relationshipType", "REL1", "propertyValue", 43D)
         ));
@@ -304,7 +304,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
         graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), relImporter.build());
 
-        String graphWriteQuery = formatWithLocale(
+        String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.streamRelationshipProperty(" +
             "   '%s', " +
             "   'newRelProp3'" +
@@ -313,7 +313,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             TEST_GRAPH_SAME_PROPERTIES
         );
 
-        assertCypherResult(graphWriteQuery, List.of(
+        assertCypherResult(graphStreamQuery, List.of(
             map("source", 0L, "target", 1L, "relationshipType", "NEW_REL", "propertyValue", 23D)
         ));
     }
@@ -340,7 +340,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldFailOnNonExistingRelationshipPropertyForSpecificLabel() {
+    void shouldFailOnNonExistingRelationshipPropertyForSpecificType() {
         QueryExecutionException ex = assertThrows(
             QueryExecutionException.class,
             () -> runQuery(formatWithLocale(
@@ -359,4 +359,25 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         assertThat(rootCause.getMessage(), containsString("Available keys: ['relProp1', 'relProp2']"));
     }
 
+    @Test
+    void shouldFailOnDisjunctCombinationsOfRelationshipTypeAndProperty() {
+        String graphStreamQuery = formatWithLocale(
+            "CALL gds.graph.streamRelationshipProperties(" +
+            "   '%s', " +
+            "   ['newRelProp1', 'newRelProp2']," +
+            "   ['REL2']" +
+            ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue",
+            TEST_GRAPH_DIFFERENT_PROPERTIES
+        );
+
+        QueryExecutionException ex = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(graphStreamQuery)
+        );
+
+        Throwable rootCause = rootCause(ex);
+        assertEquals(IllegalArgumentException.class, rootCause.getClass());
+        assertThat(rootCause.getMessage(), containsString("Relationship projection 'REL2' does not have property key 'newRelProp2'"));
+        assertThat(rootCause.getMessage(), containsString("Available keys: ['newRelProp1']"));
+    }
 }
