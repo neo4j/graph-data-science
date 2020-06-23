@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.List;
 import java.util.Optional;
 
 @ValueClass
@@ -43,5 +44,27 @@ public interface GraphSageStreamConfig extends GraphSageBaseConfig {
             username,
             userInput
         );
+    }
+
+    static GraphSageStreamConfig of(
+        String activationFunction,
+        String aggregator,
+        int batchSize,
+        int embeddingDimension,
+        int maxOptimizationIterations,
+        List<String> nodePropertyNames,
+        List<Integer> sampleSizes,
+        double tolerance
+    ) {
+        return ImmutableGraphSageStreamConfig.builder()
+            .activationFunction(activationFunction)
+            .aggregator(aggregator)
+            .batchSize(batchSize)
+            .embeddingSize(embeddingDimension)
+            .maxOptimizationIterations(maxOptimizationIterations)
+            .nodePropertyNames(nodePropertyNames)
+            .sampleSizes(sampleSizes)
+            .tolerance(tolerance)
+            .build();
     }
 }
