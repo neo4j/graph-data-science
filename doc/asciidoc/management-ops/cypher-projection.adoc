@@ -70,7 +70,6 @@ CALL gds.graph.create.cypher(
 |===
 | Name                   | Type    | Default        | Description
 | readConcurrency        | Integer | 4              | The number of concurrent threads used for creating the graph.
-| relationshipProperties | Map     | empty map      | Mappings between the RETURN items and relationship properties in the graph projection.
 | validateRelationships  | Boolean | true           | Whether to throw an error if relationships contain nodes not included in the nodeQuery.
 | parameters             | Map     | empty map      | A map of user-defined query parameters that are passed into the node and relationship query.
 |===
