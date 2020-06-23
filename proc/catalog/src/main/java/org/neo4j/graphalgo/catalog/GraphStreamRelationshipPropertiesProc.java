@@ -77,7 +77,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
     public Stream<PropertyResult> streamProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipProperties") String relationshipProperty,
-        @Name(value = "relationshipLabels", defaultValue = "['*']") List<String> relationshipLabels,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         validateGraphName(graphName);
@@ -88,7 +88,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
             getUsername(),
             graphName,
             List.of(relationshipProperty),
-            relationshipLabels,
+            relationshipTypes,
             cypherConfig
         );
         // validation
