@@ -23,8 +23,38 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
 import java.util.List;
+import java.util.Locale;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public interface Aggregator {
     Variable aggregate(Variable previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacencyMatrix);
+
     List<Weights> weights();
+
+    enum AggregatorType {
+        MEAN,
+        POOL;
+
+        public static AggregatorType of(String activationFunction) {
+            return valueOf(toUpperCaseWithLocale(activationFunction));
+        }
+
+        public static AggregatorType parse(Object object) {
+            if (object == null) {
+                return null;
+            }
+            if (object instanceof String) {
+                return of(((String) object).toUpperCase(Locale.ENGLISH));
+            }
+            if (object instanceof AggregatorType) {
+                return (AggregatorType) object;
+            }
+            return null;
+        }
+
+        public static String toString(AggregatorType af) {
+            return af.toString();
+        }
+    }
 }

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.randomprojections.ImmutableRandomProjectionBaseConfig;
@@ -115,7 +116,7 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
         graph = randomGraphGenerator.generate();
     }
 
-    private void setupLayers(ActivationFunction activationFunction, String aggregatorType) {
+    private void setupLayers(ActivationFunction activationFunction, AggregatorType aggregatorType) {
         LayerConfig layer1Config = LayerConfig.builder()
             .aggregatorType(aggregatorType)
             .rows(GS_DIM)
@@ -139,7 +140,7 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
 
     @ParameterizedTest
     @MethodSource("configVariations")
-    void smokeTestTraining(int concurrency, String aggregator, ActivationFunction activationFunction) {
+    void smokeTestTraining(int concurrency, AggregatorType aggregator, ActivationFunction activationFunction) {
         setupLayers(activationFunction, aggregator);
         GraphSageModel model = new GraphSageModel(
             concurrency,
@@ -152,7 +153,7 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
 
     @ParameterizedTest
     @MethodSource("configVariations")
-    void smokeTestTrainingSingleBatch(int concurrency, String aggregator, ActivationFunction activationFunction) {
+    void smokeTestTrainingSingleBatch(int concurrency, AggregatorType aggregator, ActivationFunction activationFunction) {
         setupLayers(activationFunction, aggregator);
         GraphSageModel model = new GraphSageModel(concurrency, (int) graph.nodeCount(), List.of(layer1, layer2), log);
         runSmokeTest(model);
@@ -182,8 +183,8 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
                 Arguments.of(4)
             ),
             () -> Stream.of(
-                Arguments.of("mean"),
-                Arguments.of("pool")
+                Arguments.of(AggregatorType.MEAN),
+                Arguments.of(AggregatorType.POOL)
             ),
             () -> Stream.of(
                 Arguments.of(ActivationFunction.SIGMOID),

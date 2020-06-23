@@ -32,9 +32,7 @@ public final class LayerInitialisationFactory {
     private LayerInitialisationFactory() {}
 
     public static Layer createLayer(LayerConfig layerConfig) {
-        String aggregatorType = layerConfig.aggregatorType();
-
-        if ("mean".equals(toLowerCaseWithLocale(aggregatorType))) {
+        if (layerConfig.aggregatorType() == Aggregator.AggregatorType.MEAN) {
             int rows = layerConfig.rows();
             int cols = layerConfig.cols();
 
@@ -48,7 +46,7 @@ public final class LayerInitialisationFactory {
             return new MeanAggregatingLayer(weights, layerConfig.sampleSize(), activationFunction.activationFunction());
         }
 
-        if ("pool".equals(toLowerCaseWithLocale(aggregatorType))) {
+        if (layerConfig.aggregatorType() == Aggregator.AggregatorType.POOL) {
             int rows = layerConfig.rows();
             int cols = layerConfig.cols();
 
@@ -84,7 +82,7 @@ public final class LayerInitialisationFactory {
             );
         }
 
-        throw new RuntimeException(formatWithLocale("Aggregator: %s is unknown", aggregatorType));
+        throw new RuntimeException(formatWithLocale("Aggregator: %s is unknown", layerConfig.aggregatorType()));
     }
 
     private static Weights generateWeights(int rows, int cols, double weightBound) {

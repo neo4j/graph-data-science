@@ -31,7 +31,7 @@ public interface LayerConfig {
 
     Optional<Integer> bias();
 
-    String aggregatorType();
+    Aggregator.AggregatorType aggregatorType();
 
     ActivationFunction activationFunction();
 

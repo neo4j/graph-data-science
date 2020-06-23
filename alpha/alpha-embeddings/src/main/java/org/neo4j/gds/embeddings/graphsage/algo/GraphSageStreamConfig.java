@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
+import org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -49,7 +50,7 @@ public interface GraphSageStreamConfig extends GraphSageBaseConfig {
 
     static GraphSageStreamConfig of(
         ActivationFunction activationFunction,
-        String aggregator,
+        AggregatorType aggregator,
         int batchSize,
         int embeddingDimension,
         int maxOptimizationIterations,

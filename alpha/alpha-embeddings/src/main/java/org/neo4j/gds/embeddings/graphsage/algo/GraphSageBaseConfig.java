@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.graphalgo.annotation.Configuration;
@@ -34,7 +35,12 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig {
 
     int embeddingSize();
 
-    String aggregator();
+    @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#toString")
+    @Value.Default
+    default Aggregator.AggregatorType aggregator() {
+        return Aggregator.AggregatorType.MEAN;
+    }
 
     @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.ActivationFunction#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.ActivationFunction#toString")
