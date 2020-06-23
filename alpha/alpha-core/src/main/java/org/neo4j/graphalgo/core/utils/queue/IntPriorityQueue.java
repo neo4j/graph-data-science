@@ -23,8 +23,9 @@ import com.carrotsearch.hppc.IntDoubleScatterMap;
 import org.apache.lucene.util.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveIntIterator;
-
-import java.util.Arrays;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 
 /**
  * A PriorityQueue specialized for ints that maintains a partial ordering of
@@ -41,7 +42,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
 
     private static final int[] EMPTY_INT = new int[0];
 
-    private int[] heap;
+    private HugeIntArray heap;
     private int size = 0;
 
     /**
@@ -58,7 +59,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
             // 1-based not 0-based.  heap[0] is unused.
             heapSize = initialCapacity + 1;
         }
-        this.heap = new int[ArrayUtil.oversize(heapSize, Integer.BYTES)];
+        this.heap = HugeIntArray.newArray(ArrayUtil.oversize(heapSize, Integer.BYTES), AllocationTracker.EMPTY);
     }
 
     /**
@@ -98,14 +99,14 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
         addCost(element, cost);
         size++;
         ensureCapacityForInsert();
-        heap[size] = element;
+        heap.set(size, element);
         upHeap(size);
     }
 
     private void add(int element) {
         size++;
         ensureCapacityForInsert();
-        heap[size] = element;
+        heap.set(size, element);
         upHeap(size);
     }
 
@@ -116,7 +117,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
         // We don't need to check size here: if maxSize is 0,
         // then heap is length 2 array with both entries null.
         // If size is 0 then heap[1] is already null.
-        return heap[1];
+        return heap.get(1);
     }
 
     /**
@@ -126,8 +127,8 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
      */
     public final int pop() {
         if (size > 0) {
-            int result = heap[1];    // save first value
-            heap[1] = heap[size];    // move last to first
+            int result = heap.get(1);    // save first value
+            heap.set(1, heap.get(size));    // move last to first
             size--;
             downHeap(1);           // adjust heap
             removeCost(result);
@@ -181,16 +182,21 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
 
     private int findElementPosition(int element) {
         final int limit = size + 1;
-        final int[] data = heap;
-        int i = 1;
-        for (; i <= limit - 4; i += 4) {
-            if (data[i] == element) return i;
-            if (data[i + 1] == element) return i + 1;
-            if (data[i + 2] == element) return i + 2;
-            if (data[i + 3] == element) return i + 3;
-        }
-        for (; i < limit; ++i) {
-            if (data[i] == element) return i;
+        final HugeIntArray data = heap;
+        HugeCursor<int[]> cursor = data.initCursor(data.newCursor(), 1, limit);
+        while (cursor.next()) {
+            int[] internalArray = cursor.array;
+            int i = cursor.offset;
+            int localLimit = cursor.limit - 4;
+            for (; i <= localLimit; i += 4) {
+                if (internalArray[i] == element) return i + (int) cursor.base;
+                if (internalArray[i + 1] == element) return i + 1 + (int) cursor.base;
+                if (internalArray[i + 2] == element) return i + 2 + (int) cursor.base;
+                if (internalArray[i + 3] == element) return i + 3 + (int) cursor.base;
+            }
+            for (; i < cursor.limit; ++i) {
+                if (internalArray[i] == element) return i + (int) cursor.base;
+            }
         }
         return 0;
     }
@@ -206,42 +212,40 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
 
     private boolean upHeap(int origPos) {
         int i = origPos;
-        int node = heap[i];          // save bottom node
+        int node = heap.get(i);          // save bottom node
         int j = i >>> 1;
-        while (j > 0 && lessThan(node, heap[j])) {
-            heap[i] = heap[j];       // shift parents down
+        while (j > 0 && lessThan(node, heap.get(j))) {
+            heap.set(i, heap.get(j));       // shift parents down
             i = j;
             j = j >>> 1;
         }
-        heap[i] = node;              // install saved node
+        heap.set(i, node);              // install saved node
         return i != origPos;
     }
 
     private void downHeap(int i) {
-        int node = heap[i];          // save top node
+        int node = heap.get(i);          // save top node
         int j = i << 1;              // find smaller child
         int k = j + 1;
-        if (k <= size && lessThan(heap[k], heap[j])) {
+        if (k <= size && lessThan(heap.get(k), heap.get(j))) {
             j = k;
         }
-        while (j <= size && lessThan(heap[j], node)) {
-            heap[i] = heap[j];       // shift up child
+        while (j <= size && lessThan(heap.get(j), node)) {
+            heap.set(i, heap.get(j));       // shift up child
             i = j;
             j = i << 1;
             k = j + 1;
-            if (k <= size && lessThan(heap[k], heap[j])) {
+            if (k <= size && lessThan(heap.get(k), heap.get(j))) {
                 j = k;
             }
         }
-        heap[i] = node;              // install saved node
+        heap.set(i, node);              // install saved node
     }
 
     private void ensureCapacityForInsert() {
-        if (size >= heap.length) {
+        if (size >= heap.size()) {
             final int oversize = ArrayUtil.oversize(size + 1, Integer.BYTES);
-            heap = Arrays.copyOf(
-                    heap,
-                    oversize);
+            heap = heap.copyOf(oversize, AllocationTracker.EMPTY);
         }
     }
 
@@ -261,7 +265,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
              */
             @Override
             public int next() {
-                return heap[i++];
+                return heap.get(i++);
             }
         };
     }
