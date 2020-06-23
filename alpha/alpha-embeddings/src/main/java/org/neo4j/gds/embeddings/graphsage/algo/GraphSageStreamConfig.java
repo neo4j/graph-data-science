@@ -55,7 +55,6 @@ public interface GraphSageStreamConfig extends GraphSageBaseConfig {
         int embeddingDimension,
         int maxIterations,
         List<String> nodePropertyNames,
-        List<Integer> sampleSizes,
         double tolerance
     ) {
         return ImmutableGraphSageStreamConfig.builder()
@@ -65,7 +64,6 @@ public interface GraphSageStreamConfig extends GraphSageBaseConfig {
             .embeddingSize(embeddingDimension)
             .maxIterations(maxIterations)
             .nodePropertyNames(nodePropertyNames)
-            .sampleSizes(sampleSizes)
             .tolerance(tolerance)
             .build();
     }

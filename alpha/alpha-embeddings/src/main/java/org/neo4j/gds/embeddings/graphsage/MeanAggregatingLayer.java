@@ -29,12 +29,12 @@ import java.util.function.Function;
 public class MeanAggregatingLayer implements Layer {
 
     private final UniformNeighborhoodSampler sampler;
-    private final int sampleSize;
+    private final long sampleSize;
     private final Weights weights;
     private long randomState;
     private final Function<Variable, Variable> activationFunction;
 
-    public MeanAggregatingLayer(Weights weights, int sampleSize, Function<Variable, Variable> activationFunction) {
+    public MeanAggregatingLayer(Weights weights, long sampleSize, Function<Variable, Variable> activationFunction) {
         this.sampleSize = sampleSize;
         this.weights = weights;
         this.activationFunction = activationFunction;
@@ -53,7 +53,7 @@ public class MeanAggregatingLayer implements Layer {
     }
 
     @Override
-    public int sampleSize() {
+    public long sampleSize() {
         return sampleSize;
     }
 

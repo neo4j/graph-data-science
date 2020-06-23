@@ -35,10 +35,15 @@ import java.util.stream.Collectors;
 
 public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, ToleranceConfig {
 
-    int embeddingSize();
+    @Value.Default
+    default int embeddingSize() {
+        return 64;
+    }
 
-    @Configuration.ConvertWith("toIntList")
-    List<Integer> sampleSizes();
+    @Value.Default
+    default List<Long> sampleSizes() {
+        return List.of(25L, 10L);
+    }
 
     @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#toString")

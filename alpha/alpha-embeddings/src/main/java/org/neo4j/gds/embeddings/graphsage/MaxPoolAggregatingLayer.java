@@ -28,7 +28,7 @@ import java.util.function.Function;
 public class MaxPoolAggregatingLayer implements Layer {
 
     private final UniformNeighborhoodSampler sampler;
-    private final int sampleSize;
+    private final long sampleSize;
     private final Weights poolWeights;
     private final Weights selfWeights;
     private final Weights neighborsWeights;
@@ -37,7 +37,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     private final Function<Variable, Variable> activationFunction;
 
     public MaxPoolAggregatingLayer(
-        int sampleSize,
+        long sampleSize,
         Weights poolWeights,
         Weights selfWeights,
         Weights neighborsWeights,
@@ -59,7 +59,7 @@ public class MaxPoolAggregatingLayer implements Layer {
 
 
     @Override
-    public int sampleSize() {
+    public long sampleSize() {
         return sampleSize;
     }
 

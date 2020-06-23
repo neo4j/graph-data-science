@@ -25,7 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import java.util.List;
 
 public interface Layer {
-    int sampleSize();
+    long sampleSize();
 
     Aggregator aggregator();
 

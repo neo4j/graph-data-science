@@ -44,7 +44,6 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
             .addParameter("aggregator", aggregator)
             .addParameter("activationFunction", activationFunction)
             .addParameter("embeddingSize", embeddingSize)
-            .addParameter("sampleSizes", List.of(25, 10))
             .addParameter("degreeAsProperty", true)
             .yields();
 
