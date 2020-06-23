@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

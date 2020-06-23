@@ -67,14 +67,4 @@ public class SubGraphBuilderImpl implements SubGraphBuilder {
         }
         return result;
     }
-
-//    private List<Set<Long>> buildNodeLists(Collection<Long> nodeIds, Graph graph) {
-//        List<Set<Long>> result = new ArrayList<>(layers.length + 1);
-//        result.add(new HashSet<>(nodeIds));
-//        for (int layerNr = layers.length - 1; layerNr >= 0; layerNr--) {
-//            Set<Long> previousSet = result.get(result.size() - 1);
-//            result.add(buildSubGraph(previousSet, layers[layerNr], graph));
-//        }
-//        return result;
-//    }
 }

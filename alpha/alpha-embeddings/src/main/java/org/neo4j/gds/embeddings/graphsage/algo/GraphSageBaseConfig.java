@@ -20,9 +20,9 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
-import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.config.ToleranceConfig;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, ToleranceConfig {
 
@@ -130,12 +129,4 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
     default int featuresSize() {
         return nodePropertyNames().size() + (degreeAsProperty() ? 1 : 0);
     }
-
-    static List<Integer> toIntList(List<Long> input) {
-        return input.stream()
-            .mapToInt(Long::intValue)
-            .boxed()
-            .collect(Collectors.toList());
-    }
-
 }

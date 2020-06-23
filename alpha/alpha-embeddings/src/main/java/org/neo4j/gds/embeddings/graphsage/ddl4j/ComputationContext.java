@@ -29,9 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Arrays.stream;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-
 public class ComputationContext {
     private final Map<Variable, Tensor> data;
     private final Map<Variable, Tensor> gradients;
@@ -67,10 +64,6 @@ public class ComputationContext {
         return gradients.get(variable);
     }
 
-    public void setData(Variable variable, Tensor tensor) {
-        data.put(variable, tensor);
-    }
-
     public void backward(Variable function) {
         if (function.dimensions().length != 1 || data(function).totalSize() != 1) {
             throw new IllegalArgumentException("Backward requires a variable with rank 1 and single dimension of size 1.");
@@ -90,8 +83,6 @@ public class ComputationContext {
             var child = task.child;
             Tensor gradient = child.gradient(variable, this);
             updateGradient(variable, gradient);
-
-//            logGradientUpdate(variable, child, gradient);
 
             upstreamCounters.get(variable).decrementAndGet();
             if (upstreamCounters.get(variable).get() == 0) {
@@ -136,15 +127,6 @@ public class ComputationContext {
             Arrays.stream(tensor.data)
                 .map(value -> value * value)
                 .sum());
-    }
-
-    private static void logGradientUpdate(Variable variable, Variable child, Tensor gradient) {
-        System.out.println(formatWithLocale(
-            "%s got gradient from %s with L2 %s",
-            variable.getClass().getSimpleName(),
-            child.getClass().getSimpleName(),
-            l2(gradient)
-        ));
     }
 
     static class BackPropTask {

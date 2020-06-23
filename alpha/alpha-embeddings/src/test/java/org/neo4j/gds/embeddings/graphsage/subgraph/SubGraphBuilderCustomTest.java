@@ -21,20 +21,16 @@ package org.neo4j.gds.embeddings.graphsage.subgraph;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
-import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraphBuilder;
-import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraphBuilderImpl;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.gds.embeddings.graphsage.NeighborhoodFunction;
 import org.neo4j.gds.embeddings.graphsage.UniformNeighborhoodSampler;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -92,26 +88,11 @@ class SubGraphBuilderCustomTest {
                 idFunction.of("i"),
                 idFunction.of("a"),
                 idFunction.of("a")
-//                nodeId.of("c")
             ),
             neighborhoodFunction,
             graph
         );
 
-        int[] expectedAdjA = new int[]{1, 2, 3, 4, 5};
-        Set<Long> expectedNeighborsA = Set.of(
-            idFunction.of("a"),
-            idFunction.of("b"),
-            idFunction.of("c"),
-            idFunction.of("d"),
-            idFunction.of("e"),
-            idFunction.of("f"),
-            idFunction.of("i"),
-            idFunction.of("j")
-        );
-
         assertEquals(6, subGraph.adjacency.length);
-//        assertArrayEquals(expectedAdjA, subGraph.adjacency[0]);
-//        assertEquals(expectedNeighborsA, subGraph.nextNodes);
     }
 }

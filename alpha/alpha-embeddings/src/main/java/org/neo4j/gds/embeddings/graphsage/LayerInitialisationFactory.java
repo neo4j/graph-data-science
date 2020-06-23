@@ -26,7 +26,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import java.util.Random;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
 
 public final class LayerInitialisationFactory {
     private LayerInitialisationFactory() {}

@@ -56,7 +56,6 @@ public class MultiMean extends SingleParentVariable {
             }
         }
 
-
         return result;
     }
 
@@ -81,20 +80,6 @@ public class MultiMean extends SingleParentVariable {
                 }
             }
         }
-
-//
-//        for (int source = 0; source < adj.length; source++) {
-//            int sourceOffset = source * parentDimensions;
-//            int numberOfNeighbors = adj[source].length;
-//            for (int dim = 0; dim < parentDimensions; dim++) {
-//                means[sourceOffset + dim] += parentData[sourceOffset + dim] / (numberOfNeighbors + 1);
-//                for (int target = 0; target < numberOfNeighbors; target++) {
-//                    int targetOffset = target * parentDimensions;
-//                    means[sourceOffset + dim] += parentData[targetOffset + dim] / (numberOfNeighbors + 1);
-//                }
-//            }
-//        }
-
 
         return new Tensor(means, dimensions());
     }
