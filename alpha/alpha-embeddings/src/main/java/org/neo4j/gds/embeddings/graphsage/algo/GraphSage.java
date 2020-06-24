@@ -97,10 +97,10 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
         HugeObjectArray<double[]> embeddings();
 
-        Double startLoss();
+        double startLoss();
 
         static GraphSageResult of(
-            Double startLoss,
+            double startLoss,
             Map<String, Double> epochLosses,
             HugeObjectArray<double[]> embeddings
         ) {

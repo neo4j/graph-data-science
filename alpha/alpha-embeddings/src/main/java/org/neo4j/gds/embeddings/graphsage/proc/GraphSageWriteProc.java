@@ -77,7 +77,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
 
     public static final class GraphSageWriteResult {
 
-        public final Double startLoss;
+        public final double startLoss;
         public final Map<String, Double> epochLosses;
 
         public final long nodeCount;
@@ -88,7 +88,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         public final Map<String, Object> configuration;
 
         GraphSageWriteResult(
-            Double startLoss,
+            double startLoss,
             Map<String, Double> epochLosses,
             long nodeCount,
             long nodePropertiesWritten,
@@ -108,9 +108,9 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         }
 
         static class Builder extends AbstractResultBuilder<GraphSageWriteResult> {
-            private Double startLoss;
+            private double startLoss;
 
-            public Builder withStartLoss(Double startLoss) {
+            public Builder withStartLoss(double startLoss) {
                 this.startLoss = startLoss;
                 return this;
             }
