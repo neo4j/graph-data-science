@@ -29,6 +29,7 @@ import org.neo4j.logging.Log;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
 import static java.util.stream.Collectors.toList;
@@ -73,20 +74,18 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
     }
 
     private HugeObjectArray<double[]> initializeFeatures() {
-        long nodeCount = graph.nodeCount();
-        HugeObjectArray<double[]> features = HugeObjectArray.newArray(double[].class, nodeCount, AllocationTracker.EMPTY);
-        LongStream.range(0, nodeCount).forEach(n -> {
-            List<Double> properties = this.nodeProperties
-                .stream()
-                .map(p -> p.nodeProperty(n))
-                .collect(toList());
+        HugeObjectArray<double[]> features = HugeObjectArray.newArray(
+            double[].class,
+            graph.nodeCount(),
+            AllocationTracker.EMPTY
+        );
+        features.setAll(n -> {
+            DoubleStream nodeFeatures = this.nodeProperties.stream().mapToDouble(p -> p.nodeProperty(n));
             if (useDegreeAsProperty) {
-                properties.add((double)graph.degree(n));
+                nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
             }
-            double[] props = properties.stream().mapToDouble(Double::doubleValue).toArray();
-            features.set(n, props);
+            return nodeFeatures.toArray();
         });
-
         return features;
     }
 
