@@ -122,10 +122,10 @@ class GraphSageModelTest implements FiniteDifferenceTest {
     @Test
     void testLoss() {
         GraphSageModel model = new GraphSageModel(CONCURRENCY, 3, List.of(mockLayer1, mockLayer2), new TestLog());
-        List<Long> batch = List.of(
+        long[] batch = new long[]{
             idFunction.of("a"),
             idFunction.of("b")
-        );
+        };
 
         finiteDifferenceShouldApproximateGradient(
             List.of(LAYER_1_WEIGHTS, LAYER_2_WEIGHTS),

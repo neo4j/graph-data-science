@@ -22,8 +22,6 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -34,11 +32,11 @@ public class BatchProvider {
         this.batchSize = batchSize;
     }
 
-    public Stream<List<Long>> stream(Graph graph) {
+    public Stream<long[]> stream(Graph graph) {
         return LazyBatchCollection.of(
             graph.nodeCount(),
             batchSize,
-            (start, length) -> LongStream.range(start, start + length).boxed().collect(Collectors.toList())
+            (start, length) -> LongStream.range(start, start + length).toArray()
         ).stream();
     }
 }

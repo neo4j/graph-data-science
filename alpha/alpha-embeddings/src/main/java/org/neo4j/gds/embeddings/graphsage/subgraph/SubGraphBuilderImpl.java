@@ -23,23 +23,23 @@ import org.neo4j.gds.embeddings.graphsage.NeighborhoodFunction;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SubGraphBuilderImpl implements SubGraphBuilder {
     @Override
-    public SubGraph buildSubGraph(
-        Collection<Long> nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph
-    ) {
-        int[][] adjacency = new int[nodeIds.size()][];
-        int[] selfAdjacency = new int[nodeIds.size()];
+    public SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph) {
+        int[][] adjacency = new int[nodeIds.length][];
+        int[] selfAdjacency = new int[nodeIds.length];
         LocalIdMap idmap = new LocalIdMapImpl();
-        nodeIds.forEach(idmap::toMapped);
+        for (long nodeId : nodeIds) {
+            idmap.toMapped(nodeId);
+        }
 
         AtomicInteger nodeOffset = new AtomicInteger(0);
-        nodeIds.forEach(nodeId -> {
+        Arrays.stream(nodeIds).forEach(nodeId -> {
             int internalId = nodeOffset.getAndIncrement();
             selfAdjacency[internalId] = idmap.toMapped(nodeId);
             List<Long> nodeNeighbors = neighborhoodFunction.apply(graph, nodeId);
@@ -54,10 +54,12 @@ public class SubGraphBuilderImpl implements SubGraphBuilder {
 
     @Override
     public List<SubGraph> buildSubGraphs(
-        Collection<Long> nodeIds, List<NeighborhoodFunction> neighborhoodFunctions, Graph graph
+        long[] nodeIds,
+        List<NeighborhoodFunction> neighborhoodFunctions,
+        Graph graph
     ) {
         List<SubGraph> result = new ArrayList<>();
-        Collection<Long> previousNodes = nodeIds;
+        long[] previousNodes = nodeIds;
 
         Collections.reverse(neighborhoodFunctions);
         for (NeighborhoodFunction neighborhoodFunction : neighborhoodFunctions) {

@@ -22,10 +22,9 @@ package org.neo4j.gds.embeddings.graphsage.subgraph;
 import org.neo4j.gds.embeddings.graphsage.NeighborhoodFunction;
 import org.neo4j.graphalgo.api.Graph;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface SubGraphBuilder {
-    SubGraph buildSubGraph(Collection<Long> nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph);
-    List<SubGraph> buildSubGraphs(Collection<Long> nodeIds, List<NeighborhoodFunction> neighborhoodFunctions, Graph graph);
+    SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph);
+    List<SubGraph> buildSubGraphs(long[] nodeIds, List<NeighborhoodFunction> neighborhoodFunctions, Graph graph);
 }

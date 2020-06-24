@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -48,7 +47,6 @@ import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -198,7 +196,7 @@ public class GraphSageModel {
     }
 
     private void trainOnBatch(
-        List<Long> batch,
+        long[] batch,
         Graph graph,
         HugeObjectArray<double[]> features,
         Updater updater,
@@ -259,13 +257,13 @@ public class GraphSageModel {
                 int dimension = embeddingVariable.dimension(1);
                 double[] embeddings = ctx.forward(embeddingVariable).data;
 
-                for (int nodeId = 0; nodeId < batch.size(); nodeId++) {
+                for (int nodeIndex = 0; nodeIndex < batch.length; nodeIndex++) {
                     double[] nodeEmbedding = Arrays.copyOfRange(
                         embeddings,
-                        nodeId * dimension,
-                        (nodeId + 1) * dimension
+                        nodeIndex * dimension,
+                        (nodeIndex + 1) * dimension
                     );
-                    result.set(batch.get(nodeId), nodeEmbedding);
+                    result.set(batch[nodeIndex], nodeEmbedding);
                 }
             })
         );
@@ -294,12 +292,12 @@ public class GraphSageModel {
         return lossValue;
     }
 
-    Variable lossFunction(List<Long> batch, Graph graph, HugeObjectArray<double[]> features) {
-        List<Long> totalBatch = Stream
-            .concat(batch.stream(), Stream.concat(
+    Variable lossFunction(long[] batch, Graph graph, HugeObjectArray<double[]> features) {
+        long[] totalBatch = LongStream
+            .concat(Arrays.stream(batch), LongStream.concat(
                 neighborBatch(graph, batch),
-                negativeBatch(graph, batch)
-            )).collect(Collectors.toList());
+                negativeBatch(graph, batch.length)
+            )).toArray();
         Variable embeddingVariable = embeddingVariable(graph, totalBatch, features);
 
         Variable lossFunction = new GraphSageLoss(embeddingVariable, Q);
@@ -307,8 +305,8 @@ public class GraphSageModel {
         return new DummyVariable(lossFunction);
     }
 
-    private Stream<Long> neighborBatch(Graph graph, List<Long> batch) {
-        return batch.stream().mapToLong(nodeId -> {
+    private LongStream neighborBatch(Graph graph, long[] batch) {
+        return Arrays.stream(batch).map(nodeId -> {
             int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
@@ -322,13 +320,12 @@ public class GraphSageModel {
                 searchDepth--;
             }
             return currentNode.get();
-        })
-            .boxed();
+        });
     }
 
-    private Stream<Long> negativeBatch(Graph graph, List<Long> batch) {
+    private LongStream negativeBatch(Graph graph, int batchSize) {
         Random rand = new Random(layers[0].randomState());
-        return IntStream.range(0, batch.size())
+        return IntStream.range(0, batchSize)
             .mapToLong(ignore -> {
                 double randomValue = rand.nextDouble();
                 double cumulativeProbability = 0;
@@ -340,26 +337,25 @@ public class GraphSageModel {
                     }
                 }
                 throw new RuntimeException("This should never happen");
-            })
-            .boxed();
+            });
     }
 
-    private Variable featureVariables(Collection<Long> nodeIds, HugeObjectArray<double[]> features) {
-        ArrayList<Long> nodeList = new ArrayList<>(nodeIds);
+    private Variable featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
         int dimension = features.get(0).length;
-        double[] data = new double[nodeIds.size() * dimension];
+        double[] data = new double[nodeIds.length * dimension];
         IntStream
-            .range(0, nodeIds.size())
-            .forEach(nodeOffset -> System.arraycopy(features.get(nodeList.get(nodeOffset)),
+            .range(0, nodeIds.length)
+            .forEach(nodeOffset -> System.arraycopy(
+                features.get(nodeIds[nodeOffset]),
                 0,
                 data,
                 nodeOffset * dimension,
                 dimension
             ));
-        return Constant.matrix(data, nodeIds.size(), dimension);
+        return Constant.matrix(data, nodeIds.length, dimension);
     }
 
-    private Variable embeddingVariable(Graph graph, Collection<Long> nodeIds, HugeObjectArray<double[]> features) {
+    private Variable embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
         SubGraphBuilder subGraphBuilder = new SubGraphBuilderImpl();
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)

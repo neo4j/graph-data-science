@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage.subgraph;
 
-import java.util.Collection;
-
 public interface LocalIdMap {
     int toMapped(long originalId);
     long toOriginal(int internalId);
-    Collection<Long> originalIds();
+    long[] originalIds();
 }

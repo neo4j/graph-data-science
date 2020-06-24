@@ -19,19 +19,16 @@
  */
 package org.neo4j.gds.embeddings.graphsage.subgraph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.LongIntHashMap;
 
 public class LocalIdMapImpl implements LocalIdMap {
-    private final List<Long> originalIds;
-    private final Map<Long, Integer> toInternalId;
+    private final LongArrayList originalIds;
+    private final LongIntHashMap toInternalId;
 
     public LocalIdMapImpl() {
-        this.originalIds = new ArrayList<>();
-        this.toInternalId = new HashMap<>();
+        this.originalIds = new LongArrayList();
+        this.toInternalId = new LongIntHashMap();
     }
 
     @Override
@@ -50,7 +47,7 @@ public class LocalIdMapImpl implements LocalIdMap {
     }
 
     @Override
-    public Collection<Long> originalIds() {
-        return originalIds;
+    public long[] originalIds() {
+        return originalIds.toArray();
     }
 }

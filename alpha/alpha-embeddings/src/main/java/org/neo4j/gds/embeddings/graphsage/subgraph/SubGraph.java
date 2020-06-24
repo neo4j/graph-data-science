@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.embeddings.graphsage.subgraph;
 
-import java.util.Collection;
-
 public class SubGraph {
     public final int[][] adjacency;
     public final int[] selfAdjacency;
-    public final Collection<Long> nextNodes;
+    public final long[] nextNodes;
 
-    public SubGraph(int[][] adjacency, int[] selfAdjacency, Collection<Long> nextNodes) {
+    public SubGraph(int[][] adjacency, int[] selfAdjacency, long[] nextNodes) {
         this.adjacency = adjacency;
         this.selfAdjacency = selfAdjacency;
         this.nextNodes = nextNodes;

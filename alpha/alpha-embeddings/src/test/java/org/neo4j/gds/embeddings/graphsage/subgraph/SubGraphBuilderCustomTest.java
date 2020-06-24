@@ -81,14 +81,14 @@ class SubGraphBuilderCustomTest {
          */
 
         SubGraph subGraph = subGraphBuilder.buildSubGraph(
-            List.of(
+            new long[]{
                 idFunction.of("a"),
                 idFunction.of("b"),
                 idFunction.of("i"),
                 idFunction.of("i"),
                 idFunction.of("a"),
                 idFunction.of("a")
-            ),
+            },
             neighborhoodFunction,
             graph
         );

@@ -53,7 +53,7 @@ class BatchProviderTest {
     void testBatching() {
 
         BatchProvider provider = new BatchProvider(3);
-        List<List<Long>> layerNodes = provider.stream(graph).collect(toList());
+        List<long[]> layerNodes = provider.stream(graph).collect(toList());
 
         assertEquals(4, layerNodes.size());
     }
