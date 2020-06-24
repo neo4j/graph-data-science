@@ -182,6 +182,8 @@
                 </d:tocentry>
                 <d:tocentry linkend="algorithms-embeddings-graph-sage"><?dbhtml filename="algorithms/alpha/graph-sage/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-embeddings-random-projection"><?dbhtml filename="algorithms/alpha/fastrp/fastrp/index.html"?>
+                </d:tocentry>
             </d:tocentry>
 
             <d:tocentry linkend="algorithms-auxiliary">

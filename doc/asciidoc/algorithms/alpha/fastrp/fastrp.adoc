@@ -1,0 +1,201 @@
+[[algorithms-embeddings-random-projection]]
+[.alpha]
+= Random Projection
+
+[abstract]
+--
+This section describes the Random Projection node embedding algorithm in the Neo4j Graph Data Science library.
+--
+
+Random Projection (fastrp), is a node embedding algorithm that uses very sparse random projections.
+It iteratively constructs _intermediate_ embeddings by combining neighboring embeddings.
+Therefore, each node's embedding depends on a neighborhood of configurable diameter.
+This way Random Projection exploits higher-order relationships in the graph while still being highly scalable.
+
+There are two aggregation methods that the algorithm can use.
+The computed embeddings are aggregated from intermediate embeddings computed during the iterations.
+One aggregation simply concatenates all the intermediate embeddings node by node.
+The other aggregation computes the embeddings as a weighted sum of the intermediate embeddings.
+The choice of aggregation method is made by specifying `iterationWeights` configuration parameters either as an empty list or containing the desired weights for the iterations.
+
+NOTE: The algorithm is defined for UNDIRECTED graphs.
+
+For more information on this algorithm see:
+
+* https://arxiv.org/pdf/1908.11512.pdf[H. Chen, S.F. Sultan, Y. Tian, M. Chen, S. Skiena: Fast and Accurate Network Embeddings via Very Sparse Random Projection, 2019.^]
+
+
+[[algorithms-embeddings-random-projection-syntax]]
+== Syntax
+
+
+[[algorithms-embeddings-random-projection-syntax-stream]]
+=== Stream mode
+
+.Run Random Projection in stream mode on a named graph.
+[source, cypher]
+----
+CALL gds.alpha.randomProjection.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer,
+  embedding: List<Float>
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name      | Type         | Description
+| nodeId    | Integer      | The Neo4j node ID.
+| embedding | List<Float>  | The computed node embedding.
+|===
+
+
+[[algorithms-embeddings-random-projection-syntax-write]]
+=== Write mode
+
+.Run Random Projection in write mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.alpha.randomProjection.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  nodeCount: Integer,
+  propertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name               | Type                 | Description
+| nodesCount         | Integer              | The number of nodes processed.
+| propertiesWritten  | Integer              | The number of node properties written.
+| createMillis       | Integer              | Milliseconds for loading data.
+| computeMillis      | Integer              | Milliseconds for running the algorithm.
+| writeMillis        | Integer              | Milliseconds for writing result data back to Neo4j.
+| configuration      | Map                  | The configuration used for running the algorithm.
+|===
+
+
+[[algorithms-embeddings-random-projection-syntax-anonymous]]
+=== Anonymous graphs
+
+include::../../shared/syntax-anonymous-graphs.adoc[]
+
+.Run Random Projection in write mode on an anonymous graph.
+[source, cypher]
+----
+CALL gds.alpha.randomProjection.write(
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  nodeCount: Integer,
+  propertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-configuration-anonymous-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, <<algorithms-embeddings-random-projection-syntax-write, specified above>>.
+
+[[algorithms-embeddings-node2vec-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher, role=setup-query]
+----
+CREATE
+  (Dan:Person),
+  (Annie:Person),
+  (Matt:Person),
+  (Jeff:Person),
+  (Brie:Person),
+  (Elsa:Person),
+  (John:Person),
+
+  (Dan)-[:REL]->(Annie),
+  (Dan)-[:REL]->(Matt),
+  (Annie)-[:REL]->(Matt),
+  (Annie)-[:REL]->(Jeff),
+  (Annie)-[:REL]->(Brie),
+  (Matt)-[:REL]->(Brie),
+  (Brie)-[:REL]->(Elsa),
+  (Brie)-[:REL]->(Jeff),
+  (John)-[:REL]->(Jeff);
+----
+
+[source, cypher, role=graph-create-query]
+----
+CALL gds.graph.create(
+  'persons',
+  'Person',
+  {
+    R: {
+      type: 'REL',
+      orientation: 'UNDIRECTED'
+    }
+})
+----
+
+NOTE: The algorithm is defined for UNDIRECTED graphs.
+
+
+=== Stream
+
+[source, cypher, role=query-example, no-result, group=randomProjection]
+----
+CALL gds.alpha.randomProjection.stream(
+  'persons',
+  {
+    maxIterations: 3,
+    iterationWeights: [1.0, 1.0, 4.0],
+    embeddingDimension: 3,
+    normalizeL2: true,
+    normalizationStrength: -0.9
+  }
+)
+----
+
+[opts=header]
+.Results
+|===
+| nodeId | embedding
+| 0      | [4.898722171783447,-2.360605239868164,-0.005474746227264404]
+| 1      | [4.2204999923706055,-3.6900253295898438,1.4258460998535156]
+| 2      | [2.1105315685272217,-4.533860206604004,1.5421669483184814]
+| 3      | [1.578028917312622,-3.608323574066162,-2.6669602394104004]
+| 4      | [4.866636753082275,-1.8121209144592285,0.38477471470832825]
+| 5      | [0.9328402280807495,-3.445551633834839,3.0306806564331055]
+| 6      | [4.526181221008301,-0.7839458584785461,-0.5074502825737]
+|===
+
+[NOTE]
+====
+Due to the random nature of the algorithm the results will vary between the runs.
+However, this does not necessarily mean that the pairwise distances of two node embeddings vary as much.
+====
