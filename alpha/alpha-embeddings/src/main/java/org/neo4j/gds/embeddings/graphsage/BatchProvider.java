@@ -17,32 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.batch;
+package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class MiniBatchProvider implements BatchProvider {
+public class BatchProvider {
     private final int batchSize;
 
-    public MiniBatchProvider(int batchSize) {
+    public BatchProvider(int batchSize) {
         this.batchSize = batchSize;
     }
 
-    @Override
     public Stream<List<Long>> stream(Graph graph) {
-        final AtomicLong counter = new AtomicLong();
-
-        return LongStream
-            .range(0, graph.nodeCount())
-            .boxed()
-            .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / batchSize))
-            .values()
-            .stream();
+        return LazyBatchCollection.of(
+            graph.nodeCount(),
+            batchSize,
+            (start, length) -> LongStream.range(start, start + length).boxed().collect(Collectors.toList())
+        ).stream();
     }
 }

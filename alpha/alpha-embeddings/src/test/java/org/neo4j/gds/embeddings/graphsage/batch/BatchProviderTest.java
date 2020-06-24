@@ -20,8 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.batch;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.batch.BatchProvider;
-import org.neo4j.gds.embeddings.graphsage.batch.MiniBatchProvider;
+import org.neo4j.gds.embeddings.graphsage.BatchProvider;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -33,7 +32,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
-class MiniBatchProviderTest {
+class BatchProviderTest {
 
     @GdlGraph
     private static final String GRAPH =
@@ -53,7 +52,7 @@ class MiniBatchProviderTest {
     @Test
     void testBatching() {
 
-        BatchProvider provider = new MiniBatchProvider(3);
+        BatchProvider provider = new BatchProvider(3);
         List<List<Long>> layerNodes = provider.stream(graph).collect(toList());
 
         assertEquals(4, layerNodes.size());

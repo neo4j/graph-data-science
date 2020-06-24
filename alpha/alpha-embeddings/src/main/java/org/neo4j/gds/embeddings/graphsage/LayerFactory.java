@@ -27,8 +27,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class LayerInitialisationFactory {
-    private LayerInitialisationFactory() {}
+public final class LayerFactory {
+    private LayerFactory() {}
 
     public static Layer createLayer(LayerConfig layerConfig) {
         if (layerConfig.aggregatorType() == Aggregator.AggregatorType.MEAN) {

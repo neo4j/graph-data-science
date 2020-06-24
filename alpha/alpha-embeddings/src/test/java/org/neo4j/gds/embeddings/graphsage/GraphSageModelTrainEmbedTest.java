@@ -133,8 +133,8 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
             .activationFunction(activationFunction)
             .build();
 
-        layer1 = LayerInitialisationFactory.createLayer(layer1Config);
-        layer2 = LayerInitialisationFactory.createLayer(layer2Config);
+        layer1 = LayerFactory.createLayer(layer1Config);
+        layer2 = LayerFactory.createLayer(layer2Config);
 
     }
 

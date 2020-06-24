@@ -20,8 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
-import org.neo4j.gds.embeddings.graphsage.batch.BatchProvider;
-import org.neo4j.gds.embeddings.graphsage.batch.MiniBatchProvider;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Constant;
@@ -65,7 +63,7 @@ public class GraphSageModel {
 
     private final Layer[] layers;
     private final Log log;
-    private final MiniBatchProvider batchProvider;
+    private final BatchProvider batchProvider;
     private final double learningRate;
     private final double tolerance;
     private final int Q; // number of negative samples
@@ -124,7 +122,7 @@ public class GraphSageModel {
             config.searchDepth(),
             config.negativeSamples(),
             config.layerConfigs().stream()
-                .map(LayerInitialisationFactory::createLayer)
+                .map(LayerFactory::createLayer)
                 .collect(Collectors.toList()),
             log
         );
@@ -150,7 +148,7 @@ public class GraphSageModel {
         this.maxIterations = maxIterations;
         this.maxSearchDepth = maxSearchDepth;
         this.Q = negativeSamples;
-        this.batchProvider = new MiniBatchProvider(batchSize);
+        this.batchProvider = new BatchProvider(batchSize);
         this.log = log;
     }
 
