@@ -20,15 +20,13 @@
 package org.neo4j.gds.embeddings.graphsage.subgraph;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
-import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMapImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LocalIdMapTest {
     @Test
     void shouldMapCorrectly() {
-        LocalIdMap localIdMap = new LocalIdMapImpl();
+        LocalIdMap localIdMap = new LocalIdMap();
 
         localIdMap.toMapped(42L);
 
@@ -47,7 +45,7 @@ class LocalIdMapTest {
 
     @Test
     void testAddingManyNumbers() {
-        LocalIdMap localIdMap = new LocalIdMapImpl();
+        LocalIdMap localIdMap = new LocalIdMap();
 
         for (int i = 100; i < 200; i++) {
             int id = localIdMap.toMapped(i);

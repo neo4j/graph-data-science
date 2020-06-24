@@ -19,8 +19,32 @@
  */
 package org.neo4j.gds.embeddings.graphsage.subgraph;
 
-public interface LocalIdMap {
-    int toMapped(long originalId);
-    long toOriginal(int internalId);
-    long[] originalIds();
+import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.LongIntHashMap;
+
+public class LocalIdMap {
+    private final LongArrayList originalIds;
+    private final LongIntHashMap toInternalId;
+
+    public LocalIdMap() {
+        this.originalIds = new LongArrayList();
+        this.toInternalId = new LongIntHashMap();
+    }
+
+    public int toMapped(long originalId) {
+        if (toInternalId.containsKey(originalId)) {
+            return toInternalId.get(originalId);
+        }
+        toInternalId.put(originalId, toInternalId.size());
+        originalIds.add(originalId);
+        return toInternalId.get(originalId);
+    }
+
+    public long toOriginal(int internalId) {
+        return originalIds.get(internalId);
+    }
+
+    public long[] originalIds() {
+        return originalIds.toArray();
+    }
 }

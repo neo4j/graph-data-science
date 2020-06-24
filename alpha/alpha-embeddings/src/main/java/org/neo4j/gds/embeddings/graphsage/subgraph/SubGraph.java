@@ -59,7 +59,7 @@ public class SubGraph {
     static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph) {
         int[][] adjacency = new int[nodeIds.length][];
         int[] selfAdjacency = new int[nodeIds.length];
-        LocalIdMap idmap = new LocalIdMapImpl();
+        LocalIdMap idmap = new LocalIdMap();
         for (long nodeId : nodeIds) {
             idmap.toMapped(nodeId);
         }
