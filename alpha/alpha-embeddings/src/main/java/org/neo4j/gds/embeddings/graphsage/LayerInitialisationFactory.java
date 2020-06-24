@@ -23,7 +23,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -86,7 +86,7 @@ public final class LayerInitialisationFactory {
 
     private static Weights generateWeights(int rows, int cols, double weightBound) {
 
-        double[] data = new Random()
+        double[] data = ThreadLocalRandom.current()
             .doubles(rows * cols, -weightBound, weightBound)
             .toArray();
 

@@ -36,15 +36,14 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -312,7 +311,7 @@ public class GraphSageModel {
 
     private Stream<Long> neighborBatch(Graph graph, List<Long> batch) {
         return batch.stream().mapToLong(nodeId -> {
-            int searchDepth = new Random().nextInt(maxSearchDepth) + 1;
+            int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
                 List<Long> samples = new UniformNeighborhoodSampler().sample(graph, currentNode.get(), 1, 0);
@@ -330,10 +329,9 @@ public class GraphSageModel {
     }
 
     private Stream<Long> negativeBatch(Graph graph, List<Long> batch) {
+        Random rand = new Random(layers[0].randomState());
         return IntStream.range(0, batch.size())
             .mapToLong(ignore -> {
-                Random rand = new SecureRandom();
-                rand.setSeed(layers[0].randomState());
                 double randomValue = rand.nextDouble();
                 double cumulativeProbability = 0;
 

@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
-import java.security.SecureRandom;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 public class MaxPoolAggregatingLayer implements Layer {
@@ -49,14 +49,13 @@ public class MaxPoolAggregatingLayer implements Layer {
         this.neighborsWeights = neighborsWeights;
         this.bias = bias;
 
-        generateNewRandomState();
+        this.randomState = ThreadLocalRandom.current().nextLong();
 
         this.sampleSize = sampleSize;
         this.sampler = new UniformNeighborhoodSampler();
 
         this.activationFunction = activationFunction;
     }
-
 
     @Override
     public long sampleSize() {
@@ -86,6 +85,6 @@ public class MaxPoolAggregatingLayer implements Layer {
 
     @Override
     public void generateNewRandomState() {
-        randomState = new SecureRandom().nextLong();
+        randomState = ThreadLocalRandom.current().nextLong();
     }
 }

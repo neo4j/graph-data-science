@@ -22,8 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
-import java.security.SecureRandom;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 public class MeanAggregatingLayer implements Layer {
@@ -38,7 +37,7 @@ public class MeanAggregatingLayer implements Layer {
         this.sampleSize = sampleSize;
         this.weights = weights;
         this.activationFunction = activationFunction;
-        this.randomState = new Random().nextLong();
+        this.randomState = ThreadLocalRandom.current().nextLong();
         this.sampler = new UniformNeighborhoodSampler();
     }
 
@@ -64,6 +63,6 @@ public class MeanAggregatingLayer implements Layer {
 
     @Override
     public void generateNewRandomState() {
-        randomState = new SecureRandom().nextLong();
+        randomState = ThreadLocalRandom.current().nextLong();
     }
 }
