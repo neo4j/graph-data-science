@@ -23,19 +23,20 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
 
 import java.util.stream.IntStream;
 
 public class GraphSageLoss extends SingleParentVariable {
+    public static final int NEGATIVE_NODES_OFFSET = 2;
     private final Variable combinedEmbeddings;
-    private final int Q;
+    private final int negativeSamplingFactor;
 
-    GraphSageLoss(Variable combinedEmbeddings, int Q) {
+    GraphSageLoss(Variable combinedEmbeddings, int negativeSamplingFactor) {
         super(combinedEmbeddings, Dimensions.scalar());
         this.combinedEmbeddings = combinedEmbeddings;
-        this.Q = Q;
+        this.negativeSamplingFactor = negativeSamplingFactor;
     }
 
     @Override
@@ -44,19 +45,19 @@ public class GraphSageLoss extends SingleParentVariable {
         int batchSize = embeddingData.dimensions[0] / 3;
         double loss = IntStream.range(0, batchSize).mapToDouble(nodeId -> {
             int positiveNodeId = nodeId + batchSize;
-            int negativeNodeId = nodeId + 2 * batchSize;
+            int negativeNodeId = nodeId + NEGATIVE_NODES_OFFSET * batchSize;
             double positiveAffinity = affinity(embeddingData, nodeId, positiveNodeId);
             double negativeAffinity = affinity(embeddingData, nodeId, negativeNodeId);
-            return -Math.log(Sigmoid.sigmoid(positiveAffinity)) - Q * Math.log(Sigmoid.sigmoid(-negativeAffinity));
+            return -Math.log(Sigmoid.sigmoid(positiveAffinity)) - negativeSamplingFactor * Math.log(Sigmoid.sigmoid(-negativeAffinity));
         }).sum();
         return Tensor.scalar(loss);
     }
 
     private double affinity(Tensor embeddingData, int nodeId, int otherNodeId) {
-        int dimension = combinedEmbeddings.dimension(1);
+        int dimensionSize = combinedEmbeddings.dimension(1);
         double sum = 0;
-        for (int i = 0; i < dimension; i++) {
-            sum += embeddingData.data[nodeId * dimension + i] * embeddingData.data[otherNodeId * dimension + i];
+        for (int i = 0; i < dimensionSize; i++) {
+            sum += embeddingData.data[nodeId * dimensionSize + i] * embeddingData.data[otherNodeId * dimensionSize + i];
         }
         return sum;
     }
@@ -64,7 +65,7 @@ public class GraphSageLoss extends SingleParentVariable {
     @Override
     protected Tensor gradient(ComputationContext ctx) {
         Tensor embeddingData = ctx.data(parent);
-        double[] embeddingArr = embeddingData.data;
+        double[] embeddings = embeddingData.data;
         int totalBatchSize = embeddingData.dimensions[0];
         int batchSize = totalBatchSize / 3;
 
@@ -73,7 +74,7 @@ public class GraphSageLoss extends SingleParentVariable {
 
         IntStream.range(0, batchSize).forEach(nodeId -> {
             int positiveNodeId = nodeId + batchSize;
-            int negativeNodeId = nodeId + 2 * batchSize;
+            int negativeNodeId = nodeId + NEGATIVE_NODES_OFFSET * batchSize;
             int dimension = parent.dimension(1);
             double positiveAffinity = affinity(embeddingData, nodeId, positiveNodeId);
             double negativeAffinity = affinity(embeddingData, nodeId, negativeNodeId);
@@ -81,25 +82,45 @@ public class GraphSageLoss extends SingleParentVariable {
             double positiveLogistic = logisticFunction(positiveAffinity);
             double negativeLogistic = logisticFunction(-negativeAffinity);
 
-            IntStream.range(0, embeddingSize).forEach(columnOffset -> {
-                gradientResult[nodeId * dimension + columnOffset] =
-                    - embeddingArr[positiveNodeId * dimension + columnOffset] * positiveLogistic +
-                    Q * embeddingArr[negativeNodeId * dimension + columnOffset] * negativeLogistic;
-
-                gradientResult[positiveNodeId * dimension + columnOffset] =
-                    - embeddingArr[nodeId * dimension + columnOffset] * positiveLogistic;
-
-                gradientResult[negativeNodeId * dimension + columnOffset] =
-                    Q * embeddingArr[nodeId * dimension + columnOffset] * negativeLogistic;
-            });
+            IntStream.range(0, embeddingSize).forEach(columnOffset -> lossMath(
+                embeddings,
+                gradientResult,
+                nodeId,
+                positiveNodeId,
+                negativeNodeId,
+                dimension,
+                positiveLogistic,
+                negativeLogistic,
+                columnOffset
+            ));
 
         });
         return Tensor.matrix(gradientResult, totalBatchSize, embeddingSize);
     }
 
-    private double logisticFunction(double positiveAffinity) {
-        return 1 / (1 + Math.pow(Math.E, positiveAffinity));
+    private void lossMath(
+        double[] embeddingArr,
+        double[] gradientResult,
+        int nodeId,
+        int positiveNodeId,
+        int negativeNodeId,
+        int dimension,
+        double positiveLogistic,
+        double negativeLogistic,
+        int columnOffset
+    ) {
+        int nodeIndex = nodeId * dimension + columnOffset;
+        int positiveNodeIndex = positiveNodeId * dimension + columnOffset;
+        int negativeNodeIndex = negativeNodeId * dimension + columnOffset;
+        gradientResult[nodeIndex] = -embeddingArr[positiveNodeIndex] * positiveLogistic +
+            negativeSamplingFactor * embeddingArr[negativeNodeIndex] * negativeLogistic;
+
+        gradientResult[positiveNodeIndex] = -embeddingArr[nodeIndex] * positiveLogistic;
+
+        gradientResult[negativeNodeIndex] = negativeSamplingFactor * embeddingArr[nodeIndex] * negativeLogistic;
     }
 
-
+    private double logisticFunction(double affinity) {
+        return 1 / (1 + Math.pow(Math.E, affinity));
+    }
 }

@@ -61,7 +61,7 @@ public class GraphSageModel {
     private final BatchProvider batchProvider;
     private final double learningRate;
     private final double tolerance;
-    private final int Q; // number of negative samples
+    private final int negativeSamplingFactor;
     private final int concurrency;
     private final int epochs;
     private final int maxIterations;
@@ -142,7 +142,7 @@ public class GraphSageModel {
         this.epochs = epochs;
         this.maxIterations = maxIterations;
         this.maxSearchDepth = maxSearchDepth;
-        this.Q = negativeSamples;
+        this.negativeSamplingFactor = negativeSamples;
         this.batchProvider = new BatchProvider(batchSize);
         this.log = log;
     }
@@ -297,7 +297,7 @@ public class GraphSageModel {
             )).toArray();
         Variable embeddingVariable = embeddingVariable(graph, totalBatch, features);
 
-        Variable lossFunction = new GraphSageLoss(embeddingVariable, Q);
+        Variable lossFunction = new GraphSageLoss(embeddingVariable, negativeSamplingFactor);
 
         return new DummyVariable(lossFunction);
     }
