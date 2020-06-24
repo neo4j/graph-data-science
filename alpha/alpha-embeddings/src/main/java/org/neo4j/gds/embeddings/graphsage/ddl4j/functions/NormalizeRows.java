@@ -63,14 +63,14 @@ public class NormalizeRows extends SingleParentVariable {
                 l2Squared += parentData[elementIndex] * parentData[elementIndex];
             }
             double l2 = Math.sqrt(l2Squared);
-            double l2Qubed = l2 * l2Squared;
+            double l2Cubed = l2 * l2Squared;
             for (int col = 0; col < cols; col++) {
                 int elementIndex = row * cols + col;
                 for (int gradCol = 0; gradCol < cols; gradCol++) {
                     if (col == gradCol) {
-                        result[elementIndex] += gradientData[elementIndex] * (l2Squared - parentData[elementIndex] * parentData[elementIndex]) / l2Qubed;
+                        result[elementIndex] += gradientData[elementIndex] * (l2Squared - parentData[elementIndex] * parentData[elementIndex]) / l2Cubed;
                     } else {
-                        result[elementIndex] -= gradientData[row * cols + gradCol] * (parentData[elementIndex] * parentData[row * cols + gradCol]) / l2Qubed;
+                        result[elementIndex] -= gradientData[row * cols + gradCol] * (parentData[elementIndex] * parentData[row * cols + gradCol]) / l2Cubed;
                     }
                 }
             }
