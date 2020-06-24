@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class GraphSageWriteProcTest extends GraphSageBaseProcTest {
 
     @ParameterizedTest
-    @MethodSource("configVariations")
+    @MethodSource("org.neo4j.gds.embeddings.graphsage.proc.GraphSageBaseProcTest#configVariations")
     void testWriting(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
 
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
