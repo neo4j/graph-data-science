@@ -63,19 +63,16 @@ class SubGraphBuilderTest {
 
     private UniformNeighborhoodSampler sampler;
     private NeighborhoodFunction neighborhoodFunction;
-    private SubGraphBuilder subGraphBuilder;
 
     @BeforeEach
     void setup() {
         sampler = new UniformNeighborhoodSampler();
-        neighborhoodFunction = (graph, nodeId) ->
-            sampler.sample(graph, nodeId, 100, 42);
-        subGraphBuilder = new SubGraphBuilderImpl();
+        neighborhoodFunction = (graph, nodeId) -> sampler.sample(graph, nodeId, 100, 42);
     }
 
     @Test
     void shouldBuildSubGraphSingleNode() {
-        SubGraph subGraph = subGraphBuilder.buildSubGraph(new long[]{0L}, neighborhoodFunction, graph);
+        SubGraph subGraph = SubGraph.buildSubGraph(new long[]{0L}, neighborhoodFunction, graph);
 
         int[] expectedAdj = new int[] {1, 2, 3};
         long[] expectedNeighbors = new long[] {
@@ -92,7 +89,7 @@ class SubGraphBuilderTest {
 
     @Test
     void shouldBuildSubGraphAnotherNode() {
-        SubGraph subGraph = subGraphBuilder.buildSubGraph(new long[]{1L}, neighborhoodFunction, graph);
+        SubGraph subGraph = SubGraph.buildSubGraph(new long[]{1L}, neighborhoodFunction, graph);
 
         int[] expectedAdj = new int[] {1, 2, 3};
         long[] expectedNeighbors = new long[] {
@@ -109,7 +106,7 @@ class SubGraphBuilderTest {
 
     @Test
     void shouldBuildSubGraphMultipleNodes() {
-        SubGraph subGraph = subGraphBuilder.buildSubGraph(new long[]{0L, 1L, 2L}, neighborhoodFunction, graph);
+        SubGraph subGraph = SubGraph.buildSubGraph(new long[]{0L, 1L, 2L}, neighborhoodFunction, graph);
 
         // start a,b,c  : 0, 1, 2
         // neighbors d,e,f : 3,4,5
@@ -135,7 +132,7 @@ class SubGraphBuilderTest {
     @Test
     void shouldBuildMultipleSubGraphs() {
 
-        List<SubGraph> subGraphs = subGraphBuilder.buildSubGraphs(
+        List<SubGraph> subGraphs = SubGraph.buildSubGraphs(
             new long[]{0L, 1L, 2L},
             new ArrayList<>(List.of(neighborhoodFunction, neighborhoodFunction)),
             graph

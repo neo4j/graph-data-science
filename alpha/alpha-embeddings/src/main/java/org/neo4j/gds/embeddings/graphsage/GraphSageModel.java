@@ -27,8 +27,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.DummyVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
-import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraphBuilder;
-import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraphBuilderImpl;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -356,12 +354,11 @@ public class GraphSageModel {
     }
 
     private Variable embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
-        SubGraphBuilder subGraphBuilder = new SubGraphBuilderImpl();
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
             .collect(Collectors.toList());
-        List<SubGraph> subGraphs = subGraphBuilder.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
+        List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
 
         Variable previousLayerRepresentations = featureVariables(
             subGraphs.get(subGraphs.size() - 1).nextNodes,
