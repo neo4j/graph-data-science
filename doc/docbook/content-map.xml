@@ -195,6 +195,9 @@
                     <?dbhtml filename="alpha-algorithms/one-hot-encoding/index.html"?>
                 </d:tocentry>
             </d:tocentry>
+            <d:tocentry linkend="pregel-api">
+                <?dbhtml filename="algorithms/pregel-api/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="production-deployment">
