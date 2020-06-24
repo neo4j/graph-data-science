@@ -7,8 +7,11 @@
 This section describes the GraphSAGE node embedding algorithm in the Neo4j Graph Data Science library.
 --
 
-GraphSAGE is an _inductive_ framework making use of node feature information to generate node embeddings.
+GraphSAGE is an _inductive_ algorithm for computing node embeddings.
+GraphSAGE is using node feature information to generate node embeddings on unseen nodes or graphs.
 Instead of training individual embeddings for each node, the algorithm learns a function that generates embeddings by sampling and aggregating features from a node's local neighborhood.
+
+NOTE: The algorithm is defined for UNDIRECTED graphs.
 
 For more information on this algorithm see:
 
@@ -57,6 +60,8 @@ CALL gds.alpha.graphSage.write(
   configuration: Map
 )
 YIELD
+  startLoss: Double,
+  epochLosses: Map,
   createMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
@@ -168,6 +173,9 @@ CALL gds.graph.create(
     }
 })
 ----
+
+NOTE: The algorithm is defined for UNDIRECTED graphs.
+
 
 === Stream
 
