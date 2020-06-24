@@ -31,7 +31,7 @@ CALL gds.alpha.graphSage.stream(
   configuration: Map
 ) YIELD
   nodeId: Integer,
-  embedding: List<Double>
+  embedding: List<Float>
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -45,7 +45,7 @@ include::specific-configuration.adoc[]
 |===
 | Name      | Type         | Description
 | nodeId    | Integer      | The Neo4j node ID.
-| embedding | List<Double> | The computed node embedding.
+| embedding | List<Float>  | The computed node embedding.
 |===
 
 
@@ -60,7 +60,7 @@ CALL gds.alpha.graphSage.write(
   configuration: Map
 )
 YIELD
-  startLoss: Double,
+  startLoss: Float,
   epochLosses: Map,
   createMillis: Integer,
   computeMillis: Integer,
@@ -80,8 +80,8 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name               | Type                 | Description
-| startLoss          | Double               | The Loss value before the first epoch.
-| epochLosses        | Map<String, Double>  | A map containing the loss for each of the ran epochs, may be less than the configured epochs.
+| startLoss          | Float                | The Loss value before the first epoch.
+| epochLosses        | Map<String, Float>   | A map containing the loss for each of the ran epochs, may be less than the configured epochs.
 | nodesCount         | Integer              | The number of nodes processed.
 | propertiesWritten  | Integer              | The number of node properties written.
 | createMillis       | Integer              | Milliseconds for loading data.

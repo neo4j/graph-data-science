@@ -8,8 +8,8 @@
 | sampleSizes        | List<Integer> | [25, 10]  | yes       | An array of Integer values, the size of the array determines the number of layers and the values determine how many nodes will be sampled by the layers.
 | nodePropertyNames  | List<String>  | []        | yes       | An array of node property names. The in-memory graph has to be created with a super-set of these property names.
 | batchSize          | Integer       | 100       | yes       | The number of nodes per batch.
-| tolerance          | Double        | 1e-4      | yes       | Tolerance controls the training cycles. The training will complete when loss changes less than `tolerance` which may happen before the epochs and/or maxOptimizationIterations are exhausted.
-| learningRate       | Double        | 0.1       | yes       | Controls the size of updates during training.
+| tolerance          | Float         | 1e-4      | yes       | Tolerance controls the training cycles. The training will complete when loss changes less than `tolerance` which may happen before the epochs and/or maxOptimizationIterations are exhausted.
+| learningRate       | Float         | 0.1       | yes       | Controls the size of updates during training.
 | epochs             | Integer       | 1         | yes       | Number of times to traverse the graph during training.
 | maxIterations      | Integer       | 10        | yes       | Maximum number of parameter updates per epoch and batch.
 | searchDepth        | Integer       | 5         | yes       | Depth of a RandomWalk when sampling neighbors during training. This is used when computing the loss function.
