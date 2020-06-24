@@ -27,6 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.DummyVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -169,7 +170,7 @@ public class GraphSageModel {
             previousLoss = newLoss;
         }
 
-        return new TrainResult(initialLoss, epochLosses);
+        return TrainResult.of(initialLoss, epochLosses);
     }
 
     private void trainEpoch(Graph graph, HugeObjectArray<double[]> features, int epoch) {
@@ -383,21 +384,18 @@ public class GraphSageModel {
             .collect(Collectors.toList());
     }
 
-    public static class TrainResult {
-        private final double startLoss;
-        private final Map<String, Double> epochLosses;
+    @ValueClass
+    public interface TrainResult {
 
-        public TrainResult(double startLoss, Map<String, Double> epochLosses) {
-            this.startLoss = startLoss;
-            this.epochLosses = epochLosses;
-        }
+        double startLoss();
 
-        public double startLoss() {
-            return startLoss;
-        }
+        Map<String, Double> epochLosses();
 
-        public Map<String, Double> epochLosses() {
-            return epochLosses;
+        static TrainResult of(double startLoss, Map<String, Double> epochLosses) {
+            return ImmutableTrainResult.builder()
+                .startLoss(startLoss)
+                .epochLosses(epochLosses)
+                .build();
         }
     }
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -60,7 +61,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
         HugeObjectArray<double[]> features = initializeFeatures();
         GraphSageModel.TrainResult trainResult = graphSageModel.train(graph, features);
         HugeObjectArray<double[]> embeddings = graphSageModel.makeEmbeddings(graph, features);
-        return new GraphSageResult(trainResult.startLoss(), trainResult.epochLosses(), embeddings);
+        return GraphSageResult.of(trainResult.startLoss(), trainResult.epochLosses(), embeddings);
     }
 
     @Override
@@ -89,31 +90,25 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
         return features;
     }
 
-    public static class GraphSageResult {
-        private final Double startLoss;
-        private final Map<String, Double> epochLosses;
-        private final HugeObjectArray<double[]> embeddings;
+    @ValueClass
+    public interface GraphSageResult {
 
-        public GraphSageResult(
+        Map<String, Double> epochLosses();
+
+        HugeObjectArray<double[]> embeddings();
+
+        Double startLoss();
+
+        static GraphSageResult of(
             Double startLoss,
             Map<String, Double> epochLosses,
             HugeObjectArray<double[]> embeddings
         ) {
-            this.startLoss = startLoss;
-            this.epochLosses = epochLosses;
-            this.embeddings = embeddings;
-        }
-
-        public Map<String, Double> epochLosses() {
-            return epochLosses;
-        }
-
-        public HugeObjectArray<double[]> embeddings() {
-            return embeddings;
-        }
-
-        public Double startLoss() {
-            return startLoss;
+            return ImmutableGraphSageResult.builder()
+                .startLoss(startLoss)
+                .epochLosses(epochLosses)
+                .embeddings(embeddings)
+                .build();
         }
     }
 }
