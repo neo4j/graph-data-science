@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -358,6 +359,7 @@ public class GraphSageModel {
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
             .collect(Collectors.toList());
+        Collections.reverse(neighborhoodFunctions);
         List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
 
         Variable previousLayerRepresentations = featureVariables(

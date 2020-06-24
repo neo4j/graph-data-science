@@ -134,7 +134,7 @@ class SubGraphBuilderTest {
 
         List<SubGraph> subGraphs = SubGraph.buildSubGraphs(
             new long[]{0L, 1L, 2L},
-            new ArrayList<>(List.of(neighborhoodFunction, neighborhoodFunction)),
+            List.of(neighborhoodFunction, neighborhoodFunction),
             graph
         );
 

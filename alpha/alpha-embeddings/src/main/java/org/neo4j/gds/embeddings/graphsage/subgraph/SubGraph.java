@@ -47,7 +47,6 @@ public class SubGraph {
         List<SubGraph> result = new ArrayList<>();
         long[] previousNodes = nodeIds;
 
-        Collections.reverse(neighborhoodFunctions);
         for (NeighborhoodFunction neighborhoodFunction : neighborhoodFunctions) {
             SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, graph);
             result.add(lastGraph);
