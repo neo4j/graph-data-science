@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.immutables.value.Value;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModel;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -72,33 +73,33 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
     @Value.Default
     @Override
     default double tolerance() {
-        return 1e-4;
+        return GraphSageModel.DEFAULT_TOLERANCE;
     }
 
     @Value.Default
     default double learningRate() {
-        return 0.1;
+        return GraphSageModel.DEFAULT_LEARNING_RATE;
     }
 
     @Value.Default
     default int epochs() {
-        return 1;
+        return GraphSageModel.DEFAULT_EPOCHS;
     }
 
     @Value.Default
     @Override
     default int maxIterations() {
-        return 10;
+        return GraphSageModel.DEFAULT_MAX_ITERATIONS;
     }
 
     @Value.Default
     default int searchDepth() {
-        return 5;
+        return GraphSageModel.DEFAULT_MAX_SEARCH_DEPTH;
     }
 
     @Value.Default
     default int negativeSamples() {
-        return 20;
+        return GraphSageModel.DEFAULT_NEGATIVE_SAMPLES;
     }
 
     @Value.Default

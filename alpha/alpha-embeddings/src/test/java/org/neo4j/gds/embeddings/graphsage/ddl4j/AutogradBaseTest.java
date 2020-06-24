@@ -27,7 +27,7 @@ public class AutogradBaseTest {
 
     @BeforeEach
     protected void setup() {
-        ctx = ComputationContext.instance();
+        ctx = new ComputationContext();
     }
 
 }

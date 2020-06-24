@@ -33,17 +33,9 @@ public class ComputationContext {
     private final Map<Variable, Tensor> data;
     private final Map<Variable, Tensor> gradients;
 
-
-    ComputationContext(
-        Map<Variable, Tensor> data,
-        Map<Variable, Tensor> gradients
-    ) {
-        this.data = data;
-        this.gradients = gradients;
-    }
-
-    public static ComputationContext instance() {
-        return new ComputationContext(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+    public ComputationContext() {
+        this.data = new ConcurrentHashMap<>();
+        this.gradients = new ConcurrentHashMap<>();
     }
 
     public Tensor forward(Variable variable) {

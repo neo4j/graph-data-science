@@ -45,12 +45,12 @@ public interface FiniteDifferenceTest {
     default void finiteDifferenceShouldApproximateGradient(List<Weights> weightVariables, Variable loss) {
         for (Weights variable : weightVariables) {
             for (int i = 0; i < Tensor.totalSize(variable.dimensions()); i++) {
-                ComputationContext ctx = ComputationContext.instance();
+                ComputationContext ctx = new ComputationContext();
                 double f0 = ctx.forward(loss).data[0];
                 ctx.backward(loss);
                 var partialDerivative = ctx.gradient(variable).data[i];
                 perturb(variable, i, epsilon());
-                ComputationContext ctx2 = ComputationContext.instance();
+                ComputationContext ctx2 = new ComputationContext();
                 double f1 = ctx2.forward(loss).data[0];
                 assertEquals(
                     (f1 - f0) / epsilon(),

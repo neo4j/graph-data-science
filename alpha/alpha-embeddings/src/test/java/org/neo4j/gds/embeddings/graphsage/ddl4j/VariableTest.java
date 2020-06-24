@@ -37,7 +37,7 @@ class VariableTest {
     @Test
     void testAdd() {
 
-        ComputationContext ctx = ComputationContext.instance();
+        ComputationContext ctx = new ComputationContext();
         int[] dimensions = {5};
         var x = new Weights(Tensor.constant(5, dimensions));
         var y = new Constant(Tensor.constant(4, dimensions));

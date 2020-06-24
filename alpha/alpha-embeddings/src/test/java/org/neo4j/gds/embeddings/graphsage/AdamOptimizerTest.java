@@ -57,7 +57,7 @@ class AdamOptimizerTest {
             3
         ));
 
-        ComputationContext ctx = ComputationContext.instance();
+        ComputationContext ctx = new ComputationContext();
         // need to populate context with data from weights
         ctx.forward(weights);
         AdamOptimizer adam = new AdamOptimizer(List.of(weights));
