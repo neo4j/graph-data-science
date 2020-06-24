@@ -31,31 +31,23 @@ public final class LayerFactory {
     private LayerFactory() {}
 
     public static Layer createLayer(LayerConfig layerConfig) {
+        int rows = layerConfig.rows();
+        int cols = layerConfig.cols();
+
+        ActivationFunction activationFunction = layerConfig.activationFunction();
+
+        Weights weights = generateWeights(
+            rows,
+            cols,
+            activationFunction.weightInitBound(rows, cols)
+        );
+
         if (layerConfig.aggregatorType() == Aggregator.AggregatorType.MEAN) {
-            int rows = layerConfig.rows();
-            int cols = layerConfig.cols();
-
-            ActivationFunction activationFunction = layerConfig.activationFunction();
-
-            Weights weights = generateWeights(
-                rows,
-                cols,
-                activationFunction.weightInitBound(rows, cols)
-            );
             return new MeanAggregatingLayer(weights, layerConfig.sampleSize(), activationFunction.activationFunction());
         }
 
         if (layerConfig.aggregatorType() == Aggregator.AggregatorType.POOL) {
-            int rows = layerConfig.rows();
-            int cols = layerConfig.cols();
-
-            ActivationFunction activationFunction = layerConfig.activationFunction();
-
-            Weights poolWeights = generateWeights(
-                rows,
-                cols,
-                activationFunction.weightInitBound(rows, cols)
-            );
+            Weights poolWeights = weights;
 
             Weights selfWeights = generateWeights(
                 rows,
