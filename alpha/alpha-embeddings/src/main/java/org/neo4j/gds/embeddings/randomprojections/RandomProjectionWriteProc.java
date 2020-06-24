@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class RandomProjectionWriteProc extends WriteProc<RandomProjection, RandomProjection, RandomProjectionWriteProc.WriteResult, RandomProjectionWriteConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.write", mode = WRITE)
-    @Description("foo")
+    @Description("Random Projection produces node embeddings via the fastrp algorithm")
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

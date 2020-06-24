@@ -40,7 +40,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class RandomProjectionStreamProc extends StreamProc<RandomProjection, RandomProjection, RandomProjectionStreamProc.StreamResult, RandomProjectionStreamConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.stream", mode = READ)
-    @Description("foo")
+    @Description("Random Projection produces node embeddings via the fastrp algorithm")
     public Stream<RandomProjectionStreamProc.StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
