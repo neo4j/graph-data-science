@@ -29,8 +29,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 // Division, squaring and square-rooting is done elementwise.
-public class AdamOptimizer implements Updater {
+public class AdamOptimizer {
 
+    private static final double CLIP_MAX = 5.0;
+    private static final double CLIP_MIN = -5.0;
     private static final double DEFAULT_ALPHA = 0.001;
 
     // TODO: Pass these via config???
@@ -45,7 +47,6 @@ public class AdamOptimizer implements Updater {
     private List<Tensor> velocityTerms;
 
     private int iteration = 0;
-
 
     public AdamOptimizer(List<Weights> variables) {
         this(variables, DEFAULT_ALPHA);
@@ -68,7 +69,6 @@ public class AdamOptimizer implements Updater {
     }
 
     // TODO: probably doesnt have to be synchronized
-    @Override
     public synchronized void update(ComputationContext otherCtx) {
         iteration += 1;
         variables.forEach(variable -> otherCtx.gradient(variable).mapInPlace(this::clip));
@@ -124,4 +124,13 @@ public class AdamOptimizer implements Updater {
             });
     }
 
+    private double clip(double value) {
+        if (value > CLIP_MAX) {
+            return CLIP_MAX;
+        }
+        if (value < CLIP_MIN) {
+            return CLIP_MIN;
+        }
+        return value;
+    }
 }

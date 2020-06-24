@@ -178,7 +178,7 @@ public class GraphSageModel {
     private void trainEpoch(Graph graph, HugeObjectArray<double[]> features, int epoch) {
         List<Weights> weights = getWeights();
 
-        Updater updater = new AdamOptimizer(weights, learningRate);
+        AdamOptimizer updater = new AdamOptimizer(weights, learningRate);
 
         AtomicInteger batchCounter = new AtomicInteger(0);
         parallelStreamConsume(
@@ -199,7 +199,7 @@ public class GraphSageModel {
         long[] batch,
         Graph graph,
         HugeObjectArray<double[]> features,
-        Updater updater,
+        AdamOptimizer updater,
         int epoch,
         int batchIndex
     ) {
