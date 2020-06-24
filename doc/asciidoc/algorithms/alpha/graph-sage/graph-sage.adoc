@@ -15,7 +15,7 @@ NOTE: The algorithm is defined for UNDIRECTED graphs.
 
 For more information on this algorithm see:
 
-* https://arxiv.org/pdf/1706.02216.pdf[William L. Hamilton, Rex Ying, and Jure Leskovec. "Inductive Representation Learning on Large Graphs. 2018.^]
+* https://arxiv.org/pdf/1706.02216.pdf[William L. Hamilton, Rex Ying, and Jure Leskovec. "Inductive Representation Learning on Large Graphs." 2018.^]
 
 [[algorithms-embeddings-graph-sage-syntax]]
 == Syntax
