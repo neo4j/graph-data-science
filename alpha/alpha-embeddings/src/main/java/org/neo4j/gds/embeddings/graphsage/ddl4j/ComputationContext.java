@@ -64,7 +64,8 @@ public class ComputationContext {
         Queue<BackPropTask> executionQueue = new LinkedBlockingQueue<>();
         DummyVariable dummy = new DummyVariable(function);
         executionQueue.add(new BackPropTask(function, dummy));
-        Map<Variable, AtomicInteger> upstreamCounters = initUpstream(dummy);
+        Map<Variable, AtomicInteger> upstreamCounters = new HashMap<>();
+        initUpstream(dummy, upstreamCounters);
         backward(executionQueue, upstreamCounters);
     }
 
@@ -87,16 +88,7 @@ public class ComputationContext {
         }
     }
 
-    private Map<Variable, AtomicInteger> initUpstream(Variable function) {
-        Map<Variable, AtomicInteger> upstreamCounters = new HashMap<>();
-        initUpstream(function, upstreamCounters);
-        return upstreamCounters;
-    }
-
-    private void initUpstream(
-        Variable function,
-        Map<Variable, AtomicInteger> upstreamCounters
-    ) {
+    private void initUpstream(Variable function, Map<Variable, AtomicInteger> upstreamCounters) {
         for (Variable parent : function.parents) {
             if (parent.requireGradient) {
                 boolean firstToSeeParent = !upstreamCounters.containsKey(parent);

@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -78,7 +77,7 @@ public class GraphSageModel {
             DEFAULT_LEARNING_RATE,
             DEFAULT_EPOCHS,
             DEFAULT_MAX_ITERATIONS,
-            layers,
+            layers.toArray(Layer[]::new),
             log
         );
     }
@@ -90,7 +89,7 @@ public class GraphSageModel {
         double learningRate,
         int epochs,
         int maxIterations,
-        Collection<Layer> layers,
+        Layer[] layers,
         Log log
     ) {
         this(
@@ -119,7 +118,7 @@ public class GraphSageModel {
             config.negativeSamples(),
             config.layerConfigs().stream()
                 .map(LayerFactory::createLayer)
-                .collect(Collectors.toList()),
+                .toArray(Layer[]::new),
             log
         );
     }
@@ -133,11 +132,11 @@ public class GraphSageModel {
         int maxIterations,
         int maxSearchDepth,
         int negativeSamples,
-        Collection<Layer> layers,
+        Layer[] layers,
         Log log
     ) {
         this.concurrency = concurrency;
-        this.layers = layers.toArray(Layer[]::new);
+        this.layers = layers;
         this.tolerance = tolerance;
         this.learningRate = learningRate;
         this.epochs = epochs;
