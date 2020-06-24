@@ -53,7 +53,6 @@ public interface GraphSageStreamConfig extends GraphSageBaseConfig {
         AggregatorType aggregator,
         int batchSize,
         int embeddingDimension,
-        int maxIterations,
         List<String> nodePropertyNames,
         double tolerance
     ) {
@@ -62,7 +61,6 @@ public interface GraphSageStreamConfig extends GraphSageBaseConfig {
             .aggregator(aggregator)
             .batchSize(batchSize)
             .embeddingSize(embeddingDimension)
-            .maxIterations(maxIterations)
             .nodePropertyNames(nodePropertyNames)
             .tolerance(tolerance)
             .build();
