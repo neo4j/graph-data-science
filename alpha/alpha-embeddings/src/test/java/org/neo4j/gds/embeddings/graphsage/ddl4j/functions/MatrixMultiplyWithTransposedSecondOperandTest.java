@@ -17,22 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ejml;
+package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AutogradBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Constant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2Norm;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-class EjmlMatrixMultiplyTransBTest extends AutogradBaseTest implements FiniteDifferenceTest {
+class MatrixMultiplyWithTransposedSecondOperandTest extends AutogradBaseTest implements FiniteDifferenceTest {
 
     @Override
     public double epsilon() {
@@ -59,7 +56,7 @@ class EjmlMatrixMultiplyTransBTest extends AutogradBaseTest implements FiniteDif
         Constant A = Constant.matrix(m1, 2, 3);
         Constant B = Constant.matrix(m2, 2, 3);
 
-        Variable product = new EjmlMatrixMultiplyTransB(A, B);
+        Variable product = new MatrixMultiplyWithTransposedSecondOperand(A, B);
         double[] result = ctx.forward(product).data;
 
         assertArrayEquals(expected, result);
@@ -80,7 +77,7 @@ class EjmlMatrixMultiplyTransBTest extends AutogradBaseTest implements FiniteDif
         Weights A = new Weights(Tensor.matrix(m1, 2, 3));
         Weights B = new Weights(Tensor.matrix(m2, 2, 3));
 
-        finiteDifferenceShouldApproximateGradient(List.of(A, B), new L2Norm(new EjmlMatrixMultiplyTransB(A, B)));
+        finiteDifferenceShouldApproximateGradient(List.of(A, B), new L2Norm(new MatrixMultiplyWithTransposedSecondOperand(A, B)));
     }
 
 }

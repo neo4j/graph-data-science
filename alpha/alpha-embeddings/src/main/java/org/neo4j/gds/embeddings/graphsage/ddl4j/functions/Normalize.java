@@ -21,9 +21,9 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
-public class Normalise extends ScalarMultiply {
+public class Normalize extends ScalarMultiply {
 
-    public Normalise(Variable variable) {
+    public Normalize(Variable variable) {
         super(new InvertScalar(new L2Norm(variable)), variable, variable.dimensions());
     }
 

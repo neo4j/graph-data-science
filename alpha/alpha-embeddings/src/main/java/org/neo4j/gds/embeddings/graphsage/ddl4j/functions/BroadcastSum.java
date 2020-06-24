@@ -50,7 +50,8 @@ public class BroadcastSum extends Variable {
 
         for(int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
-                result[row * cols + col] = matrixData[row * cols + col] + vectorData[col];
+                int matrixIndex = row * cols + col;
+                result[matrixIndex] = matrixData[matrixIndex] + vectorData[col];
             }
         }
 
@@ -68,7 +69,8 @@ public class BroadcastSum extends Variable {
             double[] result = new double[cols];
             for (int row = 0; row < rows; row++) {
                 for (int col = 0; col < cols; col++) {
-                    result[col] += gradient.data[row * cols + col];
+                    int matrixIndex = row * cols + col;
+                    result[col] += gradient.data[matrixIndex];
                 }
             }
 

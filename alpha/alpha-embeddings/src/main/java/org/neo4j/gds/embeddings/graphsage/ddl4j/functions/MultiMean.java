@@ -46,13 +46,15 @@ public class MultiMean extends SingleParentVariable {
 
         Tensor result = ctx.data(parent).zeros();
 
-        for (int c = 0; c < cols; c++) {
-            for (int r = 0; r < rows; r++) {
-                int degree = adjacency[r].length + 1;
-                for (int neighbor : adjacency[r]) {
-                    result.data[neighbor * cols + c] += 1d / degree * multiMeanGradient[r * cols + c];
+        for (int col = 0; col < cols; col++) {
+            for (int row = 0; row < rows; row++) {
+                int degree = adjacency[row].length + 1;
+                int gradientElementIndex = row * cols + col;
+                for (int neighbor : adjacency[row]) {
+                    int neighborElementIndex = neighbor * cols + col;
+                    result.data[neighborElementIndex] += 1d / degree * multiMeanGradient[gradientElementIndex];
                 }
-                result.data[selfAdjacency[r] * cols + c] += 1d / degree * multiMeanGradient[r * cols + c];
+                result.data[selfAdjacency[row] * cols + col] += 1d / degree * multiMeanGradient[gradientElementIndex];
             }
         }
 
@@ -63,20 +65,20 @@ public class MultiMean extends SingleParentVariable {
     protected Tensor apply(ComputationContext ctx) {
         Tensor parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data;
-        int parentDimensions = parent.dimension(1);
-        double[] means = new double[adjacency.length * parentDimensions];
+        int cols = parent.dimension(1);
+        double[] means = new double[adjacency.length * cols];
         for (int source = 0; source < adjacency.length; source++) {
-            int selfAdjacencyOfSourceOffset = selfAdjacency[source] * parentDimensions;
-            int sourceOffset = source * parentDimensions;
-            int[] ns = adjacency[source];
-            int numberOfNeighbors = ns.length;
-            for (int dim = 0; dim < parentDimensions; dim++) {
-                means[sourceOffset + dim] += parentData[selfAdjacencyOfSourceOffset + dim] / (numberOfNeighbors + 1);
+            int selfAdjacencyOfSourceOffset = selfAdjacency[source] * cols;
+            int sourceOffset = source * cols;
+            int[] neighbors = adjacency[source];
+            int numberOfNeighbors = neighbors.length;
+            for (int col = 0; col < cols; col++) {
+                means[sourceOffset + col] += parentData[selfAdjacencyOfSourceOffset + col] / (numberOfNeighbors + 1);
             }
-            for (int target : ns) {
-                int targetOffset = target * parentDimensions;
-                for (int dim = 0; dim < parentDimensions; dim++) {
-                    means[sourceOffset + dim] += parentData[targetOffset + dim] / (numberOfNeighbors + 1);
+            for (int target : neighbors) {
+                int targetOffset = target * cols;
+                for (int col = 0; col < cols; col++) {
+                    means[sourceOffset + col] += parentData[targetOffset + col] / (numberOfNeighbors + 1);
                 }
             }
         }

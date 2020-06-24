@@ -20,9 +20,9 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MultiMean;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixOpsFactory;
 
 import java.util.List;
 import java.util.function.Function;
@@ -44,7 +44,7 @@ public class MeanAggregator implements Aggregator {
     @Override
     public Variable aggregate(Variable previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacency) {
         MultiMean means = new MultiMean(previousLayerRepresentations, adjacencyMatrix, selfAdjacency);
-        Variable product = MatrixOpsFactory.matrixMultiply(means, weights);
+        Variable product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
         return activationFunction.apply(product);
     }
 

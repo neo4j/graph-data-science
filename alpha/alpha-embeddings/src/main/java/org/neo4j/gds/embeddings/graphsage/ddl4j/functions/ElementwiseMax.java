@@ -34,21 +34,22 @@ public class ElementwiseMax extends SingleParentVariable {
 
     @Override
     protected Tensor apply(ComputationContext ctx) {
-        Tensor max = Tensor.constant(Double.MIN_VALUE, dimensions());
+        Tensor max = Tensor.constant(Double.NEGATIVE_INFINITY, dimensions());
 
         int rows = dimension(0);
         int cols = dimension(1);
         double[] parentData = ctx.data(parent).data;
         for (int row = 0; row < rows; row++) {
             int[] neighbors = this.adjacencyMatrix[row];
-            for(int dimension = 0; dimension < cols; dimension++) {
+            for(int col = 0; col < cols; col++) {
+                int resultElementIndex = row * cols + col;
                 if (neighbors.length > 0) {
-                    for (int n: neighbors) {
-                        max.data[row * cols + dimension] =
-                            Math.max(parentData[n * cols + dimension], max.data[row * cols + dimension]);
+                    for (int neighbor : neighbors) {
+                        int neighborElementIndex = neighbor * cols + col;
+                        max.data[resultElementIndex] = Math.max(parentData[neighborElementIndex], max.data[resultElementIndex]);
                     }
                 } else {
-                    max.data[row * cols + dimension] = 0;
+                    max.data[resultElementIndex] = 0;
                 }
             }
         }
@@ -66,12 +67,14 @@ public class ElementwiseMax extends SingleParentVariable {
         double[] thisGradient = ctx.gradient(this).data;
         double[] thisData = ctx.data(this).data;
 
-        for (int adjacentRow = 0; adjacentRow < this.adjacencyMatrix.length; adjacentRow++) {
-            int[] neighbors = this.adjacencyMatrix[adjacentRow];
-            for (int dimension = 0; dimension < cols; dimension++) {
-                for (int neighborIdx : neighbors) {
-                    if (parentData[neighborIdx * cols + dimension] == thisData[adjacentRow * cols + dimension]) {
-                        result.data[neighborIdx * cols + dimension] += thisGradient[adjacentRow * cols + dimension];
+        for (int row = 0; row < this.adjacencyMatrix.length; row++) {
+            int[] neighbors = this.adjacencyMatrix[row];
+            for (int col = 0; col < cols; col++) {
+                for (int neighbor : neighbors) {
+                    int thisElementIndex = row * cols + col;
+                    int neighborElementIndex = neighbor * cols + col;
+                    if (parentData[neighborElementIndex] == thisData[thisElementIndex]) {
+                        result.data[neighborElementIndex] += thisGradient[thisElementIndex];
                     }
                 }
             }

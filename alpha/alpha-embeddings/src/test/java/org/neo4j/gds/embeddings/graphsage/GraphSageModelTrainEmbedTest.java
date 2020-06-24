@@ -98,7 +98,7 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
             features.set(n, doubleFeatures);
         });
 
-        normaliseFeatures(nodeCount);
+        normalizeFeatures(nodeCount);
     }
 
     private void createRandomGraph(int nodeCount, int averageDegree) {
@@ -194,7 +194,7 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
     }
 
     // TODO: Should this be production code and pre-processing step for the algorithm?
-    private void normaliseFeatures(long nodeCount) {
+    private void normalizeFeatures(long nodeCount) {
 
         double[] avgFeatures = new double[FEATURES_PER_NODE];
         double[] stdFeatures = new double[FEATURES_PER_NODE];

@@ -28,7 +28,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-class NormaliseRowsTest extends AutogradBaseTest implements FiniteDifferenceTest {
+class NormalizeRowsTest extends AutogradBaseTest implements FiniteDifferenceTest {
     @Override
     public double epsilon() {
         return 1e-6;
@@ -43,9 +43,9 @@ class NormaliseRowsTest extends AutogradBaseTest implements FiniteDifferenceTest
         };
 
         Weights w = new Weights(Tensor.matrix(data, 3, 2));
-        NormaliseRows normaliseRows = new NormaliseRows(w);
+        NormalizeRows normalizeRows = new NormalizeRows(w);
 
-        finiteDifferenceShouldApproximateGradient(w, new Sum(List.of(normaliseRows)));
+        finiteDifferenceShouldApproximateGradient(w, new Sum(List.of(normalizeRows)));
     }
 
     @Test
@@ -61,8 +61,8 @@ class NormaliseRowsTest extends AutogradBaseTest implements FiniteDifferenceTest
             0, 1
         };
         Weights w = new Weights(Tensor.matrix(data, 3, 2));
-        NormaliseRows normaliseRows = new NormaliseRows(w);
-        assertArrayEquals(expectedData, ctx.forward(normaliseRows).data);
+        NormalizeRows normalizeRows = new NormalizeRows(w);
+        assertArrayEquals(expectedData, ctx.forward(normalizeRows).data);
     }
 
 

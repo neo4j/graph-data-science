@@ -26,7 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Constant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.DummyVariable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormaliseRows;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraphBuilder;
@@ -384,7 +384,7 @@ public class GraphSageModel {
                     subGraphs.get(layerNr).selfAdjacency
                 );
         }
-        return new NormaliseRows(previousLayerRepresentations);
+        return new NormalizeRows(previousLayerRepresentations);
     }
 
     private List<Weights> getWeights() {

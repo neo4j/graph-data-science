@@ -17,21 +17,48 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ejml;
+package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyTransB;
 
-public class EjmlMatrixMultiplyTransB extends MatrixMultiplyTransB {
+import java.util.List;
 
-    public EjmlMatrixMultiplyTransB(Variable A, Variable B) {
-        super(A, B);
+public class MatrixMultiplyWithTransposedSecondOperand extends Variable {
+
+    private final Variable A;
+    private final Variable B;
+
+    public MatrixMultiplyWithTransposedSecondOperand(Variable A, Variable B) {
+        // the dimensions of a matrix multiplication of dimensions (m, n) x (o, p) = (m, p)
+        // B is being transposed as Bt and its dimensions are (p, o) so the result will be dimensions (m, o)
+        super(List.of(A, B), Dimensions.matrix(A.dimension(0), B.dimension(0)));
+        this.A = A;
+        this.B = B;
     }
 
-    protected Tensor multiply(Tensor t1, Tensor t2) {
+    @Override
+    protected Tensor apply(ComputationContext ctx) {
+        Tensor t1 = ctx.data(A);
+        Tensor t2 = ctx.data(B);
+        return multiplyTransB(t1, t2);
+    }
+
+    @Override
+    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+        Tensor gradient = ctx.gradient(this);
+        if (parent == A) {
+            return multiply(gradient, ctx.data(B));
+        } else {
+            return multiplyTransA(gradient, ctx.data(A));
+        }
+    }
+
+    private Tensor multiply(Tensor t1, Tensor t2) {
         DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimensions[0], t1.dimensions[1], t1.data);
         DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimensions[0], t2.dimensions[1], t2.data);
         DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numCols);
@@ -39,19 +66,23 @@ public class EjmlMatrixMultiplyTransB extends MatrixMultiplyTransB {
         return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
-    @Override
-    protected Tensor multiplyTransB(Tensor t1, Tensor t2) {
+    private Tensor multiplyTransB(Tensor t1, Tensor t2) {
         DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimensions[0], t1.dimensions[1], t1.data);
         DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimensions[0], t2.dimensions[1], t2.data);
         DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numRows);
         MatrixMatrixMult_DDRM.multTransB(m1, m2, prod);
-        return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);    }
+        return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);
+    }
 
-    @Override
-    protected Tensor multiplyTransA(Tensor t1, Tensor t2) {
+    private Tensor multiplyTransA(Tensor t1, Tensor t2) {
         DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimensions[0], t1.dimensions[1], t1.data);
         DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimensions[0], t2.dimensions[1], t2.data);
         DMatrixRMaj prod = new DMatrixRMaj(m1.numCols, m2.numCols);
         MatrixMatrixMult_DDRM.multTransA_reorder(m1, m2, prod);
-        return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);    }
+        return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);
+    }
+
+    public static MatrixMultiplyWithTransposedSecondOperand of(Variable A, Variable B) {
+        return new MatrixMultiplyWithTransposedSecondOperand(A, B);
+    }
 }

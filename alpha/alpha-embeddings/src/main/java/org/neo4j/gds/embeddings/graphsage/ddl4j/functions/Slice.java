@@ -37,29 +37,28 @@ public class Slice extends SingleParentVariable {
     @Override
     protected Tensor apply(ComputationContext ctx) {
         double[] parentData = ctx.data(parent).data;
-        int numRows = dimension(0);
+        int rows = dimension(0);
         int cols = parent.dimension(1);
-        double[] result = new double[numRows * cols];
+        double[] result = new double[rows * cols];
 
-        for (int r = 0; r < numRows; r++) {
-            System.arraycopy(parentData, selfAdjacency[r] * cols, result, r * cols, cols);
+        for (int row = 0; row < rows; row++) {
+            System.arraycopy(parentData, selfAdjacency[row] * cols, result, row * cols, cols);
         }
 
-
-        return Tensor.matrix(result, numRows, cols);
+        return Tensor.matrix(result, rows, cols);
     }
 
     @Override
     protected Tensor gradient(ComputationContext ctx) {
         Tensor result = ctx.data(parent).zeros();
 
-        int numRows = dimension(0);
+        int rows = dimension(0);
         int cols = parent.dimension(1);
         double[] selfGradient = ctx.gradient(this).data;
-        for (int r = 0; r < numRows; r++) {
-            int childRow = selfAdjacency[r];
+        for (int row = 0; row < rows; row++) {
+            int childRow = selfAdjacency[row];
             for (int col = 0; col < cols; col++) {
-                result.data[childRow * cols + col] += selfGradient[r * cols + col];
+                result.data[childRow * cols + col] += selfGradient[row * cols + col];
             }
         }
 

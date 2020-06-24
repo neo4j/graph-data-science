@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
 import java.util.List;

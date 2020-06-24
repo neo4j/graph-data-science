@@ -23,28 +23,30 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
-public class NormaliseRows extends SingleParentVariable {
-    public NormaliseRows(Variable matrix) {
+public class NormalizeRows extends SingleParentVariable {
+    public NormalizeRows(Variable matrix) {
         super(matrix, matrix.dimensions());
     }
 
     @Override
     protected Tensor apply(ComputationContext ctx) {
         int rows = dimension(0);
-        int vectorDim = dimension(1);
+        int cols = dimension(1);
         double[] parentData = ctx.data(parent).data;
-        double[] result = new double[rows * vectorDim];
+        double[] result = new double[rows * cols];
         for (int row = 0; row < rows; row++) {
             double sum = 0;
-            for (int col = 0; col < vectorDim; col++) {
-                sum += Math.pow(parentData[row * vectorDim + col], 2);
+            for (int col = 0; col < cols; col++) {
+                int elementIndex = row * cols + col;
+                sum += Math.pow(parentData[elementIndex], 2);
             }
             double l2 = Math.sqrt(sum);
-            for (int col = 0; col < vectorDim; col++) {
-                result[row * vectorDim + col] = parentData[row * vectorDim + col] / l2;
+            for (int col = 0; col < cols; col++) {
+                int elementIndex = row * cols + col;
+                result[elementIndex] = parentData[elementIndex] / l2;
             }
         }
-        return Tensor.matrix(result, rows, vectorDim);
+        return Tensor.matrix(result, rows, cols);
     }
 
     @Override
@@ -57,18 +59,18 @@ public class NormaliseRows extends SingleParentVariable {
         for (int row = 0; row < rows; row++) {
             double l2Squared = 0;
             for (int col = 0; col < cols; col++) {
-                l2Squared += parentData[row * cols + col] * parentData[row * cols + col];
+                int elementIndex = row * cols + col;
+                l2Squared += parentData[elementIndex] * parentData[elementIndex];
             }
             double l2 = Math.sqrt(l2Squared);
             double l2Qubed = l2 * l2Squared;
             for (int col = 0; col < cols; col++) {
+                int elementIndex = row * cols + col;
                 for (int gradCol = 0; gradCol < cols; gradCol++) {
                     if (col == gradCol) {
-                        result[row * cols + col] += gradientData[row * cols + col] *
-                                                    (l2Squared - parentData[row * cols + col] * parentData[row * cols + col]) / l2Qubed;
+                        result[elementIndex] += gradientData[elementIndex] * (l2Squared - parentData[elementIndex] * parentData[elementIndex]) / l2Qubed;
                     } else {
-                        result[row * cols + col] -= gradientData[row * cols + gradCol] *
-                                                    (parentData[row * cols + col] * parentData[row * cols + gradCol]) / l2Qubed;
+                        result[elementIndex] -= gradientData[row * cols + gradCol] * (parentData[elementIndex] * parentData[row * cols + gradCol]) / l2Qubed;
                     }
                 }
             }

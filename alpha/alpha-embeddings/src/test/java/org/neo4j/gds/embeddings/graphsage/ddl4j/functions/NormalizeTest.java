@@ -29,21 +29,21 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class NormaliseTest extends AutogradBaseTest implements FiniteDifferenceTest {
+class NormalizeTest extends AutogradBaseTest implements FiniteDifferenceTest {
 
     @Test
     void shouldApproximateGradient() {
         Weights weights = new Weights(Tensor.vector(new double[]{1, 2, 3}));
-        finiteDifferenceShouldApproximateGradient(weights, new Sum(List.of(new Normalise(weights))));
+        finiteDifferenceShouldApproximateGradient(weights, new Sum(List.of(new Normalize(weights))));
     }
 
     @Test
     void testL2Norm() {
         Constant vector = Constant.vector(new double[]{1, 2, 3});
 
-        Normalise normalise = new Normalise(vector);
+        Normalize normalize = new Normalize(vector);
 
-        assertNotNull(ctx.forward(normalise));
+        assertNotNull(ctx.forward(normalize));
 
         assertArrayEquals(
             new double[]{
@@ -51,7 +51,7 @@ class NormaliseTest extends AutogradBaseTest implements FiniteDifferenceTest {
                 2 * 1d / 3.74165738677,
                 3 * 1d / 3.74165738677
             },
-            ctx.data(normalise).data,
+            ctx.data(normalize).data,
             1e-10
         );
     }
