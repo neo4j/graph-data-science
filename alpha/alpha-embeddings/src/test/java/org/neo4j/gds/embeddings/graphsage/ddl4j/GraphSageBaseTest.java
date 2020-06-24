@@ -20,9 +20,8 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 
-public class AutogradBaseTest {
+public class GraphSageBaseTest {
     protected ComputationContext ctx;
 
     @BeforeEach

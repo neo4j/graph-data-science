@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AutogradBaseTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
@@ -29,7 +29,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-class MultiMeanTest extends AutogradBaseTest implements FiniteDifferenceTest {
+class MultiMeanTest extends GraphSageBaseTest implements FiniteDifferenceTest {
     @Test
     void shouldAverage() {
         // a    a

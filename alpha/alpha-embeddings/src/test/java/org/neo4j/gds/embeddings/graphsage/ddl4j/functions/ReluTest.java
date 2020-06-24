@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AutogradBaseTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 
@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ReluTest extends AutogradBaseTest implements FiniteDifferenceTest {
+public class ReluTest extends GraphSageBaseTest implements FiniteDifferenceTest {
     @Override
     public double epsilon() {
         return 1E-8;

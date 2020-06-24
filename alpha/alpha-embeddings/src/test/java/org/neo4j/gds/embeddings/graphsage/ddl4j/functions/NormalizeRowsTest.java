@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AutogradBaseTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 
@@ -28,7 +28,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-class NormalizeRowsTest extends AutogradBaseTest implements FiniteDifferenceTest {
+class NormalizeRowsTest extends GraphSageBaseTest implements FiniteDifferenceTest {
     @Override
     public double epsilon() {
         return 1e-6;

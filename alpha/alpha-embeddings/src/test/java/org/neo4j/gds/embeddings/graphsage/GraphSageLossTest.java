@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AutogradBaseTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -33,7 +33,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class GraphSageLossTest extends AutogradBaseTest implements FiniteDifferenceTest {
+class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
     @ParameterizedTest
     @CsvSource({

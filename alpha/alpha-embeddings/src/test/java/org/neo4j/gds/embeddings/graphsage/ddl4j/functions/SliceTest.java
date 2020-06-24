@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AutogradBaseTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -29,7 +29,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-class SliceTest extends AutogradBaseTest implements FiniteDifferenceTest {
+class SliceTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
     @Test
     void shouldSlice() {

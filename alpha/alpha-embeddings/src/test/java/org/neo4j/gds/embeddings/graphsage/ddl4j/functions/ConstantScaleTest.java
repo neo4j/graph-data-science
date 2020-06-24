@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AutogradBaseTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 
@@ -28,7 +28,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-class ConstantScaleTest extends AutogradBaseTest implements FiniteDifferenceTest {
+class ConstantScaleTest extends GraphSageBaseTest implements FiniteDifferenceTest {
     @Test
     void testApply() {
         Weights matrix = new Weights(Tensor.matrix(new double[]{1, 2, 3, 4}, 2, 2));
