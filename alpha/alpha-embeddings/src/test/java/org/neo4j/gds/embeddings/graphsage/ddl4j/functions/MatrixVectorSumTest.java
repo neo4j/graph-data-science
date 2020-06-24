@@ -29,14 +29,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-class BroadcastSumTest extends GraphSageBaseTest implements FiniteDifferenceTest {
+class MatrixVectorSumTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
     @Test
     void shouldBroadcastSum() {
         Constant matrix = Constant.matrix(new double[]{1, 2, 3, 4, 5, 7}, 2, 3);
         Constant vector = Constant.vector(new double[]{1, 1, 1});
 
-        Variable broadcastSum = new BroadcastSum(matrix, vector);
+        Variable broadcastSum = new MatrixVectorSum(matrix, vector);
         double[] result = ctx.forward(broadcastSum).data;
 
         assertArrayEquals(new double[] {2, 3, 4, 5, 6, 8}, result);
@@ -47,7 +47,7 @@ class BroadcastSumTest extends GraphSageBaseTest implements FiniteDifferenceTest
         Weights weights = new Weights(Tensor.matrix(new double[]{1, 2, 3, 4, 5, 7}, 2, 3));
         Weights vector = new Weights(Tensor.vector(new double[]{1, 1, 1}));
 
-        Variable broadcastSum = new Sum(List.of(new BroadcastSum(weights, vector)));
+        Variable broadcastSum = new Sum(List.of(new MatrixVectorSum(weights, vector)));
 
         finiteDifferenceShouldApproximateGradient(List.of(weights, vector), broadcastSum);
     }

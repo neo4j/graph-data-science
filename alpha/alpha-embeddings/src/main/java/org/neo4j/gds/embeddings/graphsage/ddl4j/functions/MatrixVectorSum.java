@@ -25,12 +25,12 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 import java.util.List;
 
-public class BroadcastSum extends Variable {
+public class MatrixVectorSum extends Variable {
 
     private final Variable matrix;
     private final Variable vector;
 
-    public BroadcastSum(Variable matrix, Variable vector) {
+    public MatrixVectorSum(Variable matrix, Variable vector) {
         super(List.of(matrix, vector), matrix.dimensions());
 
         this.matrix = matrix;

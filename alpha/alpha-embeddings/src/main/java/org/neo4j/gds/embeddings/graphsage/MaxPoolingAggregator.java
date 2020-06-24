@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.BroadcastSum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixVectorSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementwiseMax;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Slice;
@@ -55,20 +55,22 @@ public class MaxPoolingAggregator implements Aggregator {
 
     @Override
     public Variable aggregate(
-        Variable previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacencyMatrix
+        Variable previousLayerRepresentations,
+        int[][] adjacencyMatrix,
+        int[] selfAdjacencyMatrix
     ) {
         Variable weightedPreviousLayer = MatrixMultiplyWithTransposedSecondOperand.of(
             previousLayerRepresentations,
             poolWeights
         );
-        Variable biasedWeightedPreviousLayer = new BroadcastSum(weightedPreviousLayer, bias);
+        Variable biasedWeightedPreviousLayer = new MatrixVectorSum(weightedPreviousLayer, bias);
         Variable neighborhoodActivations = activationFunction.apply(biasedWeightedPreviousLayer);
         Variable elementwiseMax = new ElementwiseMax(neighborhoodActivations, adjacencyMatrix);
 
         Variable selfPreviousLayer =  new Slice(previousLayerRepresentations, selfAdjacencyMatrix);
         Variable self = MatrixMultiplyWithTransposedSecondOperand.of(selfPreviousLayer, selfWeights);
-        Variable neigh = MatrixMultiplyWithTransposedSecondOperand.of(elementwiseMax, neighborsWeights);
-        TensorAdd tensorAdd = new TensorAdd(List.of(self, neigh), self.dimensions());
+        Variable neighbors = MatrixMultiplyWithTransposedSecondOperand.of(elementwiseMax, neighborsWeights);
+        TensorAdd tensorAdd = new TensorAdd(List.of(self, neighbors), self.dimensions());
 
         return activationFunction.apply(tensorAdd);
     }
