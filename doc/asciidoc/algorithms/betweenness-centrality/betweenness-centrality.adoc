@@ -333,7 +333,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 7         | 7                 | 2904     | 2904     | "2904 Bytes"
+| 7         | 7                 | 2912     | 2912     | "2912 Bytes"
 |===
 --
 
@@ -352,7 +352,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 7         | 7                 | 840      | 840      | "840 Bytes"
+| 7         | 7                 | 848      | 848      | "848 Bytes"
 |===
 --
 
