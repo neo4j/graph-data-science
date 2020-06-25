@@ -288,6 +288,7 @@ CREATE
   (eve:User {name: 'Eve'}),
   (frank:User {name: 'Frank'}),
   (gale:User {name: 'Gale'}),
+
   (alice)-[:FOLLOWS]->(carol),
   (bob)-[:FOLLOWS]->(carol),
   (carol)-[:FOLLOWS]->(dan),
@@ -401,13 +402,13 @@ Conversely, there are no shortest paths that pass through either of the nodes 'A
 [[algorithms-betweenness-centrality-examples-stats]]
 === Stats
 
-:stats-details: For example Betweenness Centrality stats returns minimum, maximum and the sum of all centrality values.
+:stats-details: In particular, Betweenness Centrality returns the minimum, maximum and sum of all centrality scores.
 :stats-syntax: algorithms-betweenness-centrality-syntax-stats
 include::../shared/examples-stats-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run the algorithm and returns the result in form of statistical and measurement values
+.The following will run the algorithm in `stats` mode:
 [source, cypher]
 ----
 CALL gds.betweenness.stats('myGraph')
@@ -421,6 +422,11 @@ YIELD minCentrality, maxCentrality, sumCentrality
 | 0.0           | 8.0           | 19.0
 |===
 --
+
+Comparing this to the results we saw in the <<algorithms-betweenness-centrality-examples-stream, stream example>>, we can find our minimum and maximum values from the table.
+It is worth noting that unless the graph has a particular shape involving a directed cycle, the `minCentrality` value will almost always be zero.
+The `sumCentrality` value can be used to compute an average centrality value by dividing over the number of nodes in the graph.
+
 
 [[algorithms-betweenness-centrality-examples-mutate]]
 === Mutate
@@ -444,6 +450,10 @@ YIELD minCentrality, maxCentrality, sumCentrality, nodePropertiesWritten
 |===
 --
 
+The returned result is the same as in the `stats` example.
+Additionally, the graph 'myGraph' now has a node property `betweenness` which stores the betweenness centrality score for each node.
+To find out how to inspect the new schema of the in-memory graph, see <<catalog-graph-list>>.
+
 
 [[algorithms-betweenness-centrality-examples-write]]
 === Write
@@ -466,3 +476,7 @@ YIELD minCentrality, maxCentrality, sumCentrality, nodePropertiesWritten
 | 0.0           | 8.0           | 19.0          | 7
 |===
 --
+
+The returned result is the same as in the `stats` example.
+Additionally, each of the seven nodes now has a new property `betweenness` in the Neo4j database, containing the betweenness centrality score for that node.
+
