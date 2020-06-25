@@ -77,6 +77,7 @@ class BetweennessCentralityWriteProcTest
             "nodePropertiesWritten", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "writeMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));

@@ -100,6 +100,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
+            long postProcessingMillis,
             long writeMillis,
             double minCentrality,
             double maxCentrality,
@@ -109,6 +110,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
             super(
                 createMillis,
                 computeMillis,
+                postProcessingMillis,
                 minCentrality,
                 maxCentrality,
                 sumCentrality,
@@ -126,6 +128,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
                     nodePropertiesWritten,
                     createMillis,
                     computeMillis,
+                    postProcessingMillis,
                     writeMillis,
                     minimumScore,
                     maximumScore,

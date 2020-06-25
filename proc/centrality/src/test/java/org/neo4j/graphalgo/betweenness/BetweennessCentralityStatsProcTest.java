@@ -63,6 +63,7 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             "scoreSum", 10.0,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
     }

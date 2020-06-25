@@ -96,6 +96,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         public final double maximumScore;
         public final double scoreSum;
 
+        public final long postProcessingMillis;
         public final long createMillis;
         public final long computeMillis;
 
@@ -104,6 +105,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         StatsResult(
             long createMillis,
             long computeMillis,
+            long postProcessingMillis,
             double minimumScore,
             double maximumScore,
             double scoreSum,
@@ -111,6 +113,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
+            this.postProcessingMillis = postProcessingMillis;
 
             this.minimumScore = minimumScore;
             this.maximumScore = maximumScore;
@@ -125,6 +128,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
                 return new StatsResult(
                     createMillis,
                     computeMillis,
+                    postProcessingMillis,
                     minimumScore,
                     maximumScore,
                     scoreSum,

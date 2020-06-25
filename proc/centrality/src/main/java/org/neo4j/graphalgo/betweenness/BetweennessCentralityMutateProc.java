@@ -100,6 +100,7 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
+            long postProcessingMillis,
             long mutateMillis,
             double minCentrality,
             double maxCentrality,
@@ -109,6 +110,7 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
             super(
                 createMillis,
                 computeMillis,
+                postProcessingMillis,
                 minCentrality,
                 maxCentrality,
                 sumCentrality,
@@ -126,6 +128,7 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
                     nodePropertiesWritten,
                     createMillis,
                     computeMillis,
+                    postProcessingMillis,
                     mutateMillis,
                     minimumScore,
                     maximumScore,

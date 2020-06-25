@@ -133,6 +133,7 @@ YIELD
   scoreSum: Float,
   createMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   configuration: Map
 ----
 
@@ -145,13 +146,14 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| minimumScore  | Float   | Minimum centrality score.
-| maximumScore  | Float   | Maximum centrality score.
-| scoreSum      | Float   | Sum of all centrality scores.
-| createMillis  | Integer | Milliseconds for creating the graph.
-| computeMillis | Integer | Milliseconds for running the algorithm.
-| configuration | Map     | Configuration used for running the algorithm.
+| Name                 | Type    | Description
+| minimumScore         | Float   | Minimum centrality score.
+| maximumScore         | Float   | Maximum centrality score.
+| scoreSum             | Float   | Sum of all centrality scores.
+| createMillis         | Integer | Milliseconds for creating the graph.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis | Integer | Milliseconds for computing the statistics.
+| configuration        | Map     | Configuration used for running the algorithm.
 |===
 
 
@@ -171,6 +173,7 @@ YIELD
   scoreSum: Float,
   createMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   mutateMillis: Integer,
   nodePropertiesWritten: Integer,
   configuration: Map
@@ -191,6 +194,7 @@ include::specific-configuration.adoc[]
 | scoreSum              | Float   | Sum of all centrality scores.
 | createMillis          | Integer | Milliseconds for creating the graph.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer | Milliseconds for computing the statistics.
 | mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
 | nodePropertiesWritten | Integer | Number of properties added to the in-memory graph.
 | configuration         | Map     | Configuration used for running the algorithm.
@@ -213,6 +217,7 @@ YIELD
   scoreSum: Float,
   createMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   writeMillis: Integer,
   nodePropertiesWritten: Integer,
   configuration: Map
@@ -227,15 +232,16 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                   | Type    | Description
-| minimumScore           | Float   | Minimum centrality score.
-| maximumScore           | Float   | Maximum centrality score.
-| scoreSum               | Float   | Sum of all centrality scores.
-| createMillis           | Integer | Milliseconds for creating the graph.
-| computeMillis          | Integer | Milliseconds for running the algorithm.
-| writeMillis            | Integer | Milliseconds for writing result data back.
-| nodePropertiesWritten  | Integer | Number of properties written to Neo4j.
-| configuration          | Map     | The configuration used for running the algorithm.
+| Name                  | Type    | Description
+| minimumScore          | Float   | Minimum centrality score.
+| maximumScore          | Float   | Maximum centrality score.
+| scoreSum              | Float   | Sum of all centrality scores.
+| createMillis          | Integer | Milliseconds for creating the graph.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer | Milliseconds for computing the statistics.
+| writeMillis           | Integer | Milliseconds for writing result data back.
+| nodePropertiesWritten | Integer | Number of properties written to Neo4j.
+| configuration         | Map     | The configuration used for running the algorithm.
 |===
 
 

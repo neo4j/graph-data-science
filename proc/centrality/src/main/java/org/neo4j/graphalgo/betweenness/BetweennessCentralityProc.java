@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.betweenness;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -53,7 +54,9 @@ final class BetweennessCentralityProc {
 
         var result = computeResult.result();
         if (result != null && computeStatistics) {
+            ProgressTimer timer = ProgressTimer.start();
             procResultBuilder = computeStatistics(procResultBuilder, result);
+            procResultBuilder.withPostProcessingMillis(timer.getDuration());
         }
 
         return procResultBuilder.withConfig(computeResult.config());
@@ -85,6 +88,7 @@ final class BetweennessCentralityProc {
     abstract static class BetweennessCentralityResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
 
         double minimumScore, maximumScore, scoreSum = -1;
+        long postProcessingMillis = 0;
 
         BetweennessCentralityResultBuilder<PROC_RESULT> minimumScore(double minimumScore) {
             this.minimumScore = minimumScore;
@@ -98,6 +102,11 @@ final class BetweennessCentralityProc {
 
         BetweennessCentralityResultBuilder<PROC_RESULT> scoreSum(double scoreSum) {
             this.scoreSum = scoreSum;
+            return this;
+        }
+
+        BetweennessCentralityResultBuilder<PROC_RESULT> withPostProcessingMillis(long postProcessingMillis) {
+            this.postProcessingMillis = postProcessingMillis;
             return this;
         }
     }

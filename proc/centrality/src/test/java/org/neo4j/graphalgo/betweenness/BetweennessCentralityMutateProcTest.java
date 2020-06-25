@@ -102,6 +102,7 @@ public class BetweennessCentralityMutateProcTest
             "nodePropertiesWritten", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "mutateMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
