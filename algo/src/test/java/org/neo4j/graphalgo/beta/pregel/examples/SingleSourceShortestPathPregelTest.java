@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -81,7 +80,6 @@ class SingleSourceShortestPathPregelTest {
             config,
             new SingleSourceShortestPathPregel(0),
             batchSize,
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

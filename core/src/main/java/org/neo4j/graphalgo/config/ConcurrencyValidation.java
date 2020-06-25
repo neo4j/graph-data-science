@@ -26,7 +26,15 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface ConcurrencyValidation {
 
+    int DEFAULT_CONCURRENCY = 4;
     int CONCURRENCY_LIMITATION = 4;
+
+    @Value.Default
+    @Value.Parameter(false)
+    default int concurrency() {
+        return DEFAULT_CONCURRENCY;
+    }
+
 
     @Value.Check
     default void validateConcurrency() {

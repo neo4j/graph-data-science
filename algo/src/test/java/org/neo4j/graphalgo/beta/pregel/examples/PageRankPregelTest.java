@@ -91,7 +91,6 @@ class PageRankPregelTest {
             config,
             new PageRankPregel(graph.nodeCount(), dampingFactor),
             batchSize,
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

@@ -84,7 +84,6 @@ class WeaklyConnectedComponentsPregelTest {
             config,
             new ConnectedComponentsPregel(),
             batchSize,
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

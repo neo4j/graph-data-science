@@ -22,12 +22,14 @@ package org.neo4j.graphalgo.beta.pregel;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConcurrencyValidation;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 @ValueClass
 @Configuration("PregelConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface PregelConfig extends RelationshipWeightConfig {
+public interface PregelConfig extends RelationshipWeightConfig, AlgoBaseConfig {
 
     @Value.Default
     default double initialNodeValue() {

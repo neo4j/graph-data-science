@@ -77,7 +77,6 @@ class LabelPropagationPregelTest {
             config,
             new LabelPropagationPregel(),
             batchSize,
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -115,7 +114,6 @@ class LabelPropagationPregelTest {
             config,
             weightedLabelPropagation,
             batchSize,
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

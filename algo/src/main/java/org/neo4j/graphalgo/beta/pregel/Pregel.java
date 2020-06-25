@@ -69,7 +69,6 @@ public final class Pregel {
             final PregelConfig config,
             final PregelComputation computation,
             final int batchSize,
-            final int concurrency,
             final ExecutorService executor,
             final AllocationTracker tracker) {
 
@@ -78,7 +77,7 @@ public final class Pregel {
         HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
-                concurrency,
+                config.concurrency(),
                 nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, defaultNodeValue))
         );
 
@@ -88,7 +87,6 @@ public final class Pregel {
                 computation,
                 hugeDoubleArray,
                 batchSize,
-                concurrency,
                 executor,
                 tracker
         );
@@ -100,7 +98,6 @@ public final class Pregel {
             final PregelComputation computation,
             final NodeProperties initialNodeValues,
             final int batchSize,
-            final int concurrency,
             final ExecutorService executor,
             final AllocationTracker tracker) {
 
@@ -108,7 +105,7 @@ public final class Pregel {
         HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
-                concurrency,
+                config.concurrency(),
                 nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, initialNodeValues.nodeProperty(nodeId)))
         );
 
@@ -118,7 +115,6 @@ public final class Pregel {
                 computation,
                 hugeDoubleArray,
                 batchSize,
-                concurrency,
                 executor,
                 tracker
         );
@@ -130,7 +126,6 @@ public final class Pregel {
             final PregelComputation computation,
             final HugeDoubleArray initialNodeValues,
             final int batchSize,
-            final int concurrency,
             final ExecutorService executor,
             final AllocationTracker tracker) {
         this.graph = graph;
@@ -138,7 +133,7 @@ public final class Pregel {
         this.computation = computation;
         this.nodeValues = initialNodeValues;
         this.batchSize = batchSize;
-        this.concurrency = concurrency;
+        this.concurrency = config.concurrency();
         this.executor = executor;
 
         this.messageQueues = initLinkedQueues(graph, tracker);
