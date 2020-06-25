@@ -13,7 +13,6 @@ Pregel is a vertex-centric computation model to define your own algorithms via a
 The computation model executes the algorithm in several iterations, also called `super-steps` in Pregel terminology.
 Each node executes the same user-defined function, which process a list of messages and sends messages to its neighbours.
 Currently, messages of type `double` are only allowed.
-// TODO: on the slide it also states all nodes have to "vote to halt" but our implementation only checks for messages
 The algorithms terminates if no messages where send in the last iteration.
 
 For more information about Pregel, have a look at https://kowshik.github.io/JPregel/pregel_paper.pdf.
@@ -135,7 +134,7 @@ import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 
 
 public class PregelExample {
-    public static void main() {
+    public static void main(String[] args) {
         int batchSize = 10;
         int maxIterations = 10;
 
@@ -154,6 +153,7 @@ public class PregelExample {
         );
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+        System.out.println(nodeValues.toString());
     }
 }
 ----
