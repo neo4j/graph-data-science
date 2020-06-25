@@ -40,7 +40,7 @@ To build PregelConfig you can use the `ImmutablePregelConfig.builder()`.
 |===
 | Name                      | Type      | Default Value | Description
 | intialNodeValue           | Double    | -1            | The initial value of the node in the pregel context.
-| isAsynchronous            | Boolean   | false         | Flag indicating if multiple super-steps can be executed in parallel // TODO: validate
+| isAsynchronous            | Boolean   | false         | Flag indicating if multiple super-steps can be executed in parallel
 | relationshipWeightProperty| String    | null          | The name of the relationship property that represents weight.
 |===
 
