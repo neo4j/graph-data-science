@@ -184,4 +184,22 @@ class SubGraphBuilderTest {
         assertArrayEquals(expectedAdj2F, subGraphs.get(1).adjacency[5]);
         assertArrayEquals(expectedNeighbors, subGraphs.get(1).nextNodes);
     }
+
+    @Test
+    void shouldHandleDuplicatedNodes() {
+        SubGraph subGraph = SubGraph.buildSubGraph(
+            new long[]{
+                idFunction.of("a"),
+                idFunction.of("b"),
+                idFunction.of("i"),
+                idFunction.of("i"),
+                idFunction.of("a"),
+                idFunction.of("a")
+            },
+            neighborhoodFunction,
+            graph
+        );
+
+        assertEquals(6, subGraph.adjacency.length);
+    }
 }
