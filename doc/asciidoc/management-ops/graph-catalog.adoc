@@ -60,6 +60,11 @@ There are two variants of projecting a graph from the Neo4j database into main m
 ** The more flexible, expressive approach with lesser focus on performance.
    Recommended to be primarily used during the development phase.
 
+[NOTE]
+====
+There is also a way to generate a random graph, see <<graph-generation, Graph Generation>> documentation for more details.
+====
+
 In this section, we will give brief examples on how to create a graph using either variant.
 For detailed information about the configuration of each variant, we refer to the dedicated sections.
 
@@ -96,8 +101,6 @@ After creating the graphs in the catalog, we can refer to them in algorithms by 
 ----
 CALL gds.algo.pageRank.stream('my-native-graph') YIELD nodeId, score;
 ----
-
-There is also a way to generate a random graph, see <<graph-generation, Graph Generation>> documentation for more details.
 
 [[catalog-graph-list]]
 == Listing graphs in the catalog
