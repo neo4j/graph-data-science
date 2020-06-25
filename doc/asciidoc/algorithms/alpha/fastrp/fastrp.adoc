@@ -18,7 +18,7 @@ One aggregation simply concatenates all the intermediate embeddings node by node
 The other aggregation computes the embeddings as a weighted sum of the intermediate embeddings.
 The choice of aggregation method is made by specifying `iterationWeights` configuration parameters either as an empty list or containing the desired weights for the iterations.
 
-NOTE: The algorithm is defined for UNDIRECTED graphs.
+NOTE: The algorithm is defined only for UNDIRECTED graphs.
 
 For more information on this algorithm see:
 
@@ -155,14 +155,13 @@ CALL gds.graph.create(
   'persons',
   'Person',
   {
-    R: {
-      type: 'REL',
+    REL: {
       orientation: 'UNDIRECTED'
     }
 })
 ----
 
-NOTE: The algorithm is defined for UNDIRECTED graphs.
+NOTE: The algorithm is defined only for UNDIRECTED graphs.
 
 
 === Stream
