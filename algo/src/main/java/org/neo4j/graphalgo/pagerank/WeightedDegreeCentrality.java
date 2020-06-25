@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.pagerank;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -61,7 +61,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
 
         this.tracker = tracker;
         if (concurrency <= 0) {
-            concurrency = AlgoBaseConfig.DEFAULT_CONCURRENCY;
+            concurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         }
 
         this.graph = graph;

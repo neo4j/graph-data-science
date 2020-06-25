@@ -58,7 +58,7 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig {
 
     @Value.Default
     default int concurrency() {
-        return AlgoBaseConfig.DEFAULT_CONCURRENCY;
+        return ConcurrencyConfig.DEFAULT_CONCURRENCY;
     }
 
     @Configuration.Ignore

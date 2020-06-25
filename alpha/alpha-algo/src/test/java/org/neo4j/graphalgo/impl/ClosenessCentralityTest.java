@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
@@ -86,7 +86,7 @@ class ClosenessCentralityTest extends AlgoTestBase {
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
             AllocationTracker.EMPTY,
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             false
         );
@@ -104,7 +104,7 @@ class ClosenessCentralityTest extends AlgoTestBase {
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
             AllocationTracker.EMPTY,
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             false
         );

@@ -23,11 +23,11 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.GdsEdition;
 
-import static org.neo4j.graphalgo.config.AlgoBaseConfig.CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface ConcurrencyConfig {
 
+    String CONCURRENCY_KEY = "concurrency";
     int DEFAULT_CONCURRENCY = 4;
     int CONCURRENCY_LIMITATION = 4;
 
@@ -37,29 +37,22 @@ public interface ConcurrencyConfig {
         return DEFAULT_CONCURRENCY;
     }
 
-
     @Value.Check
     default void validateConcurrency() {
-        if (GdsEdition.instance().isOnEnterpriseEdition()) {
-            // do nothing
-            return;
-        }
-        Validator.validate(concurrency());
+        validateConcurrency(concurrency(), CONCURRENCY_KEY);
     }
 
-    class Validator {
-        static void validate(int requestedConcurrency) {
-            if (requestedConcurrency > CONCURRENCY_LIMITATION) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The configured concurrency value is too high. " +
-                    "The maximum allowed concurrency value is %d but %d was configured. " +
-                    "Please see the documentation (System Requirements section) for an explanation of concurrency limitations for different editions of Neo4j Graph Data Science. " +
-                    "Higher than concurrency %d is only available, when you have licensed the Enterprise Edition of the Neo4j Graph Data Science Library.",
-                    CONCURRENCY_LIMITATION,
-                    requestedConcurrency,
-                    CONCURRENCY_LIMITATION
-                ));
-            }
+    static void validateConcurrency(int requestedConcurrency, String configKey) {
+        if (GdsEdition.instance().isOnCommunityEdition() && requestedConcurrency > CONCURRENCY_LIMITATION) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The configured `%1$s` value is too high. " +
+                "The maximum allowed `%1$s` value is %2$d but %3$d was configured. " +
+                "Please see the documentation (System Requirements section) for an explanation of concurrency limitations for different editions of Neo4j Graph Data Science. " +
+                "Higher than concurrency %2$d is only available, when you have licensed the Enterprise Edition of the Neo4j Graph Data Science Library.",
+                configKey,
+                CONCURRENCY_LIMITATION,
+                requestedConcurrency
+            ));
         }
     }
 }

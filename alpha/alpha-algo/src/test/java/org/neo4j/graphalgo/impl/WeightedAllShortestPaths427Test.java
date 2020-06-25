@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.CostEvaluator;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
@@ -410,7 +410,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
         WeightedAllShortestPaths shortestPaths = new WeightedAllShortestPaths(
             graph,
             Pools.DEFAULT,
-            AlgoBaseConfig.DEFAULT_CONCURRENCY
+            ConcurrencyConfig.DEFAULT_CONCURRENCY
         );
         compare(shortestPaths, expected);
     }
@@ -427,7 +427,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
         MSBFSAllShortestPaths shortestPaths = new MSBFSAllShortestPaths(
             graph,
             AllocationTracker.EMPTY,
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT
         );
         compare(shortestPaths, expectedNonWeighted);

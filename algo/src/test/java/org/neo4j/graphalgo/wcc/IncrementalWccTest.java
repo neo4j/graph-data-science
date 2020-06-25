@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -75,7 +75,7 @@ class IncrementalWccTest {
         Graph graph = createGraph();
 
         WccStreamConfig config = ImmutableWccStreamConfig.builder()
-            .concurrency(AlgoBaseConfig.DEFAULT_CONCURRENCY)
+            .concurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY)
             .seedProperty(SEED_PROPERTY)
             .threshold(0D)
             .build();
@@ -127,7 +127,7 @@ class IncrementalWccTest {
         return new Wcc(
             graph,
             Pools.DEFAULT,
-            COMMUNITY_SIZE / AlgoBaseConfig.DEFAULT_CONCURRENCY,
+            COMMUNITY_SIZE / ConcurrencyConfig.DEFAULT_CONCURRENCY,
             config,
             ProgressLogger.NULL_LOGGER,
             AllocationTracker.EMPTY

@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
@@ -45,8 +44,9 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Value.Default
     @Value.Parameter(false)
+    @Configuration.Key(READ_CONCURRENCY_KEY)
     default int readConcurrency() {
-        return AlgoBaseConfig.DEFAULT_CONCURRENCY;
+        return ConcurrencyConfig.DEFAULT_CONCURRENCY;
     }
 
     @Value.Default
@@ -79,12 +79,8 @@ public interface GraphCreateConfig extends BaseConfig {
     GraphStoreFactory.Supplier graphStoreFactory();
 
     @Value.Check
-    default void validateConcurrency() {
-        if (GdsEdition.instance().isOnEnterpriseEdition()) {
-            // do nothing
-            return;
-        }
-        ConcurrencyConfig.Validator.validate(readConcurrency());
+    default void validateReadConcurrency() {
+        ConcurrencyConfig.validateConcurrency(readConcurrency(), READ_CONCURRENCY_KEY);
     }
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {

@@ -23,7 +23,7 @@ import org.HdrHistogram.AtomicHistogram;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality, 
             int concurrency
     ) {
         if (concurrency <= 0) {
-            concurrency = AlgoBaseConfig.DEFAULT_CONCURRENCY;
+            concurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         }
 
         this.graph = graph;

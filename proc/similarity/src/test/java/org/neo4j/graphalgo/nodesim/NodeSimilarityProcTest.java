@@ -40,7 +40,7 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.catalog.GraphWriteRelationshipProc;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -250,7 +250,7 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
         assertEquals(0, config.normalizedN());
         assertEquals(1, config.degreeCutoff());
         assertEquals(1E-42, config.similarityCutoff());
-        assertEquals(AlgoBaseConfig.DEFAULT_CONCURRENCY, config.concurrency());
+        assertEquals(ConcurrencyConfig.DEFAULT_CONCURRENCY, config.concurrency());
     }
 
     @ParameterizedTest(name = "top or bottom: {0}")

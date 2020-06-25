@@ -23,7 +23,7 @@ import org.HdrHistogram.AtomicHistogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -91,7 +91,7 @@ public class GraphInfo {
     private Map<String, Object> computeHistogram(Graph graph) {
         int batchSize = Math.toIntExact(ParallelUtil.adjustedBatchSize(
             graph.nodeCount(),
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
             ParallelUtil.DEFAULT_BATCH_SIZE
         ));
         // needs to be at least 2 due to some requirement from the AtomicHistogram, see their JavaDoc
@@ -99,7 +99,7 @@ public class GraphInfo {
         AtomicHistogram histogram = new AtomicHistogram(maximumDegree, PRECISION);
 
         ParallelUtil.readParallel(
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
             batchSize,
             graph,
             Pools.DEFAULT,
