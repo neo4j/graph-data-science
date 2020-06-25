@@ -117,7 +117,7 @@ include::specific-configuration.adoc[]
 
 The results are the same as for running write mode with a named graph, <<algorithms-embeddings-graph-sage-syntax-write, specified above>>.
 
-[[algorithms-embeddings-node2vec-examples]]
+[[algorithms-embeddings-graph-sage-examples]]
 == Examples
 
 Consider the graph created by the following Cypher statement:
