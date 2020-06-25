@@ -130,4 +130,13 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
     default int featuresSize() {
         return nodePropertyNames().size() + (degreeAsProperty() ? 1 : 0);
     }
+
+    @Value.Check
+    default void validate() {
+        if (nodePropertyNames().isEmpty() && !degreeAsProperty()) {
+            throw new IllegalArgumentException(
+                "GraphSage requires at least one property. Either `nodePropertyNames` or `degreeAsProperty` must be set."
+            );
+        }
+    }
 }
