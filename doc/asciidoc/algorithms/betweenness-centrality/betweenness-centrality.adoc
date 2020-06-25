@@ -512,18 +512,22 @@ ORDER BY name ASC
 | "Carol" | 4.0
 | "Dan"   | 2.0
 | "Eve"   | 2.0
-| "Frank" | 3.0
+| "Frank" | 2.0
 | "Gale"  | 0.0
 |===
 --
 
-Here we can see that the 'Carol' node has the highest score, followed by the 'Frank' node.
-This is consistent with the exact results, which we studied in the <<algorithms-betweenness-centrality-examples-stream, stream example>>.
-In fact, setting the `samplingSize` to the node count of the graph (seven, in our case) will produce exact results.
+Here we can see that the 'Carol' node has the highest score, followed by a three-way tie between the 'Dan', 'Eve', and 'Frank' nodes.
+We are only sampling from two nodes, where the probability of a node being picked for the sampling is proportional to its outgoing degree.
+The 'Carol' node has the maximum degree and is the most likely to be picked.
+The 'Gale' node has an outgoing degree of zero and is very unlikely to be picked.
+The other nodes all have the same probability to be picked.
 
-However, already at sampling size two, our approximate results are good enough to show which nodes were the most central.
-Furthermore, the two nodes that we did select for computation seems to have been either of 'Alice' and 'Bob' as well as 'Carol'.
-Picking 'Carol' is indeed very likely, because that node has the maximum outgoing degree in the graph.
+With our selected sampling seed of 0, we seem to have selected either of the 'Alice' and 'Bob' nodes, as well as the 'Carol' node.
+We can see that because either of 'Alice' and 'Bob' would add four to the score of the 'Carol' node, and each of 'Alice', 'Bob', and 'Carol' adds one to all of 'Dan', 'Eve', and 'Frank'.
+
+To increase the accuracy of our approximation, the sampling size could be increased.
+In fact, setting the `samplingSize` to the node count of the graph (seven, in our case) will produce exact results.
 
 
 [[algorithms-betweenness-centrality-examples-undirected]]
