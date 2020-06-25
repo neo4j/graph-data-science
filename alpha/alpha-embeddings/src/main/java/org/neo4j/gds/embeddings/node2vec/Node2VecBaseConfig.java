@@ -33,7 +33,7 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig {
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)
-    default int steps() {
+    default int walkLength() {
         return 80;
     }
 
@@ -63,7 +63,7 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig {
 
     @Value.Default
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
-    default double learningRate() {
+    default double initialLearningRate() {
         return 0.025;
     }
 

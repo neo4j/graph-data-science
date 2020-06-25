@@ -57,7 +57,7 @@ class RandomWalkTest extends AlgoTestBase {
         Graph graph = TestGraphLoader.from(db).graph(NATIVE);
         RandomWalk randomWalk = new RandomWalk(
             graph,
-            config.steps(),
+            config.walkLength(),
             new RandomWalk.NextNodeStrategy(graph, config.returnFactor(), config.inOutFactor()),
             config.concurrency(),
             config.walksPerNode(),
@@ -68,7 +68,7 @@ class RandomWalkTest extends AlgoTestBase {
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
         long[] walkForNodeZero = result.stream().filter(arr -> graph.toOriginalNodeId(arr[0]) == 0).findFirst().orElse(new long[0]);
-        int expectedStepsInWalkForNode0 = config.steps() + 1;
+        int expectedStepsInWalkForNode0 = config.walkLength() + 1;
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
 

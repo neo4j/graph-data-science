@@ -70,13 +70,13 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> impl
             .algo("gds.alpha.node2vec")
             .streamMode()
             .addParameter("walksPerNode", Integer.MAX_VALUE)
-            .addParameter("steps", Integer.MAX_VALUE)
+            .addParameter("walkLength", Integer.MAX_VALUE)
             .yields();
 
         Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
         assertEquals(IllegalArgumentException.class, throwable.getClass());
         String expectedMessage = formatWithLocale(
-            "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, steps: %d." +
+            "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, walkLength: %d." +
             " Try reducing these parameters or run on a smaller graph.",
             nodeCount,
             Integer.MAX_VALUE,

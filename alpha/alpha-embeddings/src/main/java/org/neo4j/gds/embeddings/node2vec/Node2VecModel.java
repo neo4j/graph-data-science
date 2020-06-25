@@ -100,11 +100,11 @@ public class Node2VecModel {
         private final PositiveSampleProducer positiveSamples;
         private final Vector centerGradientBuffer;
         private final Vector contextGradientBuffer;
-        private final float learningRate;
+        private final float initialLearningRate;
         private final float learningRateModifier;
         private final long startIndex;
 
-        private float currentLearningRate;
+        private float learningRate;
 
         TrainingTask(long startIndex, long endIndex) {
             this.startIndex = startIndex;
@@ -119,9 +119,9 @@ public class Node2VecModel {
             this.centerGradientBuffer = new Vector(config.dimensions());
             this.contextGradientBuffer = new Vector(config.dimensions());
 
-            this.learningRate = (float) config.learningRate();
-            this.learningRateModifier = (float) ((learningRate - config.minLearningRate()) / (endIndex - startIndex));
-            this.currentLearningRate = learningRate;
+            this.initialLearningRate = (float) config.initialLearningRate();
+            this.learningRateModifier = (float) ((initialLearningRate - config.minLearningRate()) / (endIndex - startIndex));
+            this.learningRate = initialLearningRate;
         }
 
         @Override
@@ -135,7 +135,7 @@ public class Node2VecModel {
                     trainSample(buffer[0], negativeSamples.nextSample(), false);
                 }
 
-                currentLearningRate = learningRate - (learningRateModifier * (positiveSamples.currentWalkIndex() - startIndex));
+                learningRate = initialLearningRate - (learningRateModifier * (positiveSamples.currentWalkIndex() - startIndex));
             }
         }
 
@@ -152,8 +152,8 @@ public class Node2VecModel {
                             ? 1 / (Math.exp(affinity) + 1)
                             : -1 / (Math.exp(affinity) + 1));
 
-            centerGradientBuffer.scalarMultiply(contextEmbedding, scalar * currentLearningRate);
-            contextGradientBuffer.scalarMultiply(centerEmbedding, scalar * currentLearningRate);
+            centerGradientBuffer.scalarMultiply(contextEmbedding, scalar * learningRate);
+            contextGradientBuffer.scalarMultiply(centerEmbedding, scalar * learningRate);
 
             centerEmbedding.addMutable(centerGradientBuffer);
             contextEmbedding.addMutable(contextGradientBuffer);

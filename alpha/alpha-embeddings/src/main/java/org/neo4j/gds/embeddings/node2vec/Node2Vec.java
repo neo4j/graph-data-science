@@ -43,7 +43,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
     public HugeObjectArray<Vector> compute() {
         RandomWalk randomWalk = new RandomWalk(
             graph,
-            config.steps(),
+            config.walkLength(),
             new RandomWalk.NextNodeStrategy(graph, config.returnFactor(), config.inOutFactor()),
             config.concurrency(),
             config.walksPerNode(),

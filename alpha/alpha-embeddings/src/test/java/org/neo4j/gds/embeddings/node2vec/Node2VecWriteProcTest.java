@@ -87,7 +87,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
         Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
         assertEquals(IllegalArgumentException.class, throwable.getClass());
         String expectedMessage = formatWithLocale(
-            "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, steps: %d." +
+            "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, walkLength: %d." +
             " Try reducing these parameters or run on a smaller graph.",
             nodeCount,
             Integer.MAX_VALUE,

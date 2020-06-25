@@ -104,15 +104,15 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
 
             private void validateConfig(Node2VecStreamConfig config, Graph graph) {
                 try {
-                    var ignored = multiplyExact(multiplyExact(graph.nodeCount(), config.walksPerNode()), config.steps());
+                    var ignored = multiplyExact(multiplyExact(graph.nodeCount(), config.walksPerNode()), config.walkLength());
                 } catch (ArithmeticException ex) {
                     throw new IllegalArgumentException(
                         formatWithLocale(
-                            "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, steps: %d." +
+                            "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, walkLength: %d." +
                             " Try reducing these parameters or run on a smaller graph.",
                             graph.nodeCount(),
                             config.walksPerNode(),
-                            config.steps()
+                            config.walkLength()
                         ));
                 }
             }
