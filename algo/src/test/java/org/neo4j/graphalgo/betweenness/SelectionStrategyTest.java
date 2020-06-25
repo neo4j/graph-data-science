@@ -33,7 +33,9 @@ import org.neo4j.graphalgo.extension.TestGraph;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 @GdlExtension
 class SelectionStrategyTest {
@@ -87,6 +89,27 @@ class SelectionStrategyTest {
         assertTrue(selectionStrategy.select(graph.toMappedNodeId("a")));
         assertTrue(selectionStrategy.select(graph.toMappedNodeId("b")));
         assertTrue(selectionStrategy.select(graph.toMappedNodeId("f")));
+    }
+
+    @Test
+    void neverIncludeZeroDegNodesIfBetterChoicesExist() {
+        TestGraph graph = fromGdl("(), (), (), (), (), (a)-->(), (), (), ()");
+
+        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(1);
+        selectionStrategy.init(graph, Pools.DEFAULT, 1);
+        assertEquals(1, samplingSize(graph.nodeCount(), selectionStrategy));
+        assertTrue(selectionStrategy.select(graph.toMappedNodeId("a")));
+    }
+
+    @Test
+    void not100PercentLikelyUnlessMaxDegNode() {
+        TestGraph graph = fromGdl("(a)-->(b), (b)-->(c), (b)-->(d)");
+
+        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(1, Optional.of(42L));
+        selectionStrategy.init(graph, Pools.DEFAULT, 1);
+        assertEquals(1, samplingSize(graph.nodeCount(), selectionStrategy));
+        assertFalse(selectionStrategy.select(graph.toMappedNodeId("a")));
+        assertTrue(selectionStrategy.select(graph.toMappedNodeId("b")));
     }
 
     @Test

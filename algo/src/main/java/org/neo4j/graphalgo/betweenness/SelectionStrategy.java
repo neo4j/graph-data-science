@@ -82,7 +82,7 @@ public interface SelectionStrategy {
             return bitSet.get(nodeId);
         }
 
-        private long maxDegree(
+        private int maxDegree(
             Graph graph,
             Collection<Partition> partitions,
             ExecutorService executorService,
@@ -116,7 +116,7 @@ public interface SelectionStrategy {
         private void selectNodes(
             Graph graph,
             Collection<Partition> partitions,
-            long maxDegree,
+            int maxDegree,
             ExecutorService executorService,
             int concurrency
         ) {
@@ -133,7 +133,11 @@ public interface SelectionStrategy {
                         if (currentSelectionSize >= samplingSize) {
                             break;
                         }
-                        if (threadLocalRandom.nextLong(maxDegree) <= graph.degree(nodeId)) {
+                        int nodeDegree = graph.degree(nodeId);
+                        // probability factor is in range [1, maxDegree] (inclusive both ends)
+                        // the probability of a node being selected is probabilityFactor * (1 / maxDegree)
+                        int probabilityFactor = threadLocalRandom.nextInt(maxDegree) + 1;
+                        if (probabilityFactor <= nodeDegree) {
                             while (true) {
                                 long actualCurrentSelectionSize = selectionSize.compareAndExchange(
                                     currentSelectionSize,

@@ -25,6 +25,7 @@ This topic includes:
 ** <<algorithms-betweenness-centrality-examples-stats, Stats>>
 ** <<algorithms-betweenness-centrality-examples-mutate, Mutate>>
 ** <<algorithms-betweenness-centrality-examples-write, Write>>
+** <<algorithms-betweenness-centrality-examples-sampling, Sampling>>
 
 
 [[algorithms-betweenness-centrality-intro]]
@@ -480,3 +481,45 @@ YIELD minCentrality, maxCentrality, sumCentrality, nodePropertiesWritten
 The returned result is the same as in the `stats` example.
 Additionally, each of the seven nodes now has a new property `betweenness` in the Neo4j database, containing the betweenness centrality score for that node.
 
+
+[[algorithms-betweenness-centrality-examples-sampling]]
+=== Sampling
+
+Betweenness Centrality can be very resource-intensive to compute.
+To help with this, it is possible to approximate the results using a sampling technique.
+The configuration parameters `samplingSize` and `samplingSeed` are used to control the sampling.
+We illustrate this on our example graph by approximating Betweenness Centrality with a sampling size of two.
+The seed value is an arbitrary integer, where using the same value will yield the same results between different runs of the procedure.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode with a sampling size of two:
+[source, cypher]
+----
+CALL gds.betweenness.stream('myGraph', {samplingSize: 2, samplingSeed: 0})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name    | score
+| "Alice" | 0.0
+| "Bob"   | 0.0
+| "Carol" | 4.0
+| "Dan"   | 2.0
+| "Eve"   | 2.0
+| "Frank" | 3.0
+| "Gale"  | 0.0
+|===
+--
+
+Here we can see that the 'Carol' node has the highest score, followed by the 'Frank' node.
+This is consistent with the exact results, which we studied in the <<algorithms-betweenness-centrality-examples-stream, stream example>>.
+In fact, setting the `samplingSize` to the node count of the graph (seven, in our case) will produce exact results.
+
+However, already at sampling size two, our approximate results are good enough to show which nodes were the most central.
+Furthermore, the two nodes that we did select for computation seems to have been either of 'Alice' and 'Bob' as well as 'Carol'.
+Picking 'Carol' is indeed very likely, because that node has the maximum outgoing degree in the graph.
