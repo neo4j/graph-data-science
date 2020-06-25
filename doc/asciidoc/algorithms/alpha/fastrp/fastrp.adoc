@@ -69,11 +69,11 @@ CALL gds.alpha.randomProjection.write(
   configuration: Map
 )
 YIELD
+  nodeCount: Integer,
+  propertiesWritten: Integer,
   createMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
-  nodeCount: Integer,
-  propertiesWritten: Integer,
   configuration: Map
 ----
 
@@ -87,7 +87,7 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name               | Type                 | Description
-| nodesCount         | Integer              | The number of nodes processed.
+| nodeCount          | Integer              | The number of nodes processed.
 | propertiesWritten  | Integer              | The number of node properties written.
 | createMillis       | Integer              | Milliseconds for loading data.
 | computeMillis      | Integer              | Milliseconds for running the algorithm.
@@ -108,11 +108,11 @@ CALL gds.alpha.randomProjection.write(
   configuration: Map
 )
 YIELD
+  nodeCount: Integer,
+  propertiesWritten: Integer,
   createMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
-  nodeCount: Integer,
-  propertiesWritten: Integer,
   configuration: Map
 ----
 
