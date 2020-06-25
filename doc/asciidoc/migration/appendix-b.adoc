@@ -29,18 +29,18 @@ This section is divided into the following sub-sections:
 * <<migration-graph-remove, Graph removal>>
 * <<migration-product-algos, Production-quality algorithms>>
 
-include::migration/migration-algos-common.adoc[leveloffset=+2]
+include::migration-algos-common.adoc[leveloffset=+2]
 
-include::migration/migration-memory-estimation.adoc[leveloffset=+2]
+include::migration-memory-estimation.adoc[leveloffset=+2]
 
-include::migration/migration-named-graph.adoc[leveloffset=+2]
+include::migration-named-graph.adoc[leveloffset=+2]
 
-include::migration/migration-cypher-projection.adoc[leveloffset=+2]
+include::migration-cypher-projection.adoc[leveloffset=+2]
 
-include::migration/migration-graph-list.adoc[leveloffset=+2]
+include::migration-graph-list.adoc[leveloffset=+2]
 
-include::migration/migration-graph-info.adoc[leveloffset=+2]
+include::migration-graph-info.adoc[leveloffset=+2]
 
-include::migration/migration-graph-remove.adoc[leveloffset=+2]
+include::migration-graph-remove.adoc[leveloffset=+2]
 
-include::migration/migration-product-algos.adoc[leveloffset=+2]
+include::migration-product-algos.adoc[leveloffset=+2]

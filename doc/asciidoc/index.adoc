@@ -60,7 +60,7 @@ include::production-deployment/production-deployment.adoc[leveloffset=+1]
 
 include::appendix-a.adoc[leveloffset=+1]
 
-include::appendix-b.adoc[leveloffset=+1]
+include::migration/appendix-b.adoc[leveloffset=+1]
 
 // ifdef::backend-html5[]
 // ++++
