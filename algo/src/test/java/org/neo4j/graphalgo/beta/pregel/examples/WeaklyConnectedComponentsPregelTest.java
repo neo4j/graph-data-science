@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.beta.pregel.examples;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
