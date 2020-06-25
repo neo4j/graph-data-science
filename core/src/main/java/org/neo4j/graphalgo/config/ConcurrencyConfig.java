@@ -20,17 +20,19 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.GdsEdition;
 
+import static org.neo4j.graphalgo.config.AlgoBaseConfig.CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface ConcurrencyValidation {
+public interface ConcurrencyConfig {
 
     int DEFAULT_CONCURRENCY = 4;
     int CONCURRENCY_LIMITATION = 4;
 
     @Value.Default
-    @Value.Parameter(false)
+    @Configuration.Key(CONCURRENCY_KEY)
     default int concurrency() {
         return DEFAULT_CONCURRENCY;
     }
@@ -42,13 +44,10 @@ public interface ConcurrencyValidation {
             // do nothing
             return;
         }
+        Validator.validate(concurrency());
         if (this instanceof WriteConfig) {
             WriteConfig wc = (WriteConfig) this;
-            Validator.validate(wc.concurrency());
             Validator.validate(wc.writeConcurrency());
-        } else if (this instanceof AlgoBaseConfig) {
-            AlgoBaseConfig algoConfig = (AlgoBaseConfig) this;
-            Validator.validate(algoConfig.concurrency());
         } else if (this instanceof GraphCreateConfig) {
             GraphCreateConfig gcc = (GraphCreateConfig) this;
             Validator.validate(gcc.readConcurrency());

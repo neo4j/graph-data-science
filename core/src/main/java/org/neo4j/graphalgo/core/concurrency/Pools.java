@@ -33,7 +33,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.neo4j.graphalgo.config.ConcurrencyValidation.CONCURRENCY_LIMITATION;
+import static org.neo4j.graphalgo.config.ConcurrencyConfig.CONCURRENCY_LIMITATION;
 
 public final class Pools {
 

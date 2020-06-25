@@ -37,6 +37,12 @@ import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.HashMap;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
+
 @GdlExtension
 class WeaklyConnectedComponentsPregelTest {
 
@@ -71,12 +77,28 @@ class WeaklyConnectedComponentsPregelTest {
     private TestGraph graph;
 
     @Test
+    void shouldFailWithConcurrency10() {
+        int batchSize = 10;
+        int maxIterations = 10;
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
+            PregelConfig config = ImmutablePregelConfig.builder()
+                .isAsynchronous(true)
+                .concurrency(10)
+                .build();
+        });
+
+        assertThat(illegalArgumentException, containsMessage("The configured concurrency value is too high"));
+    }
+
+    @Test
     void runWCC() {
         int batchSize = 10;
         int maxIterations = 10;
 
         PregelConfig config = ImmutablePregelConfig.builder()
             .isAsynchronous(true)
+            .concurrency(2)
             .build();
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(

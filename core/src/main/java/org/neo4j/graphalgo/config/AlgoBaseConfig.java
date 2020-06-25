@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 
-public interface AlgoBaseConfig extends BaseConfig {
+public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig {
 
     String NODE_LABELS_KEY = "nodeLabels";
     String CONCURRENCY_KEY = "concurrency";

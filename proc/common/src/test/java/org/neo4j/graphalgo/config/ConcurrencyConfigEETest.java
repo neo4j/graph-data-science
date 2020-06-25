@@ -32,7 +32,7 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ConcurrencyValidationEETest extends BaseProcTest {
+class ConcurrencyConfigEETest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {

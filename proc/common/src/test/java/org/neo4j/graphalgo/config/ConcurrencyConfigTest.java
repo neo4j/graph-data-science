@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-class ConcurrencyValidationTest extends BaseProcTest {
+class ConcurrencyConfigTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {

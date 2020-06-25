@@ -29,7 +29,6 @@ import org.neo4j.cypher.internal.evaluator.EvaluationException;
 import org.neo4j.cypher.internal.evaluator.Evaluator;
 import org.neo4j.cypher.internal.evaluator.ExpressionEvaluator;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.config.ConcurrencyValidation;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;

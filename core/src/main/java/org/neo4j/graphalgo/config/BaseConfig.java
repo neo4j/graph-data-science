@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @SuppressWarnings("immutables:subtype")
-public interface BaseConfig extends ConcurrencyValidation {
+public interface BaseConfig {
 
     String SUDO_KEY = "sudo";
 
