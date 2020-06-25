@@ -26,6 +26,7 @@ This topic includes:
 ** <<algorithms-betweenness-centrality-examples-mutate, Mutate>>
 ** <<algorithms-betweenness-centrality-examples-write, Write>>
 ** <<algorithms-betweenness-centrality-examples-sampling, Sampling>>
+** <<algorithms-betweenness-centrality-examples-undirected, Undirected>>
 
 
 [[algorithms-betweenness-centrality-intro]]
@@ -523,3 +524,51 @@ In fact, setting the `samplingSize` to the node count of the graph (seven, in ou
 However, already at sampling size two, our approximate results are good enough to show which nodes were the most central.
 Furthermore, the two nodes that we did select for computation seems to have been either of 'Alice' and 'Bob' as well as 'Carol'.
 Picking 'Carol' is indeed very likely, because that node has the maximum outgoing degree in the graph.
+
+
+[[algorithms-betweenness-centrality-examples-undirected]]
+=== Undirected
+
+Betweenness Centrality can also be run on undirected graphs.
+To illustrate this, we will project our example graph using the `UNDIRECTED` orientation.
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myUndirectedGraph'.
+[source, cypher, role=graph-create-query]
+----
+CALL gds.graph.create('myUndirectedGraph', 'User', {FOLLOWS: {orientation: 'UNDIRECTED'}})
+----
+
+Now we can run Betweenness Centrality on our undirected graph.
+The algorithm automatically figures out that the graph is undirected.
+
+
+[WARNING]
+Running the algorithm on an undirected graph is about twice as computationally intensive compared to a directed graph.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode on the undirected graph:
+[source, cypher]
+----
+CALL gds.betweenness.stream('myUndirectedGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name    | score
+| "Alice" | 0.0
+| "Bob"   | 0.0
+| "Carol" | 9.5
+| "Dan"   | 3.0
+| "Eve"   | 3.0
+| "Frank" | 5.5
+| "Gale"  | 0.0
+|===
+--
+
+The central nodes now have slightly higher scores, due to the fact that there are more shortest paths in the graph, and these are more likely to pass through the central nodes.
+The 'Dan' and 'Eve' nodes retain the same centrality scores as in the directed case.
