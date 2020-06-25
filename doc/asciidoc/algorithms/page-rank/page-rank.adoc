@@ -106,8 +106,8 @@ include::specific-configuration.adoc[]
 [opts="header"]
 |===
 | Name    | Type    | Description
-| nodeId  | Integer | Node ID
-| score   | Float   | PageRank score
+| nodeId  | Integer | Node ID.
+| score   | Float   | PageRank score.
 |===
 
 

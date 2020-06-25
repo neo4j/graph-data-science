@@ -80,8 +80,8 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name        | Type    | Description
-| nodeId      | Integer | The Neo4j node ID.
-| componentId | Integer | The component ID.
+| nodeId      | Integer | Node ID.
+| componentId | Integer | Component ID.
 |===
 
 

@@ -78,7 +78,7 @@ include::specific-configuration.adoc[]
 |===
 | Name                       | Type      | Description
 | nodeId                     | Integer   | Node ID.
-| localClusteringCoefficient | Double    | The local clustering coefficient for the node.
+| localClusteringCoefficient | Double    | Local clustering coefficient.
 |===
 
 

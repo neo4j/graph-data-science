@@ -104,8 +104,8 @@ include::specific-configuration.adoc[]
 [opts="header"]
 |===
 | Name        | Type    | Description
-| nodeId      | Integer | Node ID
-| communityId | Integer | Community ID
+| nodeId      | Integer | Node ID.
+| communityId | Integer | Community ID.
 |===
 
 

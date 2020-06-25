@@ -104,9 +104,9 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1m,1,6"]
 |===
 | Name       | Type    | Description
-| node1      | Integer | The Neo4j ID of the first node.
-| node2      | Integer | The Neo4j ID of the second node.
-| similarity | Float   | The similarity score for the two nodes.
+| node1      | Integer | Node ID of the first node.
+| node2      | Integer | Node ID of the second node.
+| similarity | Float   | Similarity score for the two nodes.
 |===
 
 [[algorithms-node-similarity-syntax-stats]]
