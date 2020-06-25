@@ -41,7 +41,9 @@ import java.util.stream.Stream;
 
 public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSageResult, GraphSageStreamProc.GraphSageStreamResult, GraphSageStreamConfig> {
 
-    @Description("GraphSage stream proc")
+    static final String GRAPHSAGE_DESCRIPTION = "The GraphSage algorithm inductively computes embeddings for nodes based on a their features and neighborhoods.";
+
+    @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.alpha.graphSage.stream", mode = Mode.READ)
     public Stream<GraphSageStreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

@@ -36,11 +36,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc.GRAPHSAGE_DESCRIPTION;
+
 public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSageResult, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
 
-
-    @Description("")
     @Procedure(name = "gds.alpha.graphSage.write", mode = Mode.READ)
+    @Description(GRAPHSAGE_DESCRIPTION)
     public Stream<GraphSageWriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
