@@ -13,7 +13,6 @@ The Neo4j Graph Data Science library contains the following node embedding algor
 * Alpha
 ** <<algorithms-embeddings-node2vec, Node2Vec>>
 ** <<algorithms-embeddings-graph-sage, GraphSAGE>>
-** Random Projection
 ** <<algorithms-embeddings-random-projection, Random Projection>>
 
 
