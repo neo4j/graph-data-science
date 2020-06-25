@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
@@ -76,6 +77,15 @@ public interface GraphCreateConfig extends BaseConfig {
 
     @Configuration.Ignore
     GraphStoreFactory.Supplier graphStoreFactory();
+
+    @Value.Check
+    default void validateConcurrency() {
+        if (GdsEdition.instance().isOnEnterpriseEdition()) {
+            // do nothing
+            return;
+        }
+        ConcurrencyConfig.Validator.validate(readConcurrency());
+    }
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
         CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(

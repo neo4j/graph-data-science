@@ -45,17 +45,10 @@ public interface ConcurrencyConfig {
             return;
         }
         Validator.validate(concurrency());
-        if (this instanceof WriteConfig) {
-            WriteConfig wc = (WriteConfig) this;
-            Validator.validate(wc.writeConcurrency());
-        } else if (this instanceof GraphCreateConfig) {
-            GraphCreateConfig gcc = (GraphCreateConfig) this;
-            Validator.validate(gcc.readConcurrency());
-        }
     }
 
     class Validator {
-        private static void validate(int requestedConcurrency) {
+        static void validate(int requestedConcurrency) {
             if (requestedConcurrency > CONCURRENCY_LIMITATION) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "The configured concurrency value is too high. " +

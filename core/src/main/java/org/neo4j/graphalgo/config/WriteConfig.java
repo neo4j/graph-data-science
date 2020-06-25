@@ -20,11 +20,21 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.core.GdsEdition;
 
 public interface WriteConfig extends AlgoBaseConfig {
 
     @Value.Default
     default int writeConcurrency() {
         return concurrency();
+    }
+
+    @Value.Check
+    default void validateConcurrency() {
+        if (GdsEdition.instance().isOnEnterpriseEdition()) {
+            // do nothing
+            return;
+        }
+        ConcurrencyConfig.Validator.validate(writeConcurrency());
     }
 }
