@@ -127,9 +127,9 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
                     createMillis,
                     computeMillis,
                     mutateMillis,
-                    minCentrality,
-                    maxCentrality,
-                    sumCentrality,
+                    minimumScore,
+                    maximumScore,
+                    scoreSum,
                     config.toMap()
                 );
             }

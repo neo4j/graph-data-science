@@ -58,9 +58,9 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
-            "minCentrality", 0.0,
-            "maxCentrality", 4.0,
-            "sumCentrality", 10.0,
+            "minimumScore", 0.0,
+            "maximumScore", 4.0,
+            "scoreSum", 10.0,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "configuration", isA(Map.class)

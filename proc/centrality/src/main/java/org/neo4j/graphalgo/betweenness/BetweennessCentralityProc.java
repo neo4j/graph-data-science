@@ -46,9 +46,9 @@ final class BetweennessCentralityProc {
         ProcedureCallContext callContext
     ) {
         var computeStatistics = callContext.outputFields().anyMatch(f ->
-            f.equalsIgnoreCase("minCentrality") ||
-            f.equalsIgnoreCase("maxCentrality") ||
-            f.equalsIgnoreCase("sumCentrality")
+            f.equalsIgnoreCase("minimumScore") ||
+            f.equalsIgnoreCase("maximumScore") ||
+            f.equalsIgnoreCase("scoreSum")
         );
 
         var result = computeResult.result();
@@ -77,31 +77,27 @@ final class BetweennessCentralityProc {
             sum += c;
         }
         return procResultBuilder
-            .minCentrality(min)
-            .maxCentrality(max)
-            .sumCentrality(sum);
+            .minimumScore(min)
+            .maximumScore(max)
+            .scoreSum(sum);
     }
 
     abstract static class BetweennessCentralityResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
 
-        double minCentrality = -1;
+        double minimumScore, maximumScore, scoreSum = -1;
 
-        double maxCentrality = -1;
-
-        double sumCentrality = -1;
-
-        BetweennessCentralityResultBuilder<PROC_RESULT> minCentrality(double minCentrality) {
-            this.minCentrality = minCentrality;
+        BetweennessCentralityResultBuilder<PROC_RESULT> minimumScore(double minimumScore) {
+            this.minimumScore = minimumScore;
             return this;
         }
 
-        BetweennessCentralityResultBuilder<PROC_RESULT> maxCentrality(double maxCentrality) {
-            this.maxCentrality = maxCentrality;
+        BetweennessCentralityResultBuilder<PROC_RESULT> maximumScore(double maximumScore) {
+            this.maximumScore = maximumScore;
             return this;
         }
 
-        BetweennessCentralityResultBuilder<PROC_RESULT> sumCentrality(double sumCentrality) {
-            this.sumCentrality = sumCentrality;
+        BetweennessCentralityResultBuilder<PROC_RESULT> scoreSum(double scoreSum) {
+            this.scoreSum = scoreSum;
             return this;
         }
     }

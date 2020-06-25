@@ -71,9 +71,9 @@ class BetweennessCentralityWriteProcTest
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
-            "minCentrality", 0.0,
-            "maxCentrality", 4.0,
-            "sumCentrality", 10.0,
+            "minimumScore", 0.0,
+            "maximumScore", 4.0,
+            "scoreSum", 10.0,
             "nodePropertiesWritten", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),

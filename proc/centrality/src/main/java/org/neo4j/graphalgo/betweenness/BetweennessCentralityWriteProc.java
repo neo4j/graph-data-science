@@ -127,9 +127,9 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
                     createMillis,
                     computeMillis,
                     writeMillis,
-                    minCentrality,
-                    maxCentrality,
-                    sumCentrality,
+                    minimumScore,
+                    maximumScore,
+                    scoreSum,
                     config.toMap()
                 );
             }

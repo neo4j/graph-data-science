@@ -92,9 +92,9 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
 
     public static class StatsResult {
 
-        public final double minCentrality;
-        public final double maxCentrality;
-        public final double sumCentrality;
+        public final double minimumScore;
+        public final double maximumScore;
+        public final double scoreSum;
 
         public final long createMillis;
         public final long computeMillis;
@@ -104,17 +104,17 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         StatsResult(
             long createMillis,
             long computeMillis,
-            double minCentrality,
-            double maxCentrality,
-            double sumCentrality,
+            double minimumScore,
+            double maximumScore,
+            double scoreSum,
             Map<String, Object> configuration
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
 
-            this.minCentrality = minCentrality;
-            this.maxCentrality = maxCentrality;
-            this.sumCentrality = sumCentrality;
+            this.minimumScore = minimumScore;
+            this.maximumScore = maximumScore;
+            this.scoreSum = scoreSum;
             this.configuration = configuration;
         }
 
@@ -125,9 +125,9 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
                 return new StatsResult(
                     createMillis,
                     computeMillis,
-                    minCentrality,
-                    maxCentrality,
-                    sumCentrality,
+                    minimumScore,
+                    maximumScore,
+                    scoreSum,
                     config.toMap()
                 );
             }
