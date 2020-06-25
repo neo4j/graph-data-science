@@ -88,7 +88,7 @@ class WeaklyConnectedComponentsPregelTest {
                 .build();
         });
 
-        assertThat(illegalArgumentException, containsMessage("The configured concurrency value is too high"));
+        assertThat(illegalArgumentException, containsMessage("The configured `concurrency` value is too high"));
     }
 
     @Test

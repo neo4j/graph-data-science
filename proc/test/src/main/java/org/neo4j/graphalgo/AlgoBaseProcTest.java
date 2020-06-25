@@ -359,7 +359,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                     () -> method.invoke(proc, configMap, Collections.emptyMap())
                 );
                 assertEquals(IllegalArgumentException.class, ex.getCause().getClass());
-                assertThat(ex.getCause().getMessage(), containsString("The configured concurrency value is too high"));
+                assertThat(ex.getCause().getMessage(), containsString("The configured `readConcurrency` value is too high"));
             })
         );
     }

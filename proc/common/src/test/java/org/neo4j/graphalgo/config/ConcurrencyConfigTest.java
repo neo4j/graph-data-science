@@ -53,8 +53,8 @@ class ConcurrencyConfigTest extends BaseProcTest {
 
         assertError(
             query,
-            "The configured concurrency value is too high. " +
-            "The maximum allowed concurrency value is 4 but 10 was configured."
+            "The configured `concurrency` value is too high. " +
+            "The maximum allowed `concurrency` value is 4 but 10 was configured."
         );
     }
 
@@ -64,8 +64,8 @@ class ConcurrencyConfigTest extends BaseProcTest {
 
         assertError(
             query,
-            "The configured concurrency value is too high. " +
-            "The maximum allowed concurrency value is 4 but 9 was configured."
+            "The configured `readConcurrency` value is too high. " +
+            "The maximum allowed `readConcurrency` value is 4 but 9 was configured."
         );
     }
 
@@ -75,8 +75,8 @@ class ConcurrencyConfigTest extends BaseProcTest {
 
         assertError(
             query,
-            "The configured concurrency value is too high. " +
-            "The maximum allowed concurrency value is 4 but 12 was configured."
+            "The configured `writeConcurrency` value is too high. " +
+            "The maximum allowed `writeConcurrency` value is 4 but 12 was configured."
         );
     }
 }
