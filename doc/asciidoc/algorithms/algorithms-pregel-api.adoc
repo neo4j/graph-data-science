@@ -94,7 +94,7 @@ import org.neo4j.graphalgo.beta.pregel.PregelContext;
 
 import java.util.Queue;
 
-public class WccPregel implements PregelComputation {
+public class ConnectedComponentsPregel implements PregelComputation {
 
    @Override
    public void compute(PregelContext context, long nodeId, Queue<Double> messages) {
@@ -120,7 +120,7 @@ public class WccPregel implements PregelComputation {
 }
 ----
 
-.The following runs Pregel, using the WccPregel
+.The following runs Pregel, using `ConnectedComponentsPregel`
 [source, java]
 ----
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -146,7 +146,7 @@ public class PregelExample {
         Pregel pregelJob = Pregel.withDefaultNodeValues(
             RandomGraphGenerator.generate(10, 100),
             config,
-            new WccPregel(),
+            new ConnectedComponentsPregel(),
             batchSize,
             AlgoBaseConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
