@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -110,7 +109,7 @@ class AppendixAProcedureListingTest extends BaseProcTest {
             .getMethodsAnnotatedWith(Procedure.class)
             .stream()
             .map(Method::getDeclaringClass)
-            .collect(Collectors.toSet())
+            .distinct()
             .forEach(procedureClass -> {
                 try {
                     registerProcedures(procedureClass);
@@ -125,7 +124,7 @@ class AppendixAProcedureListingTest extends BaseProcTest {
             .getMethodsAnnotatedWith(UserFunction.class)
             .stream()
             .map(Method::getDeclaringClass)
-            .collect(Collectors.toSet())
+            .distinct()
             .forEach(functionClass -> {
                 try {
                     registerFunctions(functionClass);
