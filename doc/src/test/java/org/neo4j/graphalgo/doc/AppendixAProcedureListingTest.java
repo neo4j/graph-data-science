@@ -50,49 +50,18 @@ class AppendixAProcedureListingTest extends BaseProcTest {
     private static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
 
     private final Asciidoctor asciidoctor = create();
+    private static final List<String> PACKAGES_TO_SCAN = List.of(
+        "org.neo4j.graphalgo",
+        "org.neo4j.gds.embeddings"
+    );
 
     @BeforeEach
     void setUp() {
-        Reflections graphAlgoReflections = new Reflections("org.neo4j.graphalgo",
-            new MethodAnnotationsScanner());
-
-        registerProcedures(graphAlgoReflections);
-        registerFunctions(graphAlgoReflections);
-
-        Reflections embeddingsReflections = new Reflections("org.neo4j.gds.embeddings",
-            new MethodAnnotationsScanner());
-
-        registerProcedures(embeddingsReflections);
-        registerFunctions(embeddingsReflections);
-    }
-
-    private void registerProcedures(Reflections reflections) {
-        reflections
-            .getMethodsAnnotatedWith(Procedure.class)
-            .stream()
-            .map(Method::getDeclaringClass)
-            .collect(Collectors.toSet())
-            .forEach(procedureClass -> {
-                try {
-                    registerProcedures(procedureClass);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-    }
-
-    private void registerFunctions(Reflections reflections) {
-        reflections
-            .getMethodsAnnotatedWith(UserFunction.class)
-            .stream()
-            .map(Method::getDeclaringClass)
-            .collect(Collectors.toSet())
-            .forEach(functionClass -> {
-                try {
-                    registerFunctions(functionClass);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        PACKAGES_TO_SCAN.stream()
+            .map(this::createReflections)
+            .forEach(reflections -> {
+                registerProcedures(reflections);
+                registerFunctions(reflections);
             });
     }
 
@@ -126,6 +95,44 @@ class AppendixAProcedureListingTest extends BaseProcTest {
         assertEquals(registeredProcedures, documentedProcedures);
 
         assertEquals(registeredProcedures.size(), documentedProcedures.size());
+    }
+
+
+    private Reflections createReflections(String pkg) {
+        return new Reflections(
+            pkg,
+            new MethodAnnotationsScanner()
+        );
+    }
+
+    private void registerProcedures(Reflections reflections) {
+        reflections
+            .getMethodsAnnotatedWith(Procedure.class)
+            .stream()
+            .map(Method::getDeclaringClass)
+            .collect(Collectors.toSet())
+            .forEach(procedureClass -> {
+                try {
+                    registerProcedures(procedureClass);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+    }
+
+    private void registerFunctions(Reflections reflections) {
+        reflections
+            .getMethodsAnnotatedWith(UserFunction.class)
+            .stream()
+            .map(Method::getDeclaringClass)
+            .collect(Collectors.toSet())
+            .forEach(functionClass -> {
+                try {
+                    registerFunctions(functionClass);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
     }
 
 }
