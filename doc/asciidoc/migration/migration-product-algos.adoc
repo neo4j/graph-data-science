@@ -7,6 +7,7 @@
 * <<migration-page-rank, PageRank>>
 * <<migration-wcc, Weakly Connected Components>>
 * <<migration-triangle-count, Triangle Count / Clustering Coefficient>>
+* <<migration-betweenness-centrality, Betweenness Centrality (exact and sampled)>>
 
 include::migration-lpa.adoc[leveloffset=+1]
 
@@ -19,3 +20,5 @@ include::migration-page-rank.adoc[leveloffset=+1]
 include::migration-wcc.adoc[leveloffset=+1]
 
 include::migration-triangle-count.adoc[leveloffset=+1]
+
+include::migration-betweenness-centrality.adoc[leveloffset=+1]
