@@ -76,7 +76,7 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
         long nodeCount = graph.nodeCount();
         features = HugeObjectArray.newArray(double[].class, nodeCount, AllocationTracker.EMPTY);
         RandomProjectionBaseConfig config = ImmutableRandomProjectionBaseConfig.builder()
-            .embeddingDimension(FEATURES_PER_NODE)
+            .embeddingSize(FEATURES_PER_NODE)
             .maxIterations(4)
             .normalizeL2(true)
             .addAllIterationWeights(List.of(1.0, 1.0, 7.81, 45.28))

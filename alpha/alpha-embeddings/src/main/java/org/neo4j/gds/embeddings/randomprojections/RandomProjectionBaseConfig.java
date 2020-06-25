@@ -35,7 +35,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsConfig
 {
 
-    int embeddingDimension();
+    int embeddingSize();
 
     @Value.Default
     default int sparsity() {

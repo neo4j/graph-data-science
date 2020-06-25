@@ -44,7 +44,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     private final HugeObjectArray<float[]> embeddingA;
     private final HugeObjectArray<float[]> embeddingB;
 
-    private final int embeddingDimension;
+    private final int embeddingSize;
     private final int sparsity;
     private final int iterations;
     private final List<Double> iterationWeights;
@@ -62,7 +62,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
 
-        this.embeddingDimension = config.embeddingDimension();
+        this.embeddingSize = config.embeddingSize();
         this.sparsity = config.sparsity();
         this.iterations = config.maxIterations();
         this.iterationWeights = config.iterationWeights();
@@ -70,7 +70,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         this.normalizeL2 = config.normalizeL2();
         this.concurrency = config.concurrency();
 
-        int embeddingSize = iterationWeights.isEmpty() ? embeddingDimension * iterations : embeddingDimension;
+        int embeddingSize = iterationWeights.isEmpty() ? this.embeddingSize * iterations : this.embeddingSize;
         this.embeddings.setAll((i) -> new float[embeddingSize]);
     }
 
@@ -105,7 +105,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     void initRandomVectors() {
         double probability = 1.0f / (2.0f * sparsity);
         float sqrtSparsity = (float) Math.sqrt(sparsity);
-        float sqrtEmbeddingDimension = (float) Math.sqrt(embeddingDimension);
+        float sqrtEmbeddingSize = (float) Math.sqrt(embeddingSize);
 
         progressLogger.logMessage("Computing random vectors");
         ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
@@ -117,7 +117,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
                 ? 1.0f
                 : (float) Math.pow(degree, normalizationStrength);
 
-            float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
+            float entryValue = scaling * sqrtSparsity / sqrtEmbeddingSize;
             float[] randomVector = computeRandomVector(random.get(), probability, entryValue);
             embeddingB.set(nodeId, randomVector);
         });
@@ -133,7 +133,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
             try (var concurrentGraphCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
                 ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-                    float[] currentEmbedding = new float[embeddingDimension];
+                    float[] currentEmbedding = new float[embeddingSize];
                     localCurrent.set(nodeId, currentEmbedding);
                     concurrentGraphCopy.get().forEachRelationship(nodeId, (source, target) -> {
                         addArrayValues(currentEmbedding, localPrevious.get(target));
@@ -147,7 +147,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
                 });
             }
 
-            int offset = embeddingDimension * i;
+            int offset = embeddingSize * i;
             double weight = iterationWeights.isEmpty()
                 ? Double.NaN
                 : iterationWeights.get(i);
@@ -159,7 +159,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
                     l2Normalize(newEmbedding);
                 }
                 if (iterationWeights.isEmpty()) {
-                    System.arraycopy(newEmbedding, 0, embedding, offset, embeddingDimension);
+                    System.arraycopy(newEmbedding, 0, embedding, offset, embeddingSize);
                 } else {
                     updateEmbeddings(weight, embedding, newEmbedding);
                 }
@@ -168,8 +168,8 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     }
 
     private float[] computeRandomVector(Random random, double probability, float entryValue) {
-        float[] randomVector = new float[embeddingDimension];
-        for (int i = 0; i < embeddingDimension; i++) {
+        float[] randomVector = new float[embeddingSize];
+        for (int i = 0; i < embeddingSize; i++) {
             randomVector[i] = computeRandomEntry(random, probability, entryValue);
         }
         return randomVector;

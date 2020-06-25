@@ -52,7 +52,7 @@ public interface GraphSageStreamConfig extends GraphSageBaseConfig {
         ActivationFunction activationFunction,
         AggregatorType aggregator,
         int batchSize,
-        int embeddingDimension,
+        int embeddingSize,
         List<String> nodePropertyNames,
         double tolerance
     ) {
@@ -60,7 +60,7 @@ public interface GraphSageStreamConfig extends GraphSageBaseConfig {
             .activationFunction(activationFunction)
             .aggregator(aggregator)
             .batchSize(batchSize)
-            .embeddingSize(embeddingDimension)
+            .embeddingSize(embeddingSize)
             .nodePropertyNames(nodePropertyNames)
             .tolerance(tolerance)
             .build();

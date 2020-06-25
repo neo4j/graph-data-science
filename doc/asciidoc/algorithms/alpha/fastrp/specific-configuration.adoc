@@ -2,7 +2,7 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                    | Type          | Default   | Optional  | Description
-| embeddingDimension      | Integer       | n/a       | no        | The dimension of the computed node embeddings.
+| embeddingSize           | Integer       | n/a       | no        | The dimension of the computed node embeddings.
 | sparsity                | Integer       | 3         | yes       | The expected proportion of non-zero elements in the initial random vectors is `1/sparsity`.
 | maxIterations           | Integer       | n/a       | no        | The number of iterations to run. Each iteration produces an intermediate embedding per node.
 | iterationWeights        | List<Float>   | []        | yes       | Controls how much each intermediate embedding from an iteration contributes to the final embedding.

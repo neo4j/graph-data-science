@@ -59,14 +59,14 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionProcTest#weights")
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
-        int embeddingDimension = 128;
+        int embeddingSize = 128;
         int maxIterations = 4;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .algo("gds.alpha.randomProjection")
             .writeMode()
-            .addParameter("embeddingDimension", embeddingDimension)
+            .addParameter("embeddingSize", embeddingSize)
             .addParameter("maxIterations", maxIterations)
             .addParameter("writeProperty", "embedding");
 
@@ -78,8 +78,8 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
         runQuery(writeQuery);
 
         int expectedEmbeddingsDimension = weights.isEmpty()
-            ? embeddingDimension * maxIterations
-            : embeddingDimension;
+            ? embeddingSize * maxIterations
+            : embeddingSize;
         runQueryWithRowConsumer("MATCH (n:Node) RETURN n.embedding as embedding", row -> {
             float[] embeddings = (float[]) row.get("embedding");
             assertEquals(expectedEmbeddingsDimension, embeddings.length);

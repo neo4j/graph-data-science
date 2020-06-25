@@ -75,9 +75,9 @@ public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBa
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        var withDimensions = userInput.containsKey("embeddingDimension")
+        var withDimensions = userInput.containsKey("embeddingSize")
             ? userInput
-            : userInput.withEntry("embeddingDimension", 128);
+            : userInput.withEntry("embeddingSize", 128);
 
         var withMaxIterations = withDimensions.containsKey("maxIterations")
             ? withDimensions
@@ -88,13 +88,13 @@ public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBa
 
     @Test
     void shouldFailWhenWeightsLengthUnequalToIterations() {
-        int embeddingDimension = 128;
+        int embeddingSize = 128;
         int maxIterations = 4;
 
             applyOnProcedure(proc -> {
                 getProcedureMethods(proc).forEach(method -> {
                     CypherMapWrapper configWrapper = CypherMapWrapper.empty()
-                        .withEntry("embeddingDimension", embeddingDimension)
+                        .withEntry("embeddingSize", embeddingSize)
                         .withEntry("maxIterations", maxIterations)
                         .withEntry("iterationWeights", List.of(1.0f, 1.0f));
 

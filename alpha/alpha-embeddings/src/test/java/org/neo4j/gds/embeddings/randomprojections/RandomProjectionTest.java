@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RandomProjectionTest extends AlgoTestBase {
 
     static final RandomProjectionBaseConfig DEFAULT_CONFIG = ImmutableRandomProjectionBaseConfig.builder()
-        .embeddingDimension(128)
+        .embeddingSize(128)
         .maxIterations(1)
         .build();
 
@@ -129,7 +129,7 @@ class RandomProjectionTest extends AlgoTestBase {
         RandomProjection randomProjection = new RandomProjection(
             graph,
             ImmutableRandomProjectionBaseConfig.builder()
-                .embeddingDimension(512)
+                .embeddingSize(512)
                 .maxIterations(1)
                 .build(),
             progressLogger,
@@ -172,7 +172,7 @@ class RandomProjectionTest extends AlgoTestBase {
         RandomProjection randomProjection = new RandomProjection(
             graph,
             ImmutableRandomProjectionBaseConfig.builder()
-                .embeddingDimension(64)
+                .embeddingSize(64)
                 .maxIterations(4)
                 .build(),
             progressLogger,
