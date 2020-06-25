@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 @SuppressWarnings("immutables:subtype")
 public interface GraphCreateFromGdlConfig extends GraphCreateConfig {
 
-    @Value
     String gdlGraph();
 
     @Value.Default
