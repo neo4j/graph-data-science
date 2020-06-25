@@ -98,8 +98,8 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
     }
 
     @Value.Default
-    default int negativeSamples() {
-        return GraphSageModel.DEFAULT_NEGATIVE_SAMPLES;
+    default int negativeSampleWeight() {
+        return GraphSageModel.DEFAULT_NEGATIVE_SAMPLE_WEIGHT;
     }
 
     @Value.Default

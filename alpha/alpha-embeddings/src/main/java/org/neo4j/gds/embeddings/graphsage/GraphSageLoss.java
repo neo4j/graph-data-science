@@ -82,7 +82,7 @@ public class GraphSageLoss extends SingleParentVariable {
             double positiveLogistic = logisticFunction(positiveAffinity);
             double negativeLogistic = logisticFunction(-negativeAffinity);
 
-            IntStream.range(0, embeddingSize).forEach(columnOffset -> lossMath(
+            IntStream.range(0, embeddingSize).forEach(columnOffset -> partialComputeGradient(
                 embeddings,
                 gradientResult,
                 nodeId,
@@ -98,8 +98,8 @@ public class GraphSageLoss extends SingleParentVariable {
         return Tensor.matrix(gradientResult, totalBatchSize, embeddingSize);
     }
 
-    private void lossMath(
-        double[] embeddingArr,
+    private void partialComputeGradient(
+        double[] embeddings,
         double[] gradientResult,
         int nodeId,
         int positiveNodeId,
@@ -112,12 +112,12 @@ public class GraphSageLoss extends SingleParentVariable {
         int nodeIndex = nodeId * dimension + columnOffset;
         int positiveNodeIndex = positiveNodeId * dimension + columnOffset;
         int negativeNodeIndex = negativeNodeId * dimension + columnOffset;
-        gradientResult[nodeIndex] = -embeddingArr[positiveNodeIndex] * positiveLogistic +
-            negativeSamplingFactor * embeddingArr[negativeNodeIndex] * negativeLogistic;
+        gradientResult[nodeIndex] = -embeddings[positiveNodeIndex] * positiveLogistic +
+            negativeSamplingFactor * embeddings[negativeNodeIndex] * negativeLogistic;
 
-        gradientResult[positiveNodeIndex] = -embeddingArr[nodeIndex] * positiveLogistic;
+        gradientResult[positiveNodeIndex] = -embeddings[nodeIndex] * positiveLogistic;
 
-        gradientResult[negativeNodeIndex] = negativeSamplingFactor * embeddingArr[nodeIndex] * negativeLogistic;
+        gradientResult[negativeNodeIndex] = negativeSamplingFactor * embeddings[nodeIndex] * negativeLogistic;
     }
 
     private double logisticFunction(double affinity) {

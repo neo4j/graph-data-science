@@ -56,14 +56,14 @@ public class GraphSageModel {
     public static final int DEFAULT_EPOCHS = 1;
     public static final int DEFAULT_MAX_ITERATIONS = 10;
     public static final int DEFAULT_MAX_SEARCH_DEPTH = 5;
-    public static final int DEFAULT_NEGATIVE_SAMPLES = 20;
+    public static final int DEFAULT_NEGATIVE_SAMPLE_WEIGHT = 20;
 
     private final Layer[] layers;
     private final Log log;
     private final BatchProvider batchProvider;
     private final double learningRate;
     private final double tolerance;
-    private final int negativeSamplingFactor;
+    private final int negativeSampleWeight;
     private final int concurrency;
     private final int epochs;
     private final int maxIterations;
@@ -102,7 +102,7 @@ public class GraphSageModel {
             epochs,
             maxIterations,
             DEFAULT_MAX_SEARCH_DEPTH,
-            DEFAULT_NEGATIVE_SAMPLES,
+            DEFAULT_NEGATIVE_SAMPLE_WEIGHT,
             layers,
             log
         );
@@ -117,7 +117,7 @@ public class GraphSageModel {
             config.epochs(),
             config.maxIterations(),
             config.searchDepth(),
-            config.negativeSamples(),
+            config.negativeSampleWeight(),
             config.layerConfigs().stream()
                 .map(LayerFactory::createLayer)
                 .toArray(Layer[]::new),
@@ -133,7 +133,7 @@ public class GraphSageModel {
         int epochs,
         int maxIterations,
         int maxSearchDepth,
-        int negativeSamples,
+        int negativeSampleWeight,
         Layer[] layers,
         Log log
     ) {
@@ -144,7 +144,7 @@ public class GraphSageModel {
         this.epochs = epochs;
         this.maxIterations = maxIterations;
         this.maxSearchDepth = maxSearchDepth;
-        this.negativeSamplingFactor = negativeSamples;
+        this.negativeSampleWeight = negativeSampleWeight;
         this.batchProvider = new BatchProvider(batchSize);
         this.log = log;
     }
@@ -299,7 +299,7 @@ public class GraphSageModel {
             )).toArray();
         Variable embeddingVariable = embeddingVariable(graph, totalBatch, features);
 
-        Variable lossFunction = new GraphSageLoss(embeddingVariable, negativeSamplingFactor);
+        Variable lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
 
         return new DummyVariable(lossFunction);
     }
