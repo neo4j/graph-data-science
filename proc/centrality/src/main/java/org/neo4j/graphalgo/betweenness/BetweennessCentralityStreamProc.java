@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.betweenness;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
-import org.neo4j.graphalgo.common.StreamResult;
+import org.neo4j.graphalgo.common.CentralityStreamResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
@@ -38,11 +38,11 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentrality, HugeAtomicDoubleArray, StreamResult, BetweennessCentralityStreamConfig> {
+public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentrality, HugeAtomicDoubleArray, CentralityStreamResult, BetweennessCentralityStreamConfig> {
 
     @Procedure(value = "gds.betweenness.stream", mode = READ)
     @Description(BETWEENNESS_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<CentralityStreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -63,8 +63,8 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    protected StreamResult streamResult(long originalNodeId, double value) {
-        return new StreamResult(originalNodeId, value);
+    protected CentralityStreamResult streamResult(long originalNodeId, double value) {
+        return new CentralityStreamResult(originalNodeId, value);
     }
 
     @Override

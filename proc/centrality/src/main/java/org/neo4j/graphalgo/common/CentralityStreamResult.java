@@ -20,11 +20,11 @@
 package org.neo4j.graphalgo.common;
 
 @SuppressWarnings("WeakerAccess")
-public final class StreamResult {
+public final class CentralityStreamResult {
     public final long nodeId;
     public final double score;
 
-    public StreamResult(long nodeId, double score) {
+    public CentralityStreamResult(long nodeId, double score) {
         this.nodeId = nodeId;
         this.score = score;
     }
