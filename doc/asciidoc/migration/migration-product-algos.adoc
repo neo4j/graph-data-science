@@ -1,6 +1,9 @@
 [[migration-product-algos]]
 = Production-ready algorithms
 
+This section covers all algorithms that have been migrated to the production-ready tier of the Neo4j Graph Data Science library.
+Syntax changes in configuration, return columns, and execution modes are illustrated with side-by-side examples of queries.
+
 * <<migration-lpa, Label Propagation>>
 * <<migration-louvain, Louvain>>
 * <<migration-node-sim, Node Similarity>>
