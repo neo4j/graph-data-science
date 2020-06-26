@@ -38,7 +38,7 @@ public class ElementwiseMax extends SingleParentVariable {
 
         int rows = dimension(0);
         int cols = dimension(1);
-        double[] parentData = ctx.data(parent).data;
+        double[] parentData = ctx.data(parent()).data;
         for (int row = 0; row < rows; row++) {
             int[] neighbors = this.adjacencyMatrix[row];
             for(int col = 0; col < cols; col++) {

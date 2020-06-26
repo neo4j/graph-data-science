@@ -33,7 +33,7 @@ public class Relu extends SingleParentVariable {
 
     @Override
     protected Tensor apply(ComputationContext ctx) {
-        return ctx.data(parent).map(value -> value > 0 ? value : ALPHA * value);
+        return ctx.data(parent()).map(value -> value > 0 ? value : ALPHA * value);
     }
 
     @Override

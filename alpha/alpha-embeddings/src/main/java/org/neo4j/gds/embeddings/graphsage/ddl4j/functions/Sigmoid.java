@@ -31,7 +31,7 @@ public class Sigmoid extends SingleParentVariable {
 
     @Override
     protected Tensor apply(ComputationContext ctx) {
-        return ctx.data(parent).map(Sigmoid::sigmoid);
+        return ctx.data(parent()).map(Sigmoid::sigmoid);
     }
 
     @Override

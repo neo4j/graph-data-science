@@ -36,9 +36,9 @@ public class Slice extends SingleParentVariable {
 
     @Override
     protected Tensor apply(ComputationContext ctx) {
-        double[] parentData = ctx.data(parent).data;
+        double[] parentData = ctx.data(parent()).data;
         int rows = dimension(0);
-        int cols = parent.dimension(1);
+        int cols = parent().dimension(1);
         double[] result = new double[rows * cols];
 
         for (int row = 0; row < rows; row++) {

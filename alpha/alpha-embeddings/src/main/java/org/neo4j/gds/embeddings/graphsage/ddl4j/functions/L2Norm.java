@@ -33,7 +33,7 @@ public class L2Norm extends SingleParentVariable {
 
     @Override
     protected Tensor apply(ComputationContext ctx) {
-        double norm = l2(ctx.data(parent));
+        double norm = l2(ctx.data(parent()));
         return Tensor.scalar(norm);
     }
 

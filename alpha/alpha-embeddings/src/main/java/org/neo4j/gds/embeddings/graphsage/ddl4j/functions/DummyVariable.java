@@ -31,7 +31,7 @@ public class DummyVariable extends SingleParentVariable {
 
     @Override
     protected Tensor apply(ComputationContext ctx) {
-        return ctx.data(parent);
+        return ctx.data(parent());
     }
 
     @Override

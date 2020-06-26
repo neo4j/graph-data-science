@@ -63,9 +63,9 @@ public class MultiMean extends SingleParentVariable {
 
     @Override
     protected Tensor apply(ComputationContext ctx) {
-        Tensor parentTensor = ctx.data(parent);
+        Tensor parentTensor = ctx.data(parent());
         double[] parentData = parentTensor.data;
-        int cols = parent.dimension(1);
+        int cols = parent().dimension(1);
         double[] means = new double[adjacency.length * cols];
         for (int source = 0; source < adjacency.length; source++) {
             int selfAdjacencyOfSourceOffset = selfAdjacency[source] * cols;
