@@ -122,7 +122,7 @@ include::specific-configuration.adoc[]
 
 The results are the same as for running write mode with a named graph, <<algorithms-embeddings-random-projection-syntax-write, specified above>>.
 
-[[algorithms-embeddings-node2vec-examples]]
+[[algorithms-embeddings-random-projection-examples]]
 == Examples
 
 Consider the graph created by the following Cypher statement:
