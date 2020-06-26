@@ -93,7 +93,7 @@ public interface SimilarityInput {
             var values = (List<?>) rawValues;
             int index = 0;
             for (Object value : values) {
-                if (!(value instanceof Number)) {
+                if (value != null && !(value instanceof Number)) {
                     throw new IllegalArgumentException(formatWithLocale(
                         "The weight input contains a non-numeric value at index %d: %s",
                         index,
