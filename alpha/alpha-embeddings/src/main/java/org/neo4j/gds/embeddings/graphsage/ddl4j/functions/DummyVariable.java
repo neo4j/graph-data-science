@@ -35,7 +35,7 @@ public class DummyVariable extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor gradient(ComputationContext ctx) {
+    protected Tensor gradient(Variable parent, ComputationContext ctx) {
         return Tensor.scalar(1D);
     }
 }

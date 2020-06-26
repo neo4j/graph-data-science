@@ -35,7 +35,7 @@ public class Logarithm extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor gradient(ComputationContext ctx) {
+    protected Tensor gradient(Variable parent, ComputationContext ctx) {
         return Tensor.scalar(ctx.gradient(this).data[0] / ctx.data(parent).data[0]);
     }
 }

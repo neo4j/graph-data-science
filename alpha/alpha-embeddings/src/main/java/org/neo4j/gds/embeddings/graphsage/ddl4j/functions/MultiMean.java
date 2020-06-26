@@ -39,7 +39,7 @@ public class MultiMean extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor gradient(ComputationContext ctx) {
+    protected Tensor gradient(Variable parent, ComputationContext ctx) {
         double[] multiMeanGradient = ctx.gradient(this).data;
         int rows = dimension(0);
         int cols = dimension(1);

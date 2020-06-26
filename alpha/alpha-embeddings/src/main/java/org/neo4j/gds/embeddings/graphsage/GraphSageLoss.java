@@ -29,7 +29,9 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
 import java.util.stream.IntStream;
 
 public class GraphSageLoss extends SingleParentVariable {
-    public static final int NEGATIVE_NODES_OFFSET = 2;
+
+    private static final int NEGATIVE_NODES_OFFSET = 2;
+
     private final Variable combinedEmbeddings;
     private final int negativeSamplingFactor;
 
@@ -63,7 +65,7 @@ public class GraphSageLoss extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor gradient(ComputationContext ctx) {
+    protected Tensor gradient(Variable parent, ComputationContext ctx) {
         Tensor embeddingData = ctx.data(parent);
         double[] embeddings = embeddingData.data;
         int totalBatchSize = embeddingData.dimensions[0];

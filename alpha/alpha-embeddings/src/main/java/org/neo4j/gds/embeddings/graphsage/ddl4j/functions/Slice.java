@@ -49,7 +49,7 @@ public class Slice extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor gradient(ComputationContext ctx) {
+    protected Tensor gradient(Variable parent, ComputationContext ctx) {
         Tensor result = ctx.data(parent).zeros();
 
         int rows = dimension(0);

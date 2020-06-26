@@ -37,7 +37,7 @@ public class Relu extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor gradient(ComputationContext ctx) {
+    protected Tensor gradient(Variable parent, ComputationContext ctx) {
         return ctx.data(parent).map(value -> value > 0 ? 1 : ALPHA);
     }
 }

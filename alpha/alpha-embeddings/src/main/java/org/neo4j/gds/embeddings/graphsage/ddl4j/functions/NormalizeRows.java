@@ -50,7 +50,7 @@ public class NormalizeRows extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor gradient(ComputationContext ctx) {
+    protected Tensor gradient(Variable parent, ComputationContext ctx) {
         int rows = dimension(0);
         int cols = dimension(1);
         double[] parentData = ctx.data(parent).data;

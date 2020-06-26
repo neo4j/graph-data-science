@@ -37,9 +37,5 @@ public abstract class SingleParentVariable extends Variable {
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
-        return gradient(ctx);
-    }
-
-    protected abstract Tensor gradient(ComputationContext ctx);
+    protected abstract Tensor gradient(Variable parent, ComputationContext ctx);
 }

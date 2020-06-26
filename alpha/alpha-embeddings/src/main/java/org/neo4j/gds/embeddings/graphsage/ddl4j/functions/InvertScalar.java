@@ -40,7 +40,7 @@ public class InvertScalar extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor gradient(ComputationContext ctx) {
+    protected Tensor gradient(Variable parent, ComputationContext ctx) {
         return ctx.gradient(this).scalarMultiply(-Math.pow(ctx.data(parent).data[0], -2));
     }
 

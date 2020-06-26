@@ -35,7 +35,7 @@ public class Sigmoid extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor gradient(ComputationContext ctx) {
+    protected Tensor gradient(Variable parent, ComputationContext ctx) {
         return ctx.gradient(this).elementwiseProduct(ctx.data(this).map(value -> value * (1 - value)));
     }
 
