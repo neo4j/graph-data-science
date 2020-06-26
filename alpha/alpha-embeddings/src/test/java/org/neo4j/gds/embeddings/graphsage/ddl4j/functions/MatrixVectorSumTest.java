@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
@@ -33,10 +33,10 @@ class MatrixVectorSumTest extends GraphSageBaseTest implements FiniteDifferenceT
 
     @Test
     void shouldBroadcastSum() {
-        Constant matrix = Constant.matrix(new double[]{1, 2, 3, 4, 5, 7}, 2, 3);
+        MatrixConstant matrix = new MatrixConstant(new double[]{1, 2, 3, 4, 5, 7}, 2, 3);
         Constant vector = Constant.vector(new double[]{1, 1, 1});
 
-        Variable broadcastSum = new MatrixVectorSum(matrix, vector);
+        AbstractVariable broadcastSum = new MatrixVectorSum(matrix, vector);
         double[] result = ctx.forward(broadcastSum).data;
 
         assertArrayEquals(new double[] {2, 3, 4, 5, 6, 8}, result);
@@ -47,7 +47,7 @@ class MatrixVectorSumTest extends GraphSageBaseTest implements FiniteDifferenceT
         Weights weights = new Weights(Tensor.matrix(new double[]{1, 2, 3, 4, 5, 7}, 2, 3));
         Weights vector = new Weights(Tensor.vector(new double[]{1, 1, 1}));
 
-        Variable broadcastSum = new Sum(List.of(new MatrixVectorSum(weights, vector)));
+        AbstractVariable broadcastSum = new Sum(List.of(new MatrixVectorSum(weights, vector)));
 
         finiteDifferenceShouldApproximateGradient(List.of(weights, vector), broadcastSum);
     }

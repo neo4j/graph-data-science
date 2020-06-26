@@ -20,35 +20,36 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class Constant extends Variable {
+public class Constant extends AbstractVariable {
     private final Tensor data;
 
     public Constant(Tensor data) {
         super(List.of(), data.dimensions);
         this.data = data;
-        requireGradient = false;
     }
 
     public static Constant vector(double[] data) {
         return new Constant(Tensor.vector(data));
     }
 
-    public static Constant matrix(double[] data, int rows, int cols) {
-        return new Constant(Tensor.matrix(data, rows, cols));
-    }
-
     @Override
-    protected Tensor apply(ComputationContext ctx) {
+    public Tensor apply(ComputationContext ctx) {
         return data;
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable parent, ComputationContext ctx) {
         return data.zeros();
+    }
+
+    @Override
+    public boolean requireGradient() {
+        return false;
     }
 }

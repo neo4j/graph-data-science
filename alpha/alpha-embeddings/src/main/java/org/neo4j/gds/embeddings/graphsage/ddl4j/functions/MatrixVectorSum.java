@@ -20,17 +20,18 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class MatrixVectorSum extends Variable {
+public class MatrixVectorSum extends AbstractVariable {
 
-    private final Variable matrix;
-    private final Variable vector;
+    private final AbstractVariable matrix;
+    private final AbstractVariable vector;
 
-    public MatrixVectorSum(Variable matrix, Variable vector) {
+    public MatrixVectorSum(AbstractVariable matrix, AbstractVariable vector) {
         super(List.of(matrix, vector), matrix.dimensions());
 
         this.matrix = matrix;
@@ -38,7 +39,7 @@ public class MatrixVectorSum extends Variable {
     }
 
     @Override
-    protected Tensor apply(ComputationContext ctx) {
+    public Tensor apply(ComputationContext ctx) {
 
         double[] matrixData = ctx.data(matrix).data;
         double[] vectorData = ctx.data(vector).data;
@@ -59,7 +60,7 @@ public class MatrixVectorSum extends Variable {
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable parent, ComputationContext ctx) {
         if (parent == matrix) {
             return ctx.gradient(this);
         } else {

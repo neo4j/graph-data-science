@@ -25,31 +25,46 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
-public class Relu extends SingleParentVariable implements Matrix {
+import java.util.List;
 
-    private static final double ALPHA = 0.01;
+public class MatrixConstant extends AbstractVariable implements Matrix {
+    private final Tensor data;
+    private final int rows;
+    private final int cols;
 
-    public Relu(AbstractVariable parent) {
-        super(parent, parent.dimensions());
+    public MatrixConstant(Tensor data) {
+        super(List.of(), data.dimensions);
+        this.data = data;
+        this.rows = data.dimensions[0];
+        this.cols = data.dimensions[1];
+    }
+
+    public MatrixConstant(double[] elements, int rows, int cols) {
+        this(Tensor.matrix(elements, rows, cols));
     }
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        return ctx.data(parent()).map(value -> value > 0 ? value : ALPHA * value);
+        return data;
     }
 
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
-        return ctx.data(parent).map(value -> value > 0 ? 1 : ALPHA);
+        return data.zeros();
     }
 
     @Override
     public int rows() {
-        return parent().dimension(0);
+        return rows;
     }
 
     @Override
     public int cols() {
-        return parent().dimension(1);
+        return cols;
+    }
+
+    @Override
+    public boolean requireGradient() {
+        return false;
     }
 }

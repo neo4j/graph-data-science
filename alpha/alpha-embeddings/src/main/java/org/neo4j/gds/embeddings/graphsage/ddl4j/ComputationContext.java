@@ -39,7 +39,7 @@ public class ComputationContext {
     }
 
     public Tensor forward(Variable variable) {
-        for (Variable parent : variable.parents) {
+        for (Variable parent : variable.parents()) {
             if (!data.containsKey(parent)) {
                 Tensor parentData = forward(parent);
                 data.put(parent, parentData);
@@ -79,8 +79,8 @@ public class ComputationContext {
 
             upstreamCounters.get(variable).decrementAndGet();
             if (upstreamCounters.get(variable).get() == 0) {
-                for (Variable parent : variable.parents) {
-                    if (parent.requireGradient) {
+                for (Variable parent : variable.parents()) {
+                    if (parent.requireGradient()) {
                         executionQueue.offer(new BackPropTask(parent, variable));
                     }
                 }
@@ -89,8 +89,8 @@ public class ComputationContext {
     }
 
     private void initUpstream(Variable function, Map<Variable, AtomicInteger> upstreamCounters) {
-        for (Variable parent : function.parents) {
-            if (parent.requireGradient) {
+        for (Variable parent : function.parents()) {
+            if (parent.requireGradient()) {
                 boolean firstToSeeParent = !upstreamCounters.containsKey(parent);
                 if (firstToSeeParent) {
                     initUpstream(parent, upstreamCounters);

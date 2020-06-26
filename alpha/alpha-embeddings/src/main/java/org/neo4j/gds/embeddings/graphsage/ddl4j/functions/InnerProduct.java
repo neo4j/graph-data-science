@@ -21,14 +21,15 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class InnerProduct extends Variable {
+public class InnerProduct extends AbstractVariable {
     private final Variable left;
     private final Variable right;
 
@@ -49,12 +50,12 @@ public class InnerProduct extends Variable {
     }
 
     @Override
-    protected Tensor apply(ComputationContext ctx) {
+    public Tensor apply(ComputationContext ctx) {
         return Tensor.scalar(ctx.data(left).innerProduct(ctx.data(right)));
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable parent, ComputationContext ctx) {
         Tensor otherVectorData = parent == left ? ctx.data(right) : ctx.data(left);
         return otherVectorData.scalarMultiply(ctx.gradient(this).data[0]);
     }

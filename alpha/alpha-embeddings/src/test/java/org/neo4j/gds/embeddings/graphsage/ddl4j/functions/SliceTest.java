@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
@@ -61,7 +61,7 @@ class SliceTest extends GraphSageBaseTest implements FiniteDifferenceTest {
         }, 3, 3));
 
         int[] rows = new int[] {0, 2, 0};
-        Variable sum = new Sum(List.of(new Slice(weights, rows)));
+        AbstractVariable sum = new Sum(List.of(new Slice(weights, rows)));
 
         finiteDifferenceShouldApproximateGradient(weights, sum);
     }

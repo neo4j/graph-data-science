@@ -21,26 +21,27 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.Arrays;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class InvertScalar extends SingleParentVariable {
-    InvertScalar(Variable parent) {
+    InvertScalar(AbstractVariable parent) {
         super(parent, Dimensions.scalar());
         checkParentScalar();
     }
 
     @Override
-    protected Tensor apply(ComputationContext ctx) {
+    public Tensor apply(ComputationContext ctx) {
         return Tensor.scalar(1D / ctx.data(parent()).data[0]);
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable parent, ComputationContext ctx) {
         return ctx.gradient(this).scalarMultiply(-Math.pow(ctx.data(parent).data[0], -2));
     }
 

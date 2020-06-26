@@ -20,12 +20,13 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class ScalarMultiply extends Variable {
+public class ScalarMultiply extends AbstractVariable {
     private final Variable scalar;
     private final Variable tensor;
 
@@ -36,12 +37,12 @@ public class ScalarMultiply extends Variable {
     }
 
     @Override
-    protected Tensor apply(ComputationContext ctx) {
+    public Tensor apply(ComputationContext ctx) {
         return ctx.data(tensor).scalarMultiply(ctx.data(scalar).data[0]);
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable parent, ComputationContext ctx) {
         if (parent == scalar) {
             // scalar
             return Tensor.constant(ctx.gradient(this).innerProduct(ctx.data(tensor)), scalar.dimensions());

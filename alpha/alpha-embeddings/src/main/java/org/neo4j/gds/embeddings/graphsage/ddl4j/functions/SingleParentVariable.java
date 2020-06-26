@@ -20,12 +20,13 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public abstract class SingleParentVariable extends Variable {
+public abstract class SingleParentVariable extends AbstractVariable {
     private final Variable parent;
 
     public SingleParentVariable(
@@ -41,5 +42,5 @@ public abstract class SingleParentVariable extends Variable {
     }
 
     @Override
-    protected abstract Tensor gradient(Variable parent, ComputationContext ctx);
+    public abstract Tensor gradient(Variable parent, ComputationContext ctx);
 }

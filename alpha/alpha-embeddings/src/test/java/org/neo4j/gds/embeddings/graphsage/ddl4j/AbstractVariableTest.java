@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class VariableTest {
+class AbstractVariableTest {
     @Test
     void testAdd() {
 

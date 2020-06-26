@@ -23,14 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LogarithmTest extends GraphSageBaseTest implements FiniteDifferenceTest {
     @Test
     void testApply() {
-        Variable variable = new Weights(Tensor.scalar(5D));
+        AbstractVariable variable = new Weights(Tensor.scalar(5D));
         Logarithm logarithm = new Logarithm(variable);
 
         assertEquals(Math.log(5D), ctx.forward(logarithm).data[0]);

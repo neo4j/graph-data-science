@@ -21,27 +21,28 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class Sum extends Variable {
+public class Sum extends AbstractVariable {
     public Sum(List<Variable> parents) {
         super(parents, Dimensions.scalar());
     }
 
     @Override
-    protected Tensor apply(ComputationContext ctx) {
+    public Tensor apply(ComputationContext ctx) {
         double sum = 0;
-        for (var parent : parents) {
+        for (var parent : parents()) {
             sum += ctx.data(parent).sum();
         }
         return Tensor.scalar(sum);
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable parent, ComputationContext ctx) {
         return ctx.data(parent).map(ignore -> ctx.gradient(this).getAtIndex(0));
     }
 }

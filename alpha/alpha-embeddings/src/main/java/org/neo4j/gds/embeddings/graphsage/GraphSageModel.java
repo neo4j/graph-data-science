@@ -21,9 +21,9 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Constant;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.DummyVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
@@ -206,7 +206,7 @@ public class GraphSageModel {
             layer.generateNewRandomState();
         }
 
-        Variable lossFunction = lossFunction(batch, graph, features);
+        AbstractVariable lossFunction = lossFunction(batch, graph, features);
 
         double newLoss = Double.MAX_VALUE;
         double oldLoss;
@@ -252,7 +252,7 @@ public class GraphSageModel {
             concurrency,
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable embeddingVariable = embeddingVariable(graph, batch, features);
+                AbstractVariable embeddingVariable = embeddingVariable(graph, batch, features);
                 int dimension = embeddingVariable.dimension(1);
                 double[] embeddings = ctx.forward(embeddingVariable).data;
 
@@ -282,7 +282,7 @@ public class GraphSageModel {
             concurrency,
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable loss = lossFunction(batch, graph, features);
+                AbstractVariable loss = lossFunction(batch, graph, features);
                 doubleAdder.add(ctx.forward(loss).data[0]);
             })
         );
@@ -291,15 +291,15 @@ public class GraphSageModel {
         return lossValue;
     }
 
-    Variable lossFunction(long[] batch, Graph graph, HugeObjectArray<double[]> features) {
+    AbstractVariable lossFunction(long[] batch, Graph graph, HugeObjectArray<double[]> features) {
         long[] totalBatch = LongStream
             .concat(Arrays.stream(batch), LongStream.concat(
                 neighborBatch(graph, batch),
                 negativeBatch(graph, batch.length)
             )).toArray();
-        Variable embeddingVariable = embeddingVariable(graph, totalBatch, features);
+        AbstractVariable embeddingVariable = embeddingVariable(graph, totalBatch, features);
 
-        Variable lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
+        AbstractVariable lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
 
         return new DummyVariable(lossFunction);
     }
@@ -339,7 +339,7 @@ public class GraphSageModel {
             });
     }
 
-    private Variable featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
+    private MatrixConstant featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
         int dimension = features.get(0).length;
         double[] data = new double[nodeIds.length * dimension];
         IntStream
@@ -351,10 +351,10 @@ public class GraphSageModel {
                 nodeOffset * dimension,
                 dimension
             ));
-        return Constant.matrix(data, nodeIds.length, dimension);
+        return new MatrixConstant(data, nodeIds.length, dimension);
     }
 
-    private Variable embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
+    private AbstractVariable embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
@@ -362,7 +362,7 @@ public class GraphSageModel {
         Collections.reverse(neighborhoodFunctions);
         List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
 
-        Variable previousLayerRepresentations = featureVariables(
+        AbstractVariable previousLayerRepresentations = featureVariables(
             subGraphs.get(subGraphs.size() - 1).nextNodes,
             features
         );

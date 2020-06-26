@@ -19,40 +19,19 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
-import java.util.List;
-
-public abstract class Variable {
-    private final int[] dimensions;
-    protected boolean requireGradient;
-
-    protected List<Variable> parents;
-
-    protected Variable(List<Variable> parents, int[] dimensions) {
-        this.dimensions = dimensions;
-        this.parents = parents;
-
-        this.requireGradient = false;
-        for (Variable parent : parents) {
-            if (parent.requireGradient) {
-                this.requireGradient = true;
-            }
-        }
-    }
-
-    public int[] dimensions() {
-        return dimensions;
-    }
-
-    public int dimension(int dimensionIndex) {
-        return dimensions[dimensionIndex];
-    }
-
-    protected abstract Tensor apply(ComputationContext ctx);
+public interface Variable {
+    Tensor apply(ComputationContext ctx);
 
     // Do not use directly. Use ComputationContext instead.
-    protected abstract Tensor gradient(Variable parent, ComputationContext ctx);
+    Tensor gradient(Variable parent, ComputationContext ctx);
 
-    public static class NotAFunctionException extends RuntimeException {
-
+    default boolean requireGradient() {
+        return false;
     }
+
+    Iterable<? extends Variable> parents();
+
+    int[] dimensions();
+
+    int dimension(int i);
 }

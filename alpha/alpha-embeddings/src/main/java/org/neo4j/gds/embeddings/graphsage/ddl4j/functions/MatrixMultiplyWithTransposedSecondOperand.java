@@ -23,33 +23,35 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class MatrixMultiplyWithTransposedSecondOperand extends Variable {
+public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable {
 
-    private final Variable A;
-    private final Variable B;
+    private final Matrix A;
+    private final Matrix B;
 
-    public MatrixMultiplyWithTransposedSecondOperand(Variable A, Variable B) {
+    public MatrixMultiplyWithTransposedSecondOperand(Matrix A, Matrix B) {
         // the dimensions of a matrix multiplication of dimensions (m, n) x (o, p) = (m, p)
         // B is being transposed as Bt and its dimensions are (p, o) so the result will be dimensions (m, o)
-        super(List.of(A, B), Dimensions.matrix(A.dimension(0), B.dimension(0)));
+        super(List.of(A, B), Dimensions.matrix(A.rows(), B.rows()));
         this.A = A;
         this.B = B;
     }
 
     @Override
-    protected Tensor apply(ComputationContext ctx) {
+    public Tensor apply(ComputationContext ctx) {
         Tensor t1 = ctx.data(A);
         Tensor t2 = ctx.data(B);
         return multiplyTransB(t1, t2);
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable parent, ComputationContext ctx) {
         Tensor gradient = ctx.gradient(this);
         if (parent == A) {
             return multiply(gradient, ctx.data(B));
@@ -82,7 +84,7 @@ public class MatrixMultiplyWithTransposedSecondOperand extends Variable {
         return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
-    public static MatrixMultiplyWithTransposedSecondOperand of(Variable A, Variable B) {
+    public static MatrixMultiplyWithTransposedSecondOperand of(Matrix A, Matrix B) {
         return new MatrixMultiplyWithTransposedSecondOperand(A, B);
     }
 }

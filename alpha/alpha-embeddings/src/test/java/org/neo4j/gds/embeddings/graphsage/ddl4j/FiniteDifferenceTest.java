@@ -35,11 +35,11 @@ public interface FiniteDifferenceTest {
         return 1E-4;
     }
 
-    default void finiteDifferenceShouldApproximateGradient(Weights weightVariable, Variable loss) {
+    default void finiteDifferenceShouldApproximateGradient(Weights weightVariable, AbstractVariable loss) {
         finiteDifferenceShouldApproximateGradient(List.of(weightVariable), loss);
     }
 
-    default void finiteDifferenceShouldApproximateGradient(List<Weights> weightVariables, Variable loss) {
+    default void finiteDifferenceShouldApproximateGradient(List<Weights> weightVariables, AbstractVariable loss) {
         for (Weights variable : weightVariables) {
             for (int i = 0; i < Tensor.totalSize(variable.dimensions()); i++) {
                 ComputationContext ctx = new ComputationContext();

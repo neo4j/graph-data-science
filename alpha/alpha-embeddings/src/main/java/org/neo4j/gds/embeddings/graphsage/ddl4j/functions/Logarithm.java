@@ -21,8 +21,8 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 
 public class Logarithm extends SingleParentVariable {
     public Logarithm(Variable parent) {
@@ -30,12 +30,12 @@ public class Logarithm extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor apply(ComputationContext ctx) {
+    public Tensor apply(ComputationContext ctx) {
         return Tensor.scalar(Math.log(ctx.data(parent()).data[0]));
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable parent, ComputationContext ctx) {
         return Tensor.scalar(ctx.gradient(this).data[0] / ctx.data(parent).data[0]);
     }
 }

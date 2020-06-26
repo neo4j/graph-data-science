@@ -20,31 +20,47 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class Weights extends Variable {
+public class Weights extends AbstractVariable implements Matrix {
     private final Tensor data;
 
     public Weights(Tensor data) {
         super(List.of(), data.dimensions);
         this.data = data;
-        requireGradient = true;
     }
 
     @Override
-    protected Tensor apply(ComputationContext ctx) {
+    public Tensor apply(ComputationContext ctx) {
         return data;
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable parent, ComputationContext ctx) {
         throw new NotAFunctionException();
     }
 
     public Tensor data() {
         return data;
+    }
+
+    @Override
+    public int rows() {
+        return data.dimensions[0];
+    }
+
+    @Override
+    public int cols() {
+        return data.dimensions[1];
+    }
+
+    @Override
+    public boolean requireGradient() {
+        return true;
     }
 }

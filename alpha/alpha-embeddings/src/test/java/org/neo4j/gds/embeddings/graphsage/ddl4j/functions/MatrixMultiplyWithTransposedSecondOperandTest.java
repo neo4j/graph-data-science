@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
@@ -53,10 +53,10 @@ class MatrixMultiplyWithTransposedSecondOperandTest extends GraphSageBaseTest im
             60, 27.4
         };
 
-        Constant A = Constant.matrix(m1, 2, 3);
-        Constant B = Constant.matrix(m2, 2, 3);
+        MatrixConstant A = new MatrixConstant(m1, 2, 3);
+        MatrixConstant B = new MatrixConstant(m2, 2, 3);
 
-        Variable product = new MatrixMultiplyWithTransposedSecondOperand(A, B);
+        AbstractVariable product = new MatrixMultiplyWithTransposedSecondOperand(A, B);
         double[] result = ctx.forward(product).data;
 
         assertArrayEquals(expected, result);

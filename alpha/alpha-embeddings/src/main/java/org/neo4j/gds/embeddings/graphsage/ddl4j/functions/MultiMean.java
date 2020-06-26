@@ -21,12 +21,15 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 
-public class MultiMean extends SingleParentVariable {
+public class MultiMean extends SingleParentVariable implements Matrix {
     private final int[][] adjacency;
     private final int[] selfAdjacency;
+    private final int rows;
+    private final int cols;
 
     public MultiMean(
         Variable parent,
@@ -36,10 +39,12 @@ public class MultiMean extends SingleParentVariable {
         super(parent, Dimensions.matrix(adjacency.length, parent.dimension(1)));
         this.adjacency = adjacency;
         this.selfAdjacency = selfAdjacency;
+        this.rows = adjacency.length;
+        this.cols = parent.dimension(1);
     }
 
     @Override
-    protected Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable parent, ComputationContext ctx) {
         double[] multiMeanGradient = ctx.gradient(this).data;
         int rows = dimension(0);
         int cols = dimension(1);
@@ -62,7 +67,7 @@ public class MultiMean extends SingleParentVariable {
     }
 
     @Override
-    protected Tensor apply(ComputationContext ctx) {
+    public Tensor apply(ComputationContext ctx) {
         Tensor parentTensor = ctx.data(parent());
         double[] parentData = parentTensor.data;
         int cols = parent().dimension(1);
@@ -84,5 +89,15 @@ public class MultiMean extends SingleParentVariable {
         }
 
         return new Tensor(means, dimensions());
+    }
+
+    @Override
+    public int rows() {
+        return rows;
+    }
+
+    @Override
+    public int cols() {
+        return cols;
     }
 }

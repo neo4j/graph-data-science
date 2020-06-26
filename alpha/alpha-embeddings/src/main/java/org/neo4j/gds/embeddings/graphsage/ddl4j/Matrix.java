@@ -17,14 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
+package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+public interface Matrix extends Variable {
 
-public class Normalize extends ScalarMultiply {
-
-    public Normalize(AbstractVariable variable) {
-        super(new InvertScalar(new L2Norm(variable)), variable, variable.dimensions());
-    }
-
+    int rows();
+    int cols();
 }
