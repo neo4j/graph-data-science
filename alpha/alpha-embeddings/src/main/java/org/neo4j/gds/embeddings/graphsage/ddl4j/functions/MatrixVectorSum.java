@@ -27,15 +27,25 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class MatrixVectorSum extends AbstractVariable {
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
+public class MatrixVectorSum extends AbstractVariable implements Matrix {
 
     private final Matrix matrix;
     private final Variable vector;
+    private final int rows;
+    private final int cols;
 
     public MatrixVectorSum(Matrix matrix, Variable vector) {
         super(List.of(matrix, vector), matrix.dimensions());
-
+        assert matrix.cols() == vector.dimension(0) : formatWithLocale(
+            "Cannot broadcast vector with length %d to a matrix with %d columns",
+            vector.dimension(0),
+            matrix.cols()
+        );
         this.matrix = matrix;
+        this.rows = matrix.rows();
+        this.cols = matrix.cols();
         this.vector = vector;
     }
 
@@ -46,9 +56,6 @@ public class MatrixVectorSum extends AbstractVariable {
         double[] vectorData = ctx.data(vector).data;
 
         double[] result = new double[matrixData.length];
-
-        int rows = dimension(0);
-        int cols = dimension(1);
 
         for(int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
@@ -66,8 +73,6 @@ public class MatrixVectorSum extends AbstractVariable {
             return ctx.gradient(this);
         } else {
             Tensor gradient = ctx.gradient(this);
-            int rows = dimension(0);
-            int cols = vector.dimension(0);
             double[] result = new double[cols];
             for (int row = 0; row < rows; row++) {
                 for (int col = 0; col < cols; col++) {
@@ -78,5 +83,15 @@ public class MatrixVectorSum extends AbstractVariable {
 
             return Tensor.vector(result);
         }
+    }
+
+    @Override
+    public int rows() {
+        return rows;
+    }
+
+    @Override
+    public int cols() {
+        return cols;
     }
 }

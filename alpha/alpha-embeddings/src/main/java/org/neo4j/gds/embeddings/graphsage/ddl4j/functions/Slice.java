@@ -42,8 +42,7 @@ public class Slice extends SingleParentVariable implements Matrix {
     @Override
     public Tensor apply(ComputationContext ctx) {
         double[] parentData = ctx.data(parent()).data;
-        int rows = dimension(0);
-        int cols = parent().dimension(1);
+
         double[] result = new double[rows * cols];
 
         for (int row = 0; row < rows; row++) {
@@ -57,8 +56,6 @@ public class Slice extends SingleParentVariable implements Matrix {
     public Tensor gradient(Variable parent, ComputationContext ctx) {
         Tensor result = ctx.data(parent).zeros();
 
-        int rows = dimension(0);
-        int cols = parent.dimension(1);
         double[] selfGradient = ctx.gradient(this).data;
         for (int row = 0; row < rows; row++) {
             int childRow = selfAdjacency[row];

@@ -20,11 +20,10 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixVectorSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementwiseMax;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixVectorSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Slice;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
@@ -55,24 +54,24 @@ public class MaxPoolingAggregator implements Aggregator {
         this.activationFunction = activationFunction;
     }
 
-    // FIXME
     @Override
     public Variable aggregate(
         Variable previousLayerRepresentations,
         int[][] adjacencyMatrix,
         int[] selfAdjacencyMatrix
     ) {
+        // FIXME: (Matrix) previousLayerRepresentations
         Matrix weightedPreviousLayer = MatrixMultiplyWithTransposedSecondOperand.of(
             (Matrix) previousLayerRepresentations,
             poolWeights
         );
         Variable biasedWeightedPreviousLayer = new MatrixVectorSum(weightedPreviousLayer, bias);
         Variable neighborhoodActivations = activationFunction.apply(biasedWeightedPreviousLayer);
-        Variable elementwiseMax = new ElementwiseMax(neighborhoodActivations, adjacencyMatrix);
+        Matrix elementwiseMax = new ElementwiseMax(neighborhoodActivations, adjacencyMatrix);
 
-        Variable selfPreviousLayer =  new Slice(previousLayerRepresentations, selfAdjacencyMatrix);
-        Variable self = MatrixMultiplyWithTransposedSecondOperand.of((Matrix) selfPreviousLayer, selfWeights);
-        Variable neighbors = MatrixMultiplyWithTransposedSecondOperand.of((Matrix) elementwiseMax, neighborsWeights);
+        Matrix selfPreviousLayer =  new Slice(previousLayerRepresentations, selfAdjacencyMatrix);
+        Variable self = MatrixMultiplyWithTransposedSecondOperand.of(selfPreviousLayer, selfWeights);
+        Variable neighbors = MatrixMultiplyWithTransposedSecondOperand.of(elementwiseMax, neighborsWeights);
         Variable tensorAdd = new TensorAdd(List.of(self, neighbors), self.dimensions());
 
         return activationFunction.apply(tensorAdd);

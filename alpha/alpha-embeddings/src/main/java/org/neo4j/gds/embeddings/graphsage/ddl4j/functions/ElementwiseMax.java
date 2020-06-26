@@ -41,8 +41,6 @@ public class ElementwiseMax extends SingleParentVariable implements Matrix {
     public Tensor apply(ComputationContext ctx) {
         Tensor max = Tensor.constant(Double.NEGATIVE_INFINITY, dimensions());
 
-        int rows = dimension(0);
-        int cols = dimension(1);
         double[] parentData = ctx.data(parent()).data;
         for (int row = 0; row < rows; row++) {
             int[] neighbors = this.adjacencyMatrix[row];

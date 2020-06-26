@@ -20,18 +20,22 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 public class NormalizeRows extends SingleParentVariable {
+    private final int rows;
+    private final int cols;
+
     public NormalizeRows(Variable matrix) {
         super(matrix, matrix.dimensions());
+        this.rows = matrix.dimension(0);
+        this.cols = matrix.dimension(1);
     }
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        int rows = dimension(0);
-        int cols = dimension(1);
+
         double[] parentData = ctx.data(parent()).data;
         double[] result = new double[rows * cols];
         for (int row = 0; row < rows; row++) {
@@ -51,8 +55,7 @@ public class NormalizeRows extends SingleParentVariable {
 
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
-        int rows = dimension(0);
-        int cols = dimension(1);
+
         double[] parentData = ctx.data(parent).data;
         double[] gradientData = ctx.gradient(this).data;
         double[] result = new double[parentData.length];
