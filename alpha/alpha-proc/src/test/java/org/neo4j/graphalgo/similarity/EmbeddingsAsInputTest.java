@@ -26,13 +26,17 @@ import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 import org.neo4j.values.storable.Values;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 class EmbeddingsAsInputTest extends BaseProcTest {
 
@@ -73,13 +77,9 @@ class EmbeddingsAsInputTest extends BaseProcTest {
         builder.setConfig(Settings.enterpriseLicensed(), true);
     }
 
-    @Test
-    void cosineSimilarityWithEmbeddingResult() {
-        var query =
-            " MATCH (a:Label)" +
-            " WITH id(a) as id, a.embedding as weights" +
-            " WITH {item:id, weights: weights} as userData" +
-            " WITH collect(userData) as data" +
+    private static final String RUN_COSINE_STREAM =
+            " WITH {item:id, weights: weights} AS userData" +
+            " WITH collect(userData) AS data" +
             " CALL gds.alpha.similarity.cosine.stream({" +
             "   nodeProjection: '*'," +
             "   relationshipProjection: '*'," +
@@ -89,6 +89,10 @@ class EmbeddingsAsInputTest extends BaseProcTest {
             " }) YIELD item1, item2, count1, count2, similarity" +
             " RETURN gds.util.asNode(item1).id AS from, gds.util.asNode(item2).id AS to, similarity" +
             " ORDER BY similarity DESC";
+
+    @Test
+    void cosineSimilarityWithEmbeddingResult() {
+        var query = " MATCH (a:Label) WITH id(a) AS id, a.embedding AS weights" + RUN_COSINE_STREAM;
 
         runQueryWithResultConsumer(query, results -> {
             assertTrue(results.hasNext(), "Should have exactly two results");
@@ -112,5 +116,29 @@ class EmbeddingsAsInputTest extends BaseProcTest {
             var secondTo = String.valueOf(secondItem.get("to"));
             assertEquals(secondTo, "1");
         });
+    }
+
+    @Test
+    void similarityFailsWithNonNumericInput() {
+        var query = " MATCH (a:Label) WITH id(a) AS id, 'not a number' AS weights" + RUN_COSINE_STREAM;
+
+        var exception = assertThrows(QueryExecutionException.class, () -> runQuery(query));
+        var rootCause = rootCause(exception);
+        assertAll(
+            () -> assertTrue(rootCause instanceof IllegalArgumentException, () -> "exception thrown is " + rootCause.getClass()),
+            () -> assertEquals("The weight input is not a list of numeric values, found instead: java.lang.String", rootCause.getMessage())
+        );
+    }
+
+    @Test
+    void similarityFailsWithNonNumericWeightElements() {
+        var query = " MATCH (a:Label) WITH id(a) AS id, [42, 'not a number', 1337.0] AS weights" + RUN_COSINE_STREAM;
+
+        var exception = assertThrows(QueryExecutionException.class, () -> runQuery(query));
+        var rootCause = rootCause(exception);
+        assertAll(
+            () -> assertTrue(rootCause instanceof IllegalArgumentException, () -> "exception thrown is " + rootCause.getClass()),
+            () -> assertEquals("The weight input contains a non-numeric value at index 1: not a number", rootCause.getMessage())
+        );
     }
 }
