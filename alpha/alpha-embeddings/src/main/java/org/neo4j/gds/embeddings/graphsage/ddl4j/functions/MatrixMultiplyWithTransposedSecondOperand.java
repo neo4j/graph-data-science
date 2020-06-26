@@ -30,10 +30,12 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable {
+public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable implements Matrix {
 
     private final Matrix A;
     private final Matrix B;
+    private final int rows;
+    private final int cols;
 
     public MatrixMultiplyWithTransposedSecondOperand(Matrix A, Matrix B) {
         // the dimensions of a matrix multiplication of dimensions (m, n) x (o, p) = (m, p)
@@ -41,6 +43,9 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable 
         super(List.of(A, B), Dimensions.matrix(A.rows(), B.rows()));
         this.A = A;
         this.B = B;
+
+        this.rows = A.rows();
+        this.cols = B.rows();
     }
 
     @Override
@@ -86,5 +91,15 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable 
 
     public static MatrixMultiplyWithTransposedSecondOperand of(Matrix A, Matrix B) {
         return new MatrixMultiplyWithTransposedSecondOperand(A, B);
+    }
+
+    @Override
+    public int rows() {
+        return rows;
+    }
+
+    @Override
+    public int cols() {
+        return cols;
     }
 }

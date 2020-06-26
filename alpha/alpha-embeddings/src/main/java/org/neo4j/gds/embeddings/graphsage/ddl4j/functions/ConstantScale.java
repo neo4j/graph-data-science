@@ -27,10 +27,10 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import java.util.List;
 
 public class ConstantScale extends AbstractVariable {
-    private final AbstractVariable parent;
+    private final Variable parent;
     private final double constant;
 
-    public ConstantScale(AbstractVariable parent, double constant) {
+    public ConstantScale(Variable parent, double constant) {
         super(List.of(parent), parent.dimensions());
         this.parent = parent;
         this.constant = constant;

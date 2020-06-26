@@ -21,14 +21,13 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 import static java.util.Arrays.stream;
 
 public class L2Norm extends SingleParentVariable {
-    public L2Norm(AbstractVariable parent) {
+    public L2Norm(Variable parent) {
         super(parent, Dimensions.scalar());
     }
 

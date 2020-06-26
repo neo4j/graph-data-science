@@ -21,9 +21,8 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
 
@@ -33,10 +32,10 @@ public class GraphSageLoss extends SingleParentVariable {
 
     private static final int NEGATIVE_NODES_OFFSET = 2;
 
-    private final AbstractVariable combinedEmbeddings;
+    private final Variable combinedEmbeddings;
     private final int negativeSamplingFactor;
 
-    GraphSageLoss(AbstractVariable combinedEmbeddings, int negativeSamplingFactor) {
+    GraphSageLoss(Variable combinedEmbeddings, int negativeSamplingFactor) {
         super(combinedEmbeddings, Dimensions.scalar());
         this.combinedEmbeddings = combinedEmbeddings;
         this.negativeSamplingFactor = negativeSamplingFactor;

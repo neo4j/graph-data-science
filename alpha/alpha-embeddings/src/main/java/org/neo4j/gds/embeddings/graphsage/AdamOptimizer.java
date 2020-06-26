@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
 import java.util.List;
@@ -76,7 +76,7 @@ public class AdamOptimizer {
         // m_t = beta_1*m_t + (1-beta_1)*g_t	#updates the moving averages of the gradient
         momentumTerms = IntStream.range(0, variables.size())
             .mapToObj(i -> {
-                AbstractVariable variable = variables.get(i);
+                Variable variable = variables.get(i);
                 Tensor momentumTerm = momentumTerms.get(i);
                 return Tensor.add(
                     momentumTerm.scalarMultiply(beta_1),
@@ -88,7 +88,7 @@ public class AdamOptimizer {
         // v_t = beta_2*v_t + (1-beta_2)*(g_t*g_t)	#updates the moving averages of the squared gradient
         velocityTerms = IntStream.range(0, variables.size())
             .mapToObj(i -> {
-                AbstractVariable variable = variables.get(i);
+                Variable variable = variables.get(i);
                 Tensor velocityTerm = velocityTerms.get(i);
                 Tensor gradient = otherCtx.gradient(variable);
                 Tensor squaredGradient = gradient.elementwiseProduct(gradient);

@@ -21,10 +21,10 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 import java.util.List;
 
@@ -67,7 +67,7 @@ public class ElementwiseMaxTest extends GraphSageBaseTest implements FiniteDiffe
             new int[]{}
         };
         Sum sum = new Sum(List.of(new ElementwiseMax(weights, adjacencyMatrix)));
-        AbstractVariable loss = new ConstantScale(sum, 2);
+        Variable loss = new ConstantScale(sum, 2);
         finiteDifferenceShouldApproximateGradient(weights, loss);
     }
 }

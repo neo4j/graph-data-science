@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ConstantScale;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2Norm;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
@@ -46,7 +46,7 @@ class AdamOptimizerTest {
             3
         ));
 
-        AbstractVariable expectedOptimum = new Weights(Tensor.matrix(
+        Variable expectedOptimum = new Weights(Tensor.matrix(
             new double[]{
                 0.11, 0.13, 0.231,
                 0.4, 0.3, 0.9,
@@ -63,7 +63,7 @@ class AdamOptimizerTest {
 
         double oldLoss = Double.MAX_VALUE;
         while(true) {
-            AbstractVariable difference = new TensorAdd(
+            Variable difference = new TensorAdd(
                 List.of(weights, new ConstantScale(expectedOptimum, -1)),
                 expectedOptimum.dimensions()
             );

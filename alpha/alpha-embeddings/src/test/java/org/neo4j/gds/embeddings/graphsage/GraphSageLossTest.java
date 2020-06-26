@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
@@ -45,7 +45,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         "50, 24.239937336323717"
     })
     void shouldComputeLossBatchSizeOne(int Q, double expectedLoss) {
-        AbstractVariable combinedEmbeddings = new MatrixConstant(
+        Variable combinedEmbeddings = new MatrixConstant(
             new double[]{
                 1.5, -1, 0.75,  // nodeId
                 1, -0.75, 0.7,  // positive nodeId
@@ -72,7 +72,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         "50, 76.87999339630119"
     })
     void shouldComputeLoss(int Q, double expectedLoss) {
-        AbstractVariable combinedEmbeddings = new MatrixConstant(
+        Variable combinedEmbeddings = new MatrixConstant(
             new double[]{
                 1.5, -1, 0.75,      // nodeId
                 0.5, -0.1, 0.7,     // nodeId

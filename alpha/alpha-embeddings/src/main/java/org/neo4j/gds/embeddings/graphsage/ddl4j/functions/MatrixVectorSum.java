@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
@@ -28,10 +29,10 @@ import java.util.List;
 
 public class MatrixVectorSum extends AbstractVariable {
 
-    private final AbstractVariable matrix;
-    private final AbstractVariable vector;
+    private final Matrix matrix;
+    private final Variable vector;
 
-    public MatrixVectorSum(AbstractVariable matrix, AbstractVariable vector) {
+    public MatrixVectorSum(Matrix matrix, Variable vector) {
         super(List.of(matrix, vector), matrix.dimensions());
 
         this.matrix = matrix;
