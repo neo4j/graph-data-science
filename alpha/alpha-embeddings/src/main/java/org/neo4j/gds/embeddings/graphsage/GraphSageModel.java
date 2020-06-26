@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.DummyVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
@@ -300,7 +299,7 @@ public class GraphSageModel {
             )).toArray();
         Variable embeddingVariable = embeddingVariable(graph, totalBatch, features);
 
-        AbstractVariable lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
+        Variable lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
 
         return new DummyVariable(lossFunction);
     }
