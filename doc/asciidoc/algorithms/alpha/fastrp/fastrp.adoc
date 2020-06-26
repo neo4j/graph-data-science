@@ -166,7 +166,7 @@ NOTE: The algorithm is defined only for UNDIRECTED graphs.
 
 === Stream
 
-[source, cypher, role=query-example, no-result, group=randomProjection]
+[source, cypher, role=query-example, no-result=true]
 ----
 CALL gds.alpha.randomProjection.stream(
   'persons',
