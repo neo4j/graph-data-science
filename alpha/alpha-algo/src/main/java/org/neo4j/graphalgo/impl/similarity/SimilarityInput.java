@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
@@ -68,22 +67,49 @@ public interface SimilarityInput {
 
     static List<Number> extractValues(Object rawValues) {
         if (rawValues == null) {
-            return Collections.emptyList();
+            return List.of();
         }
 
-        List<Number> valueList = new ArrayList<>();
+        List<Number> valueList;
         if (rawValues instanceof long[]) {
             long[] values = (long[]) rawValues;
+            valueList = new ArrayList<>(values.length);
             for (long value : values) {
                 valueList.add(value);
             }
         } else if (rawValues instanceof double[]) {
             double[] values = (double[]) rawValues;
+            valueList = new ArrayList<>(values.length);
             for (double value : values) {
                 valueList.add(value);
             }
+        } else if (rawValues instanceof float[]) {
+            float[] values = (float[]) rawValues;
+            valueList = new ArrayList<>(values.length);
+            for (float value : values) {
+                valueList.add(value);
+            }
+        } else if (rawValues instanceof List) {
+            var values = (List<?>) rawValues;
+            int index = 0;
+            for (Object value : values) {
+                if (!(value instanceof Number)) {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "The weight input contains a non-numeric value at index %d: %s",
+                        index,
+                        value
+                    ));
+                }
+                ++index;
+            }
+            // We did check all elements of the list before, cast is safe now
+            // noinspection unchecked
+            valueList = (List<Number>) values;
         } else {
-            valueList = (List<Number>) rawValues;
+            throw new IllegalArgumentException(formatWithLocale(
+                "The weight input is not a list of numeric values, found instead: %s",
+                rawValues.getClass().getName()
+            ));
         }
         return valueList;
     }
