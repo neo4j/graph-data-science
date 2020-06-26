@@ -56,8 +56,8 @@ public class Node2VecModel {
         this.negativeSamples = new NegativeSampleProducer(probabilityComputer.getContextNodeDistribution());
 
         // TODO research how the weights are initialized
-        centerEmbeddings = initializeEmbeddings(nodeCount, config.dimensions());
-        contextEmbeddings = initializeEmbeddings(nodeCount, config.dimensions());
+        centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingSize());
+        contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingSize());
 
         this.batchSize = ParallelUtil.adjustedBatchSize(
             walks.size(),
@@ -116,8 +116,8 @@ public class Node2VecModel {
                 config.windowSize(),
                 progressLogger
             );
-            this.centerGradientBuffer = new Vector(config.dimensions());
-            this.contextGradientBuffer = new Vector(config.dimensions());
+            this.centerGradientBuffer = new Vector(config.embeddingSize());
+            this.contextGradientBuffer = new Vector(config.embeddingSize());
 
             this.initialLearningRate = (float) config.initialLearningRate();
             this.learningRateModifier = (float) ((initialLearningRate - config.minLearningRate()) / (endIndex - startIndex));

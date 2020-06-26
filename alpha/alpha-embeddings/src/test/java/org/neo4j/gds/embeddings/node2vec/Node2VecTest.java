@@ -63,16 +63,16 @@ class Node2VecTest extends AlgoTestBase {
             .build()
             .graph();
 
-        int dimensions = 128;
+        int embeddingSize = 128;
         HugeObjectArray<Vector> node2Vec = new Node2Vec(
             graph,
-            ImmutableNode2VecStreamConfig.builder().dimensions(dimensions).build(),
+            ImmutableNode2VecStreamConfig.builder().embeddingSize(embeddingSize).build(),
             progressLogger,
             AllocationTracker.EMPTY
         ).compute();
 
         graph.forEachNode(node -> {
-                assertEquals(dimensions, node2Vec.get(node).data().length);
+                assertEquals(embeddingSize, node2Vec.get(node).data().length);
                 return true;
             }
         );
@@ -85,8 +85,8 @@ class Node2VecTest extends AlgoTestBase {
             .build()
             .graph();
 
-        int dimensions = 128;
-        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().dimensions(dimensions).build();
+        int embeddingSize = 128;
+        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().embeddingSize(embeddingSize).build();
         var testLogger = new TestProgressLogger(
             graph.nodeCount() * config.walksPerNode(),
             "Node2Vec",

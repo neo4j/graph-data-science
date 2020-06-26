@@ -26,27 +26,15 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 public interface Node2VecBaseConfig extends AlgoBaseConfig {
 
     @Value.Default
-    @Configuration.IntegerRange(min = 2)
-    default int walksPerNode() {
-        return 10;
-    }
-
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int walkLength() {
         return 80;
     }
 
     @Value.Default
-    @Configuration.DoubleRange(min = 0.0)
-    default double returnFactor() {
-        return 1.0;
-    }
-
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0)
-    default double inOutFactor() {
-        return 1.0;
+    @Configuration.IntegerRange(min = 2)
+    default int walksPerNode() {
+        return 10;
     }
 
     @Value.Default
@@ -57,20 +45,20 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig {
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)
-    default int dimensions() {
-        return 128;
+    default int walkBufferSize() {
+        return 1000;
     }
 
     @Value.Default
-    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
-    default double initialLearningRate() {
-        return 0.025;
+    @Configuration.DoubleRange(min = 0.0)
+    default double inOutFactor() {
+        return 1.0;
     }
 
     @Value.Default
-    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
-    default double minLearningRate() {
-        return 0.0001;
+    @Configuration.DoubleRange(min = 0.0)
+    default double returnFactor() {
+        return 1.0;
     }
 
     @Value.Default
@@ -87,19 +75,31 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig {
 
     @Value.Default
     @Configuration.DoubleRange(min = 0.00001, minInclusive = false, max=1.0)
-    default double contextSamplingFactor() {
+    default double contextSamplingExponent() {
         return 0.75;
+    }
+
+    @Value.Default
+    @Configuration.IntegerRange(min = 1)
+    default int embeddingSize() {
+        return 128;
+    }
+
+    @Value.Default
+    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
+    default double initialLearningRate() {
+        return 0.025;
+    }
+
+    @Value.Default
+    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
+    default double minLearningRate() {
+        return 0.0001;
     }
 
     @Value.Default
     default int iterations() {
         return 1;
-    }
-
-    @Value.Default
-    @Configuration.IntegerRange(min = 1)
-    default int walkBufferSize() {
-        return 1000;
     }
 
 }

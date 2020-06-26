@@ -2,17 +2,17 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                    | Type    | Default | Optional | Description
-| walkLength              | Integer | 80      | yes      | The number of steps in a random walk.
+| walkLength              | Integer | 80      | yes      | Number of steps in a random walk.
 | walksPerNode            | Integer | 10      | yes      | Number of random walks to starting at each node.
-| inOutFactor             | Float   | 1.0     | yes      | The tendency of the random walk to stay close to the start node or fan out in the graph. Higher value means stay local.
-| returnFactor            | Float   | 1.0     | yes      | The tendency of the random walk to return to the last visited node. A value below 1.0 means a higher tendency.
+| windowSize              | Integer | 10      | yes      | Size of the context window when training the neural network.
 | walkBufferSize          | Integer | 1000    | yes      | Number of random walks to complete before starting training.
-| embeddingSize           | Integer | 128     | yes      | The dimension of the computed node embeddings.
-| windowSize              | Integer | 10      | yes      | The size of the context window when training the neural network.
-| initialLearningRate     | Float   | 0.01    | yes      | The learning rate used initially for training the neural network.
+| inOutFactor             | Float   | 1.0     | yes      | Tendency of the random walk to stay close to the start node or fan out in the graph. Higher value means stay local.
+| returnFactor            | Float   | 1.0     | yes      | Tendency of the random walk to return to the last visited node. A value below 1.0 means a higher tendency.
+| negativeSamplingRate    | Integer | 5       | yes      | Number of negative samples to produce for each positive sample.
+| centerSamplingFactor    | Float   | 0.001   | yes      | Factor for influencing the sampling distribution for center words. A higher value increases the probability that frequent words are down-sampled.
+| contextSamplingExponent | Float   | 0.75    | yes      | Exponent applied to the context word frequency to obtain the context word sampling distribution. A value of 1.0 samples proportionally to the frequency distribution. A value of 0.0 samples each word equally.
+| embeddingSize           | Integer | 128     | yes      | Size of the computed node embeddings. Denoted by `dimensions` in the Node2Vec paper.
+| initialLearningRate     | Float   | 0.01    | yes      | Learning rate used initially for training the neural network. The learning rate decreases during training.
 | minLearningRate         | Float   | 0.0001  | yes      | Lower bound for learning rate as it is decreased during training.
-| negativeSamplingRate    | Integer | 5       | yes      | The number of negative samples to produce for each positive sample.
-| centerSamplingFactor    | Float   | 0.001   | yes      | A parameter which influences the sampling distribution for center words. Higher values increase the probability that frequent words are down sampled.
-| contextSamplingExponent | Float   | 0.75    | yes      | The exponent applied to context word frequency to obtain the context word sampling distribution. A value of 1.0 samples proportionally to frequency distribution. A value of 0.0 samples each word equally.
-| iterations              | Integer | 1       | yes      | The number of training iterations.
+| iterations              | Integer | 1       | yes      | Number of training iterations.
 |===

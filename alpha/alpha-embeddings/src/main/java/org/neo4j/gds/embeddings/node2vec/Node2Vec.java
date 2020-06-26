@@ -67,7 +67,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
             walks,
             graph.nodeCount(),
             config.centerSamplingFactor(),
-            config.contextSamplingFactor(),
+            config.contextSamplingExponent(),
             config.concurrency(),
             tracker
         );

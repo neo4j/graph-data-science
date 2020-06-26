@@ -37,7 +37,7 @@ public class ProbabilityComputer {
     private final int concurrency;
     private final AllocationTracker tracker;
     private final double centerSamplingFactor;
-    private final double contextSamplingFactor;
+    private final double contextSamplingExponent;
 
     private HugeAtomicLongArray nodeFrequencies;
     private HugeDoubleArray centerProbabilities;
@@ -47,7 +47,7 @@ public class ProbabilityComputer {
         HugeObjectArray<long[]> walks,
         long nodeCount,
         double centerSamplingFactor,
-        double contextSamplingFactor,
+        double contextSamplingExponent,
         int concurrency,
         AllocationTracker tracker
     ) {
@@ -56,7 +56,7 @@ public class ProbabilityComputer {
         this.concurrency = concurrency;
         this.tracker = tracker;
         this.centerSamplingFactor = centerSamplingFactor;
-        this.contextSamplingFactor = contextSamplingFactor;
+        this.contextSamplingExponent = contextSamplingExponent;
 
         computeFrequencies();
         computeCenterProbabilities();
@@ -110,8 +110,8 @@ public class ProbabilityComputer {
         contextDistribution = HugeLongArray.newArray(nodeCount, tracker);
         long sum = 0;
         for (var i = 0L; i < nodeCount; i++) {
-            sum += Math.pow(nodeFrequencies.get(i), contextSamplingFactor);
-            sum = addExact(sum, (long) Math.pow(nodeFrequencies.get(i), contextSamplingFactor));
+            sum += Math.pow(nodeFrequencies.get(i), contextSamplingExponent);
+            sum = addExact(sum, (long) Math.pow(nodeFrequencies.get(i), contextSamplingExponent));
             contextDistribution.set(i, sum);
         }
     }
