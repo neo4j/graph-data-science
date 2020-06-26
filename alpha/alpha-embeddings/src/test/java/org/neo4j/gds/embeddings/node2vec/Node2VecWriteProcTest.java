@@ -81,7 +81,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
             .writeMode()
             .addParameter("writeProperty", "embedding")
             .addParameter("walksPerNode", Integer.MAX_VALUE)
-            .addParameter("steps", Integer.MAX_VALUE)
+            .addParameter("walkLength", Integer.MAX_VALUE)
             .yields();
 
         Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
