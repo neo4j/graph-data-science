@@ -522,7 +522,7 @@ _Step 2_
 
 After the algorithm has finished writing to Neo4j we want to create a new node in the database.
 
-[role=query-example, no-result, group=seeding]
+[role=query-example, no-result=true, group=seeding]
 --
 .The following will create a new node in the Neo4j graph, with no component ID:
 [source, cypher]
@@ -537,7 +537,7 @@ _Step 3_
 Note, that we cannot use our already created graph as it does not contain the component id.
 We will therefore create a second in-memory graph that contains the previously computed component id.
 
-[role=query-example, no-result, group=seeding]
+[role=query-example, no-result=true, group=seeding]
 --
 .The following will create a new graph containing the previously computed component id:
 [source, cypher]
