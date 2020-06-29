@@ -10,9 +10,12 @@ This chapter provides explanations and examples for using the Pregel API in the 
 == Introduction
 
 Pregel is a vertex-centric computation model to define your own algorithms via a `compute` function.
+This is exposed through the Graph Data Science library as a Java API that enables you to implement your own algorithms.
+//TODO: link to some other docs
 The computation model executes the algorithm in several iterations, also called `super-steps` in Pregel terminology.
 Each node executes the same user-defined function, which process a list of messages and sends messages to its neighbours.
 Currently, messages of type `double` are only allowed.
+Moreover, all pregel jobs, which run in their own thread, share a so called PregelContext in which the data for the current node is stored.
 The algorithms terminates if no messages where send in the last iteration.
 
 For more information about Pregel, have a look at https://kowshik.github.io/JPregel/pregel_paper.pdf.
@@ -23,14 +26,22 @@ For more information about Pregel, have a look at https://kowshik.github.io/JPre
 .Initializing Pregel
 [source, java]
 ----
-public static Pregel withDefaultNodeValues(
-    final Graph graph,
-    final PregelConfig config,
-    final PregelComputation computation,
-    final int batchSize,
-    final int concurrency,
-    final ExecutorService executor,
-    final AllocationTracker tracker) {...}
+package org.neo4j.graphalgo.beta.pregel;
+
+public final class Pregel {
+    // constructing an instance of Pregel
+    public static Pregel withDefaultNodeValues(
+        final Graph graph,
+        final PregelConfig config,
+        final PregelComputation computation,
+        final int batchSize,
+        final ExecutorService executor,
+        final AllocationTracker tracker
+    ) {...}
+
+    // running the Pregel instance to get node values as result
+    public HugeDoubleArray run(final int maxIterations) {...}
+}
 ----
 
 To build PregelConfig you can use the `ImmutablePregelConfig.builder()`.
@@ -42,6 +53,7 @@ To build PregelConfig you can use the `ImmutablePregelConfig.builder()`.
 | intialNodeValue           | Double    | -1            | The initial value of the node in the pregel context.
 | isAsynchronous            | Boolean   | false         | Flag indicating if multiple super-steps can be executed in parallel
 | relationshipWeightProperty| String    | null          | The name of the relationship property that represents weight.
+| concurrency               | Integer   | 4             | The concurrency used when executing the pregel computation.
 |===
 
 For implementing your own algorithm, you need implement the `PregelComputation` interface.
@@ -59,6 +71,8 @@ public interface PregelComputation {
 ----
 
 
+The compute method of the Pregel class expects an instance of PregelContext.
+In addition of being a holding the data for the current node, the PregelContext provides communication via messages as well as managing the iterations and halting.
 
 .The PregelContext
 [source, java]
@@ -81,7 +95,6 @@ public final class PregelContext {
 ----
 
 
-
 [[algorithms-pregel-api-example]]
 == Example
 
@@ -97,12 +110,17 @@ public class ConnectedComponentsPregel implements PregelComputation {
 
    @Override
    public void compute(PregelContext context, long nodeId, Queue<Double> messages) {
+        // get the current componentId for the node from the context
+        // if we are on the first iteration, the value is the default value from the PregelConfig
+        // which we do not use
         double oldComponentId = context.getNodeValue(nodeId);
         double newComponentId = oldComponentId;
         if (context.isInitialSuperStep()) {
-            // In the first round, every node uses its own id as the component id
+            // In the first round, we use use the nodeId as component instead of the default -1
             newComponentId = nodeId;
+        // need to check if there are any messages for this node
         } else if (messages != null && !messages.isEmpty()){
+                // the componentId is updated to the smallest componentId of its neighbors including itself
                 Double nextComponentId;
                 while ((nextComponentId = messages.poll()) != null) {
                     if (nextComponentId.longValue() < newComponentId) {
@@ -111,8 +129,10 @@ public class ConnectedComponentsPregel implements PregelComputation {
                 }
         }
 
+        // update the node's componentId, both in the context and notify neighbors
         if (newComponentId != oldComponentId) {
             context.setNodeValue(nodeId, newComponentId);
+            // send the new componentId to neighbors so that they also can be updated
             context.sendMessages(nodeId, newComponentId);
         }
    }
@@ -143,15 +163,18 @@ public class PregelExample {
             .build();
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
-            RandomGraphGenerator.generate(10, 100),
+            // generate a random graph with 100 nodes and average degree 10
+            RandomGraphGenerator.generate(100, 10),
             config,
             new ConnectedComponentsPregel(),
             batchSize,
-            AlgoBaseConfig.DEFAULT_CONCURRENCY,
+            // run on the default GDS ExecutorService
             Pools.DEFAULT,
+            // disable memory allocation tracking
             AllocationTracker.EMPTY
         );
 
+        // the index in the nodeValues array is the nodeId from the graph
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
         System.out.println(nodeValues.toString());
     }
