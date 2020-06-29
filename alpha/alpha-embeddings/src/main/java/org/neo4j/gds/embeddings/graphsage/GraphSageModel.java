@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.DummyVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
@@ -252,15 +253,15 @@ public class GraphSageModel {
             concurrency,
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable embeddingVariable = embeddingVariable(graph, batch, features);
-                int dimension = embeddingVariable.dimension(1);
+                Matrix embeddingVariable = embeddingVariable(graph, batch, features);
+                int cols = embeddingVariable.cols();
                 double[] embeddings = ctx.forward(embeddingVariable).data;
 
                 for (int nodeIndex = 0; nodeIndex < batch.length; nodeIndex++) {
                     double[] nodeEmbedding = Arrays.copyOfRange(
                         embeddings,
-                        nodeIndex * dimension,
-                        (nodeIndex + 1) * dimension
+                        nodeIndex * cols,
+                        (nodeIndex + 1) * cols
                     );
                     result.set(batch[nodeIndex], nodeEmbedding);
                 }
@@ -297,7 +298,7 @@ public class GraphSageModel {
                 neighborBatch(graph, batch),
                 negativeBatch(graph, batch.length)
             )).toArray();
-        Variable embeddingVariable = embeddingVariable(graph, totalBatch, features);
+        Matrix embeddingVariable = embeddingVariable(graph, totalBatch, features);
 
         Variable lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
 
@@ -339,7 +340,7 @@ public class GraphSageModel {
             });
     }
 
-    private MatrixConstant featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
+    private Matrix featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
         int dimension = features.get(0).length;
         double[] data = new double[nodeIds.length * dimension];
         IntStream
@@ -354,7 +355,7 @@ public class GraphSageModel {
         return new MatrixConstant(data, nodeIds.length, dimension);
     }
 
-    private Variable embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
+    private Matrix embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)

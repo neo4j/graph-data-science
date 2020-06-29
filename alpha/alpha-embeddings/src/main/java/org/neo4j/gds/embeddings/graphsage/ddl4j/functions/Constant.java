@@ -30,7 +30,7 @@ public class Constant extends AbstractVariable {
     private final Tensor data;
 
     public Constant(Tensor data) {
-        super(List.of(), data.dimensions);
+        super(List.of(), data.dimensions());
         this.data = data;
     }
 

@@ -23,7 +23,8 @@ public interface Variable {
     Tensor apply(ComputationContext ctx);
 
     // Do not use directly. Use ComputationContext instead.
-    Tensor gradient(Variable parent, ComputationContext ctx);
+    <T extends Variable> Tensor gradient(T parent, ComputationContext ctx);
+
 
     default boolean requireGradient() {
         return false;

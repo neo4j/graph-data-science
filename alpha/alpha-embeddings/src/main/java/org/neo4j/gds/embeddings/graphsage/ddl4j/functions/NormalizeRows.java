@@ -20,10 +20,11 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
-public class NormalizeRows extends SingleParentVariable {
+public class NormalizeRows extends SingleParentVariable implements Matrix {
     private final int rows;
     private final int cols;
 
@@ -79,5 +80,15 @@ public class NormalizeRows extends SingleParentVariable {
             }
         }
         return Tensor.matrix(result, rows, cols);
+    }
+
+    @Override
+    public int rows() {
+        return rows;
+    }
+
+    @Override
+    public int cols() {
+        return cols;
     }
 }

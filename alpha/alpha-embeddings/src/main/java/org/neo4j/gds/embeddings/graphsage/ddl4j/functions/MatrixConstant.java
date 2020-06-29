@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
@@ -32,15 +33,12 @@ public class MatrixConstant extends AbstractVariable implements Matrix {
     private final int rows;
     private final int cols;
 
-    public MatrixConstant(Tensor data) {
-        super(List.of(), data.dimensions);
-        this.data = data;
-        this.rows = data.dimensions[0];
-        this.cols = data.dimensions[1];
-    }
-
     public MatrixConstant(double[] elements, int rows, int cols) {
-        this(Tensor.matrix(elements, rows, cols));
+        super(List.of(), Dimensions.matrix(rows, cols));
+
+        this.data = Tensor.matrix(elements, rows, cols);
+        this.rows = rows;
+        this.cols = cols;
     }
 
     @Override

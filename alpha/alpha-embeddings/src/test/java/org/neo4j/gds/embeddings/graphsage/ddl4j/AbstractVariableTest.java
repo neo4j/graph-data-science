@@ -20,8 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Constant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
@@ -56,7 +54,7 @@ class AbstractVariableTest {
         assertNull(ctx.gradient(z), "Gradient should be null after forward");
         assertArrayEquals(new int[]{1}, w.dimensions());
         assertEquals(45D, ctx.data(w).getAtIndex(0));
-        assertArrayEquals(new int[]{5}, ctx.data(z).dimensions);
+        assertArrayEquals(new int[]{5}, ctx.data(z).dimensions());
         for (int i = 0; i < 5; i++) {
             assertEquals(9D, ctx.data(z).getAtIndex(i));
         }
@@ -64,8 +62,8 @@ class AbstractVariableTest {
         ctx.backward(w);
 
         assertNull(ctx.gradient(y), "Gradient should be null for Constant");
-        assertArrayEquals(new int[]{5}, ctx.gradient(z).dimensions);
-        assertArrayEquals(new int[]{5}, ctx.gradient(x).dimensions);
+        assertArrayEquals(new int[]{5}, ctx.gradient(z).dimensions());
+        assertArrayEquals(new int[]{5}, ctx.gradient(x).dimensions());
         for (int i = 0; i < 5; i++) {
             assertEquals(1D, ctx.gradient(z).getAtIndex(i));
             assertEquals(1D, ctx.gradient(x).getAtIndex(i));

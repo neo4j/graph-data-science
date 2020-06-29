@@ -24,10 +24,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,7 +45,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         "50, 24.239937336323717"
     })
     void shouldComputeLossBatchSizeOne(int Q, double expectedLoss) {
-        Variable combinedEmbeddings = new MatrixConstant(
+        Matrix combinedEmbeddings = new MatrixConstant(
             new double[]{
                 1.5, -1, 0.75,  // nodeId
                 1, -0.75, 0.7,  // positive nodeId
@@ -54,7 +54,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             3, 3
         );
 
-        GraphSageLoss lossVar = new GraphSageLoss(combinedEmbeddings, Q);
+        Variable lossVar = new GraphSageLoss(combinedEmbeddings, Q);
 
         Tensor lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
@@ -72,7 +72,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         "50, 76.87999339630119"
     })
     void shouldComputeLoss(int Q, double expectedLoss) {
-        Variable combinedEmbeddings = new MatrixConstant(
+        Matrix combinedEmbeddings = new MatrixConstant(
             new double[]{
                 1.5, -1, 0.75,      // nodeId
                 0.5, -0.1, 0.7,     // nodeId
@@ -87,15 +87,11 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             9, 3
         );
 
-        GraphSageLoss lossVar = new GraphSageLoss(combinedEmbeddings, Q);
+        Variable lossVar = new GraphSageLoss(combinedEmbeddings, Q);
 
         Tensor lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
         assertEquals(expectedLoss, lossData.getAtIndex(0), 1e-10);
-    }
-
-    private double nodeLoss(int Q, double positiveAffinity, double negativeAffinity) {
-        return -Math.log(Sigmoid.sigmoid(positiveAffinity)) - Q * Math.log(Sigmoid.sigmoid(-negativeAffinity));
     }
 
     @Test

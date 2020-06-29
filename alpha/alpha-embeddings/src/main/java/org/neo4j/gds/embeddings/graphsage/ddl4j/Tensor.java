@@ -24,11 +24,19 @@ import java.util.function.DoubleUnaryOperator;
 
 public class Tensor {
     public double[] data;
-    public int[] dimensions;
+    private final int[] dimensions;
 
     public Tensor(double[] data, int[] dimensions) {
         this.data = data;
         this.dimensions = dimensions;
+    }
+
+    public int dimension(int dimensionIndex) {
+        return dimensions[dimensionIndex];
+    }
+
+    public int[] dimensions() {
+        return dimensions;
     }
 
     public Tensor zeros() {

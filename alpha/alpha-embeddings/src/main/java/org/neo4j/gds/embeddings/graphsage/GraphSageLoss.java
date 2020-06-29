@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
@@ -32,10 +33,10 @@ public class GraphSageLoss extends SingleParentVariable {
 
     private static final int NEGATIVE_NODES_OFFSET = 2;
 
-    private final Variable combinedEmbeddings;
+    private final Matrix combinedEmbeddings;
     private final int negativeSamplingFactor;
 
-    GraphSageLoss(Variable combinedEmbeddings, int negativeSamplingFactor) {
+    GraphSageLoss(Matrix combinedEmbeddings, int negativeSamplingFactor) {
         super(combinedEmbeddings, Dimensions.scalar());
         this.combinedEmbeddings = combinedEmbeddings;
         this.negativeSamplingFactor = negativeSamplingFactor;
@@ -44,7 +45,7 @@ public class GraphSageLoss extends SingleParentVariable {
     @Override
     public Tensor apply(ComputationContext ctx) {
         Tensor embeddingData = ctx.data(parents().get(0));
-        int batchSize = embeddingData.dimensions[0] / 3;
+        int batchSize = embeddingData.dimension(0) / 3;
         double loss = IntStream.range(0, batchSize).mapToDouble(nodeId -> {
             int positiveNodeId = nodeId + batchSize;
             int negativeNodeId = nodeId + NEGATIVE_NODES_OFFSET * batchSize;
@@ -56,7 +57,7 @@ public class GraphSageLoss extends SingleParentVariable {
     }
 
     private double affinity(Tensor embeddingData, int nodeId, int otherNodeId) {
-        int dimensionSize = combinedEmbeddings.dimension(1);
+        int dimensionSize = combinedEmbeddings.cols();
         double sum = 0;
         for (int i = 0; i < dimensionSize; i++) {
             sum += embeddingData.data[nodeId * dimensionSize + i] * embeddingData.data[otherNodeId * dimensionSize + i];
@@ -68,10 +69,10 @@ public class GraphSageLoss extends SingleParentVariable {
     public Tensor gradient(Variable parent, ComputationContext ctx) {
         Tensor embeddingData = ctx.data(parent);
         double[] embeddings = embeddingData.data;
-        int totalBatchSize = embeddingData.dimensions[0];
+        int totalBatchSize = embeddingData.dimension(0);
         int batchSize = totalBatchSize / 3;
 
-        int embeddingSize = embeddingData.dimensions[1];
+        int embeddingSize = embeddingData.dimension(1);
         double[] gradientResult = new double[totalBatchSize * embeddingSize];
 
         IntStream.range(0, batchSize).forEach(nodeId -> {

@@ -62,7 +62,7 @@ class MultiMeanTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
         Tensor result = ctx.forward(mean);
 
-        assertArrayEquals(expectedDim, result.dimensions);
+        assertArrayEquals(expectedDim, result.dimensions());
         assertArrayEquals(expected, result.data);
     }
 

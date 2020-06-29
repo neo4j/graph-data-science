@@ -31,7 +31,7 @@ public class Weights extends AbstractVariable implements Matrix {
     private final Tensor data;
 
     public Weights(Tensor data) {
-        super(List.of(), data.dimensions);
+        super(List.of(), data.dimensions());
         this.data = data;
     }
 
@@ -51,12 +51,12 @@ public class Weights extends AbstractVariable implements Matrix {
 
     @Override
     public int rows() {
-        return data.dimensions[0];
+        return data.dimension(0);
     }
 
     @Override
     public int cols() {
-        return data.dimensions[1];
+        return data.dimension(1);
     }
 
     @Override
