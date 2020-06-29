@@ -24,6 +24,8 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -38,9 +40,17 @@ public class GraphDropProc extends CatalogProc {
     public Stream<GraphInfo> drop(@Name(value = "graphName") String graphName) {
         validateGraphName(graphName);
 
+        Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog
+            .getUserCatalog(getUsername())
+            .getDegreeDistribution(graphName);
         AtomicReference<GraphInfo> result = new AtomicReference<>();
         GraphStoreCatalog.remove(getUsername(), graphName, (graphStoreWithConfig) -> {
-            result.set(new GraphInfo(graphStoreWithConfig.config(), graphStoreWithConfig.graphStore(), computeHistogram()));
+            result.set(new GraphInfo(
+                graphStoreWithConfig.config(),
+                graphStoreWithConfig.graphStore(),
+                maybeDegreeDistribution.isPresent(),
+                maybeDegreeDistribution
+            ));
         });
 
         return Stream.of(result.get());

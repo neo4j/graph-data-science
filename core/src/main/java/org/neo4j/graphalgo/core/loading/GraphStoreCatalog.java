@@ -83,7 +83,7 @@ public final class GraphStoreCatalog {
             .sum();
     }
 
-    private static UserCatalog getUserCatalog(String username) {
+    public static UserCatalog getUserCatalog(String username) {
         return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
     }
 
@@ -102,11 +102,13 @@ public final class GraphStoreCatalog {
         ));
     }
 
-    private static class UserCatalog {
+    public static class UserCatalog {
 
         private static final UserCatalog EMPTY = new UserCatalog();
 
         private final Map<String, GraphStoreWithConfig> graphsByName = new ConcurrentHashMap<>();
+
+        private final Map<String, Map<String, Object>> degreeDistributionByName = new ConcurrentHashMap<>();
 
         void set(GraphCreateConfig config, GraphStore graphStore) {
             if (config.graphName() == null || graphStore == null) {
@@ -122,12 +124,33 @@ public final class GraphStoreCatalog {
             graphStore.canRelease(false);
         }
 
+        public void setDegreeDistribution(String graphName, Map<String, Object> degreeDistribution) {
+
+            if (graphName == null || degreeDistribution == null) {
+                throw new IllegalArgumentException("Both name and degreeDistribution must be not null");
+            }
+            if (!graphsByName.containsKey(graphName)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Cannot set degreeDistribution because graph %s does not exist",
+                    graphName)
+                );
+            }
+            degreeDistributionByName.put(graphName, degreeDistribution);
+        }
+
         GraphStoreWithConfig get(String graphName) {
             if (graphsByName.containsKey(graphName)) {
                 return graphsByName.get(graphName);
             } else {
                 throw new NoSuchElementException(formatWithLocale("Cannot find graph with name '%s'.", graphName));
             }
+        }
+
+        public Optional<Map<String, Object>> getDegreeDistribution(String graphName) {
+            if (!graphsByName.containsKey(graphName)) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(degreeDistributionByName.get(graphName));
         }
 
         /**

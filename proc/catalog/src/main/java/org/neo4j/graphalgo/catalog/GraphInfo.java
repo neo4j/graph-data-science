@@ -30,11 +30,13 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
 
@@ -55,7 +57,12 @@ public class GraphInfo {
     public final ZonedDateTime modificationTime;
     public final Map<String, Object> schema;
 
-    GraphInfo(GraphCreateConfig config, GraphStore graphStore, boolean computeHistogram) {
+    GraphInfo(
+        GraphCreateConfig config,
+        GraphStore graphStore,
+        boolean computeHistogram,
+        Optional<Map<String, Object>> maybeDegreeDistribution
+    ) {
         this.graphName = config.graphName();
         this.creationTime = config.creationTime();
 
@@ -82,13 +89,22 @@ public class GraphInfo {
         this.modificationTime = graphStore.modificationTime();
         this.nodeCount = graphStore.nodeCount();
         this.relationshipCount = graphStore.relationshipCount();
-        this.degreeDistribution = computeHistogram ? computeHistogram(graphStore.getUnion()) : emptyMap();
         this.schema = graphStore.schema().toMap();
         this.sizeInBytes = MemoryUsage.sizeOf(graphStore);
         this.memoryUsage = MemoryUsage.humanReadable(this.sizeInBytes);
+        this.degreeDistribution = computeHistogram ? computeHistogram(graphStore, maybeDegreeDistribution) : emptyMap();
+        if (GraphStoreCatalog.exists(config.username(), config.graphName())) {
+            GraphStoreCatalog
+                .getUserCatalog(config.username())
+                .setDegreeDistribution(config.graphName(), this.degreeDistribution);
+        }
     }
 
-    private Map<String, Object> computeHistogram(Graph graph) {
+    private Map<String, Object> computeHistogram(GraphStore graphStore, Optional<Map<String, Object>> maybeDegreeDistribution) {
+        if (maybeDegreeDistribution.isPresent()) {
+            return maybeDegreeDistribution.get();
+        }
+        Graph graph = graphStore.getUnion();
         int batchSize = Math.toIntExact(ParallelUtil.adjustedBatchSize(
             graph.nodeCount(),
             ConcurrencyConfig.DEFAULT_CONCURRENCY,

@@ -50,6 +50,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
@@ -125,6 +126,27 @@ class GraphListProcTest extends BaseProcTest {
             )
         ));
     }
+
+    @Test
+    void shouldCacheDegreeDistribution() {
+        var name = "name";
+        var generateQuery = "CALL gds.beta.graph.generate($name, 500000, 5)";
+        runQuery(
+            generateQuery,
+            map("name", name)
+        );
+
+        long startTime = System.currentTimeMillis();
+        runQuery("CALL gds.graph.list() YIELD degreeDistribution");
+        long timeAfterFirst = System.currentTimeMillis();
+        runQuery("CALL gds.graph.list() YIELD degreeDistribution");
+        long timeAfterSecond = System.currentTimeMillis();
+        runQuery("CALL gds.graph.list() YIELD degreeDistribution");
+
+        assertTrue(timeAfterFirst - startTime > 5*(timeAfterSecond - timeAfterFirst));
+
+    }
+
 
     @Test
     void listGeneratedGraph() {

@@ -27,6 +27,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -51,7 +52,11 @@ public class GraphListProc extends CatalogProc {
             graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
         }
 
-        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram()));
+        GraphStoreCatalog.UserCatalog userCatalog = GraphStoreCatalog.getUserCatalog(getUsername());
+
+        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram(),
+            userCatalog.getDegreeDistribution(e.getKey().graphName())
+        ));
     }
 
 }
