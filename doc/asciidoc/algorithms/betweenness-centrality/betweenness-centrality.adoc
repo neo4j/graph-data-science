@@ -35,7 +35,7 @@ This topic includes:
 Betweenness centrality is a way of detecting the amount of influence a node has over the flow of information in a graph.
 It is often used to find nodes that serve as a bridge from one part of a graph to another.
 
-The algorithm calculates the shortest paths between all pairs of nodes in an unweighted graph.
+The algorithm calculates unweighted shortest paths between all pairs of nodes in a graph.
 Each node receives a score, based on the number of shortest paths that pass through the node.
 Nodes that more frequently lie on shortest paths between other nodes will have higher betweenness centrality scores.
 
