@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
@@ -30,7 +31,8 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 public class PregelConnectedComponentsDocExample {
-    public static void main(String[] args) {
+    @Test
+    public void testDoc() {
         int batchSize = 10;
         int maxIterations = 10;
 
@@ -39,7 +41,7 @@ public class PregelConnectedComponentsDocExample {
             .build();
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
-            RandomGraphGenerator.generate(10, 100),
+            RandomGraphGenerator.generate(100, 10),
             config,
             new ConnectedComponentsPregel(),
             batchSize,
