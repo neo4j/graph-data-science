@@ -20,21 +20,18 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 import java.util.List;
 
-public class MatrixConstant extends AbstractVariable implements Matrix {
+public class MatrixConstant implements Matrix {
     private final Tensor data;
     private final int rows;
     private final int cols;
 
     public MatrixConstant(double[] elements, int rows, int cols) {
-        super(List.of(), Dimensions.matrix(rows, cols));
 
         this.data = Tensor.matrix(elements, rows, cols);
         this.rows = rows;
@@ -62,7 +59,7 @@ public class MatrixConstant extends AbstractVariable implements Matrix {
     }
 
     @Override
-    public boolean requireGradient() {
-        return false;
+    public Iterable<? extends Variable> parents() {
+        return List.of();
     }
 }

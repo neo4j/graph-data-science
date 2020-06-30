@@ -19,21 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
-public interface Matrix extends Variable {
-
-    int rows();
-    int cols();
-
+public interface GradientMatrix extends Matrix {
     @Override
-    default int[] dimensions() {
-        return Dimensions.matrix(rows(), cols());
-    }
-
-    @Override
-    default int dimension(int i) {
-        assert i >=0 : "Matrix variable can't have negative dimension";
-        assert i <=1 : "Matrix variable can't have dimension higher than 2";
-
-        return i == 0 ? rows() : cols();
+    default boolean requireGradient() {
+        return true;
     }
 }
