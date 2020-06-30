@@ -36,7 +36,7 @@ class AbstractVariableTest {
     void testAdd() {
 
         ComputationContext ctx = new ComputationContext();
-        int[] dimensions = {5};
+        int[] dimensions = Dimensions.vector(5);
         var x = new Weights(Tensor.constant(5, dimensions));
         var y = new Constant(Tensor.constant(4, dimensions));
         var z = new TensorAdd(List.of(x, y), dimensions);

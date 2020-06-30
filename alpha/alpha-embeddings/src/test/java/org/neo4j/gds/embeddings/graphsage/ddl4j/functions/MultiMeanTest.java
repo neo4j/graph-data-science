@@ -23,7 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 import java.util.List;
 
@@ -57,8 +59,8 @@ class MultiMeanTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
         int[] expectedDim = Dimensions.matrix(2, 2);
 
-        MatrixConstant data = new MatrixConstant(matrix, 4, 2);
-        MultiMean mean = new MultiMean(data, adj, selfAdjacency);
+        Matrix data = new MatrixConstant(matrix, 4, 2);
+        Variable mean = new MultiMean(data, adj, selfAdjacency);
 
         Tensor result = ctx.forward(mean);
 
