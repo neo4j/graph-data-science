@@ -19,15 +19,11 @@
  */
 package org.neo4j.graphalgo.catalog;
 
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.time.ZonedDateTime;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -39,49 +35,14 @@ public class GraphDropProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.drop", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphDropInfo> drop(@Name(value = "graphName") String graphName) {
+    public Stream<GraphInfoWithoutDegreeDistribution> drop(@Name(value = "graphName") String graphName) {
         validateGraphName(graphName);
 
-        AtomicReference<GraphDropInfo> result = new AtomicReference<>();
+        AtomicReference<GraphInfoWithoutDegreeDistribution> result = new AtomicReference<>();
         GraphStoreCatalog.remove(getUsername(), graphName, (graphStoreWithConfig) -> {
-            result.set(new GraphDropInfo(graphStoreWithConfig.config(), graphStoreWithConfig.graphStore()));
+            result.set(new GraphInfoWithoutDegreeDistribution(graphStoreWithConfig.config(), graphStoreWithConfig.graphStore()));
         });
 
         return Stream.of(result.get());
-    }
-
-    public static class GraphDropInfo {
-        public final String graphName;
-        public final String memoryUsage;
-        public final long sizeInBytes;
-        public final Map<String, Object> nodeProjection;
-        public final Map<String, Object> relationshipProjection;
-        public final String nodeQuery;
-        public final String relationshipQuery;
-        public final long nodeCount;
-        public final long relationshipCount;
-        public final ZonedDateTime creationTime;
-        public final ZonedDateTime modificationTime;
-        public final Map<String, Object> schema;
-
-        GraphDropInfo(
-            GraphCreateConfig config,
-            GraphStore graphStore
-        ) {
-            GraphInfo graphInfo = new GraphInfo(config, graphStore, false);
-
-            this.graphName = graphInfo.graphName;
-            this.memoryUsage = graphInfo.memoryUsage;
-            this.sizeInBytes = graphInfo.sizeInBytes;
-            this.nodeProjection = graphInfo.nodeProjection;
-            this.relationshipProjection = graphInfo.relationshipProjection;
-            this.nodeQuery = graphInfo.nodeQuery;
-            this.relationshipQuery = graphInfo.relationshipQuery;
-            this.nodeCount = graphInfo.nodeCount;
-            this.relationshipCount = graphInfo.relationshipCount;
-            this.creationTime = graphInfo.creationTime;
-            this.modificationTime = graphInfo.modificationTime;
-            this.schema = graphInfo.schema;
-        }
     }
 }
