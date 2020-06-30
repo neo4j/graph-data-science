@@ -40,18 +40,19 @@ public class GraphDropProc extends CatalogProc {
     public Stream<GraphInfo> drop(@Name(value = "graphName") String graphName) {
         validateGraphName(graphName);
 
-        Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog
-            .getUserCatalog(getUsername())
+        GraphStoreCatalog.UserCatalog userCatalog = GraphStoreCatalog.getUserCatalog(getUsername());
+        Optional<Map<String, Object>> maybeDegreeDistribution = userCatalog
             .getDegreeDistribution(graphName);
         AtomicReference<GraphInfo> result = new AtomicReference<>();
         GraphStoreCatalog.remove(getUsername(), graphName, (graphStoreWithConfig) -> {
             result.set(new GraphInfo(
                 graphStoreWithConfig.config(),
                 graphStoreWithConfig.graphStore(),
-                maybeDegreeDistribution.isPresent(),
-                maybeDegreeDistribution
+                maybeDegreeDistribution.isPresent()
             ));
         });
+
+        userCatalog.removeDegreeDistribution(graphName);
 
         return Stream.of(result.get());
     }

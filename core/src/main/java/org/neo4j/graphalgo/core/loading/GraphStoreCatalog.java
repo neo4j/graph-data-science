@@ -138,6 +138,10 @@ public final class GraphStoreCatalog {
             degreeDistributionByName.put(graphName, degreeDistribution);
         }
 
+        public void removeDegreeDistribution(String graphName) {
+            degreeDistributionByName.remove(graphName);
+        }
+
         GraphStoreWithConfig get(String graphName) {
             if (graphsByName.containsKey(graphName)) {
                 return graphsByName.get(graphName);

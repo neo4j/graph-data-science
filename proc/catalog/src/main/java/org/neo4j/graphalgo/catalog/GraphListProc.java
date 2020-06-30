@@ -52,11 +52,7 @@ public class GraphListProc extends CatalogProc {
             graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
         }
 
-        GraphStoreCatalog.UserCatalog userCatalog = GraphStoreCatalog.getUserCatalog(getUsername());
-
-        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram(),
-            userCatalog.getDegreeDistribution(e.getKey().graphName())
-        ));
+        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram()));
     }
 
 }

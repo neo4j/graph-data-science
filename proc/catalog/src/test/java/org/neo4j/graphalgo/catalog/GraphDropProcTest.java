@@ -36,6 +36,8 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.core.Is.isA;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -102,7 +104,8 @@ class GraphDropProcTest extends BaseProcTest {
                     "sizeInBytes", isA(Long.class),
                     "schema", map(
                         "nodes", map("A", emptyMap()),
-                        "relationships", map("REL", emptyMap()))
+                        "relationships", map("REL", emptyMap())
+                    )
                 )
             )
         );
@@ -218,7 +221,8 @@ class GraphDropProcTest extends BaseProcTest {
             map("nodeCount", 4L, "relationshipCount", 2L, "graphName", GRAPH_NAME)
         );
 
-        assertCypherResult("CALL gds.graph.list($name) YIELD nodeCount, relationshipCount, graphName",
+        assertCypherResult(
+            "CALL gds.graph.list($name) YIELD nodeCount, relationshipCount, graphName",
             singletonMap("name", GRAPH_NAME),
             expectedGraphInfo
         );
@@ -228,8 +232,7 @@ class GraphDropProcTest extends BaseProcTest {
             expectedGraphInfo
         );
 
-        assertCypherResult(
-            "CALL gds.graph.exists($graphName)",
+        assertCypherResult("CALL gds.graph.exists($graphName)",
             map("graphName", GRAPH_NAME),
             singletonList(
                 map("graphName", GRAPH_NAME, "exists", false)
@@ -272,4 +275,32 @@ class GraphDropProcTest extends BaseProcTest {
         );
     }
 
+    @Test
+    void shouldClearCacheAfterDropping() {
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
+
+        runQuery("CALL gds.graph.list()");
+        assertTrue(graphIsCached());
+
+        runQuery("CALL gds.graph.drop($graphName)",
+            map("graphName", GRAPH_NAME));
+
+        assertFalse(graphIsCached());
+    }
+
+    @Test
+    void shouldNotCrashIfDroppedWithoutListing() {
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
+
+        assertFalse(graphIsCached());
+
+        runQuery("CALL gds.graph.drop($graphName)",
+            map("graphName", GRAPH_NAME));
+
+        assertFalse(graphIsCached());
+    }
+
+    private boolean graphIsCached() {
+        return GraphStoreCatalog.getUserCatalog(getUsername()).getDegreeDistribution(GRAPH_NAME).isPresent();
+    }
 }

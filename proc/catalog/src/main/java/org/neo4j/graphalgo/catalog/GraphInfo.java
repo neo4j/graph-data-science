@@ -43,6 +43,7 @@ import static java.util.Collections.emptyMap;
 public class GraphInfo {
     private static final int PRECISION = 5;
 
+    public final String userName;
     public final String graphName;
     public final String memoryUsage;
     public final long sizeInBytes;
@@ -60,11 +61,11 @@ public class GraphInfo {
     GraphInfo(
         GraphCreateConfig config,
         GraphStore graphStore,
-        boolean computeHistogram,
-        Optional<Map<String, Object>> maybeDegreeDistribution
+        boolean computeHistogram
     ) {
         this.graphName = config.graphName();
         this.creationTime = config.creationTime();
+        this.userName = config.username();
 
         if (config instanceof GraphCreateFromCypherConfig) {
             GraphCreateFromCypherConfig cypherConfig = (GraphCreateFromCypherConfig) config;
@@ -92,18 +93,16 @@ public class GraphInfo {
         this.schema = graphStore.schema().toMap();
         this.sizeInBytes = MemoryUsage.sizeOf(graphStore);
         this.memoryUsage = MemoryUsage.humanReadable(this.sizeInBytes);
-        this.degreeDistribution = computeHistogram ? computeHistogram(graphStore, maybeDegreeDistribution) : emptyMap();
-        if (GraphStoreCatalog.exists(config.username(), config.graphName())) {
-            GraphStoreCatalog
-                .getUserCatalog(config.username())
-                .setDegreeDistribution(config.graphName(), this.degreeDistribution);
-        }
+        this.degreeDistribution = computeHistogram ? computeHistogram(graphStore) : emptyMap();
     }
 
-    private Map<String, Object> computeHistogram(GraphStore graphStore, Optional<Map<String, Object>> maybeDegreeDistribution) {
+    private Map<String, Object> computeHistogram(GraphStore graphStore) {
+        Optional<Map<String, Object>> maybeDegreeDistribution = lookupDegreeDistribution();
+
         if (maybeDegreeDistribution.isPresent()) {
             return maybeDegreeDistribution.get();
         }
+
         Graph graph = graphStore.getUnion();
         int batchSize = Math.toIntExact(ParallelUtil.adjustedBatchSize(
             graph.nodeCount(),
@@ -128,7 +127,7 @@ public class GraphInfo {
                 }
             }
         );
-        return MapUtil.map(
+        Map<String, Object> degreeDistribution = MapUtil.map(
             "min", histogram.getMinValue(),
             "mean", histogram.getMean(),
             "max", histogram.getMaxValue(),
@@ -139,5 +138,23 @@ public class GraphInfo {
             "p99", histogram.getValueAtPercentile(99),
             "p999", histogram.getValueAtPercentile(99.9)
         );
+
+        trySaveDegreeDistribution(degreeDistribution);
+
+        return degreeDistribution;
+    }
+
+    private Optional<Map<String, Object>> lookupDegreeDistribution() {
+        return GraphStoreCatalog
+                .getUserCatalog(userName)
+                .getDegreeDistribution(graphName);
+    }
+
+    private void trySaveDegreeDistribution(Map<String, Object> degreeDistribution) {
+        if (GraphStoreCatalog.exists(userName, graphName)) {
+            GraphStoreCatalog
+                .getUserCatalog(userName)
+                .setDegreeDistribution(graphName, degreeDistribution);
+        }
     }
 }

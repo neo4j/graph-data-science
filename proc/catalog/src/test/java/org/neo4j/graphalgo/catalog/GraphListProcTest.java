@@ -49,6 +49,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
@@ -136,15 +137,19 @@ class GraphListProcTest extends BaseProcTest {
             map("name", name)
         );
 
-        long startTime = System.currentTimeMillis();
+        assertFalse(graphIsCached());
         runQuery("CALL gds.graph.list() YIELD degreeDistribution");
-        long timeAfterFirst = System.currentTimeMillis();
+        assertTrue(graphIsCached());
         runQuery("CALL gds.graph.list() YIELD degreeDistribution");
-        long timeAfterSecond = System.currentTimeMillis();
+        assertTrue(graphIsCached());
         runQuery("CALL gds.graph.list() YIELD degreeDistribution");
+        assertTrue(graphIsCached());
+    }
 
-        assertTrue(timeAfterFirst - startTime > 5*(timeAfterSecond - timeAfterFirst));
-
+    private boolean graphIsCached() {
+        return GraphStoreCatalog
+            .getUserCatalog(getUsername())
+            .getDegreeDistribution("name").isPresent();
     }
 
 
