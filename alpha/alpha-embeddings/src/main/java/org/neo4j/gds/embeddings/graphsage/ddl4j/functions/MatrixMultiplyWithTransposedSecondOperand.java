@@ -29,6 +29,8 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 import java.util.List;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public class MatrixMultiplyWithTransposedSecondOperand implements GradientMatrix {
 
     private final Matrix A;
@@ -42,6 +44,8 @@ public class MatrixMultiplyWithTransposedSecondOperand implements GradientMatrix
         // The dimensions of a matrix multiplication of dimensions (m, n) x (n, p) = (m, p)
         // When B is of the dimensions (p, n) it needs to be transposed in order to allow the multiplication.
         // When B is being transposed as B_T its dimensions become (n, p)
+        assertDimensions(A, B);
+
         this.A = A;
         this.B = B;
 
@@ -108,5 +112,13 @@ public class MatrixMultiplyWithTransposedSecondOperand implements GradientMatrix
     @Override
     public Iterable<? extends Variable> parents() {
         return parents;
+    }
+
+    private void assertDimensions(Matrix A, Matrix B) {
+        assert A.cols() == B.cols() : formatWithLocale(
+            "Cannot multiply matrix having dimensions (%d, %d) with transposed matrix of dimensions (%d, %d)",
+            A.rows(), A.cols(),
+            B.cols(), B.rows()
+        );
     }
 }
