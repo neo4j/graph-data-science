@@ -37,7 +37,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.core.Is.isA;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -50,8 +49,7 @@ class GraphDropProcTest extends BaseProcTest {
         registerProcedures(
             GraphCreateProc.class,
             GraphExistsProc.class,
-            GraphDropProc.class,
-            GraphListProc.class
+            GraphDropProc.class
         );
         runQuery(DB_CYPHER);
     }
@@ -97,7 +95,6 @@ class GraphDropProcTest extends BaseProcTest {
                     "relationshipQuery", null,
                     "nodeCount", 2L,
                     "relationshipCount", 1L,
-                    "degreeDistribution", map(),
                     "creationTime", isA(ZonedDateTime.class),
                     "modificationTime", isA(ZonedDateTime.class),
                     "memoryUsage", isA(String.class),
@@ -120,28 +117,15 @@ class GraphDropProcTest extends BaseProcTest {
     }
 
     @Test
-    void dropGraphShouldYieldDegreeDistributionWhenPreviouslyListed() {
+    void shouldNotReturnDegreeDistribution() {
         runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
 
-        runQuery("CALL gds.graph.list()");
-
-        assertCypherResult(
-            "CALL gds.graph.drop($graphName) YIELD degreeDistribution",
+        runQueryWithResultConsumer(
+            "CALL gds.graph.drop($graphName)",
             map("graphName", GRAPH_NAME),
-            singletonList(
-                map(
-                    "degreeDistribution", map(
-                        "min", 0L,
-                        "mean", 0.5D,
-                        "max", 1L,
-                        "p50", 0L,
-                        "p75", 1L,
-                        "p90", 1L,
-                        "p95", 1L,
-                        "p99", 1L,
-                        "p999", 1L
-                    )
-                )
+            result -> assertFalse(
+                result.columns().contains("degreeDistribution"),
+                "The result should not contain `degreeDistribution` field"
             )
         );
     }
@@ -157,8 +141,6 @@ class GraphDropProcTest extends BaseProcTest {
                 map("graphName", GRAPH_NAME, "exists", true)
             )
         );
-
-        runQuery("CALL gds.graph.list()");
 
         assertCypherResult(
             "CALL gds.graph.drop($graphName) " +
@@ -198,6 +180,7 @@ class GraphDropProcTest extends BaseProcTest {
     @Test
     void removeGraphWithMultipleRelationshipTypes() throws Exception {
         clearDb();
+        registerProcedures(GraphListProc.class);
 
         String testGraph =
             "CREATE" +
@@ -232,7 +215,8 @@ class GraphDropProcTest extends BaseProcTest {
             expectedGraphInfo
         );
 
-        assertCypherResult("CALL gds.graph.exists($graphName)",
+        assertCypherResult(
+            "CALL gds.graph.exists($graphName)",
             map("graphName", GRAPH_NAME),
             singletonList(
                 map("graphName", GRAPH_NAME, "exists", false)
@@ -275,32 +259,4 @@ class GraphDropProcTest extends BaseProcTest {
         );
     }
 
-    @Test
-    void shouldClearCacheAfterDropping() {
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
-
-        runQuery("CALL gds.graph.list()");
-        assertTrue(graphIsCached());
-
-        runQuery("CALL gds.graph.drop($graphName)",
-            map("graphName", GRAPH_NAME));
-
-        assertFalse(graphIsCached());
-    }
-
-    @Test
-    void shouldNotCrashIfDroppedWithoutListing() {
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
-
-        assertFalse(graphIsCached());
-
-        runQuery("CALL gds.graph.drop($graphName)",
-            map("graphName", GRAPH_NAME));
-
-        assertFalse(graphIsCached());
-    }
-
-    private boolean graphIsCached() {
-        return GraphStoreCatalog.getUserCatalog(getUsername()).getDegreeDistribution(GRAPH_NAME).isPresent();
-    }
 }
