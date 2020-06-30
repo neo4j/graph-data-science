@@ -21,9 +21,17 @@ package org.neo4j.graphalgo.similarity;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
@@ -216,6 +224,68 @@ class SimilaritiesFuncTest extends BaseProcTest {
                 assertEquals(jimSim.get(), result.next().get("jaccardSim"));
                 assertEquals(bobSim.get(), result.next().get("jaccardSim"));
             });
+    }
+
+    @Test
+    void testJaccardWithDuplicatesViaCypher() {
+        runQueryWithResultConsumer(
+            "RETURN gds.alpha.similarity.jaccard([1, 1, 2], [1, 3, 3]) AS jaccardSim", result -> {
+                assertEquals(1/5D, result.next().get("jaccardSim"));
+            });
+    }
+
+    @ParameterizedTest
+    @MethodSource("listsWithDuplicates")
+    void jaccardSimilarityShouldUseListsNotSets(List<Number> left, List<Number> right, double expected) {
+        double actual = new SimilaritiesFunc().jaccardSimilarity(left, right);
+        assertEquals(expected, actual);
+    }
+
+    static Stream<Arguments> listsWithDuplicates() {
+        return Stream.of(
+            Arguments.of(
+                new ArrayList<Number>(Arrays.asList(1, 1)),
+                new ArrayList<Number>(Arrays.asList(1, 2)),
+                1/3D
+            ),
+            Arguments.of(
+                new ArrayList<Number>(Arrays.asList(1, 2)),
+                new ArrayList<Number>(Arrays.asList(2, 1)),
+                2/2D
+            ),
+            Arguments.of(
+                new ArrayList<Number>(Arrays.asList(Long.MAX_VALUE,              1)),
+                new ArrayList<Number>(Arrays.asList((double) Long.MAX_VALUE - 1, 1)),
+                1/3D
+            ),
+            Arguments.of(
+                new ArrayList<Number>(Arrays.asList(Long.MAX_VALUE,     1)),
+                new ArrayList<Number>(Arrays.asList(Long.MAX_VALUE - 1, 1)),
+                1/3D
+            ),
+            Arguments.of(
+                new ArrayList<Number>(Arrays.asList(Integer.MAX_VALUE,     1)),
+                new ArrayList<Number>(Arrays.asList(Integer.MAX_VALUE - 1, 1)),
+                1/3D
+            ),
+            Arguments.of(
+                new ArrayList<Number>(Arrays.asList(16605, 16605, 16605, 150672)),
+                new ArrayList<Number>(Arrays.asList(16605, 16605, 150672, 16605)),
+                4/4D
+            ), Arguments.of(
+                new ArrayList<Number>(Arrays.asList(4159, 4159, 4159, 4159)),
+                new ArrayList<Number>(Arrays.asList(4159, 4159, 4159, 1337)),
+                3/5D
+            ), Arguments.of(
+                new ArrayList<Number>(Arrays.asList(4159, 1337, 1337, 1337)),
+                new ArrayList<Number>(Arrays.asList(1337, 4159, 4159, 4159)),
+                2/6D
+            ), Arguments.of(
+                new ArrayList<Number>(Arrays.asList(1, 2, 2)),
+                new ArrayList<Number>(Arrays.asList(2, 2, 3)),
+                2/4D
+            )
+        );
     }
 
     @Test
