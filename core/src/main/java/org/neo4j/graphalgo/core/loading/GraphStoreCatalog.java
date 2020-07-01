@@ -69,10 +69,11 @@ public final class GraphStoreCatalog {
             .orElseThrow(failOnNonExistentGraph(graphName));
 
         removedGraphConsumer.accept(graphStoreWithConfig);
-
         GraphStore graphStore = graphStoreWithConfig.graphStore();
         graphStore.canRelease(true);
         graphStore.release();
+
+        getUserCatalog(username).removeDegreeDistribution(graphName);
     }
 
     public static int graphStoresCount() {
