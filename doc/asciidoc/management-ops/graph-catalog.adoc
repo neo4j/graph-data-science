@@ -115,27 +115,20 @@ CALL gds.algo.pageRank.stream('my-native-graph') YIELD nodeId, score;
 == Listing graphs in the catalog
 
 Once we have created graphs in the catalog, we can list information about either all of them or a single graph using its name.
+There is one return field, `degreeDistribution`, which can be fairly time-consuming for large graphs.
+Its computation is however cached per graph, so subsequent listing of the same graph is fast.
+Moreover, `degreeDistribution` is only computed when included in the `YIELD` subclause, or if no `YIELD` clause is given.
 
-.List information about all graphs in the catalog:
+.List information about all graphs in the catalog with all return columns except `degreeDistribution`:
 [source,cypher]
 ----
 CALL gds.graph.list()
 YIELD graphName, nodeProjection, relationshipProjection, nodeQuery, relationshipQuery,
-      nodeCount, relationshipCount, schema, degreeDistribution, creationTime, modificationTime;
+      nodeCount, relationshipCount, schema, creationTime, modificationTime, sizeInBytes, memoryUsage;
 ----
 
-.List information about a named graph in the catalog:
-[source,cypher]
-----
-CALL gds.graph.list(graphName)
-YIELD graphName, nodeProjection, relationshipProjection, nodeQuery, relationshipQuery,
-      nodeCount, relationshipCount, schema, degreeDistribution, creationTime, modificationTime, sizeInBytes, memoryUsage;
-----
 The `nodeProjection` and `relationshipProjection` columns are primarily applicable to <<native-projection, Native projection>>.
 The `nodeQuery` and `relationshipQuery` columns are applicable only to <<cypher-projection, Cypher projection>> and are `null` for graphs created with Native projection.
-
-The `degreeDistribution` is more time-consuming to compute than the other return columns.
-It is however only computed when included in the `YIELD` subclause.
 
 The `schema` consists of information about the nodes and relationships stored in the graph.
 For each node label, the schema maps the label to its property keys and their corresponding property types.
@@ -147,11 +140,17 @@ The `modificationTime` indicates when the graph was updated by an algorithm runn
 The `sizeInBytes` yields the number of bytes used in the Java Heap to store that graph.
 The `memoryUsage` is the same information in a human readable format.
 
-.List information about the degree distribution of a specific graph:
+.List information about the degree distribution of a named graph in the catalog:
 [source,cypher]
 ----
 CALL gds.graph.list('my-cypher-graph')
 YIELD graphName, degreeDistribution;
+----
+
+.List information about a named graph in the catalog with all return columns including `degreeDistribution`:
+[source,cypher]
+----
+CALL gds.graph.list('my-native-graph')
 ----
 
 
