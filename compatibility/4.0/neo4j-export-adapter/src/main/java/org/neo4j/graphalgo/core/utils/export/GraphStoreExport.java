@@ -29,7 +29,6 @@ import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.EmptyLogFilesInitializer;
 import org.neo4j.internal.batchimport.ImportLogic;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
@@ -43,6 +42,7 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.logging.internal.StoreLogService;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.storageengine.api.LogFilesInitializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -124,7 +124,7 @@ public class GraphStoreExport {
                 ImportLogic.NO_MONITOR,
                 jobScheduler,
                 Collector.EMPTY,
-                EmptyLogFilesInitializer.INSTANCE
+                LogFilesInitializer.NULL
             );
             importer.doImport(input);
         } catch (IOException e) {
