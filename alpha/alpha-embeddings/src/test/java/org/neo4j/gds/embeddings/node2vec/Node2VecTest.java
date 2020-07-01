@@ -21,6 +21,9 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
@@ -31,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -56,10 +60,12 @@ class Node2VecTest extends AlgoTestBase {
         runQuery(DB_CYPHER);
     }
 
-    @Test
-    void embeddingsShouldHaveTheConfiguredDimension() {
+    @ParameterizedTest (name = "{0}")
+    @MethodSource("graphs")
+    void embeddingsShouldHaveTheConfiguredDimension(String msg, Iterable<String> nodeLabels) {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
+            .nodeLabels(nodeLabels)
             .build()
             .graph();
 
@@ -107,5 +113,12 @@ class Node2VecTest extends AlgoTestBase {
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
+    }
+
+    static Stream<Arguments> graphs() {
+        return Stream.of(
+            Arguments.of("All Labels", List.of()),
+            Arguments.of("Non Consecutive Original IDs", List.of("Node2", "Isolated"))
+        );
     }
 }
