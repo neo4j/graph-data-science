@@ -101,7 +101,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             long[] nodeIds = new long[steps + 1];
             long currentNodeId = startNodeId;
             long previousNodeId = currentNodeId;
-            nodeIds[0] = toOriginalNodeId(currentNodeId);
+            nodeIds[0] = currentNodeId;
             for (int i = 1; i <= steps; i++) {
                 long nextNodeId = strategy.getNextNode(currentNodeId, previousNodeId);
                 previousNodeId = currentNodeId;
@@ -110,7 +110,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                 if (currentNodeId == -1 || !terminationFlag.running()) {
                     return Arrays.copyOf(nodeIds, i);
                 }
-                nodeIds[i] = toOriginalNodeId(currentNodeId);
+                nodeIds[i] = currentNodeId;
             }
 
             return nodeIds;
