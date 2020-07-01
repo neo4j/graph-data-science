@@ -91,7 +91,9 @@ public class GraphInfo extends GraphInfoWithoutDegreeDistribution {
             "p999", histogram.getValueAtPercentile(99.9)
         );
 
-        trySaveDegreeDistribution(degreeDistribution);
+        GraphStoreCatalog
+            .getUserCatalog(userName)
+            .setDegreeDistribution(graphName, degreeDistribution);
 
         return degreeDistribution;
     }
@@ -102,11 +104,4 @@ public class GraphInfo extends GraphInfoWithoutDegreeDistribution {
                 .getDegreeDistribution(graphName);
     }
 
-    private void trySaveDegreeDistribution(Map<String, Object> degreeDistribution) {
-        if (GraphStoreCatalog.exists(userName, graphName)) {
-            GraphStoreCatalog
-                .getUserCatalog(userName)
-                .setDegreeDistribution(graphName, degreeDistribution);
-        }
-    }
 }
