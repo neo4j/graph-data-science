@@ -40,31 +40,7 @@ final class WccProc {
     private WccProc() {}
 
     static <CONFIG extends WccBaseConfig> AlgorithmFactory<Wcc, CONFIG> algorithmFactory() {
-        return new AlgorithmFactory<Wcc, CONFIG>() {
-            @Override
-            public Wcc build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
-                var progressLogger = new BatchingProgressLogger(
-                    log,
-                    graph.relationshipCount(),
-                    "WCC",
-                    configuration.concurrency()
-                );
-
-                return new Wcc(
-                    graph,
-                    Pools.DEFAULT,
-                    ParallelUtil.DEFAULT_BATCH_SIZE,
-                    configuration,
-                    progressLogger,
-                    tracker
-                );
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(CONFIG config) {
-                return Wcc.memoryEstimation(config.isIncremental());
-            }
-        };
+        return new WccFactory<>();
     }
 
     static <PROC_RESULT, CONFIG extends WccBaseConfig> AbstractCommunityResultBuilder<PROC_RESULT> resultBuilder(
