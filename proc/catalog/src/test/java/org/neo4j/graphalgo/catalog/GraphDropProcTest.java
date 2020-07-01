@@ -131,53 +131,6 @@ class GraphDropProcTest extends BaseProcTest {
     }
 
     @Test
-    void dropWithDegreeDistributionComputationOptOut() {
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
-
-        assertCypherResult(
-            "CALL gds.graph.exists($graphName)",
-            map("graphName", GRAPH_NAME),
-            singletonList(
-                map("graphName", GRAPH_NAME, "exists", true)
-            )
-        );
-
-        assertCypherResult(
-            "CALL gds.graph.drop($graphName) " +
-            "YIELD graphName, nodeProjection, relationshipProjection, nodeCount, relationshipCount",
-            map("graphName", GRAPH_NAME),
-            singletonList(
-                map(
-                    "graphName", GRAPH_NAME,
-                    "nodeProjection", map(
-                        "A", map(
-                            "label", "A",
-                            "properties", emptyMap()
-                        )
-                    ),
-                    "relationshipProjection", map(
-                        "REL", map(
-                            "type", "REL",
-                            "orientation", "NATURAL",
-                            "aggregation", "DEFAULT",
-                            "properties", emptyMap()
-                        )),
-                    "nodeCount", 2L,
-                    "relationshipCount", 1L
-                )
-            )
-        );
-
-        assertCypherResult(
-            "CALL gds.graph.exists($graphName)",
-            map("graphName", GRAPH_NAME),
-            singletonList(
-                map("graphName", GRAPH_NAME, "exists", false)
-            )
-        );
-    }
-
-    @Test
     void removeGraphWithMultipleRelationshipTypes() throws Exception {
         clearDb();
         registerProcedures(GraphListProc.class);
