@@ -38,14 +38,22 @@ import java.util.Set;
 
 public class NullGraphStore implements GraphStore {
 
+    static class NullGraphException extends UnsupportedOperationException {
+
+        NullGraphException() {
+            super("This algorithm does not support operating on named graphs. " +
+                  "Please report this stacktrace to https://github.com/neo4j/graph-data-science");
+        }
+    }
+
     @Override
     public GraphStoreSchema schema() {
-        return null;
+        throw new NullGraphException();
     }
 
     @Override
     public ZonedDateTime modificationTime() {
-        return null;
+        return ZonedDateTime.now();
     }
 
     @Override
@@ -55,7 +63,7 @@ public class NullGraphStore implements GraphStore {
 
     @Override
     public NodeMapping nodes() {
-        return null;
+        throw new NullGraphException();
     }
 
     @Override
@@ -65,12 +73,12 @@ public class NullGraphStore implements GraphStore {
 
     @Override
     public Set<String> nodePropertyKeys(NodeLabel label) {
-        return null;
+        return Set.of();
     }
 
     @Override
     public Map<NodeLabel, Set<String>> nodePropertyKeys() {
-        return null;
+        return Map.of();
     }
 
     @Override
@@ -85,35 +93,34 @@ public class NullGraphStore implements GraphStore {
 
     @Override
     public NumberType nodePropertyType(NodeLabel label, String propertyKey) {
-        return null;
+        return NumberType.NO_NUMBER;
     }
 
     @Override
     public PropertyState nodePropertyState(String propertyKey) {
-        return null;
+        return PropertyState.TRANSIENT;
     }
 
     @Override
     public NodeProperties nodePropertyValues(String propertyKey) {
-        return null;
+        throw new NullGraphException();
     }
 
     @Override
     public NodeProperties nodePropertyValues(NodeLabel label, String propertyKey) {
-        return null;
+        throw new NullGraphException();
     }
 
     @Override
     public void addNodeProperty(
-        NodeLabel nodeLabel, String propertyKey, NumberType propertyType, NodeProperties propertyValues
-    ) {
-
-    }
+        NodeLabel nodeLabel,
+        String propertyKey,
+        NumberType propertyType,
+        NodeProperties propertyValues
+    ) {}
 
     @Override
-    public void removeNodeProperty(NodeLabel nodeLabel, String propertyKey) {
-
-    }
+    public void removeNodeProperty(NodeLabel nodeLabel, String propertyKey) {}
 
     @Override
     public long relationshipCount() {
@@ -142,7 +149,7 @@ public class NullGraphStore implements GraphStore {
 
     @Override
     public NumberType relationshipPropertyType(String propertyKey) {
-        return null;
+        return NumberType.NO_NUMBER;
     }
 
     @Override
@@ -152,12 +159,12 @@ public class NullGraphStore implements GraphStore {
 
     @Override
     public Set<String> relationshipPropertyKeys() {
-        return null;
+        return Set.of();
     }
 
     @Override
     public Set<String> relationshipPropertyKeys(RelationshipType relationshipType) {
-        return null;
+        return Set.of();
     }
 
     @Override
@@ -166,13 +173,11 @@ public class NullGraphStore implements GraphStore {
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
         HugeGraph.Relationships relationships
-    ) {
-
-    }
+    ) {}
 
     @Override
     public DeletionResult deleteRelationships(RelationshipType relationshipType) {
-        return null;
+        return DeletionResult.of(c -> {});
     }
 
     @Override
@@ -190,12 +195,8 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
-    public void canRelease(boolean canRelease) {
-
-    }
+    public void canRelease(boolean canRelease) {}
 
     @Override
-    public void release() {
-
-    }
+    public void release() {}
 }
