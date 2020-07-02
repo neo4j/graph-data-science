@@ -1,0 +1,22 @@
+subprojects { proj ->
+
+    plugins.withType(JavaLibraryPlugin) {
+        proj.apply plugin: 'checkstyle'
+
+        proj.checkstyle {
+            configFile = file("$publicDir/etc/checkstyle/checkstyle.xml")
+
+            // When  `ignoreFailures=false` the build will be failing on checkstyle errors
+            ignoreFailures = true
+            showViolations = true
+        }
+
+        proj.tasks.withType(Checkstyle) {
+            reports {
+                xml.enabled false
+                html.enabled true
+                html.stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-noframes-severity-sorted.xsl")
+            }
+        }
+    }
+}
