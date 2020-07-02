@@ -151,10 +151,10 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
     @Test
     void testFailSeedingAndConsecutiveIds() {
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(MapUtil.map(
             "consecutiveIds", true,
             "seedProperty", "seed"
-        )));
+        ))));
 
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -171,7 +171,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
     @Test
     void testFailThresholdWithoutRelationshipWeight() {
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(
-            "threshold", 3.14
+            MapUtil.map("threshold", 3.14)
         )));
 
         applyOnProcedure(proc -> {

@@ -51,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
@@ -68,10 +67,6 @@ public class BaseProcTest extends BaseTest {
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
         builder.setConfig(GraphDatabaseSettings.procedure_unrestricted, singletonList("gds.*"));
-    }
-
-    protected static Map<String, Object> anonymousGraphConfig(Object... objects) {
-        return anonymousGraphConfig(map(objects));
     }
 
     protected static Map<String, Object> anonymousGraphConfig(Map<String, Object> baseMap) {

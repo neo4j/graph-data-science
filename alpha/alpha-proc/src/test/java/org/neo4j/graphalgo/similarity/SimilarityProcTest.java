@@ -19,22 +19,20 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.eclipse.collections.api.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GraphCreateConfigSupport;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
 import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
 import org.neo4j.graphalgo.similarity.nil.NullGraph;
-import org.neo4j.graphalgo.similarity.nil.NullGraphLoader;
 import org.neo4j.graphalgo.similarity.nil.NullGraphStore;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -58,6 +56,7 @@ import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.graphalgo.similarity.SimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
 
 public abstract class SimilarityProcTest<
     ALGORITHM extends SimilarityAlgorithm<ALGORITHM, INPUT>,
@@ -137,7 +136,7 @@ public abstract class SimilarityProcTest<
     }
 
     @Test
-    void shouldAcceptNoProjections() {
+    void shouldAcceptOmittingProjections() {
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
                 try {
@@ -152,18 +151,33 @@ public abstract class SimilarityProcTest<
     }
 
     @Test
-    void worksOnEmptyGraph() {
-        runQuery("MATCH (n) DETACH DELETE n");
+    void shouldAcceptIncludingProjections() {
         Map<String, Object> config = minimalViableConfig();
         config.putAll(Map.of(
             NODE_PROJECTION_KEY, PROJECT_ALL,
             RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL
         ));
+        applyOnProcedure(proc -> {
+            getProcMethods(proc).forEach(method -> {
+                try {
+                    method.invoke(proc, config, Map.of());
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    fail(e);
+                }
+            });
+        });
+
+        // does not throw
+    }
+
+    @Test
+    void worksOnEmptyGraph() {
+        runQuery("MATCH (n) DETACH DELETE n");
 
         applyOnProcedure((proc) -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    Stream<?> result = (Stream<?>) method.invoke(proc, config, Map.of());
+                    Stream<?> result = (Stream<?>) method.invoke(proc, minimalViableConfig(), Map.of());
 
                     if (getProcedureMethodName(method).endsWith("stream")) {
                         assertEquals(0, result.count(), "Stream result should be empty.");
@@ -180,20 +194,39 @@ public abstract class SimilarityProcTest<
     @Test
     void shouldNotLoadAnything() {
         applyOnProcedure(proc -> {
-            GraphLoader graphLoader = proc.newLoader(GraphCreateConfig.createImplicit(
+            Pair<? extends SimilarityConfig, Optional<String>> input = proc.processInput(
+                minimalViableConfig(),
+                Map.of()
+            );
+            assertEquals(SIMILARITY_FAKE_GRAPH_NAME, input.getTwo().get());
+            assertTrue(GraphStoreCatalog.exists(getUsername(), SIMILARITY_FAKE_GRAPH_NAME));
+            GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(
                 getUsername(),
-                CypherMapWrapper.create(Map.of(
-                    NODE_PROJECTION_KEY, PROJECT_ALL,
-                    RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL
-                ))
-            ), AllocationTracker.EMPTY);
+                SIMILARITY_FAKE_GRAPH_NAME
+            );
 
-            assertTrue(graphLoader instanceof NullGraphLoader);
-            assertTrue(graphLoader.graph() instanceof NullGraph);
-            assertTrue(graphLoader.graphStore() instanceof NullGraphStore);
-            assertTrue(graphLoader.graphStore().nodeLabels().isEmpty());
-            assertTrue(graphLoader.graphStore().relationshipTypes().isEmpty());
-            assertTrue(graphLoader.graphStore().getGraph(Set.of(), Set.of(), Optional.empty()) instanceof NullGraph);
+            GraphStore graphStore = graphStoreWithConfig.graphStore();
+
+            assertTrue(graphStore instanceof NullGraphStore);
+            assertTrue(graphStore.nodeLabels().isEmpty());
+            assertTrue(graphStore.relationshipTypes().isEmpty());
+            assertTrue(graphStore.getGraph(Set.of(), Set.of(), Optional.empty()) instanceof NullGraph);
         });
+    }
+
+    @Test
+    void leavesNoTraceInGraphCatalog() {
+        applyOnProcedure((proc) -> {
+            getProcMethods(proc).forEach(method -> {
+                try {
+                    method.invoke(proc, minimalViableConfig(), Map.of());
+                } catch (Throwable e) {
+                    fail(e);
+                }
+
+                assertEquals(0, GraphStoreCatalog.graphStoresCount());
+            });
+        });
+
     }
 }
