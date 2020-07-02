@@ -280,8 +280,8 @@ public class SimilaritiesFuncTest extends BaseProcTest {
                 new ArrayList<Number>(Arrays.asList(16605, 16605, 150672, 16605)),
                 4/4D
             ), Arguments.of(
-                new ArrayList<Number>(Arrays.asList(4159, 4159, 4159, 4159)),
-                new ArrayList<Number>(Arrays.asList(4159, 4159, 4159, 1337)),
+                new ArrayList<Number>(Arrays.asList(4159.0, 4159,   4159.0, 4159)),
+                new ArrayList<Number>(Arrays.asList(4159,   4159.0, 4159,   1337.0)),
                 3/5D
             ), Arguments.of(
                 new ArrayList<Number>(Arrays.asList(4159, 1337, 1337, 1337)),
