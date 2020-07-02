@@ -125,7 +125,7 @@ public abstract class SimilarityProcTest<
                     var rootCause = ExceptionUtil.rootCause(e);
                     assertEquals(IllegalArgumentException.class, rootCause.getClass());
                     assertEquals(
-                        "Similarity algorithms does not support named graphs",
+                        "Similarity algorithms do not support named graphs",
                         rootCause.getMessage()
                     );
                 } catch (IllegalAccessException e) {

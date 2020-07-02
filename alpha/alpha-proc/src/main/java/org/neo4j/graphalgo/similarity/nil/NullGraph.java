@@ -35,11 +35,13 @@ import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
+/**
+ * The NullGraph is used for non-product algos that don't use a graph.
+ * It makes it a bit easier to adapt those algorithms to the new API,
+ * as we can override graph creation and inject a NullGraph.
+ */
 public class NullGraph implements Graph {
 
-    // The NullGraph is used for non-product algos that don't use a graph.
-    // It makes it a bit easier to adapt those algorithms to the new API,
-    // as we can override graph creation and inject a NullGraph.
     @Override
     public boolean isEmpty() {
         return false;
