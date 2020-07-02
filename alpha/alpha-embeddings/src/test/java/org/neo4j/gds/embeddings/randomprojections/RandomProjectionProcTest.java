@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.randomprojections;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
@@ -34,8 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
@@ -63,13 +61,13 @@ public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBa
         RandomProjection result1, RandomProjection result2
     ) {
         // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
-        Assertions.assertEquals(result1.embeddings().get(0).length, result1.embeddings().get(0).length);
+        assertEquals(result1.embeddings().get(0).length, result1.embeddings().get(0).length);
     }
 
     private static Stream<Arguments> weights() {
         return Stream.of(
             Arguments.of(Collections.emptyList()),
-            Arguments.of(List.of(1.0f, 1.0f, 2.0f, 4.0f ))
+            Arguments.of(List.of(1.0f, 1.0f, 2.0f, 4.0f))
         );
     }
 
@@ -91,22 +89,28 @@ public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBa
         int embeddingSize = 128;
         int maxIterations = 4;
 
-            applyOnProcedure(proc -> {
-                getProcedureMethods(proc).forEach(method -> {
-                    CypherMapWrapper configWrapper = CypherMapWrapper.empty()
-                        .withEntry("embeddingSize", embeddingSize)
-                        .withEntry("maxIterations", maxIterations)
-                        .withEntry("iterationWeights", List.of(1.0f, 1.0f));
+        applyOnProcedure(proc -> {
+            getProcedureMethods(proc).forEach(method -> {
+                CypherMapWrapper configWrapper = CypherMapWrapper.empty()
+                    .withEntry("embeddingSize", embeddingSize)
+                    .withEntry("maxIterations", maxIterations)
+                    .withEntry("iterationWeights", List.of(1.0f, 1.0f));
 
-                    Map<String, Object> config = createMinimalImplicitConfig(configWrapper).toMap();
+                Map<String, Object> config = createMinimalImplicitConfig(configWrapper).toMap();
 
-                    InvocationTargetException ex = assertThrows(
-                        InvocationTargetException.class,
-                        () -> method.invoke(proc, config, Collections.emptyMap())
-                    );
+                InvocationTargetException ex = assertThrows(
+                    InvocationTargetException.class,
+                    () -> method.invoke(proc, config, Collections.emptyMap())
+                );
 
-                    assertThat(rootCause(ex).getMessage(), containsString("Parameter `iterationWeights` should have `maxIterations` entries"));
-                });
+                var rootMessage = rootCause(ex).getMessage();
+                assertEquals(
+                    "The value of `iterationWeights` must be a list where its length is the " +
+                    "same value as the configured value for `maxIterations`." + System.lineSeparator() +
+                    "`maxIterations` is defined as `4` but `iterationWeights` contains `2` entries.",
+                    rootMessage
+                );
+            });
         });
     }
 }
