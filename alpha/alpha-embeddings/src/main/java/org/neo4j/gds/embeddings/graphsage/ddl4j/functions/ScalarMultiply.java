@@ -38,7 +38,7 @@ public class ScalarMultiply extends AbstractVariable {
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        return ctx.data(tensor).scalarMultiply(ctx.data(scalar).data[0]);
+        return ctx.data(tensor).scalarMultiply(ctx.data(scalar).dataAt(0));
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ScalarMultiply extends AbstractVariable {
             return Tensor.constant(ctx.gradient(this).innerProduct(ctx.data(tensor)), scalar.dimensions());
         } else if (parent == tensor) {
             // tensor
-            return ctx.gradient(this).scalarMultiply(ctx.data(scalar).data[0]);
+            return ctx.gradient(this).scalarMultiply(ctx.data(scalar).dataAt(0));
         } else {
             throw new IllegalArgumentException("Variable requesting gradient does not match any of the parents.");
         }

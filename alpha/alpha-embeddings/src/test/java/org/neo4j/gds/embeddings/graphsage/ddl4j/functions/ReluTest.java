@@ -61,9 +61,9 @@ public class ReluTest extends GraphSageBaseTest implements FiniteDifferenceTest 
 
         Tensor resultData = ctx.forward(relu);
         assertNotNull(resultData);
-        assertEquals(vectorData.length, resultData.data.length);
+        assertEquals(vectorData.length, resultData.data().length);
 
-        assertArrayEquals(new double[]{14, 0.01 * -5, 36, 0}, resultData.data);
+        assertArrayEquals(new double[]{14, 0.01 * -5, 36, 0}, resultData.data());
     }
 
     @Test
@@ -75,9 +75,9 @@ public class ReluTest extends GraphSageBaseTest implements FiniteDifferenceTest 
 
         Tensor resultData = ctx.forward(relu);
         assertNotNull(resultData);
-        assertEquals(vectorData.length, resultData.data.length);
+        assertEquals(vectorData.length, resultData.data().length);
 
-        assertArrayEquals(new double[]{}, resultData.data);
+        assertArrayEquals(new double[]{}, resultData.data());
 
     }
 

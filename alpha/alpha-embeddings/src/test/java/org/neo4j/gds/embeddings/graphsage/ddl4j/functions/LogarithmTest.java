@@ -33,7 +33,7 @@ class LogarithmTest extends GraphSageBaseTest implements FiniteDifferenceTest {
         Variable variable = new Weights(Tensor.scalar(5D));
         Variable logarithm = new Logarithm(variable);
 
-        assertEquals(Math.log(5D), ctx.forward(logarithm).data[0]);
+        assertEquals(Math.log(5D), ctx.forward(logarithm).dataAt(0));
     }
 
     @Test

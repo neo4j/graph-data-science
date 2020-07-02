@@ -62,7 +62,7 @@ class NormalizeRowsTest extends GraphSageBaseTest implements FiniteDifferenceTes
         };
         Weights w = new Weights(Tensor.matrix(data, 3, 2));
         NormalizeRows normalizeRows = new NormalizeRows(w);
-        assertArrayEquals(expectedData, ctx.forward(normalizeRows).data);
+        assertArrayEquals(expectedData, ctx.forward(normalizeRows).data());
     }
 
 

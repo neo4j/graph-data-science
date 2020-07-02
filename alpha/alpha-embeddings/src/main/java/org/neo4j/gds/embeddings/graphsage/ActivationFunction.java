@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Relu;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
@@ -31,7 +32,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 public enum ActivationFunction {
     SIGMOID {
         @Override
-        public Function<Variable, Variable> activationFunction() {
+        public Function<Variable, Matrix> activationFunction() {
             return Sigmoid::new;
         }
 
@@ -42,7 +43,7 @@ public enum ActivationFunction {
     },
     RELU {
         @Override
-        public Function<Variable, Variable> activationFunction() {
+        public Function<Variable, Matrix> activationFunction() {
             return Relu::new;
         }
 
@@ -52,7 +53,7 @@ public enum ActivationFunction {
         }
     };
 
-    public abstract Function<Variable, Variable> activationFunction();
+    public abstract Function<Variable, Matrix> activationFunction();
 
     public abstract double weightInitBound(int rows, int cols);
 

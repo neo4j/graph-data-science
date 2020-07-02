@@ -45,7 +45,7 @@ public class MultiMean extends SingleParentVariable implements Matrix {
 
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
-        double[] multiMeanGradient = ctx.gradient(this).data;
+        double[] multiMeanGradient = ctx.gradient(this).data();
         int rows = dimension(0);
         int cols = dimension(1);
 
@@ -57,9 +57,15 @@ public class MultiMean extends SingleParentVariable implements Matrix {
                 int gradientElementIndex = row * cols + col;
                 for (int neighbor : adjacency[row]) {
                     int neighborElementIndex = neighbor * cols + col;
-                    result.data[neighborElementIndex] += 1d / degree * multiMeanGradient[gradientElementIndex];
+                    result.addDataAt(
+                        neighborElementIndex,
+                        1d / degree * multiMeanGradient[gradientElementIndex]
+                    );
                 }
-                result.data[selfAdjacency[row] * cols + col] += 1d / degree * multiMeanGradient[gradientElementIndex];
+                result.addDataAt(
+                    selfAdjacency[row] * cols + col,
+                    1d / degree * multiMeanGradient[gradientElementIndex]
+                );
             }
         }
 
@@ -68,9 +74,9 @@ public class MultiMean extends SingleParentVariable implements Matrix {
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        Tensor parentTensor = ctx.data(parent());
-        double[] parentData = parentTensor.data;
-        int cols = parent().dimension(1);
+        Tensor parentTensor = ctx.data(parent);
+        double[] parentData = parentTensor.data();
+        int cols = parent.dimension(1);
         double[] means = new double[adjacency.length * cols];
         for (int source = 0; source < adjacency.length; source++) {
             int selfAdjacencyOfSourceOffset = selfAdjacency[source] * cols;

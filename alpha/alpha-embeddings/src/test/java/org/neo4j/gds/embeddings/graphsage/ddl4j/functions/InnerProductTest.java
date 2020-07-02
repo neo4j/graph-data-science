@@ -39,7 +39,7 @@ class InnerProductTest extends GraphSageBaseTest implements FiniteDifferenceTest
 
         double expected = 24D;
 
-        assertEquals(expected, ctx.forward(prod).data[0]);
+        assertEquals(expected, ctx.forward(prod).dataAt(0));
     }
 
     @Test

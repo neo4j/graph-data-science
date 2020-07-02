@@ -37,7 +37,7 @@ public class NormalizeRows extends SingleParentVariable implements Matrix {
     @Override
     public Tensor apply(ComputationContext ctx) {
 
-        double[] parentData = ctx.data(parent()).data;
+        double[] parentData = ctx.data(parent).data();
         double[] result = new double[rows * cols];
         for (int row = 0; row < rows; row++) {
             double sum = 0;
@@ -57,8 +57,8 @@ public class NormalizeRows extends SingleParentVariable implements Matrix {
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
 
-        double[] parentData = ctx.data(parent).data;
-        double[] gradientData = ctx.gradient(this).data;
+        double[] parentData = ctx.data(parent).data();
+        double[] gradientData = ctx.gradient(this).data();
         double[] result = new double[parentData.length];
         for (int row = 0; row < rows; row++) {
             double l2Squared = 0;

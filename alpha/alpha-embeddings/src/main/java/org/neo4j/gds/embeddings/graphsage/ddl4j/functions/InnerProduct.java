@@ -57,6 +57,6 @@ public class InnerProduct extends AbstractVariable {
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
         Tensor otherVectorData = parent == left ? ctx.data(right) : ctx.data(left);
-        return otherVectorData.scalarMultiply(ctx.gradient(this).data[0]);
+        return otherVectorData.scalarMultiply(ctx.gradient(this).dataAt(0));
     }
 }

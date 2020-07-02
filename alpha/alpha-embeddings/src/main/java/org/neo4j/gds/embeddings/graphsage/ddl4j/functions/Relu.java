@@ -34,7 +34,7 @@ public class Relu extends SingleParentVariable implements Matrix {
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        return ctx.data(parent()).map(value -> value > 0 ? value : ALPHA * value);
+        return ctx.data(parent).map(value -> value > 0 ? value : ALPHA * value);
     }
 
     @Override
@@ -44,11 +44,11 @@ public class Relu extends SingleParentVariable implements Matrix {
 
     @Override
     public int rows() {
-        return parent().dimension(0);
+        return parent.dimension(0);
     }
 
     @Override
     public int cols() {
-        return parent().dimension(1);
+        return parent.dimension(1);
     }
 }

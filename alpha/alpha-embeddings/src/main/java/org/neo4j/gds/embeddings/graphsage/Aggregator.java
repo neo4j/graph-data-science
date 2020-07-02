@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.Locale;
 import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public interface Aggregator {
-    Variable aggregate(Variable previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacencyMatrix);
+    Matrix aggregate(Matrix previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacencyMatrix);
 
     List<Weights> weights();
 

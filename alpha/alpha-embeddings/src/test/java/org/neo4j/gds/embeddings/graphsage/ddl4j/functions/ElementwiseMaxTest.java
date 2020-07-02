@@ -56,7 +56,7 @@ public class ElementwiseMaxTest extends GraphSageBaseTest implements FiniteDiffe
             0, 0, 0,
             3, 3, 3
         };
-        assertArrayEquals(expected, ctx.forward(max).data);
+        assertArrayEquals(expected, ctx.forward(max).data());
     }
 
     @Test

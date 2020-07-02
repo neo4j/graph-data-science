@@ -220,7 +220,7 @@ public class GraphSageModel {
 
             ComputationContext localCtx = new ComputationContext();
 
-            newLoss = localCtx.forward(lossFunction).data[0];
+            newLoss = localCtx.forward(lossFunction).dataAt(0);
             double lossDiff = Math.abs((oldLoss - newLoss) / oldLoss);
             if (lossDiff < tolerance) {
                 break;
@@ -255,7 +255,7 @@ public class GraphSageModel {
                 ComputationContext ctx = new ComputationContext();
                 Matrix embeddingVariable = embeddingVariable(graph, batch, features);
                 int cols = embeddingVariable.cols();
-                double[] embeddings = ctx.forward(embeddingVariable).data;
+                double[] embeddings = ctx.forward(embeddingVariable).data();
 
                 for (int nodeIndex = 0; nodeIndex < batch.length; nodeIndex++) {
                     double[] nodeEmbedding = Arrays.copyOfRange(
@@ -284,7 +284,7 @@ public class GraphSageModel {
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
                 Variable loss = lossFunction(batch, graph, features);
-                doubleAdder.add(ctx.forward(loss).data[0]);
+                doubleAdder.add(ctx.forward(loss).dataAt(0));
             })
         );
         double lossValue = doubleAdder.doubleValue();
@@ -363,7 +363,7 @@ public class GraphSageModel {
         Collections.reverse(neighborhoodFunctions);
         List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
 
-        Variable previousLayerRepresentations = featureVariables(
+        Matrix previousLayerRepresentations = featureVariables(
             subGraphs.get(subGraphs.size() - 1).nextNodes,
             features
         );

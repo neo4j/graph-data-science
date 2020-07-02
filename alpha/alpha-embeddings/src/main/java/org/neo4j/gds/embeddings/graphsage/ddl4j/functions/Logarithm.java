@@ -31,11 +31,11 @@ public class Logarithm extends SingleParentVariable {
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        return Tensor.scalar(Math.log(ctx.data(parent()).data[0]));
+        return Tensor.scalar(Math.log(ctx.data(parent).dataAt(0)));
     }
 
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
-        return Tensor.scalar(ctx.gradient(this).data[0] / ctx.data(parent).data[0]);
+        return Tensor.scalar(ctx.gradient(this).dataAt(0) / ctx.data(parent).dataAt(0));
     }
 }

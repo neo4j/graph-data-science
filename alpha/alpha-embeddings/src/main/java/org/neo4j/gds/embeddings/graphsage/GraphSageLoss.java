@@ -60,7 +60,7 @@ public class GraphSageLoss extends SingleParentVariable {
         int dimensionSize = combinedEmbeddings.cols();
         double sum = 0;
         for (int i = 0; i < dimensionSize; i++) {
-            sum += embeddingData.data[nodeId * dimensionSize + i] * embeddingData.data[otherNodeId * dimensionSize + i];
+            sum += embeddingData.dataAt(nodeId * dimensionSize + i) * embeddingData.dataAt(otherNodeId * dimensionSize + i);
         }
         return sum;
     }
@@ -68,7 +68,7 @@ public class GraphSageLoss extends SingleParentVariable {
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
         Tensor embeddingData = ctx.data(parent);
-        double[] embeddings = embeddingData.data;
+        double[] embeddings = embeddingData.data();
         int totalBatchSize = embeddingData.dimension(0);
         int batchSize = totalBatchSize / 3;
 

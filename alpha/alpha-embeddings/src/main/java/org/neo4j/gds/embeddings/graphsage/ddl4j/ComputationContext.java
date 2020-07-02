@@ -108,7 +108,7 @@ public class ComputationContext {
 
     private static double l2(Tensor tensor) {
         return Math.sqrt(
-            Arrays.stream(tensor.data)
+            Arrays.stream(tensor.data())
                 .map(value -> value * value)
                 .sum());
     }

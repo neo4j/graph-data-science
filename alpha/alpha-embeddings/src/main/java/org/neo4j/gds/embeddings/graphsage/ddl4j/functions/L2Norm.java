@@ -33,18 +33,18 @@ public class L2Norm extends SingleParentVariable {
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        double norm = l2(ctx.data(parent()));
+        double norm = l2(ctx.data(parent));
         return Tensor.scalar(norm);
     }
 
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
-        return ctx.data(parent).scalarMultiply(ctx.gradient(this).data[0] / ctx.data(this).data[0]);
+        return ctx.data(parent).scalarMultiply(ctx.gradient(this).dataAt(0) / ctx.data(this).dataAt(0));
     }
 
     public static double l2(Tensor tensor) {
         return Math.sqrt(
-            stream(tensor.data)
+            stream(tensor.data())
                 .map(value -> value * value)
                 .sum());
     }

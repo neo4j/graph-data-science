@@ -69,7 +69,7 @@ class AdamOptimizerTest {
             );
             L2Norm lossFunction = new L2Norm(difference);
 
-            double newLoss = ctx.forward(lossFunction).data[0];
+            double newLoss = ctx.forward(lossFunction).dataAt(0);
             double d = oldLoss - newLoss;
             if (Math.abs(d) < 1e-8) break;
 

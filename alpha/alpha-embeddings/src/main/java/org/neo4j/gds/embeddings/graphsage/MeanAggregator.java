@@ -35,17 +35,17 @@ import java.util.function.Function;
 public class MeanAggregator implements Aggregator {
 
     private final Weights weights;
-    private final Function<Variable, Variable> activationFunction;
+    private final Function<Variable, Matrix> activationFunction;
 
-    public MeanAggregator(Weights weights, Function<Variable, Variable> activationFunction) {
+    public MeanAggregator(Weights weights, Function<Variable, Matrix> activationFunction) {
         this.weights = weights;
         this.activationFunction = activationFunction;
     }
 
     @Override
-    public Variable aggregate(Variable previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacency) {
+    public Matrix aggregate(Matrix previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacency) {
         Matrix means = new MultiMean(previousLayerRepresentations, adjacencyMatrix, selfAdjacency);
-        Variable product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
+        Matrix product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
         return activationFunction.apply(product);
     }
 

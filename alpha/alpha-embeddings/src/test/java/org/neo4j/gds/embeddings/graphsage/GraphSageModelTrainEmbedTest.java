@@ -170,7 +170,7 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
             .collect(Collectors.toList());
 
         for (int i = 0; i < expectedWeights.size(); i++) {
-            assertThat(weightsBeforeTraining.get(i).data, not(IsEqual.equalTo(expectedWeights.get(i).data)));
+            assertThat(weightsBeforeTraining.get(i).data(), not(IsEqual.equalTo(expectedWeights.get(i).data())));
         }
     }
 

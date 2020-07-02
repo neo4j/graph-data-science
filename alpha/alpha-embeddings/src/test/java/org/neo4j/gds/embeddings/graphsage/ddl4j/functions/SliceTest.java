@@ -42,7 +42,7 @@ class SliceTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
         int[] rows = new int[] {0, 2, 0};
         Slice slice = new Slice(weights, rows);
-        double[] result = ctx.forward(slice).data;
+        double[] result = ctx.forward(slice).data();
 
         assertArrayEquals(
             new double[]{

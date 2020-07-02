@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
@@ -31,9 +32,9 @@ public class MeanAggregatingLayer implements Layer {
     private final long sampleSize;
     private final Weights weights;
     private long randomState;
-    private final Function<Variable, Variable> activationFunction;
+    private final Function<Variable, Matrix> activationFunction;
 
-    public MeanAggregatingLayer(Weights weights, long sampleSize, Function<Variable, Variable> activationFunction) {
+    public MeanAggregatingLayer(Weights weights, long sampleSize, Function<Variable, Matrix> activationFunction) {
         this.sampleSize = sampleSize;
         this.weights = weights;
         this.activationFunction = activationFunction;

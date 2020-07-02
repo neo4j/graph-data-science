@@ -62,13 +62,13 @@ class SigmoidTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
         Tensor resultData = ctx.forward(sigmoid);
         assertNotNull(resultData);
-        assertEquals(vectorData.length, resultData.data.length);
+        assertEquals(vectorData.length, resultData.data().length);
 
         assertArrayEquals(new double[]{
             (1 / (1 + Math.pow(Math.E, -14))),
             (1 / (1 + Math.pow(Math.E, -5))),
             (1 / (1 + Math.pow(Math.E, -36)))
-        }, resultData.data);
+        }, resultData.data());
 
     }
 
@@ -81,9 +81,9 @@ class SigmoidTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
         Tensor resultData = ctx.forward(sigmoid);
         assertNotNull(resultData);
-        assertEquals(vectorData.length, resultData.data.length);
+        assertEquals(vectorData.length, resultData.data().length);
 
-        assertArrayEquals(new double[]{}, resultData.data);
+        assertArrayEquals(new double[]{}, resultData.data());
 
     }
 

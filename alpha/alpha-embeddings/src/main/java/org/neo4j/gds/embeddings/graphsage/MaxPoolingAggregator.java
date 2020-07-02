@@ -37,14 +37,14 @@ public class MaxPoolingAggregator implements Aggregator {
     private final Weights selfWeights;
     private final Weights neighborsWeights;
     private final Weights bias;
-    private final Function<Variable, Variable> activationFunction;
+    private final Function<Variable, Matrix> activationFunction;
 
     public MaxPoolingAggregator(
         Weights poolWeights,
         Weights selfWeights,
         Weights neighborsWeights,
         Weights bias,
-        Function<Variable, Variable> activationFunction) {
+        Function<Variable, Matrix> activationFunction) {
 
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
@@ -55,14 +55,13 @@ public class MaxPoolingAggregator implements Aggregator {
     }
 
     @Override
-    public Variable aggregate(
-        Variable previousLayerRepresentations,
+    public Matrix aggregate(
+        Matrix previousLayerRepresentations,
         int[][] adjacencyMatrix,
         int[] selfAdjacencyMatrix
     ) {
-        // FIXME: (Matrix) previousLayerRepresentations
         Matrix weightedPreviousLayer = MatrixMultiplyWithTransposedSecondOperand.of(
-            (Matrix) previousLayerRepresentations,
+            previousLayerRepresentations,
             poolWeights
         );
         Variable biasedWeightedPreviousLayer = new MatrixVectorSum(weightedPreviousLayer, bias);

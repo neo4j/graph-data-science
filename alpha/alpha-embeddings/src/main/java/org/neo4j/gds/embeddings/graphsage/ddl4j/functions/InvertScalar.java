@@ -36,16 +36,16 @@ public class InvertScalar extends SingleParentVariable {
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        return Tensor.scalar(1D / ctx.data(parent()).data[0]);
+        return Tensor.scalar(1D / ctx.data(parent).dataAt(0));
     }
 
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
-        return ctx.gradient(this).scalarMultiply(-Math.pow(ctx.data(parent).data[0], -2));
+        return ctx.gradient(this).scalarMultiply(-Math.pow(ctx.data(parent).dataAt(0), -2));
     }
 
     private void checkParentScalar() {
-        int[] parentDimensions = parent().dimensions();
+        int[] parentDimensions = parent.dimensions();
         if (parentDimensions.length != 1 || parentDimensions[0] != 1) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Parent is expected to be scalar but has dimension %s",

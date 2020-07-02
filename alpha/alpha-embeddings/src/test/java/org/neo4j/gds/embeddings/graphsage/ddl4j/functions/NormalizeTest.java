@@ -51,7 +51,7 @@ class NormalizeTest extends GraphSageBaseTest implements FiniteDifferenceTest {
                 2 * 1d / 3.74165738677,
                 3 * 1d / 3.74165738677
             },
-            ctx.data(normalize).data,
+            ctx.data(normalize).data(),
             1e-10
         );
     }

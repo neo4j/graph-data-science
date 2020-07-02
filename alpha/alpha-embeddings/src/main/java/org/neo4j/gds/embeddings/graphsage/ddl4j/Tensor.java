@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
 public class Tensor {
-    public double[] data;
+    private final double[] data;
     private final int[] dimensions;
 
     public Tensor(double[] data, int[] dimensions) {
@@ -37,6 +37,22 @@ public class Tensor {
 
     public int[] dimensions() {
         return dimensions;
+    }
+
+    public double[] data() {
+        return data;
+    }
+
+    public double dataAt(int idx) {
+        return data[idx];
+    }
+
+    public void setDataAt(int idx, double newValue) {
+        data[idx] = newValue;
+    }
+
+    public void addDataAt(int idx, double newValue) {
+        data[idx] += newValue;
     }
 
     public Tensor zeros() {

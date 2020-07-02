@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 
@@ -34,7 +35,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     private final Weights neighborsWeights;
     private final Weights bias;
     private long randomState;
-    private final Function<Variable, Variable> activationFunction;
+    private final Function<Variable, Matrix> activationFunction;
 
     public MaxPoolAggregatingLayer(
         long sampleSize,
@@ -42,7 +43,7 @@ public class MaxPoolAggregatingLayer implements Layer {
         Weights selfWeights,
         Weights neighborsWeights,
         Weights bias,
-        Function<Variable, Variable> activationFunction
+        Function<Variable, Matrix> activationFunction
     ) {
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;

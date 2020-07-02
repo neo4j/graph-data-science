@@ -35,7 +35,7 @@ class ConstantScaleTest extends GraphSageBaseTest implements FiniteDifferenceTes
         double constant = 5.34D;
         ConstantScale scaled = new ConstantScale(matrix, constant);
 
-        assertArrayEquals(new double[]{constant, 2 * constant, 3 * constant, 4 * constant}, ctx.forward(scaled).data);
+        assertArrayEquals(new double[]{constant, 2 * constant, 3 * constant, 4 * constant}, ctx.forward(scaled).data());
     }
 
 

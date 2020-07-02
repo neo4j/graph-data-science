@@ -72,24 +72,24 @@ public class MatrixMultiplyWithTransposedSecondOperand implements GradientMatrix
     }
 
     private Tensor multiply(Tensor t1, Tensor t2) {
-        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data);
-        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data);
+        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data());
+        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numCols);
         MatrixMatrixMult_DDRM.mult_reorder(m1, m2, prod);
         return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
     private Tensor multiplyTransB(Tensor t1, Tensor t2) {
-        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data);
-        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data);
+        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data());
+        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numRows);
         MatrixMatrixMult_DDRM.multTransB(m1, m2, prod);
         return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
     private Tensor multiplyTransA(Tensor t1, Tensor t2) {
-        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data);
-        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data);
+        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data());
+        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numCols, m2.numCols);
         MatrixMatrixMult_DDRM.multTransA_reorder(m1, m2, prod);
         return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);

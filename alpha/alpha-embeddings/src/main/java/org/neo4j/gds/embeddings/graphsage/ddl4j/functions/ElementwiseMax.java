@@ -41,7 +41,7 @@ public class ElementwiseMax extends SingleParentVariable implements Matrix {
     public Tensor apply(ComputationContext ctx) {
         Tensor max = Tensor.constant(Double.NEGATIVE_INFINITY, dimensions());
 
-        double[] parentData = ctx.data(parent()).data;
+        double[] parentData = ctx.data(parent).data();
         for (int row = 0; row < rows; row++) {
             int[] neighbors = this.adjacencyMatrix[row];
             for(int col = 0; col < cols; col++) {
@@ -49,10 +49,13 @@ public class ElementwiseMax extends SingleParentVariable implements Matrix {
                 if (neighbors.length > 0) {
                     for (int neighbor : neighbors) {
                         int neighborElementIndex = neighbor * cols + col;
-                        max.data[resultElementIndex] = Math.max(parentData[neighborElementIndex], max.data[resultElementIndex]);
+                        max.setDataAt(
+                            resultElementIndex,
+                            Math.max(parentData[neighborElementIndex], max.dataAt(resultElementIndex))
+                        );
                     }
                 } else {
-                    max.data[resultElementIndex] = 0;
+                    max.setDataAt(resultElementIndex, 0);
                 }
             }
         }
@@ -66,9 +69,9 @@ public class ElementwiseMax extends SingleParentVariable implements Matrix {
 
         int cols = parent.dimension(1);
 
-        double[] parentData = ctx.data(parent).data;
-        double[] thisGradient = ctx.gradient(this).data;
-        double[] thisData = ctx.data(this).data;
+        double[] parentData = ctx.data(parent).data();
+        double[] thisGradient = ctx.gradient(this).data();
+        double[] thisData = ctx.data(this).data();
 
         for (int row = 0; row < this.adjacencyMatrix.length; row++) {
             int[] neighbors = this.adjacencyMatrix[row];
@@ -77,7 +80,7 @@ public class ElementwiseMax extends SingleParentVariable implements Matrix {
                     int thisElementIndex = row * cols + col;
                     int neighborElementIndex = neighbor * cols + col;
                     if (parentData[neighborElementIndex] == thisData[thisElementIndex]) {
-                        result.data[neighborElementIndex] += thisGradient[thisElementIndex];
+                        result.addDataAt(neighborElementIndex, thisGradient[thisElementIndex]);
                     }
                 }
             }

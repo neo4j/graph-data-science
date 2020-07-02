@@ -60,7 +60,7 @@ class MatrixMultiplyWithTransposedSecondOperandTest extends GraphSageBaseTest im
         MatrixConstant B = new MatrixConstant(m2, 2, 3);
 
         Variable product = new MatrixMultiplyWithTransposedSecondOperand(A, B);
-        double[] result = ctx.forward(product).data;
+        double[] result = ctx.forward(product).data();
 
         assertArrayEquals(expected, result);
     }

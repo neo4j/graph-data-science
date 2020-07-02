@@ -52,8 +52,8 @@ public class MatrixVectorSum extends AbstractVariable implements Matrix {
     @Override
     public Tensor apply(ComputationContext ctx) {
 
-        double[] matrixData = ctx.data(matrix).data;
-        double[] vectorData = ctx.data(vector).data;
+        double[] matrixData = ctx.data(matrix).data();
+        double[] vectorData = ctx.data(vector).data();
 
         double[] result = new double[matrixData.length];
 
@@ -77,7 +77,7 @@ public class MatrixVectorSum extends AbstractVariable implements Matrix {
             for (int row = 0; row < rows; row++) {
                 for (int col = 0; col < cols; col++) {
                     int matrixIndex = row * cols + col;
-                    result[col] += gradient.data[matrixIndex];
+                    result[col] += gradient.dataAt(matrixIndex);
                 }
             }
 

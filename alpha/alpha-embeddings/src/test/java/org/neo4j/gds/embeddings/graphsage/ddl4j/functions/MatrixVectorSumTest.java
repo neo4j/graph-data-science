@@ -44,7 +44,7 @@ class MatrixVectorSumTest extends GraphSageBaseTest implements FiniteDifferenceT
         Constant vector = Constant.vector(new double[]{1, 1, 1});
 
         Variable broadcastSum = new MatrixVectorSum(matrix, vector);
-        double[] result = ctx.forward(broadcastSum).data;
+        double[] result = ctx.forward(broadcastSum).data();
 
         assertArrayEquals(new double[] {2, 3, 4, 5, 6, 8}, result);
     }

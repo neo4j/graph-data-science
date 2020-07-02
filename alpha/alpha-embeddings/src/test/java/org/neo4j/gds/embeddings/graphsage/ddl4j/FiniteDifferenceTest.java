@@ -43,12 +43,12 @@ public interface FiniteDifferenceTest {
         for (Weights variable : weightVariables) {
             for (int i = 0; i < Tensor.totalSize(variable.dimensions()); i++) {
                 ComputationContext ctx = new ComputationContext();
-                double f0 = ctx.forward(loss).data[0];
+                double f0 = ctx.forward(loss).dataAt(0);
                 ctx.backward(loss);
-                var partialDerivative = ctx.gradient(variable).data[i];
+                var partialDerivative = ctx.gradient(variable).dataAt(i);
                 perturb(variable, i, epsilon());
                 ComputationContext ctx2 = new ComputationContext();
-                double f1 = ctx2.forward(loss).data[0];
+                double f1 = ctx2.forward(loss).dataAt(0);
                 assertEquals(
                     (f1 - f0) / epsilon(),
                     partialDerivative,
@@ -60,7 +60,7 @@ public interface FiniteDifferenceTest {
     }
 
     private void perturb(Weights variable, int index, double epsilon) {
-        variable.data().data[index] += epsilon;
+        variable.data().addDataAt(index, epsilon);
     }
 
 }

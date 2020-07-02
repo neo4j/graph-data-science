@@ -34,7 +34,7 @@ public class InvertScalarTest extends GraphSageBaseTest implements FiniteDiffere
         AbstractVariable variable = new Weights(Tensor.scalar(5D));
         InvertScalar invertScalar = new InvertScalar(variable);
 
-        assertEquals(0.2, ctx.forward(invertScalar).data[0]);
+        assertEquals(0.2, ctx.forward(invertScalar).dataAt(0));
     }
 
     @Test
