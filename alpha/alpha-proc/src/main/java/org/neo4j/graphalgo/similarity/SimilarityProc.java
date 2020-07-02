@@ -156,7 +156,7 @@ abstract class SimilarityProc
     @Override
     protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
         if (graphNameOrConfig instanceof String) {
-            throw new IllegalArgumentException("Similarity algorithms does not support named graphs");
+            throw new IllegalArgumentException("Similarity algorithms do not support named graphs");
         } else if (graphNameOrConfig instanceof Map) {
             // User is doing the only supported thing: anonymous syntax
 
