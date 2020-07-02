@@ -19,13 +19,16 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GraphCreateConfigSupport;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
@@ -33,6 +36,7 @@ import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
 import org.neo4j.graphalgo.similarity.nil.NullGraph;
 import org.neo4j.graphalgo.similarity.nil.NullGraphLoader;
 import org.neo4j.graphalgo.similarity.nil.NullGraphStore;
+import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Procedure;
 
@@ -58,7 +62,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 public abstract class SimilarityProcTest<
     ALGORITHM extends SimilarityAlgorithm<ALGORITHM, INPUT>,
     INPUT extends SimilarityInput
-    > extends BaseProcTest {
+    > extends BaseProcTest implements GraphCreateConfigSupport {
 
     abstract Class<? extends SimilarityProc<ALGORITHM, ? extends SimilarityConfig>> getProcedureClazz();
 
@@ -102,6 +106,34 @@ public abstract class SimilarityProcTest<
 
     Map<String, Object> minimalViableConfig() {
         return new HashMap<>();
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @Test
+    void throwsOnExplicitGraph() {
+        GraphStoreCatalog.set(
+            emptyWithNameNative(getUsername(), "foo"), new NullGraphStore()
+        );
+        applyOnProcedure(proc -> {
+            getProcMethods(proc).forEach(method -> {
+                try {
+                    method.invoke(proc, "foo", minimalViableConfig());
+                } catch (InvocationTargetException e) {
+                    var rootCause = ExceptionUtil.rootCause(e);
+                    assertEquals(IllegalArgumentException.class, rootCause.getClass());
+                    assertEquals(
+                        "Similarity algorithms does not support named graphs",
+                        rootCause.getMessage()
+                    );
+                } catch (IllegalAccessException e) {
+                    fail(e);
+                }
+            });
+        });
     }
 
     @Test
