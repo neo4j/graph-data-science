@@ -351,4 +351,9 @@ public class SimilaritiesFuncTest extends BaseProcTest {
                 assertEquals(jimSim.get(), result.next().get("euclidSim"));
             });
     }
+
+    @Test
+    void testSimilarityFunctionsHandlesNullValues() {
+        runQuery("RETURN gds.alpha.similarity.jaccard([1, null, 2], [null, 1, 3])");
+    }
 }
