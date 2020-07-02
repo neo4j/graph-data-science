@@ -148,9 +148,10 @@ abstract class SimilarityProc
     }
 
     @Override
-    protected Pair<CONFIG, Optional<String>> processInput(
-        Object graphNameOrConfig, Map<String, Object> configuration
-    ) {
+    protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
+        if (graphNameOrConfig instanceof String) {
+            throw new IllegalArgumentException("Similarity algorithms does not support named graphs");
+        }
         if (graphNameOrConfig instanceof Map) {
             Map<String, Object> configMap = (Map<String, Object>) graphNameOrConfig;
             configMap.put(NODE_PROJECTION_KEY, PROJECT_ALL);
@@ -160,18 +161,8 @@ abstract class SimilarityProc
     }
 
     @Override
-    public GraphLoader newLoader(
-        GraphCreateConfig createConfig, AllocationTracker tracker
-    ) {
+    public GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
         return new NullGraphLoader();
-    }
-
-    @Override
-    protected final Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
-        if (configAndName.getTwo().isPresent()) {
-            throw new IllegalArgumentException("Similarity does not run on an explicitly created graph");
-        }
-        return new NullGraph();
     }
 
     private Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
