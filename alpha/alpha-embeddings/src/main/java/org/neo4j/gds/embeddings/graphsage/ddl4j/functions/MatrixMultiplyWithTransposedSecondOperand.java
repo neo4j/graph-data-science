@@ -21,8 +21,9 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.GradientMatrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -31,16 +32,16 @@ import java.util.List;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class MatrixMultiplyWithTransposedSecondOperand implements GradientMatrix {
+public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable implements Matrix {
 
     private final Matrix A;
     private final Matrix B;
-    private final Iterable<Matrix> parents;
 
     private final int rows;
     private final int cols;
 
     public MatrixMultiplyWithTransposedSecondOperand(Matrix A, Matrix B) {
+        super(List.of(A, B), Dimensions.matrix(A.rows(), B.rows()));
         // The dimensions of a matrix multiplication of dimensions (m, n) x (n, p) = (m, p)
         // When B is of the dimensions (p, n) it needs to be transposed in order to allow the multiplication.
         // When B is being transposed as B_T its dimensions become (n, p)
@@ -51,7 +52,6 @@ public class MatrixMultiplyWithTransposedSecondOperand implements GradientMatrix
 
         this.rows = A.rows();
         this.cols = B.rows();
-        parents = List.of(A, B);
     }
 
     @Override
@@ -107,11 +107,6 @@ public class MatrixMultiplyWithTransposedSecondOperand implements GradientMatrix
     @Override
     public int cols() {
         return cols;
-    }
-
-    @Override
-    public Iterable<? extends Variable> parents() {
-        return parents;
     }
 
     private void assertDimensions(Matrix A, Matrix B) {
