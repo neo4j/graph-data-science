@@ -31,9 +31,9 @@ import java.util.List;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-@Configuration("RandomProjectionConfigImpl")
-public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsConfig
-{
+public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsConfig {
+
+    String ITERATION_WEIGHTS_KEY = "iterationWeights";
 
     int embeddingSize();
 
@@ -42,6 +42,7 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
         return 3;
     }
 
+    @Configuration.Key(ITERATION_WEIGHTS_KEY)
     @Value.Default
     default List<Double> iterationWeights() {
         return Collections.emptyList();
@@ -60,12 +61,19 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
     @Value.Check
     default void validate() {
         if (!iterationWeights().isEmpty()) {
-            if (iterationWeights().size() != maxIterations()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Parameter `iterationWeights` should have `maxIterations` entries, but was %s, %s.",
-                    iterationWeights().size(),
-                    maxIterations()
-                ));
+            var numberOfIterationWeights = iterationWeights().size();
+            if (numberOfIterationWeights != maxIterations()) {
+                var message = formatWithLocale(
+                    "The value of `%1$s` must be a list where its length is the " +
+                    "same value as the configured value for `%2$s`.%n" +
+                    "`%2$s` is defined as `%3$d` but `%1$s` contains `%4$d` %5$s.",
+                    ITERATION_WEIGHTS_KEY,
+                    MAX_ITERATIONS_KEY,
+                    maxIterations(),
+                    numberOfIterationWeights,
+                    numberOfIterationWeights == 1 ? "entry" : "entries"
+                );
+                throw new IllegalArgumentException(message);
             }
         }
     }

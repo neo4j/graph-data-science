@@ -19,7 +19,12 @@
  */
 package org.neo4j.graphalgo.config;
 
+import org.neo4j.graphalgo.annotation.Configuration;
+
 public interface IterationsConfig {
 
+    String MAX_ITERATIONS_KEY = "maxIterations";
+
+    @Configuration.Key(MAX_ITERATIONS_KEY)
     int maxIterations();
 }
