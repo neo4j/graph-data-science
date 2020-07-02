@@ -21,8 +21,10 @@ package org.neo4j.graphalgo.similarity;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.Settings;
+import org.neo4j.graphalgo.impl.similarity.EuclideanAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
+import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -39,7 +41,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransactio
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class EuclideanProcTest extends BaseProcTest {
+class EuclideanProcTest extends SimilarityProcTest<EuclideanAlgorithm, WeightedInput> {
 
     private static final String STATEMENT_STATS =
         " MATCH (i:Item)" +
@@ -636,5 +638,10 @@ class EuclideanProcTest extends BaseProcTest {
         assertEquals(2L, row.get("count2"));
         // assertEquals(2L, row.get("intersection"));
         assertEquals(sqrt(1), row.get("similarity"));
+    }
+
+    @Override
+    Class<? extends SimilarityProc<EuclideanAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
+        return EuclideanProc.class;
     }
 }

@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -36,6 +38,8 @@ import org.neo4j.graphalgo.results.SimilarityExporter;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.graphalgo.results.SimilarityStatsResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
+import org.neo4j.graphalgo.similarity.nil.NullGraph;
+import org.neo4j.graphalgo.similarity.nil.NullGraphLoader;
 import org.neo4j.logging.Log;
 
 import java.util.Map;
@@ -44,6 +48,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 abstract class SimilarityProc
@@ -138,6 +145,25 @@ abstract class SimilarityProc
                 return newAlgo(config);
             }
         };
+    }
+
+    @Override
+    protected Pair<CONFIG, Optional<String>> processInput(
+        Object graphNameOrConfig, Map<String, Object> configuration
+    ) {
+        if (graphNameOrConfig instanceof Map) {
+            Map<String, Object> configMap = (Map<String, Object>) graphNameOrConfig;
+            configMap.put(NODE_PROJECTION_KEY, PROJECT_ALL);
+            configMap.put(RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL);
+        }
+        return super.processInput(graphNameOrConfig, configuration);
+    }
+
+    @Override
+    public GraphLoader newLoader(
+        GraphCreateConfig createConfig, AllocationTracker tracker
+    ) {
+        return new NullGraphLoader();
     }
 
     @Override
