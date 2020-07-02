@@ -31,6 +31,7 @@ import org.neo4j.procedure.UserAggregationFunction;
 import org.neo4j.procedure.UserFunction;
 import org.neo4j.values.storable.Values;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -190,6 +191,9 @@ public class SimilaritiesFunc {
      */
     private double jaccard(List<Number> vector1, List<Number> vector2) {
         Comparator<Number> numberComparator = new NumberComparator();
+        List<Number> nullList = Collections.singletonList(null);
+        vector1.removeAll(nullList);
+        vector2.removeAll(nullList);
         vector1.sort(numberComparator);
         vector2.sort(numberComparator);
 
