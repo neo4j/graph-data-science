@@ -21,9 +21,11 @@ package org.neo4j.graphalgo.similarity;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
+import org.neo4j.graphalgo.impl.similarity.PearsonAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
+import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -39,7 +41,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransactio
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class PearsonProcTest extends BaseProcTest {
+class PearsonProcTest extends SimilarityProcTest<PearsonAlgorithm, WeightedInput> {
 
     private static final String STATEMENT_STATS =
         " MATCH (i:Item)" +
@@ -638,5 +640,10 @@ class PearsonProcTest extends BaseProcTest {
         assertEquals(4L, row.get("count2"));
         // assertEquals(2L, row.get("intersection"));
         assertEquals(1.0, (double) row.get("similarity"), 0.01);
+    }
+
+    @Override
+    Class<? extends SimilarityProc<PearsonAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
+        return PearsonProc.class;
     }
 }

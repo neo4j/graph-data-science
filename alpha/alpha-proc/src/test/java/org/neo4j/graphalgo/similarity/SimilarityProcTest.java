@@ -30,6 +30,9 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
 import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
+import org.neo4j.graphalgo.similarity.nil.NullGraph;
+import org.neo4j.graphalgo.similarity.nil.NullGraphLoader;
+import org.neo4j.graphalgo.similarity.nil.NullGraphStore;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Procedure;
 
@@ -97,12 +100,16 @@ public abstract class SimilarityProcTest<
             );
     }
 
+    Map<String, Object> minimalViableConfig() {
+        return new HashMap<>();
+    }
+
     @Test
     void shouldAcceptNoProjections() {
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    method.invoke(proc, new HashMap<String, Object>(), Map.of());
+                    method.invoke(proc, minimalViableConfig(), Map.of());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     fail(e);
                 }
@@ -115,7 +122,8 @@ public abstract class SimilarityProcTest<
     @Test
     void worksOnEmptyGraph() {
         runQuery("MATCH (n) DETACH DELETE n");
-        HashMap<String, Object> config = new HashMap<>(Map.<String, Object>of(
+        Map<String, Object> config = minimalViableConfig();
+        config.putAll(Map.of(
             NODE_PROJECTION_KEY, PROJECT_ALL,
             RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL
         ));
@@ -148,9 +156,9 @@ public abstract class SimilarityProcTest<
                 ))
             ), AllocationTracker.EMPTY);
 
-            assertTrue(graphLoader instanceof SimilarityProc.NullGraphLoader);
+            assertTrue(graphLoader instanceof NullGraphLoader);
             assertTrue(graphLoader.graph() instanceof NullGraph);
-            assertTrue(graphLoader.graphStore() instanceof SimilarityProc.NullGraphStore);
+            assertTrue(graphLoader.graphStore() instanceof NullGraphStore);
             assertTrue(graphLoader.graphStore().nodeLabels().isEmpty());
             assertTrue(graphLoader.graphStore().relationshipTypes().isEmpty());
             assertTrue(graphLoader.graphStore().getGraph(Set.of(), Set.of(), Optional.empty()) instanceof NullGraph);
