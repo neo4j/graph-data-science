@@ -69,7 +69,7 @@ public abstract class BaseProc {
         return transaction.subjectOrAnonymous().username();
     }
 
-    public GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
+    protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()

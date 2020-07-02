@@ -50,8 +50,7 @@ public class NullGraph implements Graph {
 
     @Override
     public long relationshipCount() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.nil.NullGraph.relationshipCount is not implemented.");
+        return 0L;
     }
 
     @Override
@@ -92,7 +91,7 @@ public class NullGraph implements Graph {
 
     @Override
     public int degree(long nodeId) {
-        throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.nil.NullGraph.degree is not implemented.");
+        return 0;
     }
 
     @Override
@@ -115,12 +114,12 @@ public class NullGraph implements Graph {
 
     @Override
     public boolean contains(long nodeId) {
-        throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.nil.NullGraph.contains is not implemented.");
+        return false;
     }
 
     @Override
     public long nodeCount() {
-        throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.nil.NullGraph.nodeCount is not implemented.");
+        return 0L;
     }
 
     @Override

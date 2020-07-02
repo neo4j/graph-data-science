@@ -98,8 +98,8 @@ class ApproxNearestNeighborsProcTest extends SimilarityProcTest<ApproxNearestNei
         );
 
         Map<String, Object> config = map(
-            "config",
-            anonymousGraphConfig("algorithm", "jaccard", "similarityCutoff", 0.1, "randomSeed", 42L)
+            "config", map(
+            "algorithm", "jaccard", "similarityCutoff", 0.1, "randomSeed", 42L)
         );
 
         String query =
@@ -149,7 +149,7 @@ class ApproxNearestNeighborsProcTest extends SimilarityProcTest<ApproxNearestNei
 
         Map<String, Object> config = map(
             "config",
-            anonymousGraphConfig("algorithm", "jaccard", "similarityCutoff", 0.1, "randomSeed", 42L)
+            map("algorithm", "jaccard", "similarityCutoff", 0.1, "randomSeed", 42L)
         );
 
         String query =
