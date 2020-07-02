@@ -179,7 +179,7 @@ NOTE: The algorithm is defined for UNDIRECTED graphs.
 
 === Stream
 
-[source, cypher, role=query-example, no-result, group=graphSage]
+[source, cypher, role=query-example, no-result=true]
 ----
 CALL gds.alpha.graphSage.stream(
   'persons',
@@ -211,7 +211,7 @@ NOTE: Due to the random initialisation of the weight variables the results may v
 
 === Write
 
-[source, cypher, role=query-example, no-result, group=graphSageWrite]
+[source, cypher, role=query-example, no-result=true]
 ----
 CALL gds.alpha.graphSage.write(
   'persons',

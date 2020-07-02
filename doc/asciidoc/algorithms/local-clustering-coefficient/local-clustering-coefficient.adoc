@@ -445,7 +445,7 @@ in `mutate` mode.
 The Triangle Count algorithm is going to store its result back into 'myGraph'.
 It is also possible to obtain the property value from the Neo4j database using a graph projection with a node property when creating the in-memory graph.
 
-[role=query-example, no-result, group=triangleCountProperty]
+[role=query-example, no-result=true, group=triangleCountProperty]
 --
 .The following computes the triangle counts and stores the result into the in-memory graph:
 [source, cypher]

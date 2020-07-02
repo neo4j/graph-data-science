@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.asciidoctor.ast.Cell;
+import org.asciidoctor.ast.ContentNode;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.ast.Row;
 import org.asciidoctor.ast.StructuralNode;
@@ -57,7 +58,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
     private static final String QUERY_EXAMPLE_ROLE = "query-example";
     private static final String TEST_TYPE_NO_RESULT = "no-result";
     private static final String TEST_GROUP_ATTRIBUTE = "group";
-    public static final String ROLE_SELECTOR = "role";
+    private static final String ROLE_SELECTOR = "role";
 
     private final SetupQueryConsumer setupQueryConsumer;
     private final QueryExampleConsumer queryExampleConsumer;
@@ -130,7 +131,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
                 groupedQueryExamples.putIfAbsent(testGroup, new ArrayList<>());
                 groupedQueryExamples.get(testGroup).add(queryExample);
             } else {
-                if (queryExample.hasAttribute(TEST_TYPE_NO_RESULT)) {
+                if (isNoResultExample(queryExample)) {
                     queryNoResultExamples.add(queryExample);
                 } else {
                     queryExamples.add(queryExample);
@@ -143,15 +144,20 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
         groupedQueryExamples.forEach((group, examples) -> {
             Collection<Runnable> groupQueries = new ArrayList<>();
             examples.forEach(example -> {
-                if (example.hasAttribute(TEST_TYPE_NO_RESULT)) {
-                    groupQueries.add(() -> processCypherExample(example));
-                } else {
+                if (isNoResultExample(example)) {
                     groupQueries.add(() -> processCypherNoResultExample(example));
+                } else {
+                    groupQueries.add(() -> processCypherExample(example));
                 }
             });
 
             processExamples(groupQueries);
         });
+    }
+
+    private boolean isNoResultExample(ContentNode example) {
+        return example.hasAttribute(TEST_TYPE_NO_RESULT) &&
+               Boolean.parseBoolean(example.getAttribute(TEST_TYPE_NO_RESULT).toString());
     }
 
     private void processExample(Runnable example) {
