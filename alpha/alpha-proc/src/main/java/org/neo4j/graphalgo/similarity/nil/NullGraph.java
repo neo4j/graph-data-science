@@ -42,6 +42,9 @@ import java.util.stream.Stream;
  */
 public class NullGraph implements Graph {
 
+    /*
+     * The NullGraph doesn't have any nodes or rels, but it isn't empty because then the algo will not be run.
+     */
     @Override
     public boolean isEmpty() {
         return false;
