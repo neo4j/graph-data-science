@@ -284,6 +284,14 @@ class SimilaritiesFuncTest extends BaseProcTest {
                 new ArrayList<Number>(Arrays.asList(1, 2, 2)),
                 new ArrayList<Number>(Arrays.asList(2, 2, 3)),
                 2/4D
+            ), Arguments.of(
+                new ArrayList<Number>(Arrays.asList(null, 2, 2)),
+                new ArrayList<Number>(Arrays.asList(2, 2, null, null)),
+                1D
+            ), Arguments.of(
+                new ArrayList<Number>(),
+                new ArrayList<Number>(),
+                1D
             )
         );
     }
