@@ -33,7 +33,7 @@ import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 @DataClass
 public abstract class AbstractRelationshipProjection extends ElementProjection {
 
-    private static final RelationshipProjection ALL = of(ALL_RELATIONSHIPS.name, Orientation.NATURAL);
+    static final RelationshipProjection ALL = of(ALL_RELATIONSHIPS.name, Orientation.NATURAL);
 
     public abstract String type();
 

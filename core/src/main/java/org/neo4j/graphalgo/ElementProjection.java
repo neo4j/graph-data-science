@@ -33,6 +33,7 @@ import static java.util.Collections.emptyMap;
 
 public abstract class ElementProjection {
 
+    public static final String PROJECT_ALL = "*";
     public static final String PROPERTIES_KEY = "properties";
 
     @Value.Default

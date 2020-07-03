@@ -38,6 +38,8 @@ import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 @Value.Immutable(singleton = true)
 public abstract class AbstractRelationshipProjections extends AbstractProjections<RelationshipType, RelationshipProjection> {
 
+    public static final RelationshipProjections ALL = create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL));
+
     public abstract Map<RelationshipType, RelationshipProjection> projections();
 
     public static RelationshipProjections fromObject(Object object) {

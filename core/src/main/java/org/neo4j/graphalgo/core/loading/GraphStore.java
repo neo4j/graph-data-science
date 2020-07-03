@@ -58,7 +58,7 @@ import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.ALL_NODE_LABEL_IDENTIFIERS;
 
-public final class GraphStore {
+public class GraphStore {
 
     private final IdMap nodes;
 
@@ -140,7 +140,7 @@ public final class GraphStore {
         return GraphStore.of(graph.idMap(), nodeProperties, topology, relationshipProperties, tracker);
     }
 
-    private GraphStore(
+    protected GraphStore(
         IdMap nodes,
         Map<NodeLabel, NodePropertyStore> nodeProperties,
         Map<RelationshipType, HugeGraph.TopologyCSR> relationships,
@@ -431,7 +431,7 @@ public final class GraphStore {
         return createGraph(nodeLabels, singletonList(relationshipType), maybeRelationshipProperty, 1);
     }
 
-    private IdMapGraph createGraph(
+    protected IdMapGraph createGraph(
         List<NodeLabel> filteredLabels,
         List<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty,

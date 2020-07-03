@@ -22,9 +22,11 @@ package org.neo4j.graphalgo.similarity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.functions.IsFiniteFunc;
+import org.neo4j.graphalgo.impl.similarity.CosineAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
+import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.graphdb.Result;
 
 import java.util.Collections;
@@ -38,7 +40,12 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransactio
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class CosineProcTest extends BaseProcTest {
+class CosineProcTest extends SimilarityProcTest<CosineAlgorithm, WeightedInput> {
+
+    @Override
+    Class<? extends SimilarityProc<CosineAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
+        return CosineProc.class;
+    }
 
     public static final String DB_CYPHER =
         "CREATE" +
@@ -113,6 +120,7 @@ class CosineProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         db.shutdown();
+        super.tearDown();
     }
 
     private void buildRandomDB(int size) {

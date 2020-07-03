@@ -22,8 +22,10 @@ package org.neo4j.graphalgo.similarity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.impl.similarity.CategoricalInput;
+import org.neo4j.graphalgo.impl.similarity.OverlapAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
 import org.neo4j.graphdb.Result;
 
 import java.util.Collections;
@@ -38,7 +40,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class OverlapProcTest extends BaseProcTest {
+class OverlapProcTest extends SimilarityProcTest<OverlapAlgorithm, CategoricalInput> {
 
     private static final String DB_CYPHER = "CREATE" +
                                             "  (a:Person {name: 'Alice'})" +
@@ -96,9 +98,15 @@ class OverlapProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
     }
 
+    @Override
+    Class<? extends SimilarityProc<OverlapAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
+        return OverlapProc.class;
+    }
+
     @AfterEach
     void tearDown() {
         db.shutdown();
+        super.tearDown();
     }
 
     private void buildRandomDB(int size) {
