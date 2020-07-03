@@ -24,7 +24,11 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
+import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.Computations;
@@ -44,9 +48,16 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+
 abstract class SimilarityProc
     <ALGO extends SimilarityAlgorithm<ALGO, ?>, CONFIG extends SimilarityConfig>
     extends AlgoBaseProc<ALGO, SimilarityAlgorithmResult, CONFIG> {
+
+    public static final String SIMILARITY_FAKE_GRAPH_NAME = "  SIM-NULL-GRAPH";
 
     Stream<SimilarityResult> stream(
         Object graphNameOrConfig,
@@ -95,17 +106,47 @@ abstract class SimilarityProc
                 AllocationTracker tracker,
                 Log log
             ) {
+                GraphStoreCatalog.remove(getUsername(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
                 return newAlgo(config);
             }
         };
     }
 
+    // Alpha similarities don't play well with the API, so we must hook in here and hack graph creation
     @Override
-    protected final Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
-        if (configAndName.getTwo().isPresent()) {
-            throw new IllegalArgumentException("Similarity does not run on an explicitly created graph");
+    protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
+        if (graphNameOrConfig instanceof String) {
+            throw new IllegalArgumentException("Similarity algorithms do not support named graphs");
+        } else if (graphNameOrConfig instanceof Map) {
+            // User is doing the only supported thing: anonymous syntax
+
+            Map<String, Object> configMap = (Map<String, Object>) graphNameOrConfig;
+
+            // We will tell the rest of the system that we are in named graph mode, with a fake graph name
+            graphNameOrConfig = SIMILARITY_FAKE_GRAPH_NAME;
+            // We move the map to the second argument position of CALL gds.algo.mode(name, config)
+            configuration = configMap;
+
+            // We must curate the configuration map to remove any eventual projection keys
+            // This is backwards compatibility since the alpha similarities featured anonymous star projections in docs
+            configuration.remove(NODE_QUERY_KEY);
+            configuration.remove(RELATIONSHIP_QUERY_KEY);
+            configuration.remove(NODE_PROJECTION_KEY);
+            configuration.remove(RELATIONSHIP_PROJECTION_KEY);
+
+            // We put the fake graph store into the graph catalog
+            GraphStoreCatalog.set(
+                ImmutableGraphCreateFromStoreConfig.of(
+                    getUsername(),
+                    graphNameOrConfig.toString(),
+                    NodeProjections.ALL,
+                    RelationshipProjections.ALL
+                ),
+                new NullGraphStore()
+            );
         }
-        return new NullGraph();
+        // And finally we call super in named graph mode
+        return super.processInput(graphNameOrConfig, configuration);
     }
 
     private Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {

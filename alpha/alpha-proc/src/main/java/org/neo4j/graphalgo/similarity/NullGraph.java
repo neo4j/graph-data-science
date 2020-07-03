@@ -33,11 +33,16 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
+/**
+ * The NullGraph is used for non-product algos that don't use a graph.
+ * It makes it a bit easier to adapt those algorithms to the new API,
+ * as we can override graph creation and inject a NullGraph.
+ */
 public class NullGraph implements Graph {
 
-    // The NullGraph is used for non-product algos that don't use a graph.
-    // It makes it a bit easier to adapt those algorithms to the new API,
-    // as we can override graph creation and inject a NullGraph.
+    /*
+     * The NullGraph doesn't have any nodes or rels, but it isn't empty because then the algo will not be run.
+     */
     @Override
     public boolean isEmpty() {
         return false;
@@ -48,140 +53,118 @@ public class NullGraph implements Graph {
 
     @Override
     public long relationshipCount() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.relationshipCount is not implemented.");
+        return 0L;
     }
 
     @Override
     public boolean isUndirected() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.isUndirected is not implemented.");
+        return false;
     }
 
     @Override
     public boolean hasRelationshipProperty() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.hasRelationshipProperty is not implemented.");
+        return false;
     }
 
     @Override
-    public void canRelease(boolean canRelease) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.canRelease is not implemented.");
-    }
+    public void canRelease(boolean canRelease) {}
 
     @Override
     public RelationshipIntersect intersection(long maxDegree) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.intersection is not implemented.");
+        throw new NullGraphStore.NullGraphException();
+    }
+
+    @Override
+    public Graph concurrentCopy() {
+        return this;
     }
 
     @Override
     public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.batchIterables is not implemented.");
+        return Set.of();
     }
 
     @Override
     public int degree(long nodeId) {
-        throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.degree is not implemented.");
+        return 0;
     }
 
     @Override
     public NodeMapping nodeMapping() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.nodeMapping is not implemented.");
+        throw new NullGraphStore.NullGraphException();
     }
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.toMappedNodeId is not implemented.");
+        throw new NullGraphStore.NullGraphException();
     }
 
     @Override
     public long toOriginalNodeId(long nodeId) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.toOriginalNodeId is not implemented.");
+        throw new NullGraphStore.NullGraphException();
     }
 
     @Override
     public boolean contains(long nodeId) {
-        throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.contains is not implemented.");
+        return false;
     }
 
     @Override
     public long nodeCount() {
-        throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.nodeCount is not implemented.");
+        return 0L;
     }
 
     @Override
-    public void forEachNode(LongPredicate consumer) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.forEachNode is not implemented.");
-    }
+    public void forEachNode(LongPredicate consumer) {}
 
     @Override
     public PrimitiveLongIterator nodeIterator() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.nodeIterator is not implemented.");
+        throw new NullGraphStore.NullGraphException();
     }
 
     @Override
     public Set<NodeLabel> nodeLabels(long nodeId) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.nodeLabelStream is not implemented.");
+        return Set.of();
     }
 
     @Override
     public Set<NodeLabel> availableNodeLabels() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.availableNodeLabels is not implemented.");
+        return Set.of();
     }
 
     @Override
     public NodeProperties nodeProperties(String propertyKey) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.nodeProperties is not implemented.");
+        throw new NullGraphStore.NullGraphException();
     }
 
     @Override
     public Set<String> availableNodeProperties() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.availableNodeProperties is not implemented.");
+        return Set.of();
     }
 
     @Override
     public long getTarget(long nodeId, long index) {
-        throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.getTarget is not implemented.");
+        throw new NullGraphStore.NullGraphException();
     }
 
     @Override
-    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.forEachRelationship is not implemented.");
-    }
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {}
 
     @Override
-    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.forEachRelationship is not implemented.");
-    }
+    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {}
 
     @Override
     public boolean exists(long sourceNodeId, long targetNodeId) {
-        throw new UnsupportedOperationException("org.neo4j.graphalgo.similarity.NullGraph.exists is not implemented.");
+        return false;
     }
 
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.relationshipProperty is not implemented.");
+        throw new NullGraphStore.NullGraphException();
     }
 
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
-        throw new UnsupportedOperationException(
-            "org.neo4j.graphalgo.similarity.NullGraph.relationshipProperty is not implemented.");
+        throw new NullGraphStore.NullGraphException();
     }
 }

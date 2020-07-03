@@ -23,9 +23,11 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
+import org.neo4j.graphalgo.impl.similarity.ApproxNearestNeighborsAlgorithm;
+import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
+import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
 
 import java.util.Map;
 
@@ -34,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class ApproxNearestNeighborsProcTest extends BaseProcTest {
+class ApproxNearestNeighborsProcTest extends SimilarityProcTest<ApproxNearestNeighborsAlgorithm<SimilarityInput>, SimilarityInput> {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -75,6 +77,18 @@ class ApproxNearestNeighborsProcTest extends BaseProcTest {
         registerProcedures(ApproxNearestNeighborsProc.class);
         registerFunctions(GetNodeFunc.class);
         runQuery(DB_CYPHER);
+    }
+
+    @Override
+    Map<String, Object> minimalViableConfig() {
+        Map<String, Object> config = super.minimalViableConfig();
+        config.put("algorithm", "jaccard");
+        return config;
+    }
+
+    @Override
+    Class<? extends SimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ? extends SimilarityConfig>> getProcedureClazz() {
+        return ApproxNearestNeighborsProc.class;
     }
 
     @Test
