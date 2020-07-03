@@ -5,6 +5,8 @@ plugins {
     id "ch.kk7.spawn"                               version "1.0.20180924200750"    apply false
     id "com.vanniktech.dependency.graph.generator"  version "0.5.0"
     id 'de.thetaphi.forbiddenapis'                  version '2.7'                   apply false
+
+    id 'com.github.spotbugs'                        version '4.4.4'                 apply false
 }
 
 ext {
@@ -13,6 +15,8 @@ ext {
     publicDir = "${project.rootDir}"
 
     checkstyleReportsDir = "${buildDir}/reports/checkstyle/"
+
+    spotbugsToolVersion = '4.0.6'
 
     compatibilityModules = [
             'kernel-adapter': [
@@ -48,3 +52,4 @@ apply from: 'gradle/dependencies.gradle'
 apply from: 'gradle/defaults-java.gradle'
 apply from: 'gradle/forbidden-apis.gradle'
 apply from: 'gradle/checkstyle.gradle'
+apply from: 'gradle/spotbugs.gradle'

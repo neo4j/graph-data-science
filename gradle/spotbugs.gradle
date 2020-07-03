@@ -1,0 +1,30 @@
+subprojects { proj ->
+
+    plugins.withType(JavaLibraryPlugin) {
+        proj.apply plugin: 'com.github.spotbugs'
+
+        proj.spotbugs {
+            toolVersion = spotbugsToolVersion
+            effort = "max"
+
+            // When  `ignoreFailures=false` the build will be failing on spotbugs errors
+            ignoreFailures = true
+            showStackTraces = false
+            showProgress = true
+
+            excludeFilter = file("$publicDir/etc/spotbugs/spotbugs-exclude.xml")
+        }
+
+        proj.tasks.spotbugsMain {
+            reports {
+                html {
+                    enabled = true
+                }
+                xml {
+                    enabled = true
+                }
+            }
+        }
+
+    }
+}
