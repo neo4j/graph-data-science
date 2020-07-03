@@ -31,17 +31,20 @@ import org.neo4j.procedure.UserAggregationFunction;
 import org.neo4j.procedure.UserFunction;
 import org.neo4j.values.storable.Values;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator.CATEGORY_KEY;
 import static org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator.WEIGHT_KEY;
 import static org.neo4j.graphalgo.impl.utils.NumberUtils.getDoubleValue;
 
 public class SimilaritiesFunc {
+
+    public static final Predicate<Number> IS_NULL = Predicate.isEqual(null);
+    public static final Comparator<Number> NUMBER_COMPARATOR = new NumberComparator();
 
     @UserFunction("gds.alpha.similarity.jaccard")
     @Description("RETURN gds.alpha.similarity.jaccard(vector1, vector2) - Given two collection vectors, calculate Jaccard similarity")
@@ -190,12 +193,10 @@ public class SimilaritiesFunc {
      * @return The jaccard score, the intersection divided by the union of the input lists.
      */
     private double jaccard(List<Number> vector1, List<Number> vector2) {
-        Comparator<Number> numberComparator = new NumberComparator();
-        List<Number> nullList = Collections.singletonList(null);
-        vector1.removeAll(nullList);
-        vector2.removeAll(nullList);
-        vector1.sort(numberComparator);
-        vector2.sort(numberComparator);
+        vector1.removeIf(IS_NULL);
+        vector2.removeIf(IS_NULL);
+        vector1.sort(NUMBER_COMPARATOR);
+        vector2.sort(NUMBER_COMPARATOR);
 
         int index1 = 0;
         int index2 = 0;
@@ -206,7 +207,7 @@ public class SimilaritiesFunc {
         while (index1 < vector1.size() && index2 < vector2.size()) {
             Number val1 = vector1.get(index1);
             Number val2 = vector2.get(index2);
-            int compare = numberComparator.compare(val1, val2);
+            int compare = NUMBER_COMPARATOR.compare(val1, val2);
 
             if (compare == 0) {
                 intersection++;
@@ -225,7 +226,7 @@ public class SimilaritiesFunc {
         // the remainder, if any, is never shared so add to the union
         union += (vector1.size() - index1) + (vector2.size() - index2);
 
-        return intersection / union;
+        return union == 0 ? 1 : intersection / union;
     }
 
     static class NumberComparator implements Comparator<Number> {
