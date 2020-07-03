@@ -36,6 +36,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * The NullGraphStore is used to store a {@link NullGraph}.
+ * It helps non-product algos work under the standard API.
+ */
 public class NullGraphStore implements GraphStore {
 
     static class NullGraphException extends UnsupportedOperationException {

@@ -54,6 +54,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.similarity.SimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
@@ -156,6 +160,26 @@ public abstract class SimilarityProcTest<
         config.putAll(Map.of(
             NODE_PROJECTION_KEY, PROJECT_ALL,
             RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL
+        ));
+        applyOnProcedure(proc -> {
+            getProcMethods(proc).forEach(method -> {
+                try {
+                    method.invoke(proc, config, Map.of());
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    fail(e);
+                }
+            });
+        });
+
+        // does not throw
+    }
+
+    @Test
+    void shouldAcceptIncludingQueries() {
+        Map<String, Object> config = minimalViableConfig();
+        config.putAll(Map.of(
+            NODE_QUERY_KEY, ALL_NODES_QUERY,
+            RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY
         ));
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
