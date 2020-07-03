@@ -5,6 +5,10 @@ subprojects { proj ->
 
         proj.checkstyle {
             configFile = file("$publicDir/etc/checkstyle/checkstyle.xml")
+            configProperties = [
+                'org.checkstyle.sun.suppressionfilter.config':
+                    file("$publicDir/etc/checkstyle/checkstyle-suppressions.xml")
+            ]
 
             // When  `ignoreFailures=false` the build will be failing on checkstyle errors
             ignoreFailures = true
@@ -13,7 +17,7 @@ subprojects { proj ->
 
         proj.tasks.withType(Checkstyle) {
             reports {
-                xml.enabled false
+                xml.enabled true
                 html.enabled true
                 html.stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-noframes-severity-sorted.xsl")
             }
