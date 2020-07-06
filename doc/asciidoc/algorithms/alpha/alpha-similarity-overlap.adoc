@@ -128,7 +128,7 @@ O(A,B) = 2 / min(3,4)
  MATCH (book:Book)-[:HAS_GENRE]->(genre)
  WITH {item:id(genre), categories: collect(id(book))} AS userData
  WITH collect(userData) AS data
- CALL gds.alpha.similarity.overlap.stream({nodeProjection: '*', relationshipProjection: '*', data: data})
+ CALL gds.alpha.similarity.overlap.stream({data: data})
  YIELD item1, item2, count1, count2, intersection, similarity
  RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to,
         count1, count2, intersection, similarity
@@ -160,8 +160,6 @@ The others are less obvious; Dystopia probably isn't a subgenre of Fantasy, but 
  WITH {item:id(genre), categories: collect(id(book))} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.overlap.stream({
-   nodeProjection: '*',
-   relationshipProjection: '*',
    data: data,
    similarityCutoff: 0.75
  })
@@ -194,8 +192,6 @@ We can do that by passing in the `topK` parameter.
  WITH {item:id(genre), categories: collect(id(book))} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.overlap.stream({
-  nodeProjection: '*',
-  relationshipProjection: '*',
   data: data,
   topK: 2
  })
@@ -228,8 +224,6 @@ We can do that by passing in the `topK` parameter.
  WITH {item:id(genre), categories: collect(id(book))} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.overlap.write({
-  nodeProjection: '*',
-  relationshipProjection: '*',
   data: data,
   topK: 2,
   similarityCutoff: 0.5
@@ -279,8 +273,6 @@ We then could write a query to find out the genre hierarchy for a specific genre
  WITH {item:id(genre), categories: collect(id(book))} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.overlap.stats({
-  nodeProjection: '*',
-  relationshipProjection: '*',
   data: data,
   topK: 2,
   similarityCutoff: 0.5
@@ -306,8 +298,6 @@ We could use this technique to compute the similarity of a subset of items to al
  WITH data,
       [value in data WHERE value.name IN ["Fantasy", "Classics"] | value.item ] AS sourceIds
  CALL gds.alpha.similarity.overlap.stream({
-  nodeProjection: '*',
-  relationshipProjection: '*',
   data: data,
   sourceIds: sourceIds
  })
@@ -356,8 +346,7 @@ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, me
 | similarityCutoff      | Integer           | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | degreeCutoff          | Integer           | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
 | skipValue             | Float             | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
-| concurrency           | Integer           | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency       | Integer           | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| concurrency           | Integer           | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'writeConcurrency'.
 | writeConcurrency      | Integer           | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | graph                 | String            | dense                  | yes      | The graph name ('dense' or 'cypher').
 | writeBatchSize        | Integer           | 10000                  | yes      | The batch size to use when storing results.
@@ -415,8 +404,7 @@ YIELD item1, item2, count1, count2, similarity
 | similarityCutoff  | Integer           | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | degreeCutoff      | Integer           | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
 | skipValue         | Float             | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
-| concurrency       | Integer           | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency   | Integer           | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| concurrency       | Integer           | 4                      | yes      | The number of concurrent threads used for running the algorithm.
 | graph             | String            | dense                  | yes      | The graph name ('dense' or 'cypher').
 | sourceIds         | Integer[]         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 | targetIds         | Integer[]         | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
