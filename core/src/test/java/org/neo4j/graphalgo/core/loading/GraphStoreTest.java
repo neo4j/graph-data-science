@@ -38,8 +38,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.AdjacencyList;
-import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 
 import java.time.ZonedDateTime;
@@ -168,8 +168,8 @@ class GraphStoreTest extends BaseTest {
         HugeGraph.Relationships relationships = HugeGraph.Relationships.of(
             0L,
             Orientation.NATURAL,
-            new AdjacencyList(new byte[0][0]),
-            AdjacencyOffsets.of(new long[0]),
+            new TransientAdjacencyList(new byte[0][0]),
+            TransientAdjacencyOffsets.of(new long[0]),
             null,
             null,
             42.0

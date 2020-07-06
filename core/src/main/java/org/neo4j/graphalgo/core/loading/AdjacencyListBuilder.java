@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.core.huge.AdjacencyList;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
@@ -28,9 +28,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_MASK;
-import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_SHIFT;
-import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_SIZE;
+import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_MASK;
+import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_SHIFT;
+import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArrayElements;
@@ -65,8 +65,8 @@ final class AdjacencyListBuilder {
         return new Allocator(this);
     }
 
-    public AdjacencyList build() {
-        return new AdjacencyList(pages);
+    public TransientAdjacencyList build() {
+        return new TransientAdjacencyList(pages);
     }
 
     private long insertDefaultSizedPage(Allocator into) {

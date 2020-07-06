@@ -31,8 +31,8 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
-import org.neo4j.graphalgo.core.huge.AdjacencyList;
-import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -81,21 +81,21 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
             // adjacency list
             builder.add(
                 formatWithLocale("adjacency list for '%s'", relationshipType),
-                AdjacencyList.compressedMemoryEstimation(relationshipType, undirected)
+                TransientAdjacencyList.compressedMemoryEstimation(relationshipType, undirected)
             );
             builder.add(
                 formatWithLocale("adjacency offsets for '%s'", relationshipType),
-                AdjacencyOffsets.memoryEstimation()
+                TransientAdjacencyOffsets.memoryEstimation()
             );
             // all properties per projection
             relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
                 builder.add(
                     formatWithLocale("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
-                    AdjacencyList.uncompressedMemoryEstimation(relationshipType, undirected)
+                    TransientAdjacencyList.uncompressedMemoryEstimation(relationshipType, undirected)
                 );
                 builder.add(
                     formatWithLocale("property offset '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
-                    AdjacencyOffsets.memoryEstimation()
+                    TransientAdjacencyOffsets.memoryEstimation()
                 );
             });
         });

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyList.DecompressingCursor;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
@@ -41,6 +42,8 @@ import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.Cursor;
 
 /**
  * Huge Graph contains two array like data structures.
@@ -89,15 +92,15 @@ public class HugeGraph implements Graph {
     private final Orientation orientation;
 
     private final long relationshipCount;
-    private AdjacencyList adjacencyList;
-    private AdjacencyOffsets adjacencyOffsets;
+    private TransientAdjacencyList adjacencyList;
+    private TransientAdjacencyOffsets adjacencyOffsets;
 
     private final double defaultPropertyValue;
-    private @Nullable AdjacencyList properties;
-    private @Nullable AdjacencyOffsets propertyOffsets;
+    private @Nullable TransientAdjacencyList properties;
+    private @Nullable TransientAdjacencyOffsets propertyOffsets;
 
-    private AdjacencyList.DecompressingCursor emptyCursor;
-    private AdjacencyList.DecompressingCursor cursorCache;
+    private DecompressingCursor emptyCursor;
+    private DecompressingCursor cursorCache;
 
     private boolean canRelease = true;
 
@@ -129,12 +132,12 @@ public class HugeGraph implements Graph {
         IdMap idMapping,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
+        TransientAdjacencyList adjacencyList,
+        TransientAdjacencyOffsets adjacencyOffsets,
         boolean hasRelationshipProperty,
         double defaultPropertyValue,
-        @Nullable AdjacencyList properties,
-        @Nullable AdjacencyOffsets propertyOffsets,
+        @Nullable TransientAdjacencyList properties,
+        @Nullable TransientAdjacencyOffsets propertyOffsets,
         Orientation orientation,
         AllocationTracker tracker
     ) {
@@ -217,8 +220,8 @@ public class HugeGraph implements Graph {
         }
         long propertyOffset = propertyOffsets.get(fromId);
 
-        AdjacencyList.DecompressingCursor relDecompressingCursor = adjacencyList.decompressingCursor(relOffset);
-        AdjacencyList.Cursor propertyCursor = properties.cursor(propertyOffset);
+        DecompressingCursor relDecompressingCursor = adjacencyList.decompressingCursor(relOffset);
+        Cursor propertyCursor = properties.cursor(propertyOffset);
 
         while (relDecompressingCursor.hasNextVLong() && propertyCursor.hasNextLong() && relDecompressingCursor.nextVLong() != toId) {
             propertyCursor.nextLong();
@@ -271,7 +274,7 @@ public class HugeGraph implements Graph {
         if (offset == 0L) {
             return 0;
         }
-        return adjacencyList.getDegree(offset);
+        return adjacencyList.degree(offset);
     }
 
     @Override
@@ -332,7 +335,7 @@ public class HugeGraph implements Graph {
     }
 
     private void runForEach(long sourceId, RelationshipConsumer consumer) {
-        AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(sourceId);
+        var adjacencyCursor = adjacencyCursorForIteration(sourceId);
         consumeAdjacentNodes(sourceId, adjacencyCursor, consumer);
     }
 
@@ -340,13 +343,13 @@ public class HugeGraph implements Graph {
         if (!hasRelationshipProperty()) {
             runForEach(sourceId, (s, t) -> consumer.accept(s, t, fallbackValue));
         } else {
-            AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(sourceId);
-            AdjacencyList.Cursor propertyCursor = propertyCursorForIteration(sourceId);
+            var adjacencyCursor = adjacencyCursorForIteration(sourceId);
+            var propertyCursor = propertyCursorForIteration(sourceId);
             consumeAdjacentNodesWithProperty(sourceId, adjacencyCursor, propertyCursor, consumer);
         }
     }
 
-    private AdjacencyList.DecompressingCursor adjacencyCursorForIteration(long sourceNodeId) {
+    private DecompressingCursor adjacencyCursorForIteration(long sourceNodeId) {
         if (adjacencyOffsets == null) {
             throw new NullPointerException();
         }
@@ -358,7 +361,7 @@ public class HugeGraph implements Graph {
 
     }
 
-    private AdjacencyList.Cursor propertyCursorForIteration(long sourceNodeId) {
+    private Cursor propertyCursorForIteration(long sourceNodeId) {
         if (!hasRelationshipProperty()) {
             throw new UnsupportedOperationException(
                 "Can not create property cursor on a graph without relationship property");
@@ -366,7 +369,7 @@ public class HugeGraph implements Graph {
 
         long offset = propertyOffsets.get(sourceNodeId);
         if (offset == 0L) {
-            return AdjacencyList.Cursor.EMPTY;
+            return Cursor.EMPTY;
         }
         return properties.cursor(offset);
     }
@@ -427,13 +430,13 @@ public class HugeGraph implements Graph {
         return hasRelationshipProperty;
     }
 
-    private AdjacencyList.DecompressingCursor newAdjacencyCursor(AdjacencyList adjacency) {
+    private DecompressingCursor newAdjacencyCursor(TransientAdjacencyList adjacency) {
         return adjacency != null ? adjacency.rawDecompressingCursor() : null;
     }
 
     private void consumeAdjacentNodes(
         long sourceId,
-        AdjacencyList.DecompressingCursor adjacencyCursor,
+        DecompressingCursor adjacencyCursor,
         RelationshipConsumer consumer
     ) {
         while (adjacencyCursor.hasNextVLong()) {
@@ -445,8 +448,8 @@ public class HugeGraph implements Graph {
 
     private void consumeAdjacentNodesWithProperty(
         long sourceId,
-        AdjacencyList.DecompressingCursor adjacencyCursor,
-        AdjacencyList.Cursor propertyCursor,
+        DecompressingCursor adjacencyCursor,
+        Cursor propertyCursor,
         RelationshipWithPropertyConsumer consumer
     ) {
 
@@ -510,10 +513,10 @@ public class HugeGraph implements Graph {
         static Relationships of(
             long relationshipCount,
             Orientation orientation,
-            AdjacencyList adjacencyList,
-            AdjacencyOffsets adjacencyOffsets,
-            @Nullable AdjacencyList properties,
-            @Nullable AdjacencyOffsets propertyOffsets,
+            TransientAdjacencyList adjacencyList,
+            TransientAdjacencyOffsets adjacencyOffsets,
+            @Nullable TransientAdjacencyList properties,
+            @Nullable TransientAdjacencyOffsets propertyOffsets,
             double defaultPropertyValue
         ) {
             TopologyCSR topologyCSR = ImmutableTopologyCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
@@ -533,9 +536,9 @@ public class HugeGraph implements Graph {
 
     @ValueClass
     public interface TopologyCSR {
-        AdjacencyList list();
+        TransientAdjacencyList list();
 
-        AdjacencyOffsets offsets();
+        TransientAdjacencyOffsets offsets();
 
         long elementCount();
 

@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.apache.lucene.util.LongsRef;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
@@ -173,12 +173,12 @@ public abstract class AdjacencyBuilder {
         }
 
         void finishPreparation() {
-            globalBuilder.setGlobalAdjacencyOffsets(AdjacencyOffsets.of(globalAdjacencyOffsets, pageSize));
-            AdjacencyOffsets[] globalWeights = new AdjacencyOffsets[globalWeightOffsets.length];
+            globalBuilder.setGlobalAdjacencyOffsets(TransientAdjacencyOffsets.of(globalAdjacencyOffsets, pageSize));
+            TransientAdjacencyOffsets[] globalWeights = new TransientAdjacencyOffsets[globalWeightOffsets.length];
             Arrays.setAll(globalWeights, i -> {
                 long[][] globalWeightOffset = globalWeightOffsets[i];
                 if (globalWeightOffset != null) {
-                    return AdjacencyOffsets.of(globalWeightOffset, pageSize);
+                    return TransientAdjacencyOffsets.of(globalWeightOffset, pageSize);
                 }
                 return null;
             });
