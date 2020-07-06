@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-// TODO: document
 public interface AdjacencyOffsets {
 
     long get(long index);

@@ -70,7 +70,7 @@ public final class CSRGraphStore implements GraphStore {
 
     private final Map<NodeLabel, NodePropertyStore> nodeProperties;
 
-    private final Map<RelationshipType, Relationships.TopologyCSR> relationships;
+    private final Map<RelationshipType, Relationships.Topology> relationships;
 
     private final Map<RelationshipType, RelationshipPropertyStore> relationshipProperties;
 
@@ -83,8 +83,8 @@ public final class CSRGraphStore implements GraphStore {
     public static GraphStore of(
         IdMap nodes,
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
-        Map<RelationshipType, Relationships.TopologyCSR> relationships,
-        Map<RelationshipType, Map<String, Relationships.PropertyCSR>> relationshipProperties,
+        Map<RelationshipType, Relationships.Topology> relationships,
+        Map<RelationshipType, Map<String, Relationships.Properties>> relationshipProperties,
         int concurrency,
         AllocationTracker tracker
     ) {
@@ -127,7 +127,7 @@ public final class CSRGraphStore implements GraphStore {
     ) {
         Relationships relationships = graph.relationships();
 
-        Map<RelationshipType, Relationships.TopologyCSR> topology = singletonMap(RelationshipType.of(relationshipType), relationships.topology());
+        Map<RelationshipType, Relationships.Topology> topology = singletonMap(RelationshipType.of(relationshipType), relationships.topology());
 
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties = new HashMap<>();
         nodeProperties.put(
@@ -138,7 +138,7 @@ public final class CSRGraphStore implements GraphStore {
             ))
         );
 
-        Map<RelationshipType, Map<String, Relationships.PropertyCSR>> relationshipProperties = Collections.emptyMap();
+        Map<RelationshipType, Map<String, Relationships.Properties>> relationshipProperties = Collections.emptyMap();
         if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
             relationshipProperties = singletonMap(
                 RelationshipType.of(relationshipType),
@@ -152,7 +152,7 @@ public final class CSRGraphStore implements GraphStore {
     private CSRGraphStore(
         IdMap nodes,
         Map<NodeLabel, NodePropertyStore> nodeProperties,
-        Map<RelationshipType, Relationships.TopologyCSR> relationships,
+        Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
         int concurrency,
         AllocationTracker tracker
@@ -288,7 +288,7 @@ public final class CSRGraphStore implements GraphStore {
     @Override
     public long relationshipCount() {
         return relationships.values().stream()
-            .mapToLong(Relationships.TopologyCSR::elementCount)
+            .mapToLong(Relationships.Topology::elementCount)
             .sum();
     }
 
@@ -322,7 +322,7 @@ public final class CSRGraphStore implements GraphStore {
                 .values()
                 .stream()
                 .map(RelationshipProperty::values)
-                .mapToLong(Relationships.PropertyCSR::elementCount))
+                .mapToLong(Relationships.Properties::elementCount))
             .sum();
     }
 
@@ -467,7 +467,7 @@ public final class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType,
         String propertyKey,
         NumberType propertyType,
-        Relationships.PropertyCSR propertyCSR,
+        Relationships.Properties properties,
         CSRGraphStore graphStore
     ) {
         graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
@@ -477,7 +477,7 @@ public final class CSRGraphStore implements GraphStore {
             }
             return builder.putIfAbsent(
                 propertyKey,
-                ImmutableRelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyCSR)
+                ImmutableRelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, properties)
             ).build();
         });
     }
@@ -743,9 +743,9 @@ public final class CSRGraphStore implements GraphStore {
 
         PropertyState state();
 
-        Relationships.PropertyCSR values();
+        Relationships.Properties values();
 
-        static RelationshipProperty of(String key, NumberType type, PropertyState state, Relationships.PropertyCSR values) {
+        static RelationshipProperty of(String key, NumberType type, PropertyState state, Relationships.Properties values) {
             return ImmutableRelationshipProperty.of(key, type, state, values);
         }
     }

@@ -88,8 +88,8 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
         GraphDimensions dimensions
     ) {
         int relTypeCount = dimensions.relationshipTypeTokens().size();
-        Map<RelationshipType, Relationships.TopologyCSR> relationships = new HashMap<>(relTypeCount);
-        Map<RelationshipType, Map<String, Relationships.PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Map<String, Relationships.Properties>> relationshipProperties = new HashMap<>(relTypeCount);
 
         relationshipImportResult.builders().forEach((relationshipType, relationshipsBuilder) -> {
             TransientAdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
@@ -100,7 +100,7 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
 
             relationships.put(
                 relationshipType,
-                ImmutableTopologyCSR.of(
+                ImmutableTopology.of(
                     adjacencyList,
                     adjacencyOffsets,
                     relationshipCount,
@@ -110,11 +110,11 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
 
             PropertyMappings propertyMappings = projection.properties();
             if (!propertyMappings.isEmpty()) {
-                Map<String, Relationships.PropertyCSR> propertyMap = propertyMappings
+                Map<String, Relationships.Properties> propertyMap = propertyMappings
                     .enumerate()
                     .collect(Collectors.toMap(
                         propertyIndexAndMapping -> propertyIndexAndMapping.getTwo().propertyKey(),
-                        propertyIndexAndMapping -> ImmutablePropertyCSR.of(
+                        propertyIndexAndMapping -> ImmutableProperties.of(
                             relationshipsBuilder.properties(propertyIndexAndMapping.getOne()),
                             relationshipsBuilder.globalPropertyOffsets(propertyIndexAndMapping.getOne()),
                             relationshipCount,

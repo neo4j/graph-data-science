@@ -109,21 +109,21 @@ public class HugeGraph implements Graph {
     public static HugeGraph create(
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        Relationships.TopologyCSR topologyCSR,
-        Optional<Relationships.PropertyCSR> maybePropertyCSR,
+        Relationships.Topology topology,
+        Optional<Relationships.Properties> maybePropertyCSR,
         AllocationTracker tracker
     ) {
         return new HugeGraph(
             nodes,
             nodeProperties,
-            topologyCSR.elementCount(),
-            TransientAdjacencyList.castOrThrow(topologyCSR.list()),
-            TransientAdjacencyOffsets.castOrThrow(topologyCSR.offsets()),
+            topology.elementCount(),
+            TransientAdjacencyList.castOrThrow(topology.list()),
+            TransientAdjacencyOffsets.castOrThrow(topology.offsets()),
             maybePropertyCSR.isPresent(),
-            maybePropertyCSR.map(Relationships.PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
-            maybePropertyCSR.map(Relationships.PropertyCSR::list).map(TransientAdjacencyList::castOrThrow).orElse(null),
-            maybePropertyCSR.map(Relationships.PropertyCSR::offsets).map(TransientAdjacencyOffsets::castOrThrow).orElse(null),
-            topologyCSR.orientation(),
+            maybePropertyCSR.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
+            maybePropertyCSR.map(Relationships.Properties::list).map(TransientAdjacencyList::castOrThrow).orElse(null),
+            maybePropertyCSR.map(Relationships.Properties::offsets).map(TransientAdjacencyOffsets::castOrThrow).orElse(null),
+            topology.orientation(),
             tracker
         );
     }

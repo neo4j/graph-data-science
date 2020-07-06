@@ -28,9 +28,9 @@ import java.util.Optional;
 @ValueClass
 public interface Relationships {
 
-    TopologyCSR topology();
+    Topology topology();
 
-    Optional<PropertyCSR> properties();
+    Optional<Properties> properties();
 
     static Relationships of(
         long relationshipCount,
@@ -41,10 +41,10 @@ public interface Relationships {
         @Nullable AdjacencyOffsets propertyOffsets,
         double defaultPropertyValue
     ) {
-        TopologyCSR topologyCSR = ImmutableTopologyCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
+        Topology topology = ImmutableTopology.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
 
-        Optional<PropertyCSR> maybePropertyCSR = properties != null && propertyOffsets != null
-            ? Optional.of(ImmutablePropertyCSR.of(
+        Optional<Properties> maybePropertyCSR = properties != null && propertyOffsets != null
+            ? Optional.of(ImmutableProperties.of(
                 properties,
                 propertyOffsets,
                 relationshipCount,
@@ -52,11 +52,11 @@ public interface Relationships {
                 defaultPropertyValue
             )) : Optional.empty();
 
-        return ImmutableRelationships.of(topologyCSR, maybePropertyCSR);
+        return ImmutableRelationships.of(topology, maybePropertyCSR);
     }
 
     @ValueClass
-    interface TopologyCSR {
+    interface Topology {
         AdjacencyList list();
 
         AdjacencyOffsets offsets();
@@ -68,7 +68,7 @@ public interface Relationships {
 
     @ValueClass
     @SuppressWarnings("immutables:subtype")
-    interface PropertyCSR extends TopologyCSR {
+    interface Properties extends Topology {
         double defaultPropertyValue();
     }
 }

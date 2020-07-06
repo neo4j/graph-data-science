@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-// TODO: documentation
 public interface AdjacencyList {
 
     int degree(long nodeId);

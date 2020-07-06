@@ -549,7 +549,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             Relationships outRelationships = outImporter().build();
             Relationships inRelationships = inImporter().build();
 
-            Map<RelationshipType, Relationships.TopologyCSR> topology = new HashMap<>();
+            Map<RelationshipType, Relationships.Topology> topology = new HashMap<>();
             topology.put(ANN_OUT_GRAPH, outRelationships.topology());
             topology.put(ANN_IN_GRAPH, inRelationships.topology());
 
