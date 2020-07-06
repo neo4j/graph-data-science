@@ -47,7 +47,7 @@ public interface AdjacencyCursor {
     int remaining();
 
     /**
-     * Read and decode target ids until it is strictly larger than (`>`) the provided {@code target}.
+     * Read and decode target ids until it is strictly larger than ({@literal >}) the provided {@code target}.
      * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
      * id that is large enough.
      * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
@@ -56,7 +56,7 @@ public interface AdjacencyCursor {
     long skipUntil(long target);
 
     /**
-     * Read and decode target ids until it is larger than or equal (`>=`) the provided {@code target}.
+     * Read and decode target ids until it is larger than or equal ({@literal >=}) the provided {@code target}.
      * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
      * id that is large enough.
      * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
