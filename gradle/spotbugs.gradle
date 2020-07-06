@@ -1,6 +1,7 @@
-subprojects { proj ->
+allprojects { proj ->
 
     plugins.withType(JavaLibraryPlugin) {
+
         proj.apply plugin: 'com.github.spotbugs'
 
         proj.spotbugs {
@@ -15,37 +16,22 @@ subprojects { proj ->
             excludeFilter = file("$publicDir/etc/spotbugs/spotbugs-exclude.xml")
         }
 
-        proj.tasks.spotbugsMain {
-            def reportsDir = "${rootProject.buildDir}/reports/spotbugs/"
-            def fileName = "${proj.name}-main"
-            reports {
+        proj.tasks.withType(SpotBugsTask) {
+            tasks.check.dependsOn it
+
+            def taskName = it.name;
+            def fileName = "${proj.name}-${taskName}"
+            it.reports {
                 html {
                     enabled = true
                     stylesheet = resources.text.fromFile("$publicDir/etc/spotbugs/xsl/fancy-hist.xsl")
-                    destination = file("${reportsDir}/html/${fileName}.html")
+                    destination = file("${spotbugsReportsDir}/html/${fileName}.html")
                 }
                 xml {
                     enabled = true
-                    destination = file("${reportsDir}/xml/${fileName}.xml")
+                    destination = file("${spotbugsReportsDir}/xml/${fileName}.xml")
                 }
             }
         }
-
-        proj.tasks.spotbugsTest {
-            def reportsDir = "${rootProject.buildDir}/reports/spotbugs/"
-            def fileName = "${proj.name}-test"
-            reports {
-                html {
-                    enabled = true
-                    stylesheet = resources.text.fromFile("$publicDir/etc/spotbugs/xsl/fancy-hist.xsl")
-                    destination = file("${reportsDir}/html/${fileName}.html")
-                }
-                xml {
-                    enabled = true
-                    destination = file("${reportsDir}/xml/${fileName}.xml")
-                }
-            }
-        }
-
     }
 }
