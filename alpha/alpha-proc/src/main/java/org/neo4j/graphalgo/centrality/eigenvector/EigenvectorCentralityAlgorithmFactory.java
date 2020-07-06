@@ -50,7 +50,6 @@ class EigenvectorCentralityAlgorithmFactory extends AlphaAlgorithmFactory<PageRa
                 graph,
                 configuration.sourceNodeIds(),
                 configuration,
-                configuration.concurrency(),
                 Pools.DEFAULT,
                 new BatchingProgressLogger(log, 0, "PageRank", configuration.concurrency()),
                 tracker

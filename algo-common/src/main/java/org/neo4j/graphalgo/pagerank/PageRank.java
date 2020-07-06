@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphalgo.result.CentralityResult;
-import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,11 +40,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -107,8 +101,8 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     public static final Double DEFAULT_TOLERANCE = 0.0000001D;
 
     private final ExecutorService executor;
-    private final int concurrency;
     private final int batchSize;
+    private final int concurrency;
     private final AllocationTracker tracker;
     private final IdMapping idMapping;
     private final double dampingFactor;
@@ -134,7 +128,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         PageRankVariant pageRankVariant,
         LongStream sourceNodeIds,
         PageRankBaseConfig algoConfig,
-        int concurrency,
         ExecutorService executor,
         int batchSize,
         ProgressLogger progressLogger,
@@ -142,8 +135,8 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     ) {
         assert algoConfig.maxIterations() >= 1;
         this.executor = executor;
-        this.concurrency = concurrency;
         this.batchSize = batchSize;
+        this.concurrency = algoConfig.concurrency();
         this.tracker = tracker;
         this.idMapping = graph;
         this.graph = graph;
@@ -199,15 +192,16 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         List<Partition> partitions = PartitionUtils.degreePartition(graph, adjustBatchSize(batchSize));
 
         ExecutorService executor = ParallelUtil.canRunInParallel(this.executor)
-                ? this.executor : null;
+            ? this.executor
+            : null;
 
         computeSteps = createComputeSteps(
-                concurrency,
-                idMapping.nodeCount(),
-                dampingFactor,
-                sourceNodeIds.map(graph::toMappedNodeId).filter(mappedId -> mappedId != -1L).toArray(),
-                partitions,
-                executor);
+            idMapping.nodeCount(),
+            dampingFactor,
+            sourceNodeIds.map(graph::toMappedNodeId).filter(mappedId -> mappedId != -1L).toArray(),
+            partitions,
+            executor
+        );
     }
 
     private int adjustBatchSize(int batchSize) {
@@ -224,23 +218,24 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     }
 
     private ComputeSteps createComputeSteps(
-            int concurrency,
-            long nodeCount,
-            double dampingFactor,
-            long[] sourceNodeIds,
-            List<Partition> partitions,
-            ExecutorService pool) {
-        concurrency = findIdealConcurrency(nodeCount, partitions, concurrency, progressLogger.getLog());
+        long nodeCount,
+        double dampingFactor,
+        long[] sourceNodeIds,
+        List<Partition> partitions,
+        ExecutorService pool
+    ) {
         final int expectedParallelism = Math.min(
-                concurrency,
-                partitions.size());
+            concurrency,
+            partitions.size()
+        );
 
         List<ComputeStep> computeSteps = new ArrayList<>(expectedParallelism);
         LongArrayList starts = new LongArrayList(expectedParallelism);
         IntArrayList lengths = new IntArrayList(expectedParallelism);
         int partitionsPerThread = ParallelUtil.threadCount(
-                concurrency + 1,
-                partitions.size());
+            concurrency + 1,
+            partitions.size()
+        );
         Iterator<Partition> parts = partitions.iterator();
 
         DegreeComputer degreeComputer = pageRankVariant.degreeComputer(graph);
@@ -263,16 +258,16 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
             lengths.add(partitionSize);
 
             computeSteps.add(pageRankVariant.createComputeStep(
-                    dampingFactor,
-                    toleranceValue,
-                    sourceNodeIds,
-                    graph,
-                    tracker,
-                    partitionSize,
-                    start,
-                    degreeCache,
-                    nodeCount,
-                    progressLogger
+                dampingFactor,
+                toleranceValue,
+                sourceNodeIds,
+                graph,
+                tracker,
+                partitionSize,
+                start,
+                degreeCache,
+                nodeCount,
+                progressLogger
             ));
         }
 
@@ -282,131 +277,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
             computeStep.setStarts(startArray, lengthArray);
         }
         return new ComputeSteps(tracker, computeSteps, concurrency, pool);
-    }
-
-    private static int findIdealConcurrency(
-            long nodeCount,
-            List<Partition> partitions,
-            int concurrency,
-            Log log) {
-        if (concurrency <= 0) {
-            concurrency = partitions.size();
-        }
-
-        if (log != null && log.isDebugEnabled()) {
-            log.debug(
-                    "PageRank: nodes=%d, concurrency=%d, available memory=%s, estimated memory usage: %s",
-                    nodeCount,
-                    concurrency,
-                    humanReadable(availableMemory()),
-                    humanReadable(memoryUsageFor(concurrency, partitions))
-            );
-        }
-
-        int maxConcurrency = maxConcurrencyByMemory(
-                nodeCount,
-                concurrency,
-                availableMemory(),
-                partitions);
-        if (concurrency > maxConcurrency) {
-            if (log != null) {
-                long required = memoryUsageFor(concurrency, partitions);
-                long newRequired = memoryUsageFor(maxConcurrency, partitions);
-                long available = availableMemory();
-                log.warn(
-                        "Requested concurrency of %d would require %s Heap but only %s are available, Page Rank will be throttled to a concurrency of %d to use only %s Heap.",
-                        concurrency,
-                        humanReadable(required),
-                        humanReadable(available),
-                        maxConcurrency,
-                        humanReadable(newRequired)
-                );
-            }
-            concurrency = maxConcurrency;
-        }
-        return concurrency;
-    }
-
-    private static int maxConcurrencyByMemory(
-            long nodeCount,
-            int concurrency,
-            long availableBytes,
-            List<Partition> partitions) {
-        int newConcurrency = concurrency;
-
-        long memoryUsage = memoryUsageFor(newConcurrency, partitions);
-        while (memoryUsage > availableBytes) {
-            long perThread = estimateMemoryUsagePerThread(nodeCount, concurrency);
-            long overflow = memoryUsage - availableBytes;
-            newConcurrency -= (int) Math.ceil((double) overflow / (double) perThread);
-
-            memoryUsage = memoryUsageFor(newConcurrency, partitions);
-        }
-
-        if (newConcurrency < 1) {
-            throw new IllegalStateException(
-                formatWithLocale(
-                    "Requested concurrency of %d would require %s Heap but only %s are available. Page Rank needs at least %d Heap in order to run.",
-                    concurrency,
-                    humanReadable(memoryUsageFor(concurrency, partitions)),
-                    humanReadable(memoryUsageFor(1, partitions))
-                )
-            );
-        }
-
-        return newConcurrency;
-    }
-
-    private static long availableMemory() {
-        // TODO: run gc first to free up memory?
-        Runtime rt = Runtime.getRuntime();
-
-        long max = rt.maxMemory(); // max allocated
-        long total = rt.totalMemory(); // currently allocated
-        long free = rt.freeMemory(); // unused portion of currently allocated
-
-        return max - total + free;
-    }
-
-    private static long estimateMemoryUsagePerThread(long nodeCount, int concurrency) {
-        int nodesPerThread = (int) Math.ceil((double) nodeCount / (double) concurrency);
-        long partitions = sizeOfIntArray(nodesPerThread) * (long) concurrency;
-        return sizeOfInstance(BaseComputeStep.class) + partitions;
-    }
-
-    private static long memoryUsageFor(
-            int concurrency,
-            List<Partition> partitions) {
-        long perThreadUsage = 0L;
-        long sharedUsage = 0L;
-        int stepSize = 0;
-        int partitionsPerThread = ParallelUtil.threadCount(concurrency + 1, partitions.size());
-        Iterator<Partition> parts = partitions.iterator();
-
-        while (parts.hasNext()) {
-            Partition partition = parts.next();
-            int partitionCount = (int) partition.nodeCount;
-            int i = 1;
-            while (parts.hasNext()
-                   && i < partitionsPerThread
-                   && partition.fits(partitionCount)) {
-                partition = parts.next();
-                partitionCount += partition.nodeCount;
-                ++i;
-            }
-            stepSize++;
-            sharedUsage += (sizeOfDoubleArray(partitionCount) << 1);
-            perThreadUsage += sizeOfIntArray(partitionCount);
-        }
-
-        perThreadUsage *= stepSize;
-        perThreadUsage += sizeOfInstance(BaseComputeStep.class);
-        perThreadUsage += sizeOfObjectArray(stepSize);
-
-        sharedUsage += sizeOfInstance(ComputeSteps.class);
-        sharedUsage += sizeOfLongArray(stepSize) << 1;
-
-        return sharedUsage + perThreadUsage;
     }
 
     @Override
@@ -426,10 +296,11 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         private final int concurrency;
 
         private ComputeSteps(
-                AllocationTracker tracker,
-                List<ComputeStep> steps,
-                int concurrency,
-                ExecutorService pool) {
+            AllocationTracker tracker,
+            List<ComputeStep> steps,
+            int concurrency,
+            ExecutorService pool
+        ) {
             this.concurrency = concurrency;
             assert !steps.isEmpty();
             this.steps = steps;
@@ -489,9 +360,10 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
             for (ComputeStep step : steps) {
                 double[] deltas = step.deltas();
                 l2Norm += ParallelUtil.parallelStream(
-                        Arrays.stream(deltas),
-                        concurrency,
-                        (stream) -> stream.map(score -> score * score).sum());
+                    Arrays.stream(deltas),
+                    concurrency,
+                    (stream) -> stream.map(score -> score * score).sum()
+                );
             }
             l2Norm = Math.sqrt(l2Norm);
             l2Norm = l2Norm < 0 ? 1 : l2Norm;

@@ -147,7 +147,6 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
                     graph,
                     configuration.sourceNodeIds(),
                     configuration,
-                    configuration.concurrency(),
                     Pools.DEFAULT,
                     new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank", configuration.concurrency()),
                     tracker

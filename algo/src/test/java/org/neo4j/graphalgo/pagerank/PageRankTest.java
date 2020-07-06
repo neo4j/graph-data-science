@@ -128,8 +128,7 @@ final class PageRankTest {
             .create(
                 naturalGraph,
                 LongStream.range(0L, naturalGraph.nodeCount()),
-                DEFAULT_CONFIG,
-                1,
+                defaultConfigBuilder().concurrency(1).build(),
                 null,
                 1,
                 ProgressLogger.NULL_LOGGER,
@@ -150,9 +149,11 @@ final class PageRankTest {
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankTest#expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
+        var config = defaultConfigBuilder().build();
+        var nodeCount = 100_000;
         assertMemoryEstimation(
-            () -> new PageRankFactory<>(PageRankAlgorithmType.NON_WEIGHTED).memoryEstimation(defaultConfigBuilder().build()),
-            100_000L,
+            () -> new PageRankFactory<>(PageRankAlgorithmType.NON_WEIGHTED).memoryEstimation(config),
+            nodeCount,
             concurrency,
             expectedMinBytes,
             expectedMaxBytes

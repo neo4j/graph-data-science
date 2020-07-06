@@ -37,7 +37,7 @@ public interface PageRankAlgorithm extends Assessable {
     /**
      * Forces sequential use. If you want parallelism, prefer
      *
-     * {@link #create(Graph, LongStream, PageRankBaseConfig, int, ExecutorService, int, ProgressLogger, AllocationTracker)} }
+     * {@link #create(Graph, LongStream, PageRankBaseConfig, ExecutorService, int, ProgressLogger, AllocationTracker)} }
      */
     default PageRank create(
         Graph graph,
@@ -45,14 +45,13 @@ public interface PageRankAlgorithm extends Assessable {
         LongStream sourceNodeIds,
         ProgressLogger progressLogger
     ) {
-        return create(graph, sourceNodeIds, algoConfig, -1, null, ParallelUtil.DEFAULT_BATCH_SIZE, progressLogger, AllocationTracker.EMPTY);
+        return create(graph, sourceNodeIds, algoConfig, null, ParallelUtil.DEFAULT_BATCH_SIZE, progressLogger, AllocationTracker.EMPTY);
     }
 
     default PageRank create(
         Graph graph,
         LongStream sourceNodeIds,
         PageRankBaseConfig algoConfig,
-        int concurrency,
         ExecutorService executor,
         ProgressLogger progressLogger,
         AllocationTracker tracker
@@ -61,7 +60,6 @@ public interface PageRankAlgorithm extends Assessable {
             graph,
             sourceNodeIds,
             algoConfig,
-            concurrency,
             executor,
             ParallelUtil.DEFAULT_BATCH_SIZE,
             progressLogger,
@@ -73,7 +71,6 @@ public interface PageRankAlgorithm extends Assessable {
         Graph graph,
         LongStream sourceNodeIds,
         PageRankBaseConfig algoConfig,
-        int concurrency,
         ExecutorService executor,
         int batchSize,
         ProgressLogger progressLogger,
@@ -84,7 +81,6 @@ public interface PageRankAlgorithm extends Assessable {
             variant(algoConfig),
             sourceNodeIds,
             algoConfig,
-            concurrency,
             executor,
             batchSize,
             progressLogger,
