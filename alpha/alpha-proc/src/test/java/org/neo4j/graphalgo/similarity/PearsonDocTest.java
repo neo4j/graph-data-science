@@ -139,8 +139,6 @@ class PearsonDocTest extends BaseProcTest {
                        " WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.pearson.stream({" +
-                       "    nodeProjection: '*', " +
-                       "    relationshipProjection: '*', " +
                        "    data: data," +
                        "    topK: 0" +
                        "})" +
@@ -174,8 +172,6 @@ class PearsonDocTest extends BaseProcTest {
                        " WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.pearson.stream({" +
-                       "  nodeProjection: '*', " +
-                       "  relationshipProjection: '*', " +
                        "  data: data," +
                        "  similarityCutoff: 0.1," +
                        "  topK: 0" +
@@ -205,8 +201,6 @@ class PearsonDocTest extends BaseProcTest {
                        " WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.pearson.stream({" +
-                       "  nodeProjection: '*', " +
-                       "  relationshipProjection: '*', " +
                        "  data: data, " +
                        "  topK: 1, " +
                        "  similarityCutoff: 0.0" +
@@ -235,8 +229,6 @@ class PearsonDocTest extends BaseProcTest {
                        " WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.pearson.write({" +
-                       "  nodeProjection: '*', " +
-                       "  relationshipProjection: '*', " +
                        "  data: data," +
                        "  topK: 1, " +
                        "  similarityCutoff: 0.1 " +
@@ -277,8 +269,6 @@ class PearsonDocTest extends BaseProcTest {
                        " WITH personCuisines," +
                        "      [value in personCuisines WHERE value.name IN [\"Praveena\", \"Arya\"] | value.item ] AS sourceIds" +
                        " CALL gds.alpha.similarity.pearson.stream({" +
-                       "    nodeProjection: '*', " +
-                       "    relationshipProjection: '*', " +
                        "    data: personCuisines, " +
                        "    sourceIds: sourceIds, " +
                        "    topK: 1" +
@@ -315,8 +305,6 @@ class PearsonDocTest extends BaseProcTest {
                        " WITH {item:id(m), weights: m.embedding} as userData" +
                        " WITH collect(userData) as data" +
                        " CALL gds.alpha.similarity.pearson.stream({" +
-                       "  nodeProjection: '*', " +
-                       "  relationshipProjection: '*', " +
                        "  data: data," +
                        "  skipValue: null," +
                        "  topK: 0" +
@@ -349,8 +337,6 @@ class PearsonDocTest extends BaseProcTest {
         String query = " WITH \"MATCH (person:Person)-[rated:RATED]->(c)" +
                        "       RETURN id(person) AS item, id(c) AS category, rated.score AS weight\" AS query" +
                        " CALL gds.alpha.similarity.pearson.write({" +
-                       "  nodeProjection: '*', " +
-                       "  relationshipProjection: '*', " +
                        "  data: query," +
                        "  graph: 'cypher'," +
                        "  topK: 1," +

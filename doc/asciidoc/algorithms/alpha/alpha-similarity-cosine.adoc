@@ -94,8 +94,7 @@ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, me
 | similarityCutoff      | Integer         | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | degreeCutoff          | Integer         | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
 | skipValue             | Float           | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
-| concurrency           | Integer         | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency       | Integer         | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| concurrency           | Integer         | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'writeConcurrency'.
 | writeConcurrency      | Integer         | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | graph                 | String          | dense                  | yes      | The graph type ('dense' or 'cypher').
 | writeBatchSize        | Integer         | 10000                  | yes      | The batch size to use when storing results.
@@ -166,8 +165,7 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | similarityCutoff | Integer            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
 | degreeCutoff     | Integer            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
 | skipValue        | Float              | null                   | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
-| concurrency      | Integer            | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | Integer            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| concurrency      | Integer            | 4                      | yes      | The number of concurrent threads used for running the algorithm.
 | graph            | String             | dense                  | yes      | The graph type ('dense' or 'cypher').
 | sourceIds        | Integer[]          | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 | targetIds        | Integer[]          | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
@@ -364,7 +362,7 @@ CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
  WITH collect(userData) AS data
- CALL gds.alpha.similarity.cosine.stream({nodeProjection: '*', relationshipProjection: '*', data: data})
+ CALL gds.alpha.similarity.cosine.stream({data: data})
  YIELD item1, item2, count1, count2, similarity
  RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
  ORDER BY similarity DESC
@@ -402,8 +400,6 @@ We'd probably want to filter those out, which we can do by passing in the `simil
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({
-   nodeProjection: '*',
-   relationshipProjection: '*',
    data: data,
    similarityCutoff: 0.0
  })
@@ -438,8 +434,6 @@ We can do that by passing in the `topK` parameter.
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({
-   nodeProjection: '*',
-   relationshipProjection: '*',
    data: data,
    similarityCutoff: 0.0,
    topK: 1
@@ -476,8 +470,6 @@ For example, the person most similar to Zhen is Michael, but the person most sim
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.write({
-   nodeProjection: '*',
-   relationshipProjection: '*',
    data: data,
    topK: 1,
    similarityCutoff: 0.1
@@ -526,8 +518,6 @@ We then could write a query to find out what types of cuisine that other people 
  WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stats({
-   nodeProjection: '*',
-   relationshipProjection: '*',
    data: data,
    topK: 1,
    similarityCutoff: 0.1
@@ -554,8 +544,6 @@ We could use this technique to compute the similarity of a subset of items to al
  WITH personCuisines,
       [value in personCuisines WHERE value.name IN ["Praveena", "Arya"] | value.item ] AS sourceIds
  CALL gds.alpha.similarity.cosine.stream({
-  nodeProjection: '*',
-  relationshipProjection: '*',
   data: personCuisines,
   sourceIds: sourceIds,
   topK: 1
@@ -600,8 +588,6 @@ CREATE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31
  WITH {item:id(c), weights: c.embedding} AS userData
  WITH collect(userData) AS data
  CALL gds.alpha.similarity.cosine.stream({
-  nodeProjection: '*',
-  relationshipProjection: '*',
   data: data,
   skipValue: null
  })
@@ -622,8 +608,6 @@ include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
  WITH 'MATCH (person:Person)-[likes:LIKES]->(c)
        RETURN id(person) AS item, id(c) AS category, likes.score AS weight' AS query
  CALL gds.alpha.similarity.cosine.write({
-  nodeProjection: '*',
-  relationshipProjection: '*',
   data: query,
   graph: 'cypher',
   topK: 1,
