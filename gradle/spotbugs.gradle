@@ -16,12 +16,33 @@ subprojects { proj ->
         }
 
         proj.tasks.spotbugsMain {
+            def reportsDir = "${rootProject.buildDir}/reports/spotbugs/"
+            def fileName = "${proj.name}-main"
             reports {
                 html {
                     enabled = true
+                    stylesheet = resources.text.fromFile("$publicDir/etc/spotbugs/xsl/fancy-hist.xsl")
+                    destination = file("${reportsDir}/html/${fileName}.html")
                 }
                 xml {
                     enabled = true
+                    destination = file("${reportsDir}/xml/${fileName}.xml")
+                }
+            }
+        }
+
+        proj.tasks.spotbugsTest {
+            def reportsDir = "${rootProject.buildDir}/reports/spotbugs/"
+            def fileName = "${proj.name}-test"
+            reports {
+                html {
+                    enabled = true
+                    stylesheet = resources.text.fromFile("$publicDir/etc/spotbugs/xsl/fancy-hist.xsl")
+                    destination = file("${reportsDir}/html/${fileName}.html")
+                }
+                xml {
+                    enabled = true
+                    destination = file("${reportsDir}/xml/${fileName}.xml")
                 }
             }
         }
