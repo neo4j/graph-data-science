@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo.core.utils.queue;
 
 import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.apache.lucene.util.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeArrays;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 
@@ -59,7 +59,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
             // 1-based not 0-based.  heap[0] is unused.
             heapSize = initialCapacity + 1;
         }
-        this.heap = HugeIntArray.newArray(ArrayUtil.oversize(heapSize, Integer.BYTES), AllocationTracker.EMPTY);
+        this.heap = HugeIntArray.newArray(HugeArrays.oversize(heapSize, Integer.BYTES), AllocationTracker.EMPTY);
     }
 
     /**
@@ -244,7 +244,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
 
     private void ensureCapacityForInsert() {
         if (size >= heap.size()) {
-            final int oversize = ArrayUtil.oversize(size + 1, Integer.BYTES);
+            long oversize = HugeArrays.oversize(size + 1, Integer.BYTES);
             heap = heap.copyOf(oversize, AllocationTracker.EMPTY);
         }
     }

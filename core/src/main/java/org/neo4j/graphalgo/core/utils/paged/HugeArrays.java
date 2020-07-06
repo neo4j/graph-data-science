@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-final class HugeArrays {
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+
+public final class HugeArrays {
 
     static final int PAGE_SHIFT = 14;
     static final int PAGE_SIZE = 1 << PAGE_SHIFT;
@@ -45,6 +47,66 @@ final class HugeArrays {
         final long numPages = (capacity + PAGE_MASK) >>> PAGE_SHIFT;
         assert numPages <= Integer.MAX_VALUE : "pageSize=" + (PAGE_SIZE) + " is too small for capacity: " + capacity;
         return (int) numPages;
+    }
+
+    /**
+     * Huge version of Lucene oversize for arrays.
+     * @see org.apache.lucene.util.ArrayUtil#oversize(int, int)
+     */
+    public static long oversize(long minTargetSize, int bytesPerElement) {
+
+        if (minTargetSize == 0) {
+            // wait until at least one element is requested
+            return 0;
+        }
+
+        // asymptotic exponential growth by 1/8th, favors
+        // spending a bit more CPU to not tie up too much wasted
+        // RAM:
+        long extra = minTargetSize >> 3;
+
+        if (extra < 3) {
+            // for very small arrays, where constant overhead of
+            // realloc is presumably relatively high, we grow
+            // faster
+            extra = 3;
+        }
+
+        long newSize = minTargetSize + extra;
+
+        if (MemoryUsage.BYTES_OBJECT_REF == 8) {
+            // round up to 8 byte alignment to match JVM pointer size
+            switch (bytesPerElement) {
+                case 4:
+                    // round up to multiple of 2
+                    return (newSize + 1) & 0x7FFF_FFFE;
+                case 2:
+                    // round up to multiple of 4
+                    return (newSize + 3) & 0x7FFF_FFFC;
+                case 1:
+                    // round up to multiple of 8
+                    return (newSize + 7) & 0x7FFF_FFF8;
+                case 8:
+                    // no rounding
+                default:
+                    return newSize;
+            }
+        } else {
+            // round up to 4 byte alignment to match JVM pointer size
+            switch (bytesPerElement) {
+                case 2:
+                    // round up to multiple of 2
+                    return (newSize + 1) & 0x7FFFFFFE;
+                case 1:
+                    // round up to multiple of 4
+                    return (newSize + 3) & 0x7FFFFFFC;
+                case 4:
+                case 8:
+                    // no rounding
+                default:
+                    return newSize;
+            }
+        }
     }
 
     private HugeArrays() {
