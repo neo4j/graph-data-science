@@ -16,10 +16,18 @@ subprojects { proj ->
         }
 
         proj.tasks.withType(Checkstyle) {
+            def reportsDir = "${rootProject.buildDir}/reports/checkstyle/"
+            def fileName = "${proj.name}-${name}"
             reports {
-                xml.enabled true
-                html.enabled true
-                html.stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-noframes-severity-sorted.xsl")
+                xml {
+                    enabled true
+                    destination file("${reportsDir}/xml/${fileName}.xml")
+                }
+                html {
+                    enabled true
+                    destination file("${reportsDir}/html/${fileName}.html")
+                    stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-noframes-severity-sorted.xsl")
+                }
             }
         }
     }
