@@ -140,8 +140,6 @@ public class EuclideanDocTest extends BaseProcTest {
             " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData" +
             " WITH collect(userData) AS data" +
             " CALL gds.alpha.similarity.euclidean.stream({" +
-            "   nodeProjection: '*', " +
-            "   relationshipProjection: '*', " +
             "   data: data," +
             "   topK: 0" +
             " })" +
@@ -176,8 +174,6 @@ public class EuclideanDocTest extends BaseProcTest {
             " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
             " WITH collect(userData) as data" +
             " CALL gds.alpha.similarity.euclidean.stream({" +
-            "   nodeProjection: '*', " +
-            "   relationshipProjection: '*', " +
             "   data: data," +
             "   topK: 0" +
             " })" +
@@ -212,8 +208,6 @@ public class EuclideanDocTest extends BaseProcTest {
             " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} as userData" +
             " WITH collect(userData) as data" +
             " CALL gds.alpha.similarity.euclidean.stream({" +
-            "  nodeProjection: '*', " +
-            "  relationshipProjection: '*', " +
             "  data: data," +
             "  similarityCutoff: 4.0," +
             "  topK: 0" +
@@ -244,8 +238,6 @@ public class EuclideanDocTest extends BaseProcTest {
             " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData" +
             " WITH collect(userData) AS data" +
             " CALL gds.alpha.similarity.euclidean.stream({" +
-            "  nodeProjection: '*', " +
-            "  relationshipProjection: '*', " +
             "  data: data," +
             "  topK: 1" +
             " })" +
@@ -276,8 +268,6 @@ public class EuclideanDocTest extends BaseProcTest {
             " WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData" +
             " WITH collect(userData) AS data" +
             " CALL gds.alpha.similarity.euclidean.write({" +
-            "  nodeProjection: '*', " +
-            "  relationshipProjection: '*', " +
             "  data: data," +
             "  topK: 1" +
             " })" +
@@ -321,8 +311,6 @@ public class EuclideanDocTest extends BaseProcTest {
             " WITH personCuisines," +
             "      [value IN personCuisines WHERE value.name IN ['Praveena', 'Arya'] | value.item ] AS sourceIds" +
             " CALL gds.alpha.similarity.euclidean.stream({" +
-            "   nodeProjection: '*', " +
-            "   relationshipProjection: '*', " +
             "   data: personCuisines," +
             "   sourceIds: sourceIds," +
             "   topK: 1" +
@@ -362,8 +350,6 @@ public class EuclideanDocTest extends BaseProcTest {
             " WITH {item:id(c), weights: c.embedding} AS userData" +
             " WITH collect(userData) AS data" +
             " CALL gds.alpha.similarity.euclidean.stream({" +
-            "  nodeProjection: '*', " +
-            "  relationshipProjection: '*', " +
             "  data: data," +
             "  skipValue: null" +
             " })" +
@@ -407,8 +393,6 @@ public class EuclideanDocTest extends BaseProcTest {
             " WITH \"MATCH (person:Person)-[likes:LIKES]->(c)\n" +
             "      RETURN id(person) AS item, id(c) AS category, likes.score AS weight\" AS query" +
             " CALL gds.alpha.similarity.euclidean.write({" +
-            "  nodeProjection: '*', " +
-            "  relationshipProjection: '*', " +
             "  data: query," +
             "  graph: 'cypher'," +
             "  topK: 1," +
