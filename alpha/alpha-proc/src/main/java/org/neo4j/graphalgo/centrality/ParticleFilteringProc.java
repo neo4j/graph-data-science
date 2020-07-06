@@ -37,6 +37,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/*
+Gallo, Denis; Lissandrini, Matteo; and Velegrakis, Yannis.
+“Personalized Page Rank on Knowledge Graphs: Particle Filtering is all you need!.”
+Proceedings of the 23th International Conference on Extending Database Technology, EDBT 2020 (169-180).
+http://dx.doi.org/10.5441/002/edbt.2020.54
+ */
 public class ParticleFilteringProc {
 
     private static final String DESCRIPTION =

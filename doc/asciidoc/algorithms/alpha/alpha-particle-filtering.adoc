@@ -7,7 +7,13 @@
 This section describes the Particle Filtering algorithm in the Neo4j Graph Data Science library.
 --
 
-Particle filtering measures the proximity between source nodes and other nodes in the graph.
+Particle filtering methods produce an approximation of the Personalized Page Rank (PPR) score with sufficient precision while exploiting what graph databases architectures are already optimized for: navigating local connections.
+
+Personalized Page Rank (PPR) is a particularly important task to support search and exploration within graphs.
+PPR computes the proximity between query nodes and other local nodes in the graph.
+In practice, given a small set of query entities, PPR returns a ranked list of other relevant entities based on a computed random-walk proximity to the query nodes.
+This is used, among others, for entity exploration, query expansion, and product recommendation.
+
 It is an alternative to the <<algorithms-page-rank-examples-personalised, Personalized Page Rank>> algorithm that runs directly against Neo4j rather than a projected graph.
 
 include::alpha-note.adoc[]
@@ -20,7 +26,9 @@ include::alpha-note.adoc[]
 [[algorithms-particle-filtering-context]]
 == History and explanation
 
-Particle Filtering was proposed by Denis Gallo, Matteo Lissandrini, and Yannis Velegrakis in their 2020 paper https://people.cs.aau.dk/~matteo/pdf/EDBT20-particle-filtering.pdf[Personalized Page Rank on Knowledge Graphs: Particle Filtering is all you need!^].
+Particle Filtering was proposed by Lao, Ni, and William W. Cohen. in https://doi.org/10.1145/1835804.1835916["Fast query execution for retrieval models based on path-constrained random walks."^] at Proceedings of the 16th ACM SIGKDD international conference on Knowledge discovery and data mining. 2010.
+
+The implementation used in the library was proposed by Denis Gallo, Matteo Lissandrini, and Yannis Velegrakis in their 2020 paper https://people.cs.aau.dk/~matteo/pdf/EDBT20-particle-filtering.pdf[Personalized Page Rank on Knowledge Graphs: Particle Filtering is all you need!^].
 
 [[algorithms-particle-filtering-usecase]]
 == Use-cases - when to use the Particle Filtering algorithm
