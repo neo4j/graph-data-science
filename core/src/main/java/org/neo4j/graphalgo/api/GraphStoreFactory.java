@@ -28,9 +28,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.ImmutablePropertyCSR;
-import org.neo4j.graphalgo.core.huge.ImmutableTopologyCSR;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
@@ -91,8 +88,8 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
         GraphDimensions dimensions
     ) {
         int relTypeCount = dimensions.relationshipTypeTokens().size();
-        Map<RelationshipType, HugeGraph.TopologyCSR> relationships = new HashMap<>(relTypeCount);
-        Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Relationships.TopologyCSR> relationships = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Map<String, Relationships.PropertyCSR>> relationshipProperties = new HashMap<>(relTypeCount);
 
         relationshipImportResult.builders().forEach((relationshipType, relationshipsBuilder) -> {
             TransientAdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
@@ -113,7 +110,7 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
 
             PropertyMappings propertyMappings = projection.properties();
             if (!propertyMappings.isEmpty()) {
-                Map<String, HugeGraph.PropertyCSR> propertyMap = propertyMappings
+                Map<String, Relationships.PropertyCSR> propertyMap = propertyMappings
                     .enumerate()
                     .collect(Collectors.toMap(
                         propertyIndexAndMapping -> propertyIndexAndMapping.getTwo().propertyKey(),

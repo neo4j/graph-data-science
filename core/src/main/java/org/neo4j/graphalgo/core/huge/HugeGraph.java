@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -29,6 +28,7 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList.DecompressingCursor;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -109,20 +109,20 @@ public class HugeGraph implements Graph {
     public static HugeGraph create(
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
-        TopologyCSR topologyCSR,
-        Optional<PropertyCSR> maybePropertyCSR,
+        Relationships.TopologyCSR topologyCSR,
+        Optional<Relationships.PropertyCSR> maybePropertyCSR,
         AllocationTracker tracker
     ) {
         return new HugeGraph(
             nodes,
             nodeProperties,
             topologyCSR.elementCount(),
-            topologyCSR.list(),
-            topologyCSR.offsets(),
+            TransientAdjacencyList.castOrThrow(topologyCSR.list()),
+            TransientAdjacencyOffsets.castOrThrow(topologyCSR.offsets()),
             maybePropertyCSR.isPresent(),
-            maybePropertyCSR.map(PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
-            maybePropertyCSR.map(PropertyCSR::list).orElse(null),
-            maybePropertyCSR.map(PropertyCSR::offsets).orElse(null),
+            maybePropertyCSR.map(Relationships.PropertyCSR::defaultPropertyValue).orElse(Double.NaN),
+            maybePropertyCSR.map(Relationships.PropertyCSR::list).map(TransientAdjacencyList::castOrThrow).orElse(null),
+            maybePropertyCSR.map(Relationships.PropertyCSR::offsets).map(TransientAdjacencyOffsets::castOrThrow).orElse(null),
             topologyCSR.orientation(),
             tracker
         );
@@ -501,53 +501,5 @@ public class HugeGraph implements Graph {
             }
             return true;
         }
-    }
-
-    @ValueClass
-    public interface Relationships {
-
-        TopologyCSR topology();
-
-        Optional<PropertyCSR> properties();
-
-        static Relationships of(
-            long relationshipCount,
-            Orientation orientation,
-            TransientAdjacencyList adjacencyList,
-            TransientAdjacencyOffsets adjacencyOffsets,
-            @Nullable TransientAdjacencyList properties,
-            @Nullable TransientAdjacencyOffsets propertyOffsets,
-            double defaultPropertyValue
-        ) {
-            TopologyCSR topologyCSR = ImmutableTopologyCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
-
-            Optional<PropertyCSR> maybePropertyCSR = properties != null && propertyOffsets != null
-                ? Optional.of(ImmutablePropertyCSR.of(
-                    properties,
-                    propertyOffsets,
-                    relationshipCount,
-                    orientation,
-                    defaultPropertyValue
-                )) : Optional.empty();
-
-            return ImmutableRelationships.of(topologyCSR, maybePropertyCSR);
-        }
-    }
-
-    @ValueClass
-    public interface TopologyCSR {
-        TransientAdjacencyList list();
-
-        TransientAdjacencyOffsets offsets();
-
-        long elementCount();
-
-        Orientation orientation();
-    }
-
-    @ValueClass
-    @SuppressWarnings("immutables:subtype")
-    public interface PropertyCSR extends TopologyCSR {
-        double defaultPropertyValue();
     }
 }

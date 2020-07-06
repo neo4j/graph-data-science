@@ -36,11 +36,11 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -165,7 +165,7 @@ class GraphStoreTest extends BaseTest {
         ZonedDateTime nodePropertyTime = graphStore.modificationTime();
 
         // add relationships
-        HugeGraph.Relationships relationships = HugeGraph.Relationships.of(
+        Relationships relationships = Relationships.of(
             0L,
             Orientation.NATURAL,
             new TransientAdjacencyList(new byte[0][0]),

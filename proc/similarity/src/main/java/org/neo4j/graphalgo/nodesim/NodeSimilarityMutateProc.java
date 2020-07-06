@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -126,7 +127,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
             NodeSimilarityProc.resultBuilder(new MutateResult.Builder(), computationResult);
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            HugeGraph.Relationships resultRelationships = getRelationships(
+            Relationships resultRelationships = getRelationships(
                 computationResult,
                 computationResult.result().graphResult(),
                 resultBuilder
@@ -144,12 +145,12 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
         return Stream.of(resultBuilder.build());
     }
 
-    private HugeGraph.Relationships getRelationships(
+    private Relationships getRelationships(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
         NodeSimilarityProc.NodeSimilarityResultBuilder<MutateResult> resultBuilder
     ) {
-        HugeGraph.Relationships resultRelationships;
+        Relationships resultRelationships;
 
         if (similarityGraphResult.isTopKGraph()) {
             TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();

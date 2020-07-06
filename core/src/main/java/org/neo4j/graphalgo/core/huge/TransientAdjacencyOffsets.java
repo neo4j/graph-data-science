@@ -19,19 +19,18 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.ImportSizing;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
+import java.util.Locale;
+
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
-public abstract class TransientAdjacencyOffsets {
-
-    abstract long get(long index);
-
-    abstract long release();
+public abstract class TransientAdjacencyOffsets implements AdjacencyOffsets {
 
     public static TransientAdjacencyOffsets of(long[][] pages, int pageSize) {
         if (pages.length == 1) {
@@ -62,6 +61,19 @@ public abstract class TransientAdjacencyOffsets {
         );
     }
 
+    static TransientAdjacencyOffsets castOrThrow(AdjacencyOffsets from) {
+        if (from instanceof TransientAdjacencyOffsets) {
+            return (TransientAdjacencyOffsets) from;
+        }
+
+        throw new IllegalArgumentException(String.format(
+            Locale.ENGLISH,
+            "Expected %s, got %s.",
+            TransientAdjacencyList.class.getSimpleName(),
+            from == null ? "null" : from.getClass().getSimpleName()
+        ));
+    }
+
     public static TransientAdjacencyOffsets of(long[] page) {
         return new SinglePageOffsets(page);
     }
@@ -87,14 +99,14 @@ public abstract class TransientAdjacencyOffsets {
         }
 
         @Override
-        long get(long index) {
+        public long get(long index) {
             final int pageIndex = (int) (index >>> pageShift);
             final int indexInPage = (int) (index & pageMask);
             return pages[pageIndex][indexInPage];
         }
 
         @Override
-        long release() {
+        public long release() {
             if (pages != null) {
                 long memoryUsed = sizeOfObjectArray(pages.length);
                 for (long[] page : pages) {
@@ -122,12 +134,12 @@ public abstract class TransientAdjacencyOffsets {
         }
 
         @Override
-        long get(long index) {
+        public long get(long index) {
             return page[(int) index];
         }
 
         @Override
-        long release() {
+        public long release() {
             if (page != null) {
                 long memoryUsed = sizeOfLongArray(page.length);
                 page = null;

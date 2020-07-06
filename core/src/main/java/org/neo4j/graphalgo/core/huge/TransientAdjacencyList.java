@@ -30,6 +30,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
+import java.util.Locale;
+
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
@@ -117,6 +119,19 @@ public final class TransientAdjacencyList implements AdjacencyList {
         int degreeByteSize = Integer.BYTES;
         long compressedAdjacencyByteSize = relationshipByteSize * Math.max(0, (avgDegree - 1));
         return (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
+    }
+
+    static TransientAdjacencyList castOrThrow(AdjacencyList from) {
+        if (from instanceof TransientAdjacencyList) {
+            return (TransientAdjacencyList) from;
+        }
+
+        throw new IllegalArgumentException(String.format(
+            Locale.ENGLISH,
+            "Expected %s, got %s.",
+            TransientAdjacencyList.class.getSimpleName(),
+            from == null ? "null" : from.getClass().getSimpleName()
+        ));
     }
 
     public TransientAdjacencyList(byte[][] pages) {

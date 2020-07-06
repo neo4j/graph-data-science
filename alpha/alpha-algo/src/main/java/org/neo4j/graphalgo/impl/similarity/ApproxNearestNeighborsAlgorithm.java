@@ -27,9 +27,9 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
@@ -546,10 +546,10 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         default GraphStore buildGraphStore(IdMap idMap, int concurrency, AllocationTracker tracker) {
-            HugeGraph.Relationships outRelationships = outImporter().build();
-            HugeGraph.Relationships inRelationships = inImporter().build();
+            Relationships outRelationships = outImporter().build();
+            Relationships inRelationships = inImporter().build();
 
-            Map<RelationshipType, HugeGraph.TopologyCSR> topology = new HashMap<>();
+            Map<RelationshipType, Relationships.TopologyCSR> topology = new HashMap<>();
             topology.put(ANN_OUT_GRAPH, outRelationships.topology());
             topology.put(ANN_IN_GRAPH, inRelationships.topology());
 

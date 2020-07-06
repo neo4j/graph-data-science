@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
@@ -69,7 +70,7 @@ public final class CSRGraphStore implements GraphStore {
 
     private final Map<NodeLabel, NodePropertyStore> nodeProperties;
 
-    private final Map<RelationshipType, HugeGraph.TopologyCSR> relationships;
+    private final Map<RelationshipType, Relationships.TopologyCSR> relationships;
 
     private final Map<RelationshipType, RelationshipPropertyStore> relationshipProperties;
 
@@ -82,8 +83,8 @@ public final class CSRGraphStore implements GraphStore {
     public static GraphStore of(
         IdMap nodes,
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
-        Map<RelationshipType, HugeGraph.TopologyCSR> relationships,
-        Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> relationshipProperties,
+        Map<RelationshipType, Relationships.TopologyCSR> relationships,
+        Map<RelationshipType, Map<String, Relationships.PropertyCSR>> relationshipProperties,
         int concurrency,
         AllocationTracker tracker
     ) {
@@ -124,9 +125,9 @@ public final class CSRGraphStore implements GraphStore {
         int concurrency,
         AllocationTracker tracker
     ) {
-        HugeGraph.Relationships relationships = graph.relationships();
+        Relationships relationships = graph.relationships();
 
-        Map<RelationshipType, HugeGraph.TopologyCSR> topology = singletonMap(RelationshipType.of(relationshipType), relationships.topology());
+        Map<RelationshipType, Relationships.TopologyCSR> topology = singletonMap(RelationshipType.of(relationshipType), relationships.topology());
 
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties = new HashMap<>();
         nodeProperties.put(
@@ -137,7 +138,7 @@ public final class CSRGraphStore implements GraphStore {
             ))
         );
 
-        Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> relationshipProperties = Collections.emptyMap();
+        Map<RelationshipType, Map<String, Relationships.PropertyCSR>> relationshipProperties = Collections.emptyMap();
         if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
             relationshipProperties = singletonMap(
                 RelationshipType.of(relationshipType),
@@ -151,7 +152,7 @@ public final class CSRGraphStore implements GraphStore {
     private CSRGraphStore(
         IdMap nodes,
         Map<NodeLabel, NodePropertyStore> nodeProperties,
-        Map<RelationshipType, HugeGraph.TopologyCSR> relationships,
+        Map<RelationshipType, Relationships.TopologyCSR> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
         int concurrency,
         AllocationTracker tracker
@@ -287,7 +288,7 @@ public final class CSRGraphStore implements GraphStore {
     @Override
     public long relationshipCount() {
         return relationships.values().stream()
-            .mapToLong(HugeGraph.TopologyCSR::elementCount)
+            .mapToLong(Relationships.TopologyCSR::elementCount)
             .sum();
     }
 
@@ -321,7 +322,7 @@ public final class CSRGraphStore implements GraphStore {
                 .values()
                 .stream()
                 .map(RelationshipProperty::values)
-                .mapToLong(HugeGraph.PropertyCSR::elementCount))
+                .mapToLong(Relationships.PropertyCSR::elementCount))
             .sum();
     }
 
@@ -344,7 +345,7 @@ public final class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
-        HugeGraph.Relationships relationships
+        Relationships relationships
     ) {
         updateGraphStore(graphStore -> {
             if (!hasRelationshipType(relationshipType)) {
@@ -466,7 +467,7 @@ public final class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType,
         String propertyKey,
         NumberType propertyType,
-        HugeGraph.PropertyCSR propertyCSR,
+        Relationships.PropertyCSR propertyCSR,
         CSRGraphStore graphStore
     ) {
         graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
@@ -742,9 +743,9 @@ public final class CSRGraphStore implements GraphStore {
 
         PropertyState state();
 
-        HugeGraph.PropertyCSR values();
+        Relationships.PropertyCSR values();
 
-        static RelationshipProperty of(String key, NumberType type, PropertyState state, HugeGraph.PropertyCSR values) {
+        static RelationshipProperty of(String key, NumberType type, PropertyState state, Relationships.PropertyCSR values) {
             return ImmutableRelationshipProperty.of(key, type, state, values);
         }
     }
