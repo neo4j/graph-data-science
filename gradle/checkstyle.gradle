@@ -1,33 +1,29 @@
 subprojects { proj ->
+    proj.apply plugin: 'checkstyle'
 
-    plugins.withType(JavaLibraryPlugin) {
-        proj.apply plugin: 'checkstyle'
-
-        proj.checkstyle {
-            configFile = file("$publicDir/etc/checkstyle/checkstyle.xml")
-            configProperties = [
+    proj.checkstyle {
+        configFile = file("$publicDir/etc/checkstyle/checkstyle.xml")
+        configProperties = [
                 'org.checkstyle.sun.suppressionfilter.config':
-                    file("$publicDir/etc/checkstyle/checkstyle-suppressions.xml")
-            ]
+                        file("$publicDir/etc/checkstyle/checkstyle-suppressions.xml")
+        ]
 
-            // When  `ignoreFailures=false` the build will be failing on checkstyle errors
-            ignoreFailures = true
-            showViolations = true
-        }
+        // When  `ignoreFailures=false` the build will be failing on checkstyle errors
+        ignoreFailures = true
+        showViolations = true
+    }
 
-        proj.tasks.withType(Checkstyle) {
-            def reportsDir = "${rootProject.buildDir}/reports/checkstyle/"
-            def fileName = "${proj.name}-${name}"
-            reports {
-                xml {
-                    enabled true
-                    destination file("${reportsDir}/xml/${fileName}.xml")
-                }
-                html {
-                    enabled true
-                    destination file("${reportsDir}/html/${fileName}.html")
-                    stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-noframes-severity-sorted.xsl")
-                }
+    proj.tasks.withType(Checkstyle) {
+        def fileName = "${proj.name}-${name}"
+        reports {
+            xml {
+                enabled true
+                destination file("${checkstyleReportsDir}/xml/${fileName}.xml")
+            }
+            html {
+                enabled true
+                destination file("${checkstyleReportsDir}/html/${fileName}.html")
+                stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-noframes-severity-sorted.xsl")
             }
         }
     }
