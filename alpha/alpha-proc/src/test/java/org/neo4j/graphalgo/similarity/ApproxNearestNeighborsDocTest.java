@@ -83,8 +83,6 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
                        " WITH {item:id(p), categories: collect(id(cuisine))} AS userData " +
                        " WITH collect(userData) AS data " +
                        " CALL gds.alpha.ml.ann.stream({" +
-                       "   nodeProjection: '*'," +
-                       "   relationshipProjection: '*', " +
                        "   data: data," +
                        "   algorithm: 'jaccard'," +
                        "   similarityCutoff: 0.1," +
@@ -121,8 +119,6 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
             " WITH {item:id(p), categories: collect(id(cuisine))} AS userData " +
             " WITH collect(userData) AS data " +
             " CALL gds.alpha.ml.ann.write({ " +
-            "  nodeProjection: '*', " +
-            "  relationshipProjection: '*', " +
             "  algorithm: 'jaccard', " +
             "  data: data, " +
             "  similarityCutoff: 0.1, " +
