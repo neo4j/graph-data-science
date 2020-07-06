@@ -57,6 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
@@ -103,9 +104,7 @@ public abstract class SimilarityProcTest<
     private Stream<Method> getProcMethods(SimilarityProc<ALGORITHM, ? extends SimilarityConfig> proc) {
         return Arrays.stream(proc.getClass().getDeclaredMethods())
             .filter(method ->
-                method.getDeclaredAnnotation(Procedure.class) != null && Set
-                    .of("stream", "stats", "write")
-                    .stream()
+                method.getDeclaredAnnotation(Procedure.class) != null && Stream.of("stream", "stats", "write")
                     .anyMatch(mode -> getProcedureMethodName(method).endsWith(mode))
             );
     }
@@ -152,7 +151,7 @@ public abstract class SimilarityProcTest<
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    method.invoke(proc, minimalViableConfig(), Map.of());
+                    method.invoke(proc, minimalViableConfig(), Collections.emptyMap());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     fail(e);
                 }
@@ -165,14 +164,14 @@ public abstract class SimilarityProcTest<
     @Test
     void shouldAcceptIncludingProjections() {
         Map<String, Object> config = minimalViableConfig();
-        config.putAll(Map.of(
+        config.putAll(map(
             NODE_PROJECTION_KEY, PROJECT_ALL,
             RELATIONSHIP_PROJECTION_KEY, PROJECT_ALL
         ));
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    method.invoke(proc, config, Map.of());
+                    method.invoke(proc, config, Collections.emptyMap());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     fail(e);
                 }
@@ -185,14 +184,14 @@ public abstract class SimilarityProcTest<
     @Test
     void shouldAcceptIncludingQueries() {
         Map<String, Object> config = minimalViableConfig();
-        config.putAll(Map.of(
+        config.putAll(map(
             NODE_QUERY_KEY, ALL_NODES_QUERY,
             RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY
         ));
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    method.invoke(proc, config, Map.of());
+                    method.invoke(proc, config, Collections.emptyMap());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     fail(e);
                 }
@@ -209,7 +208,7 @@ public abstract class SimilarityProcTest<
         applyOnProcedure((proc) -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    Stream<?> result = (Stream<?>) method.invoke(proc, minimalViableConfig(), Map.of());
+                    Stream<?> result = (Stream<?>) method.invoke(proc, minimalViableConfig(), Collections.emptyMap());
 
                     if (getProcedureMethodName(method).endsWith("stream")) {
                         assertEquals(0, result.count(), "Stream result should be empty.");
@@ -228,7 +227,7 @@ public abstract class SimilarityProcTest<
         applyOnProcedure(proc -> {
             Pair<? extends SimilarityConfig, Optional<String>> input = proc.processInput(
                 minimalViableConfig(),
-                Map.of()
+                Collections.emptyMap()
             );
             assertEquals(SIMILARITY_FAKE_GRAPH_NAME, input.getTwo().get());
             assertTrue(GraphStoreCatalog.exists(getUsername(), SIMILARITY_FAKE_GRAPH_NAME));
@@ -261,7 +260,7 @@ public abstract class SimilarityProcTest<
         applyOnProcedure((proc) -> {
             getProcMethods(proc).forEach(method -> {
                 try {
-                    method.invoke(proc, minimalViableConfig(), Map.of());
+                    method.invoke(proc, minimalViableConfig(), Collections.emptyMap());
                 } catch (Throwable e) {
                     fail(e);
                 }
