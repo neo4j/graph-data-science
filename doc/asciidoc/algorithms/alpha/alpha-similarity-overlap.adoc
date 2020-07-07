@@ -323,7 +323,7 @@ We could use this technique to compute the similarity of a subset of items to al
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.similarity.overlap.write(graphNameOrConfig: String|Map, configuration: Map)
+CALL gds.alpha.similarity.overlap.write(configuration: Map)
 YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
@@ -331,8 +331,7 @@ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, me
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type          | Default        | Optional | Description
-| graphNameOrConfig | String or Map | null           | no      | Either then name of a loaded graph or directly the config.
-| configuration     | Map           | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+| configuration     | Map           | n/a            | no       | Algorithm-specific configuration.
 |===
 
 
@@ -381,7 +380,7 @@ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, me
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL gds.alpha.similarity.overlap.stream(graphNameOrConfig: String|Map, configuration: Map)
+CALL gds.alpha.similarity.overlap.stream(configuration: Map)
 YIELD item1, item2, count1, count2, similarity
 ----
 
@@ -389,8 +388,7 @@ YIELD item1, item2, count1, count2, similarity
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type              | Default        | Optional | Description
-| graphNameOrConfig | String or Map     | null           | no       | Either the name of a created graph or directly the config.
-| configuration     | Map               | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+| configuration     | Map               | n/a            | no       | Algorithm-specific configuration.
 |===
 
 
