@@ -517,7 +517,7 @@ include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL gds.alpha.similarity.euclidean.write(graphNameOrConfig: String|Map, configuration: Map)
+CALL gds.alpha.similarity.euclidean.write(configuration: Map)
 YIELD nodes, similarityPair, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
 
@@ -525,8 +525,7 @@ YIELD nodes, similarityPair, writeRelationshipType, writeProperty, min, max, mea
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type          | Default        | Optional | Description
-| graphNameOrConfig | String or Map | null           | no      | Either then name of a loaded graph or directly the config.
-| configuration     | Map           | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+| configuration     | Map           | n/a            | no       | Algorithm-specific configuration.
 |===
 
 .Configuration
@@ -574,17 +573,15 @@ YIELD nodes, similarityPair, writeRelationshipType, writeProperty, min, max, mea
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL gds.alpha.similarity.euclidean.stream(graphNameOrConfig: String|Map, configuration: Map)
+CALL gds.alpha.similarity.euclidean.stream(configuration: Map)
 YIELD item1, item2, count1, count2, intersection, similarity
-
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type              | Default        | Optional | Description
-| graphNameOrConfig | String or Map     | null           | no       | Either then name of a loaded graph or directly the config.
-| configuration     | Map               | n/a            | yes      | Additional configuration, if the first parameter was a graph name.
+| configuration     | Map               | n/a            | no       | Algorithm-specific configuration.
 |===
 
 .Configuration
