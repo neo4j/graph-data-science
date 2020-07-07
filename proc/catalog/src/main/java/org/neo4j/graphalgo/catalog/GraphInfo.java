@@ -27,31 +27,41 @@ import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static java.util.Collections.emptyMap;
 
 public class GraphInfo extends GraphInfoWithoutDegreeDistribution {
     private static final int PRECISION = 5;
-    private static NamedDatabaseId namedDatabaseId;
 
-    public final String userName;
     public final Map<String, Object> degreeDistribution;
 
-    GraphInfo(GraphCreateConfig config, NamedDatabaseId namedDatabaseId, GraphStore graphStore, boolean computeHistogram) {
+    GraphInfo(
+        GraphCreateConfig config,
+        GraphStore graphStore,
+        boolean computeHistogram,
+        Consumer<Map<String, Object>> degreeDistributionCacheSaver,
+        Supplier<Optional<Map<String, Object>>> degreeDistributionCacheFetcher
+    ) {
         super(config, graphStore);
-        GraphInfo.namedDatabaseId = namedDatabaseId;
-        this.userName = config.username();
-        this.degreeDistribution = computeHistogram ? computeHistogram(graphStore) : emptyMap();
+        this.degreeDistribution = computeHistogram ? computeHistogram(
+            graphStore,
+            degreeDistributionCacheSaver,
+            degreeDistributionCacheFetcher
+        ) : emptyMap();
     }
 
-    private Map<String, Object> computeHistogram(GraphStore graphStore) {
-        Optional<Map<String, Object>> maybeDegreeDistribution = lookupDegreeDistribution();
+    private Map<String, Object> computeHistogram(
+        GraphStore graphStore,
+        Consumer<Map<String, Object>> degreeDistributionCacheSaver,
+        Supplier<Optional<Map<String, Object>>> degreeDistributionCacheFetcher
+    ) {
+        Optional<Map<String, Object>> maybeDegreeDistribution = degreeDistributionCacheFetcher.get();
 
         if (maybeDegreeDistribution.isPresent()) {
             return maybeDegreeDistribution.get();
@@ -93,13 +103,9 @@ public class GraphInfo extends GraphInfoWithoutDegreeDistribution {
             "p999", histogram.getValueAtPercentile(99.9)
         );
 
-        GraphStoreCatalog.setDegreeDistribution(userName, namedDatabaseId, graphName, degreeDistribution);
+        degreeDistributionCacheSaver.accept(degreeDistribution);
 
         return degreeDistribution;
-    }
-
-    private Optional<Map<String, Object>> lookupDegreeDistribution() {
-        return GraphStoreCatalog.getDegreeDistribution(userName, namedDatabaseId, graphName);
     }
 
 }
