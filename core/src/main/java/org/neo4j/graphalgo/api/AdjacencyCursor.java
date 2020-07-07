@@ -21,7 +21,11 @@ package org.neo4j.graphalgo.api;
 
 public interface AdjacencyCursor {
 
-    // TODO: docs
+    /**
+     * Initializes the cursor.
+     *
+     * @param offset the position in an adjacency list to start iterating from
+     */
     AdjacencyCursor init(long offset);
 
     /**
