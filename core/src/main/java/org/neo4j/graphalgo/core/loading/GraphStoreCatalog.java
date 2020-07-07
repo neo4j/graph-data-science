@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.GraphStoreKey;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -43,39 +43,26 @@ public final class GraphStoreCatalog {
     private GraphStoreCatalog() { }
 
     public static GraphStoreWithConfig get(String username, NamedDatabaseId namedDatabaseId, String graphName) {
-        return get(GraphStoreKey.of(username, namedDatabaseId, graphName));
-    }
-
-    public static GraphStoreWithConfig get(GraphStoreKey graphStoreKey) {
-        return getUserCatalog(graphStoreKey.username()).get(graphStoreKey);
+        return getUserCatalog(username).get(UserCatalog.UserCatalogKey.of(namedDatabaseId, graphName));
     }
 
     public static void set(GraphCreateConfig config, NamedDatabaseId namedDatabaseId, GraphStore graphStore) {
-        var graphStoreKey = GraphStoreKey.of(config.username(), namedDatabaseId, config.graphName());
         graphStore.canRelease(false);
-        userCatalogs.compute(graphStoreKey.username(), (user, userCatalog) -> {
+        userCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
             }
-            userCatalog.set(graphStoreKey, config, graphStore);
+            userCatalog.set(UserCatalog.UserCatalogKey.of(namedDatabaseId, config.graphName()), config, graphStore);
             return userCatalog;
         });
     }
 
     public static Optional<Graph> getUnion(String username, NamedDatabaseId namedDatabaseId, String graphName) {
-        return getUnion(GraphStoreKey.of(username, namedDatabaseId, graphName));
-    }
-
-    public static Optional<Graph> getUnion(GraphStoreKey graphStoreKey) {
-        return getUserCatalog(graphStoreKey.username()).getUnion(graphStoreKey);
+        return getUserCatalog(username).getUnion(UserCatalog.UserCatalogKey.of(namedDatabaseId, graphName));
     }
 
     public static boolean exists(String username, NamedDatabaseId namedDatabaseId, String graphName) {
-        return exists(GraphStoreKey.of(username, namedDatabaseId, graphName));
-    }
-
-    public static boolean exists(GraphStoreKey graphStoreKey) {
-        return getUserCatalog(graphStoreKey.username()).exists(graphStoreKey);
+        return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(namedDatabaseId, graphName));
     }
 
     public static void remove(
@@ -84,20 +71,18 @@ public final class GraphStoreCatalog {
         String graphName,
         Consumer<GraphStoreWithConfig> removedGraphConsumer
     ) {
-        remove(GraphStoreKey.of(username, namedDatabaseId, graphName), removedGraphConsumer);
-    }
+        UserCatalog.UserCatalogKey userCatalogKey = UserCatalog.UserCatalogKey.of(namedDatabaseId, graphName);
 
-    public static void remove(GraphStoreKey graphStoreKey, Consumer<GraphStoreWithConfig> removedGraphConsumer) {
         GraphStoreWithConfig graphStoreWithConfig = Optional
-            .ofNullable(getUserCatalog(graphStoreKey.username()).remove(graphStoreKey))
-            .orElseThrow(failOnNonExistentGraph(graphStoreKey.graphName()));
+            .ofNullable(getUserCatalog(username).remove(userCatalogKey))
+            .orElseThrow(failOnNonExistentGraph(userCatalogKey.graphName()));
 
         removedGraphConsumer.accept(graphStoreWithConfig);
         GraphStore graphStore = graphStoreWithConfig.graphStore();
         graphStore.canRelease(true);
         graphStore.release();
 
-        getUserCatalog(graphStoreKey.username()).removeDegreeDistribution(graphStoreKey);
+        getUserCatalog(username).removeDegreeDistribution(userCatalogKey);
     }
 
     public static int graphStoresCount(NamedDatabaseId namedDatabaseId) {
@@ -107,13 +92,12 @@ public final class GraphStoreCatalog {
             .mapToLong(userCatalog -> userCatalog.getGraphStores(namedDatabaseId).values().size())
             .sum();
     }
-
-    public static Optional<Map<String, Object>> getDegreeDistribution(GraphStoreKey graphStoreKey) {
-        return getUserCatalog(graphStoreKey.username()).getDegreeDistribution(graphStoreKey);
+    public static Optional<Map<String, Object>> getDegreeDistribution(String username, NamedDatabaseId namedDatabaseId, String graphName) {
+        return getUserCatalog(username).getDegreeDistribution(UserCatalog.UserCatalogKey.of(namedDatabaseId, graphName));
     }
 
-    public static void setDegreeDistribution(GraphStoreKey graphStoreKey, Map<String, Object> degreeDistribution) {
-        getUserCatalog(graphStoreKey.username()).setDegreeDistribution(graphStoreKey, degreeDistribution);
+    public static void setDegreeDistribution(String username, NamedDatabaseId namedDatabaseId, String graphName, Map<String, Object> degreeDistribution) {
+        getUserCatalog(username).setDegreeDistribution(UserCatalog.UserCatalogKey.of(namedDatabaseId, graphName), degreeDistribution);
     }
 
     public static void removeAllLoadedGraphs() {
@@ -135,21 +119,37 @@ public final class GraphStoreCatalog {
         ));
     }
 
-    private static class UserCatalog {
+    static class UserCatalog {
+
+        @ValueClass
+        public interface UserCatalogKey {
+
+            String graphName();
+
+            NamedDatabaseId namedDatabaseId();
+
+            static UserCatalogKey of(GraphCreateConfig createConfig, NamedDatabaseId namedDatabaseId) {
+                return of(namedDatabaseId, createConfig.graphName());
+            }
+
+            static UserCatalogKey of(NamedDatabaseId namedDatabaseId, String graphName) {
+                return ImmutableUserCatalogKey.of(graphName, namedDatabaseId);
+            }
+        }
 
         private static final UserCatalog EMPTY = new UserCatalog();
 
-        private final Map<GraphStoreKey, GraphStoreWithConfig> graphsByName = new ConcurrentHashMap<>();
+        private final Map<UserCatalogKey, GraphStoreWithConfig> graphsByName = new ConcurrentHashMap<>();
 
-        private final Map<GraphStoreKey, Map<String, Object>> degreeDistributionByName = new ConcurrentHashMap<>();
+        private final Map<UserCatalogKey, Map<String, Object>> degreeDistributionByName = new ConcurrentHashMap<>();
 
-        private void set(GraphStoreKey graphStoreKey, GraphCreateConfig config, GraphStore graphStore) {
+        private void set(UserCatalogKey userCatalogKey, GraphCreateConfig config, GraphStore graphStore) {
             if (config.graphName() == null || graphStore == null) {
                 throw new IllegalArgumentException("Both name and graph store must be not null");
             }
             GraphStoreWithConfig graphStoreWithConfig = ImmutableGraphStoreWithConfig.of(graphStore, config);
 
-            if (graphsByName.putIfAbsent(graphStoreKey, graphStoreWithConfig) != null) {
+            if (graphsByName.putIfAbsent(userCatalogKey, graphStoreWithConfig) != null) {
                 throw new IllegalStateException(formatWithLocale(
                     "Graph name %s already loaded",
                     config.graphName()
@@ -158,37 +158,37 @@ public final class GraphStoreCatalog {
             graphStore.canRelease(false);
         }
 
-        private void setDegreeDistribution(GraphStoreKey graphStoreKey, Map<String, Object> degreeDistribution) {
+        private void setDegreeDistribution(UserCatalogKey userCatalogKey, Map<String, Object> degreeDistribution) {
 
-            if (graphStoreKey == null || degreeDistribution == null) {
+            if (userCatalogKey == null || degreeDistribution == null) {
                 throw new IllegalArgumentException("Both name and degreeDistribution must be not null");
             }
-            if (!graphsByName.containsKey(graphStoreKey)) {
+            if (!graphsByName.containsKey(userCatalogKey)) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Cannot set degreeDistribution because graph %s does not exist",
-                    graphStoreKey.graphName()
+                    userCatalogKey.graphName()
                 ));
             }
-            degreeDistributionByName.put(graphStoreKey, degreeDistribution);
+            degreeDistributionByName.put(userCatalogKey, degreeDistribution);
         }
 
-        private void removeDegreeDistribution(GraphStoreKey graphStoreKey) {
-            degreeDistributionByName.remove(graphStoreKey);
+        private void removeDegreeDistribution(UserCatalogKey userCatalogKey) {
+            degreeDistributionByName.remove(userCatalogKey);
         }
 
-        private GraphStoreWithConfig get(GraphStoreKey graphStoreKey) {
-            if (graphsByName.containsKey(graphStoreKey)) {
-                return graphsByName.get(graphStoreKey);
+        private GraphStoreWithConfig get(UserCatalogKey userCatalogKey) {
+            if (graphsByName.containsKey(userCatalogKey)) {
+                return graphsByName.get(userCatalogKey);
             } else {
-                throw new NoSuchElementException(formatWithLocale("Cannot find graph with name '%s'.", graphStoreKey.graphName()));
+                throw new NoSuchElementException(formatWithLocale("Cannot find graph with name '%s'.", userCatalogKey.graphName()));
             }
         }
 
-        private Optional<Map<String, Object>> getDegreeDistribution(GraphStoreKey graphStoreKey) {
-            if (!graphsByName.containsKey(graphStoreKey)) {
+        private Optional<Map<String, Object>> getDegreeDistribution(UserCatalogKey userCatalogKey) {
+            if (!graphsByName.containsKey(userCatalogKey)) {
                 return Optional.empty();
             }
-            return Optional.ofNullable(degreeDistributionByName.get(graphStoreKey));
+            return Optional.ofNullable(degreeDistributionByName.get(userCatalogKey));
         }
 
         /**
@@ -196,23 +196,23 @@ public final class GraphStoreCatalog {
          * Each sub-graph has the same node set and represents a unique relationship type / property combination.
          * This method returns the union of all subgraphs refered to by the given name.
          */
-        private Optional<Graph> getUnion(GraphStoreKey graphStoreKey) {
-            return !exists(graphStoreKey) ? Optional.empty() : Optional.of(graphsByName.get(graphStoreKey).graphStore().getUnion());
+        private Optional<Graph> getUnion(UserCatalogKey userCatalogKey) {
+            return !exists(userCatalogKey) ? Optional.empty() : Optional.of(graphsByName.get(userCatalogKey).graphStore().getUnion());
         }
 
-        private boolean exists(GraphStoreKey graphStoreKey) {
-            return graphStoreKey != null && graphsByName.containsKey(graphStoreKey);
+        private boolean exists(UserCatalogKey userCatalogKey) {
+            return userCatalogKey != null && graphsByName.containsKey(userCatalogKey);
         }
 
         @Nullable
-        private GraphStoreWithConfig remove(GraphStoreKey graphStoreKey) {
-            if (!exists(graphStoreKey)) {
+        private GraphStoreWithConfig remove(UserCatalogKey userCatalogKey) {
+            if (!exists(userCatalogKey)) {
                 // remove is allowed to return null if the graph does not exist
                 // as it's being used by algo.graph.info or algo.graph.remove,
                 // that can deal with missing graphs
                 return null;
             }
-            return graphsByName.remove(graphStoreKey);
+            return graphsByName.remove(userCatalogKey);
         }
 
         private Map<GraphCreateConfig, GraphStore> getGraphStores(NamedDatabaseId namedDatabaseId) {

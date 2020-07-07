@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.GraphStoreKey;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
@@ -151,8 +150,6 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             .gdlGraph(gdlGraphSetup.gdlGraph())
             .orientation(gdlGraphSetup.orientation())
             .build();
-
-        var graphStoreKey = GraphStoreKey.of(gdlGraphSetup.username(), NAMED_DATABASE_ID, graphName);
 
         GdlFactory gdlFactory = GdlFactory.of(createConfig);
         GraphStore graphStore = gdlFactory.build().graphStore();

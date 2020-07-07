@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.catalog;
 import org.HdrHistogram.AtomicHistogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.GraphStoreKey;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -94,13 +93,13 @@ public class GraphInfo extends GraphInfoWithoutDegreeDistribution {
             "p999", histogram.getValueAtPercentile(99.9)
         );
 
-        GraphStoreCatalog.setDegreeDistribution(GraphStoreKey.of(userName, namedDatabaseId, graphName), degreeDistribution);
+        GraphStoreCatalog.setDegreeDistribution(userName, namedDatabaseId, graphName, degreeDistribution);
 
         return degreeDistribution;
     }
 
     private Optional<Map<String, Object>> lookupDegreeDistribution() {
-        return GraphStoreCatalog.getDegreeDistribution(GraphStoreKey.of(userName, namedDatabaseId, graphName));
+        return GraphStoreCatalog.getDegreeDistribution(userName, namedDatabaseId, graphName);
     }
 
 }
