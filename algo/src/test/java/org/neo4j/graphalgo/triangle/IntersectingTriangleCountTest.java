@@ -155,6 +155,24 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
     }
 
     @Test
+    void parallelRelationships() {
+        var graph = fromGdl(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ", (a)-[:T]->(b)",
+            UNDIRECTED
+        );
+
+        TriangleCountResult result = compute(graph);
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(1, result.localTriangles().get(2));
+    }
+
+    @Test
     void manyTrianglesAndOtherThings() {
         runQuery("CREATE" +
                  " (a)-[:T]->(b)-[:T]->(b)-[:T]->(c)-[:T]->(a), " +
