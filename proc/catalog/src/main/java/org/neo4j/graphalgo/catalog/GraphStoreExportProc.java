@@ -49,7 +49,7 @@ public class GraphStoreExportProc extends BaseProc {
 
         var result = runWithExceptionLogging(
             "Graph creation failed", () -> {
-                var graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
+                var graphStore = GraphStoreCatalog.get(getUsername(), api.databaseId(), graphName).graphStore();
                 var graphStoreExport = new GraphStoreExport(graphStore, neo4jHome, exportConfig);
 
                 var start = System.nanoTime();

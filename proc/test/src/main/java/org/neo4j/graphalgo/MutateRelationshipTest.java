@@ -64,7 +64,7 @@ public interface MutateRelationshipTest<ALGORITHM extends Algorithm<ALGORITHM, R
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
 
         GraphLoader loader = storeLoaderBuilder.build();
-        GraphStoreCatalog.set(loader.createConfig(), loader.graphStore());
+        GraphStoreCatalog.set(loader.createConfig(), graphDb().databaseId(), loader.graphStore());
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)

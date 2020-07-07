@@ -427,7 +427,7 @@ class GraphCreateProcTest extends BaseProcTest {
             ))
         );
 
-        Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[{w:55}]->()"), graph);
     }
 
@@ -451,7 +451,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
@@ -549,7 +549,7 @@ class GraphCreateProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph graph = GraphStoreCatalog.get("", name).graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
         assertGraphEquals(fromGdl(formatWithLocale("()-[{w: %d}]->()", expectedValue)), graph);
     }
 
@@ -813,7 +813,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
         runQuery(query, map());
 
-        Graph graph = GraphStoreCatalog.get("", "g").graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
         Graph expected = fromGdl("(:Node { fooProp: 42, barProp: 13.37D })" +
                                  "(:Node { fooProp: 43, barProp: 13.38D })" +
                                  "(:Node { fooProp: 44, barProp: 13.39D })" +
@@ -865,7 +865,7 @@ class GraphCreateProcTest extends BaseProcTest {
             assertEquals("MAX", maxCostParams.get("aggregation").toString());
         });
 
-        Graph actual = GraphStoreCatalog.get("", "aggGraph").graphStore().getUnion();
+        Graph actual = GraphStoreCatalog.get("", db.databaseId(), "aggGraph").graphStore().getUnion();
         Graph expected = fromGdl("(a:Node)-[{w:85.3D}]->(b:Node),(a)-[{w:42.1D}]->(b),(a)-[{w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1414,7 +1414,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     private Graph relPropertyGraph(String graphName, RelationshipType relationshipType, String property) {
         return GraphStoreCatalog
-            .get(getUsername(), graphName)
+            .get(getUsername(), db.databaseId(), graphName)
             .graphStore()
             .getGraph(relationshipType, Optional.of(property));
     }

@@ -119,7 +119,7 @@ public abstract class SimilarityProcTest<
     @Test
     void throwsOnExplicitGraph() {
         GraphStoreCatalog.set(
-            emptyWithNameNative(getUsername(), "foo"), new NullGraphStore()
+            emptyWithNameNative(getUsername(), "foo"), db.databaseId(), new NullGraphStore()
         );
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
@@ -223,10 +223,10 @@ public abstract class SimilarityProcTest<
                 Map.of()
             );
             assertEquals(SIMILARITY_FAKE_GRAPH_NAME, input.getTwo().get());
-            assertTrue(GraphStoreCatalog.exists(getUsername(), SIMILARITY_FAKE_GRAPH_NAME));
+            assertTrue(GraphStoreCatalog.exists(getUsername(), db.databaseId(), SIMILARITY_FAKE_GRAPH_NAME));
             GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(
                 getUsername(),
-                SIMILARITY_FAKE_GRAPH_NAME
+                db.databaseId(), SIMILARITY_FAKE_GRAPH_NAME
             );
 
             GraphStore graphStore = graphStoreWithConfig.graphStore();
@@ -248,7 +248,7 @@ public abstract class SimilarityProcTest<
                     fail(e);
                 }
 
-                assertEquals(0, GraphStoreCatalog.graphStoresCount());
+                assertEquals(0, GraphStoreCatalog.graphStoresCount(db.databaseId()));
             });
         });
 

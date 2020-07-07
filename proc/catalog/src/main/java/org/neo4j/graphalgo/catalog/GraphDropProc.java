@@ -39,8 +39,11 @@ public class GraphDropProc extends CatalogProc {
         validateGraphName(graphName);
 
         AtomicReference<GraphInfoWithoutDegreeDistribution> result = new AtomicReference<>();
-        GraphStoreCatalog.remove(getUsername(), graphName, (graphStoreWithConfig) -> {
-            result.set(new GraphInfoWithoutDegreeDistribution(graphStoreWithConfig.config(), graphStoreWithConfig.graphStore()));
+        GraphStoreCatalog.remove(getUsername(), api.databaseId(), graphName, (graphStoreWithConfig) -> {
+            result.set(new GraphInfoWithoutDegreeDistribution(
+                graphStoreWithConfig.config(),
+                graphStoreWithConfig.graphStore()
+            ));
         });
 
         return Stream.of(result.get());

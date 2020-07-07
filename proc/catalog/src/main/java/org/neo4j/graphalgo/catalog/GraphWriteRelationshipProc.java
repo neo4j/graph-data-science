@@ -67,7 +67,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), api.databaseId(), graphName).graphStore();
         config.validate(graphStore);
         // writing
         Result.Builder builder = new Result.Builder(graphName, relationshipType, maybeRelationshipProperty);

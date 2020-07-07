@@ -65,9 +65,9 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.graphalgo.config.ConcurrencyConfig.CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
-import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -151,7 +151,10 @@ public abstract class AlgoBaseProc<
         } else {
             String graphName = config.graphName().orElseThrow(IllegalStateException::new);
 
-            GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(getUsername(), graphName);
+            GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(getUsername(),
+                api.databaseId(),
+                graphName
+            );
             GraphCreateConfig graphCreateConfig = graphStoreWithConfig.config();
             GraphStore graphStore = graphStoreWithConfig.graphStore();
 
@@ -236,7 +239,7 @@ public abstract class AlgoBaseProc<
         GraphStoreWithConfig graphCandidate;
 
         if (maybeGraphName.isPresent()) {
-            graphCandidate = GraphStoreCatalog.get(getUsername(), maybeGraphName.get());
+            graphCandidate = GraphStoreCatalog.get(getUsername(), api.databaseId(), maybeGraphName.get());
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);

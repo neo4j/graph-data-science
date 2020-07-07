@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.catalog;
 import org.HdrHistogram.AtomicHistogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.GraphStoreKey;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -29,6 +30,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
 import java.util.Optional;
@@ -37,14 +39,15 @@ import static java.util.Collections.emptyMap;
 
 public class GraphInfo extends GraphInfoWithoutDegreeDistribution {
     private static final int PRECISION = 5;
+    private static NamedDatabaseId namedDatabaseId;
 
     public final String userName;
     public final Map<String, Object> degreeDistribution;
 
-    GraphInfo(GraphCreateConfig config, GraphStore graphStore, boolean computeHistogram) {
+    GraphInfo(GraphCreateConfig config, NamedDatabaseId namedDatabaseId, GraphStore graphStore, boolean computeHistogram) {
         super(config, graphStore);
+        GraphInfo.namedDatabaseId = namedDatabaseId;
         this.userName = config.username();
-
         this.degreeDistribution = computeHistogram ? computeHistogram(graphStore) : emptyMap();
     }
 
@@ -91,17 +94,13 @@ public class GraphInfo extends GraphInfoWithoutDegreeDistribution {
             "p999", histogram.getValueAtPercentile(99.9)
         );
 
-        GraphStoreCatalog
-            .getUserCatalog(userName)
-            .setDegreeDistribution(graphName, degreeDistribution);
+        GraphStoreCatalog.setDegreeDistribution(GraphStoreKey.of(userName, namedDatabaseId, graphName), degreeDistribution);
 
         return degreeDistribution;
     }
 
     private Optional<Map<String, Object>> lookupDegreeDistribution() {
-        return GraphStoreCatalog
-                .getUserCatalog(userName)
-                .getDegreeDistribution(graphName);
+        return GraphStoreCatalog.getDegreeDistribution(GraphStoreKey.of(userName, namedDatabaseId, graphName));
     }
 
 }

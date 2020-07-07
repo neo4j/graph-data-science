@@ -189,7 +189,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     void streamMutatedNodeProperties() {
         long expectedPropertyCount = 6;
 
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
         NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
         graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
         graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
@@ -295,7 +295,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     void streamMutatedNodeProperty() {
         long expectedPropertyCount = 6;
 
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
         NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
         graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
         graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);

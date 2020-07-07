@@ -21,8 +21,10 @@ package org.neo4j.graphalgo.functions;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.GraphStoreKey;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,6 +38,9 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 public class NodePropertyFunc {
+    @Context
+    public GraphDatabaseAPI api;
+
     @Context
     public KernelTransaction transaction;
 
@@ -53,7 +58,8 @@ public class NodePropertyFunc {
         Objects.requireNonNull(nodeLabel);
 
         String username = transaction.subjectOrAnonymous().username();
-        GraphStore graphStore = GraphStoreCatalog.get(username, graphName).graphStore();
+        GraphStoreKey graphStoreKey = GraphStoreKey.of(username, api.databaseId(), graphName);
+        GraphStore graphStore = GraphStoreCatalog.get(graphStoreKey).graphStore();
         boolean projectAll = nodeLabel.equals(PROJECT_ALL);
 
         if (projectAll) {

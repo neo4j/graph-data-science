@@ -182,7 +182,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamMutatedRelationshipProperties() {
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
         HugeGraphUtil.RelationshipsBuilder relImporter = HugeGraphUtil.createRelImporter(
             (IdMap) graphStore.nodes(),
@@ -289,7 +289,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamMutatedNodeProperty() {
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
         HugeGraphUtil.RelationshipsBuilder relImporter = HugeGraphUtil.createRelImporter(
             (IdMap) graphStore.nodes(),

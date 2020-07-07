@@ -28,9 +28,12 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.GraphStoreKey;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.kernel.database.DatabaseIdFactory;
+import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -38,6 +41,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
@@ -45,6 +49,8 @@ import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
 public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallback {
+
+    public static final NamedDatabaseId NAMED_DATABASE_ID = DatabaseIdFactory.from("GDL", UUID.fromString("42-42-42-42-42"));
 
     @Override
     public void beforeEach(ExtensionContext context) {
@@ -146,6 +152,8 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             .orientation(gdlGraphSetup.orientation())
             .build();
 
+        var graphStoreKey = GraphStoreKey.of(gdlGraphSetup.username(), NAMED_DATABASE_ID, graphName);
+
         GdlFactory gdlFactory = GdlFactory.of(createConfig);
         GraphStore graphStore = gdlFactory.build().graphStore();
         Graph graph = graphStore.getUnion();
@@ -153,7 +161,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         TestGraph testGraph = new TestGraph(graph, idFunction, graphName);
 
         if (gdlGraphSetup.addToCatalog()) {
-            GraphStoreCatalog.set(createConfig, graphStore);
+            GraphStoreCatalog.set(createConfig, NAMED_DATABASE_ID, graphStore);
         }
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {

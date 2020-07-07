@@ -260,7 +260,7 @@ public class BaseProcTest extends BaseTest {
 
     protected Graph findLoadedGraph(String graphName) {
         return GraphStoreCatalog
-            .getGraphStores("")
+            .getGraphStores("", db.databaseId())
             .entrySet()
             .stream()
             .filter(e -> e.getKey().graphName().equals(graphName))
@@ -271,7 +271,7 @@ public class BaseProcTest extends BaseTest {
 
     private Set<Graph> getLoadedGraphs(String graphName) {
         return GraphStoreCatalog
-            .getGraphStores("")
+            .getGraphStores("", db.databaseId())
             .entrySet()
             .stream()
             .filter(e -> e.getKey().graphName().equals(graphName))

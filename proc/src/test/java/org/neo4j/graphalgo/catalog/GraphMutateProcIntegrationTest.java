@@ -170,7 +170,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         runQuery(louvainQuery);
         runQuery(nodeSimilarityQuery);
 
-        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion());
+        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH).graphStore().getUnion());
 
         // write new properties and relationships to Neo
         String writeNodePropertiesQuery = formatWithLocale(
@@ -209,6 +209,6 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .yields()
         );
 
-        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), TEST_GRAPH).graphStore().getUnion());
+        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH).graphStore().getUnion());
     }
 }

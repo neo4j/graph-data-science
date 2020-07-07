@@ -93,6 +93,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
         GraphStoreCatalog.set(
             graphCreateConfig,
+            namedDatabaseId(),
             graphLoader(graphCreateConfig).graphStore()
         );
 

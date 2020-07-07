@@ -167,7 +167,7 @@ public class GraphCreateProc extends CatalogProc {
                 .withNodeCount(graphStore.nodeCount())
                 .withRelationshipCount(graphStore.relationshipCount());
 
-            GraphStoreCatalog.set(config, graphStore);
+            GraphStoreCatalog.set(config, api.databaseId(), graphStore);
         }
 
         return builder.build();

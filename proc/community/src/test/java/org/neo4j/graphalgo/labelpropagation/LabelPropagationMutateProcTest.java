@@ -89,7 +89,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             .build()
             .graphStore();
 
-        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
+        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), namedDatabaseId(), initialGraphStore);
 
         var mutateQuery = GdsCypher
             .call()
@@ -189,7 +189,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         expectedValueList.add(Double.NaN);
         RESULT.forEach(component -> expectedValueList.add((double) component + deletedNodes + 1));
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore().getUnion();
         mutatedGraph.forEachNode(nodeId -> {
             assertEquals(
                     expectedValueList.get(Math.toIntExact(nodeId)),

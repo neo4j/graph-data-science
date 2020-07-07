@@ -17,22 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.catalog;
+package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.UserFunction;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.kernel.database.NamedDatabaseId;
 
-public class GraphExistsFunc extends CatalogProc {
+@ValueClass
+public interface GraphStoreKey {
 
-    private static final String DESCRIPTION = "Checks if a graph exists in the catalog.";
+    String username();
 
-    @UserFunction("gds.graph.exists")
-    @Description(DESCRIPTION)
-    public boolean existsFunction(@Name(value = "graphName") String graphName) {
-        validateGraphName(graphName);
-        return GraphStoreCatalog.exists(getUsername(), api.databaseId(), graphName);
+    String graphName();
+
+    NamedDatabaseId namedDatabaseId();
+
+    static GraphStoreKey of(GraphCreateConfig createConfig, NamedDatabaseId namedDatabaseId) {
+        return of(createConfig.username(), namedDatabaseId, createConfig.graphName());
     }
 
+    static GraphStoreKey of(String username, NamedDatabaseId namedDatabaseId, String graphName) {
+        return ImmutableGraphStoreKey.of(username, graphName, namedDatabaseId);
+    }
 }

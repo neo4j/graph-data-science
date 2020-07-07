@@ -128,7 +128,7 @@ class TriangleCountMutateProcTest
             "mutateMillis", greaterThan(-1L)
         )));
 
-        Graph actualGraph = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
+        Graph actualGraph = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "testGraph").graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(

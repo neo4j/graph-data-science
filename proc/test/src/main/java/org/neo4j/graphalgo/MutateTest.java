@@ -75,6 +75,7 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
             );
             GraphStoreCatalog.set(
                 graphCreateConfig,
+                namedDatabaseId(),
                 graphLoader(graphCreateConfig).graphStore()
             );
             return loadedGraphName;
@@ -93,7 +94,7 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
                 })
         );
 
-        GraphStore graphStore = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), graphStore.getUnion());
 
         GraphStoreSchema schema = graphStore.schema();
@@ -122,11 +123,8 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
             .graphStore(NATIVE);
 
         String graphName = "myGraph";
-        GraphStoreCatalog.set(withNameAndRelationshipProjections(
-            "",
-            graphName,
-            relationshipProjections()
-        ), graphStore);
+        var createConfig = withNameAndRelationshipProjections("", graphName, relationshipProjections());
+        GraphStoreCatalog.set(createConfig, namedDatabaseId(), graphStore);
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)
@@ -146,7 +144,7 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
                 })
         );
 
-        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore();
+        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
         assertEquals(
             Collections.singleton(mutateProperty()),
             mutatedGraph.nodePropertyKeys(NodeLabel.of("A"))
@@ -169,6 +167,7 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
             );
             GraphStoreCatalog.set(
                 graphCreateConfig,
+                namedDatabaseId(),
                 graphLoader(graphCreateConfig).graphStore()
             );
             return loadedGraphName;
@@ -197,7 +196,7 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
                 })
         );
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, graphName).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore().getUnion();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 

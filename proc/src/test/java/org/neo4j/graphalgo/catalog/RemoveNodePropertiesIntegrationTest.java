@@ -64,17 +64,17 @@ public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
 
     @Test
     void shouldBeAbleToMutateAndDelete() {
-        Graph graphBefore = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
+        Graph graphBefore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "testGraph").graphStore().getUnion();
 
         runQuery("CALL gds.wcc.mutate('testGraph', {mutateProperty: 'componentId'})");
-        Graph graphAfterMutate = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
+        Graph graphAfterMutate = GraphStoreCatalog.get(getUsername(), db.databaseId(), "testGraph").graphStore().getUnion();
         assertNotEquals(graphBefore.availableNodeProperties(), graphAfterMutate.availableNodeProperties());
 
         assertCypherResult(
             "CALL gds.graph.removeNodeProperties('testGraph', ['componentId']) YIELD propertiesRemoved",
             singletonList(map("propertiesRemoved", 4L))
         );
-        Graph graphAfterDelete = GraphStoreCatalog.get(getUsername(), "testGraph").graphStore().getUnion();
+        Graph graphAfterDelete = GraphStoreCatalog.get(getUsername(), db.databaseId(), "testGraph").graphStore().getUnion();
         TestSupport.assertGraphEquals(graphBefore, graphAfterDelete);
     }
 }

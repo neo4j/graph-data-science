@@ -93,7 +93,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements MutateNo
             .build()
             .graphStore();
 
-        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
+        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), namedDatabaseId(), initialGraphStore);
 
         var mutateQuery = GdsCypher
             .call()

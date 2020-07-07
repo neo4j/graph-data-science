@@ -146,7 +146,7 @@ abstract class SimilarityProc
                 AllocationTracker tracker,
                 Log log
             ) {
-                GraphStoreCatalog.remove(getUsername(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
+                GraphStoreCatalog.remove(getUsername(), api.databaseId(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
                 return newAlgo(config);
             }
         };
@@ -182,6 +182,7 @@ abstract class SimilarityProc
                     NodeProjections.ALL,
                     RelationshipProjections.ALL
                 ),
+                api.databaseId(),
                 new NullGraphStore()
             );
         }

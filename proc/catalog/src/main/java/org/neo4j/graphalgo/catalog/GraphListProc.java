@@ -41,7 +41,7 @@ public class GraphListProc extends CatalogProc {
     @Description(DESCRIPTION)
     public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
         Stream<Map.Entry<GraphCreateConfig, GraphStore>> graphEntries = GraphStoreCatalog
-            .getGraphStores(getUsername())
+            .getGraphStores(getUsername(), api.databaseId())
             .entrySet()
             .stream();
 
@@ -52,7 +52,7 @@ public class GraphListProc extends CatalogProc {
             graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
         }
 
-        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram()));
+        return graphEntries.map(e -> new GraphInfo(e.getKey(), api.databaseId(), e.getValue(), computeHistogram()));
     }
 
 }

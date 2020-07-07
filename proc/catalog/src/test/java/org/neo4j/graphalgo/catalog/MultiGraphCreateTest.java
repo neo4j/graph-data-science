@@ -62,13 +62,13 @@ class MultiGraphCreateTest extends BaseProcTest {
         runQuery(create2);
 
         Graph graph1 = GraphStoreCatalog
-            .get("", "graph1")
+            .get("", db.databaseId(), "graph1")
             .graphStore()
             .getGraph(RelationshipType.of("TYPE1"), Optional.empty());
         assertGraph(graph1);
 
         Graph graph2 = GraphStoreCatalog
-            .get("", "graph2")
+            .get("", db.databaseId(), "graph2")
             .graphStore()
             .getGraph(RelationshipType.of("TYPE2"), Optional.empty());
         assertGraph(graph2);

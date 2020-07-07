@@ -119,7 +119,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
 
         runQuery(loadQuery);
 
-        Graph simGraph = GraphStoreCatalog.getUnion(getUsername(), resultGraphName).orElse(null);
+        Graph simGraph = GraphStoreCatalog.getUnion(getUsername(), namedDatabaseId(), resultGraphName).orElse(null);
         assertNotNull(simGraph);
         assertGraphEquals(
             orientation == REVERSE

@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.api.GraphStoreKey;
 import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
@@ -148,8 +149,8 @@ class GraphListProcTest extends BaseProcTest {
 
     private boolean graphIsCached() {
         return GraphStoreCatalog
-            .getUserCatalog(getUsername())
-            .getDegreeDistribution("name").isPresent();
+            .getDegreeDistribution(GraphStoreKey.of(getUsername(), db.databaseId(), "name"))
+            .isPresent();
     }
 
 

@@ -41,6 +41,7 @@ import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Procedure;
 
@@ -97,6 +98,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     Class<? extends AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> getProcedureClazz();
 
     GraphDatabaseAPI graphDb();
+
+    default NamedDatabaseId namedDatabaseId() {
+        return graphDb().databaseId();
+    }
 
     default GraphDatabaseAPI emptyDb() {
         GraphDatabaseAPI db = graphDb();
@@ -218,6 +223,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
             GraphStoreCatalog.set(
                 graphCreateConfig,
+                namedDatabaseId(),
                 graphStore
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
@@ -282,6 +288,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         applyOnProcedure((proc) -> {
             GraphStoreCatalog.set(
                 graphCreateConfig,
+                namedDatabaseId(),
                 graphLoader(graphCreateConfig).graphStore()
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
