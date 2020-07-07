@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -345,6 +346,59 @@ public abstract class AlgoBaseProc<
                         entry.getValue().orientation()
                     ));
                 });
+        }
+    }
+
+    protected void validateIsParallelFreeGraph(GraphCreateConfig graphCreateConfig, CONFIG config) {
+        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
+            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
+            storeConfig.relationshipProjections().projections().entrySet().stream()
+                .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
+                                 config.relationshipTypes().contains(entry.getKey().name()))
+                .filter(entry -> entry.getValue().aggregation() != Aggregation.NONE || entry.getValue().properties().mappings().stream().anyMatch(m -> m.aggregation() != Aggregation.NONE))
+                .forEach(entry -> {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Procedure requires relationship aggregation. Projection for `%s` does not aggregate relationships",
+                        entry.getKey().equals(RelationshipType.ALL_RELATIONSHIPS) ? "*" : entry.getKey().name
+                    ));
+                });
+        }
+    }
+
+    /**
+     * Validates that {@link Orientation#UNDIRECTED} is not mixed with {@link Orientation#NATURAL}
+     * and {@link Orientation#REVERSE}. If a relationship type filter is present in the algorithm
+     * config, only those relationship projections are considered in the validation.
+     */
+    protected void validateOrientationCombinations(GraphCreateConfig graphCreateConfig, CONFIG algorithmConfig) {
+        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
+            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
+            var filteredProjections = storeConfig
+                .relationshipProjections()
+                .projections()
+                .entrySet()
+                .stream()
+                .filter(entry -> algorithmConfig.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
+                                 algorithmConfig.relationshipTypes().contains(entry.getKey().name()))
+                .collect(toList());
+
+            boolean allUndirected = filteredProjections
+                .stream()
+                .allMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
+
+            boolean anyUndirected = filteredProjections
+                .stream()
+                .anyMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
+
+            if (anyUndirected && !allUndirected) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported. Found projections: %s.",
+                    StringJoining.join(filteredProjections
+                        .stream()
+                        .map(entry -> formatWithLocale("%s (%s)", entry.getKey().name, entry.getValue().orientation()))
+                        .sorted())
+                ));
+            }
         }
     }
 

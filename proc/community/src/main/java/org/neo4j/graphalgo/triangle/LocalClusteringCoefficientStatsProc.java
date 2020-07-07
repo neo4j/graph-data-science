@@ -64,6 +64,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStatsConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);
+        validateIsParallelFreeGraph(graphCreateConfig, config);
     }
 
     @Override

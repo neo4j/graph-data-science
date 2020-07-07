@@ -90,6 +90,7 @@ public class LocalClusteringCoefficientStreamProc
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStreamConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);
+        validateIsParallelFreeGraph(graphCreateConfig, config);
     }
 
     @Override
