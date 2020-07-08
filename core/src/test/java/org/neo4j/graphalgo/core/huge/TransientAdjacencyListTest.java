@@ -28,12 +28,12 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_MASK;
-import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_SHIFT;
-import static org.neo4j.graphalgo.core.huge.AdjacencyList.computeAdjacencyByteSize;
+import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_MASK;
+import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_SHIFT;
+import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.computeAdjacencyByteSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
-class AdjacencyListTest {
+class TransientAdjacencyListTest {
 
     @Test
     void shouldComputeCompressedMemoryEstimationForSinglePage() {
@@ -42,7 +42,7 @@ class AdjacencyListTest {
             .maxRelCount(100)
             .build();
 
-        MemoryTree memRec = AdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 500;
@@ -66,7 +66,7 @@ class AdjacencyListTest {
             .maxRelCount(100)
             .build();
 
-        MemoryTree memRec = AdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long uncompressedAdjacencySize = 1200;
@@ -87,7 +87,7 @@ class AdjacencyListTest {
             .maxRelCount(100_000_000_000L)
             .build();
 
-        MemoryTree memRec = AdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 100_500_000_000L;
@@ -111,7 +111,7 @@ class AdjacencyListTest {
             .maxRelCount(100_000_000_000L)
             .build();
 
-        MemoryTree memRec = AdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
 

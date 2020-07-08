@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.nodesim;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.AdjacencyList;
-import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
@@ -66,9 +66,9 @@ class SimilarityGraphBuilder {
             return MemoryEstimations.builder(HugeGraph.class)
                 .add(
                     "adjacency list",
-                    AdjacencyList.compressedMemoryEstimation(averageDegree, newNodeCount)
+                    TransientAdjacencyList.compressedMemoryEstimation(averageDegree, newNodeCount)
                 )
-                .add("adjacency offsets", AdjacencyOffsets.memoryEstimation(concurrency, newNodeCount))
+                .add("adjacency offsets", TransientAdjacencyOffsets.memoryEstimation(concurrency, newNodeCount))
                 .build();
         });
     }

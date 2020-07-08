@@ -105,7 +105,7 @@ final class AdjacencyDecompressingReader {
 
         // last block
         if(available <= 0) {
-            return AdjacencyList.DecompressingCursor.NOT_FOUND;
+            return TransientAdjacencyList.DecompressingCursor.NOT_FOUND;
         }
 
         int targetPos = findPosStrictlyGreaterInBlock(target, pos, Math.min(pos + available, CHUNK_SIZE), block);

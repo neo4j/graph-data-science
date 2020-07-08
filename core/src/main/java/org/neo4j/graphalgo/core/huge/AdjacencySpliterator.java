@@ -19,18 +19,20 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.ModifiableRelationshipCursor;
+import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.api.RelationshipCursor;
 
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
 abstract class AdjacencySpliterator implements Spliterator<RelationshipCursor> {
-    private final AdjacencyList.DecompressingCursor adjacencyCursor;
+    private final AdjacencyCursor adjacencyCursor;
     private final ModifiableRelationshipCursor modifiableRelationshipCursor;
 
     static Spliterator<RelationshipCursor> of(
-        AdjacencyList.DecompressingCursor adjacencyCursor,
+        AdjacencyCursor adjacencyCursor,
         long sourceNodeId,
         double fallbackValue
     ) {
@@ -38,15 +40,15 @@ abstract class AdjacencySpliterator implements Spliterator<RelationshipCursor> {
     }
 
     static Spliterator<RelationshipCursor> of(
-        AdjacencyList.DecompressingCursor adjacencyCursor,
-        AdjacencyList.Cursor propertyCursor,
+        AdjacencyCursor adjacencyCursor,
+        PropertyCursor propertyCursor,
         long sourceNodeId
     ) {
         return new WithProperty(adjacencyCursor, propertyCursor, sourceNodeId);
     }
 
     private AdjacencySpliterator(
-        AdjacencyList.DecompressingCursor adjacencyCursor,
+        AdjacencyCursor adjacencyCursor,
         long sourceNodeId
     ) {
         this.adjacencyCursor = adjacencyCursor;
@@ -84,7 +86,7 @@ abstract class AdjacencySpliterator implements Spliterator<RelationshipCursor> {
 
         private final double fallbackValue;
 
-        WithoutProperty(AdjacencyList.DecompressingCursor adjacencyCursor, long sourceNodeId, double fallbackValue) {
+        WithoutProperty(AdjacencyCursor adjacencyCursor, long sourceNodeId, double fallbackValue) {
             super(adjacencyCursor, sourceNodeId);
             this.fallbackValue = fallbackValue;
         }
@@ -97,11 +99,11 @@ abstract class AdjacencySpliterator implements Spliterator<RelationshipCursor> {
 
     static final class WithProperty extends AdjacencySpliterator {
 
-        private final AdjacencyList.Cursor propertyCursor;
+        private final PropertyCursor propertyCursor;
 
         WithProperty(
-            AdjacencyList.DecompressingCursor adjacencyCursor,
-            AdjacencyList.Cursor propertyCursor,
+            AdjacencyCursor adjacencyCursor,
+            PropertyCursor propertyCursor,
             long sourceNodeId
         ) {
             super(adjacencyCursor, sourceNodeId);

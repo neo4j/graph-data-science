@@ -28,10 +28,10 @@ import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
@@ -187,7 +187,7 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
             ));
     }
 
-    private Map<RelationshipType, Pair<Optional<String>, HugeGraph.Relationships>> loadRelationships(IdMap nodes) {
+    private Map<RelationshipType, Pair<Optional<String>, Relationships>> loadRelationships(IdMap nodes) {
         var propertyKeysByRelType = new HashMap<String, Optional<String>>();
 
         gdlHandler.getEdges()

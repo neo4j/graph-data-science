@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -27,13 +30,15 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
+import java.util.Locale;
+
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 
-public final class AdjacencyList {
+public final class TransientAdjacencyList implements AdjacencyList {
 
     public static final int PAGE_SHIFT = 18;
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
@@ -66,7 +71,7 @@ public final class AdjacencyList {
         MemoryRange pagesMemoryRange = MemoryRange.of(minMemoryReqs, maxMemoryReqs);
 
         return MemoryEstimations
-            .builder(AdjacencyList.class)
+            .builder(TransientAdjacencyList.class)
             .fixed("pages", pagesMemoryRange)
             .build();
     }
@@ -81,7 +86,7 @@ public final class AdjacencyList {
             long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
             long relCount = undirected ? relCountForType * 2 : relCountForType;
             long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
-            return AdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
+            return TransientAdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
         });
     }
 
@@ -92,7 +97,7 @@ public final class AdjacencyList {
     public static MemoryEstimation uncompressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
 
         return MemoryEstimations
-            .builder(AdjacencyList.class)
+            .builder(TransientAdjacencyList.class)
             .perGraphDimension("pages", (dimensions, concurrency) -> {
                 long nodeCount = dimensions.nodeCount();
                 long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
@@ -116,7 +121,20 @@ public final class AdjacencyList {
         return (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
     }
 
-    public AdjacencyList(byte[][] pages) {
+    static TransientAdjacencyList castOrThrow(AdjacencyList from) {
+        if (from instanceof TransientAdjacencyList) {
+            return (TransientAdjacencyList) from;
+        }
+
+        throw new IllegalArgumentException(String.format(
+            Locale.ENGLISH,
+            "Expected %s, got %s.",
+            TransientAdjacencyList.class.getSimpleName(),
+            from == null ? "null" : from.getClass().getSimpleName()
+        ));
+    }
+
+    public TransientAdjacencyList(byte[][] pages) {
         this.pages = pages;
         this.allocatedMemory = memoryOfPages(pages);
     }
@@ -131,13 +149,14 @@ public final class AdjacencyList {
         return memory;
     }
 
-    int getDegree(long index) {
+    @Override
+    public int degree(long index) {
         return AdjacencyDecompressingReader.readInt(
                 pages[pageIndex(index, PAGE_SHIFT)],
                 indexInPage(index, PAGE_MASK));
     }
 
-    public final long release() {
+    public long release() {
         if (pages == null) {
             return 0L;
         }
@@ -147,21 +166,18 @@ public final class AdjacencyList {
 
     // Cursors
 
-    Cursor cursor(long offset) {
+    @Override
+    public Cursor cursor(long offset) {
         return new Cursor(pages).init(offset);
     }
 
-    /**
-     * Returns a new, uninitialized delta cursor. Call {@link DecompressingCursor#init(long)}.
-     */
-    DecompressingCursor rawDecompressingCursor() {
+    @Override
+    public DecompressingCursor rawDecompressingCursor() {
         return new DecompressingCursor(pages);
     }
 
-    /**
-     * Get a new cursor initialised on the given offset
-     */
-    DecompressingCursor decompressingCursor(long offset) {
+    @Override
+    public DecompressingCursor decompressingCursor(long offset) {
         return rawDecompressingCursor().init(offset);
     }
 
@@ -172,7 +188,7 @@ public final class AdjacencyList {
         return reuse.init(offset);
     }
 
-    public static final class Cursor extends MutableIntValue {
+    public static final class Cursor extends MutableIntValue implements PropertyCursor {
 
         static final Cursor EMPTY = new Cursor(new byte[0][]);
 
@@ -192,24 +208,19 @@ public final class AdjacencyList {
             return degree;
         }
 
-        /**
-         * Return true iff there is at least one more target to decode.
-         */
-        boolean hasNextLong() {
+        @Override
+        public boolean hasNextLong() {
             return offset < limit;
         }
 
-        /**
-         * Read the next target id.
-         * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
-         */
-        long nextLong() {
+        @Override
+        public long nextLong() {
             long value = AdjacencyDecompressingReader.readLong(currentPage, offset);
             offset += Long.BYTES;
             return value;
         }
 
-        Cursor init(long fromIndex) {
+        public Cursor init(long fromIndex) {
             this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
             this.offset = indexInPage(fromIndex, PAGE_MASK);
             this.degree = AdjacencyDecompressingReader.readInt(currentPage, offset);
@@ -219,9 +230,9 @@ public final class AdjacencyList {
         }
     }
 
-    public static final class DecompressingCursor extends MutableIntValue {
+    public static final class DecompressingCursor extends MutableIntValue implements AdjacencyCursor {
 
-        public static final long NOT_FOUND = -1;
+        static final long NOT_FOUND = -1;
         // TODO: free
         private byte[][] pages;
         private final AdjacencyDecompressingReader decompress;
@@ -234,6 +245,15 @@ public final class AdjacencyList {
             this.decompress = new AdjacencyDecompressingReader();
         }
 
+        @Override
+        public DecompressingCursor init(long fromIndex) {
+            maxTargets = decompress.reset(
+                pages[pageIndex(fromIndex, PAGE_SHIFT)],
+                indexInPage(fromIndex, PAGE_MASK));
+            currentTarget = 0;
+            return this;
+        }
+
         /**
          * Copy iteration state from another cursor without changing {@code other}.
          */
@@ -243,58 +263,37 @@ public final class AdjacencyList {
             maxTargets = other.maxTargets;
         }
 
-        /**
-         * Return how many targets can be decoded in total. This is equivalent to the degree.
-         */
-        public int cost() {
+        @Override
+        public int size() {
             return maxTargets;
         }
 
-        /**
-         * Return how many targets are still left to be decoded.
-         */
-        int remaining() {
+        @Override
+        public int remaining() {
             return maxTargets - currentTarget;
         }
 
-        /**
-         * Return true iff there is at least one more target to decode.
-         */
-        boolean hasNextVLong() {
+        @Override
+        public boolean hasNextVLong() {
             return currentTarget < maxTargets;
         }
 
-        /**
-         * Read and decode the next target id.
-         * It is undefined behavior if this is called after {@link #hasNextVLong()} returns {@code false}.
-         */
-        long nextVLong() {
+        @Override
+        public long nextVLong() {
             int current = currentTarget++;
             int remaining = maxTargets - current;
             return decompress.next(remaining);
         }
 
-        /**
-         * Read and decode target ids until it is strictly larger than (`>`) the provided {@code target}.
-         * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
-         * id that is large enough.
-         * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-         * will return {@code false}
-         */
-        long skipUntil(long target) {
+        @Override
+        public long skipUntil(long target) {
             long value = decompress.skipUntil(target, remaining(), this);
             this.currentTarget += this.value;
             return value;
         }
 
-        /**
-         * Read and decode target ids until it is larger than or equal (`>=`) the provided {@code target}.
-         * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
-         * id that is large enough.
-         * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-         * will return {@code false}
-         */
-        long advance(long target) {
+        @Override
+        public long advance(long target) {
             int targetsLeftToBeDecoded = remaining();
             if(targetsLeftToBeDecoded <= 0) {
                 return NOT_FOUND;
@@ -302,14 +301,6 @@ public final class AdjacencyList {
             long value = decompress.advance(target, targetsLeftToBeDecoded, this);
             this.currentTarget += this.value;
             return value;
-        }
-
-        DecompressingCursor init(long fromIndex) {
-            maxTargets = decompress.reset(
-                    pages[pageIndex(fromIndex, PAGE_SHIFT)],
-                    indexInPage(fromIndex, PAGE_MASK));
-            currentTarget = 0;
-            return this;
         }
     }
 }

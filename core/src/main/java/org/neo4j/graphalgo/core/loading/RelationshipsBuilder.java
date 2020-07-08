@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.AdjacencyList;
-import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
@@ -36,8 +36,8 @@ public class RelationshipsBuilder {
     final AdjacencyListBuilder adjacencyListBuilder;
     final AdjacencyListBuilder[] propertyBuilders;
 
-    AdjacencyOffsets globalAdjacencyOffsets;
-    AdjacencyOffsets[] globalPropertyOffsets;
+    TransientAdjacencyOffsets globalAdjacencyOffsets;
+    TransientAdjacencyOffsets[] globalPropertyOffsets;
 
     public RelationshipsBuilder(
         RelationshipProjection projection,
@@ -71,28 +71,28 @@ public class RelationshipsBuilder {
         );
     }
 
-    final void setGlobalAdjacencyOffsets(AdjacencyOffsets globalAdjacencyOffsets) {
+    final void setGlobalAdjacencyOffsets(TransientAdjacencyOffsets globalAdjacencyOffsets) {
         this.globalAdjacencyOffsets = globalAdjacencyOffsets;
     }
 
-    final void setGlobalPropertyOffsets(AdjacencyOffsets[] globalPropertyOffsets) {
+    final void setGlobalPropertyOffsets(TransientAdjacencyOffsets[] globalPropertyOffsets) {
         this.globalPropertyOffsets = globalPropertyOffsets;
     }
 
-    public AdjacencyList adjacencyList() {
+    public TransientAdjacencyList adjacencyList() {
         return adjacencyListBuilder.build();
     }
 
-    public AdjacencyOffsets globalAdjacencyOffsets() {
+    public TransientAdjacencyOffsets globalAdjacencyOffsets() {
         return globalAdjacencyOffsets;
     }
 
     // TODO: This returns only the first of possibly multiple properties
-    public AdjacencyList properties() {
+    public TransientAdjacencyList properties() {
         return propertyBuilders.length > 0 ? propertyBuilders[0].build() : null;
     }
 
-    public AdjacencyList properties(int propertyIndex) {
+    public TransientAdjacencyList properties(int propertyIndex) {
         return propertyBuilders.length > 0 ? propertyBuilders[propertyIndex].build() : null;
     }
 
@@ -101,11 +101,11 @@ public class RelationshipsBuilder {
     }
 
     // TODO: This returns only the first of possibly multiple properties
-    public AdjacencyOffsets globalPropertyOffsets() {
+    public TransientAdjacencyOffsets globalPropertyOffsets() {
         return globalPropertyOffsets[0];
     }
 
-    public AdjacencyOffsets globalPropertyOffsets(int propertyIndex) {
+    public TransientAdjacencyOffsets globalPropertyOffsets(int propertyIndex) {
         return globalPropertyOffsets[propertyIndex];
     }
 }

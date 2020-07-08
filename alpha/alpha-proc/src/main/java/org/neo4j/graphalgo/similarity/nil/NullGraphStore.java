@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.values.storable.NumberType;
 
@@ -176,7 +176,7 @@ public class NullGraphStore implements GraphStore {
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
-        HugeGraph.Relationships relationships
+        Relationships relationships
     ) {}
 
     @Override

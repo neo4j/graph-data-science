@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -77,7 +78,7 @@ public final class HugeGraphUtil {
         );
     }
 
-    public static HugeGraph create(IdMap idMap, HugeGraph.Relationships relationships, AllocationTracker tracker) {
+    public static HugeGraph create(IdMap idMap, Relationships relationships, AllocationTracker tracker) {
         return HugeGraph.create(
             idMap,
             Collections.emptyMap(),
@@ -261,11 +262,11 @@ public final class HugeGraphUtil {
             addFromInternal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
         }
 
-        public HugeGraph.Relationships build() {
+        public Relationships build() {
             flushBuffer();
 
             ParallelUtil.run(relationshipImporter.flushTasks(), executorService);
-            return HugeGraph.Relationships.of(
+            return Relationships.of(
                 importedRelationships,
                 orientation,
                 relationshipsBuilder.adjacencyList(),
