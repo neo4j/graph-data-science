@@ -25,8 +25,6 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
-import java.util.Locale;
-
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
@@ -59,19 +57,6 @@ public abstract class TransientAdjacencyOffsets implements AdjacencyOffsets {
                 "adjacency offsets",
                 (dimensions, concurrency) -> memoryEstimation(concurrency, dimensions.nodeCount())
         );
-    }
-
-    static TransientAdjacencyOffsets castOrThrow(AdjacencyOffsets from) {
-        if (from instanceof TransientAdjacencyOffsets) {
-            return (TransientAdjacencyOffsets) from;
-        }
-
-        throw new IllegalArgumentException(String.format(
-            Locale.ENGLISH,
-            "Expected %s, got %s.",
-            TransientAdjacencyList.class.getSimpleName(),
-            from == null ? "null" : from.getClass().getSimpleName()
-        ));
     }
 
     public static TransientAdjacencyOffsets of(long[] page) {

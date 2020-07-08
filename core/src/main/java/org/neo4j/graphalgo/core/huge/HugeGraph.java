@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.Cursor;
+import static org.neo4j.graphalgo.core.utils.GenericUtil.castOrThrow;
 
 /**
  * Huge Graph contains two array like data structures.
@@ -110,19 +111,19 @@ public class HugeGraph implements Graph {
         IdMap nodes,
         Map<String, NodeProperties> nodeProperties,
         Relationships.Topology topology,
-        Optional<Relationships.Properties> maybePropertyCSR,
+        Optional<Relationships.Properties> maybeProperties,
         AllocationTracker tracker
     ) {
         return new HugeGraph(
             nodes,
             nodeProperties,
             topology.elementCount(),
-            TransientAdjacencyList.castOrThrow(topology.list()),
-            TransientAdjacencyOffsets.castOrThrow(topology.offsets()),
-            maybePropertyCSR.isPresent(),
-            maybePropertyCSR.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
-            maybePropertyCSR.map(Relationships.Properties::list).map(TransientAdjacencyList::castOrThrow).orElse(null),
-            maybePropertyCSR.map(Relationships.Properties::offsets).map(TransientAdjacencyOffsets::castOrThrow).orElse(null),
+            castOrThrow(topology.list(), TransientAdjacencyList.class),
+            castOrThrow(topology.offsets(), TransientAdjacencyOffsets.class),
+            maybeProperties.isPresent(),
+            maybeProperties.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
+            maybeProperties.map(Relationships.Properties::list).map(castOrThrow(TransientAdjacencyList.class)).orElse(null),
+            maybeProperties.map(Relationships.Properties::offsets).map(castOrThrow(TransientAdjacencyOffsets.class)).orElse(null),
             topology.orientation(),
             tracker
         );
