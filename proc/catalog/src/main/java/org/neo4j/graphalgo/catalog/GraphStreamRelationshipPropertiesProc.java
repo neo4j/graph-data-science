@@ -59,7 +59,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphStreamRelationshipPropertiesConfig config = GraphStreamRelationshipPropertiesConfig.of(
-            getUsername(),
+            username(),
             graphName,
             relationshipProperties,
             relationshipTypes,
@@ -67,7 +67,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), api.databaseId(), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(username(), namedDatabaseId(), graphName).graphStore();
         config.validate(graphStore);
 
        return streamRelationshipProperties(graphStore, config, PropertiesResult::new);
@@ -86,7 +86,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphStreamRelationshipPropertiesConfig config = GraphStreamRelationshipPropertiesConfig.of(
-            getUsername(),
+            username(),
             graphName,
             List.of(relationshipProperty),
             relationshipTypes,
@@ -94,7 +94,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), api.databaseId(), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(username(), namedDatabaseId(), graphName).graphStore();
         config.validate(graphStore);
 
         return streamRelationshipProperties(

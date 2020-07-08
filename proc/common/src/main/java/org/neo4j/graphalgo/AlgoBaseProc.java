@@ -96,7 +96,7 @@ public abstract class AlgoBaseProc<
         if (graphName.isEmpty()) {
             // inherit concurrency from AlgoBaseConfig
             config = config.withNumber(READ_CONCURRENCY_KEY, config.getInt(CONCURRENCY_KEY, DEFAULT_CONCURRENCY));
-            GraphCreateConfig createConfig = GraphCreateConfig.createImplicit(getUsername(), config);
+            GraphCreateConfig createConfig = GraphCreateConfig.createImplicit(username(), config);
             maybeImplicitCreate = Optional.of(createConfig);
             allowedKeys.addAll(createConfig.configKeys());
             CypherMapWrapper configWithoutCreateKeys = config.withoutAny(allowedKeys);
@@ -108,7 +108,7 @@ public abstract class AlgoBaseProc<
             }
             config = configWithoutCreateKeys;
         }
-        CONFIG algoConfig = newConfig(getUsername(), graphName, maybeImplicitCreate, config);
+        CONFIG algoConfig = newConfig(username(), graphName, maybeImplicitCreate, config);
         allowedKeys.addAll(algoConfig.configKeys());
         validateConfig(config, allowedKeys);
         return algoConfig;
@@ -151,8 +151,9 @@ public abstract class AlgoBaseProc<
         } else {
             String graphName = config.graphName().orElseThrow(IllegalStateException::new);
 
-            GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(getUsername(),
-                api.databaseId(),
+            GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(
+                username(),
+                namedDatabaseId(),
                 graphName
             );
             GraphCreateConfig graphCreateConfig = graphStoreWithConfig.config();
@@ -239,7 +240,7 @@ public abstract class AlgoBaseProc<
         GraphStoreWithConfig graphCandidate;
 
         if (maybeGraphName.isPresent()) {
-            graphCandidate = GraphStoreCatalog.get(getUsername(), api.databaseId(), maybeGraphName.get());
+            graphCandidate = GraphStoreCatalog.get(username(), namedDatabaseId(), maybeGraphName.get());
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);

@@ -61,12 +61,12 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        validateGraphName(getUsername(), graphName);
+        validateGraphName(username(), graphName);
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateFromStoreConfig config = GraphCreateFromStoreConfig.of(
-            getUsername(),
+            username(),
             graphName,
             nodeProjection,
             relationshipProjection,
@@ -92,7 +92,7 @@ public class GraphCreateProc extends CatalogProc {
     ) {
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateConfig config = GraphCreateFromStoreConfig.of(
-            getUsername(),
+            username(),
             NO_GRAPH_NAME,
             nodeProjection,
             relationshipProjection,
@@ -110,12 +110,12 @@ public class GraphCreateProc extends CatalogProc {
         @Name(value = "relationshipQuery") String relationshipQuery,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        validateGraphName(getUsername(), graphName);
+        validateGraphName(username(), graphName);
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateFromCypherConfig config = GraphCreateFromCypherConfig.of(
-            getUsername(),
+            username(),
             graphName,
             nodeQuery,
             relationshipQuery,
@@ -141,7 +141,7 @@ public class GraphCreateProc extends CatalogProc {
     ) {
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphCreateFromCypherConfig config = GraphCreateFromCypherConfig.of(
-            getUsername(),
+            username(),
             NO_GRAPH_NAME,
             nodeQuery,
             relationshipQuery,
@@ -167,7 +167,7 @@ public class GraphCreateProc extends CatalogProc {
                 .withNodeCount(graphStore.nodeCount())
                 .withRelationshipCount(graphStore.relationshipCount());
 
-            GraphStoreCatalog.set(config, api.databaseId(), graphStore);
+            GraphStoreCatalog.set(config, namedDatabaseId(), graphStore);
         }
 
         return builder.build();

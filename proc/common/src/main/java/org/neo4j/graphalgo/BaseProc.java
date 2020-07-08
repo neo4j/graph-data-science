@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
@@ -65,8 +66,12 @@ public abstract class BaseProc {
     @Context
     public ProcedureCallContext callContext;
 
-    protected String getUsername() {
+    protected String username() {
         return transaction.subjectOrAnonymous().username();
+    }
+
+    protected NamedDatabaseId namedDatabaseId() {
+        return api.databaseId();
     }
 
     protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
@@ -79,7 +84,7 @@ public abstract class BaseProc {
                 .tracker(tracker)
                 .terminationFlag(TerminationFlag.wrap(transaction))
                 .build())
-            .username(getUsername())
+            .username(username())
             .createConfig(createConfig)
             .build();
     }
@@ -112,7 +117,7 @@ public abstract class BaseProc {
 
     protected final void validateGraphName(String username, String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
-        if (GraphStoreCatalog.exists(username, api.databaseId(), graphName)) {
+        if (GraphStoreCatalog.exists(username, namedDatabaseId(), graphName)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "A graph with name '%s' already exists.",
                 graphName
@@ -152,10 +157,10 @@ public abstract class BaseProc {
         long minBytesProcedure = memoryTreeWithDimensions.memoryTree.memoryUsage().min;
         if (minBytesProcedure > freeMemory) {
             String template = "Procedure was blocked since minimum estimated memory (%s) exceeds current free memory (%s).";
-            if (GraphStoreCatalog.graphStoresCount(api.databaseId()) > 0) {
+            if (GraphStoreCatalog.graphStoresCount(namedDatabaseId()) > 0) {
                 template += formatWithLocale(
                     " Note: you have %s graphs currently loaded into memory.",
-                    GraphStoreCatalog.graphStoresCount(api.databaseId())
+                    GraphStoreCatalog.graphStoresCount(namedDatabaseId())
                 );
             }
             throw new IllegalStateException(formatWithLocale(

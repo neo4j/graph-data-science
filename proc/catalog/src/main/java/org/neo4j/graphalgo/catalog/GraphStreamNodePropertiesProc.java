@@ -56,7 +56,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphStreamNodePropertiesConfig config = GraphStreamNodePropertiesConfig.of(
-            getUsername(),
+            username(),
             graphName,
             nodeProperties,
             nodeLabels,
@@ -64,7 +64,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), api.databaseId(), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(username(), namedDatabaseId(), graphName).graphStore();
         config.validate(graphStore);
 
        return streamNodeProperties(graphStore, config, PropertiesResult::new);
@@ -83,7 +83,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphStreamNodePropertiesConfig config = GraphStreamNodePropertiesConfig.of(
-            getUsername(),
+            username(),
             graphName,
             List.of(nodeProperty),
             nodeLabels,
@@ -91,7 +91,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), api.databaseId(), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(username(), namedDatabaseId(), graphName).graphStore();
         config.validate(graphStore);
 
         return streamNodeProperties(graphStore, config, (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId,propertyValue));

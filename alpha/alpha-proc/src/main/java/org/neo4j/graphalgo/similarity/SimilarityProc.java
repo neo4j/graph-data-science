@@ -146,7 +146,7 @@ abstract class SimilarityProc
                 AllocationTracker tracker,
                 Log log
             ) {
-                GraphStoreCatalog.remove(getUsername(), api.databaseId(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
+                GraphStoreCatalog.remove(username(), namedDatabaseId(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
                 return newAlgo(config);
             }
         };
@@ -177,12 +177,12 @@ abstract class SimilarityProc
             // We put the fake graph store into the graph catalog
             GraphStoreCatalog.set(
                 ImmutableGraphCreateFromStoreConfig.of(
-                    getUsername(),
+                    username(),
                     graphNameOrConfig.toString(),
                     NodeProjections.ALL,
                     RelationshipProjections.ALL
                 ),
-                api.databaseId(),
+                namedDatabaseId(),
                 new NullGraphStore()
             );
         }

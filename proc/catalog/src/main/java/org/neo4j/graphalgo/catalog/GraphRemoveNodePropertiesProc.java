@@ -52,7 +52,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphRemoveNodePropertiesConfig config = GraphRemoveNodePropertiesConfig.of(
-            getUsername(),
+            username(),
             graphName,
             nodeProperties,
             nodeLabels,
@@ -60,7 +60,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), api.databaseId(), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(username(), namedDatabaseId(), graphName).graphStore();
         config.validate(graphStore);
         // removing
         long propertiesRemoved = runWithExceptionLogging(

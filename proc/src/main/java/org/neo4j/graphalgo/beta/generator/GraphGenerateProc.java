@@ -55,12 +55,12 @@ public final class GraphGenerateProc extends BaseProc {
         @Name(value = "averageDegree") long averageDegree,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        validateGraphName(getUsername(), graphName);
+        validateGraphName(username(), graphName);
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         RandomGraphGeneratorConfig config = RandomGraphGeneratorConfig.of(
-            getUsername(),
+            username(),
             graphName,
             nodeCount,
             averageDegree,
@@ -105,7 +105,7 @@ public final class GraphGenerateProc extends BaseProc {
 
             stats.nodes = graphStore.nodeCount();
             stats.relationships = graphStore.relationshipCount();
-            GraphStoreCatalog.set(config, api.databaseId(), graphStore);
+            GraphStoreCatalog.set(config, namedDatabaseId(), graphStore);
         }
 
         return stats;

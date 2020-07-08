@@ -60,7 +60,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphWriteNodePropertiesConfig config = GraphWriteNodePropertiesConfig.of(
-            getUsername(),
+            username(),
             graphName,
             nodeProperties,
             nodeLabels,
@@ -68,7 +68,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), api.databaseId(), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(username(), namedDatabaseId(), graphName).graphStore();
         config.validate(graphStore);
 
         // writing

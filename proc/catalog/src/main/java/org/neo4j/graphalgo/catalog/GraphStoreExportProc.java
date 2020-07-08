@@ -42,14 +42,14 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var cypherConfig = CypherMapWrapper.create(configuration);
-        var exportConfig = GraphStoreExportConfig.of(getUsername(), cypherConfig);
+        var exportConfig = GraphStoreExportConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
 
         var neo4jHome = api.databaseLayout().getNeo4jLayout().homeDirectory();
 
         var result = runWithExceptionLogging(
             "Graph creation failed", () -> {
-                var graphStore = GraphStoreCatalog.get(getUsername(), api.databaseId(), graphName).graphStore();
+                var graphStore = GraphStoreCatalog.get(username(), namedDatabaseId(), graphName).graphStore();
                 var graphStoreExport = new GraphStoreExport(graphStore, neo4jHome, exportConfig);
 
                 var start = System.nanoTime();
