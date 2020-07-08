@@ -23,7 +23,7 @@ subprojects { proj ->
             html {
                 enabled true
                 destination file("${checkstyleReportsDir}/html/${fileName}.html")
-                stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-noframes-severity-sorted.xsl")
+                stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-simple.xsl")
             }
         }
     }
