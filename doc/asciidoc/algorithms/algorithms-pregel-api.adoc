@@ -9,20 +9,28 @@ This chapter provides explanations and examples for using the Pregel API in the 
 [[algorithms-pregel-api-intro]]
 == Introduction
 
-Pregel is a vertex-centric computation model to define your own algorithms via a `compute` function.
-This is exposed through the Graph Data Science library as a Java API that enables you to implement your own algorithms.
-//TODO: link to some other docs
-The computation model executes the algorithm in several iterations, also called `super-steps` in Pregel terminology.
-Each node executes the same user-defined function, which process a list of messages and sends messages to its neighbours.
-Currently, messages of type `double` are only allowed.
-Moreover, all pregel jobs, which run in their own thread, share a so called PregelContext in which the data for the current node is stored.
-The algorithms terminates if no messages where send in the last iteration.
+Pregel is a vertex-centric computation model to define your own algorithms via a user-defined _compute_ function.
+Node values can be updated within the compute function and represent the algorithm result.
+The input graph contains default node values or node values from a graph projection.
+
+The compute function is executed in multiple iterations, also called _super-steps_.
+In each super-step the compute function is executed for each node in the graph.
+Within that function, a node can receive messages from its neighbor nodes.
+Based on the received messages and its currently stored value, a node can compute a new value.
+A node can also send messages to all of its neighbors which are received in the next super-step.
+The algorithm terminates after a fixed number of super-steps or if no messages are being sent between nodes.
+
+A Pregel computation is executed in parallel.
+Each thread executes the compute function for a batch of nodes.
 
 For more information about Pregel, have a look at https://kowshik.github.io/JPregel/pregel_paper.pdf.
 
+To implement your own Pregel algorithm, the Graph Data Science library provides a Java API, which is described below.
 
-== Pregel Architecture
-// TODO: does this concurrency allow arbitrary values? (enterprise feature?)
+For an example on how to expose a custom Pregel computation via a Neo4j procedure, have a look at the https://github.com/neo-technology/graph-analytics/tree/master/public/examples/PregelK1Coloring[K1-Coloring example].
+
+
+== Pregel API
 .Initializing Pregel
 [source, java]
 ----
@@ -44,21 +52,21 @@ public final class Pregel {
 }
 ----
 
-To build PregelConfig you can use the `ImmutablePregelConfig.builder()`.
+To build a PregelConfig you can use the `ImmutablePregelConfig.builder()`.
 
 .Pregel Config
 [opts="header",cols="1,1,1,6"]
 |===
 | Name                      | Type      | Default Value | Description
-| intialNodeValue           | Double    | -1            | The initial value of the node in the pregel context.
-| isAsynchronous            | Boolean   | false         | Flag indicating if multiple super-steps can be executed in parallel
-| relationshipWeightProperty| String    | null          | The name of the relationship property that represents weight.
-| concurrency               | Integer   | 4             | The concurrency used when executing the pregel computation.
+| initialNodeValue          | Double    | -1            | Initial value of the node in the Pregel context.
+| isAsynchronous            | Boolean   | false         | Flag indicating if messages can be sent and received in the same super-step.
+| relationshipWeightProperty| String    | null          | Name of the relationship property that represents weight.
+| concurrency               | Integer   | 4             | Concurrency used when executing the Pregel computation.
 |===
 
-For implementing your own algorithm, you need implement the `PregelComputation` interface.
+To implement your own algorithm, you need to implement the `PregelComputation` interface.
 
-.The Pregel Computation
+.The Pregel computation
 [source, java]
 ----
 @FunctionalInterface
@@ -70,11 +78,10 @@ public interface PregelComputation {
 }
 ----
 
+The compute function takes a context, the node id for which the method is being executed for, and the messages that were sent to that node.
+Using the context and the node id, one can access the current super-step, read and update the node value, send messages or vote to halt the computation.
 
-The compute method of the Pregel class expects an instance of PregelContext.
-In addition of being a holding the data for the current node, the PregelContext provides communication via messages as well as managing the iterations and halting.
-
-.The PregelContext
+.The Pregel context
 [source, java]
 ----
 public final class PregelContext {
