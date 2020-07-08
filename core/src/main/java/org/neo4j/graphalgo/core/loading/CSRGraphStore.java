@@ -19,14 +19,16 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.NodeProperty;
+import org.neo4j.graphalgo.api.NodePropertyStore;
+import org.neo4j.graphalgo.api.RelationshipProperty;
+import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
@@ -490,7 +492,7 @@ public final class CSRGraphStore implements GraphStore {
             }
             return builder.putIfAbsent(
                 propertyKey,
-                ImmutableRelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, properties)
+                RelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, properties)
             ).build();
         });
     }
@@ -634,134 +636,6 @@ public final class CSRGraphStore implements GraphStore {
         return relationshipPropsBuilder.build();
     }
 
-    @ValueClass
-    interface NodeProperty {
-
-        String key();
-
-        NumberType type();
-
-        PropertyState state();
-
-        NodeProperties values();
-
-        static NodeProperty of(String key, NumberType type, PropertyState origin, NodeProperties values) {
-            return ImmutableNodeProperty.of(key, type, origin, values);
-        }
-    }
-
-    @ValueClass
-    public interface NodePropertyStore {
-
-        Map<String, NodeProperty> nodeProperties();
-
-        default Map<String, NodeProperties> nodePropertyValues() {
-            return nodeProperties()
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().values()));
-        }
-
-        default NodeProperty get(String propertyKey) {
-            return nodeProperties().get(propertyKey);
-        }
-
-        default boolean isEmpty() {
-            return nodeProperties().isEmpty();
-        }
-
-        default Set<String> keySet() {
-            return nodeProperties().keySet();
-        }
-
-        default boolean containsKey(String propertyKey) {
-            return nodeProperties().containsKey(propertyKey);
-        }
-
-        static NodePropertyStore empty() {
-            return ImmutableNodePropertyStore.of(Collections.emptyMap());
-        }
-
-        static Builder builder() {
-            // need to initialize with empty map due to `deferCollectionAllocation = true`
-            return new Builder().nodeProperties(Collections.emptyMap());
-        }
-
-        @AccessibleFields
-        final class Builder extends ImmutableNodePropertyStore.Builder {
-
-            Builder putIfAbsent(String propertyKey, NodeProperty nodeProperty) {
-                nodeProperties.putIfAbsent(propertyKey, nodeProperty);
-                return this;
-            }
-
-            Builder removeProperty(String propertyKey) {
-                nodeProperties.remove(propertyKey);
-                return this;
-            }
-        }
-    }
-
-    @ValueClass
-    public interface RelationshipPropertyStore {
-
-        Map<String, RelationshipProperty> relationshipProperties();
-
-        default RelationshipProperty get(String propertyKey) {
-            return relationshipProperties().get(propertyKey);
-        }
-
-        default boolean isEmpty() {
-            return relationshipProperties().isEmpty();
-        }
-
-        default Set<String> keySet() {
-            return relationshipProperties().keySet();
-        }
-
-        default Collection<RelationshipProperty> values() {
-            return relationshipProperties().values();
-        }
-
-        default boolean containsKey(String propertyKey) {
-            return relationshipProperties().containsKey(propertyKey);
-        }
-
-        static RelationshipPropertyStore empty() {
-            return ImmutableRelationshipPropertyStore.of(Collections.emptyMap());
-        }
-
-        static Builder builder() {
-            // need to initialize with empty map due to `deferCollectionAllocation = true`
-            return new Builder().relationshipProperties(Collections.emptyMap());
-        }
-
-        @AccessibleFields
-        final class Builder extends ImmutableRelationshipPropertyStore.Builder {
-
-            Builder putIfAbsent(String propertyKey, RelationshipProperty relationshipProperty) {
-                relationshipProperties.putIfAbsent(propertyKey, relationshipProperty);
-                return this;
-            }
-        }
-
-    }
-
-    @ValueClass
-    public interface RelationshipProperty {
-
-        String key();
-
-        NumberType type();
-
-        PropertyState state();
-
-        Relationships.Properties values();
-
-        static RelationshipProperty of(String key, NumberType type, PropertyState state, Relationships.Properties values) {
-            return ImmutableRelationshipProperty.of(key, type, state, values);
-        }
-    }
 }
 
 
