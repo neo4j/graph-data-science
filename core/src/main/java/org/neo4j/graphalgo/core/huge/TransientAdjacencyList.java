@@ -245,8 +245,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
             this.decompress = new AdjacencyDecompressingReader();
         }
 
-        @Override
-        public DecompressingCursor init(long fromIndex) {
+        DecompressingCursor init(long fromIndex) {
             maxTargets = decompress.reset(
                 pages[pageIndex(fromIndex, PAGE_SHIFT)],
                 indexInPage(fromIndex, PAGE_MASK));
@@ -285,15 +284,27 @@ public final class TransientAdjacencyList implements AdjacencyList {
             return decompress.next(remaining);
         }
 
-        @Override
-        public long skipUntil(long target) {
+        /**
+         * Read and decode target ids until it is strictly larger than ({@literal >}) the provided {@code target}.
+         * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
+         * id that is large enough.
+         * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
+         * will return {@code false}
+         */
+        long skipUntil(long target) {
             long value = decompress.skipUntil(target, remaining(), this);
             this.currentTarget += this.value;
             return value;
         }
 
-        @Override
-        public long advance(long target) {
+        /**
+         * Read and decode target ids until it is larger than or equal ({@literal >=}) the provided {@code target}.
+         * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
+         * id that is large enough.
+         * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
+         * will return {@code false}
+         */
+        long advance(long target) {
             int targetsLeftToBeDecoded = remaining();
             if(targetsLeftToBeDecoded <= 0) {
                 return NOT_FOUND;

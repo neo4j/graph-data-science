@@ -22,13 +22,6 @@ package org.neo4j.graphalgo.api;
 public interface AdjacencyCursor {
 
     /**
-     * Initializes the cursor.
-     *
-     * @param offset the position in an adjacency list to start iterating from
-     */
-    AdjacencyCursor init(long offset);
-
-    /**
      * Return how many targets can be decoded in total. This is equivalent to the degree.
      */
     int size();
@@ -50,21 +43,4 @@ public interface AdjacencyCursor {
      */
     int remaining();
 
-    /**
-     * Read and decode target ids until it is strictly larger than ({@literal >}) the provided {@code target}.
-     * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
-     * id that is large enough.
-     * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-     * will return {@code false}
-     */
-    long skipUntil(long target);
-
-    /**
-     * Read and decode target ids until it is larger than or equal ({@literal >=}) the provided {@code target}.
-     * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
-     * id that is large enough.
-     * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-     * will return {@code false}
-     */
-    long advance(long target);
 }
