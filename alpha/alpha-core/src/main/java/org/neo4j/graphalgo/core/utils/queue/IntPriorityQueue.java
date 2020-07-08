@@ -43,7 +43,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
     private static final int[] EMPTY_INT = new int[0];
 
     private HugeIntArray heap;
-    private int size = 0;
+    private long size = 0;
 
     /**
      * Creates a new queue with the given capacity.
@@ -141,7 +141,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
     /**
      * @return the number of elements currently stored in the queue.
      */
-    public final int size() {
+    public final long size() {
         return size;
     }
 
@@ -164,7 +164,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
      * Cost is linear with the size of the queue.
      */
     public final void update(int element) {
-        int pos = findElementPosition(element);
+        long pos = findElementPosition(element);
         if (pos != 0) {
             if (!upHeap(pos) && pos < size) {
                 downHeap(pos);
@@ -180,8 +180,8 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
         }
     }
 
-    private int findElementPosition(int element) {
-        final int limit = size + 1;
+    private long findElementPosition(int element) {
+        final long limit = size + 1;
         final HugeIntArray data = heap;
         HugeCursor<int[]> cursor = data.initCursor(data.newCursor(), 1, limit);
         while (cursor.next()) {
@@ -189,13 +189,13 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
             int i = cursor.offset;
             int localLimit = cursor.limit - 4;
             for (; i <= localLimit; i += 4) {
-                if (internalArray[i] == element) return i + (int) cursor.base;
-                if (internalArray[i + 1] == element) return i + 1 + (int) cursor.base;
-                if (internalArray[i + 2] == element) return i + 2 + (int) cursor.base;
-                if (internalArray[i + 3] == element) return i + 3 + (int) cursor.base;
+                if (internalArray[i] == element) return i + cursor.base;
+                if (internalArray[i + 1] == element) return i + 1 + cursor.base;
+                if (internalArray[i + 2] == element) return i + 2 + cursor.base;
+                if (internalArray[i + 3] == element) return i + 3 + cursor.base;
             }
             for (; i < cursor.limit; ++i) {
-                if (internalArray[i] == element) return i + (int) cursor.base;
+                if (internalArray[i] == element) return i + cursor.base;
             }
         }
         return 0;
@@ -210,10 +210,10 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
         heap = null;
     }
 
-    private boolean upHeap(int origPos) {
-        int i = origPos;
+    private boolean upHeap(long origPos) {
+        long i = origPos;
         int node = heap.get(i);          // save bottom node
-        int j = i >>> 1;
+        long j = i >>> 1;
         while (j > 0 && lessThan(node, heap.get(j))) {
             heap.set(i, heap.get(j));       // shift parents down
             i = j;
@@ -223,10 +223,10 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
         return i != origPos;
     }
 
-    private void downHeap(int i) {
+    private void downHeap(long i) {
         int node = heap.get(i);          // save top node
-        int j = i << 1;              // find smaller child
-        int k = j + 1;
+        long j = i << 1;              // find smaller child
+        long k = j + 1;
         if (k <= size && lessThan(heap.get(k), heap.get(j))) {
             j = k;
         }
