@@ -163,7 +163,14 @@
         <!-- See https://checkstyle.org/config_coding.html -->
         <module name="EmptyStatement"/>
         <module name="EqualsHashCode"/>
-        <module name="HiddenField"/>
+        <module name="HiddenField">
+            <!--
+                Set to `false` these don't allow constructor or
+                setter method parameters to have the same name as class fields
+            -->
+            <property name="ignoreConstructorParameter" value="true" />
+            <property name="ignoreSetter" value="true" />
+        </module>
         <module name="IllegalInstantiation"/>
         <module name="InnerAssignment"/>
         <module name="MagicNumber"/>

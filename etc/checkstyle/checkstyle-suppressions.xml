@@ -5,5 +5,73 @@
     "https://checkstyle.org/dtds/suppressions_1_0.dtd">
 
 <suppressions>
+    <!--
+        Start with all rules suppressed; removing individual lines enables the rule checks
+        See `checkstyle.xml` file for links to the rules details.
+    -->
     <suppress checks="JavadocPackage" files=".*"/>
+    <suppress checks="NewlineAtEndOfFile" files=".*"/>
+    <suppress checks="Translation" files=".*"/>
+    <suppress checks="FileLength" files=".*"/>
+    <suppress checks="LineLength" files=".*"/>
+    <suppress checks="FileTabCharacter" files=".*"/>
+    <suppress checks="RegexpSingleline" files=".*"/>
+    <suppress checks="InvalidJavadocPosition" files=".*"/>
+    <suppress checks="JavadocMethod" files=".*"/>
+    <suppress checks="JavadocType" files=".*"/>
+    <suppress checks="JavadocVariable" files=".*"/>
+    <suppress checks="JavadocStyle" files=".*"/>
+    <suppress checks="MissingJavadocMethod" files=".*"/>
+    <suppress checks="ConstantName" files=".*"/>
+    <suppress checks="LocalFinalVariableName" files=".*"/>
+    <suppress checks="LocalVariableName" files=".*"/>
+    <suppress checks="MemberName" files=".*"/>
+    <suppress checks="MethodName" files=".*"/>
+    <suppress checks="PackageName" files=".*"/>
+    <suppress checks="ParameterName" files=".*"/>
+    <suppress checks="StaticVariableName" files=".*"/>
+    <suppress checks="TypeName" files=".*"/>
+    <suppress checks="AvoidStarImport" files=".*"/>
+    <suppress checks="IllegalImport" files=".*"/>
+    <suppress checks="RedundantImport" files=".*"/>
+    <suppress checks="UnusedImports" files=".*"/>
+    <suppress checks="MethodLength" files=".*"/>
+    <suppress checks="ParameterNumber" files=".*"/>
+    <suppress checks="EmptyForIteratorPad" files=".*"/>
+    <suppress checks="GenericWhitespace" files=".*"/>
+    <suppress checks="MethodParamPad" files=".*"/>
+    <suppress checks="NoWhitespaceAfter" files=".*"/>
+    <suppress checks="NoWhitespaceBefore" files=".*"/>
+    <suppress checks="OperatorWrap" files=".*"/>
+    <suppress checks="ParenPad" files=".*"/>
+    <suppress checks="TypecastParenPad" files=".*"/>
+    <suppress checks="WhitespaceAfter" files=".*"/>
+    <suppress checks="WhitespaceAround" files=".*"/>
+    <suppress checks="ModifierOrder" files=".*"/>
+    <suppress checks="RedundantModifier" files=".*"/>
+    <suppress checks="AvoidNestedBlocks" files=".*"/>
+    <suppress checks="EmptyBlock" files=".*"/>
+    <suppress checks="LeftCurly" files=".*"/>
+    <suppress checks="NeedBraces" files=".*"/>
+    <suppress checks="RightCurly" files=".*"/>
+    <suppress checks="EmptyStatement" files=".*"/>
+    <suppress checks="EqualsHashCode" files=".*"/>
+    <suppress checks="HiddenField" files=".*"/>
+    <suppress checks="IllegalInstantiation" files=".*"/>
+    <suppress checks="InnerAssignment" files=".*"/>
+    <suppress checks="MagicNumber" files=".*"/>
+    <suppress checks="MissingSwitchDefault" files=".*"/>
+    <suppress checks="MultipleVariableDeclarations" files=".*"/>
+    <suppress checks="SimplifyBooleanExpression" files=".*"/>
+    <suppress checks="SimplifyBooleanReturn" files=".*"/>
+    <suppress checks="DesignForExtension" files=".*"/>
+    <suppress checks="FinalClass" files=".*"/>
+    <suppress checks="HideUtilityClassConstructor" files=".*"/>
+    <suppress checks="InterfaceIsType" files=".*"/>
+    <suppress checks="VisibilityModifier" files=".*"/>
+    <suppress checks="ArrayTypeStyle" files=".*"/>
+    <suppress checks="FinalParameters" files=".*"/>
+    <suppress checks="TodoComment" files=".*"/>
+    <suppress checks="UpperEll" files=".*"/>
+    <suppress checks="SuppressionXpathFilter" files=".*"/>
 </suppressions>
