@@ -51,15 +51,26 @@ public class GraphListProc extends CatalogProc {
             graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName));
         }
 
-        return graphEntries.map(e -> new GraphInfo(e.getKey(), e.getValue(), computeHistogram(),
-            (degreeDistribution) -> GraphStoreCatalog.setDegreeDistribution(
-                getUsername(),
-                api.databaseId(),
-                e.getKey().graphName(),
-                degreeDistribution
-            ),
-            () -> GraphStoreCatalog.getDegreeDistribution(getUsername(), api.databaseId(), e.getKey().graphName())
-        ));
+        return graphEntries.map(e -> {
+            GraphCreateConfig graphCreateConfig = e.getKey();
+            GraphStore graphStore = e.getValue();
+            return new GraphInfo(
+                graphCreateConfig,
+                graphStore,
+                computeHistogram(),
+                (degreeDistribution) -> GraphStoreCatalog.setDegreeDistribution(
+                    getUsername(),
+                    api.databaseId(),
+                    graphCreateConfig.graphName(),
+                    degreeDistribution
+                ),
+                () -> GraphStoreCatalog.getDegreeDistribution(
+                    getUsername(),
+                    api.databaseId(),
+                    graphCreateConfig.graphName()
+                )
+            );
+        });
     }
 
 }
