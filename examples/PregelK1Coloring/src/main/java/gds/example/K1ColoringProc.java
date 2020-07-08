@@ -19,14 +19,15 @@
  */
 package gds.example;
 
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -35,30 +36,27 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class K1ColoringProc extends AlgoBaseProc<K1ColoringAlgorithm, HugeDoubleArray, K1ColoringPregelConfig> {
-    private static final String DESCRIPTION = "The K-1 Coloring algorithm assigns a color to every node in the graph.";
+public class K1ColoringProc extends StreamProc<K1ColoringAlgorithm, HugeDoubleArray, K1ColoringProc.StreamResult, K1ColoringPregelConfig> {
 
-    @Description(DESCRIPTION)
+    @Description("The K-1 Coloring algorithm assigns a color to every node in the graph.")
     @Procedure(value = "gds.example.k1coloring.pregel")
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<K1ColoringAlgorithm, HugeDoubleArray, K1ColoringPregelConfig> compute = compute(graphNameOrConfig, configuration);
+        return stream(compute(graphNameOrConfig, configuration));
+    }
 
-        return Optional.ofNullable(compute.result())
-            .map(coloring -> {
-                Graph graph = compute.graph();
-                return LongStream.range(0, graph.nodeCount())
-                    .mapToObj(nodeId -> {
-                        long neoNodeId = graph.toOriginalNodeId(nodeId);
-                        return new StreamResult(neoNodeId, Double.valueOf(coloring.get(nodeId)).longValue());
-                    });
+    @Override
+    protected StreamResult streamResult(long originalNodeId, double value) {
+        return new StreamResult(originalNodeId, (long) value);
+    }
 
-            }).orElse(Stream.empty());
+    @Override
+    protected PropertyTranslator<HugeDoubleArray> nodePropertyTranslator(ComputationResult<K1ColoringAlgorithm, HugeDoubleArray, K1ColoringPregelConfig> computationResult) {
+        return HugeDoubleArray.Translator.INSTANCE;
     }
 
     @Override
@@ -73,14 +71,15 @@ public class K1ColoringProc extends AlgoBaseProc<K1ColoringAlgorithm, HugeDouble
 
     @Override
     protected AlgorithmFactory<K1ColoringAlgorithm, K1ColoringPregelConfig> algorithmFactory(K1ColoringPregelConfig config) {
-        return new AlgorithmFactory<K1ColoringAlgorithm, K1ColoringPregelConfig>() {
+        return new AlgorithmFactory<>() {
 
             @Override
             public K1ColoringAlgorithm build(
                     Graph graph,
                     K1ColoringPregelConfig configuration,
                     AllocationTracker tracker,
-                    Log log) {
+                    Log log
+            ) {
                 return new K1ColoringAlgorithm(graph, configuration.maxIterations());
             }
 
