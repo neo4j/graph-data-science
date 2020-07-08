@@ -23,7 +23,8 @@ allprojects { proj ->
             def fileName = "${proj.name}-${taskName}"
             it.reports {
                 html {
-                    enabled = true
+                    // Due to a known issue with SpotBugs, HTML and XML reports cannot be generated both at the same time.
+                    enabled = false
                     stylesheet = resources.text.fromFile("$publicDir/etc/spotbugs/xsl/fancy-hist.xsl")
                     destination = file("${spotbugsReportsDir}/html/${fileName}.html")
                 }
