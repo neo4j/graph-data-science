@@ -27,36 +27,24 @@ import java.util.Queue;
 public class ConnectedComponentsPregel implements PregelComputation {
 
     @Override
-    public void compute(PregelContext pregel, final long nodeId, Queue<Double> messages) {
-        if (pregel.isInitialSuperStep()) {
-            // Incremental computation
-            double currentValue = pregel.getNodeValue(nodeId);
-            if (Double.compare(currentValue, pregel.getInitialNodeValue()) == 0) {
-                pregel.sendMessages(nodeId, nodeId);
-                pregel.setNodeValue(nodeId, nodeId);
-            } else {
-                pregel.sendMessages(nodeId, currentValue);
-            }
-        } else {
-            long newComponentId = (long) pregel.getNodeValue(nodeId);
-            boolean hasChanged = false;
-
-            if (messages != null) {
-                Double message;
-                while ((message = messages.poll()) != null) {
-                    if (message < newComponentId) {
-                        newComponentId = message.longValue();
-                        hasChanged = true;
+    public void compute(PregelContext context, final long nodeId, Queue<Double> messages) {
+        double oldComponentId = context.getNodeValue(nodeId);
+        double newComponentId = oldComponentId;
+        if (context.isInitialSuperStep()) {
+            // In the first round, every node uses its own id as the component id
+            newComponentId = nodeId;
+        } else if (messages != null && !messages.isEmpty()){
+                Double nextComponentId;
+                while ((nextComponentId = messages.poll()) != null) {
+                    if (nextComponentId.longValue() < newComponentId) {
+                        newComponentId = nextComponentId.longValue();
                     }
                 }
-            }
+        }
 
-            if (hasChanged) {
-                pregel.setNodeValue(nodeId, newComponentId);
-                pregel.sendMessages(nodeId, newComponentId);
-            }
-
-            pregel.voteToHalt(nodeId);
+        if (newComponentId != oldComponentId) {
+            context.setNodeValue(nodeId, newComponentId);
+            context.sendMessages(nodeId, newComponentId);
         }
     }
 }
