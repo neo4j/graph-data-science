@@ -25,12 +25,16 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 
-public class AsUndirected implements GraphCreateConfig.Rewriter {
+public final class AsUndirected implements GraphCreateConfig.Rewriter {
 
     private GraphCreateConfig undirectedConfig;
 
+    private AsUndirected(GraphCreateConfig originalConfig) {
+        this.undirectedConfig = originalConfig;
+    }
+
     static GraphCreateConfig rewrite(GraphCreateConfig config) {
-        return new AsUndirected().apply(config);
+        return new AsUndirected(config).apply(config);
     }
 
     @Override
