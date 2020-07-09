@@ -22,34 +22,32 @@ package org.neo4j.graphalgo.core.utils.paged;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
 
-class LongPageFillerTest {
-
-    @Test
-    void fillsAnArray() {
-        long[] array = {1, 3, 3, 7};
-
-        LongPageFiller.of(1, (d) -> 42L).accept(array);
-
-        long[] expected = {42, 42, 42, 42};
-        assertArrayEquals(expected, array);
-    }
+class DoublePageCreatorTest {
 
     @Test
-    void doesNotFillAnything() {
-        long[] array = {1, 3, 3, 7};
+    void fillsPages() {
+        var numPages = 3;
+        var lastPageSize = 4;
 
-        LongPageFiller.passThrough().accept(array);
-        assertArrayEquals(array, array);
-    }
+        double[][] pages = new double[numPages][];
 
-    @Test
-    void fillsWithIndex() {
-        long[] array = {1, 3, 3, 7};
+        DoublePageCreator.of(1, (d) -> d).fill(pages, lastPageSize);
 
-        LongPageFiller.identity(4).accept(array);
+        for (int pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+            double[] page = pages[pageIndex];
 
-        long[] expected = {0, 1, 2, 3};
-        assertArrayEquals(expected, array);
+            if(pageIndex < numPages - 1) {
+                assertEquals(PAGE_SIZE, page.length);
+            } else {
+                assertEquals(lastPageSize, page.length);
+            }
+
+            for (int indexInPage = 0; indexInPage < page.length; indexInPage++) {
+                double value = page[indexInPage];
+                assertEquals(indexInPage + (pageIndex * PAGE_SIZE), value);
+            }
+        }
     }
 }
