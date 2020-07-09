@@ -108,4 +108,14 @@ public interface GraphCreateConfig extends BaseConfig {
 
         default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
     }
+
+    interface Rewriter extends Visitor {
+
+        GraphCreateConfig rewrittenConfig();
+
+        default GraphCreateConfig apply(GraphCreateConfig config) {
+            config.accept(this);
+            return rewrittenConfig();
+        }
+    }
 }

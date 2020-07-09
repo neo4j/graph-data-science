@@ -22,11 +22,7 @@ package org.neo4j.graphalgo.centrality;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -123,22 +119,7 @@ public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, Har
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        maybeImplicitCreate = maybeImplicitCreate.map(graphCreateConfig -> {
-            if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
-                GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
-                RelationshipProjections.Builder builder = RelationshipProjections.builder();
-                storeConfig.relationshipProjections().projections().forEach(
-                    (id, projection) ->
-                        builder.putProjection(id, projection.withOrientation(Orientation.UNDIRECTED))
-                );
-                return ImmutableGraphCreateFromStoreConfig.builder()
-                    .from(graphCreateConfig)
-                    .relationshipProjections(builder.build())
-                    .build();
-            }
-            return graphCreateConfig;
-        });
-        return HarmonicCentralityConfig.of(graphName, maybeImplicitCreate, username, config);
+        return HarmonicCentralityConfig.of(graphName, maybeImplicitCreate.map(AsUndirected::rewrite), username, config);
     }
 
     @Override
