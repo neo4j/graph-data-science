@@ -283,6 +283,16 @@ public class HugeGraph implements Graph {
     }
 
     @Override
+    public int degreeWithoutParallelRelationships(long nodeId) {
+        if (isGuaranteedParallelFree()) {
+            return degree(nodeId);
+        }
+        var degreeCounter = new ParallelRelationshipsDegreeCounter();
+        runForEach(nodeId, degreeCounter);
+        return degreeCounter.degree;
+    }
+
+    @Override
     public long toMappedNodeId(long nodeId) {
         return idMapping.toMappedNodeId(nodeId);
     }
@@ -516,6 +526,24 @@ public class HugeGraph implements Graph {
             if (t == targetNodeId) {
                 found = true;
                 return false;
+            }
+            return true;
+        }
+    }
+
+    private static class ParallelRelationshipsDegreeCounter implements RelationshipConsumer {
+        private long previousNodeId;
+        private int degree;
+
+        ParallelRelationshipsDegreeCounter() {
+            this.previousNodeId = -1;
+        }
+
+        @Override
+        public boolean accept(long s, long t) {
+            if (t != previousNodeId) {
+                degree++;
+                previousNodeId = t;
             }
             return true;
         }

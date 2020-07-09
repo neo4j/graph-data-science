@@ -25,4 +25,13 @@ package org.neo4j.graphalgo.api;
 public interface Degrees {
 
     int degree(long nodeId);
+
+    /**
+     * Much slower than just degree() because it may have to look up all relationships.
+     * <p></p>
+     * This is not thread-safe, so if this is called concurrently please use {@link RelationshipIterator#concurrentCopy()}.
+     *
+     * @see Graph#isGuaranteedParallelFree()
+     */
+    int degreeWithoutParallelRelationships(long nodeId);
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -147,6 +148,16 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
+    public int degreeWithoutParallelRelationships(long nodeId) {
+        if (isGuaranteedParallelFree()) {
+            return degree(nodeId);
+        }
+        var degreeCounter = new ParallelRelationshipDegreeCounter();
+        graphs.forEach(graph -> graph.forEachRelationship(nodeId, degreeCounter));
+        return degreeCounter.degree();
+    }
+
+    @Override
     public Graph concurrentCopy() {
         return of(graphs.stream().map(Graph::concurrentCopy).collect(Collectors.toList()));
     }
@@ -214,4 +225,21 @@ public final class UnionGraph implements Graph {
         return false;
     }
 
+    private static class ParallelRelationshipDegreeCounter implements RelationshipConsumer {
+        private final BitSet visited;
+
+        ParallelRelationshipDegreeCounter() {
+            visited = BitSet.newInstance();
+        }
+
+        @Override
+        public boolean accept(long s, long t) {
+            visited.set(t);
+            return true;
+        }
+
+        int degree() {
+            return Math.toIntExact(visited.cardinality());
+        }
+    }
 }

@@ -97,6 +97,11 @@ public class NullGraph implements Graph {
     }
 
     @Override
+    public int degreeWithoutParallelRelationships(long nodeId) {
+        return 0;
+    }
+
+    @Override
     public NodeMapping nodeMapping() {
         throw new NullGraphStore.NullGraphException();
     }
